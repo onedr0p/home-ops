@@ -3,7 +3,7 @@
 ## Cluster Nodes
 
 |Device|Node Type|Hostname|CPU|Ram|Disk|
-|---|---|---|---|---|
+|---|---|---|---|---|---|
 |RPi4|Master|k3s-master-a|4000m|4GB|32GB SD|
 |RPi4|Master|k3s-master-b|4000m|4GB|32GB SD|
 |RPi4|Master|k3s-master-c|4000m|4GB|32GB SD|
