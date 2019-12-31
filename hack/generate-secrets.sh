@@ -13,13 +13,13 @@ need "envsubst"
 
 if [ "$(uname)" == "Darwin" ]; then
   set -a
-  . "${REPO_ROOT}/setup/.secrets.env"
+  . "${REPO_ROOT}/secrets/.secrets.env"
   set +a
 else
-  . "${REPO_ROOT}/setup/.secrets.env"
+  . "${REPO_ROOT}/secrets/.secrets.env"
 fi
 
-PUB_CERT="${REPO_ROOT}/setup/pub-cert.pem"
+PUB_CERT="${REPO_ROOT}/secrets/pub-cert.pem"
 
 # Helper function to generate secrets
 kseal() {
@@ -53,15 +53,15 @@ kseal() {
 # Helm Secrets
 #
 
-kseal "${REPO_ROOT}/deployments/velero/velero/velero-helm-values.txt"
-kseal "${REPO_ROOT}/deployments/default/minio/minio-helm-values.txt"
-kseal "${REPO_ROOT}/deployments/default/radarr/radarr-helm-values.txt"
-kseal "${REPO_ROOT}/deployments/default/sonarr/sonarr-helm-values.txt"
-kseal "${REPO_ROOT}/deployments/default/qbittorrent/qbittorrent-helm-values.txt"
-kseal "${REPO_ROOT}/deployments/default/nzbget/nzbget-helm-values.txt"
-kseal "${REPO_ROOT}/deployments/default/nzbhydra2/nzbhydra2-helm-values.txt"
-kseal "${REPO_ROOT}/deployments/default/jackett/jackett-helm-values.txt"
-kseal "${REPO_ROOT}/deployments/default/cloudflare-dyndns/cloudflare-dyndns-helm-values.txt"
+# kseal "${REPO_ROOT}/deployments/velero/velero/velero-helm-values.txt"
+# kseal "${REPO_ROOT}/deployments/default/minio/minio-helm-values.txt"
+# kseal "${REPO_ROOT}/deployments/default/radarr/radarr-helm-values.txt"
+# kseal "${REPO_ROOT}/deployments/default/sonarr/sonarr-helm-values.txt"
+# kseal "${REPO_ROOT}/deployments/default/qbittorrent/qbittorrent-helm-values.txt"
+# kseal "${REPO_ROOT}/deployments/default/nzbget/nzbget-helm-values.txt"
+# kseal "${REPO_ROOT}/deployments/default/nzbhydra2/nzbhydra2-helm-values.txt"
+# kseal "${REPO_ROOT}/deployments/default/jackett/jackett-helm-values.txt"
+# kseal "${REPO_ROOT}/deployments/default/cloudflare-dyndns/cloudflare-dyndns-helm-values.txt"
 
 #
 # Generic Secrets
