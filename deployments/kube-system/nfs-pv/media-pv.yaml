@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-media-pv
+spec:
+  storageClassName: media-library
+  capacity:
+    storage: 1Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 192.168.1.170
+    path: "/share/Media/Library"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-media-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: media-library
+  resources:
+    requests:
+      storage: 1Mi
