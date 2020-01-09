@@ -29,4 +29,4 @@ kapply() {
   fi
 }
 
-kapply "$REPO_ROOT"/rook-ceph/dashboard/ingress.txt
+kapply "$REPO_ROOT"/deployments/rook-ceph/dashboard/ingress.txt
