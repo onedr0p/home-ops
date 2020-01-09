@@ -1,0 +1,23 @@
+---
+
+# Ceph Requirement
+- name: Add the rbd module on ubuntu-amd64
+  modprobe:
+    name: rbd
+    state: present
+
+# Ceph Requirement
+- name: Add the bonding module on ubuntu-amd64
+  modprobe:
+    name: bonding
+    state: present
+
+- name: Disable SWAP on ubuntu-amd64
+  shell: |
+    swapoff -a
+
+- name: Disable SWAP in fstab on ubuntu-amd64
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    replace: '# \1'
