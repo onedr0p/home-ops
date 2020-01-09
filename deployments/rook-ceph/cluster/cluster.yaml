@@ -1,3 +1,4 @@
+---
 apiVersion: ceph.rook.io/v1
 kind: CephCluster
 metadata:
@@ -17,6 +18,37 @@ spec:
   dashboard:
     enabled: true
   # cluster level storage configuration and selection
+  resources:
+    api:
+      requests:
+          cpu: 25m
+          memory: 250Mi
+      limits:
+        memory: 512Mi
+    mgr:
+      requests:
+          cpu: 50m
+          memory: 300Mi
+      limits:
+        memory: 512Mi
+    mon:
+      requests:
+          cpu: 35m
+          memory: 800Mi
+      limits:
+        memory: 1024Mi
+    osd:
+      requests:
+        cpu: "35m"
+        memory: "2048Mi"
+      limits:
+        memory: "4096Mi"
+    rbdmirror:
+      requests:
+          cpu: 25m
+          memory: 250Mi
+      limits:
+        memory: 512Mi
   storage:
     useAllNodes: false
     useAllDevices: false
