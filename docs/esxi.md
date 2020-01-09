@@ -2,6 +2,15 @@
 
 > *Note*: this document is a work in progress
 
+## Configure
+
+- Disable IPv6 ESXi
+- Set swap ESXi
+- Set and enable NTP on ESXi (0.us.pool.ntp.org,1.us.pool.ntp.org,2.us.pool.ntp.org,3.us.pool.ntp.org)
+- Set and enable SSH on ESXi
+- Set NVMe pass-through for Intel NUC storage nodes
+- Set iGPU pass-through for Intel NUC worker nodes
+
 ## Update ESXi
 
 ```bash
@@ -20,14 +29,7 @@ esxcli software profile update -p ESXi-6.7.0-20191204001-standard -d https://hos
 esxcli network firewall ruleset set -e false -r httpClient
 ```
 
-```bash
-wget https://hostupdate.vmware.com/software/VUM/PRODUCTION/main/esx/vmw/vib20/nvme/VMW_bootbank_nvme_1.2.2.28-1vmw.670.3.73.14320388.vib
-
-esxcli software vib install -f -v /tmp/VMW_bootbank_nvme_1.2.2.28-1vmw.670.3.73.14320388.vib
-
-https://hostupdate.vmware.com/software/VUM/PRODUCTION/main/esx/vmw/vib20/nvme/VMW_bootbank_nvme_1.2.1.34-1vmw.670.0.0.8169922.vib
-
-```
+## Update ESXi if storage errors
 
 ```bash
 # https://esxi-patches.v-front.de/ESXi-6.7.0.html
@@ -54,14 +56,24 @@ esxcli software vib install -f -v /vmfs/volumes/local-datastore-b/scratch/VMware
 esxcli software vib install -f -v /vmfs/volumes/local-datastore-b/scratch/VMware_bootbank_vsan_6.7.0-3.89.14840357.vib
 ```
 
-Format drive for datastore
+## Downgrade or upgrade NVMe driver
+
+```bash
+wget https://hostupdate.vmware.com/software/VUM/PRODUCTION/main/esx/vmw/vib20/nvme/VMW_bootbank_nvme_1.2.2.28-1vmw.670.3.73.14320388.vib
+
+esxcli software vib install -f -v /tmp/VMW_bootbank_nvme_1.2.2.28-1vmw.670.3.73.14320388.vib
+
+https://hostupdate.vmware.com/software/VUM/PRODUCTION/main/esx/vmw/vib20/nvme/VMW_bootbank_nvme_1.2.1.34-1vmw.670.0.0.8169922.vib
+```
+
+## Format drive for datastore if it doesn't show up
 
 ```bash
 esxcli storage core device list
 partedUtil mklabel /vmfs/devices/disks/t10.ATA_____KINGSTON_SA400S37120G___________________50026B76832D53EA____ gpt
 ```
 
-Make scratch directory
+## Make scratch directory
 
 ```bash
 mkdir /vmfs/volumes/local-datastore-b/scratch
