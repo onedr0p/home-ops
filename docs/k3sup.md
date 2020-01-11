@@ -28,6 +28,12 @@ k3sup join --ip "192.168.42.44" \
     --k3s-version "v1.17.0+k3s.1" \
     --user "devin"
 
+# k3s-worker-d
+k3sup join --ip "192.168.42.45" \
+    --server-ip "192.168.42.41" \
+    --k3s-version "v1.17.0+k3s.1" \
+    --user "devin"
+
 # k3s-worker-e
 k3sup join --ip "192.168.42.46" \
     --server-ip "192.168.42.41" \

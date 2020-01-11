@@ -70,11 +70,11 @@ https://hostupdate.vmware.com/software/VUM/PRODUCTION/main/esx/vmw/vib20/nvme/VM
 
 ```bash
 esxcli storage core device list
-partedUtil mklabel /vmfs/devices/disks/t10.ATA_____KINGSTON_SA400S37120G___________________50026B76832D53EA____ gpt
+partedUtil mklabel /vmfs/devices/disks/t10.ATA_____Samsung_SSD_840_EVO_750GB_______________S1DMNEAD915457R_____ gpt
 ```
 
 ## Make scratch directory
 
 ```bash
-mkdir /vmfs/volumes/local-datastore-b/scratch
+mkdir /vmfs/volumes/local-datastore-f/scratch
 ```
