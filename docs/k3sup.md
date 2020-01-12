@@ -45,4 +45,6 @@ kubectl label node k3s-worker-b node-role.kubernetes.io/worker=worker
 kubectl label node k3s-worker-c node-role.kubernetes.io/worker=worker
 kubectl label node k3s-worker-d node-role.kubernetes.io/worker=worker
 kubectl label node k3s-worker-e node-role.kubernetes.io/worker=worker
+kubectl label nodes k3s-worker-d homelab.gpu/type=intel
+kubectl label nodes k3s-worker-e homelab.gpu/type=intel
 ```
