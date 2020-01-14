@@ -1,0 +1,46 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: velero
+  namespace: velero
+  annotations:
+    fluxcd.io/ignore: false
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: semver:~v1
+spec:
+  releaseName: velero
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: velero
+    version: 2.7.4
+  values:
+    image:
+      repository: velero/velero
+      tag: v1.2.0
+    resources:
+      requests:
+        memory: 300Mi
+        cpu: 25m
+      limits:
+        memory: 1000Mi
+    metrics:
+      enabled: true
+    snapshotsEnabled: false
+    deployRestic: true
+    restic:
+      podVolumePath: /var/lib/kubelet/pods
+      privileged: false
+      resources:
+        requests:
+          memory: 200Mi
+          cpu: 15m
+        limits:
+          memory: 500Mi
+    schedules:
+      daily-backup:
+        schedule: "0 6 * * *"
+        template:
+          ttl: "120h"
+  valueFileSecrets:
+  - name: "velero-helm-values"
