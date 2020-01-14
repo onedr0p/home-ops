@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-export REPO_ROOT=$(git rev-parse --show-toplevel)
+export REPO_ROOT
+REPO_ROOT=$(git rev-parse --show-toplevel)
 
 need() {
     which "$1" &>/dev/null || die "Binary '$1' is missing but required"
