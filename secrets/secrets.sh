@@ -80,14 +80,6 @@ kubeseal --format=yaml --cert="$PUB_CERT" \
 # NginX Basic Auth - kube-system Namespace
 kubectl create secret generic nginx-basic-auth \
   --from-literal=auth="$NGINX_BASIC_AUTH" \
-  --namespace rook-ceph --dry-run -o json \
-  | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/kube-system/nginx/nginx-basic-auth-rook-ceph.yaml
-
-# NginX Basic Auth - kube-system Namespace
-kubectl create secret generic nginx-basic-auth \
-  --from-literal=auth="$NGINX_BASIC_AUTH" \
   --namespace kube-system --dry-run -o json \
   | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
