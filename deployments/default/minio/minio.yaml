@@ -1,0 +1,33 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: minio
+  namespace: default
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: minio
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: minio
+    version: 5.0.5
+  values:
+    image:
+      repository: minio/minio
+      tag: RELEASE.2020-01-03T19-12-21Z
+    persistence:
+      existingClaim: "nfs-data-pvc"
+      subPath: "minio"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+    resources:
+      requests:
+        memory: 350Mi
+        cpu: 25m
+      limits:
+        memory: 1000Mi
+  valueFileSecrets:
+  - name: "minio-helm-values"
