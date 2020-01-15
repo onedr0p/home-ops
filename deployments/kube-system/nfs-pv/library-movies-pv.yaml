@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nfs-data-pv
+  name: nfs-movie-library-pv
 spec:
-  storageClassName: data
+  storageClassName: movie-library
   capacity:
     storage: 1Mi
   accessModes:
@@ -11,16 +11,16 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     server: 192.168.1.170
-    path: "/share/Data"
+    path: "/share/Media/Library/Movies"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nfs-data-pvc
+  name: nfs-movie-library-pvc
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: data
+  storageClassName: movie-library
   resources:
     requests:
       storage: 1Mi
