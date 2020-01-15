@@ -4,13 +4,15 @@ network:
   version: 2
   renderer: networkd
   ethernets:
-    ens160:
+    ens8:
       match:
         macaddress: {{ ansible_default_ipv4.macaddress }}
       mtu: 9000
       addresses: [ {{ ansible_default_ipv4.address }}/24 ]
       gateway4: 192.168.42.1
       nameservers:
-          search: [ lan ]
-          addresses:
-              - "192.168.1.15"
+        search: 
+          - lan
+          - unifi.lan
+        addresses:
+          - "192.168.1.15"

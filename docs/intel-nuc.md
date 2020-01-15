@@ -10,11 +10,6 @@
 
 ### Advanced
 
-- Disable Wifi
-- Disable Bluetooth
-- Disable Audio
-- Disable Microphone
-- Disable CEC Control Device
 - Disable Intel Platform Trust Technology
 - Disable Secure Boot
 - Boot USB Devices First
