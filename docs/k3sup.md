@@ -40,12 +40,17 @@ k3sup join --ip "192.168.42.16" \
     --k3s-version "v1.17.0+k3s.1" \
     --user "devin"
 
+# Don't run anything on the master node
+kubectl taint nodes k3s-master k3s-controlplane=true:NoExecute
+
+# Label worker nodes as such
 kubectl label node k3s-worker-a node-role.kubernetes.io/worker=worker && \
 kubectl label node k3s-worker-b node-role.kubernetes.io/worker=worker && \
 kubectl label node k3s-worker-c node-role.kubernetes.io/worker=worker && \
 kubectl label node k3s-worker-d node-role.kubernetes.io/worker=worker && \
 kubectl label node k3s-worker-e node-role.kubernetes.io/worker=worker
 
+# Label worker nodes that can accept Intel GPU
 kubectl label nodes k3s-worker-a homelab.gpu/type=intel && \
 kubectl label nodes k3s-worker-b homelab.gpu/type=intel && \
 kubectl label nodes k3s-worker-c homelab.gpu/type=intel && \
