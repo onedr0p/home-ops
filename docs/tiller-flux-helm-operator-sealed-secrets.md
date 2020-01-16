@@ -1,14 +1,26 @@
 # flux-helm-operator
 
-## Add namespace
+## Install Tiller
 
 ```bash
-kubectl apply -f deployments/flux/namespace.yaml
+# Install Tiller
+kubectl -n kube-system create sa tiller
+
+kubectl create clusterrolebinding tiller-cluster-rule \
+    --clusterrole=cluster-admin \
+    --serviceaccount=kube-system:tiller
+
+helm init --tiller-image=jessestuart/tiller:v2.15.0 --service-account tiller
+
+# Upgrade Tiller
+helm init --upgrade --tiller-image=jessestuart/tiller:v2.15.0 --service-account tiller
 ```
 
 ## Install Flux
 
 ```bash
+kubectl apply -f deployments/flux/namespace.yaml
+
 helm repo add fluxcd https://charts.fluxcd.io
 helm repo update
 helm upgrade --install flux --values deployments/flux/flux/flux-values.yaml --namespace flux fluxcd/flux
