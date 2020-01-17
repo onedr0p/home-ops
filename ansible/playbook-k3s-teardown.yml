@@ -17,6 +17,18 @@
       command:
         cmd: k3s-agent-uninstall.sh
         removes: /usr/local/bin/k3s-agent-uninstall.sh
+    
+    - name: "Clean up Docker"
+      command: docker system prune -a --force
+
+    - name: Rebooting hosts
+      reboot:
+        msg: "Systems are being rebooted"
+        reboot_timeout: 60
+      ignore_errors: true
+
+    - name: "Clean up Docker (again)"
+      command: docker system prune -a --force
 
 # https://rook.io/docs/rook/v0.9/ceph-teardown.html
 # sudo su -

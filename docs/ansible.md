@@ -15,7 +15,7 @@ env ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook \
 ```bash
 env ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook \
   -i ansible/inventory \
-  ansible/playbook-teardown.yml --ask-become-pass
+  ansible/playbook-k3s-teardown.yml --ask-become-pass
 ```
 
 ## Reset Ceph playbook

@@ -13,16 +13,26 @@
   command: netplan apply
   when: deploy_target == 'intelnuc'
 
-# Ubuntu 19.x
-# See: https://github.com/kubernetes/kubernetes/issues/71305
-- name: Use iptables-legacy instead of nftables
+- name: Configuring the nodes to use legacy iptables for compatibility with Kubernetes
   alternatives:
-    name: iptables
-    path: /usr/sbin/iptables-legacy
-  when: >
-    ansible_distribution == 'Ubuntu' and (ansible_distribution_release == 'eoan' or ansible_distribution_release == 'disco')
+      name: "{{ item }}"
+      path: /usr/sbin/{{ item }}-legacy
+  with_items:
+      - "iptables"
+      - "ip6tables"
+      - "ebtables"
+  ignore_errors: true
 
-- name: Disable IPv6 on Ubuntu amd64
+- name: Enable IP forwarding via sysctl
+  sysctl: 
+    name: "{{ item }}"
+    value: 1
+    state: present
+  with_items:
+    - net.ipv4.ip_forward
+  ignore_errors: true
+
+- name: Disable IPv6 via sysctl
   sysctl: 
     name: "{{ item }}"
     value: 1
@@ -47,6 +57,6 @@
     backup: yes
   when: not (' ipv6.disable=1' in cmdline.stdout)
 
-- name: Reconfigure gurb
+- name: Reconfigure grub
   command: update-grub
   when: not (' ipv6.disable=1' in cmdline.stdout)

@@ -1,22 +1,19 @@
 ---
 
-# Ceph Requirement
-- name: Add the rbd module on ubuntu-amd64
+- name: Set Timezone
+  timezone:
+    name: America/New_York
+
+- name: Add the rbd module
   modprobe:
     name: rbd
     state: present
 
-# Ceph Requirement
-- name: Add the bonding module on ubuntu-amd64
-  modprobe:
-    name: bonding
-    state: present
-
-- name: Disable SWAP on ubuntu-amd64
+- name: Disable SWAP
   shell: |
     swapoff -a
 
-- name: Disable SWAP in fstab on ubuntu-amd64
+- name: Disable SWAP in fstab
   replace:
     path: /etc/fstab
     regexp: '^([^#].*?\sswap\s+sw\s+.*)$'

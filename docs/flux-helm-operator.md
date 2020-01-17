@@ -1,20 +1,6 @@
 # flux-helm-operator
 
-## Install Tiller
-
-```bash
-# Install Tiller
-kubectl -n kube-system create sa tiller
-
-kubectl create clusterrolebinding tiller-cluster-rule \
-    --clusterrole=cluster-admin \
-    --serviceaccount=kube-system:tiller
-
-helm init --tiller-image=jessestuart/tiller:v2.15.0 --service-account tiller
-
-# Upgrade Tiller
-helm init --upgrade --tiller-image=jessestuart/tiller:v2.15.0 --service-account tiller
-```
+> *Note*: this document is a work in progress
 
 ## Install Flux
 

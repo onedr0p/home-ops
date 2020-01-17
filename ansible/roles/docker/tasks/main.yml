@@ -1,0 +1,51 @@
+---
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu bionic stable
+    state: present
+  register: apt_apt_repository
+  retries: 5
+  until: apt_apt_repository is success
+
+- name: Install Docker {{ docker_version }}
+  apt:
+    name: "docker-ce={{ docker_version }}"
+    install_recommends: false
+    update_cache: true
+    # Need the force_apt_get until
+    # https://github.com/ansible/ansible/issues/56832
+    force_apt_get: true
+  register: apt_install_common
+  retries: 5
+  until: apt_install_common is success
+
+- name: Add Docker configuration file
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+
+- name: Replace single quotes with double quotes in daemon.json
+  replace:
+    path: /etc/docker/daemon.json
+    regexp: "'"
+    replace: "\""
+
+- name: Ensure user is added to the docker group
+  user:
+    name: "{{ item }}"
+    group: docker
+    append: true
+  with_items:
+   - "{{ ansible_user }}"
+
+- name: Start and enable Docker
+  systemd:
+    name: docker
+    state: started
+    enabled: true

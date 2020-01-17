@@ -6,39 +6,44 @@
 
 ```bash
 k3sup install --ip "192.168.42.11" \
-    --k3s-version "v1.0.1" \
+    --k3s-version "v1.17.0+k3s.1" \
     --user "devin" \
-    --k3s-extra-args "--no-deploy servicelb --no-deploy traefik --no-deploy metrics-server"
+    --k3s-extra-args "--docker --no-deploy servicelb --no-deploy traefik --no-deploy metrics-server"
 
 # k3s-worker-a
 k3sup join --ip "192.168.42.12" \
     --server-ip "192.168.42.11" \
-    --k3s-version "v1.0.1" \
-    --user "devin"
+    --k3s-version "v1.17.0+k3s.1" \
+    --user "devin" \
+    --k3s-extra-args "--docker"
 
 # k3s-worker-b
 k3sup join --ip "192.168.42.13" \
     --server-ip "192.168.42.11" \
-    --k3s-version "v1.0.1" \
-    --user "devin"
+    --k3s-version "v1.17.0+k3s.1" \
+    --user "devin" \
+    --k3s-extra-args "--docker"
 
 # k3s-worker-c
 k3sup join --ip "192.168.42.14" \
     --server-ip "192.168.42.11" \
-    --k3s-version "v1.0.1" \
-    --user "devin"
+    --k3s-version "v1.17.0+k3s.1" \
+    --user "devin" \
+    --k3s-extra-args "--docker"
 
 # k3s-worker-d
 k3sup join --ip "192.168.42.15" \
     --server-ip "192.168.42.11" \
-    --k3s-version "v1.0.1" \
-    --user "devin"
+    --k3s-version "v1.17.0+k3s.1" \
+    --user "devin" \
+    --k3s-extra-args "--docker"
 
 # k3s-worker-e
 k3sup join --ip "192.168.42.16" \
     --server-ip "192.168.42.11" \
-    --k3s-version "v1.0.1" \
-    --user "devin"
+    --k3s-version "v1.17.0+k3s.1" \
+    --user "devin" \
+    --k3s-extra-args "--docker"
 
 # Don't run anything on the master node
 kubectl taint nodes k3s-master k3s-controlplane=true:NoExecute
