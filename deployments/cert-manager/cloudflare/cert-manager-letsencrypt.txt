@@ -1,0 +1,62 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-test
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: $EMAIL
+    privateKeySecretRef:
+      name: letsencrypt-test
+    solvers:
+    - selector: {}
+      dns01:
+        cloudflare:
+          email: $EMAIL
+          apiKeySecretRef:
+            name: cloudflare-api-key
+            key: api-key
+
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: $EMAIL
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - selector: {}
+      dns01:
+        cloudflare:
+          email: $EMAIL
+          apiKeySecretRef:
+            name: cloudflare-api-key
+            key: api-key
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: acme-crt
+  namespace: cert-manager
+spec:
+  secretName: acme-crt-secret
+  commonName: "*.$DOMAIN"
+  dnsNames:
+  - $DOMAIN
+  - '*.$DOMAIN'
+  - '*.nd.$DOMAIN'
+  acme:
+    config:
+    - dns01:
+        provider: cf-dns
+      domains:
+      - $DOMAIN
+      - '*.$DOMAIN'
+      - '*.nd.$DOMAIN'
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
