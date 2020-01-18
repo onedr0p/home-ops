@@ -45,9 +45,6 @@ k3sup join --ip "192.168.42.16" \
     --user "devin" \
     --k3s-extra-args "--docker"
 
-# Don't run anything on the master node
-kubectl taint nodes k3s-master k3s-controlplane=true:NoExecute
-
 # Label worker nodes as such
 kubectl label node k3s-worker-a node-role.kubernetes.io/worker=worker && \
 kubectl label node k3s-worker-b node-role.kubernetes.io/worker=worker && \
