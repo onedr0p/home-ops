@@ -75,7 +75,7 @@ kubectl create secret generic nginx-basic-auth \
   --namespace default --dry-run -o json \
   | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/kube-system/nginx/basic-auth-default.yaml
+    > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-default.yaml
 
 # NginX Basic Auth - kube-system Namespace
 kubectl create secret generic nginx-basic-auth \
@@ -83,7 +83,7 @@ kubectl create secret generic nginx-basic-auth \
   --namespace kube-system --dry-run -o json \
   | \
 kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/kube-system/nginx/basic-auth-kube-system.yaml
+    > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-kube-system.yaml
 
 
 
