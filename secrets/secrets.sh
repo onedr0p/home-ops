@@ -55,9 +55,9 @@ kseal() {
 #
 
 kseal "${REPO_ROOT}/deployments/default/minio/minio-helm-values.txt"
+kseal "${REPO_ROOT}/deployments/default/nzbget/nzbget-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/velero/velero/velero-helm-values.txt"
 
-# kseal "${REPO_ROOT}/deployments/default/nzbget/nzbget-helm-values.txt"
 # kseal "${REPO_ROOT}/deployments/default/radarr/radarr-helm-values.txt"
 # kseal "${REPO_ROOT}/deployments/default/sonarr/sonarr-helm-values.txt"
 # kseal "${REPO_ROOT}/deployments/default/qbittorrent/qbittorrent-helm-values.txt"
