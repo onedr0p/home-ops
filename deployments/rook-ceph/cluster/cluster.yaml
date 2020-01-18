@@ -1,0 +1,71 @@
+---
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: rook-ceph
+  namespace: rook-ceph
+spec:
+  cephVersion:
+    image: ceph/ceph:v14.2.5-20191210
+  dataDirHostPath: /var/lib/rook
+  mon:
+    count: 3
+    allowMultiplePerNode: false
+  mgr:
+    modules:
+    - name: pg_autoscaler
+      enabled: true
+  dashboard:
+    enabled: true
+    port: 7000
+    ssl: false
+  # cluster level storage configuration and selection
+  resources:
+    api:
+      requests:
+          cpu: 25m
+          memory: 250Mi
+      limits:
+        memory: 512Mi
+    mgr:
+      requests:
+          cpu: 50m
+          memory: 300Mi
+      limits:
+        memory: 512Mi
+    mon:
+      requests:
+          cpu: 35m
+          memory: 800Mi
+      limits:
+        memory: 1024Mi
+    osd:
+      requests:
+        cpu: "35m"
+        memory: "2048Mi"
+      limits:
+        memory: "4096Mi"
+    rbdmirror:
+      requests:
+          cpu: 25m
+          memory: 250Mi
+      limits:
+        memory: 512Mi
+  storage:
+    useAllNodes: false
+    useAllDevices: false
+    deviceFilter: 
+    location: 
+    config:
+      metadataDevice: 
+      osdsPerDevice: "1"
+    nodes:
+      - name: "k3s-worker-a"
+        devices:
+          - name: "nvme0n1"
+      - name: "k3s-worker-b"
+        devices:
+          - name: "nvme0n1"
+      - name: "k3s-worker-c"
+        devices:
+          - name: "nvme0n1"
