@@ -1,0 +1,21 @@
+configuration:
+  provider: aws
+  backupStorageLocation:
+    name: aws
+    bucket: velero
+    config:
+      region: minio
+      s3ForcePathStyle: true
+      s3Url: http://minio.default.svc:9000
+      publicUrl: https://minio.$DOMAIN
+  volumeSnapshotLocation:
+    name: aws
+    resticTimeout: 4h
+    config:
+      region: minio
+credentials:
+  secretContents:
+    cloud: |
+      [default]
+      aws_access_key_id = $MINIO_ACCESS_KEY
+      aws_secret_access_key = $MINIO_SECRET_KEY
