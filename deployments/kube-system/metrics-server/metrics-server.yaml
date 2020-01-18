@@ -11,14 +11,13 @@ spec:
   rollback:
     enable: true
   chart:
-    repository: https://charts.bitnami.com/bitnami
+    repository: https://kubernetes-charts.storage.googleapis.com/
     name: metrics-server
-    version: 4.1.2
+    version: 2.9.0
   values:
     image:
-      registry: docker.io
-      repository: bitnami/metrics-server
-      tag: 0.3.6-debian-9-r72
-    extraArgs:
-      kubelet-insecure-tls: true
-      kubelet-preferred-address-types: InternalIP
+      repository: gcr.io/google_containers/metrics-server-amd64
+      tag: v0.3.6
+    args:
+      - --kubelet-insecure-tls=true
+      - --kubelet-preferred-address-types=InternalIP
