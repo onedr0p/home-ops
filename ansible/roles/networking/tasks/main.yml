@@ -1,18 +1,5 @@
 ---
 
-- name: Set MTU to 9000 on Intel NUCs
-  template:
-    src: "01-netcfg.yaml.j2"
-    dest: "/etc/netplan/01-netcfg.yaml"
-    owner: root
-    group: root
-    mode: 0644
-  when: deploy_target == 'intelnuc'
-
-- name: Apply MTU changes
-  command: netplan apply
-  when: deploy_target == 'intelnuc'
-
 - name: Configuring the nodes to use legacy iptables for compatibility with Kubernetes
   alternatives:
       name: "{{ item }}"
