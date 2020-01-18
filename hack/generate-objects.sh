@@ -32,7 +32,7 @@ kapply() {
 
 ROOK_NAMESPACE_READY=1
 while [ $ROOK_NAMESPACE_READY != 0 ]; do
-  echo "waiting for rook-ceph namespace to be fully ready..."
+  message "waiting for rook-ceph namespace to be fully ready..."
   # this is a hack to check for the namespace
   kubectl -n rook-ceph wait --for condition=Established crd/volumes.rook.io > /dev/null 2>&1
   ROOK_NAMESPACE_READY="$?"
@@ -42,7 +42,7 @@ kapply "$REPO_ROOT"/deployments/rook-ceph/dashboard/ingress.txt
 
 CERT_MANAGER_READY=1
 while [ $CERT_MANAGER_READY != 0 ]; do
-  echo "waiting for cert-manager to be fully ready..."
+  message "waiting for cert-manager to be fully ready..."
   kubectl -n cert-manager wait --for condition=Available deployment/cert-manager > /dev/null 2>&1
   CERT_MANAGER_READY="$?"
   sleep 5
