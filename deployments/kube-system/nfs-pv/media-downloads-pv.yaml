@@ -1,0 +1,27 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-media-downloads-pv
+spec:
+  storageClassName: media-downloads
+  capacity:
+    storage: 1Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 192.168.1.170
+    path: /Media/Downloads
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-media-downloads-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: media-downloads
+  resources:
+    requests:
+      storage: 1Mi
