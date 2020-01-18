@@ -1,4 +1,3 @@
----
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -6,10 +5,10 @@ metadata:
   namespace: rook-ceph
   annotations:
     kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/backend-protocol: HTTP
-    nginx.ingress.kubernetes.io/server-snippet: |
-      proxy_ssl_verify off;
 spec:
+  tls:
+   - hosts:
+     - rook.$DOMAIN
   rules:
   - host: rook.$DOMAIN
     http:
@@ -17,4 +16,4 @@ spec:
       - path: /
         backend:
           serviceName: rook-ceph-mgr-dashboard
-          servicePort: 7000
+          servicePort: dashboard
