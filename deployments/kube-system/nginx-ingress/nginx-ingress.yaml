@@ -11,26 +11,25 @@ spec:
   rollback:
     enable: true
   chart:
-    repository: https://helm.nginx.com/stable
+    repository: https://kubernetes-charts.storage.googleapis.com/
     name: nginx-ingress
-    version: 0.4.1
+    version: 1.29.2
   values:
     controller:
       replicaCount: 2
       image:
-        repository: nginx/nginx-ingress
-        tag: 1.6.1
+        repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
+        tag: 0.27.1
       service:
         loadBalancerIP: 192.168.42.100
         externalTrafficPolicy: Local
-      defaultTLS:
-        secret: "kube-system/acme-crt-secret"
       config:
-        entries:
-          proxy-body-size: "50m"
+        proxy-body-size: "50m"
       resources:
         requests:
           memory: 500Mi
           cpu: 25m
         limits:
           memory: 600Mi
+    defaultBackend:
+      enabled: false
