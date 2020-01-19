@@ -64,7 +64,6 @@ kseal "${REPO_ROOT}/deployments/default/sonarr/sonarr-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/velero/velero/velero-helm-values.txt"
 
 # kseal "${REPO_ROOT}/deployments/default/qbittorrent/qbittorrent-helm-values.txt"
-# kseal "${REPO_ROOT}/deployments/default/cloudflare-dyndns/cloudflare-dyndns-helm-values.txt"
 
 #
 # Generic Secrets
@@ -94,4 +93,12 @@ kubectl create secret generic cloudflare-api-key \
 kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/cert-manager/cloudflare/cloudflare-api-key.yaml
 
-
+kubectl create secret generic cloudflare-ddns \
+  --from-literal=api-key="$CF_API_KEY" \
+  --from-literal=user="$EMAIL" \
+  --from-literal=zones="$CF_ZONES" \
+  --from-literal=hosts="$CF_HOSTS" \
+  --from-literal=record-types="$CF_RECORDTYPES" \
+  --namespace default --dry-run -o json \
+  | kubeseal --format=yaml --cert="$PUB_CERT" \
+    > "$REPO_ROOT"/deployments/default/cloudflare-ddns/cloudflare-ddns-values.yaml
