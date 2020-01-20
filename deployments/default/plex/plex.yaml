@@ -31,6 +31,10 @@ spec:
       type: LoadBalancer
       loadBalancerIP: 192.168.42.140
     persistence:
+      config:
+        storageClass: "rook-ceph-block"
+        size: 120Gi
+        accessMode: ReadWriteOnce
       transcode:
         enabled: true
         storageClass: "local-path"
@@ -38,10 +42,6 @@ spec:
       data:
         enabled: true
         claimName: nfs-media-library-pvc
-      config:
-        storageClass: "rook-ceph-block"
-        size: 120Gi
-        accessMode: ReadWriteOnce
     resources:
       requests:
         cpu: 35m
