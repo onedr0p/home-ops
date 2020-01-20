@@ -1,0 +1,51 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: qbittorrent
+  namespace: default
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: qbittorrent
+  rollback:
+    enable: true
+  chart:
+    repository: https://billimek.com/billimek-charts/
+    name: qbittorrent
+    version: 3.0.0
+  values:
+    image:
+      repository: linuxserver/qbittorrent
+      tag: 14.2.0.99201912180418-6819-118af03ubuntu18.04.1-ls57
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
+    puid: 1000
+    pgid: 1000
+    guiService:
+      type: ClusterIP
+    btService:
+      type: LoadBalancer
+      port: 50413
+      loadBalancerIP: 192.168.42.130
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+    persistence:
+      config:
+        enabled: true
+        storageClass: "rook-ceph-block"
+        size: 200Mi
+      downloads:
+        enabled: true
+        existingClaim: nfs-media-downloads-pvc
+        accessMode: ReadWriteMany
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 25m
+      limits:
+        memory: 3000Mi
+  valueFileSecrets:
+  - name: "qbittorrent-helm-values"
