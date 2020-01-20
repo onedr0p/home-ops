@@ -102,3 +102,10 @@ kubectl create secret generic cloudflare-ddns \
   --namespace default --dry-run -o json \
   | kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/default/cloudflare-ddns/cloudflare-ddns-values.yaml
+
+kubectl create secret generic qbittorrent-prune \
+  --from-literal=username="$QB_USERNAME" \
+  --from-literal=password="$QB_PASSWORD" \
+  --namespace default --dry-run -o json \
+  | kubeseal --format=yaml --cert="$PUB_CERT" \
+    > "$REPO_ROOT"/deployments/default/qbittorrent-prune/qbittorrent-prune-values.yaml

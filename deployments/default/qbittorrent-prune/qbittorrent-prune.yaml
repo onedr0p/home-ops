@@ -1,0 +1,52 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: qbittorrent-prune
+  labels:
+    app: qbittorrent-prune
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qbittorrent-prune
+  template:
+    metadata:
+      labels:
+        app: qbittorrent-prune
+    spec:
+      containers:
+        - name: qbittorrent-prune
+          image: onedr0p/qbittorrent-prune:1.1.2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CRON_SCHEDULE
+              value: '"0 * * * *"'
+            - name: LOG_LEVEL
+              value: "2"
+            - name: DRY_RUN
+              value: "false"
+            - name: QB_HOST
+              value: "qbittorrent-gui.default.svc.cluster.local"
+            - name: QB_CATEGORY_1
+              value: "radarr"
+            - name: QB_CATEGORY_2
+              value: "sonarr"
+            - name: QB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: qbittorrent-prune
+                  key: username
+            - name: QB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: qbittorrent-prune
+                  key: password
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi
