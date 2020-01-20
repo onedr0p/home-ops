@@ -1,3 +1,6 @@
-nzbget.default.svc.cluster.local
+# media-stack
 
-qbittorrent.default.svc.cluster.local
+## Cluster addresses
+
+- nzbget.default.svc.cluster.local
+- qbittorrent-gui.default.svc.cluster.local
