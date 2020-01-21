@@ -21,9 +21,3 @@ hack/add-repo-key.sh "ssh-rsa ..."
 ```bash
 helm upgrade --install helm-operator --values deployments/flux/helm-operator/helm-operator-values.yaml --namespace flux fluxcd/helm-operator
 ```
-
-## Sealed Secrets
-
-```bash
-kubeseal --controller-name sealed-secrets --fetch-cert > ./secrets/pub-cert.pem
-```
