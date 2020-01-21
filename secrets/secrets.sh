@@ -69,7 +69,7 @@ kseal "${REPO_ROOT}/deployments/velero/velero/velero-helm-values.txt"
 # Generic Secrets
 #
 
-# NginX Basic Auth - default Namespace
+# NginX Basic Auth - default namespace
 kubectl create secret generic nginx-basic-auth \
   --from-literal=auth="$NGINX_BASIC_AUTH" \
   --namespace default --dry-run -o json \
@@ -77,7 +77,7 @@ kubectl create secret generic nginx-basic-auth \
 kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-default.yaml
 
-# NginX Basic Auth - kube-system Namespace
+# NginX Basic Auth - kube-system namespace
 kubectl create secret generic nginx-basic-auth \
   --from-literal=auth="$NGINX_BASIC_AUTH" \
   --namespace kube-system --dry-run -o json \
@@ -85,7 +85,7 @@ kubectl create secret generic nginx-basic-auth \
 kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-kube-system.yaml
 
-# Cloudflare API Key - cert-manager Namespace
+# Cloudflare API Key - cert-manager namespace
 kubectl create secret generic cloudflare-api-key \
   --from-literal=api-key="$CF_API_KEY" \
   --namespace cert-manager --dry-run -o json \
@@ -93,6 +93,7 @@ kubectl create secret generic cloudflare-api-key \
 kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/cert-manager/cloudflare/cloudflare-api-key.yaml
 
+# Cloudflare DDNS - default namespace
 kubectl create secret generic cloudflare-ddns \
   --from-literal=api-key="$CF_API_KEY" \
   --from-literal=user="$EMAIL" \
@@ -103,9 +104,17 @@ kubectl create secret generic cloudflare-ddns \
   | kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/default/cloudflare-ddns/cloudflare-ddns-values.yaml
 
+# qBittorrent Prune - default namespace
 kubectl create secret generic qbittorrent-prune \
   --from-literal=username="$QB_USERNAME" \
   --from-literal=password="$QB_PASSWORD" \
   --namespace default --dry-run -o json \
   | kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/default/qbittorrent-prune/qbittorrent-prune-values.yaml
+
+# sonarr episode prune - default namespace
+kubectl create secret generic sonarr-episode-prune \
+  --from-literal=api-key="$SONARR_API_KEY" \
+  --namespace default --dry-run -o json \
+  | kubeseal --format=yaml --cert="$PUB_CERT" \
+    > "$REPO_ROOT"/deployments/default/sonarr-episode-prune/sonarr-episode-prune-values.yaml

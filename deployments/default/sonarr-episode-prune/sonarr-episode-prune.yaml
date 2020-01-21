@@ -1,0 +1,43 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: sonarr-episode-prune
+  labels:
+    app: sonarr-episode-prune
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarr-episode-prune
+  template:
+    metadata:
+      labels:
+        app: sonarr-episode-prune
+    spec:
+      containers:
+        - name: sonarr-episode-prune
+          image: onedr0p/sonarr-episode-prune:v2.0.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DRY_RUN
+              value: "true"
+            - name: KEEP
+              value: "10"
+            - name: SERIES
+              value: "jeopardy,saturday-night-live,the-graham-norton-show,conan-2010,the-late-show-with-stephen-colbert,vice-news-tonight,last-week-tonight-with-john-oliver"
+            - name: URL
+              value: "http://sonarr.default.svc.cluster.local:8989"
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sonarr-episode-prune
+                  key: api-key
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi
