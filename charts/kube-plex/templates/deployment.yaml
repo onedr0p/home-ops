@@ -1,0 +1,206 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+      {{- if .Values.podAnnotations }}
+      annotations:
+        {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ if .Values.rbac.create }}{{ template "fullname" . }}{{ else }}{{ .Values.rbac.serviceAccountName | quote }}{{ end }}
+      hostname: "{{ template "fullname" . }}"
+{{- if .Values.kubePlex.enabled }}
+      initContainers:
+      - name: kube-plex-install
+        image: "{{ .Values.kubePlex.image.repository }}:{{ .Values.kubePlex.image.tag }}"
+        imagePullPolicy: {{ .Values.kubePlex.image.pullPolicy }}
+        command:
+        - cp
+        - /kube-plex
+        - /shared/kube-plex
+        volumeMounts:
+        - name: shared
+          mountPath: /shared
+{{- end }}
+      containers:
+      - name: plex
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- if .Values.kubePlex.enabled }}
+        # We replace the PMS binary with a postStart hook to save having to
+        # modify the default image entrypoint.
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - bash
+              - -c
+              - |
+                #!/bin/bash
+                set -e
+                rm -f '/usr/lib/plexmediaserver/Plex Transcoder'
+                cp /shared/kube-plex '/usr/lib/plexmediaserver/Plex Transcoder'
+{{- end }}
+        readinessProbe:
+          httpGet:
+            path: /identity
+            port: 32400
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /identity
+            port: 32400
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+        ports:
+          - name: pms
+            containerPort: 32400
+          - name: http
+            containerPort: 32400
+          - name: https
+            containerPort: 32443
+{{- if .Values.webtools.enabled }}
+          - name: webtools
+            containerPort: 33400
+{{- end }}
+        env:
+        - name: TZ
+          value: "{{ .Values.timezone }}"
+        # TODO: move this to a secret?
+        - name: PLEX_CLAIM
+          value: "{{ .Values.claimToken }}"
+        # kube-plex env vars
+        - name: PMS_INTERNAL_ADDRESS
+          value: http://{{ template "fullname" . }}:32400
+        - name: PMS_IMAGE
+          value: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        - name: KUBE_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: TRANSCODE_PVC
+{{- if .Values.persistence.transcode.claimName }}
+          value: "{{ .Values.persistence.transcode.claimName }}"
+{{- else }}
+          value: "{{ template "fullname" . }}-transcode"
+{{- end }}
+        - name: DATA_PVC
+{{- if .Values.persistence.data.claimName }}
+          value: "{{ .Values.persistence.data.claimName }}"
+{{- else }}
+          value: "{{ template "fullname" . }}-data"
+{{- end }}
+        - name: CONFIG_PVC
+{{- if .Values.persistence.config.claimName }}
+          value: "{{ .Values.persistence.config.claimName }}"
+{{- else }}
+          value: "{{ template "fullname" . }}-config"
+{{- end }}
+{{- if .Values.proxy.enable }}
+  {{- if .Values.proxy.http }}
+        - name: "HTTP_PROXY"
+          value: "{{.Values.proxy.http}}"
+  {{- end }}
+  {{- if .Values.proxy.https }}
+        - name: "HTTPS_PROXY"
+          value: "{{.Values.proxy.https}}"
+  {{- end }}
+  {{- if .Values.proxy.noproxy }}
+        - name: "NO_PROXY"
+          value: "{{.Values.proxy.noproxy}}"
+  {{- end }}
+{{- end }}
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        {{- if .Values.persistence.data.subPath }}
+          subPath: {{ .Values.persistence.data.subPath }}
+        {{ end }}
+        - name: config
+          mountPath: /config
+        {{- if .Values.persistence.config.subPath }}
+          subPath: {{ .Values.persistence.config.subPath }}
+        {{ end }}
+        - name: transcode
+          mountPath: /transcode
+        {{- if .Values.persistence.transcode.subPath }}
+          subPath: {{ .Values.persistence.transcode.subPath }}
+        {{ end }}
+        {{-  range .Values.persistence.extraData }}
+        - mountPath: "/data-{{ .name }}"
+          name: "extradata-{{ .name }}"
+        {{- end }}
+        - name: shared
+          mountPath: /shared
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+{{- if .Values.persistence.data.claimName }}
+          claimName: "{{ .Values.persistence.data.claimName }}"
+{{- else }}
+          claimName: "{{ template "fullname" . }}-data"
+{{- end }}
+      - name: config
+        persistentVolumeClaim:
+{{- if .Values.persistence.config.claimName }}
+          claimName: "{{ .Values.persistence.config.claimName }}"
+{{- else }}
+          claimName: "{{ template "fullname" . }}-config"
+{{- end }}
+      - name: transcode
+{{- if .Values.persistence.transcode.enabled }}
+        persistentVolumeClaim:
+{{- if .Values.persistence.transcode.claimName }}
+          claimName: "{{ .Values.persistence.transcode.claimName }}"
+{{- else }}
+          claimName: "{{ template "fullname" . }}-transcode"
+{{- end }}
+{{- else }}
+        emptyDir: {}
+{{- end }}
+{{-  range .Values.persistence.extraData }}
+      - name: "extradata-{{ .name }}"
+        persistentVolumeClaim:
+{{- if .claimName }}
+          claimName: "{{ .claimName }}"
+{{- else }}
+          claimName: "extradata-{{ .name }}"
+{{- end }}
+{{- end }}
+      - name: shared
+        emptyDir: {}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
