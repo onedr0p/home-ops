@@ -1,21 +1,33 @@
 # Ansible
 
-> *Note*: this document is a work in progress
+Various playbooks to help integrate or destroy your k3s cluster
 
 ## Provision playbook
 
-```bash
-env ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook \
-  -i ansible/inventory \
-  ansible/playbook.yml --ask-become-pass
-```
-
-## Teardown cluster playbook
+> **Caution:** This playbook will provision your operating systems to be most compatible with Kubernetes
 
 ```bash
 env ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook \
   -i ansible/inventory \
-  ansible/playbook-k3s-teardown.yml --ask-become-pass
+  ansible/main.yml --ask-become-pass
 ```
 
-## Reset Ceph playbook
+## Teardown k3s cluster playbook
+
+> **Caution:** This playbook will complete destroy your k3s Cluster
+
+```bash
+env ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook \
+  -i ansible/inventory \
+  ansible/teardown-k3s.yml --ask-become-pass
+```
+
+## Teardown rook-ceph playbook
+
+> **Caution:** This playbook will complete destroy your ceph cluster and delete all data
+
+```bash
+env ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook \
+  -i ansible/inventory \
+  ansible/teardown-rook-ceph.yml --ask-become-pass
+```
