@@ -3,7 +3,6 @@
 Offical [https://github.com/munnerz/kube-plex](kube-plex) with slight modifications:
 
 - https://github.com/munnerz/kube-plex/pull/79
-- https://github.com/munnerz/kube-plex/pull/52
 - Ability to change `persistence.transcode.accessMode`
 
 This chart will go away once these changes are made into the offical chart
@@ -21,8 +20,6 @@ The following tables lists the configurable parameters of the Plex chart and the
 | `kubePlex.image.repository`         | Image repository | `quay.io/munnerz/kube-plex` |
 | `kubePlex.image.tag`                | Image tag. | `latest`|
 | `kubePlex.image.pullPolicy`         | Image pull policy | `IfNotPresent` |
-| `webtools.enabled`         | Enables WebTools | `false` |
-| `webtools.enabled.path`         | Access webtools via path | `/WebTools` |
 | `claimToken`                 | Plex Claim Token to authenticate your acount | `` |
 | `timezone`                 | Timezone plex instance should run as, e.g. 'America/New_York' | `Europe/London` |
 | `service.type`          | Kubernetes service type for the plex GUI/API | `ClusterIP` |
