@@ -11,7 +11,7 @@ spec:
   rollback:
     enable: true
   chart:
-    git: https://github.com/munnerz/kube-plex
+    git: https://github.com/onedr0p/k3s-gitops
     ref: master
     path: charts/kube-plex
   values:
@@ -37,8 +37,10 @@ spec:
         accessMode: ReadWriteOnce
       transcode:
         enabled: true
-        claimName: nfs-data-pvc
-        subPath: plex
+        storageClass: "local-path"
+        # claimName: nfs-data-pvc
+        # subPath: plex
+        accessMode: ReadWriteOnce
       data:
         enabled: true
         claimName: nfs-media-library-pvc
