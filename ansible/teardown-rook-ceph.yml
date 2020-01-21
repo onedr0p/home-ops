@@ -1,0 +1,26 @@
+---
+- hosts: k3s_storage
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: "Zap the drives"
+      command: sgdisk --zap-all /dev/nvme0n1
+
+    - name: "Remove LVM partitions"
+      shell: ls /dev/mapper/ceph-* | xargs -I% -- dmsetup remove %
+
+    - name: "Wipe the block device"
+      command: wipefs -af /dev/nvme0n1
+    
+    - name: Rebooting hosts
+      reboot:
+        msg: "Systems are being rebooted"
+        reboot_timeout: 60
+      ignore_errors: true
+
+# https://rook.io/docs/rook/v0.9/ceph-teardown.html
+# sudo su -
+# sgdisk --zap-all /dev/nvme0n1
+# ls /dev/mapper/ceph-* | xargs -I% -- dmsetup remove %
+# wipefs -af /dev/nvme0n1
