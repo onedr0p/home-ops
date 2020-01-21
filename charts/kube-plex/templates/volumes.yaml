@@ -1,0 +1,66 @@
+{{- if and (not .Values.persistence.transcode.claimName) .Values.persistence.transcode.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ template "fullname" . }}-transcode
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: transcode
+spec:
+  accessModes:
+  - {{ .Values.persistence.transcode.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.transcode.size | quote }}
+{{- if .Values.persistence.transcode.storageClass }}
+  storageClassName: {{ .Values.persistence.transcode.storageClass | quote }}
+{{- end }}
+---
+{{- end }}
+{{- if not .Values.persistence.config.claimName }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ template "fullname" . }}-config
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: config
+spec:
+  accessModes:
+  - {{ .Values.persistence.config.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.config.size | quote }}
+{{- if .Values.persistence.config.storageClass }}
+  storageClassName: {{ .Values.persistence.config.storageClass | quote }}
+{{- end }}
+---
+{{- end }}
+{{- if not .Values.persistence.data.claimName }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ template "fullname" . }}-data
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: data
+spec:
+  accessModes:
+  - {{ .Values.persistence.data.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.data.size | quote }}
+{{- if .Values.persistence.data.storageClass }}
+  storageClassName: {{ .Values.persistence.data.storageClass | quote }}
+{{- end }}
+---
+{{- end }}
