@@ -21,8 +21,6 @@ The following tables lists the configurable parameters of the Plex chart and the
 | `kubePlex.image.repository`         | Image repository | `quay.io/munnerz/kube-plex` |
 | `kubePlex.image.tag`                | Image tag. | `latest`|
 | `kubePlex.image.pullPolicy`         | Image pull policy | `IfNotPresent` |
-| `webtools.enabled`         | Enables WebTools | `false` |
-| `webtools.enabled.path`         | Access webtools via path | `/WebTools` |
 | `claimToken`                 | Plex Claim Token to authenticate your acount | `` |
 | `timezone`                 | Timezone plex instance should run as, e.g. 'America/New_York' | `Europe/London` |
 | `service.type`          | Kubernetes service type for the plex GUI/API | `ClusterIP` |
