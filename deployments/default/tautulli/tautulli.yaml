@@ -1,0 +1,44 @@
+
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: tautulli
+  namespace: default
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: tautulli
+  rollback:
+    enable: true
+  chart:
+    repository: https://billimek.com/billimek-charts/
+    name: tautulli
+    version: 2.0.1
+  values:
+    image:
+      repository: linuxserver/tautulli
+      tag: v2.1.42-ls34
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+    timezone: "America/New_York"
+    puid: 1000
+    pgid: 1000
+    persistence:
+      config:
+        enabled: true
+        storageClass: "rook-ceph-block"
+        accessMode: ReadWriteOnce
+        size: 20Gi
+    resources:
+      requests:
+        memory: 350Mi
+        cpu: 25m
+      limits:
+        memory: 1000Mi
+  valueFileSecrets:
+  - name: "tautulli-helm-values"
