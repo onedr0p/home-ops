@@ -1,0 +1,127 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: prometheus-operator
+  namespace: monitoring
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+    fluxcd.io/tag.grafana: semver:~6
+spec:
+  releaseName: prometheus-operator
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: prometheus-operator
+    version: 8.4.0
+  values:
+    server:
+      resources:
+        requests:
+          memory: 1000Mi
+          cpu: 25m
+        limits:
+          memory: 2000Mi
+    prometheusOperator:
+      createCustomResource: true
+    alertmanager:
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: rook-ceph-block
+              resources:
+                requests:
+                  storage: 10Gi
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+    grafana:
+      deploymentStrategy:
+        type: Recreate
+      podAnnotations:
+        backup.velero.io/backup-volumes: storage
+      persistence:
+        enabled: true
+        storageClassName: "rook-ceph-block"
+        size: 10Gi
+        accessModes:
+        - ReadWriteOnce
+      env:
+        GF_EXPLORE_ENABLED: true
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+      plugins:
+      - natel-discrete-panel
+      - pr0ps-trackmap-panel
+      - grafana-piechart-panel
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+          - name: 'default'
+            orgId: 1
+            folder: ''
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+      dashboards:
+        default:
+          nginx-dashboard:
+            url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
+            datasource: Prometheus
+          ceph-cluster:
+            url: https://grafana.com/api/dashboards/2842/revisions/10/download
+            datasource: Prometheus
+          ceph-osd:
+            url: https://grafana.com/api/dashboards/5336/revisions/3/download
+            datasource: Prometheus
+          ceph-pools:
+            url: https://grafana.com/api/dashboards/5342/revisions/3/download
+            datasource: Prometheus
+      additionalDataSources:
+      - name: loki
+        type: loki
+        access: proxy
+        url: http://loki.logging.svc.cluster.local:3100
+      grafana.ini:
+        paths:
+          data: /var/lib/grafana/data
+          logs: /var/log/grafana
+          plugins: /var/lib/grafana/plugins
+          provisioning: /etc/grafana/provisioning
+        analytics:
+          check_for_updates: true
+        log:
+          mode: console
+        grafana_net:
+          url: https://grafana.net
+    kubeEtcd:
+      enabled: false
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    prometheus:
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+      prometheusSpec:
+        retention: 30d
+        enableAdminAPI: true
+        serviceMonitorSelectorNilUsesHelmValues: false
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: rook-ceph-block
+              resources:
+                requests:
+                  storage: 100Gi
+  valueFileSecrets:
+  - name: "prometheus-operator-helm-values"
