@@ -1,0 +1,32 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: loki
+  namespace: logging
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: loki
+  chart:
+    repository: https://grafana.github.io/loki/charts
+    name: loki-stack
+    version: 0.26.0
+  values:
+    loki:
+      image:
+        repository: grafana/loki
+        tag: v1.3.0
+      persistence:
+        enabled: true
+        storageClassName: "rook-ceph-block"
+        size: 50Gi
+      serviceMonitor:
+        enabled: true
+    promtail:
+      image:
+        repository: grafana/promtail
+        tag: v1.3.0
+      serviceMonitor:
+        enabled: true
