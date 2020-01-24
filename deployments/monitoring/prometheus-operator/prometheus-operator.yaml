@@ -76,7 +76,7 @@ spec:
             url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
             datasource: Prometheus
           ceph-cluster:
-            url: https://grafana.com/api/dashboards/2842/revisions/10/download
+            url: https://grafana.com/api/dashboards/2842/revisions/11/download
             datasource: Prometheus
           ceph-osd:
             url: https://grafana.com/api/dashboards/5336/revisions/3/download
@@ -123,5 +123,16 @@ spec:
               resources:
                 requests:
                   storage: 100Gi
+        additionalScrapeConfigs:
+        - job_name: 'netdata-scrape'
+          metrics_path: '/api/v1/allmetrics'
+          params:
+              # format: prometheus | prometheus_all_hosts
+              # You can use `prometheus_all_hosts` if you want Prometheus to set the `instance` to your hostname instead of IP 
+            format: [prometheus]
+          honor_labels: true
+          static_configs:
+          - targets:
+            - pihole:19999
   valueFileSecrets:
   - name: "prometheus-operator-helm-values"
