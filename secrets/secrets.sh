@@ -88,6 +88,14 @@ kubectl create secret generic nginx-basic-auth \
 kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-kube-system.yaml
 
+# NginX Basic Auth - monitoring namespace
+kubectl create secret generic nginx-basic-auth \
+  --from-literal=auth="$NGINX_BASIC_AUTH" \
+  --namespace monitoring --dry-run -o json \
+  | \
+kubeseal --format=yaml --cert="$PUB_CERT" \
+    > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-monitoring.yaml
+
 # Cloudflare API Key - cert-manager namespace
 kubectl create secret generic cloudflare-api-key \
   --from-literal=api-key="$CF_API_KEY" \
