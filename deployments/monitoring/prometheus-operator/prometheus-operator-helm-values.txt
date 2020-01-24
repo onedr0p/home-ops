@@ -1,0 +1,30 @@
+alertmanager:
+  ingress:
+    hosts: [alert-manager.$DOMAIN]
+    tls:
+    - hosts:
+      - alert-manager.$DOMAIN
+    annotations:
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: nginx-basic-auth
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+prometheus:
+  ingress:
+    hosts: [prometheus.$DOMAIN]
+    tls:
+    - hosts:
+      - prometheus.$DOMAIN
+    annotations:
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: nginx-basic-auth
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+grafana:
+  ingress:
+    hosts: [grafana.$DOMAIN]
+    tls:
+    - hosts:
+      - grafana.$DOMAIN
+  adminPassword: "$GRAFANA_PASSWORD"
+  grafana.ini:
+    server:
+      root_url: https://grafana.${DOMAIN}
