@@ -36,14 +36,14 @@ spec:
         accessMode: ReadWriteOnce
         size: 20Gi
       downloads:
-        enabled: true
-        existingClaim: nfs-media-downloads-pvc
-        accessMode: ReadWriteMany
+        enabled: false
       movies:
-        enabled: true
-        existingClaim: nfs-media-library-pvc
-        subPath: Movies
-        accessMode: ReadWriteMany
+        enabled: false
+      extraExistingClaimMounts:
+        - name: media
+          existingClaim: nfs-media-pvc
+          mountPath: /media
+          readOnly: false
     resources:
       requests:
         memory: 350Mi
