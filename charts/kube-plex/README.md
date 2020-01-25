@@ -3,7 +3,6 @@
 Offical [https://github.com/munnerz/kube-plex](kube-plex) with slight modifications:
 
 - https://github.com/munnerz/kube-plex/pull/79
-- https://github.com/munnerz/kube-plex/pull/52
 - Ability to change `persistence.transcode.accessMode`
 
 This chart will go away once these changes are made into the offical chart
