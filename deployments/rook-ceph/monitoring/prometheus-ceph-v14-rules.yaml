@@ -86,13 +86,13 @@ spec:
         severity: critical
     - alert: CephMonHighNumberOfLeaderChanges
       annotations:
-        description: 'Ceph Monitor "{{ $labels.job }}": instance {{ $labels.instance
-          }} has seen {{ $value }} leader changes per minute recently.'
+        description: Ceph Monitor {{ $labels.ceph_daemon }} on host {{ $labels.hostname
+          }} has seen {{ $value | printf "%.2f" }} leader changes per minute recently.
         message: Storage Cluster has seen many leader changes recently.
         severity_level: warning
         storage_type: ceph
       expr: |
-        rate(ceph_mon_num_elections{job="rook-ceph-mgr"}[5m]) * 60 > 0.95
+        (ceph_mon_metadata{job="rook-ceph-mgr"} * on (ceph_daemon) group_left() (rate(ceph_mon_num_elections{job="rook-ceph-mgr"}[5m]) * 60)) > 0.95
       for: 5m
       labels:
         severity: warning
@@ -112,6 +112,32 @@ spec:
         severity: critical
   - name: osd-alert.rules
     rules:
+    - alert: CephOSDCriticallyFull
+      annotations:
+        description: Utilization of back-end storage device {{ $labels.ceph_daemon
+          }} has crossed 85% on host {{ $labels.hostname }}. Immediately free up some
+          space or expand the storage cluster or contact support.
+        message: Back-end storage device is critically full.
+        severity_level: error
+        storage_type: ceph
+      expr: |
+        (ceph_osd_metadata * on (ceph_daemon) group_left() (ceph_osd_stat_bytes_used / ceph_osd_stat_bytes)) >= 0.85
+      for: 40s
+      labels:
+        severity: critical
+    - alert: CephOSDNearFull
+      annotations:
+        description: Utilization of back-end storage device {{ $labels.ceph_daemon
+          }} has crossed 75% on host {{ $labels.hostname }}. Free up some space or
+          expand the storage cluster or contact support.
+        message: Back-end storage device is nearing full.
+        severity_level: warning
+        storage_type: ceph
+      expr: |
+        (ceph_osd_metadata * on (ceph_daemon) group_left() (ceph_osd_stat_bytes_used / ceph_osd_stat_bytes)) >= 0.75
+      for: 40s
+      labels:
+        severity: warning
     - alert: CephOSDDiskNotResponding
       annotations:
         description: Disk device {{ $labels.device }} not responding, on host {{ $labels.host
@@ -138,7 +164,7 @@ spec:
         severity: critical
     - alert: CephDataRecoveryTakingTooLong
       annotations:
-        description: Data recovery has been active for more than 2h. Contact Support.
+        description: Data recovery has been active for too long. Contact Support.
         message: Data recovery is slow
         severity_level: warning
         storage_type: ceph
@@ -210,23 +236,27 @@ spec:
     rules:
     - alert: CephClusterNearFull
       annotations:
-        description: Storage cluster utilization has crossed 85%.
-        message: Storage cluster is nearing full. Expansion is required.
+        description: Storage cluster utilization has crossed 75%. Free up some space
+          or expand the storage cluster.
+        message: Storage cluster is nearing full. Data deletion or cluster expansion
+          is required.
         severity_level: warning
         storage_type: ceph
       expr: |
-        sum(ceph_osd_stat_bytes_used) / sum(ceph_osd_stat_bytes) > 0.85
-      for: 5m
+        sum(ceph_osd_stat_bytes_used) / sum(ceph_osd_stat_bytes) > 0.75
+      for: 30s
       labels:
         severity: warning
     - alert: CephClusterCriticallyFull
       annotations:
-        description: Storage cluster utilization has crossed 95%.
-        message: Storage cluster is critically full and needs immediate expansion
+        description: Storage cluster utilization has crossed 85%. Free up some space
+          or expand the storage cluster immediately.
+        message: Storage cluster is critically full and needs immediate data deletion
+          or cluster expansion.
         severity_level: error
         storage_type: ceph
       expr: |
-        sum(ceph_osd_stat_bytes_used) / sum(ceph_osd_stat_bytes) > 0.95
-      for: 5m
+        sum(ceph_osd_stat_bytes_used) / sum(ceph_osd_stat_bytes) > 0.85
+      for: 30s
       labels:
         severity: critical
