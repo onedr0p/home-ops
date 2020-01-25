@@ -30,3 +30,12 @@ spec:
         tag: v1.3.0
       serviceMonitor:
         enabled: true
+      extraScrapeConfigs:
+      - job_name: syslog
+        syslog:
+          listen_address: 0.0.0.0:1514
+          labels:
+            job: "syslog"
+        relabel_configs:
+        - source_labels: ['__syslog_message_hostname']
+          target_label: 'host'
