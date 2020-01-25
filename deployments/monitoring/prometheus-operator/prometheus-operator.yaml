@@ -85,6 +85,9 @@ spec:
           ceph-pools:
             url: https://grafana.com/api/dashboards/5342/revisions/3/download
             datasource: Prometheus
+          pihole-dashboard:
+            url: https://raw.githubusercontent.com/eko/pihole-exporter/master/grafana/dashboard.json
+            datasource: Prometheus
       additionalDataSources:
       - name: loki
         type: loki
@@ -135,5 +138,8 @@ spec:
           static_configs:
           - targets:
             - pihole:19999
+        - job_name: 'pihole'
+          static_configs:
+          - targets: ['pihole:9617']
   valueFileSecrets:
   - name: "prometheus-operator-helm-values"
