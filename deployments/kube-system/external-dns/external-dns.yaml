@@ -1,0 +1,27 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: kube-system
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: 'regexp:^([0-9]+\.[0-9]+\.[0-9]+-debian-10-r[0-9]+)$'
+spec:
+  releaseName: external-dns
+  rollback:
+    enable: true
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: external-dns
+    version: 2.15.2
+  values:
+    image:
+      registry: docker.io
+      repository: bitnami/external-dns
+      tag: 0.5.18-debian-10-r0
+    provider: cloudflare
+    cloudflare:
+      proxied: true
+  valueFileSecrets:
+  - name: "external-dns-helm-values"
