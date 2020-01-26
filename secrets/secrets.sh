@@ -106,7 +106,7 @@ kubeseal --format=yaml --cert="$PUB_CERT" \
 # Cloudflare DDNS - kube-system namespace
 kubectl create secret generic cloudflare-ddns \
   --from-literal=api-key="$CF_API_KEY" \
-  --from-literal=user="$CF_EMAIL" \
+  --from-literal=user="$CF_API_EMAIL" \
   --from-literal=zones="$CF_ZONES" \
   --from-literal=hosts="$CF_HOSTS" \
   --from-literal=record-types="$CF_RECORDTYPES" \
