@@ -66,8 +66,6 @@ kseal "${REPO_ROOT}/deployments/default/qbittorrent/qbittorrent-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/default/plex/plex-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/velero/velero/velero-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
-kseal "${REPO_ROOT}/deployments/kube-system/external-dns/external-dns-helm-values.txt"
-kseal "${REPO_ROOT}/deployments/kube-system/nginx-ingress/nginx-ingress-helm-values.txt"
 
 #
 # Generic Secrets
@@ -105,16 +103,16 @@ kubectl create secret generic cloudflare-api-key \
 kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/cert-manager/cloudflare/cloudflare-api-key.yaml
 
-# Cloudflare DDNS - default namespace
-# kubectl create secret generic cloudflare-ddns \
-#   --from-literal=api-key="$CF_API_KEY" \
-#   --from-literal=user="$EMAIL" \
-#   --from-literal=zones="$CF_ZONES" \
-#   --from-literal=hosts="$CF_HOSTS" \
-#   --from-literal=record-types="$CF_RECORDTYPES" \
-#   --namespace default --dry-run -o json \
-#   | kubeseal --format=yaml --cert="$PUB_CERT" \
-#     > "$REPO_ROOT"/deployments/default/cloudflare-ddns/cloudflare-ddns-values.yaml
+# Cloudflare DDNS - kube-system namespace
+kubectl create secret generic cloudflare-ddns \
+  --from-literal=api-key="$CF_API_KEY" \
+  --from-literal=user="$CF_EMAIL" \
+  --from-literal=zones="$CF_ZONES" \
+  --from-literal=hosts="$CF_HOSTS" \
+  --from-literal=record-types="$CF_RECORDTYPES" \
+  --namespace kube-system --dry-run -o json \
+  | kubeseal --format=yaml --cert="$PUB_CERT" \
+    > "$REPO_ROOT"/deployments/kube-system/cloudflare-ddns/cloudflare-ddns-values.yaml
 
 # qBittorrent Prune - default namespace
 kubectl create secret generic qbittorrent-prune \
