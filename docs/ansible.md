@@ -12,6 +12,22 @@ env ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook \
   ansible/main.yml --ask-become-pass
 ```
 
+## Ping Cluster
+
+```bash
+env ANSIBLE_CONFIG=ansible/ansible.cfg ansible \
+  -i ansible/inventory k3s_cluster -m ping
+```
+
+## Reboot cluster
+
+```bash
+env ANSIBLE_CONFIG=ansible/ansible.cfg ansible -b \
+      all -i ansible/inventory -m shell -a "/sbin/shutdown -r now"
+```
+
+:warning: Caution Dangerzone Below :warning:
+
 ## Teardown k3s cluster playbook
 
 > **Caution:** This playbook will complete destroy your k3s Cluster
@@ -31,3 +47,5 @@ env ANSIBLE_CONFIG=ansible/ansible.cfg ansible-playbook \
   -i ansible/inventory \
   ansible/teardown-rook-ceph.yml --ask-become-pass
 ```
+
+
