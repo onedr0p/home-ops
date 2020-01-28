@@ -1,0 +1,25 @@
+
+{{- if and .Values.persistence.movies.enabled (not .Values.persistence.movies.existingClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ template "radarr.fullname" . }}-movies
+  labels:
+    app.kubernetes.io/name: {{ include "radarr.name" . }}
+    helm.sh/chart: {{ include "radarr.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.movies.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.movies.size | quote }}
+{{- if .Values.persistence.movies.storageClass }}
+{{- if (eq "-" .Values.persistence.movies.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.persistence.movies.storageClass }}"
+{{- end }}
+{{- end }}
+{{- end -}}
