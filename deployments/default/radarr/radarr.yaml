@@ -13,13 +13,9 @@ spec:
   rollback:
     enable: true
   chart:
-    git: https://github.com/onedr0p/k3s-gitops
-    ref: master
-    path: charts/radarr
-  # chart:
-  #   repository: https://billimek.com/billimek-charts/
-  #   name: radarr
-  #   version: 3.0.0
+    repository: https://billimek.com/billimek-charts/
+    name: radarr
+    version: 3.0.0
   values:
     image:
       repository: linuxserver/radarr
@@ -43,9 +39,11 @@ spec:
         enabled: false
       movies:
         enabled: false
-      extraMounts:
+      extraExistingClaimMounts:
         - name: media
-          claimName: nfs-media-pvc
+          existingClaim: nfs-media-pvc
+          mountPath: /media
+          readOnly: false
     resources:
       requests:
         memory: 350Mi
