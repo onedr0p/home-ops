@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "cloudflare-dyndns.fullname" . }}
+  labels:
+    app: {{ template "cloudflare-dyndns.name" . }}
+    chart: {{ template "cloudflare-dyndns.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "cloudflare-dyndns.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "cloudflare-dyndns.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: CF_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "cloudflare-dyndns.fullname" . }}
+                  key: cloudflare-dyndns-user
+            - name: CF_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "cloudflare-dyndns.fullname" . }}
+                  key: cloudflare-dyndns-token
+            - name: CF_ZONES
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "cloudflare-dyndns.fullname" . }}
+                  key: cloudflare-dyndns-zones
+            - name: CF_HOSTS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "cloudflare-dyndns.fullname" . }}
+                  key: cloudflare-dyndns-hosts
+            - name: CF_RECORDTYPES
+              value: "{{ .Values.cloudflare.record_types }}"
+            - name: DETECTION_MODE
+              value: "{{ .Values.cloudflare.detection_mode }}"
+            - name: LOG_LEVEL
+              value: "{{ .Values.cloudflare.log_level }}"
+            - name: SLEEP_INTERVAL
+              value: "{{ .Values.cloudflare.sleep_interval }}"
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
