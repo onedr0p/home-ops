@@ -1,0 +1,25 @@
+
+{{- if and .Values.persistence.tv.enabled (not .Values.persistence.tv.existingClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ template "sonarr.fullname" . }}-tv
+  labels:
+    app.kubernetes.io/name: {{ include "sonarr.name" . }}
+    helm.sh/chart: {{ include "sonarr.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.tv.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.tv.size | quote }}
+{{- if .Values.persistence.tv.storageClass }}
+{{- if (eq "-" .Values.persistence.tv.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.persistence.tv.storageClass }}"
+{{- end }}
+{{- end }}
+{{- end -}}
