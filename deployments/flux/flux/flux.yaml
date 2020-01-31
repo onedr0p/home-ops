@@ -13,6 +13,25 @@ spec:
     repository: https://charts.fluxcd.io/
     name: flux
     version: 1.1.0
-  valuesFrom:
-  - externalSourceRef:
-      url: https://raw.githubusercontent.com/onedr0p/k3s-gitops/master/deployments/flux/flux/flux-values.yaml
+  values:
+    helmOperator:
+      create: false
+    git:
+      url: "git@github.com:onedr0p/k3s-gitops.git"
+      branch: master
+      path: deployments
+    registry:
+      rps: 1
+      burst: 1
+    memcached:
+      enabled: true
+    syncGarbageCollection:
+      enabled: true
+      dry: false
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        create: true
+        interval: 30s
+        scrapeTimeout: 10s
+        namespace: flux
