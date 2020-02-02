@@ -1,4 +1,6 @@
-# Kubernetes cluster utilizing the GitOps workflow
+# My home Kubernetes cluster utilizing GitOps
+
+![Kubernetes](https://i.imgur.com/p1RzXjQ.png)
 
 [Join](https://discord.gg/hk58BZV) Discord Community
 
