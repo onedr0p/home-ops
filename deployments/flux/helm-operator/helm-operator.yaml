@@ -13,17 +13,6 @@ spec:
     repository: https://charts.fluxcd.io/
     name: helm-operator
     version: 0.6.0
-  values:
-    createCRD: true
-    git:
-      ssh:
-        secretName: flux-git-deploy
-    helm:
-      versions: "v3"
-    prometheus:
-      enabled: true
-      serviceMonitor:
-        create: true
-        namespace: flux
-        interval: 30s
-        scrapeTimeout: 10s
+  valuesFrom:
+  - externalSourceRef:
+      url: https://raw.githubusercontent.com/onedr0p/k3s-gitops/master/deployments/flux/helm-operator/helm-operator-values.yaml
