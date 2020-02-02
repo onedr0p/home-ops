@@ -8,6 +8,8 @@
 
 This is my Homelab's Kubernetes cluster. All workloads are in the [deployments](./deployments/) folder and sorted into folders by namespace. Investigate into each folder below to learn more about my deployments. This repository isn't really a tutorial on how to set up a cluster because of the amount of differences you would experience in setting up a Kubernetes cluster. However I do have some things documented in the [docs](./docs/) folder. You can also checkout my [k3s-gitops-arm](https://github.com/onedr0p/k3s-gitops-arm) repo for more of a A-Z guide on how to setup a cluster on a bunch of Raspberry Pis.
 
+## Deployment Namespaces
+
 - [cert-manager](./deployments/cert-manager)
 - [default](./deployments/default)
 - [flux](./deployments/flux)
@@ -17,7 +19,7 @@ This is my Homelab's Kubernetes cluster. All workloads are in the [deployments](
 - [rook-ceph](./deployments/rook-ceph)
 - [velero](./deployments/velero)
 
-## Server configuration
+## Server Configuration
 
 - 1x OdroidH2 w/ 256GB NVMe and 16GB RAM for the Kubernetes master node
 - 3x NUC8i5BEH w/ 1TB NVMe and 32GB RAM for the rook-ceph/storage nodes
