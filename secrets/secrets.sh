@@ -128,3 +128,17 @@ kubectl create secret generic sonarr-episode-prune \
   --namespace default --dry-run -o json \
   | kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/default/sonarr-episode-prune/sonarr-episode-prune-values.yaml
+
+# sonarr exporter
+kubectl create secret generic sonarr-exporter \
+  --from-literal=api-key="$SONARR_API_KEY" \
+  --namespace monitoring --dry-run -o json \
+  | kubeseal --format=yaml --cert="$PUB_CERT" \
+    > "$REPO_ROOT"/deployments/monitoring/sonarr-exporter/sonarr-exporter-values.yaml
+
+# pihole exporter
+kubectl create secret generic pihole-exporter \
+  --from-literal=password="$PIHOLE_PASSWORD" \
+  --namespace monitoring --dry-run -o json \
+  | kubeseal --format=yaml --cert="$PUB_CERT" \
+    > "$REPO_ROOT"/deployments/monitoring/pihole-exporter/pihole-exporter-values.yaml
