@@ -19,7 +19,7 @@ This is my Homelab's Kubernetes cluster. All workloads are in the [deployments](
 - [rook-ceph](./deployments/rook-ceph)
 - [velero](./deployments/velero)
 
-## k3s or K8s
+## k3s or k8s
 
 [k3s](https://github.com/rancher/k3s) was my choice in deployment because of how easy and quick it is to get going with [k3sup](https://github.com/alexellis/k3sup). I am also using the Docker CRI under k3s instead of the default containerd. This is helpful to me if I ever want to set up Continuous Integration in the future.
 
