@@ -124,14 +124,14 @@ kubectl create secret generic qbittorrent-prune \
 
 # sonarr episode prune - default namespace
 kubectl create secret generic sonarr-episode-prune \
-  --from-literal=api-key="$SONARR_API_KEY" \
+  --from-literal=api-key="$SONARR_APIKEY" \
   --namespace default --dry-run -o json \
   | kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/default/sonarr-episode-prune/sonarr-episode-prune-values.yaml
 
 # sonarr exporter
 kubectl create secret generic sonarr-exporter \
-  --from-literal=api-key="$SONARR_API_KEY" \
+  --from-literal=api-key="$SONARR_APIKEY" \
   --namespace monitoring --dry-run -o json \
   | kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/monitoring/sonarr-exporter/sonarr-exporter-values.yaml
