@@ -1,4 +1,4 @@
-# My home Kubernetes cluster with [GitOps](https://www.weave.works/blog/what-is-gitops-really)
+# My home Kubernetes cluster driven by [GitOps](https://www.weave.works/blog/what-is-gitops-really)
 
 ![Kubernetes](https://i.imgur.com/p1RzXjQ.png)
 
