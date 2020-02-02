@@ -24,5 +24,5 @@ This is my Homelab's Kubernetes cluster. All workloads are in the [deployments](
 - 1x OdroidH2 w/ 256GB NVMe and 16GB RAM for the Kubernetes master node
 - 3x NUC8i5BEH w/ 1TB NVMe and 32GB RAM for the rook-ceph/storage nodes
 - 2x NUC8i7BEH w/ 500GB SSD and 64GB RAM for the worker nodes
-- 5x Sonnet Thunderbolt to 10Gb SFP+ for the Kubernetes worker and storage nodes
+- 5x Sonnet Thunderbolt to 10Gb SFP+ for the Intel NUC Kubernetes worker and storage nodes
 - 1x Qnap 8 bay NAS w/ 12TB drives for media and some deployment volumes
