@@ -19,7 +19,13 @@ This is my Homelab's Kubernetes cluster. All workloads are in the [deployments](
 - [rook-ceph](./deployments/rook-ceph)
 - [velero](./deployments/velero)
 
+## k3s or K8s
+
+[k3s](https://github.com/rancher/k3s) was my choice in deployment because of how easy and quick it is to get going with [k3sup](https://github.com/alexellis/k3sup). I am also using the Docker CRI under k3s instead of the default containerd. This is helpful to me if I ever want to set up Continuous Integration in the future.
+
 ## Server Configuration
+
+All my Kubernetes worker and master nodes below are running bare metal Ubuntu 18.04.3. Using a Hypervisor seemed like a bit overkill, all the devices would be running 1 VM anyways.
 
 - 1x OdroidH2 w/ 256GB NVMe and 16GB RAM for the Kubernetes master node
 - 3x NUC8i5BEH w/ 1TB NVMe and 32GB RAM for the rook-ceph/storage nodes
