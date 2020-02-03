@@ -34,3 +34,14 @@ All my Kubernetes worker and master nodes below are running bare metal Ubuntu 18
 - 2x NUC8i7BEH w/ 500GB SSD and 64GB RAM for the worker nodes
 - 5x Sonnet Thunderbolt to 10Gb SFP+ for the Intel NUC Kubernetes worker and storage nodes
 - 1x Qnap 8 bay NAS w/ 12TB drives for media and some deployment volumes
+
+## Load Balancer IPs
+
+[MetalLB](https://metallb.universe.tf/) IP Address Range: `192.168.42.100-192.168.42.250`
+
+|Deployment|IP Address|
+|---|---|
+|nginx-ingress|192.168.42.100|
+|qbittorrent  |192.168.42.130|
+|plex         |192.168.42.140|
+|influxdb     |192.168.42.150|
