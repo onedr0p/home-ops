@@ -19,8 +19,6 @@ spec:
     image:
       repository: influxdb
       tag: 1.7.9
-    podAnnotations:
-      backup.velero.io/backup-volumes: influxdb-data
     service:
       type: LoadBalancer
       loadBalancerIP: 192.168.42.150
@@ -37,6 +35,8 @@ spec:
     config:
       opentsdb:
         enabled: true
+    podAnnotations:
+      backup.velero.io/backup-volumes: influxdb-data
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
