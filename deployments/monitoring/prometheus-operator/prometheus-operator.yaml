@@ -24,6 +24,10 @@ spec:
     prometheusOperator:
       createCustomResource: true
     alertmanager:
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
       alertmanagerSpec:
         storage:
           volumeClaimTemplate:
@@ -32,10 +36,6 @@ spec:
               resources:
                 requests:
                   storage: 10Gi
-      ingress:
-        enabled: true
-        annotations:
-          kubernetes.io/ingress.class: "nginx"
     grafana:
       deploymentStrategy:
         type: Recreate
@@ -122,15 +122,8 @@ spec:
         annotations:
           kubernetes.io/ingress.class: "nginx"
       prometheusSpec:
-        ruleSelector: {}
-        ruleNamespaceSelector: {}
-        serviceMonitorSelector: {}
-        serviceMonitorNamespaceSelector: {}
-        podMonitorSelector: {}
-        podMonitorNamespaceSelector: {}
         retention: 30d
         enableAdminAPI: true
-        serviceMonitorSelectorNilUsesHelmValues: false
         storageSpec:
           volumeClaimTemplate:
             spec:
