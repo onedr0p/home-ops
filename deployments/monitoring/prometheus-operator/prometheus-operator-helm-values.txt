@@ -8,6 +8,31 @@ alertmanager:
       nginx.ingress.kubernetes.io/auth-type: basic
       nginx.ingress.kubernetes.io/auth-secret: nginx-basic-auth
       nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ["job"]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: "pushover"
+      routes:
+      - match:
+          alertname: "Watchdog"
+        receiver: "null"
+    inhibit_rules:
+      - target_match_re:
+           alertname: ".+Overcommit"
+        source_match:
+           alertname: "Watchdog"
+        equal: ["prometheus"]
+    receivers:
+      - name: "null"
+      - name: "pushover"
+        pushover_configs:
+          - user_key: "$PUSHOVER_USER_TOKEN"
+            token: "$PUSHOVER_API_TOKEN"
 prometheus:
   ingress:
     hosts: [prometheus.$DOMAIN]
