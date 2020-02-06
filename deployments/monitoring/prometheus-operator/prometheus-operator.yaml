@@ -23,13 +23,30 @@ spec:
           memory: 2000Mi
     prometheusOperator:
       createCustomResource: true
-      logLevel: debug
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/worker
+                operator: In
+                values:
+                - "true"
     alertmanager:
       ingress:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
       alertmanagerSpec:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/worker
+                  operator: In
+                  values:
+                  - "true"
         storage:
           volumeClaimTemplate:
             spec:
@@ -123,7 +140,15 @@ spec:
         annotations:
           kubernetes.io/ingress.class: "nginx"
       prometheusSpec:
-        logLevel: debug
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/worker
+                  operator: In
+                  values:
+                  - "true"
         ruleNamespaceSelector: {}
         serviceMonitorNamespaceSelector: {}
         retention: 30d
