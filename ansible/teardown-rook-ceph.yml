@@ -3,7 +3,11 @@
   become: true
   gather_facts: true
 
+  # https://github.com/rook/rook/blob/master/Documentation/ceph-teardown.md
   tasks:
+    - name: "Delete /var/lib/rook"
+      command: rm -rf /var/lib/rook
+  
     - name: "Zap the drives"
       command: sgdisk --zap-all /dev/nvme0n1
 
@@ -18,9 +22,3 @@
         msg: "Systems are being rebooted"
         reboot_timeout: 60
       ignore_errors: true
-
-# https://rook.io/docs/rook/v0.9/ceph-teardown.html
-# sudo su -
-# sgdisk --zap-all /dev/nvme0n1
-# ls /dev/mapper/ceph-* | xargs -I% -- dmsetup remove %
-# wipefs -af /dev/nvme0n1
