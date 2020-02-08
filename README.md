@@ -2,9 +2,7 @@
 
 ![Kubernetes](https://i.imgur.com/p1RzXjQ.png)
 
-[Join](https://discord.gg/hk58BZV) Discord Community
-
-![Discord](https://img.shields.io/discord/673534664354430999?label=discord) 
+[![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60&style=flat-square)](https://discord.gg/hk58BZV)
 
 All workloads are in the [deployments](./deployments/) folder and sorted into folders by namespace. 
 
