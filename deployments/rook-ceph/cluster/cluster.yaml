@@ -10,7 +10,7 @@ spec:
   dataDirHostPath: /var/lib/rook
   mon:
     count: 3
-    allowMultiplePerNode: true
+    allowMultiplePerNode: false
   monitoring:
     enabled: true
   mgr:
@@ -50,16 +50,6 @@ spec:
           memory: 250Mi
       limits:
         memory: 1024Mi
-  placement:
-    all:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-          - matchExpressions:
-            - key: node-role.kubernetes.io/storage
-              operator: In
-              values:
-              - "true"
   storage:
     useAllNodes: false
     useAllDevices: false
