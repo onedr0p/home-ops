@@ -6,7 +6,7 @@ metadata:
   namespace: rook-ceph
 spec:
   cephVersion:
-    image: ceph/ceph:v14.2.6
+    image: ceph/ceph:v14.2.7
   dataDirHostPath: /var/lib/rook
   mon:
     count: 3
@@ -27,13 +27,13 @@ spec:
           cpu: 25m
           memory: 250Mi
       limits:
-        memory: 512Mi
+        memory: 1024Mi
     mgr:
       requests:
           cpu: 50m
           memory: 300Mi
       limits:
-        memory: 512Mi
+        memory: 1024Mi
     mon:
       requests:
           cpu: 35m
@@ -45,13 +45,23 @@ spec:
         cpu: 35m
         memory: 2048Mi
       limits:
-        memory: 4096Mi
+        memory: 8192Mi
     rbdmirror:
       requests:
           cpu: 25m
           memory: 250Mi
       limits:
-        memory: 512Mi
+        memory: 1024Mi
+  placement:
+    all:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: node-role.kubernetes.io/storage
+              operator: In
+              values:
+              - "true"
   storage:
     useAllNodes: false
     useAllDevices: false
