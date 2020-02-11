@@ -2,11 +2,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: sonarr-exporter
+  name: radarr-exporter
   namespace: monitoring
 spec:
   selector:
-    app: sonarr-exporter
+    app: radarr-exporter
   ports:
     - protocol: TCP
       port: 9811
@@ -16,30 +16,30 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   namespace: monitoring
-  name: sonarr-exporter
+  name: radarr-exporter
   labels:
-    app: sonarr-exporter
+    app: radarr-exporter
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sonarr-exporter
+      app: radarr-exporter
   template:
     metadata:
       labels:
-        app: sonarr-exporter
+        app: radarr-exporter
     spec:
       containers:
-        - name: sonarr-exporter
-          image: onedr0p/sonarr-exporter:v1.0.0
+        - name: radarr-exporter
+          image: onedr0p/radarr-exporter:v1.0.0
           imagePullPolicy: IfNotPresent
           env:
-            - name: SONARR_HOSTNAME
-              value: "http://sonarr.default.svc.cluster.local:8989"
-            - name: SONARR_APIKEY
+            - name: RADARR_HOSTNAME
+              value: "http://radarr.default.svc.cluster.local:7878"
+            - name: RADARR_APIKEY
               valueFrom:
                 secretKeyRef:
-                  name: sonarr-exporter
+                  name: radarr-exporter
                   key: api-key
           resources:
             requests:
