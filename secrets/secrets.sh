@@ -136,6 +136,13 @@ kubectl create secret generic sonarr-exporter \
   | kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/monitoring/sonarr-exporter/sonarr-exporter-values.yaml
 
+# radarr exporter
+kubectl create secret generic radarr-exporter \
+  --from-literal=api-key="$RADARR_APIKEY" \
+  --namespace monitoring --dry-run -o json \
+  | kubeseal --format=yaml --cert="$PUB_CERT" \
+    > "$REPO_ROOT"/deployments/monitoring/radarr-exporter/radarr-exporter-values.yaml
+
 # pihole exporter
 kubectl create secret generic pihole-exporter \
   --from-literal=password="$PIHOLE_PASSWORD" \
