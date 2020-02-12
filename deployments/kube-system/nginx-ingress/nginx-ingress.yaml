@@ -43,6 +43,24 @@ spec:
             any: true
         prometheusRule:
           enabled: true
+          namespace: kube-system
+          rules: 
+            - alert: TooMany500s
+              expr: 100 * ( sum( nginx_ingress_controller_requests{status=~"5.+"} ) / sum(nginx_ingress_controller_requests) ) > 5
+              for: 1m
+              labels:
+                severity: critical
+              annotations:
+                description: Too many 5XXs
+                summary: More than 5% of the all requests did return 5XX, this require your attention
+            - alert: TooMany400s
+              expr: 100 * ( sum( nginx_ingress_controller_requests{status=~"4.+"} ) / sum(nginx_ingress_controller_requests) ) > 5
+              for: 1m
+              labels:
+                severity: critical
+              annotations:
+                description: Too many 4XXs
+                summary: More than 5% of the all requests did return 4XX, this require your attention
       extraArgs:
         default-ssl-certificate: "kube-system/acme-crt-secret"
       resources:
