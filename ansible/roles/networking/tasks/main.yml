@@ -9,11 +9,16 @@
       - "ebtables"
   ignore_errors: true
 
-- name: Enable IP forwarding via sysctl
-  sysctl: 
-    name: "{{ item }}"
-    value: 1
+- name: Enable IPv4 forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
     state: present
-  with_items:
-    - net.ipv4.ip_forward
-  ignore_errors: true
+    reload: yes
+
+- name: Enable IPv6 forwarding
+  sysctl:
+    name: net.ipv6.conf.all.forwarding
+    value: "1"
+    state: present
+    reload: yes
