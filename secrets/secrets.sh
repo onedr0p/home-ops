@@ -63,7 +63,7 @@ kseal "${REPO_ROOT}/deployments/default/nzbhydra2/nzbhydra2-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/default/radarr/radarr-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/default/sonarr/sonarr-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/default/qbittorrent/qbittorrent-helm-values.txt"
-kseal "${REPO_ROOT}/deployments/default/plex/plex-helm-values.txt"
+# kseal "${REPO_ROOT}/deployments/default/plex/plex-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/velero/velero/velero-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
 
