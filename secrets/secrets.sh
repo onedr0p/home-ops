@@ -103,16 +103,16 @@ kubectl create secret generic cloudflare-api-key \
 kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/cert-manager/cloudflare/cloudflare-api-key.yaml
 
-# Cloudflare DDNS - kube-system namespace
-kubectl create secret generic cloudflare-ddns \
-  --from-literal=api-key="$CF_API_KEY" \
-  --from-literal=user="$CF_API_EMAIL" \
-  --from-literal=zones="$CF_ZONES" \
-  --from-literal=hosts="$CF_HOSTS" \
-  --from-literal=record-types="$CF_RECORDTYPES" \
-  --namespace kube-system --dry-run -o json \
-  | kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/kube-system/cloudflare-ddns/cloudflare-ddns-values.yaml
+# # Cloudflare DDNS - kube-system namespace
+# kubectl create secret generic cloudflare-ddns \
+#   --from-literal=api-key="$CF_API_KEY" \
+#   --from-literal=user="$CF_API_EMAIL" \
+#   --from-literal=zones="$CF_ZONES" \
+#   --from-literal=hosts="$CF_HOSTS" \
+#   --from-literal=record-types="$CF_RECORDTYPES" \
+#   --namespace kube-system --dry-run -o json \
+#   | kubeseal --format=yaml --cert="$PUB_CERT" \
+#     > "$REPO_ROOT"/deployments/kube-system/cloudflare-ddns/cloudflare-ddns-values.yaml
 
 # qBittorrent Prune - default namespace
 kubectl create secret generic qbittorrent-prune \
