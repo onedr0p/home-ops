@@ -12,7 +12,7 @@ spec:
   chart:
     repository: https://grafana.github.io/loki/charts
     name: loki-stack
-    version: 0.31.1
+    version: 0.32.0
   values:
     loki:
       image:
@@ -39,3 +39,8 @@ spec:
         relabel_configs:
         - source_labels: ['__syslog_message_hostname']
           target_label: 'host'
+      syslogService:
+        enabled: true
+        type: LoadBalancer
+        port: 1514
+        loadBalancerIP: 192.168.42.155
