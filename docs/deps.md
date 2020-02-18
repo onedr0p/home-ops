@@ -5,6 +5,5 @@
 brew install helm \
 kubernetes-cli \
 kubeseal \
-velero \
 ansible
 ```

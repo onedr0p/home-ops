@@ -19,7 +19,6 @@ Huge shout out to [billimek/k8s-gitops](https://github.com/billimek/k8s-gitops) 
 - [logging](./deployments/logging)
 - [monitoring](./deployments/monitoring)
 - [rook-ceph](./deployments/rook-ceph)
-- [velero](./deployments/velero)
 
 ## k3s or k8s
 
