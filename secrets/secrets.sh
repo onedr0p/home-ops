@@ -130,10 +130,3 @@ kubectl create secret generic radarr-exporter \
   --namespace monitoring --dry-run -o json \
   | kubeseal --format=yaml --cert="$PUB_CERT" \
     > "$REPO_ROOT"/deployments/monitoring/radarr-exporter/radarr-exporter-values.yaml
-
-# pihole exporter
-kubectl create secret generic pihole-exporter \
-  --from-literal=password="$PIHOLE_PASSWORD" \
-  --namespace monitoring --dry-run -o json \
-  | kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/monitoring/pihole-exporter/pihole-exporter-values.yaml
