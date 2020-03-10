@@ -39,8 +39,9 @@ All my Kubernetes worker and master nodes below are running bare metal Ubuntu 18
 [MetalLB](https://metallb.universe.tf/) IP Address Range: `192.168.42.100-192.168.42.250`
 
 |Deployment|IP Address|
-|---|---|
+|---------------|--------------|
 |nginx-ingress  |192.168.42.100|
+|blocky         |192.168.42.115|
 |qbittorrent    |192.168.42.130|
 |plex           |192.168.42.140|
 |influxdb       |192.168.42.150|
