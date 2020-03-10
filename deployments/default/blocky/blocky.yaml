@@ -75,6 +75,16 @@ spec:
         metallb.universe.tf/allow-shared-ip: blocky-svc
     serviceMonitor:
       enabled: true
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: 
+                - blocky
+            topologyKey: "kubernetes.io/hostname"
     resources:
       requests:
         memory: 275Mi
