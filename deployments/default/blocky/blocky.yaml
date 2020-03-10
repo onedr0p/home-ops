@@ -1,0 +1,83 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: blocky
+  namespace: default
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: blocky
+  rollback:
+    enable: true
+  chart:
+    repository: https://billimek.com/billimek-charts/
+    name: blocky
+    version: 2.1.0
+  values:
+    image:
+      repository: spx01/blocky
+      tag: v0.5
+    replicas: 2
+    timeZone: "America/New_York"
+    #
+    # @CHAMGEME - blocky configuration
+    # https://github.com/0xERR0R/blocky
+    #
+    config: |
+      upstream:
+          externalResolvers:
+            - tcp-tls:1.0.0.1:853
+            - tcp-tls:1.1.1.1:853
+      blocking:
+          blackLists:
+            ads:
+              - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
+          whiteLists:
+            ads:
+              - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt
+              - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/referral-sites.txt
+              - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+          clientGroupsBlock:
+            default:
+              - ads
+          blockType: zeroIp
+          refreshPeriod: 1
+      caching:
+        minTime: 40
+        maxTime: -1
+      clientLookup:
+          upstream: udp:192.168.42.1
+          singleNameOrder:
+            - 2
+            - 1
+      prometheus:
+        enable: true
+        path: /metrics
+      httpPort: 4000
+      logLevel: info
+    serviceTCP:
+      enabled: true
+      type: LoadBalancer
+      externalTrafficPolicy: Local
+      loadBalancerIP: 192.168.42.115
+      annotations:
+        metallb.universe.tf/address-pool: network-services
+        metallb.universe.tf/allow-shared-ip: blocky-svc
+    serviceUDP:
+      enabled: true
+      type: LoadBalancer
+      externalTrafficPolicy: Local
+      loadBalancerIP: 192.168.42.115
+      annotations:
+        metallb.universe.tf/address-pool: network-services
+        metallb.universe.tf/allow-shared-ip: blocky-svc
+    serviceMonitor:
+      enabled: true
+    resources:
+      requests:
+        memory: 275Mi
+        cpu: 50m
+      limits:
+        memory: 1000Mi
