@@ -9,6 +9,7 @@ metadata:
     fluxcd.io/automated: "false"
 spec:
   releaseName: blocky
+  resetValues: true
   rollback:
     enable: false
   chart:
@@ -21,10 +22,7 @@ spec:
       tag: v0.5
     replicas: 2
     timeZone: "America/New_York"
-    #
     # blocky configuration
-    # https://github.com/0xERR0R/blocky
-    #
     config:
       upstream:
         externalResolvers:
@@ -39,15 +37,21 @@ spec:
       blocking:
         blackLists:
           ads:
-            - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
+            - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+            - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+            - https://mirror1.malwaredomains.com/files/justdomains
+            - http://sysctl.org/cameleon/hosts
+            - https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist
+            - https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
+          special: []
+          #   - https://hosts-file.net/ad_servers.txt
         whiteLists:
           ads:
-            - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt
-            - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/referral-sites.txt
             - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
         clientGroupsBlock:
           default:
             - ads
+            # - special
       clientLookup:
         upstream: udp:192.168.42.1
       prometheus:
