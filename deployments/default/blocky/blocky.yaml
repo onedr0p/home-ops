@@ -27,31 +27,35 @@ spec:
     #
     config: |
       upstream:
-          externalResolvers:
-            - tcp-tls:1.0.0.1:853
-            - tcp-tls:1.1.1.1:853
+        externalResolvers:
+          - udp:8.8.8.8
+          - udp:8.8.4.4
+          - udp:1.1.1.1
+          - tcp-tls:1.0.0.1:853
+          - https://cloudflare-dns.com/dns-query
       blocking:
-          blackLists:
-            ads:
-              - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
-          whiteLists:
-            ads:
-              - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt
-              - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/referral-sites.txt
-              - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
-          clientGroupsBlock:
-            default:
-              - ads
-          blockType: zeroIp
-          refreshPeriod: 1
+        blackLists:
+          ads:
+            - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
+        whiteLists:
+          ads:
+            - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt
+            - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/referral-sites.txt
+            - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+          special: []
+        clientGroupsBlock:
+          default:
+            - ads
+        blockType: zeroIp
+        refreshPeriod: 1
       caching:
         minTime: 40
         maxTime: -1
       clientLookup:
-          upstream: udp:192.168.42.1
-          singleNameOrder:
-            - 2
-            - 1
+        upstream: udp:192.168.42.1
+        singleNameOrder:
+          - 2
+          - 1
       prometheus:
         enable: true
         path: /metrics
