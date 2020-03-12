@@ -132,10 +132,10 @@ kubectl create secret generic radarr-exporter \
     > "${REPO_ROOT}"/deployments/monitoring/radarr-exporter/radarr-exporter-values.yaml
 
 # stash - restic - default namespace
-kubectl create secret generic stash-restic-credentials  \
+kubectl create secret generic restic-backup-credentials  \
  --from-literal=RESTIC_PASSWORD="${RESTIC_PASSWORD}" \
  --from-literal=AWS_ACCESS_KEY_ID="${MINIO_ACCESS_KEY}" \
  --from-literal=AWS_SECRET_ACCESS_KEY="${MINIO_SECRET_KEY}" \
  --namespace default --dry-run -o json \
  | kubeseal --format=yaml --cert="${PUB_CERT}" \
-   > "${REPO_ROOT}"/deployments/stash/chart/stash-restic-credentials-default.yaml
+   > "${REPO_ROOT}"/deployments/stash/chart/restic-backup-credentials-default.yaml
