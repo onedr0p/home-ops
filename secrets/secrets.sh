@@ -44,7 +44,7 @@ kseal() {
   kubectl -n "${namespace}" create secret generic "${secret_name}" \
     --from-file=values.yaml --dry-run -o json \
     | \
-  kubeseal --format=yaml --cert="$PUB_CERT" \
+  kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${secret}.yaml"
   # Clean up temp file
   rm values.yaml
@@ -72,61 +72,70 @@ kseal "${REPO_ROOT}/deployments/monitoring/prometheus-operator/prometheus-operat
 
 # NginX Basic Auth - default namespace
 kubectl create secret generic nginx-basic-auth \
-  --from-literal=auth="$NGINX_BASIC_AUTH" \
+  --from-literal=auth="${NGINX_BASIC_AUTH}" \
   --namespace default --dry-run -o json \
   | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-default.yaml
+kubeseal --format=yaml --cert="${PUB_CERT}" \
+    > "${REPO_ROOT}"/deployments/kube-system/nginx-ingress/basic-auth-default.yaml
 
 # NginX Basic Auth - kube-system namespace
 kubectl create secret generic nginx-basic-auth \
-  --from-literal=auth="$NGINX_BASIC_AUTH" \
+  --from-literal=auth="${NGINX_BASIC_AUTH}" \
   --namespace kube-system --dry-run -o json \
   | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-kube-system.yaml
+kubeseal --format=yaml --cert="${PUB_CERT}" \
+    > "${REPO_ROOT}"/deployments/kube-system/nginx-ingress/basic-auth-kube-system.yaml
 
 # NginX Basic Auth - monitoring namespace
 kubectl create secret generic nginx-basic-auth \
-  --from-literal=auth="$NGINX_BASIC_AUTH" \
+  --from-literal=auth="${NGINX_BASIC_AUTH}" \
   --namespace monitoring --dry-run -o json \
   | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/kube-system/nginx-ingress/basic-auth-monitoring.yaml
+kubeseal --format=yaml --cert="${PUB_CERT}" \
+    > "${REPO_ROOT}"/deployments/kube-system/nginx-ingress/basic-auth-monitoring.yaml
 
 # Cloudflare API Key - cert-manager namespace
 kubectl create secret generic cloudflare-api-key \
-  --from-literal=api-key="$CF_API_KEY" \
+  --from-literal=api-key="${CF_API_KEY}" \
   --namespace cert-manager --dry-run -o json \
   | \
-kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/cert-manager/cloudflare/cloudflare-api-key.yaml
+kubeseal --format=yaml --cert="${PUB_CERT}" \
+    > "${REPO_ROOT}"/deployments/cert-manager/cloudflare/cloudflare-api-key.yaml
 
 # qBittorrent Prune - default namespace
 kubectl create secret generic qbittorrent-prune \
-  --from-literal=username="$QB_USERNAME" \
-  --from-literal=password="$QB_PASSWORD" \
+  --from-literal=username="${QB_USERNAME}" \
+  --from-literal=password="${QB_PASSWORD}" \
   --namespace default --dry-run -o json \
-  | kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/default/qbittorrent-prune/qbittorrent-prune-values.yaml
+  | kubeseal --format=yaml --cert="${PUB_CERT}" \
+    > "${REPO_ROOT}"/deployments/default/qbittorrent-prune/qbittorrent-prune-values.yaml
 
 # sonarr episode prune - default namespace
 kubectl create secret generic sonarr-episode-prune \
-  --from-literal=api-key="$SONARR_APIKEY" \
+  --from-literal=api-key="${SONARR_APIKEY}" \
   --namespace default --dry-run -o json \
-  | kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/default/sonarr-episode-prune/sonarr-episode-prune-values.yaml
+  | kubeseal --format=yaml --cert="${PUB_CERT}" \
+    > "${REPO_ROOT}"/deployments/default/sonarr-episode-prune/sonarr-episode-prune-values.yaml
 
 # sonarr exporter
 kubectl create secret generic sonarr-exporter \
-  --from-literal=api-key="$SONARR_APIKEY" \
+  --from-literal=api-key="${SONARR_APIKEY}" \
   --namespace monitoring --dry-run -o json \
-  | kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/monitoring/sonarr-exporter/sonarr-exporter-values.yaml
+  | kubeseal --format=yaml --cert="${PUB_CERT}" \
+    > "${REPO_ROOT}"/deployments/monitoring/sonarr-exporter/sonarr-exporter-values.yaml
 
 # radarr exporter
 kubectl create secret generic radarr-exporter \
-  --from-literal=api-key="$RADARR_APIKEY" \
+  --from-literal=api-key="${RADARR_APIKEY}" \
   --namespace monitoring --dry-run -o json \
-  | kubeseal --format=yaml --cert="$PUB_CERT" \
-    > "$REPO_ROOT"/deployments/monitoring/radarr-exporter/radarr-exporter-values.yaml
+  | kubeseal --format=yaml --cert="${PUB_CERT}" \
+    > "${REPO_ROOT}"/deployments/monitoring/radarr-exporter/radarr-exporter-values.yaml
+
+# stash - restic - default namespace
+kubectl create secret generic stash-restic-credentials  \
+ --from-literal=RESTIC_PASSWORD="${RESTIC_PASSWORD}" \
+ --from-literal=AWS_ACCESS_KEY_ID="${MINIO_ACCESS_KEY}" \
+ --from-literal=AWS_SECRET_ACCESS_KEY="${MINIO_SECRET_KEY}" \
+ --namespace default --dry-run -o json \
+ | kubeseal --format=yaml --cert="${PUB_CERT}" \
+   > "${REPO_ROOT}"/deployments/stash/chart/stash-restic-credentials-default.yaml
