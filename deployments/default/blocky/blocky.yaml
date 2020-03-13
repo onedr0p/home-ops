@@ -1,95 +1,95 @@
----
-apiVersion: helm.fluxcd.io/v1
-kind: HelmRelease
-metadata:
-  name: blocky
-  namespace: default
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "false"
-spec:
-  releaseName: blocky
-  resetValues: true
-  rollback:
-    enable: false
-  chart:
-    repository: https://billimek.com/billimek-charts/
-    name: blocky
-    version: 2.2.1
-  values:
-    image:
-      repository: spx01/blocky
-      tag: v0.5
-    replicas: 2
-    timeZone: "America/New_York"
-    # blocky configuration
-    config:
-      upstream:
-        externalResolvers:
-          - udp:8.8.8.8
-          - udp:8.8.4.4
-          - udp:1.1.1.1
-          - tcp-tls:1.0.0.1:853
-          - https://cloudflare-dns.com/dns-query
-      conditional:
-        mapping:
-          local: udp:192.168.42.1
-      blocking:
-        blackLists:
-          ads:
-            - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
-            - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-            - https://mirror1.malwaredomains.com/files/justdomains
-            - http://sysctl.org/cameleon/hosts
-            - https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist
-            - https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
-          special: []
-          #   - https://hosts-file.net/ad_servers.txt
-        whiteLists:
-          ads:
-            - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
-        clientGroupsBlock:
-          default:
-            - ads
-            # - special
-      clientLookup:
-        upstream: udp:192.168.42.1
-      prometheus:
-        enable: true
-        path: /metrics
-      httpPort: 4000
-      logLevel: info
-    serviceTCP:
-      enabled: true
-      type: LoadBalancer
-      externalTrafficPolicy: Local
-      loadBalancerIP: 192.168.42.115
-      annotations:
-        metallb.universe.tf/address-pool: network-services
-        metallb.universe.tf/allow-shared-ip: blocky-svc
-    serviceUDP:
-      enabled: true
-      type: LoadBalancer
-      externalTrafficPolicy: Local
-      loadBalancerIP: 192.168.42.115
-      annotations:
-        metallb.universe.tf/address-pool: network-services
-        metallb.universe.tf/allow-shared-ip: blocky-svc
-    serviceMonitor:
-      enabled: true
-    affinity:
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values: 
-                - blocky
-            topologyKey: "kubernetes.io/hostname"
-    resources:
-      requests:
-        memory: 275Mi
-        cpu: 50m
-      limits:
-        memory: 1000Mi
+# ---
+# apiVersion: helm.fluxcd.io/v1
+# kind: HelmRelease
+# metadata:
+#   name: blocky
+#   namespace: default
+#   annotations:
+#     fluxcd.io/ignore: "false"
+#     fluxcd.io/automated: "false"
+# spec:
+#   releaseName: blocky
+#   resetValues: true
+#   rollback:
+#     enable: false
+#   chart:
+#     repository: https://billimek.com/billimek-charts/
+#     name: blocky
+#     version: 2.2.1
+#   values:
+#     image:
+#       repository: spx01/blocky
+#       tag: v0.5
+#     replicas: 2
+#     timeZone: "America/New_York"
+#     # blocky configuration
+#     config:
+#       upstream:
+#         externalResolvers:
+#           - udp:8.8.8.8
+#           - udp:8.8.4.4
+#           - udp:1.1.1.1
+#           - tcp-tls:1.0.0.1:853
+#           - https://cloudflare-dns.com/dns-query
+#       conditional:
+#         mapping:
+#           local: udp:192.168.42.1
+#       blocking:
+#         blackLists:
+#           ads:
+#             - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+#             - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+#             - https://mirror1.malwaredomains.com/files/justdomains
+#             - http://sysctl.org/cameleon/hosts
+#             - https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist
+#             - https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
+#           special: []
+#           #   - https://hosts-file.net/ad_servers.txt
+#         whiteLists:
+#           ads:
+#             - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+#         clientGroupsBlock:
+#           default:
+#             - ads
+#             # - special
+#       clientLookup:
+#         upstream: udp:192.168.42.1
+#       prometheus:
+#         enable: true
+#         path: /metrics
+#       httpPort: 4000
+#       logLevel: info
+#     serviceTCP:
+#       enabled: true
+#       type: LoadBalancer
+#       externalTrafficPolicy: Local
+#       loadBalancerIP: 192.168.42.115
+#       annotations:
+#         metallb.universe.tf/address-pool: network-services
+#         metallb.universe.tf/allow-shared-ip: blocky-svc
+#     serviceUDP:
+#       enabled: true
+#       type: LoadBalancer
+#       externalTrafficPolicy: Local
+#       loadBalancerIP: 192.168.42.115
+#       annotations:
+#         metallb.universe.tf/address-pool: network-services
+#         metallb.universe.tf/allow-shared-ip: blocky-svc
+#     serviceMonitor:
+#       enabled: true
+#     affinity:
+#       podAntiAffinity:
+#         requiredDuringSchedulingIgnoredDuringExecution:
+#           - labelSelector:
+#               matchExpressions:
+#               - key: app.kubernetes.io/name
+#                 operator: In
+#                 values: 
+#                 - blocky
+#             topologyKey: "kubernetes.io/hostname"
+#     resources:
+#       requests:
+#         memory: 275Mi
+#         cpu: 50m
+#       limits:
+#         memory: 1000Mi
