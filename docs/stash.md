@@ -43,3 +43,23 @@ kubectl delete apiservice/v1beta1.admission.stash.appscode.com;
 kubectl delete apiservice/v1alpha1.admission.stash.appscode.com;
 kubectl delete apiservice/v1alpha1.repositories.stash.appscode.com;
 ```
+
+## Delete PodSecurityPolicy
+
+```bash
+kubectl delete PodSecurityPolicy/stash-backup-job
+kubectl delete PodSecurityPolicy/stash-backupsession-cron
+kubectl delete PodSecurityPolicy/stash
+kubectl delete PodSecurityPolicy/stash-restore-job
+```
+
+## Delete ClusterRole and ClusterRoleBinding and RoleBinding
+
+```bash
+kubectl delete ClusterRole/stash
+kubectl delete ClusterRole/appscode:stash:edit
+kubectl delete ClusterRole/appscode:stash:view
+kubectl delete ClusterRoleBinding/stash-apiserver-auth-delegator
+kubectl delete ClusterRoleBinding/stash
+kubectl delete RoleBinding/stash-apiserver-extension-server-authentication-reader -n kube-system
+```
