@@ -138,4 +138,4 @@ kubectl create secret generic restic-backup-credentials  \
  --from-literal=AWS_SECRET_ACCESS_KEY="${MINIO_SECRET_KEY}" \
  --namespace default --dry-run -o json \
  | kubeseal --format=yaml --cert="${PUB_CERT}" \
-   > "${REPO_ROOT}"/deployments/stash/chart/restic-backup-credentials-default.yaml
+   > "${REPO_ROOT}"/deployments/kube-system/restic-backup-credentials-default.yaml
