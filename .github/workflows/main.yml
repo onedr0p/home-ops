@@ -6,7 +6,14 @@ jobs:
   hrval:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Lint Ansible
+        uses: ansible/ansible-lint-action@master
+        with:
+          targets: ./ansible
+
       - name: Validate Helm Releases in deployment directory
         uses: stefanprodan/hrval-action@v3.1.0
         with:
