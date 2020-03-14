@@ -7,6 +7,8 @@ helm uninstall stash --namespace kube-system
 ## Delete all resources
 
 ```bash
+kubectl get crd -l app=stash
+
 kubectl delete restics.stash.appscode.com --all;
 kubectl delete recoveries.stash.appscode.com --all;
 kubectl delete backupconfigurations.stash.appscode.com --all;
