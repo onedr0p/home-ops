@@ -3,14 +3,20 @@ name: main
 on: [push, pull_request]
 
 jobs:
-  hrval:
+  main:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: Validate Helm Releases in deployment directory
-        uses: stefanprodan/hrval-action@v3.0.1
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Lint Ansible
+        uses: ansible/ansible-lint-action@master
         with:
-          helmRelease: ./deployments/
-          helmVersion: v3
-          kubernetesVersion: 1.17.2
-          ignoreValues: true
+          targets: ./ansible
+
+      - name: Validate Helm Releases
+        uses: stefanprodan/hrval-action@v3.1.0
+        with:
+          helmRelease: deployments/
+          kubernetesVersion: 1.17.3
+          ignoreValues: false
