@@ -1,0 +1,27 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: k10
+  namespace: kasten-io
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: k10
+  chart:
+    repository: https://charts.kasten.io/
+    name: k10
+    version: 2.0.15
+  values:
+    persistence:
+      enabled: true
+      storageClass: rook-ceph-block
+    toolsImage:
+      enabled: true
+      image: gcr.io/kasten-images/github-kastenhq-ceph-tools:0.0.2
+    ingress:
+      create: true
+      class: nginx
+  valueFileSecrets:
+  - name: "kasten-io-helm-values"
