@@ -1,0 +1,20 @@
+---
+apiVersion: stash.appscode.com/v1beta1
+kind: RestoreSession
+metadata:
+  name: tautulli-restore
+  namespace: default
+spec:
+  repository:
+    name: deploy-tautulli
+  rules:
+  - snapshots:
+    - latest
+  target:
+    ref:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: tautulli
+    volumeMounts:
+    - name:  config
+      mountPath:  /config

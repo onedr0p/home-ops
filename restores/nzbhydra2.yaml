@@ -1,0 +1,20 @@
+---
+apiVersion: stash.appscode.com/v1beta1
+kind: RestoreSession
+metadata:
+  name: nzbhydra2-restore
+  namespace: default
+spec:
+  repository:
+    name: deploy-nzbhydra2
+  rules:
+  - snapshots:
+    - latest
+  target:
+    ref:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: nzbhydra2
+    volumeMounts:
+    - name:  config
+      mountPath:  /config
