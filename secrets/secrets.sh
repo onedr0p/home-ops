@@ -65,7 +65,6 @@ kseal "${REPO_ROOT}/deployments/default/sonarr/sonarr-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/default/qbittorrent/qbittorrent-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/default/plex/plex-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/monitoring/prometheus-operator/prometheus-operator-helm-values.txt"
-# kseal "${REPO_ROOT}/deployments/kasten-io/chart/kasten-io-helm-values.txt"
 
 #
 # Generic Secrets
