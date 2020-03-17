@@ -1,0 +1,57 @@
+{
+    "service": {
+        "dns": {
+            "dynamic": {
+                "interface": {
+                    "eth2": {
+                        "service": {
+                            "cloudflare": {
+                                "host-name": [
+                                    "<domain.tld>"
+                                ],
+                                "login": "<cloudflare_email>",
+                                "options": [
+                                    "zone=<domain.tld>"
+                                ],
+                                "password": "<cloudflare_api-key>",
+                                "protocol": "cloudflare"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "nat": {
+            "rule": {
+                "1": {
+                    "description": "Redirect DNS requests",
+                    "destination": {
+                        "port": "53"
+                    },
+                    "inbound-interface": "eth0",
+                    "inside-address": {
+                        "address": "<blocky_ip_addess>",
+                        "port": "53"
+                    },
+                    "source": {
+                        "address": "!<blocky_ip_addess>"
+                    },
+                    "log": "disable",
+                    "protocol": "tcp_udp",
+                    "type": "destination"
+                },
+                "6000": {
+                    "description": "MASQ DNS requests to LAN",
+                    "destination": {
+                        "address": "<blocky_ip_addess>",
+                        "port": "53"
+                    },
+                    "log": "disable",
+                    "outbound-interface": "eth0",
+                    "protocol": "tcp_udp",
+                    "type": "masquerade"
+                }
+            }
+        }
+    }
+}
