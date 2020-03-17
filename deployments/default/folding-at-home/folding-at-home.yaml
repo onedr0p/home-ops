@@ -21,12 +21,13 @@ spec:
           image: johnktims/folding-at-home:latest
           imagePullPolicy: IfNotPresent
           command: ["FAHClient", "--web-allow=0/0:7396", "--allow=0/0:7396"]
-          args: ["--user=Devin_Buhl", "--team=241985", "--gpu=false", "--smp=true", "--power=full"]
+          args: ["--user=Devin_Buhl", "--team=241985", "--gpu=true", "--smp=true", "--power=full"]
           resources:
             requests:
               cpu: 100m
               memory: 256Mi
             limits:
+              gpu.intel.com/i915: 1
               cpu: 1000m
               memory: 2Gi
       affinity:
@@ -34,7 +35,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: node-role.kubernetes.io/worker
+              - key: homelab.gpu/type
                 operator: In
                 values: 
-                  - "true"
+                  - "intel"
