@@ -1,0 +1,39 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: folding-at-home
+  labels:
+    app: folding-at-home
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: folding-at-home
+  template:
+    metadata:
+      labels:
+        app: folding-at-home
+    spec:
+      containers:
+        - name: folding-at-home
+          image: johnktims/folding-at-home:latest
+          imagePullPolicy: IfNotPresent
+          args: ["--user", "Devin_Buhl", "--team", "241985", "--gpu", "false", "--smp", "true", "--power", "full"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/worker
+                operator: In
+                values: 
+                  - "true"
