@@ -8,6 +8,7 @@ metadata:
     app: folding-at-home
 spec:
   replicas: 2
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: folding-at-home
@@ -18,10 +19,9 @@ spec:
     spec:
       containers:
         - name: folding-at-home
-          image: johnktims/folding-at-home:latest
+          image: stefancrain/folding-at-home:7.5.1-gpu
           imagePullPolicy: IfNotPresent
-          command: ["FAHClient", "--web-allow=0/0:7396", "--allow=0/0:7396"]
-          args: ["--user=Devin_Buhl", "--team=241985", "--gpu=false", "--smp=true", "--power=full"]
+          command: ["--user=Devin_Buhl", "--team=241985", "--gpu=true", "--power=full"]
           resources:
             requests:
               cpu: 100m
@@ -29,12 +29,26 @@ spec:
             limits:
               cpu: 1000m
               memory: 2Gi
+              gpu.intel.com/i915: 1
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: node-role.kubernetes.io/worker
+              - key: homelab.gpu/type
                 operator: In
                 values: 
-                  - "true"
+                  - "intel"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: folding-at-home
+spec:
+  selector:
+    app: folding-at-home
+  type: NodePort
+  ports:
+    - port: 7396
+      nodePort: 30160
+      targetPort: 7396
