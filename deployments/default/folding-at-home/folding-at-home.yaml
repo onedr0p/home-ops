@@ -21,7 +21,8 @@ spec:
         - name: folding-at-home
           image: stefancrain/folding-at-home:7.5.1-gpu
           imagePullPolicy: IfNotPresent
-          command: ["--user=Devin_Buhl", "--team=241985", "--gpu=true", "--power=full"]
+          command: ["/bin/tini", "--", "/usr/bin/FAHClient", "--web-allow=0/0:7396", "--allow=0/0:7396", "--smp=true"]
+          args: ["--user=Devin_Buhl", "--team=241985", "--gpu=true", "--power=full", "--gpu-usage=50"]
           resources:
             requests:
               cpu: 100m
