@@ -19,10 +19,10 @@ spec:
     spec:
       containers:
         - name: folding-at-home
-          image: stefancrain/folding-at-home:7.5.1-gpu
+          image: stefancrain/folding-at-home:7.5.1
           imagePullPolicy: IfNotPresent
           command: ["/bin/tini", "--", "/usr/bin/FAHClient", "--web-allow=0/0:7396", "--allow=0/0:7396", "--smp=true"]
-          args: ["--user=Devin_Buhl", "--team=241985", "--gpu=true", "--power=full", "--gpu-usage=50"]
+          args: ["--user=Devin_Buhl", "--team=241985", "--gpu=false", "--power=full"]
           resources:
             requests:
               cpu: 100m
@@ -30,16 +30,15 @@ spec:
             limits:
               cpu: 1000m
               memory: 2Gi
-              gpu.intel.com/i915: 1
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: homelab.gpu/type
+              - key: node-role.kubernetes.io/worker
                 operator: In
                 values: 
-                  - "intel"
+                  - "true"
 ---
 apiVersion: v1
 kind: Service
