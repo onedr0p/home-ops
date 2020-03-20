@@ -28,12 +28,12 @@ Huge shout out to [billimek/k8s-gitops](https://github.com/billimek/k8s-gitops) 
 
 All my Kubernetes master and worker nodes below are running bare metal Ubuntu 18.04.3.
 
-|Device         |Count  |Root Disk Size|Data Disk Size|Ram    |Purpose                                   |
-|---------------|-------|--------------|--------------|-------|------------------------------------------|
-|Odroid H2      |1      |256GB NVMe    |N/A           |16GB   |Kubernetes Master                         |
-|Intel NUC8i5BEH|3      |120GB SATA    |1TB NVMe      |32GB   |Kubernetes Workers for rook-ceph workloads|
-|Intel NUC8i7BEH|2      |750GB SATA    |N/A           |64GB   |Kubernetes Workers for standard workloads |
-|Qnap NAS       |1      |N/A           |96TB SATA     |16GB   |NAS for media and shared file storage     |
+|Device         |Count  |OS Disk Size|Data Disk Size|Ram    |Purpose                              |
+|---------------|-------|------------|--------------|-------|-------------------------------------|
+|Odroid H2      |1      |256GB NVMe  |N/A           |16GB   |k8s Master                           |
+|Intel NUC8i5BEH|3      |120GB SSD   |1TB NVMe      |32GB   |k8s Workers for rook-ceph workloads  |
+|Intel NUC8i7BEH|2      |750GB SSD   |N/A           |64GB   |k8s Workers for standard workloads   |
+|Qnap NAS       |1      |N/A         |8x12TB WD Reds|16GB   |NAS for media and shared file storage|
 
 ## Load balancer IPs
 
