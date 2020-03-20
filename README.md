@@ -10,7 +10,7 @@ This repository isn't really a tutorial on how to set up a Kubernetes cluster, c
 
 Huge shout out to [billimek/k8s-gitops](https://github.com/billimek/k8s-gitops) and [carpenike/k8s-gitops](https://github.com/carpenike/k8s-gitops) who continue to be a great resource of information.
 
-## Deployment Namespaces
+## Deployment namespaces
 
 - [cert-manager](./deployments/cert-manager)
 - [default](./deployments/default)
@@ -24,17 +24,18 @@ Huge shout out to [billimek/k8s-gitops](https://github.com/billimek/k8s-gitops) 
 
 [k3s](https://github.com/rancher/k3s) was my choice in Kubernetes distros because of how easy and quick it is to get going with [k3sup](https://github.com/alexellis/k3sup).
 
-## Server Configuration
+## Server hardware configurations
 
-All my Kubernetes worker and master nodes below are running bare metal Ubuntu 18.04.3. Using a Hypervisor seemed like a bit overkill, all the devices would be running 1 VM anyways.
+All my Kubernetes master and worker nodes below are running bare metal Ubuntu 18.04.3.
 
-- 1x OdroidH2 w/ 256GB NVMe and 16GB RAM for the Kubernetes master node
-- 3x NUC8i5BEH w/ 1TB NVMe and 32GB RAM for the rook-ceph/storage nodes
-- 2x NUC8i7BEH w/ 500GB SSD and 64GB RAM for the worker nodes
-- 5x Sonnet Thunderbolt to 10Gb SFP+ for the Intel NUC Kubernetes worker and storage nodes
-- 1x Qnap 8 bay NAS w/ 12TB drives for media and some deployment volumes
+|Device         |Count  |Root Disk Size|Data Disk Size|Ram    |Purpose                                   |
+|---------------|-------|--------------|--------------|-------|------------------------------------------|
+|Odroid H2      |1      |256GB NVMe    |N/A           |16GB   |Kubernetes Master                         |
+|Intel NUC8i5BEH|3      |120GB SATA    |1TB NVMe      |32GB   |Kubernetes Workers for rook-ceph workloads|
+|Intel NUC8i7BEH|2      |750GB SATA    |N/A           |64GB   |Kubernetes Workers for standard workloads |
+|Qnap NAS       |1      |N/A           |96TB SATA     |16GB   |NAS for media and shared file storage     |
 
-## Load Balancer IPs
+## Load balancer IPs
 
 [MetalLB](https://metallb.universe.tf/) IP Address Range: `192.168.42.100-192.168.42.250`
 
