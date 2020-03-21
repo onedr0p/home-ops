@@ -54,3 +54,13 @@ kubectl label node k3s-worker-e node-role.kubernetes.io/worker=true
 kubectl label node k3s-worker-d homelab.gpu/type=intel && \
 kubectl label node k3s-worker-e homelab.gpu/type=intel
 ```
+
+## Grab existing kubeconfig
+
+```bash
+k3sup install --ip "192.168.42.11" \
+    --k3s-version "v1.17.3+k3s1" \
+    --user "devin" \
+    --k3s-extra-args "--docker --no-deploy servicelb --no-deploy traefik --no-deploy metrics-server --default-local-storage-path=/dev/shm" \
+    --skip-install
+```
