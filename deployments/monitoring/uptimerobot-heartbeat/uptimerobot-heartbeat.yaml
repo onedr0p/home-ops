@@ -3,7 +3,7 @@ apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   namespace: monitoring
-  name: healthcheck
+  name: uptimerobot-heartbeat
 spec:
   schedule: "*/5 * * * *"
   jobTemplate:
@@ -11,7 +11,7 @@ spec:
       template:
         spec:
           containers:
-          - name: healthcheck
+          - name: uptimerobot-heartbeat
             image: onedr0p/healthcheck:v1.0.0
             env:
               - name: HEALTHCHECK_URL
