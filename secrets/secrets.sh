@@ -132,6 +132,13 @@ kubectl create secret generic radarr-exporter \
   | kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${REPO_ROOT}"/deployments/monitoring/radarr-exporter/radarr-exporter-values.yaml
 
+# uptimerobot heartbeat
+kubectl create secret generic uptimerobot-heartbeat \
+  --from-literal=url="${UPTIMEROBOT_HEARTBEAT_URL}" \
+  --namespace monitoring --dry-run -o json \
+  | kubeseal --format=yaml --cert="${PUB_CERT}" \
+    > "${REPO_ROOT}"/deployments/monitoring/uptimerobot-heartbeat/uptimerobot-heartbeat-values.yaml
+
 # # stash - restic - default namespace
 # kubectl create secret generic restic-backup-credentials  \
 #  --from-literal=RESTIC_PASSWORD="${RESTIC_PASSWORD}" \
