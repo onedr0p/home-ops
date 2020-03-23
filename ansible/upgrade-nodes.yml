@@ -15,6 +15,15 @@
       retries: 5
       until: apt_update is success
 
+    - name: List installed and updated packages
+      shell: grep -E "^$(date +%Y-%m-%d).+ (install|upgrade) " /var/log/dpkg.log |cut -d " " -f 3-5
+      register: result
+      when: apt_update.changed
+
+    - name: Show Output
+      debug: msg="{{ result.stdout_lines }}"
+      when: apt_update.changed
+
     - name: Clean up apt
       apt:
         autoremove: true
