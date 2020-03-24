@@ -54,7 +54,7 @@ kseal() {
 # External NginX Services
 #
 
-envsubst < "${REPO_ROOT}/deployments/kube-system/nginx/external/unifi-controller.txt" | kubectl apply -f -
+envsubst < "${REPO_ROOT}/deployments/kube-system/nginx-ingress/external/unifi-controller.txt" | kubectl apply -f -
 
 #
 # Helm Secrets
