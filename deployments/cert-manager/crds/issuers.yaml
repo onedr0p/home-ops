@@ -379,9 +379,11 @@ spec:
                             - nameserver
                             properties:
                               nameserver:
-                                description: 'The IP address of the DNS supporting
-                                  RFC2136. Required. Note: FQDN is not a valid value,
-                                  only IP.'
+                                description: The IP address or hostname of an authoritative
+                                  DNS server supporting RFC2136 in the form host:port.
+                                  If the host is an IPv6 address it must be enclosed
+                                  in square brackets (e.g [2001:db8::1]) ; port is
+                                  optional. This field is required.
                                 type: string
                               tsigAlgorithm:
                                 description: 'The TSIG Algorithm configured in the
@@ -513,6 +515,32 @@ spec:
                                   use this challenge solver. Only one of 'class' or
                                   'name' may be specified.
                                 type: string
+                              ingressTemplate:
+                                description: Optional ingress template used to configure
+                                  the ACME challenge solver ingress used for HTTP01
+                                  challenges
+                                type: object
+                                properties:
+                                  metadata:
+                                    description: ObjectMeta overrides for the ingress
+                                      used to solve HTTP01 challenges. Only the 'labels'
+                                      and 'annotations' fields may be set. If labels
+                                      or annotations overlap with in-built values,
+                                      the values here will override the in-built values.
+                                    type: object
+                                    properties:
+                                      annotations:
+                                        description: Annotations that should be added
+                                          to the created ACME HTTP01 solver ingress.
+                                        type: object
+                                        additionalProperties:
+                                          type: string
+                                      labels:
+                                        description: Labels that should be added to
+                                          the created ACME HTTP01 solver ingress.
+                                        type: object
+                                        additionalProperties:
+                                          type: string
                               name:
                                 description: The name of the ingress resource that
                                   should have ACME challenge solving routes inserted
@@ -1525,12 +1553,29 @@ spec:
               required:
               - secretName
               properties:
+                crlDistributionPoints:
+                  description: The CRL distribution points is an X.509 v3 certificate
+                    extension which identifies the location of the CRL from which
+                    the revocation of this certificate can be checked. If not set
+                    certificate will be issued without CDP. Values are strings.
+                  type: array
+                  items:
+                    type: string
                 secretName:
                   description: SecretName is the name of the secret used to sign Certificates
                     issued by this Issuer.
                   type: string
             selfSigned:
               type: object
+              properties:
+                crlDistributionPoints:
+                  description: The CRL distribution points is an X.509 v3 certificate
+                    extension which identifies the location of the CRL from which
+                    the revocation of this certificate can be checked. If not set
+                    certificate will be issued without CDP. Values are strings.
+                  type: array
+                  items:
+                    type: string
             vault:
               type: object
               required:
