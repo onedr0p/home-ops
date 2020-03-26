@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snmp-exporter
+  namespace: monitoring
+spec:
+  selector:
+    app: snmp-exporter
+  ports:
+    - name: http-metrics
+      protocol: TCP
+      port: 9116
+      targetPort: metrics
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: monitoring
+  name: snmp-exporter
+  labels:
+    app: snmp-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snmp-exporter
+  template:
+    metadata:
+      labels:
+        app: snmp-exporter
+    spec:
+      containers:
+        - name: snmp-exporter
+          image: prom/snmp-exporter:v0.17.0
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 9116
+            name: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8s-app: snmp-exporter
+    prometheus: kube-prometheus
+  name: snmp-exporter
+spec:
+  jobLabel: k8s-app
+  selector:
+    app: snmp-exporter
+  namespaceSelector:
+    matchNames:
+      - monitoring
+  endpoints:
+    - interval: 60s
+      port: http-metrics
+      params:
+        module: [if_mib]
+        target:
+          - 192.168.1.165
+      path: "/snmp"
+      targetPort: 9116
