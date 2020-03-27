@@ -8,9 +8,29 @@ spec:
   selector:
     app: radarr-exporter
   ports:
-    - protocol: TCP
+    - name: http-metrics
+      protocol: TCP
       port: 9811
-      targetPort: 9811
+      targetPort: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: radarr-exporter
+  namespace: monitoring
+  labels:
+    app: radarr-exporter
+    prometheus: default
+spec:
+  jobLabel: radarr-exporter
+  selector:
+    matchLabels:
+      app: radarr-exporter
+  endpoints:
+    - interval: 60s
+      port: http-metrics
+      path: "/metrics"
+      targetPort: metrics
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -33,6 +53,9 @@ spec:
         - name: radarr-exporter
           image: onedr0p/radarr-exporter:v1.0.0
           imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9811
+              name: metrics
           env:
             - name: INTERVAL
               value: "1h"
