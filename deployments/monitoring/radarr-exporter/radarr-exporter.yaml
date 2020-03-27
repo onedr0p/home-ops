@@ -31,12 +31,15 @@ spec:
     - port: monitoring
       interval: 60s
       path: /metrics
+  namespaceSelector:
+    matchNames:
+    - monitoring
 ---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  namespace: monitoring
   name: radarr-exporter
+  namespace: monitoring
   labels:
     app.kubernetes.io/name: radarr-exporter
     app.kubernetes.io/instance: radarr-exporter
