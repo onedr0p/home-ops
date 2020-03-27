@@ -4,30 +4,59 @@ kind: Service
 metadata:
   name: sonarr-exporter
   namespace: monitoring
+  labels:
+    app.kubernetes.io/name: sonarr-exporter
+    app.kubernetes.io/instance: sonarr-exporter
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: sonarr-exporter
+    app.kubernetes.io/instance: sonarr-exporter
+  ports:
+    - name: monitoring
+      port: 9811
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sonarr-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: sonarr-exporter
+    app.kubernetes.io/instance: sonarr-exporter
 spec:
   selector:
-    app: sonarr-exporter
-  ports:
-    - protocol: TCP
-      port: 9811
-      targetPort: 9811
+    matchLabels:
+      app.kubernetes.io/name: sonarr-exporter
+      app.kubernetes.io/instance: sonarr-exporter
+  endpoints:
+    - port: monitoring
+      interval: 60s
+      path: /metrics
 ---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  namespace: monitoring
   name: sonarr-exporter
+  namespace: monitoring
   labels:
-    app: sonarr-exporter
+    app.kubernetes.io/name: sonarr-exporter
+    app.kubernetes.io/instance: sonarr-exporter
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
-      app: sonarr-exporter
+      app.kubernetes.io/name: sonarr-exporter
+      app.kubernetes.io/instance: sonarr-exporter
   template:
     metadata:
       labels:
-        app: sonarr-exporter
+        app.kubernetes.io/name: sonarr-exporter
+        app.kubernetes.io/instance: sonarr-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "monitoring"
     spec:
       containers:
         - name: sonarr-exporter
@@ -43,6 +72,28 @@ spec:
                 secretKeyRef:
                   name: sonarr-exporter
                   key: api-key
+          ports:
+            - name: monitoring
+              containerPort: 9811
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: monitoring
+            failureThreshold: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: monitoring
+            failureThreshold: 5
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /metrics
+              port: monitoring
+            initialDelaySeconds: 5
+            failureThreshold: 30
+            periodSeconds: 10
           resources:
             requests:
               cpu: 100m
