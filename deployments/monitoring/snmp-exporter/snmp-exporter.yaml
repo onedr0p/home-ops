@@ -6,7 +6,8 @@ metadata:
   namespace: monitoring
 spec:
   selector:
-    app: snmp-exporter
+    app.kubernetes.io/name: snmp-exporter
+    app.kubernetes.io/instance: snmp-exporter
   ports:
     - name: http-metrics
       protocol: TCP
@@ -19,13 +20,14 @@ metadata:
   name: snmp-exporter
   namespace: monitoring
   labels:
-    app: snmp-exporter
-    prometheus: default
+    app.kubernetes.io/name: snmp-exporter
+    app.kubernetes.io/instance: snmp-exporter
 spec:
   jobLabel: snmp-exporter
   selector:
     matchLabels:
-      app: snmp-exporter
+      app.kubernetes.io/name: snmp-exporter
+      app.kubernetes.io/instance: snmp-exporter
   endpoints:
     - interval: 60s
       port: http-metrics
@@ -43,16 +45,19 @@ metadata:
   namespace: monitoring
   name: snmp-exporter
   labels:
-    app: snmp-exporter
+    app.kubernetes.io/name: snmp-exporter
+    app.kubernetes.io/instance: snmp-exporter
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: snmp-exporter
+      app.kubernetes.io/name: snmp-exporter
+      app.kubernetes.io/instance: snmp-exporter
   template:
     metadata:
       labels:
-        app: snmp-exporter
+        app.kubernetes.io/name: snmp-exporter
+        app.kubernetes.io/instance: snmp-exporter
     spec:
       containers:
         - name: snmp-exporter
