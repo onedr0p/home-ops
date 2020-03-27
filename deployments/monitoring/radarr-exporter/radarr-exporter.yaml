@@ -6,12 +6,13 @@ metadata:
   namespace: monitoring
 spec:
   selector:
-    app: radarr-exporter
+    app.kubernetes.io/name: radarr-exporter
+    app.kubernetes.io/instance: radarr-exporter
   ports:
-    - name: http-metrics
+    - name: monitoring
       protocol: TCP
       port: 9811
-      targetPort: metrics
+      targetPort: monitoring
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -19,18 +20,17 @@ metadata:
   name: radarr-exporter
   namespace: monitoring
   labels:
-    app: radarr-exporter
-    prometheus: default
+    app.kubernetes.io/name: radarr-exporter
+    app.kubernetes.io/instance: radarr-exporter
 spec:
-  jobLabel: radarr-exporter
   selector:
     matchLabels:
-      app: radarr-exporter
+      app.kubernetes.io/name: radarr-exporter
+      app.kubernetes.io/instance: radarr-exporter
   endpoints:
-    - interval: 60s
-      port: http-metrics
-      path: "/metrics"
-      targetPort: metrics
+    - port: monitoring
+      interval: 60s
+      path: /metrics
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -38,16 +38,22 @@ metadata:
   namespace: monitoring
   name: radarr-exporter
   labels:
-    app: radarr-exporter
+    app.kubernetes.io/name: radarr-exporter
+    app.kubernetes.io/instance: radarr-exporter
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: radarr-exporter
+      app.kubernetes.io/name: radarr-exporter
+      app.kubernetes.io/instance: radarr-exporter
   template:
     metadata:
       labels:
-        app: radarr-exporter
+        app.kubernetes.io/name: radarr-exporter
+        app.kubernetes.io/instance: radarr-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "monitoring"
     spec:
       containers:
         - name: radarr-exporter
@@ -55,7 +61,26 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9811
-              name: metrics
+              name: monitoring
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: monitoring
+            failureThreshold: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: monitoring
+            failureThreshold: 5
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /metrics
+              port: monitoring
+            initialDelaySeconds: 5
+            failureThreshold: 30
+            periodSeconds: 10
           env:
             - name: INTERVAL
               value: "1h"
