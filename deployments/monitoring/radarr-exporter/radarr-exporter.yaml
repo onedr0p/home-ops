@@ -5,12 +5,12 @@ metadata:
   name: radarr-exporter
   namespace: monitoring
 spec:
+  clusterIP: None
   selector:
     app.kubernetes.io/name: radarr-exporter
     app.kubernetes.io/instance: radarr-exporter
   ports:
     - name: monitoring
-      protocol: TCP
       port: 9811
       targetPort: monitoring
 ---
@@ -42,6 +42,7 @@ metadata:
     app.kubernetes.io/instance: radarr-exporter
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: radarr-exporter
@@ -59,6 +60,16 @@ spec:
         - name: radarr-exporter
           image: onedr0p/radarr-exporter:v1.0.0
           imagePullPolicy: IfNotPresent
+          env:
+            - name: INTERVAL
+              value: "1h"
+            - name: RADARR_HOSTNAME
+              value: "http://radarr.default.svc.cluster.local:7878"
+            - name: RADARR_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: radarr-exporter
+                  key: api-key
           ports:
             - containerPort: 9811
               name: monitoring
@@ -81,16 +92,6 @@ spec:
             initialDelaySeconds: 5
             failureThreshold: 30
             periodSeconds: 10
-          env:
-            - name: INTERVAL
-              value: "1h"
-            - name: RADARR_HOSTNAME
-              value: "http://radarr.default.svc.cluster.local:7878"
-            - name: RADARR_APIKEY
-              valueFrom:
-                secretKeyRef:
-                  name: radarr-exporter
-                  key: api-key
           resources:
             requests:
               cpu: 100m
