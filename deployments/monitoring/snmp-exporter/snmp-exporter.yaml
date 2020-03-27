@@ -13,6 +13,30 @@ spec:
       port: 9116
       targetPort: metrics
 ---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: snmp-exporter
+  namespace: monitoring
+  labels:
+    app: snmp-exporter
+    prometheus: default
+spec:
+  jobLabel: snmp-exporter
+  selector:
+    matchLabels:
+      app: snmp-exporter
+  endpoints:
+    - interval: 60s
+      port: http-metrics
+      params:
+        module: 
+          - if_mib
+        target:
+          - 192.168.1.165
+      path: "/snmp"
+      targetPort: 9116
+---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -37,27 +61,3 @@ spec:
           ports:
           - containerPort: 9116
             name: metrics
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: snmp-exporter
-  namespace: monitoring
-  labels:
-    app: snmp-exporter
-    prometheus: default
-spec:
-  jobLabel: snmp-exporter
-  selector:
-    matchLabels:
-      app: snmp-exporter
-  endpoints:
-    - interval: 60s
-      port: http-metrics
-      params:
-        module: 
-          - if_mib
-        target:
-          - 192.168.1.165
-      path: "/snmp"
-      targetPort: 9116
