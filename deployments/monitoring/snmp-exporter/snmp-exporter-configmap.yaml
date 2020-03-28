@@ -1,0 +1,132 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snmp-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: snmp-exporter
+    app.kubernetes.io/instance: snmp-exporter
+data:
+  snmp.yml: |
+    # WARNING: This file was auto-generated using snmp_exporter generator, manual changes will be lost.
+    cyber_power:
+      walk:
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.10
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.2
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.6
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.7
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.8
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.9
+      - 1.3.6.1.4.1.3808.1.1.3.3.3.1.1.2
+      - 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.7
+      - 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.8
+      get:
+      - 1.3.6.1.4.1.3808.1.1.3.1.1.0
+      - 1.3.6.1.4.1.3808.1.1.3.1.2.0
+      - 1.3.6.1.4.1.3808.1.1.3.5.7.0
+      - 1.3.6.1.4.1.3808.1.1.3.5.8.0
+      - 1.3.6.1.4.1.3808.1.1.4.2.1.0
+      - 1.3.6.1.4.1.3808.1.1.4.2.6.0
+      - 1.3.6.1.4.1.3808.1.1.4.3.1.0
+      metrics:
+      - name: ePDUIdentName
+        oid: 1.3.6.1.4.1.3808.1.1.3.1.1
+        type: DisplayString
+        help: The name of the Rack PDU - 1.3.6.1.4.1.3808.1.1.3.1.1
+      - name: ePDUIdentHardwareRev
+        oid: 1.3.6.1.4.1.3808.1.1.3.1.2
+        type: DisplayString
+        help: The hardware revision of the Rack PDU - 1.3.6.1.4.1.3808.1.1.3.1.2
+      - name: ePDULoadStatusEnergy
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.10
+        type: gauge
+        help: Getting this OID will return the phase/bank apparent power measured in 0.1
+          kilowatt-hours. - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.10
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDULoadStatusLoad
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.2
+        type: gauge
+        help: Getting this OID will return the phase/bank load measured in tenths of Amps.
+          - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.2
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDULoadStatusVoltage
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.6
+        type: gauge
+        help: Getting this OID will return the phase/bank voltage measured in 0.1 volts.
+          - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.6
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDULoadStatusActivePower
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.7
+        type: gauge
+        help: Getting this OID will return the phase/bank active power measured in watts.
+          - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.7
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDULoadStatusApparentPower
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.8
+        type: gauge
+        help: Getting this OID will return the phase/bank apparent power measured in VA.
+          - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.8
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDULoadStatusPowerFactor
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.9
+        type: gauge
+        help: Getting this OID will return power factor of the output measured in hundredths
+          - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.9
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDUOutletControlOutletName
+        oid: 1.3.6.1.4.1.3808.1.1.3.3.3.1.1.2
+        type: DisplayString
+        help: The name of the outlet - 1.3.6.1.4.1.3808.1.1.3.3.3.1.1.2
+        indexes:
+        - labelname: ePDUOutletControlIndex
+          type: gauge
+      - name: ePDUOutletStatusLoad
+        oid: 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.7
+        type: gauge
+        help: Getting this OID will return the measured Outlet load for an Outlet Monitored
+          Rack PDU in tenths of Amps. - 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.7
+        indexes:
+        - labelname: ePDUOutletStatusIndex
+          type: gauge
+      - name: ePDUOutletStatusActivePower
+        oid: 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.8
+        type: gauge
+        help: Getting this OID will return the measured Outlet load for an Outlet Monitored
+          Rack PDU in watts - 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.8
+        indexes:
+        - labelname: ePDUOutletStatusIndex
+          type: gauge
+      - name: ePDUStatusInputVoltage
+        oid: 1.3.6.1.4.1.3808.1.1.3.5.7
+        type: gauge
+        help: The input voltage in 0.1 Volt. - 1.3.6.1.4.1.3808.1.1.3.5.7
+      - name: ePDUStatusInputFrequency
+        oid: 1.3.6.1.4.1.3808.1.1.3.5.8
+        type: gauge
+        help: The input frequency in 0.1 Hertz. - 1.3.6.1.4.1.3808.1.1.3.5.8
+      - name: envirTemperature
+        oid: 1.3.6.1.4.1.3808.1.1.4.2.1
+        type: gauge
+        help: The environment temperature expressed in 1/10 Fahrenheit - 1.3.6.1.4.1.3808.1.1.4.2.1
+      - name: envirTemperatureCelsius
+        oid: 1.3.6.1.4.1.3808.1.1.4.2.6
+        type: gauge
+        help: The environment temperature expressed in 1/10 Celsius - 1.3.6.1.4.1.3808.1.1.4.2.6
+      - name: envirHumidity
+        oid: 1.3.6.1.4.1.3808.1.1.4.3.1
+        type: gauge
+        help: The environment relative humidity expressed in persentage. - 1.3.6.1.4.1.3808.1.1.4.3.1
+      version: 1
