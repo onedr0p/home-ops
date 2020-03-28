@@ -4,15 +4,17 @@ kind: Service
 metadata:
   name: snmp-exporter
   namespace: monitoring
+  labels:
+    app.kubernetes.io/name: snmp-exporter
+    app.kubernetes.io/instance: snmp-exporter
 spec:
+  clusterIP: None
   selector:
     app.kubernetes.io/name: snmp-exporter
     app.kubernetes.io/instance: snmp-exporter
   ports:
-    - name: http-metrics
-      protocol: TCP
+    - name: monitoring
       port: 9116
-      targetPort: metrics
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -30,10 +32,10 @@ spec:
       app.kubernetes.io/instance: snmp-exporter
   endpoints:
     - interval: 60s
-      port: http-metrics
+      port: monitoring
       params:
         module: 
-          - if_mib
+          - cyber_power
         target:
           - 192.168.1.165
       path: "/snmp"
@@ -64,5 +66,13 @@ spec:
           image: prom/snmp-exporter:v0.17.0
           imagePullPolicy: IfNotPresent
           ports:
-          - containerPort: 9116
-            name: metrics
+            - name: monitoring
+              containerPort: 9116
+          volumeMounts:
+            - name: config
+              mountPath: /etc/snmp_exporter/snmp.yml
+              subPath: snmp.yml
+      volumes:
+        - name: config
+          configMap:
+            name: snmp-exporter
