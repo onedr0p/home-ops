@@ -4,6 +4,18 @@
 
 This will create a `snmp.yml` file which will be needed for snmp-exporter. The MIB below is specific for Cyberpowers PDUs and UPSs
 
+## Clone and build the snmp-exporter generator
+
+```bash
+sudo apt-get install unzip build-essential libsnmp-dev golang
+go get github.com/prometheus/snmp_exporter/generator
+cd ${GOPATH-$HOME/go}/src/github.com/prometheus/snmp_exporter/generator
+go build
+make mibs
+```
+
+## Update generator.yml
+
 ```yaml
 modules:
   cyber_power:
@@ -27,15 +39,17 @@ modules:
       - envirHumidity               ## relative humidity (%)
 ```
 
+## Get the Cyberpower MIB
+
 ```bash
-sudo apt-get install unzip build-essential libsnmp-dev golang
-go get github.com/prometheus/snmp_exporter/generator
-cd ${GOPATH-$HOME/go}/src/github.com/prometheus/snmp_exporter/generator
-go build
-make mibs
 wget https://dl4jz3rbrsfum.cloudfront.net/software/CyberPower_MIB_v2.9.MIB.zip
 unzip CyberPower_MIB_v2.9.MIB.zip
 mv CyberPower_MIB_v2.9.MIB mibs/
+```
+
+## Generate the snmp.yml
+
+```bash
 export MIBDIRS=mibs
 ./generator generate
 ```
