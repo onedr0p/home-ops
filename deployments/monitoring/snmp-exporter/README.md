@@ -18,7 +18,7 @@ make mibs
 
 ```yaml
 modules:
-  cyber_power:
+  cyberpower:
     version: 1
     walk:
       - ePDUIdentName
