@@ -84,10 +84,17 @@ spec:
             - name: monitoring
               containerPort: 9116
           volumeMounts:
-            - name: config
+            - name: snmp-etc
               mountPath: /etc/snmp_exporter/snmp.yml
               subPath: snmp.yml
+              readOnly: true
       volumes:
-        - name: config
-          configMap:
-            name: snmp-exporter
+        - name: snmp-etc
+          projected:
+            defaultMode: 0444
+            sources:
+              - configMap:
+                  name: snmp-etc
+                  items:
+                    - key: snmp.yml
+                      path: snmp.yml
