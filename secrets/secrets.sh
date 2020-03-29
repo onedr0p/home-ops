@@ -42,7 +42,7 @@ kseal() {
   envsubst < "$@" | tee values.yaml \
     | \
   kubectl -n "${namespace}" create secret generic "${secret_name}" \
-    --from-file=values.yaml --dry-run -o json \
+    --from-file=values.yaml --dry-run=client -o json \
     | \
   kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${secret}.yaml"
@@ -55,12 +55,12 @@ kseal() {
 #
 
 envsubst < "${REPO_ROOT}/deployments/kube-system/nginx-ingress/external/unifi-controller.txt" | kubectl apply -f -
+envsubst < "${REPO_ROOT}/deployments/kube-system/nginx-ingress/external/unifi-protect.txt" | kubectl apply -f -
 
 #
 # Helm Secrets
 #
 
-kseal "${REPO_ROOT}/deployments/default/minio/minio-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/default/nzbget/nzbget-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/default/ombi/ombi-helm-values.txt"
 kseal "${REPO_ROOT}/deployments/default/tautulli/tautulli-helm-values.txt"
@@ -80,7 +80,7 @@ kseal "${REPO_ROOT}/deployments/velero/velero/velero-helm-values.txt"
 # NginX Basic Auth - default namespace
 kubectl create secret generic nginx-basic-auth \
   --from-literal=auth="${NGINX_BASIC_AUTH}" \
-  --namespace default --dry-run -o json \
+  --namespace default --dry-run=client -o json \
   | \
 kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${REPO_ROOT}"/deployments/kube-system/nginx-ingress/basic-auth-default.yaml
@@ -88,7 +88,7 @@ kubeseal --format=yaml --cert="${PUB_CERT}" \
 # NginX Basic Auth - kube-system namespace
 kubectl create secret generic nginx-basic-auth \
   --from-literal=auth="${NGINX_BASIC_AUTH}" \
-  --namespace kube-system --dry-run -o json \
+  --namespace kube-system --dry-run=client -o json \
   | \
 kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${REPO_ROOT}"/deployments/kube-system/nginx-ingress/basic-auth-kube-system.yaml
@@ -96,7 +96,7 @@ kubeseal --format=yaml --cert="${PUB_CERT}" \
 # NginX Basic Auth - monitoring namespace
 kubectl create secret generic nginx-basic-auth \
   --from-literal=auth="${NGINX_BASIC_AUTH}" \
-  --namespace monitoring --dry-run -o json \
+  --namespace monitoring --dry-run=client -o json \
   | \
 kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${REPO_ROOT}"/deployments/kube-system/nginx-ingress/basic-auth-monitoring.yaml
@@ -104,7 +104,7 @@ kubeseal --format=yaml --cert="${PUB_CERT}" \
 # Cloudflare API Key - cert-manager namespace
 kubectl create secret generic cloudflare-api-key \
   --from-literal=api-key="${CF_API_KEY}" \
-  --namespace cert-manager --dry-run -o json \
+  --namespace cert-manager --dry-run=client -o json \
   | \
 kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${REPO_ROOT}"/deployments/cert-manager/cloudflare/cloudflare-api-key.yaml
@@ -113,35 +113,35 @@ kubeseal --format=yaml --cert="${PUB_CERT}" \
 kubectl create secret generic qbittorrent-prune \
   --from-literal=username="${QB_USERNAME}" \
   --from-literal=password="${QB_PASSWORD}" \
-  --namespace default --dry-run -o json \
+  --namespace default --dry-run=client -o json \
   | kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${REPO_ROOT}"/deployments/default/qbittorrent-prune/qbittorrent-prune-values.yaml
 
 # sonarr episode prune - default namespace
 kubectl create secret generic sonarr-episode-prune \
   --from-literal=api-key="${SONARR_APIKEY}" \
-  --namespace default --dry-run -o json \
+  --namespace default --dry-run=client -o json \
   | kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${REPO_ROOT}"/deployments/default/sonarr-episode-prune/sonarr-episode-prune-values.yaml
 
 # sonarr exporter
 kubectl create secret generic sonarr-exporter \
   --from-literal=api-key="${SONARR_APIKEY}" \
-  --namespace monitoring --dry-run -o json \
+  --namespace monitoring --dry-run=client -o json \
   | kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${REPO_ROOT}"/deployments/monitoring/sonarr-exporter/sonarr-exporter-values.yaml
 
 # radarr exporter
 kubectl create secret generic radarr-exporter \
   --from-literal=api-key="${RADARR_APIKEY}" \
-  --namespace monitoring --dry-run -o json \
+  --namespace monitoring --dry-run=client -o json \
   | kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${REPO_ROOT}"/deployments/monitoring/radarr-exporter/radarr-exporter-values.yaml
 
 # uptimerobot heartbeat
 kubectl create secret generic uptimerobot-heartbeat \
   --from-literal=url="${UPTIMEROBOT_HEARTBEAT_URL}" \
-  --namespace monitoring --dry-run -o json \
+  --namespace monitoring --dry-run=client -o json \
   | kubeseal --format=yaml --cert="${PUB_CERT}" \
     > "${REPO_ROOT}"/deployments/monitoring/uptimerobot-heartbeat/uptimerobot-heartbeat-values.yaml
 
@@ -150,6 +150,6 @@ kubectl create secret generic uptimerobot-heartbeat \
 #  --from-literal=RESTIC_PASSWORD="${RESTIC_PASSWORD}" \
 #  --from-literal=AWS_ACCESS_KEY_ID="${MINIO_ACCESS_KEY}" \
 #  --from-literal=AWS_SECRET_ACCESS_KEY="${MINIO_SECRET_KEY}" \
-#  --namespace default --dry-run -o json \
+#  --namespace default --dry-run=client -o json \
 #  | kubeseal --format=yaml --cert="${PUB_CERT}" \
 #    > "${REPO_ROOT}"/deployments/kube-system/stash/restic-backup-credentials-default.yaml
