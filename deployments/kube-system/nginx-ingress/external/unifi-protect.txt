@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: external-unifi-protect
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  rules:
+  - host: unifi-protect.$DOMAIN
+    http:
+      paths:
+      - backend:
+          serviceName: external-unifi-protect
+          servicePort: 7443
+  tls:
+  - hosts:
+    - unifi-protect.$DOMAIN
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-unifi-protect
+spec:
+  ports:
+  - name: http
+    port: 7443
+  type: ExternalName
+  externalName: 192.168.1.2
