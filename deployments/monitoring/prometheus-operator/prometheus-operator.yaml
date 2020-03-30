@@ -179,5 +179,14 @@ spec:
               resources:
                 requests:
                   storage: 100Gi
+        additionalScrapeConfigs:
+        - job_name: 'netdata-scrape'
+          metrics_path: '/api/v1/allmetrics'
+          params:
+            format: [prometheus]
+          honor_labels: true
+          static_configs:
+          - targets:
+            - 192.168.1.170:19999
   valueFileSecrets:
   - name: "prometheus-operator-helm-values"
