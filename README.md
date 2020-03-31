@@ -39,11 +39,12 @@ All my Kubernetes master and worker nodes below are running bare metal Ubuntu 18
 
 [MetalLB](https://metallb.universe.tf/) IP Address Range: `192.168.42.100-192.168.42.250`
 
-|Deployment     |IP Address    |Namespace  |
-|---------------|--------------|-----------|
-|nginx-ingress  |192.168.42.100|kube-system|
-|blocky         |192.168.42.115|default    |
-|qbittorrent    |192.168.42.130|default    |
-|plex           |192.168.42.140|default    |
-|loki-syslog    |192.168.42.155|logging    |
-|radarr-test    |192.168.42.230|test       |
+|Deployment            |IP Address    |Namespace  |
+|----------------------|--------------|-----------|
+|nginx-ingress         |192.168.42.100|kube-system|
+|blocky                |192.168.42.115|default    |
+|qbittorrent           |192.168.42.130|default    |
+|plex                  |192.168.42.140|default    |
+|loki-syslog           |192.168.42.155|logging    |
+|minecraft-survival    |192.168.42.165|default    |
+|radarr-test           |192.168.42.230|test       |
