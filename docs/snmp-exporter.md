@@ -1,12 +1,8 @@
 # snmp-exporter
 
-Retrieve metrics from devices that only support monitoring via SNMP. For now I am usng snmp-exporter for getting metrics from my Cyberpower PDUs (model PDU41001).
+Retrieve metrics from devices that only support monitoring via SNMP. For now I am usng snmp-exporter for getting metrics from my Cyberpower PDUs (model PDU41001) and my APC UPS (Smart-UPS 1500)
 
-## Cyberpower PDU
-
-This will create a `snmp.yml` file which will be needed for snmp-exporter. The MIB below is specific for Cyberpowers PDUs and UPSs.
-
-### Clone and build the snmp-exporter generator
+## Clone and build the snmp-exporter generator
 
 ```bash
 sudo apt-get install unzip build-essential libsnmp-dev golang
@@ -16,12 +12,43 @@ go build
 make mibs
 ```
 
-### Update generator.yml
+## Update generator.yml
 
 Kubernetes configmaps have a max size. I needed to srip out all the other modules.
 
 ```yaml
 modules:
+  apcups:
+    version: 1
+    walk:
+      - sysUpTime
+      - interfaces
+      - 1.3.6.1.4.1.318.1.1.1.2       # upsBattery
+      - 1.3.6.1.4.1.318.1.1.1.3       # upsInput
+      - 1.3.6.1.4.1.318.1.1.1.4       # upsOutput
+      - 1.3.6.1.4.1.318.1.1.1.7.2     # upsAdvTest
+      - 1.3.6.1.4.1.318.1.1.1.8.1     # upsCommStatus
+      - 1.3.6.1.4.1.318.1.1.1.12      # upsOutletGroups
+      - 1.3.6.1.4.1.318.1.1.10.2.3.2  # iemStatusProbesTable
+      - 1.3.6.1.4.1.318.1.1.26.8.3    # rPDU2BankStatusTable
+    lookups:
+      - source_indexes: [upsOutletGroupStatusIndex]
+        lookup: upsOutletGroupStatusName
+        drop_source_indexes: true
+      - source_indexes: [iemStatusProbeIndex]
+        lookup: iemStatusProbeName
+        drop_source_indexes: true
+    overrides:
+      ifType:
+        type: EnumAsInfo
+      rPDU2BankStatusLoadState:
+        type: EnumAsStateSet
+      upsAdvBatteryCondition:
+        type: EnumAsStateSet
+      upsAdvBatteryChargingCurrentRestricted:
+        type: EnumAsStateSet
+      upsAdvBatteryChargerStatus:
+        type: EnumAsStateSet
   cyberpower:
     version: 1
     walk:
@@ -43,7 +70,7 @@ modules:
       - envirHumidity               ## relative humidity (%)
 ```
 
-### Get the Cyberpower MIB
+## Get the Cyberpower MIB
 
 ```bash
 wget https://dl4jz3rbrsfum.cloudfront.net/software/CyberPower_MIB_v2.9.MIB.zip
@@ -51,7 +78,9 @@ unzip CyberPower_MIB_v2.9.MIB.zip
 mv CyberPower_MIB_v2.9.MIB mibs/
 ```
 
-### Generate the snmp.yml
+## Generate the snmp.yml
+
+This will create a `snmp.yml` file which will be needed for the configmap for snmp-exporter
 
 ```bash
 export MIBDIRS=mibs
