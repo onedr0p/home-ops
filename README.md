@@ -24,7 +24,7 @@ Huge shout out to [billimek/k8s-gitops](https://github.com/billimek/k8s-gitops) 
 
 [k3s](https://github.com/rancher/k3s) was my choice in Kubernetes distros because of how easy and quick it is to get going with [k3sup](https://github.com/alexellis/k3sup).
 
-## Server hardware configurations
+## Server and Hardware configurations
 
 All my Kubernetes master and worker nodes below are running bare metal Ubuntu 18.04.3.
 
