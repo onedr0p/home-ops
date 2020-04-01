@@ -8,7 +8,7 @@ Create file `/etc/rsyslog.d/51-loki.conf` with the following content:
 module(load="omprog")
 module(load="mmutf8fix")
 action(type="mmutf8fix" replacementChar="?")
-action(type="omfwd" protocol="tcp" target="192.168.42.155" port="1514" Template="RSYSLOG_SyslogProtocol23Format" TCP_Framing="octet-counted")
+action(type="omfwd" protocol="tcp" target="192.168.42.155" port="1514" Template="RSYSLOG_SyslogProtocol23Format" TCP_Framing="octet-counted" KeepAlive="on")
 ```
 
 Restart rsyslog and view status
