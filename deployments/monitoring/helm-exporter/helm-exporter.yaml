@@ -1,0 +1,27 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: helm-exporter
+  namespace: monitoring
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: helm-exporter
+  rollback:
+    enable: false
+  chart:
+    git: https://github.com/sstarcher/helm-exporter
+    ref: master
+    path: helm
+  values:
+    image:
+      repository: sstarcher/helm-exporter:0.5.2
+      pullPolicy: IfNotPresent
+    serviceMonitor:
+      create: true
+      interval: 1m
+      namespace: monitoring
+
+
