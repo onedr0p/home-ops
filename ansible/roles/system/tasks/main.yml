@@ -1,4 +1,21 @@
 ---
+- name: Add Timesyncd Configuration
+  template:
+    src: timesyncd.conf
+    dest: /etc/systemd/timesyncd.conf
+
+- name: Restart systemd-timesyncd service
+  systemd:
+    name: systemd-timesyncd
+    enabled: true
+    state: restarted
+
+- name: Enable systemd-timesyncd service and assure it is started
+  systemd:
+    name: systemd-timesyncd
+    enabled: true
+    state: started
+
 - name: Set Timezone
   timezone:
     name: "{{ timezone | default('America/New_York') }}"
