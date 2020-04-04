@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 # Get Absolute Path of the base repo
-export REPO_ROOT
-REPO_ROOT=$(git rev-parse --show-toplevel)
+export REPO_ROOT=$(git rev-parse --show-toplevel)
 
 need() {
     if ! [ -x "$(command -v $1)" ]; then
@@ -16,6 +15,7 @@ need "kubeseal"
 need "kubectl"
 need "sed"
 need "envsubst"
+need "yq"
 
 # Work-arounds for MacOS
 if [ "$(uname)" == "Darwin" ]; then
@@ -61,7 +61,7 @@ do
   
   # Find namespace by looking for the chart file in the deployments folder
   namespace="$(find ${REPO_ROOT}/deployments -type f -name "${secret_name}.yaml" | awk -F/ '{print $(NF-1)}')"
-  echo "  Generating secret ${secret_name} in namespace ${namespace}..."
+  echo "  Generating helm secret '${secret_name}' in namespace '${namespace}'..."
 
   # Create secret
   envsubst < "$file" \
@@ -181,6 +181,14 @@ echo "---" >> "${GENERATED_SECRETS}"
 
 # Remove empty new-lines
 sed -i '/^[[:space:]]*$/d' "${GENERATED_SECRETS}"
+
+# Validate Yaml
+if ! yq validate "${GENERATED_SECRETS}" > /dev/null 2>&1; then
+    echo "Errors in YAML"
+    exit 1
+else
+    echo "** YAML looks good, ready to commit"
+fi
 
 #
 # Kubernetes Manifests w/ Secrets
