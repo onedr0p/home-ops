@@ -11,19 +11,19 @@ need() {
     fi
 }
 
+# Verify we have dependencies
 need "kubeseal"
 need "kubectl"
 need "sed"
 need "envsubst"
 
+# Work-arounds for MacOS
 if [ "$(uname)" == "Darwin" ]; then
   # brew install gnu-sed
   need "gsed"
   # use sed as alias to gsed
-  export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
-fi
-
-if [ "$(uname)" == "Darwin" ]; then
+  export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"  
+  # Source secrets.env
   set -a
   . "${REPO_ROOT}/secrets/.secrets.env"
   set +a
