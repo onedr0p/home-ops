@@ -69,7 +69,7 @@ do
   # Create secret
   envsubst < "$file" \
     | \
-  kubectl -n "${namespace}" create secret generic "${secret_name}" \
+  kubectl -n "${namespace}" create secret generic "${secret_name}-helm-values" \
     --from-file=/dev/stdin --dry-run=client -o json \
     | \
   kubeseal --format=yaml --cert="${PUB_CERT}" \
