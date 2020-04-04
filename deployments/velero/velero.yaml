@@ -6,7 +6,8 @@ metadata:
   namespace: velero
   annotations:
     fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "false"
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: semver:~v1
 spec:
   releaseName: velero
   chart:
@@ -14,6 +15,9 @@ spec:
     name: velero
     version: 2.9.7
   values:
+    image:
+      repository: velero/velero
+      tag: v1.3.1
     initContainers:
       - name: velero-plugin-for-aws
         image: velero/velero-plugin-for-aws:v1.0.1
