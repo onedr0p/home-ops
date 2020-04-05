@@ -13,8 +13,8 @@ spec:
     app.kubernetes.io/name: radarr-exporter
     app.kubernetes.io/instance: radarr-exporter
   ports:
-    - name: monitoring
-      port: 9811
+  - name: monitoring
+    port: 9811
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -30,9 +30,9 @@ spec:
       app.kubernetes.io/name: radarr-exporter
       app.kubernetes.io/instance: radarr-exporter
   endpoints:
-    - port: monitoring
-      interval: 60s
-      path: /metrics
+  - port: monitoring
+    interval: 60s
+    path: /metrics
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -63,41 +63,41 @@ spec:
         prometheus.io/port: "monitoring"
     spec:
       containers:
-        - name: radarr-exporter
-          image: onedr0p/radarr-exporter:v1.2.2
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: INTERVAL
-              value: "20m"
-            - name: RADARR_HOSTNAME
-              value: "http://radarr.default.svc.cluster.local:7878"
-            - name: RADARR_APIKEY
-              valueFrom:
-                secretKeyRef:
-                  name: radarr-exporter
-                  key: api-key
-          ports:
-            - name: monitoring
-              containerPort: 9811
-          livenessProbe:
-            httpGet:
-              path: /liveness
-              port: monitoring
-            failureThreshold: 5
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /readiness
-              port: monitoring
-            failureThreshold: 5
-            periodSeconds: 10
-          resources:
-            requests:
-              cpu: 100m
-              memory: 64Mi
-            limits:
-              cpu: 500m
-              memory: 256Mi
+      - name: radarr-exporter
+        image: onedr0p/radarr-exporter:v1.2.3
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: INTERVAL
+          value: "20m"
+        - name: RADARR_HOSTNAME
+          value: "http://radarr.default.svc.cluster.local:7878"
+        - name: RADARR_APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: radarr-exporter
+              key: api-key
+        ports:
+        - name: monitoring
+          containerPort: 9811
+        livenessProbe:
+          httpGet:
+            path: /liveness
+            port: monitoring
+          failureThreshold: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: monitoring
+          failureThreshold: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -105,5 +105,5 @@ spec:
             - matchExpressions:
               - key: node-role.kubernetes.io/worker
                 operator: In
-                values: 
-                  - "true"
+                values:
+                - "true"
