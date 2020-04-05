@@ -73,7 +73,7 @@ These applications work alongside Sonarr, Radarr and Lidarr to manage search Bit
 
 ### Plex/Tautulli/Ombi
 
-Plex is media server that allows you to stream your content, it also organizes media to include metadata such as trailers, ratings and reviews and more. For monitoring and tracking what is going on in Plex, there's Tautulli and for giving your family and friends a nice interface for requesting new content checkout Ombi.
+Plex is media server that allows you to stream your media, it also organizes it to include metadata such as trailers, ratings and reviews and more. For monitoring and tracking what is going on in Plex, there's Tautulli and for giving your family and friends a nice interface for requesting new content checkout Ombi.
 
 ---
 
