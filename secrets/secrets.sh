@@ -22,7 +22,7 @@ if [ "$(uname)" == "Darwin" ]; then
   # brew install gnu-sed
   need "gsed"
   # use sed as alias to gsed
-  export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"  
+  export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
   # Source secrets.env
   set -a
   . "${REPO_ROOT}/secrets/.secrets.env"
