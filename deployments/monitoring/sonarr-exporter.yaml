@@ -1,0 +1,109 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarr-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: sonarr-exporter
+    app.kubernetes.io/instance: sonarr-exporter
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: sonarr-exporter
+    app.kubernetes.io/instance: sonarr-exporter
+  ports:
+  - name: monitoring
+    port: 9811
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sonarr-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: sonarr-exporter
+    app.kubernetes.io/instance: sonarr-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sonarr-exporter
+      app.kubernetes.io/instance: sonarr-exporter
+  endpoints:
+  - port: monitoring
+    interval: 5m
+    path: /metrics
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: sonarr-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: sonarr-exporter
+    app.kubernetes.io/instance: sonarr-exporter
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.sonarr-exporter: semver:~v2
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sonarr-exporter
+      app.kubernetes.io/instance: sonarr-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sonarr-exporter
+        app.kubernetes.io/instance: sonarr-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "monitoring"
+    spec:
+      containers:
+      - name: sonarr-exporter
+        image: onedr0p/sonarr-exporter:v2.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: INTERVAL
+          value: "10m"
+        - name: SONARR_HOSTNAME
+          value: "http://sonarr.default.svc.cluster.local:8989"
+        - name: SONARR_APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: sonarr-exporter
+              key: api-key
+        ports:
+        - name: monitoring
+          containerPort: 9811
+        livenessProbe:
+          httpGet:
+            path: /liveness
+            port: monitoring
+          failureThreshold: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: monitoring
+          failureThreshold: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/worker
+                operator: In
+                values:
+                - "true"
