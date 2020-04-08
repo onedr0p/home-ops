@@ -1,0 +1,2075 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snmp-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: snmp-exporter
+    app.kubernetes.io/instance: snmp-exporter
+data:
+  snmp.yml: |
+    # WARNING: This file was auto-generated using snmp_exporter generator, manual changes will be lost.
+    apcups:
+      walk:
+      - 1.3.6.1.2.1.2
+      - 1.3.6.1.4.1.318.1.1.1.12
+      - 1.3.6.1.4.1.318.1.1.1.2
+      - 1.3.6.1.4.1.318.1.1.1.3
+      - 1.3.6.1.4.1.318.1.1.1.4
+      - 1.3.6.1.4.1.318.1.1.1.7.2
+      - 1.3.6.1.4.1.318.1.1.10.2.3.2
+      - 1.3.6.1.4.1.318.1.1.26.8.3
+      get:
+      - 1.3.6.1.2.1.1.3.0
+      - 1.3.6.1.4.1.318.1.1.1.8.1.0
+      metrics:
+      - name: sysUpTime
+        oid: 1.3.6.1.2.1.1.3
+        type: gauge
+        help: The time (in hundredths of a second) since the network management portion
+          of the system was last re-initialized. - 1.3.6.1.2.1.1.3
+      - name: ifNumber
+        oid: 1.3.6.1.2.1.2.1
+        type: gauge
+        help: The number of network interfaces (regardless of their current state) present
+          on this system. - 1.3.6.1.2.1.2.1
+      - name: ifIndex
+        oid: 1.3.6.1.2.1.2.2.1.1
+        type: gauge
+        help: A unique value, greater than zero, for each interface - 1.3.6.1.2.1.2.2.1.1
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifDescr
+        oid: 1.3.6.1.2.1.2.2.1.2
+        type: DisplayString
+        help: A textual string containing information about the interface - 1.3.6.1.2.1.2.2.1.2
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifType
+        oid: 1.3.6.1.2.1.2.2.1.3
+        type: EnumAsInfo
+        help: The type of interface - 1.3.6.1.2.1.2.2.1.3
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: regular1822
+          3: hdh1822
+          4: ddnX25
+          5: rfc877x25
+          6: ethernetCsmacd
+          7: iso88023Csmacd
+          8: iso88024TokenBus
+          9: iso88025TokenRing
+          10: iso88026Man
+          11: starLan
+          12: proteon10Mbit
+          13: proteon80Mbit
+          14: hyperchannel
+          15: fddi
+          16: lapb
+          17: sdlc
+          18: ds1
+          19: e1
+          20: basicISDN
+          21: primaryISDN
+          22: propPointToPointSerial
+          23: ppp
+          24: softwareLoopback
+          25: eon
+          26: ethernet3Mbit
+          27: nsip
+          28: slip
+          29: ultra
+          30: ds3
+          31: sip
+          32: frameRelay
+          33: rs232
+          34: para
+          35: arcnet
+          36: arcnetPlus
+          37: atm
+          38: miox25
+          39: sonet
+          40: x25ple
+          41: iso88022llc
+          42: localTalk
+          43: smdsDxi
+          44: frameRelayService
+          45: v35
+          46: hssi
+          47: hippi
+          48: modem
+          49: aal5
+          50: sonetPath
+          51: sonetVT
+          52: smdsIcip
+          53: propVirtual
+          54: propMultiplexor
+          55: ieee80212
+          56: fibreChannel
+          57: hippiInterface
+          58: frameRelayInterconnect
+          59: aflane8023
+          60: aflane8025
+          61: cctEmul
+          62: fastEther
+          63: isdn
+          64: v11
+          65: v36
+          66: g703at64k
+          67: g703at2mb
+          68: qllc
+          69: fastEtherFX
+          70: channel
+          71: ieee80211
+          72: ibm370parChan
+          73: escon
+          74: dlsw
+          75: isdns
+          76: isdnu
+          77: lapd
+          78: ipSwitch
+          79: rsrb
+          80: atmLogical
+          81: ds0
+          82: ds0Bundle
+          83: bsc
+          84: async
+          85: cnr
+          86: iso88025Dtr
+          87: eplrs
+          88: arap
+          89: propCnls
+          90: hostPad
+          91: termPad
+          92: frameRelayMPI
+          93: x213
+          94: adsl
+          95: radsl
+          96: sdsl
+          97: vdsl
+          98: iso88025CRFPInt
+          99: myrinet
+          100: voiceEM
+          101: voiceFXO
+          102: voiceFXS
+          103: voiceEncap
+          104: voiceOverIp
+          105: atmDxi
+          106: atmFuni
+          107: atmIma
+          108: pppMultilinkBundle
+          109: ipOverCdlc
+          110: ipOverClaw
+          111: stackToStack
+          112: virtualIpAddress
+          113: mpc
+          114: ipOverAtm
+          115: iso88025Fiber
+          116: tdlc
+          117: gigabitEthernet
+          118: hdlc
+          119: lapf
+          120: v37
+          121: x25mlp
+          122: x25huntGroup
+          123: transpHdlc
+          124: interleave
+          125: fast
+          126: ip
+          127: docsCableMaclayer
+          128: docsCableDownstream
+          129: docsCableUpstream
+          130: a12MppSwitch
+          131: tunnel
+          132: coffee
+          133: ces
+          134: atmSubInterface
+          135: l2vlan
+          136: l3ipvlan
+          137: l3ipxvlan
+          138: digitalPowerline
+          139: mediaMailOverIp
+          140: dtm
+          141: dcn
+          142: ipForward
+          143: msdsl
+          144: ieee1394
+          145: if-gsn
+          146: dvbRccMacLayer
+          147: dvbRccDownstream
+          148: dvbRccUpstream
+          149: atmVirtual
+          150: mplsTunnel
+          151: srp
+          152: voiceOverAtm
+          153: voiceOverFrameRelay
+          154: idsl
+          155: compositeLink
+          156: ss7SigLink
+          157: propWirelessP2P
+          158: frForward
+          159: rfc1483
+          160: usb
+          161: ieee8023adLag
+          162: bgppolicyaccounting
+          163: frf16MfrBundle
+          164: h323Gatekeeper
+          165: h323Proxy
+          166: mpls
+          167: mfSigLink
+          168: hdsl2
+          169: shdsl
+          170: ds1FDL
+          171: pos
+          172: dvbAsiIn
+          173: dvbAsiOut
+          174: plc
+          175: nfas
+          176: tr008
+          177: gr303RDT
+          178: gr303IDT
+          179: isup
+          180: propDocsWirelessMaclayer
+          181: propDocsWirelessDownstream
+          182: propDocsWirelessUpstream
+          183: hiperlan2
+          184: propBWAp2Mp
+          185: sonetOverheadChannel
+          186: digitalWrapperOverheadChannel
+          187: aal2
+          188: radioMAC
+          189: atmRadio
+          190: imt
+          191: mvl
+          192: reachDSL
+          193: frDlciEndPt
+          194: atmVciEndPt
+          195: opticalChannel
+          196: opticalTransport
+          197: propAtm
+          198: voiceOverCable
+          199: infiniband
+          200: teLink
+          201: q2931
+          202: virtualTg
+          203: sipTg
+          204: sipSig
+          205: docsCableUpstreamChannel
+          206: econet
+          207: pon155
+          208: pon622
+          209: bridge
+          210: linegroup
+          211: voiceEMFGD
+          212: voiceFGDEANA
+          213: voiceDID
+          214: mpegTransport
+          215: sixToFour
+          216: gtp
+          217: pdnEtherLoop1
+          218: pdnEtherLoop2
+          219: opticalChannelGroup
+          220: homepna
+          221: gfp
+          222: ciscoISLvlan
+          223: actelisMetaLOOP
+          224: fcipLink
+          225: rpr
+          226: qam
+          227: lmp
+          228: cblVectaStar
+          229: docsCableMCmtsDownstream
+          230: adsl2
+          231: macSecControlledIF
+          232: macSecUncontrolledIF
+          233: aviciOpticalEther
+          234: atmbond
+          235: voiceFGDOS
+          236: mocaVersion1
+          237: ieee80216WMAN
+          238: adsl2plus
+          239: dvbRcsMacLayer
+          240: dvbTdm
+          241: dvbRcsTdma
+          242: x86Laps
+          243: wwanPP
+          244: wwanPP2
+          245: voiceEBS
+          246: ifPwType
+          247: ilan
+          248: pip
+          249: aluELP
+          250: gpon
+          251: vdsl2
+          252: capwapDot11Profile
+          253: capwapDot11Bss
+          254: capwapWtpVirtualRadio
+          255: bits
+          256: docsCableUpstreamRfPort
+          257: cableDownstreamRfPort
+          258: vmwareVirtualNic
+          259: ieee802154
+          260: otnOdu
+          261: otnOtu
+          262: ifVfiType
+          263: g9981
+          264: g9982
+          265: g9983
+          266: aluEpon
+          267: aluEponOnu
+          268: aluEponPhysicalUni
+          269: aluEponLogicalLink
+          270: aluGponOnu
+          271: aluGponPhysicalUni
+          272: vmwareNicTeam
+          277: docsOfdmDownstream
+          278: docsOfdmaUpstream
+          279: gfast
+          280: sdci
+          281: xboxWireless
+          282: fastdsl
+          283: docsCableScte55d1FwdOob
+          284: docsCableScte55d1RetOob
+          285: docsCableScte55d2DsOob
+          286: docsCableScte55d2UsOob
+          287: docsCableNdf
+          288: docsCableNdr
+          289: ptm
+          290: ghn
+          291: otnOtsi
+          292: otnOtuc
+          293: otnOduc
+          294: otnOtsig
+          295: microwaveCarrierTermination
+          296: microwaveRadioLinkTerminal
+          297: ieee8021axDrni
+          298: ax25
+          299: ieee19061nanocom
+      - name: ifMtu
+        oid: 1.3.6.1.2.1.2.2.1.4
+        type: gauge
+        help: The size of the largest packet which can be sent/received on the interface,
+          specified in octets - 1.3.6.1.2.1.2.2.1.4
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifSpeed
+        oid: 1.3.6.1.2.1.2.2.1.5
+        type: gauge
+        help: An estimate of the interface's current bandwidth in bits per second - 1.3.6.1.2.1.2.2.1.5
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifPhysAddress
+        oid: 1.3.6.1.2.1.2.2.1.6
+        type: PhysAddress48
+        help: The interface's address at its protocol sub-layer - 1.3.6.1.2.1.2.2.1.6
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifAdminStatus
+        oid: 1.3.6.1.2.1.2.2.1.7
+        type: gauge
+        help: The desired state of the interface - 1.3.6.1.2.1.2.2.1.7
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+        enum_values:
+          1: up
+          2: down
+          3: testing
+      - name: ifOperStatus
+        oid: 1.3.6.1.2.1.2.2.1.8
+        type: gauge
+        help: The current operational state of the interface - 1.3.6.1.2.1.2.2.1.8
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+        enum_values:
+          1: up
+          2: down
+          3: testing
+          4: unknown
+          5: dormant
+          6: notPresent
+          7: lowerLayerDown
+      - name: ifLastChange
+        oid: 1.3.6.1.2.1.2.2.1.9
+        type: gauge
+        help: The value of sysUpTime at the time the interface entered its current operational
+          state - 1.3.6.1.2.1.2.2.1.9
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifInOctets
+        oid: 1.3.6.1.2.1.2.2.1.10
+        type: counter
+        help: The total number of octets received on the interface, including framing
+          characters - 1.3.6.1.2.1.2.2.1.10
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifInUcastPkts
+        oid: 1.3.6.1.2.1.2.2.1.11
+        type: counter
+        help: The number of packets, delivered by this sub-layer to a higher (sub-)layer,
+          which were not addressed to a multicast or broadcast address at this sub-layer
+          - 1.3.6.1.2.1.2.2.1.11
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifInNUcastPkts
+        oid: 1.3.6.1.2.1.2.2.1.12
+        type: counter
+        help: The number of packets, delivered by this sub-layer to a higher (sub-)layer,
+          which were addressed to a multicast or broadcast address at this sub-layer -
+          1.3.6.1.2.1.2.2.1.12
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifInDiscards
+        oid: 1.3.6.1.2.1.2.2.1.13
+        type: counter
+        help: The number of inbound packets which were chosen to be discarded even though
+          no errors had been detected to prevent their being deliverable to a higher-layer
+          protocol - 1.3.6.1.2.1.2.2.1.13
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifInErrors
+        oid: 1.3.6.1.2.1.2.2.1.14
+        type: counter
+        help: For packet-oriented interfaces, the number of inbound packets that contained
+          errors preventing them from being deliverable to a higher-layer protocol - 1.3.6.1.2.1.2.2.1.14
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifInUnknownProtos
+        oid: 1.3.6.1.2.1.2.2.1.15
+        type: counter
+        help: For packet-oriented interfaces, the number of packets received via the interface
+          which were discarded because of an unknown or unsupported protocol - 1.3.6.1.2.1.2.2.1.15
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifOutOctets
+        oid: 1.3.6.1.2.1.2.2.1.16
+        type: counter
+        help: The total number of octets transmitted out of the interface, including framing
+          characters - 1.3.6.1.2.1.2.2.1.16
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifOutUcastPkts
+        oid: 1.3.6.1.2.1.2.2.1.17
+        type: counter
+        help: The total number of packets that higher-level protocols requested be transmitted,
+          and which were not addressed to a multicast or broadcast address at this sub-layer,
+          including those that were discarded or not sent - 1.3.6.1.2.1.2.2.1.17
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifOutNUcastPkts
+        oid: 1.3.6.1.2.1.2.2.1.18
+        type: counter
+        help: The total number of packets that higher-level protocols requested be transmitted,
+          and which were addressed to a multicast or broadcast address at this sub-layer,
+          including those that were discarded or not sent - 1.3.6.1.2.1.2.2.1.18
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifOutDiscards
+        oid: 1.3.6.1.2.1.2.2.1.19
+        type: counter
+        help: The number of outbound packets which were chosen to be discarded even though
+          no errors had been detected to prevent their being transmitted - 1.3.6.1.2.1.2.2.1.19
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifOutErrors
+        oid: 1.3.6.1.2.1.2.2.1.20
+        type: counter
+        help: For packet-oriented interfaces, the number of outbound packets that could
+          not be transmitted because of errors - 1.3.6.1.2.1.2.2.1.20
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: ifOutQLen
+        oid: 1.3.6.1.2.1.2.2.1.21
+        type: gauge
+        help: The length of the output packet queue (in packets). - 1.3.6.1.2.1.2.2.1.21
+        indexes:
+        - labelname: ifIndex
+          type: gauge
+      - name: upsOutletGroupStatusTableSize
+        oid: 1.3.6.1.4.1.318.1.1.1.12.1.1
+        type: gauge
+        help: The number of outlet groups for the UPS. - 1.3.6.1.4.1.318.1.1.1.12.1.1
+      - name: upsOutletGroupStatusIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.1
+        type: gauge
+        help: The index to the outlet group entry. - 1.3.6.1.4.1.318.1.1.1.12.1.2.1.1
+        indexes:
+        - labelname: upsOutletGroupStatusIndex
+          type: gauge
+        lookups:
+        - labels:
+          - upsOutletGroupStatusIndex
+          labelname: upsOutletGroupStatusName
+          oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.2
+          type: DisplayString
+        - labels: []
+          labelname: upsOutletGroupStatusIndex
+      - name: upsOutletGroupStatusName
+        oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.2
+        type: DisplayString
+        help: The name of the outlet group - 1.3.6.1.4.1.318.1.1.1.12.1.2.1.2
+        indexes:
+        - labelname: upsOutletGroupStatusIndex
+          type: gauge
+        lookups:
+        - labels:
+          - upsOutletGroupStatusIndex
+          labelname: upsOutletGroupStatusName
+          oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.2
+          type: DisplayString
+        - labels: []
+          labelname: upsOutletGroupStatusIndex
+      - name: upsOutletGroupStatusGroupState
+        oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.3
+        type: gauge
+        help: Getting this variable will return the outlet group state - 1.3.6.1.4.1.318.1.1.1.12.1.2.1.3
+        indexes:
+        - labelname: upsOutletGroupStatusIndex
+          type: gauge
+        lookups:
+        - labels:
+          - upsOutletGroupStatusIndex
+          labelname: upsOutletGroupStatusName
+          oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.2
+          type: DisplayString
+        - labels: []
+          labelname: upsOutletGroupStatusIndex
+        enum_values:
+          1: upsOutletGroupStatusOn
+          2: upsOutletGroupStatusOff
+          3: upsOutletGroupStatusUnknown
+      - name: upsOutletGroupStatusCommandPending
+        oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.4
+        type: gauge
+        help: Getting this variable will return the command pending state of the outlet
+          group - 1.3.6.1.4.1.318.1.1.1.12.1.2.1.4
+        indexes:
+        - labelname: upsOutletGroupStatusIndex
+          type: gauge
+        lookups:
+        - labels:
+          - upsOutletGroupStatusIndex
+          labelname: upsOutletGroupStatusName
+          oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.2
+          type: DisplayString
+        - labels: []
+          labelname: upsOutletGroupStatusIndex
+        enum_values:
+          1: upsOutletGroupCommandPending
+          2: upsOutletGroupNoCommandPending
+      - name: upsOutletGroupStatusOutletType
+        oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.5
+        type: gauge
+        help: Getting this variable will return the type of outlet group - 1.3.6.1.4.1.318.1.1.1.12.1.2.1.5
+        indexes:
+        - labelname: upsOutletGroupStatusIndex
+          type: gauge
+        lookups:
+        - labels:
+          - upsOutletGroupStatusIndex
+          labelname: upsOutletGroupStatusName
+          oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.2
+          type: DisplayString
+        - labels: []
+          labelname: upsOutletGroupStatusIndex
+        enum_values:
+          1: upsSwitchedOutletGroup
+          2: upsMainOutletGroup
+      - name: upsOutletGroupStatusGroupFullState
+        oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.6
+        type: DisplayString
+        help: An ASCII string containing the 32 flags representing the current state(s)
+          of the outlet group - 1.3.6.1.4.1.318.1.1.1.12.1.2.1.6
+        indexes:
+        - labelname: upsOutletGroupStatusIndex
+          type: gauge
+        lookups:
+        - labels:
+          - upsOutletGroupStatusIndex
+          labelname: upsOutletGroupStatusName
+          oid: 1.3.6.1.4.1.318.1.1.1.12.1.2.1.2
+          type: DisplayString
+        - labels: []
+          labelname: upsOutletGroupStatusIndex
+      - name: upsOutletGroupConfigTableSize
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.1
+        type: gauge
+        help: The number of outlet groups for the UPS. - 1.3.6.1.4.1.318.1.1.1.12.2.1
+      - name: upsOutletGroupConfigIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.1
+        type: gauge
+        help: The index to the outlet group entry. - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.1
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+      - name: upsOutletGroupConfigName
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.2
+        type: DisplayString
+        help: The name of the outlet group. - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.2
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+      - name: upsOutletGroupConfigPowerOnDelay
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.3
+        type: gauge
+        help: The amount of time (seconds) the outlet group will delay powering on when
+          the delayed on, reboot, or shutdown command is applied - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.3
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+      - name: upsOutletGroupConfigPowerOffDelay
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.4
+        type: gauge
+        help: The amount of time (seconds) the outlet group will delay powering off when
+          the delayed off, reboot, or shutdown command is applied - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.4
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+      - name: upsOutletGroupConfigRebootDuration
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.5
+        type: gauge
+        help: During a reboot sequence, power is turned off and then back on - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.5
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+      - name: upsOutletGroupConfigMinReturnRuntime
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.6
+        type: gauge
+        help: In an Outlet Group shutdown sequence, the Outlet Group cycles power off
+          then on - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.6
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+      - name: upsOutletGroupConfigOutletType
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.7
+        type: gauge
+        help: Getting this variable will return the type of outlet group - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.7
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+        enum_values:
+          1: upsSwitchedOutletGroup
+          2: upsMainOutletGroup
+      - name: upsOutletGroupConfigLoadShedControlSkipOffDelay
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.8
+        type: gauge
+        help: Configures whether the outlet group's off delay setting (upsOutletGroupConfigPowerOffDelay)
+          will be used in a load shedding situation, where applicable. - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.8
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+        enum_values:
+          1: upsOutletGroupConfigSkipOffDelay
+          2: upsOutletGroupConfigUseOffDelay
+      - name: upsOutletGroupConfigLoadShedControlAutoRestart
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.9
+        type: gauge
+        help: Configures whether the outlet group will automatically restart after a load
+          shedding situation, where applicable. - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.9
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+        enum_values:
+          1: upsOutletGroupConfigAutoRestart
+          2: upsOutletGroupConfigManualRestart
+      - name: upsOutletGroupConfigLoadShedControlTimeOnBattery
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.10
+        type: gauge
+        help: Configures whether the outlet group will load shed (turn off) after the
+          UPS's time on battery has exceeded the upsOutletGroupConfigLoadShedTimeOnBattery
+          OID setting - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.10
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+        enum_values:
+          1: upsOutletGroupConfigDisableTimeOnBatteryLoadShed
+          2: upsOutletGroupConfigEnableTimeOnBatteryLoadShed
+      - name: upsOutletGroupConfigLoadShedControlRuntimeRemaining
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.11
+        type: gauge
+        help: Configures whether the outlet group will load shed (turn off) when the UPS
+          is on battery and the remaining runtime is less than the upsOutletGroupConfigLoadShedRuntimeRemaining
+          OID setting - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.11
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+        enum_values:
+          1: upsOutletGroupConfigDisableRuntimeRemainingLoadShed
+          2: upsOutletGroupConfigEnableRuntimeRemainingLoadShed
+      - name: upsOutletGroupConfigLoadShedControlInOverload
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.12
+        type: gauge
+        help: Configures whether the outlet group will load shed (turn off) when the UPS
+          is in an overload condition - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.12
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+        enum_values:
+          1: upsOutletGroupConfigDisableInOverloadLoadShed
+          2: upsOutletGroupConfigEnableInOverloadLoadShed
+      - name: upsOutletGroupConfigLoadShedTimeOnBattery
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.13
+        type: gauge
+        help: When the UPS has been on battery for more time than this value, the outlet
+          group will turn off if this condition is enabled by the upsOutletGroupConfigLoadShedControlTimeOnBattery
+          OID - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.13
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+      - name: upsOutletGroupConfigLoadShedRuntimeRemaining
+        oid: 1.3.6.1.4.1.318.1.1.1.12.2.2.1.14
+        type: gauge
+        help: When the runtime remaining is less than this value, the outlet group will
+          turn off if this condition is enabled by the upsOutletGroupConfigLoadShedControlRuntimeRemaining
+          OID - 1.3.6.1.4.1.318.1.1.1.12.2.2.1.14
+        indexes:
+        - labelname: upsOutletGroupConfigIndex
+          type: gauge
+      - name: upsOutletGroupControlTableSize
+        oid: 1.3.6.1.4.1.318.1.1.1.12.3.1
+        type: gauge
+        help: The number of outlet groups for the UPS. - 1.3.6.1.4.1.318.1.1.1.12.3.1
+      - name: upsOutletGroupControlIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.12.3.2.1.1
+        type: gauge
+        help: The index to the outlet group entry. - 1.3.6.1.4.1.318.1.1.1.12.3.2.1.1
+        indexes:
+        - labelname: upsOutletGroupControlIndex
+          type: gauge
+      - name: upsOutletGroupControlName
+        oid: 1.3.6.1.4.1.318.1.1.1.12.3.2.1.2
+        type: DisplayString
+        help: The name of the outlet group - 1.3.6.1.4.1.318.1.1.1.12.3.2.1.2
+        indexes:
+        - labelname: upsOutletGroupControlIndex
+          type: gauge
+      - name: upsOutletGroupControlCommand
+        oid: 1.3.6.1.4.1.318.1.1.1.12.3.2.1.3
+        type: gauge
+        help: Getting this variable will return the outlet group state - 1.3.6.1.4.1.318.1.1.1.12.3.2.1.3
+        indexes:
+        - labelname: upsOutletGroupControlIndex
+          type: gauge
+        enum_values:
+          1: upsOutletGroupImmediateOn
+          2: upsOutletGroupImmediateOff
+          3: upsOutletGroupImmediateRebootWithOrWithoutAC
+          4: upsOutletGroupDelayedOn
+          5: upsOutletGroupDelayedOff
+          6: upsOutletGroupDelayedRebootWithOrWithoutAC
+          7: upsOutletGroupCancelPendingCommand
+          8: upsOutletGroupControlUnknown
+          9: upsOutletGroupImmediateRebootShutdown
+          10: upsOutletGroupDelayedRebootShutdown
+      - name: upsOutletGroupControlOutletType
+        oid: 1.3.6.1.4.1.318.1.1.1.12.3.2.1.4
+        type: gauge
+        help: Getting this variable will return the type of outlet group - 1.3.6.1.4.1.318.1.1.1.12.3.2.1.4
+        indexes:
+        - labelname: upsOutletGroupControlIndex
+          type: gauge
+        enum_values:
+          1: upsSwitchedOutletGroup
+          2: upsMainOutletGroup
+      - name: upsBasicBatteryStatus
+        oid: 1.3.6.1.4.1.318.1.1.1.2.1.1
+        type: gauge
+        help: The status of the UPS batteries - 1.3.6.1.4.1.318.1.1.1.2.1.1
+        enum_values:
+          1: unknown
+          2: batteryNormal
+          3: batteryLow
+          4: batteryInFaultCondition
+      - name: upsBasicBatteryTimeOnBattery
+        oid: 1.3.6.1.4.1.318.1.1.1.2.1.2
+        type: gauge
+        help: The elapsed time since the UPS has switched to battery power. - 1.3.6.1.4.1.318.1.1.1.2.1.2
+      - name: upsBasicBatteryLastReplaceDate
+        oid: 1.3.6.1.4.1.318.1.1.1.2.1.3
+        type: DisplayString
+        help: The date when the UPS system's batteries were last replaced in mm/dd/yy
+          (or yyyy) format - 1.3.6.1.4.1.318.1.1.1.2.1.3
+      - name: upsAdvBatteryCapacity
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.1
+        type: gauge
+        help: The remaining battery capacity expressed in percent of full capacity. -
+          1.3.6.1.4.1.318.1.1.1.2.2.1
+      - name: upsAdvBatteryTemperature
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.2
+        type: gauge
+        help: The current internal UPS temperature expressed in Celsius. - 1.3.6.1.4.1.318.1.1.1.2.2.2
+      - name: upsAdvBatteryRunTimeRemaining
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.3
+        type: gauge
+        help: The UPS battery run time remaining before battery exhaustion. - 1.3.6.1.4.1.318.1.1.1.2.2.3
+      - name: upsAdvBatteryReplaceIndicator
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.4
+        type: gauge
+        help: Indicates whether the UPS batteries need replacing. - 1.3.6.1.4.1.318.1.1.1.2.2.4
+        enum_values:
+          1: noBatteryNeedsReplacing
+          2: batteryNeedsReplacing
+      - name: upsAdvBatteryNumOfBattPacks
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.5
+        type: gauge
+        help: The number of external battery packs connected to the UPS - 1.3.6.1.4.1.318.1.1.1.2.2.5
+      - name: upsAdvBatteryNumOfBadBattPacks
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.6
+        type: gauge
+        help: The number of external battery packs connected to the UPS that are defective
+          - 1.3.6.1.4.1.318.1.1.1.2.2.6
+      - name: upsAdvBatteryNominalVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.7
+        type: gauge
+        help: The nominal battery voltage in Volts. - 1.3.6.1.4.1.318.1.1.1.2.2.7
+      - name: upsAdvBatteryActualVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.8
+        type: gauge
+        help: The actual battery bus voltage in Volts. - 1.3.6.1.4.1.318.1.1.1.2.2.8
+      - name: upsAdvBatteryCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.9
+        type: gauge
+        help: The battery current in Amps. - 1.3.6.1.4.1.318.1.1.1.2.2.9
+      - name: upsAdvTotalDCCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.10
+        type: gauge
+        help: The total DC current in Amps. - 1.3.6.1.4.1.318.1.1.1.2.2.10
+      - name: upsAdvBatteryFullCapacity
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.11
+        type: gauge
+        help: The full chargeable capacity of the battery which is expressed in percentage.
+          - 1.3.6.1.4.1.318.1.1.1.2.2.11
+      - name: upsAdvBatteryActualVoltageTableIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.12.1.1
+        type: gauge
+        help: The Battery Frame identifier - 1.3.6.1.4.1.318.1.1.1.2.2.12.1.1
+        indexes:
+        - labelname: upsAdvBatteryActualVoltageTableIndex
+          type: gauge
+      - name: upsAdvBatteryActualVoltagePolarity
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.12.1.2
+        type: gauge
+        help: The selected Battery Voltage Polarity - 1.3.6.1.4.1.318.1.1.1.2.2.12.1.2
+        indexes:
+        - labelname: upsAdvBatteryActualVoltageTableIndex
+          type: gauge
+        enum_values:
+          0: positive
+          1: negative
+      - name: upsAdvBatteryFrameActualVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.12.1.3
+        type: gauge
+        help: The actual battery bus voltage in Volts. - 1.3.6.1.4.1.318.1.1.1.2.2.12.1.3
+        indexes:
+        - labelname: upsAdvBatteryActualVoltageTableIndex
+          type: gauge
+      - name: upsAdvTotalDCCurrentTableIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.13.1.1
+        type: gauge
+        help: The Battery Frame identifier - 1.3.6.1.4.1.318.1.1.1.2.2.13.1.1
+        indexes:
+        - labelname: upsAdvTotalDCCurrentTableIndex
+          type: gauge
+      - name: upsAdvTotalDCCurrentPolarity
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.13.1.2
+        type: gauge
+        help: The selected Battery Current Polarity - 1.3.6.1.4.1.318.1.1.1.2.2.13.1.2
+        indexes:
+        - labelname: upsAdvTotalDCCurrentTableIndex
+          type: gauge
+        enum_values:
+          0: positive
+          1: negative
+      - name: upsAdvTotalFrameDCCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.13.1.3
+        type: gauge
+        help: The Total DC Current of battery in Amperes. - 1.3.6.1.4.1.318.1.1.1.2.2.13.1.3
+        indexes:
+        - labelname: upsAdvTotalDCCurrentTableIndex
+          type: gauge
+      - name: upsAdvBatteryCurrentTableIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.14.1.1
+        type: gauge
+        help: The Battery Frame identifier - 1.3.6.1.4.1.318.1.1.1.2.2.14.1.1
+        indexes:
+        - labelname: upsAdvBatteryCurrentTableIndex
+          type: gauge
+        - labelname: upsAdvBatteryCurrentIndex
+          type: gauge
+      - name: upsAdvBatteryCurrentIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.14.1.2
+        type: gauge
+        help: The battery frame identifier. - 1.3.6.1.4.1.318.1.1.1.2.2.14.1.2
+        indexes:
+        - labelname: upsAdvBatteryCurrentTableIndex
+          type: gauge
+        - labelname: upsAdvBatteryCurrentIndex
+          type: gauge
+      - name: upsAdvBatteryCurrentPolarity
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.14.1.3
+        type: gauge
+        help: The selected Battery current polarity - 1.3.6.1.4.1.318.1.1.1.2.2.14.1.3
+        indexes:
+        - labelname: upsAdvBatteryCurrentTableIndex
+          type: gauge
+        - labelname: upsAdvBatteryCurrentIndex
+          type: gauge
+        enum_values:
+          0: positive
+          1: negative
+      - name: upsAdvBatteryFrameCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.14.1.4
+        type: gauge
+        help: The Battery current measured in Amperes - 1.3.6.1.4.1.318.1.1.1.2.2.14.1.4
+        indexes:
+        - labelname: upsAdvBatteryCurrentTableIndex
+          type: gauge
+        - labelname: upsAdvBatteryCurrentIndex
+          type: gauge
+      - name: upsAdvBatteryEstimatedChargeTime
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.15
+        type: gauge
+        help: The estimated remaining time required to charge the UPS to a full state
+          of charge. - 1.3.6.1.4.1.318.1.1.1.2.2.15
+      - name: upsAdvBatteryPower
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.16
+        type: gauge
+        help: The measured battery power in kW. - 1.3.6.1.4.1.318.1.1.1.2.2.16
+      - name: upsAdvBatteryChargerStatus
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.17
+        type: EnumAsStateSet
+        help: The status of the battery charger - 1.3.6.1.4.1.318.1.1.1.2.2.17
+        enum_values:
+          1: unknown
+          2: ok
+          3: inFaultCondition
+          4: floatCharging
+          5: boostCharging
+          6: resting
+          7: notCharging
+          8: equalizationCharging
+          9: testInProgress
+          10: cyclicFloatCharging
+      - name: upsAdvBatteryInternalSKU
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.19
+        type: DisplayString
+        help: The SKU of the internal battery. - 1.3.6.1.4.1.318.1.1.1.2.2.19
+      - name: upsAdvBatteryExternalSKU
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.20
+        type: DisplayString
+        help: The SKU of the external battery. - 1.3.6.1.4.1.318.1.1.1.2.2.20
+      - name: upsAdvBatteryRecommendedReplaceDate
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.21
+        type: DisplayString
+        help: The recommended replacement date for the battery based on the UPS internal
+          battery life algorithm. - 1.3.6.1.4.1.318.1.1.1.2.2.21
+      - name: upsAdvBatteryNominalBackupTime
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.22
+        type: gauge
+        help: Defines the runtime of the user supplied battery in minutes, when battery
+          is new. - 1.3.6.1.4.1.318.1.1.1.2.2.22
+      - name: upsAdvBatteryCondition
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.23
+        type: EnumAsStateSet
+        help: Health of the battries based on the battery test. - 1.3.6.1.4.1.318.1.1.1.2.2.23
+        enum_values:
+          1: unknown
+          2: ok
+          3: weak
+          4: poor
+      - name: upsAdvBatteryChargingCurrentRestricted
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.24
+        type: EnumAsStateSet
+        help: Indicates whether battery charging current is restricted or not - 1.3.6.1.4.1.318.1.1.1.2.2.24
+        enum_values:
+          1: "yes"
+          2: "no"
+      - name: upsAdvBatteryTotalCapacity
+        oid: 1.3.6.1.4.1.318.1.1.1.2.2.25
+        type: gauge
+        help: Total battery capacity in Ampere Hour (Ah) - 1.3.6.1.4.1.318.1.1.1.2.2.25
+      - name: upsHighPrecBatteryCapacity
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.1
+        type: gauge
+        help: The remaining battery capacity expressed in tenths of percent of full capacity.
+          - 1.3.6.1.4.1.318.1.1.1.2.3.1
+      - name: upsHighPrecBatteryTemperature
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.2
+        type: gauge
+        help: The current internal UPS temperature expressed in tenths of degrees Celsius.
+          - 1.3.6.1.4.1.318.1.1.1.2.3.2
+      - name: upsHighPrecBatteryNominalVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.3
+        type: gauge
+        help: The nominal battery voltage in tenths of Volts. - 1.3.6.1.4.1.318.1.1.1.2.3.3
+      - name: upsHighPrecBatteryActualVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.4
+        type: gauge
+        help: The actual battery bus voltage in tenths of Volts. - 1.3.6.1.4.1.318.1.1.1.2.3.4
+      - name: upsHighPrecBatteryCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.5
+        type: gauge
+        help: The battery current in tenths of Amps. - 1.3.6.1.4.1.318.1.1.1.2.3.5
+      - name: upsHighPrecTotalDCCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.6
+        type: gauge
+        help: The total DC current in tenths of Amps. - 1.3.6.1.4.1.318.1.1.1.2.3.6
+      - name: upsHighPrecBatteryActualVoltageTableIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.7.1.1
+        type: gauge
+        help: The Battery Frame identifier - 1.3.6.1.4.1.318.1.1.1.2.3.7.1.1
+        indexes:
+        - labelname: upsHighPrecBatteryActualVoltageTableIndex
+          type: gauge
+      - name: upsHighPrecBatteryActualVoltagePolarity
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.7.1.2
+        type: gauge
+        help: The selected Battery Voltage polarity - 1.3.6.1.4.1.318.1.1.1.2.3.7.1.2
+        indexes:
+        - labelname: upsHighPrecBatteryActualVoltageTableIndex
+          type: gauge
+        enum_values:
+          0: positive
+          1: negative
+      - name: upsHighPrecBatteryVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.7.1.3
+        type: gauge
+        help: The actual battery bus voltage expressed as tenths of Volts. - 1.3.6.1.4.1.318.1.1.1.2.3.7.1.3
+        indexes:
+        - labelname: upsHighPrecBatteryActualVoltageTableIndex
+          type: gauge
+      - name: upsHighPrecTotalDCCurrentTableIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.8.1.1
+        type: gauge
+        help: The Battery Frame identifier - 1.3.6.1.4.1.318.1.1.1.2.3.8.1.1
+        indexes:
+        - labelname: upsHighPrecTotalDCCurrentTableIndex
+          type: gauge
+      - name: upsHighPrecTotalDCCurrentPolarity
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.8.1.2
+        type: gauge
+        help: The selected Battery Current polarity - 1.3.6.1.4.1.318.1.1.1.2.3.8.1.2
+        indexes:
+        - labelname: upsHighPrecTotalDCCurrentTableIndex
+          type: gauge
+        enum_values:
+          0: positive
+          1: negative
+      - name: upsHighPrecTotalDCFrameCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.8.1.3
+        type: gauge
+        help: The total DC current in tenths of Amperes. - 1.3.6.1.4.1.318.1.1.1.2.3.8.1.3
+        indexes:
+        - labelname: upsHighPrecTotalDCCurrentTableIndex
+          type: gauge
+      - name: upsHighPrecBatteryCurrentTableIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.9.1.1
+        type: gauge
+        help: The Battery frame identifier - 1.3.6.1.4.1.318.1.1.1.2.3.9.1.1
+        indexes:
+        - labelname: upsHighPrecBatteryCurrentTableIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCurrentIndex
+          type: gauge
+      - name: upsHighPrecBatteryCurrentIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.9.1.2
+        type: gauge
+        help: The Battery frame identifier - 1.3.6.1.4.1.318.1.1.1.2.3.9.1.2
+        indexes:
+        - labelname: upsHighPrecBatteryCurrentTableIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCurrentIndex
+          type: gauge
+      - name: upsHighPrecBatteryCurrentPolarity
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.9.1.3
+        type: gauge
+        help: The selected Battery Current polarity - 1.3.6.1.4.1.318.1.1.1.2.3.9.1.3
+        indexes:
+        - labelname: upsHighPrecBatteryCurrentTableIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCurrentIndex
+          type: gauge
+        enum_values:
+          0: positive
+          1: negative
+      - name: upsHighPrecBatteryFrameCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.9.1.4
+        type: gauge
+        help: The Battery current in tenths of Amperes. - 1.3.6.1.4.1.318.1.1.1.2.3.9.1.4
+        indexes:
+        - labelname: upsHighPrecBatteryCurrentTableIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCurrentIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackTableSize
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.1
+        type: gauge
+        help: The number of entries in the upsHighPrecBatteryPacks. - 1.3.6.1.4.1.318.1.1.1.2.3.10.1
+      - name: upsHighPrecBatteryPackIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.1
+        type: gauge
+        help: The battery pack identifier. - 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.1
+        indexes:
+        - labelname: upsHighPrecBatteryPackIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCartridgeIndex
+          type: gauge
+      - name: upsHighPrecBatteryCartridgeIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.2
+        type: gauge
+        help: The battery cartridge identifier. - 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.2
+        indexes:
+        - labelname: upsHighPrecBatteryPackIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCartridgeIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackFirmwareRevision
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.3
+        type: DisplayString
+        help: The battery pack firmware revision. - 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.3
+        indexes:
+        - labelname: upsHighPrecBatteryPackIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCartridgeIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackSerialNumber
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.4
+        type: DisplayString
+        help: The battery pack serial number. - 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.4
+        indexes:
+        - labelname: upsHighPrecBatteryPackIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCartridgeIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackTemperature
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.5
+        type: gauge
+        help: The battery pack temperature measured in 10ths of degree Celcius - 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.5
+        indexes:
+        - labelname: upsHighPrecBatteryPackIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCartridgeIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackStatus
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.6
+        type: OctetString
+        help: The battery status for the pack only - 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.6
+        indexes:
+        - labelname: upsHighPrecBatteryPackIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCartridgeIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackCartridgeHealth
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.7
+        type: OctetString
+        help: The battery cartridge health - 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.7
+        indexes:
+        - labelname: upsHighPrecBatteryPackIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCartridgeIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackCartridgeReplaceDate
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.8
+        type: DisplayString
+        help: The battery cartridge estimated battery replace date. - 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.8
+        indexes:
+        - labelname: upsHighPrecBatteryPackIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCartridgeIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackCartridgeInstallDate
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.9
+        type: DisplayString
+        help: The battery cartridge install date. - 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.9
+        indexes:
+        - labelname: upsHighPrecBatteryPackIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCartridgeIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackCartridgeStatus
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.10
+        type: OctetString
+        help: The battery cartridge status - 1.3.6.1.4.1.318.1.1.1.2.3.10.2.1.10
+        indexes:
+        - labelname: upsHighPrecBatteryPackIndex
+          type: gauge
+        - labelname: upsHighPrecBatteryCartridgeIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackOnlyTableSize
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.3
+        type: gauge
+        help: The number of entries in the upsHighPrecBatteryPacks. - 1.3.6.1.4.1.318.1.1.1.2.3.10.3
+      - name: upsHighPrecBatteryPackOnlyIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.1
+        type: gauge
+        help: The battery pack identifier. - 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.1
+        indexes:
+        - labelname: upsHighPrecBatteryPackOnlyIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackOnlyFirmwareRevision
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.2
+        type: DisplayString
+        help: The battery pack firmware revision. - 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.2
+        indexes:
+        - labelname: upsHighPrecBatteryPackOnlyIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackOnlySerialNumber
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.3
+        type: DisplayString
+        help: The battery pack serial number. - 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.3
+        indexes:
+        - labelname: upsHighPrecBatteryPackOnlyIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackOnlyTemperature
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.4
+        type: gauge
+        help: The battery pack temperature measured in 10ths of degree Celcius - 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.4
+        indexes:
+        - labelname: upsHighPrecBatteryPackOnlyIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackOnlyStatus
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.5
+        type: OctetString
+        help: The battery status for the pack only - 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.5
+        indexes:
+        - labelname: upsHighPrecBatteryPackOnlyIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackOnlyHealth
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.6
+        type: OctetString
+        help: The battery pack health - 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.6
+        indexes:
+        - labelname: upsHighPrecBatteryPackOnlyIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackOnlyReplaceDate
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.7
+        type: DisplayString
+        help: The battery pack estimated battery replace date. - 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.7
+        indexes:
+        - labelname: upsHighPrecBatteryPackOnlyIndex
+          type: gauge
+      - name: upsHighPrecBatteryPackOnlyInstallDate
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.8
+        type: DisplayString
+        help: The battery pack install date. - 1.3.6.1.4.1.318.1.1.1.2.3.10.4.1.8
+        indexes:
+        - labelname: upsHighPrecBatteryPackOnlyIndex
+          type: gauge
+      - name: upsHighPrecBatteryHealth
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.11
+        type: OctetString
+        help: The battery health - 1.3.6.1.4.1.318.1.1.1.2.3.11
+      - name: upsHighPrecActivePower
+        oid: 1.3.6.1.4.1.318.1.1.1.2.3.12
+        type: gauge
+        help: Active Power of Battery in tenths of kW - 1.3.6.1.4.1.318.1.1.1.2.3.12
+      - name: upsBasicInputPhase
+        oid: 1.3.6.1.4.1.318.1.1.1.3.1.1
+        type: gauge
+        help: The current AC input phase. - 1.3.6.1.4.1.318.1.1.1.3.1.1
+      - name: upsAdvInputLineVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.1
+        type: gauge
+        help: The current utility line voltage in VAC. - 1.3.6.1.4.1.318.1.1.1.3.2.1
+      - name: upsAdvInputMaxLineVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.2
+        type: gauge
+        help: The maximum utility line voltage in VAC over the previous 1 minute period.
+          - 1.3.6.1.4.1.318.1.1.1.3.2.2
+      - name: upsAdvInputMinLineVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.3
+        type: gauge
+        help: The minimum utility line voltage in VAC over the previous 1 minute period.
+          - 1.3.6.1.4.1.318.1.1.1.3.2.3
+      - name: upsAdvInputFrequency
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.4
+        type: gauge
+        help: The current input frequency to the UPS system in Hz. - 1.3.6.1.4.1.318.1.1.1.3.2.4
+      - name: upsAdvInputLineFailCause
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.5
+        type: gauge
+        help: The reason for the occurrence of the last transfer to UPS battery power
+          - 1.3.6.1.4.1.318.1.1.1.3.2.5
+        enum_values:
+          1: noTransfer
+          2: highLineVoltage
+          3: brownout
+          4: blackout
+          5: smallMomentarySag
+          6: deepMomentarySag
+          7: smallMomentarySpike
+          8: largeMomentarySpike
+          9: selfTest
+          10: rateOfVoltageChange
+      - name: upsAdvInputNominalFrequency
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.6
+        type: gauge
+        help: The nominal input frequency of the UPS system in Hz. - 1.3.6.1.4.1.318.1.1.1.3.2.6
+      - name: upsAdvInputNominalVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.7
+        type: gauge
+        help: The nominal input voltage of the UPS system in VAC. - 1.3.6.1.4.1.318.1.1.1.3.2.7
+      - name: upsAdvInputBypassNominalFrequency
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.8
+        type: gauge
+        help: The nominal bypass input frequency of the UPS system in Hz. - 1.3.6.1.4.1.318.1.1.1.3.2.8
+      - name: upsAdvInputBypassNominalVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.9
+        type: gauge
+        help: The nominal bypass input voltage of the UPS system in VAC. - 1.3.6.1.4.1.318.1.1.1.3.2.9
+      - name: upsAdvInputStatisticsIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.10.1.1
+        type: gauge
+        help: The input identifier. - 1.3.6.1.4.1.318.1.1.1.3.2.10.1.1
+        indexes:
+        - labelname: upsAdvInputStatisticsIndex
+          type: gauge
+      - name: upsAdvInputApparentPower
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.10.1.2
+        type: gauge
+        help: The input apparent power(sum of all of the three phases) measured in kVA.
+          - 1.3.6.1.4.1.318.1.1.1.3.2.10.1.2
+        indexes:
+        - labelname: upsAdvInputStatisticsIndex
+          type: gauge
+      - name: upsAdvInputVoltageTHD
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.10.1.3
+        type: gauge
+        help: The input voltage Total Harmonic Distortion in percent. - 1.3.6.1.4.1.318.1.1.1.3.2.10.1.3
+        indexes:
+        - labelname: upsAdvInputStatisticsIndex
+          type: gauge
+      - name: upsAdvInputBypassVoltageTHD
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.10.1.4
+        type: gauge
+        help: The bypass input voltage Total Harmonic Distortion in percent. - 1.3.6.1.4.1.318.1.1.1.3.2.10.1.4
+        indexes:
+        - labelname: upsAdvInputStatisticsIndex
+          type: gauge
+      - name: upsAdvInputPeakCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.10.1.5
+        type: gauge
+        help: The input peak current in Amperes. - 1.3.6.1.4.1.318.1.1.1.3.2.10.1.5
+        indexes:
+        - labelname: upsAdvInputStatisticsIndex
+          type: gauge
+      - name: upsAdvInputBypassPeakCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.10.1.6
+        type: gauge
+        help: The bypass input peak current in Amperes. - 1.3.6.1.4.1.318.1.1.1.3.2.10.1.6
+        indexes:
+        - labelname: upsAdvInputStatisticsIndex
+          type: gauge
+      - name: upsAdvInputActivePower
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.10.1.7
+        type: gauge
+        help: The input active power measured in kW. - 1.3.6.1.4.1.318.1.1.1.3.2.10.1.7
+        indexes:
+        - labelname: upsAdvInputStatisticsIndex
+          type: gauge
+      - name: upsAdvInputTotalApparentPower
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.11
+        type: gauge
+        help: The input total apparent power(sum of all three phases) of the UPS system
+          in kVA. - 1.3.6.1.4.1.318.1.1.1.3.2.11
+      - name: upsAdvInputTotalActivePower
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.12
+        type: gauge
+        help: The input total active power(sum of all three phases) of the UPS system
+          in kW. - 1.3.6.1.4.1.318.1.1.1.3.2.12
+      - name: upsAdvInputBypassTotalApparentPower
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.13
+        type: gauge
+        help: The input bypass total apparent power(sum of all three phases) of the UPS
+          system in kVA. - 1.3.6.1.4.1.318.1.1.1.3.2.13
+      - name: upsAdvInputBypassTotalActivePower
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.14
+        type: gauge
+        help: The input bypass total active power(sum of all three phases) of the UPS
+          system in kW. - 1.3.6.1.4.1.318.1.1.1.3.2.14
+      - name: upsAdvInputEnergyUsage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.15
+        type: gauge
+        help: The input energy usage of the UPS in kWh. - 1.3.6.1.4.1.318.1.1.1.3.2.15
+      - name: upsAdvInputDCVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.16
+        type: gauge
+        help: The DC input voltage in Volts. - 1.3.6.1.4.1.318.1.1.1.3.2.16
+      - name: upsAdvInputDCCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.3.2.17
+        type: gauge
+        help: The DC input current in Amps. - 1.3.6.1.4.1.318.1.1.1.3.2.17
+      - name: upsHighPrecInputLineVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.3.1
+        type: gauge
+        help: The current utility line voltage in tenths of VAC. - 1.3.6.1.4.1.318.1.1.1.3.3.1
+      - name: upsHighPrecInputMaxLineVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.3.2
+        type: gauge
+        help: The maximum utility line voltage in tenths of VAC over the previous 1 minute
+          period. - 1.3.6.1.4.1.318.1.1.1.3.3.2
+      - name: upsHighPrecInputMinLineVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.3.3
+        type: gauge
+        help: The minimum utility line voltage in tenths of VAC over the previous 1 minute
+          period. - 1.3.6.1.4.1.318.1.1.1.3.3.3
+      - name: upsHighPrecInputFrequency
+        oid: 1.3.6.1.4.1.318.1.1.1.3.3.4
+        type: gauge
+        help: The current input frequency to the UPS system in tenths of Hz. - 1.3.6.1.4.1.318.1.1.1.3.3.4
+      - name: upsHighPrecInputEnergyUsage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.3.5
+        type: gauge
+        help: The input energy usage of the UPS in hundredths of kWh. - 1.3.6.1.4.1.318.1.1.1.3.3.5
+      - name: upsHighPrecInputBypassVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.3.3.6
+        type: gauge
+        help: The current bypass line voltage in tenths of VAC. - 1.3.6.1.4.1.318.1.1.1.3.3.6
+      - name: upsHighPrecInputBypassFrequency
+        oid: 1.3.6.1.4.1.318.1.1.1.3.3.7
+        type: gauge
+        help: The current input bypass frequency to the UPS system in tenths of Hz. -
+          1.3.6.1.4.1.318.1.1.1.3.3.7
+      - name: upsBasicOutputStatus
+        oid: 1.3.6.1.4.1.318.1.1.1.4.1.1
+        type: gauge
+        help: The current state of the UPS - 1.3.6.1.4.1.318.1.1.1.4.1.1
+        enum_values:
+          1: unknown
+          2: onLine
+          3: onBattery
+          4: onSmartBoost
+          5: timedSleeping
+          6: softwareBypass
+          7: "off"
+          8: rebooting
+          9: switchedBypass
+          10: hardwareFailureBypass
+          11: sleepingUntilPowerReturn
+          12: onSmartTrim
+          13: ecoMode
+          14: hotStandby
+          15: onBatteryTest
+          16: emergencyStaticBypass
+          17: staticBypassStandby
+          18: powerSavingMode
+          19: spotMode
+          20: eConversion
+          21: chargerSpotmode
+          22: inverterSpotmode
+          23: activeLoad
+          24: batteryDischargeSpotmode
+          25: inverterStandby
+          26: chargerOnly
+      - name: upsBasicOutputPhase
+        oid: 1.3.6.1.4.1.318.1.1.1.4.1.2
+        type: gauge
+        help: The current output phase. - 1.3.6.1.4.1.318.1.1.1.4.1.2
+      - name: upsBasicSystemStatus
+        oid: 1.3.6.1.4.1.318.1.1.1.4.1.3
+        type: gauge
+        help: Current state for the whole system (UPS and surrounding breakers) - 1.3.6.1.4.1.318.1.1.1.4.1.3
+        enum_values:
+          1: unknown
+          2: onLine
+          3: onBattery
+          4: onSmartBoost
+          5: timedSleeping
+          6: softwareBypass
+          7: "off"
+          8: rebooting
+          9: switchedBypass
+          10: hardwareFailureBypass
+          11: sleepingUntilPowerReturn
+          12: onSmartTrim
+          13: ecoMode
+          14: inverter
+          15: eConversion
+          16: staticBypassStandby
+          17: efficiencyBoosterMode
+      - name: upsBasicSystemInternalTemperature
+        oid: 1.3.6.1.4.1.318.1.1.1.4.1.4
+        type: gauge
+        help: The actual internal temperature of the UPS system in Celsius. - 1.3.6.1.4.1.318.1.1.1.4.1.4
+      - name: upsBasicSystemInverterStatus
+        oid: 1.3.6.1.4.1.318.1.1.1.4.1.5
+        type: gauge
+        help: The current state of the UPS inverter - 1.3.6.1.4.1.318.1.1.1.4.1.5
+        enum_values:
+          1: unknown
+          2: ok
+          3: inFaultCondition
+      - name: upsBasicSystemPFCStatus
+        oid: 1.3.6.1.4.1.318.1.1.1.4.1.6
+        type: gauge
+        help: The general status of the power factor correction (AC input stage of the
+          UPS) - 1.3.6.1.4.1.318.1.1.1.4.1.6
+        enum_values:
+          1: unknown
+          2: ok
+          3: inFaultCondition
+      - name: upsBasicOutputACwiringConfiguration
+        oid: 1.3.6.1.4.1.318.1.1.1.4.1.7
+        type: gauge
+        help: Indicates if neutral wire on output side of the UPS is used (load wired
+          line to neutral) - 1.3.6.1.4.1.318.1.1.1.4.1.7
+        enum_values:
+          1: unknown
+          2: noNeutralWiredonSystem
+          3: neutralUsedforSupplyingLoad
+      - name: upsAdvOutputVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.1
+        type: gauge
+        help: The output voltage of the UPS system in VAC. - 1.3.6.1.4.1.318.1.1.1.4.2.1
+      - name: upsAdvOutputFrequency
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.2
+        type: gauge
+        help: The current output frequency of the UPS system in Hz. - 1.3.6.1.4.1.318.1.1.1.4.2.2
+      - name: upsAdvOutputLoad
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.3
+        type: gauge
+        help: The current UPS load expressed in percent of rated capacity. - 1.3.6.1.4.1.318.1.1.1.4.2.3
+      - name: upsAdvOutputCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.4
+        type: gauge
+        help: The current in amperes drawn by the load on the UPS. - 1.3.6.1.4.1.318.1.1.1.4.2.4
+      - name: upsAdvOutputRedundancy
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.5
+        type: gauge
+        help: The number of power modules which can fail or be removed without causing
+          the UPS to generate a Minimum Redundancy Lost event. - 1.3.6.1.4.1.318.1.1.1.4.2.5
+      - name: upsAdvOutputKVACapacity
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.6
+        type: gauge
+        help: The maximum load that this UPS can support. - 1.3.6.1.4.1.318.1.1.1.4.2.6
+      - name: upsAdvOutputNominalFrequency
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.7
+        type: gauge
+        help: The nominal output frequency of the UPS system in Hz. - 1.3.6.1.4.1.318.1.1.1.4.2.7
+      - name: upsAdvOutputActivePower
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.8
+        type: gauge
+        help: The total output active power of the UPS system in W - 1.3.6.1.4.1.318.1.1.1.4.2.8
+      - name: upsAdvOutputApparentPower
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.9
+        type: gauge
+        help: The total output apparent power of all phases of the UPS system in VA. -
+          1.3.6.1.4.1.318.1.1.1.4.2.9
+      - name: upsAdvOutputStatisticsIndex
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.10.1.1
+        type: gauge
+        help: The output identifier. - 1.3.6.1.4.1.318.1.1.1.4.2.10.1.1
+        indexes:
+        - labelname: upsAdvOutputStatisticsIndex
+          type: gauge
+      - name: upsAdvOutputPeakCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.10.1.2
+        type: gauge
+        help: The output peak current in Amperes. - 1.3.6.1.4.1.318.1.1.1.4.2.10.1.2
+        indexes:
+        - labelname: upsAdvOutputStatisticsIndex
+          type: gauge
+      - name: upsAdvOutputCurrentTHD
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.10.1.3
+        type: gauge
+        help: The output current Total Harmonic Distortion in percent. - 1.3.6.1.4.1.318.1.1.1.4.2.10.1.3
+        indexes:
+        - labelname: upsAdvOutputStatisticsIndex
+          type: gauge
+      - name: upsAdvOutputCrestFactor
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.10.1.4
+        type: gauge
+        help: The output current crest factor expressed in tenths. - 1.3.6.1.4.1.318.1.1.1.4.2.10.1.4
+        indexes:
+        - labelname: upsAdvOutputStatisticsIndex
+          type: gauge
+      - name: upsAdvOutputNeutralCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.11
+        type: gauge
+        help: The neutral current in amperes. - 1.3.6.1.4.1.318.1.1.1.4.2.11
+      - name: upsAdvOutputEnergyUsage
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.12
+        type: gauge
+        help: The output energy usage of the UPS in kWh. - 1.3.6.1.4.1.318.1.1.1.4.2.12
+      - name: upsAdvOutputSourceSynchronization
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.13
+        type: gauge
+        help: Indicates the synchronization source for the inverter output frequency -
+          1.3.6.1.4.1.318.1.1.1.4.2.13
+      - name: upsAdvOutputInverterFrequency
+        oid: 1.3.6.1.4.1.318.1.1.1.4.2.14
+        type: gauge
+        help: Output frequency in Hz measured at the output of inverter. - 1.3.6.1.4.1.318.1.1.1.4.2.14
+      - name: upsHighPrecOutputVoltage
+        oid: 1.3.6.1.4.1.318.1.1.1.4.3.1
+        type: gauge
+        help: The output voltage of the UPS system in tenths of VAC. - 1.3.6.1.4.1.318.1.1.1.4.3.1
+      - name: upsHighPrecOutputFrequency
+        oid: 1.3.6.1.4.1.318.1.1.1.4.3.2
+        type: gauge
+        help: The current output frequency of the UPS system in tenths of Hz. - 1.3.6.1.4.1.318.1.1.1.4.3.2
+      - name: upsHighPrecOutputLoad
+        oid: 1.3.6.1.4.1.318.1.1.1.4.3.3
+        type: gauge
+        help: The current UPS load expressed in tenths of percent of rated capacity. -
+          1.3.6.1.4.1.318.1.1.1.4.3.3
+      - name: upsHighPrecOutputCurrent
+        oid: 1.3.6.1.4.1.318.1.1.1.4.3.4
+        type: gauge
+        help: The current in tenths of amperes drawn by the load on the UPS. - 1.3.6.1.4.1.318.1.1.1.4.3.4
+      - name: upsHighPrecOutputEfficiency
+        oid: 1.3.6.1.4.1.318.1.1.1.4.3.5
+        type: gauge
+        help: The positive values represent efficiency of the UPS in tenths of percent
+          - 1.3.6.1.4.1.318.1.1.1.4.3.5
+      - name: upsHighPrecOutputEnergyUsage
+        oid: 1.3.6.1.4.1.318.1.1.1.4.3.6
+        type: gauge
+        help: The output energy usage of the UPS in hundredths of kWh. - 1.3.6.1.4.1.318.1.1.1.4.3.6
+      - name: upsAdvTestDiagnosticSchedule
+        oid: 1.3.6.1.4.1.318.1.1.1.7.2.1
+        type: gauge
+        help: The UPS system's automatic battery test schedule. - 1.3.6.1.4.1.318.1.1.1.7.2.1
+        enum_values:
+          1: unknown
+          2: biweekly
+          3: weekly
+          4: atTurnOn
+          5: never
+          6: fourWeeks
+          7: twelveWeeks
+          8: biweeklySinceLastTest
+          9: weeklySinceLastTest
+          10: eightWeeks
+          11: twentysixWeeks
+          12: fiftytwoWeeks
+      - name: upsAdvTestDiagnostics
+        oid: 1.3.6.1.4.1.318.1.1.1.7.2.2
+        type: gauge
+        help: Setting this variable to testDiagnostics(2) causes the UPS to perform a
+          diagnostic self test - 1.3.6.1.4.1.318.1.1.1.7.2.2
+        enum_values:
+          1: noTestDiagnostics
+          2: testDiagnostics
+      - name: upsAdvTestDiagnosticsResults
+        oid: 1.3.6.1.4.1.318.1.1.1.7.2.3
+        type: gauge
+        help: The results of the last UPS diagnostics test performed. - 1.3.6.1.4.1.318.1.1.1.7.2.3
+        enum_values:
+          1: ok
+          2: failed
+          3: invalidTest
+          4: testInProgress
+      - name: upsAdvTestLastDiagnosticsDate
+        oid: 1.3.6.1.4.1.318.1.1.1.7.2.4
+        type: DisplayString
+        help: The date the last UPS diagnostics test was performed in mm/dd/yy format.
+          - 1.3.6.1.4.1.318.1.1.1.7.2.4
+      - name: upsAdvTestRuntimeCalibration
+        oid: 1.3.6.1.4.1.318.1.1.1.7.2.5
+        type: gauge
+        help: Setting this variable to performCalibration(2) causes the UPS to discharge
+          to calibrate the UPS - 1.3.6.1.4.1.318.1.1.1.7.2.5
+        enum_values:
+          1: noPerformCalibration
+          2: performCalibration
+          3: cancelCurrentCalibration
+      - name: upsAdvTestCalibrationResults
+        oid: 1.3.6.1.4.1.318.1.1.1.7.2.6
+        type: gauge
+        help: The results of the last runtime calibration - 1.3.6.1.4.1.318.1.1.1.7.2.6
+        enum_values:
+          1: ok
+          2: invalidCalibration
+          3: calibrationInProgress
+          4: refused
+          5: aborted
+          6: pending
+      - name: upsAdvTestCalibrationDate
+        oid: 1.3.6.1.4.1.318.1.1.1.7.2.7
+        type: DisplayString
+        help: The date the last UPS runtime calibration was performed in mm/dd/yy format.
+          - 1.3.6.1.4.1.318.1.1.1.7.2.7
+      - name: upsAdvTestDiagnosticTime
+        oid: 1.3.6.1.4.1.318.1.1.1.7.2.8
+        type: DisplayString
+        help: The time of the day to perform automatic battery test - 1.3.6.1.4.1.318.1.1.1.7.2.8
+      - name: upsAdvTestDiagnosticDay
+        oid: 1.3.6.1.4.1.318.1.1.1.7.2.9
+        type: gauge
+        help: The day of the week to perform automatic battery test. - 1.3.6.1.4.1.318.1.1.1.7.2.9
+        enum_values:
+          1: monday
+          2: tuesday
+          3: wednesday
+          4: thursday
+          5: friday
+          6: saturday
+          7: sunday
+      - name: upsAdvTestBatteryInterval
+        oid: 1.3.6.1.4.1.318.1.1.1.7.2.10
+        type: DisplayString
+        help: The UPS system's automatic battery test period. - 1.3.6.1.4.1.318.1.1.1.7.2.10
+      - name: upsCommStatus
+        oid: 1.3.6.1.4.1.318.1.1.1.8.1
+        type: gauge
+        help: The status of agent's communication with UPS. - 1.3.6.1.4.1.318.1.1.1.8.1
+        enum_values:
+          1: ok
+          2: noComm
+      - name: iemStatusProbeNumber
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.1
+        type: gauge
+        help: The index of the probe. - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.1
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+      - name: iemStatusProbeName
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.2
+        type: DisplayString
+        help: A descriptive name for the probe set by the user. - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.2
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+      - name: iemStatusProbeStatus
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.3
+        type: gauge
+        help: The connected status of the probe, either disconnected(1) or connected(2).
+          - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.3
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+        enum_values:
+          1: disconnected
+          2: connected
+      - name: iemStatusProbeCurrentTemp
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.4
+        type: gauge
+        help: The current temperature reading from the probe displayed in the units shown
+          in the 'iemStatusProbeTempUnits' OID (Celsius or Fahrenheit). - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.4
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+      - name: iemStatusProbeTempUnits
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.5
+        type: gauge
+        help: The temperature scale used to display the temperature thresholds of the
+          probe, Celsius(1) or Fahrenheit(2) - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.5
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+        enum_values:
+          1: celsius
+          2: fahrenheit
+      - name: iemStatusProbeCurrentHumid
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.6
+        type: gauge
+        help: The current humidity reading from the probe in percent relative humidity.
+          - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.6
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+      - name: iemStatusProbeHighTempViolation
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.7
+        type: gauge
+        help: The high temperature violation status of the probe temperature reading -
+          1.3.6.1.4.1.318.1.1.10.2.3.2.1.7
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+        enum_values:
+          1: noViolation
+          2: highTempViolation
+          3: disabled
+      - name: iemStatusProbeLowTempViolation
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.8
+        type: gauge
+        help: The high temperature violation status of the probe temperature reading -
+          1.3.6.1.4.1.318.1.1.10.2.3.2.1.8
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+        enum_values:
+          1: noViolation
+          2: lowTempViolation
+          3: disabled
+      - name: iemStatusProbeHighHumidViolation
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.9
+        type: gauge
+        help: The high humidity violation status of the probe humidity reading - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.9
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+        enum_values:
+          1: noViolation
+          2: highHumidViolation
+          3: disabled
+      - name: iemStatusProbeLowHumidViolation
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.10
+        type: gauge
+        help: The low humidity violation status of the probe humidity reading - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.10
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+        enum_values:
+          1: noViolation
+          2: lowHumidViolation
+          3: disabled
+      - name: iemStatusProbeMaxTempViolation
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.11
+        type: gauge
+        help: The max temperature violation status of the probe temperature reading -
+          1.3.6.1.4.1.318.1.1.10.2.3.2.1.11
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+        enum_values:
+          1: noViolation
+          2: maxTempViolation
+          3: disabled
+      - name: iemStatusProbeMinTempViolation
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.12
+        type: gauge
+        help: The minimum temperature violation status of the probe temperature reading
+          - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.12
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+        enum_values:
+          1: noViolation
+          2: minTempViolation
+          3: disabled
+      - name: iemStatusProbeMaxHumidViolation
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.13
+        type: gauge
+        help: The maximum humidity violation status of the probe humidity reading - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.13
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+        enum_values:
+          1: noViolation
+          2: maxHumidViolation
+          3: disabled
+      - name: iemStatusProbeMinHumidViolation
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.14
+        type: gauge
+        help: The minimum humidity violation status of the probe humidity reading - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.14
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+        enum_values:
+          1: noViolation
+          2: minHumidViolation
+          3: disabled
+      - name: iemStatusProbeLocation
+        oid: 1.3.6.1.4.1.318.1.1.10.2.3.2.1.15
+        type: DisplayString
+        help: A descriptive location for the probe set by the user. - 1.3.6.1.4.1.318.1.1.10.2.3.2.1.15
+        indexes:
+        - labelname: iemStatusProbeNumber
+          type: gauge
+      - name: rPDU2BankStatusIndex
+        oid: 1.3.6.1.4.1.318.1.1.26.8.3.1.1
+        type: gauge
+        help: The index to the Rack PDU bank status table entry - 1.3.6.1.4.1.318.1.1.26.8.3.1.1
+        indexes:
+        - labelname: rPDU2BankStatusIndex
+          type: gauge
+      - name: rPDU2BankStatusModule
+        oid: 1.3.6.1.4.1.318.1.1.26.8.3.1.2
+        type: gauge
+        help: The user-defined Rack PDU numeric ID - 1.3.6.1.4.1.318.1.1.26.8.3.1.2
+        indexes:
+        - labelname: rPDU2BankStatusIndex
+          type: gauge
+      - name: rPDU2BankStatusNumber
+        oid: 1.3.6.1.4.1.318.1.1.26.8.3.1.3
+        type: gauge
+        help: The numeric bank ID - 1.3.6.1.4.1.318.1.1.26.8.3.1.3
+        indexes:
+        - labelname: rPDU2BankStatusIndex
+          type: gauge
+      - name: rPDU2BankStatusLoadState
+        oid: 1.3.6.1.4.1.318.1.1.26.8.3.1.4
+        type: EnumAsStateSet
+        help: Indicates the present load status of the Rack PDU bank being queried - 1.3.6.1.4.1.318.1.1.26.8.3.1.4
+        indexes:
+        - labelname: rPDU2BankStatusIndex
+          type: gauge
+        enum_values:
+          1: lowLoad
+          2: normal
+          3: nearOverload
+          4: overload
+      - name: rPDU2BankStatusCurrent
+        oid: 1.3.6.1.4.1.318.1.1.26.8.3.1.5
+        type: gauge
+        help: Indicates the current draw, in tenths of Amps, of the load on the Rack PDU
+          bank being queried - 1.3.6.1.4.1.318.1.1.26.8.3.1.5
+        indexes:
+        - labelname: rPDU2BankStatusIndex
+          type: gauge
+      - name: rPDU2BankStatusPeakCurrent
+        oid: 1.3.6.1.4.1.318.1.1.26.8.3.1.6
+        type: gauge
+        help: The peak current of the Rack PDU bank load in tenths of Amps - 1.3.6.1.4.1.318.1.1.26.8.3.1.6
+        indexes:
+        - labelname: rPDU2BankStatusIndex
+          type: gauge
+      - name: rPDU2BankStatusPeakCurrentTimestamp
+        oid: 1.3.6.1.4.1.318.1.1.26.8.3.1.7
+        type: DisplayString
+        help: Indicates the date and time the bank peak current occurred - 1.3.6.1.4.1.318.1.1.26.8.3.1.7
+        indexes:
+        - labelname: rPDU2BankStatusIndex
+          type: gauge
+      - name: rPDU2BankStatusPeakCurrentStartTime
+        oid: 1.3.6.1.4.1.318.1.1.26.8.3.1.8
+        type: DisplayString
+        help: Indicates the date and time of the last bank peak current reset - 1.3.6.1.4.1.318.1.1.26.8.3.1.8
+        indexes:
+        - labelname: rPDU2BankStatusIndex
+          type: gauge
+      version: 1
+    cyberpower:
+      walk:
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.10
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.2
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.6
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.7
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.8
+      - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.9
+      - 1.3.6.1.4.1.3808.1.1.3.3.3.1.1.2
+      - 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.7
+      - 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.8
+      get:
+      - 1.3.6.1.4.1.3808.1.1.3.1.1.0
+      - 1.3.6.1.4.1.3808.1.1.3.1.2.0
+      - 1.3.6.1.4.1.3808.1.1.3.5.7.0
+      - 1.3.6.1.4.1.3808.1.1.3.5.8.0
+      - 1.3.6.1.4.1.3808.1.1.4.2.1.0
+      - 1.3.6.1.4.1.3808.1.1.4.2.6.0
+      - 1.3.6.1.4.1.3808.1.1.4.3.1.0
+      metrics:
+      - name: ePDUIdentName
+        oid: 1.3.6.1.4.1.3808.1.1.3.1.1
+        type: DisplayString
+        help: The name of the Rack PDU - 1.3.6.1.4.1.3808.1.1.3.1.1
+      - name: ePDUIdentHardwareRev
+        oid: 1.3.6.1.4.1.3808.1.1.3.1.2
+        type: DisplayString
+        help: The hardware revision of the Rack PDU - 1.3.6.1.4.1.3808.1.1.3.1.2
+      - name: ePDULoadStatusEnergy
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.10
+        type: gauge
+        help: Getting this OID will return the phase/bank apparent power measured in 0.1
+          kilowatt-hours. - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.10
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDULoadStatusLoad
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.2
+        type: gauge
+        help: Getting this OID will return the phase/bank load measured in tenths of Amps.
+          - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.2
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDULoadStatusVoltage
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.6
+        type: gauge
+        help: Getting this OID will return the phase/bank voltage measured in 0.1 volts.
+          - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.6
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDULoadStatusActivePower
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.7
+        type: gauge
+        help: Getting this OID will return the phase/bank active power measured in watts.
+          - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.7
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDULoadStatusApparentPower
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.8
+        type: gauge
+        help: Getting this OID will return the phase/bank apparent power measured in VA.
+          - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.8
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDULoadStatusPowerFactor
+        oid: 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.9
+        type: gauge
+        help: Getting this OID will return power factor of the output measured in hundredths
+          - 1.3.6.1.4.1.3808.1.1.3.2.3.1.1.9
+        indexes:
+        - labelname: ePDULoadStatusIndex
+          type: gauge
+      - name: ePDUOutletControlOutletName
+        oid: 1.3.6.1.4.1.3808.1.1.3.3.3.1.1.2
+        type: DisplayString
+        help: The name of the outlet - 1.3.6.1.4.1.3808.1.1.3.3.3.1.1.2
+        indexes:
+        - labelname: ePDUOutletControlIndex
+          type: gauge
+      - name: ePDUOutletStatusLoad
+        oid: 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.7
+        type: gauge
+        help: Getting this OID will return the measured Outlet load for an Outlet Monitored
+          Rack PDU in tenths of Amps. - 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.7
+        indexes:
+        - labelname: ePDUOutletStatusIndex
+          type: gauge
+      - name: ePDUOutletStatusActivePower
+        oid: 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.8
+        type: gauge
+        help: Getting this OID will return the measured Outlet load for an Outlet Monitored
+          Rack PDU in watts - 1.3.6.1.4.1.3808.1.1.3.3.5.1.1.8
+        indexes:
+        - labelname: ePDUOutletStatusIndex
+          type: gauge
+      - name: ePDUStatusInputVoltage
+        oid: 1.3.6.1.4.1.3808.1.1.3.5.7
+        type: gauge
+        help: The input voltage in 0.1 Volt. - 1.3.6.1.4.1.3808.1.1.3.5.7
+      - name: ePDUStatusInputFrequency
+        oid: 1.3.6.1.4.1.3808.1.1.3.5.8
+        type: gauge
+        help: The input frequency in 0.1 Hertz. - 1.3.6.1.4.1.3808.1.1.3.5.8
+      - name: envirTemperature
+        oid: 1.3.6.1.4.1.3808.1.1.4.2.1
+        type: gauge
+        help: The environment temperature expressed in 1/10 Fahrenheit - 1.3.6.1.4.1.3808.1.1.4.2.1
+      - name: envirTemperatureCelsius
+        oid: 1.3.6.1.4.1.3808.1.1.4.2.6
+        type: gauge
+        help: The environment temperature expressed in 1/10 Celsius - 1.3.6.1.4.1.3808.1.1.4.2.6
+      - name: envirHumidity
+        oid: 1.3.6.1.4.1.3808.1.1.4.3.1
+        type: gauge
+        help: The environment relative humidity expressed in persentage. - 1.3.6.1.4.1.3808.1.1.4.3.1
+      version: 1
