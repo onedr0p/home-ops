@@ -1,25 +1,24 @@
-
 ---
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: sonarr
+  name: lidarr
   namespace: default
   annotations:
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "false"
 spec:
-  releaseName: sonarr
+  releaseName: lidarr
   rollback:
     enable: false
   chart:
     repository: https://billimek.com/billimek-charts/
-    name: sonarr
-    version: 3.1.0
+    name: lidarr
+    version: 1.0.1
   values:
     image:
-      repository: linuxserver/sonarr
-      tag: 3.0.3.744-ls1
+      repository: linuxserver/lidarr
+      tag: 0.7.1.1665-ls1
     ingress:
       enabled: true
       annotations:
@@ -35,7 +34,7 @@ spec:
         size: 20Gi
       downloads:
         enabled: false
-      tv:
+      music:
         enabled: false
       extraExistingClaimMounts:
         - name: media
@@ -49,4 +48,4 @@ spec:
       limits:
         memory: 1000Mi
   valueFileSecrets:
-  - name: "sonarr-helm-values"
+  - name: "lidarr-helm-values"
