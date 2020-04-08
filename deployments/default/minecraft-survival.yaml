@@ -1,0 +1,53 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: minecraft-survival
+  namespace: default
+spec:
+  releaseName: minecraft-survival
+  rollback:
+    enable: false
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: minecraft
+    version: 1.2.2
+  values:
+    image: itzg/minecraft-server
+    imageTag: latest
+    minecraftServer:
+      eula: "TRUE"
+      version: "LATEST"
+      type: PAPER
+      paperDownloadUrl: https://papermc.io/api/v1/paper/1.15.2/latest/download
+      forceReDownload: true
+      jvmOpts: "-Xmx1024M -Xms1024M  -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs"
+      difficulty: normal
+      serviceType: LoadBalancer
+      gameMode: survival
+      ops: "83d9416e-216e-4ffb-81ae-d2bd455a398a"
+      motd: "onedr0p minecraft server (survival)"
+      loadBalancerIP: 192.168.42.165
+    persistence:
+      storageClass: "rook-ceph-block"
+      dataDir:
+        enabled: true
+        Size: 10Gi
+    resources:
+      requests:
+        memory: 1500Mi
+        cpu: 250m
+      limits:
+        memory: 4000Mi
+    livenessProbe:
+      initialDelaySeconds: 120
+      periodSeconds: 5
+      failureThreshold: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    readinessProbe:
+      initialDelaySeconds: 120
+      periodSeconds: 5
+      failureThreshold: 10
+      successThreshold: 1
+      timeoutSeconds: 1

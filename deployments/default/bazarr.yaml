@@ -1,25 +1,28 @@
-
 ---
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: sonarr
+  name: bazarr
   namespace: default
   annotations:
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "false"
 spec:
-  releaseName: sonarr
+  releaseName: bazarr
   rollback:
     enable: false
   chart:
     repository: https://billimek.com/billimek-charts/
-    name: sonarr
-    version: 3.1.0
+    name: bazarr
+    version: 1.0.0
   values:
     image:
-      repository: linuxserver/sonarr
-      tag: 3.0.3.744-ls1
+      repository: linuxserver/bazarr
+      tag: v0.8.4.2-ls72
+    # deploymentAnnotations:
+    #   stash.appscode.com/backup-blueprint: default-workload-blueprint
+    #   stash.appscode.com/target-paths: "/config"
+    #   stash.appscode.com/volume-mounts: "config:/config"
     ingress:
       enabled: true
       annotations:
@@ -32,10 +35,10 @@ spec:
         enabled: true
         storageClass: "rook-ceph-block"
         accessMode: ReadWriteOnce
-        size: 20Gi
-      downloads:
-        enabled: false
+        size: 5Gi
       tv:
+        enabled: false
+      movies:
         enabled: false
       extraExistingClaimMounts:
         - name: media
@@ -47,6 +50,6 @@ spec:
         memory: 350Mi
         cpu: 25m
       limits:
-        memory: 1000Mi
+        memory: 4000Mi
   valueFileSecrets:
-  - name: "sonarr-helm-values"
+  - name: "bazarr-helm-values"
