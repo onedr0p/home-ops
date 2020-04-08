@@ -1,13 +1,13 @@
 ---
 - name: Add user to sudoers
   copy:
-    content: "{{ ansible_ssh_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
-    dest: "/etc/sudoers.d/{{ ansible_ssh_user }}_nopasswd"
+    content: "{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
+    dest: "/etc/sudoers.d/{{ ansible_user }}_nopasswd"
     mode: 0440
 
 - name: Check if neofetch config directory exists
   stat:
-    path: "/home/{{ ansible_ssh_user }}/.config/neofetch"
+    path: "/home/{{ ansible_user }}/.config/neofetch"
   register: stat_result
 
 - name: Remove motd
@@ -16,37 +16,37 @@
 
 - name: Quite the login prompt
   file:
-    dest: "/home/{{ ansible_ssh_user }}/.hushlogin"
+    dest: "/home/{{ ansible_user }}/.hushlogin"
     state: touch
-    owner: "{{ ansible_ssh_user }}"
+    owner: "{{ ansible_user }}"
     mode: 0775
 
 - name: Create config directory
   file:
-    path: "/home/{{ ansible_ssh_user }}/.config"
+    path: "/home/{{ ansible_user }}/.config"
     state: directory
     recurse: true
-    owner: "{{ ansible_ssh_user }}"
+    owner: "{{ ansible_user }}"
     mode: 0775
 
 - name: Create neofetch directory
   file:
-    path: "/home/{{ ansible_ssh_user }}/.config/neofetch"
+    path: "/home/{{ ansible_user }}/.config/neofetch"
     state: directory
     recurse: true
-    owner: "{{ ansible_ssh_user }}"
+    owner: "{{ ansible_user }}"
     mode: 0775
 
 - name: Add custom neofetch config
   copy:
     src: neofetch.conf
-    dest: "/home/{{ ansible_ssh_user }}/.config/neofetch/config.conf"
-    owner: "{{ ansible_ssh_user }}"
+    dest: "/home/{{ ansible_user }}/.config/neofetch/config.conf"
+    owner: "{{ ansible_user }}"
     mode: 0775
 
 - name: Enable neofetch on login for Ubuntu
   copy:
     content: "neofetch --ascii_distro debian_small"
-    dest: "/home/{{ ansible_ssh_user }}/.bash_profile"
-    owner: "{{ ansible_ssh_user }}"
+    dest: "/home/{{ ansible_user }}/.bash_profile"
+    owner: "{{ ansible_user }}"
     mode: 0775
