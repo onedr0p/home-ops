@@ -21,3 +21,18 @@ ceph crash archive <id>
 # or, archive all crash reports
 ceph crash archive-all
 ```
+
+## Backup / Restore
+
+In the toolbox...
+
+```bash
+rbd list --pool replicapool
+
+mkdir /mnt/tmp
+rbd map -p replicapool csi-vol-*
+mount /dev/rbd0 /mnt/tmp
+# do stuff
+umount /mnt/tmp
+rbd unmap -p replicapool csi-vol-*
+```
