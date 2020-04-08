@@ -17,8 +17,6 @@ spec:
     # image:
     #   repository: docker.io/fluxcd/flux
     #   tag: 1.19.0
-    helmOperator:
-      create: false
     git:
       url: "git@github.com:onedr0p/k3s-gitops.git"
       branch: master
@@ -31,6 +29,11 @@ spec:
     syncGarbageCollection:
       enabled: true
       dry: false
+    # Fix for: Could not resolve hostname github.com
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "1"
     prometheus:
       enabled: true
       serviceMonitor:
