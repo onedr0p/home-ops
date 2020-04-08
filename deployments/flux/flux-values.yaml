@@ -1,0 +1,24 @@
+git:
+  url: "git@github.com:onedr0p/k3s-gitops.git"
+  branch: master
+  path: deployments
+registry:
+  rps: 1
+  burst: 1
+memcached:
+  enabled: true
+syncGarbageCollection:
+  enabled: true
+  dry: false
+# Fix for: Could not resolve hostname github.com
+dnsConfig:
+  options:
+    - name: ndots
+      value: "1"
+prometheus:
+  enabled: true
+  serviceMonitor:
+    create: false
+    interval: 30s
+    scrapeTimeout: 10s
+    namespace: flux
