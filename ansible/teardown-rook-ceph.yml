@@ -11,8 +11,14 @@
     - name: "Zap the drives"
       command: sgdisk --zap-all /dev/nvme0n1
 
-    - name: "Remove LVM partitions"
-      shell: ls /dev/mapper/ceph-* | xargs -I% -- dmsetup remove %
+    - name: Remove LVM partitions
+      shell: "{{ item }}"
+      ignore_errors: yes
+      with_items:
+        - ls /dev/mapper/ceph--* | xargs -I% -- fuser --kill %
+        - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup clear %
+        - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup remove -f %
+        - ls /dev/mapper/ceph--* | xargs -I% -- rm -rf %
 
     - name: "Wipe the block device"
       command: wipefs -af /dev/nvme0n1
