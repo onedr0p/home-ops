@@ -170,15 +170,6 @@ kubeseal --format=yaml --cert="${PUB_CERT}" \
   >> "${GENERATED_SECRETS}"
 echo "---" >> "${GENERATED_SECRETS}"
 
-# # # stash - restic - default namespace
-# # kubectl create secret generic restic-backup-credentials  \
-# #  --from-literal=RESTIC_PASSWORD="${RESTIC_PASSWORD}" \
-# #  --from-literal=AWS_ACCESS_KEY_ID="${MINIO_ACCESS_KEY}" \
-# #  --from-literal=AWS_SECRET_ACCESS_KEY="${MINIO_SECRET_KEY}" \
-# #  --namespace default --dry-run=client -o json \
-# #  | kubeseal --format=yaml --cert="${PUB_CERT}" \
-# #    > "${REPO_ROOT}"/deployments/kube-system/stash/restic-backup-credentials-default.yaml
-
 # Remove empty new-lines
 sed -i '/^[[:space:]]*$/d' "${GENERATED_SECRETS}"
 
@@ -190,21 +181,19 @@ else
     echo "** YAML looks good, ready to commit"
 fi
 
-#
-# Kubernetes Manifests w/ Secrets
-#
+# #
+# # Kubernetes Manifests w/ Secrets
+# #
 
-for file in "${REPO_ROOT}"/secrets/manifest-templates/*.txt
-do
-  # Get the path and basename of the txt file
-  # e.g. "deployments/default/pihole/pihole-helm-values"
-  secret_path="$(dirname "$file")/$(basename -s .txt "$file")"
-  # Get the filename without extension
-  # e.g. "pihole-helm-values"
-  secret_name=$(basename "${secret_path}")
-  echo "  Applying manifest ${secret_name} to cluster..."
-  # Apply this manifest to our cluster
-  if output=$(envsubst < "$file"); then
-    printf '%s' "$output" | kubectl apply -f -
-  fi
-done
+# for file in "${REPO_ROOT}"/secrets/manifest-templates/*.txt
+# do
+#   # Get the path and basename of the txt file
+#   secret_path="$(dirname "$file")/$(basename -s .txt "$file")"
+#   # Get the filename without extension
+#   secret_name=$(basename "${secret_path}")
+#   echo "  Applying manifest ${secret_name} to cluster..."
+#   # Apply this manifest to our cluster
+#   if output=$(envsubst < "$file"); then
+#     printf '%s' "$output" | kubectl apply -f -
+#   fi
+# done
