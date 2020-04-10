@@ -10,12 +10,14 @@
     name: rsyslog
     enabled: true
     state: restarted
+  when: syslog.enabled is defined and syslog.enabled == true
 
 - name: Enable rsyslog service and assure it is started
   systemd:
     name: rsyslog
     enabled: true
     state: started
+  when: syslog.enabled is defined and syslog.enabled == true
 
 - name: Add Timesyncd Configuration
   template:
