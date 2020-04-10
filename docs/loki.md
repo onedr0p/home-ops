@@ -2,7 +2,7 @@
 
 Enable syslog, do this on each host and replace `target` IP (and maybe `port`) with you syslog `loadBalancerIP` that is defined [here](../deployments/logging/loki/loki.yaml)
 
-Create file `/etc/rsyslog.d/51-loki.conf` with the following content:
+Create file `/etc/rsyslog.d/50-promtail.conf` with the following content:
 
 ```bash
 module(load="omprog")
