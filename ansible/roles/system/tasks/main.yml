@@ -3,21 +3,21 @@
   template:
     src: 50-promtail.conf.j2
     dest: /etc/rsyslog.d/50-promtail.conf
-  when: syslog.enabled is defined and syslog.enabled == true
+  when: remote_syslog.enabled is defined and remote_syslog.enabled == true
 
 - name: Restart rsyslog service
   systemd:
     name: rsyslog
     enabled: true
     state: restarted
-  when: syslog.enabled is defined and syslog.enabled == true
+  when: remote_syslog.enabled is defined and remote_syslog.enabled == true
 
 - name: Enable rsyslog service and assure it is started
   systemd:
     name: rsyslog
     enabled: true
     state: started
-  when: syslog.enabled is defined and syslog.enabled == true
+  when: remote_syslog.enabled is defined and remote_syslog.enabled == true
 
 - name: Add Timesyncd Configuration
   template:
