@@ -31,8 +31,8 @@ spec:
       app.kubernetes.io/instance: radarr-exporter
   endpoints:
   - port: monitoring
-    interval: 5m
-    scrapeTimeout: 1m
+    interval: 10m
+    scrapeTimeout: 2m
     path: /metrics
 ---
 kind: Deployment
@@ -65,11 +65,9 @@ spec:
     spec:
       containers:
       - name: radarr-exporter
-        image: onedr0p/radarr-exporter:v2.0.0
+        image: onedr0p/radarr-exporter:v2.1.0
         imagePullPolicy: IfNotPresent
         env:
-        - name: INTERVAL
-          value: "10m"
         - name: RADARR_HOSTNAME
           value: "http://radarr.default.svc.cluster.local:7878"
         - name: RADARR_APIKEY
