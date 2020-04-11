@@ -65,7 +65,7 @@ spec:
     spec:
       containers:
       - name: radarr-exporter
-        image: onedr0p/radarr-exporter:v2.0.0
+        image: onedr0p/radarr-exporter:v2.1.1
         imagePullPolicy: IfNotPresent
         env:
         - name: RADARR_HOSTNAME
@@ -80,19 +80,13 @@ spec:
           containerPort: 9707
         livenessProbe:
           httpGet:
-            path: /liveness
+            path: /healthz
             port: monitoring
           failureThreshold: 5
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /readiness
-            port: monitoring
-          failureThreshold: 5
-          periodSeconds: 10
-        startupProbe:
-          httpGet:
-            path: /metrics
+            path: /healthz
             port: monitoring
           failureThreshold: 5
           periodSeconds: 10
