@@ -14,7 +14,7 @@ spec:
     app.kubernetes.io/instance: sonarr-exporter
   ports:
   - name: monitoring
-    port: 9811
+    port: 9707
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -31,7 +31,8 @@ spec:
       app.kubernetes.io/instance: sonarr-exporter
   endpoints:
   - port: monitoring
-    interval: 5m
+    interval: 4m
+    scrapeTimeout: 90s
     path: /metrics
 ---
 kind: Deployment
@@ -45,7 +46,7 @@ metadata:
   annotations:
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "true"
-    fluxcd.io/tag.sonarr-exporter: semver:~v2
+    fluxcd.io/tag.sonarr-exporter: semver:~v0.1
 spec:
   replicas: 1
   revisionHistoryLimit: 3
@@ -64,12 +65,14 @@ spec:
     spec:
       containers:
       - name: sonarr-exporter
-        image: onedr0p/sonarr-exporter:v2.0.0
+        image: onedr0p/exportarr:v0.1.0
         imagePullPolicy: IfNotPresent
+        command: ["exportarr"]
+        args: ["sonarr"]
         env:
-        - name: INTERVAL
-          value: "10m"
-        - name: SONARR_HOSTNAME
+        - name: LISTEN_PORT
+          value: "9707"
+        - name: SONARR_URL
           value: "http://sonarr.default.svc.cluster.local:8989"
         - name: SONARR_APIKEY
           valueFrom:
@@ -78,16 +81,16 @@ spec:
               key: api-key
         ports:
         - name: monitoring
-          containerPort: 9811
+          containerPort: 9707
         livenessProbe:
           httpGet:
-            path: /liveness
+            path: /healthz
             port: monitoring
           failureThreshold: 5
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /readiness
+            path: /healthz
             port: monitoring
           failureThreshold: 5
           periodSeconds: 10
@@ -98,12 +101,3 @@ spec:
           limits:
             cpu: 500m
             memory: 256Mi
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: node-role.kubernetes.io/worker
-                operator: In
-                values:
-                - "true"

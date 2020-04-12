@@ -14,7 +14,7 @@ spec:
     app.kubernetes.io/instance: radarr-exporter
   ports:
   - name: monitoring
-    port: 9707
+    port: 9708
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -32,7 +32,7 @@ spec:
   endpoints:
   - port: monitoring
     interval: 4m
-    scrapeTimeout: 1m
+    scrapeTimeout: 90s
     path: /metrics
 ---
 kind: Deployment
@@ -45,8 +45,8 @@ metadata:
     app.kubernetes.io/instance: radarr-exporter
   annotations:
     fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "false"
-    fluxcd.io/tag.radarr-exporter: semver:~2.2
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.radarr-exporter: semver:~v0.1
 spec:
   replicas: 1
   revisionHistoryLimit: 3
@@ -65,9 +65,13 @@ spec:
     spec:
       containers:
       - name: radarr-exporter
-        image: onedr0p/radarr-exporter:v2.2.5
+        image: onedr0p/exportarr:v0.1.0
         imagePullPolicy: IfNotPresent
+        command: ["exportarr"]
+        args: ["radarr"]
         env:
+        - name: LISTEN_PORT
+          value: "9708"
         - name: RADARR_URL
           value: "http://radarr.default.svc.cluster.local:7878"
         - name: RADARR_APIKEY
@@ -77,7 +81,7 @@ spec:
               key: api-key
         ports:
         - name: monitoring
-          containerPort: 9707
+          containerPort: 9708
         livenessProbe:
           httpGet:
             path: /healthz
