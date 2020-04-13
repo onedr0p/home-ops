@@ -43,10 +43,6 @@ metadata:
   labels:
     app.kubernetes.io/name: radarr-exporter
     app.kubernetes.io/instance: radarr-exporter
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "true"
-    fluxcd.io/tag.radarr-exporter: semver:~v0.1
 spec:
   replicas: 1
   revisionHistoryLimit: 3
@@ -65,16 +61,16 @@ spec:
     spec:
       containers:
       - name: radarr-exporter
-        image: onedr0p/exportarr:v0.1.2
+        image: onedr0p/exportarr:v0.3.0
         imagePullPolicy: IfNotPresent
         command: ["exportarr"]
         args: ["radarr"]
         env:
-        - name: LISTEN_PORT
+        - name: PORT
           value: "9708"
-        - name: RADARR_URL
+        - name: URL
           value: "http://radarr.default.svc.cluster.local:7878"
-        - name: RADARR_APIKEY
+        - name: APIKEY
           valueFrom:
             secretKeyRef:
               name: radarr-exporter
