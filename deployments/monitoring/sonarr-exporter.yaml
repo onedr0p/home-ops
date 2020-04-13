@@ -43,10 +43,6 @@ metadata:
   labels:
     app.kubernetes.io/name: sonarr-exporter
     app.kubernetes.io/instance: sonarr-exporter
-  annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "true"
-    fluxcd.io/tag.sonarr-exporter: semver:~v0.1
 spec:
   replicas: 1
   revisionHistoryLimit: 3
@@ -65,21 +61,21 @@ spec:
     spec:
       containers:
       - name: sonarr-exporter
-        image: onedr0p/exportarr:v0.1.2
+        image: onedr0p/exportarr:v0.3.0
         imagePullPolicy: IfNotPresent
         command: ["exportarr"]
         args: ["sonarr"]
         env:
-        - name: LISTEN_PORT
+        - name: PORT
           value: "9707"
-        - name: SONARR_URL
+        - name: URL
           value: "http://sonarr.default.svc.cluster.local:8989"
-        - name: SONARR_APIKEY
+        - name: APIKEY
           valueFrom:
             secretKeyRef:
               name: sonarr-exporter
               key: api-key
-        - name: SONARR_ENABLE_EPISODE_QUALITY_METRICS
+        - name: ENABLE_EPISODE_QUALITY_METRICS
           value: "true"
         ports:
         - name: monitoring
