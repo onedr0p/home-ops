@@ -12,11 +12,29 @@ spec:
         spec:
           containers:
           - name: uptimerobot-heartbeat
-            image: onedr0p/healthcheck:v1.0.0
+            image: curlimages/curl:7.70.0
+            imagePullPolicy: IfNotPresent
             env:
               - name: HEALTHCHECK_URL
                 valueFrom:
                   secretKeyRef:
                     name: uptimerobot-heartbeat
                     key: url
+            command:
+              - "/bin/sh"
+              - "-ec"
+              - |
+                set -o nounset
+                set -o errexit
+                if [[ -z "${HEALTHCHECK_URL}" ]]; then
+                    echo "$(date -u) - Error - Missing HEALTHCHECK_URL environment variable"
+                    exit 1
+                fi
+                status_code=$(curl -I -s -o /dev/null -w '%{http_code}' ${HEALTHCHECK_URL})
+                if [[ ! "${status_code}" =~ ^(2[[:digit:]]{2})$ ]]; then
+                    echo "$(date -u) - ERROR - Heartbeat request failed, http code: ${status_code}"
+                    exit 1
+                fi
+                echo "$(date -u) - Success - Heartbeat request received and processed successfully"
+                exit 0
           restartPolicy: OnFailure
