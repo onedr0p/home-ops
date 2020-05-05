@@ -14,39 +14,14 @@ spec:
     name: prometheus-operator
     version: 8.13.7
   values:
-    server:
-      resources:
-        requests:
-          memory: 1000Mi
-          cpu: 25m
-        limits:
-          memory: 2000Mi
     prometheusOperator:
       createCustomResource: false
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: node-role.kubernetes.io/worker
-                operator: In
-                values:
-                - "true"
     alertmanager:
       ingress:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
       alertmanagerSpec:
-        affinity:
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-              - matchExpressions:
-                - key: node-role.kubernetes.io/worker
-                  operator: In
-                  values:
-                  - "true"
         storage:
           volumeClaimTemplate:
             spec:
@@ -173,15 +148,6 @@ spec:
         annotations:
           kubernetes.io/ingress.class: "nginx"
       prometheusSpec:
-        affinity:
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-              - matchExpressions:
-                - key: node-role.kubernetes.io/worker
-                  operator: In
-                  values:
-                  - "true"
         ruleSelector: {}
         ruleNamespaceSelector: {}
         ruleSelectorNilUsesHelmValues: false
@@ -191,7 +157,7 @@ spec:
         podMonitorSelector: {}
         podMonitorNamespaceSelector: {}
         podMonitorSelectorNilUsesHelmValues: false
-        retention: 30d
+        retention: 60d
         enableAdminAPI: true
         walCompression: true
         storageSpec:
