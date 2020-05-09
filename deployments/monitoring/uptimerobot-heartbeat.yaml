@@ -30,7 +30,7 @@ spec:
                   printf "%s - Error - Missing HEALTHCHECK_URL environment variable" "$(date -u)"
                   exit 1
                 fi
-                status_code=$(curl -I -s -o /dev/null -w '%{http_code}' "${HEALTHCHECK_URL}")
+                status_code=$(curl --connect-timeout 10 --max-time 30 -I -s -o /dev/null -w '%{http_code}' "${HEALTHCHECK_URL}")
                 if [ "${status_code}" != 200 ]; then
                   printf "%s - ERROR - Heartbeat request failed, http code: %s" "$(date -u)" "${status_code}"
                   exit 1
