@@ -54,8 +54,15 @@ spec:
         size: 10Gi
         accessModes:
         - ReadWriteOnce
+      extraContainers: |
+        - name: renderer
+          image: grafana/grafana-image-renderer:latest        
       env:
         GF_EXPLORE_ENABLED: true
+        GF_PANELS_DISABLE_SANITIZE_HTML: true
+        GF_RENDERING_SERVER_URL: http://localhost:8081/render
+        GF_RENDERING_CALLBACK_URL: http://localhost:3000/
+        GF_LOG_FILTERS: rendering:debug
       ingress:
         enabled: true
         annotations:
