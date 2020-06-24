@@ -46,7 +46,6 @@ All my Kubernetes master and worker nodes below are running bare metal Ubuntu 18
 |qbittorrent           |192.168.42.130|default    |
 |plex                  |192.168.42.140|default    |
 |loki-syslog           |192.168.42.155|logging    |
-|minecraft-survival    |192.168.42.165|default    |
 
 ---
 
