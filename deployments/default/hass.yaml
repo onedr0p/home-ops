@@ -1,0 +1,60 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: hass
+  namespace: default
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: semver:~0.
+spec:
+  releaseName: hass
+  rollback:
+    enable: true
+  chart:
+    repository: https://billimek.com/billimek-charts/
+    name: home-assistant
+    version: 1.0.0
+  values:
+    image:
+      repository: homeassistant/home-assistant
+      tag: 0.111.4
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: "rook-ceph-block"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+    service:
+      type: LoadBalancer
+      loadBalancerIP: 192.168.42.110
+    hostNetwork: true
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
+    vscode:
+      enabled: true
+      image:
+        repository: codercom/code-server
+        tag: 3.4.1
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+    resources:
+      limits:
+        memory: 2500Mi
+      requests:
+        cpu: 35m
+        memory: 2000Mi
+    monitoring:
+      enabled: false
+  valueFileSecrets:
+  - name: "hass-helm-values"
