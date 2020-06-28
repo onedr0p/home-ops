@@ -42,6 +42,7 @@ All my Kubernetes master and worker nodes below are running bare metal Ubuntu 18
 |Deployment            |IP Address    |Namespace  |
 |----------------------|--------------|-----------|
 |nginx-ingress         |192.168.42.100|kube-system|
+|home-assistant        |192.168.42.110|default    |
 |blocky                |192.168.42.115|default    |
 |qbittorrent           |192.168.42.130|default    |
 |plex                  |192.168.42.140|default    |
