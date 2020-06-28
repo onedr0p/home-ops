@@ -8,7 +8,7 @@
 k3sup install --ip "192.168.42.11" \
     --k3s-version "v1.17.7+k3s1" \
     --user "devin" \
-    --k3s-extra-args "--no-deploy servicelb --no-deploy traefik --no-deploy metrics-server --default-local-storage-path=/dev/shm --flannel-backend=host-gw"
+    --k3s-extra-args "--no-deploy servicelb --no-deploy traefik --no-deploy metrics-server --default-local-storage-path /dev/shm --flannel-backend host-gw"
 
 # k3s-worker-a
 k3sup join --ip "192.168.42.12" \
