@@ -1,0 +1,34 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: nfs-client-provisioner
+  namespace: kube-system
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: nfs-client-provisioner
+  rollback:
+    enable: true
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: nfs-client-provisioner
+    version: 1.2.8
+  values:
+    image:
+      repository: quay.io/external_storage/nfs-client-provisioner
+      tag: v3.1.0-k8s1.11
+    nfs:
+      server: 192.168.1.170
+      path: /Data/k8s
+      mountOptions:
+        - tcp
+        - intr
+        - hard
+        - noatime
+        - nodiratime
+        - rsize=32768
+        - wsize=32768
+    storageClass:
+      defaultClass: true
