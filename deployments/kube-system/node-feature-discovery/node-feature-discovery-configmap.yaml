@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nfd-worker-config
+  namespace: kube-system
+data:
+  nfd-worker.conf: |
+    sources:
+      usb:
+        deviceClassWhitelist:
+          - "02"
+          - "0e"
+          - "ef"
+          - "fe"
+          - "ff"
+        deviceLabelFields:
+          - "class"
+          - "vendor"
+          - "device"
+      custom:
+        - name: "zwave"
+          matchOn:
+            - usbId:
+                class: ["02"]
+                vendor: ["0658"]
+                device: ["0200"]
+        - name: "intel-gpu"
+          matchOn:
+            - pciId:
+                class: ["0300"]
+                vendor: ["8086"]
