@@ -15,7 +15,7 @@ spec:
         app: intel-gpu-plugin
     spec:
       nodeSelector:
-        homelab.gpu/type: intel
+        feature.node.kubernetes.io/custom-intel-gpu: "true"
       containers:
       - name: intel-gpu-plugin
         env:
@@ -23,10 +23,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: spec.nodeName
-        image: onedr0p/intel-gpu-plugin:master
+        image: billimek/intel-gpu-plugin:0.17.0
         imagePullPolicy: IfNotPresent
-        command: ["/usr/local/bin/intel_gpu_device_plugin"]
-        args: ["-shared-dev-num", "4"]
         securityContext:
           readOnlyRootFilesystem: true
         volumeMounts:
