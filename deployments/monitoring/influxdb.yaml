@@ -1,0 +1,46 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: influxdb
+  namespace: monitoring
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: influxdb
+  rollback:
+    enable: false
+  chart:
+    repository: https://helm.influxdata.com/
+    name: influxdb
+    version: 4.7.0
+  values:
+    image:
+      repository: "influxdb"
+      tag: "1.8.0"
+    service:
+      type: LoadBalancer
+    persistence:
+      enabled: true
+      size: 50Gi
+      storageClass: rook-ceph-block
+    resources:
+      requests:
+        memory: 2000Mi
+        cpu: 100m
+      limits:
+        memory: 4000Mi
+    livenessProbe:
+      timeoutSeconds: 10
+    readinessProbe:
+      timeoutSeconds: 10
+    startupProbe:
+      enabled: true
+      failureThreshold: 6
+      periodSeconds: 5
+    config:
+      opentsdb:
+        enabled: true
+    podAnnotations:
+      backup.velero.io/backup-volumes: influxdb-data
