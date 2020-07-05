@@ -11,7 +11,7 @@
 - sonarr.default.svc.cluster.local
 - radarr.default.svc.cluster.local
 - plex-kube-plex.default.svc.cluster.local
-
+- xteve.default.svc.cluster.local
 
 ## Debugging connectivity
 
