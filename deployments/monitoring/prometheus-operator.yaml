@@ -38,13 +38,6 @@ spec:
           sourceLabels:
           - __meta_kubernetes_pod_node_name
           targetLabel: kubernetes_node
-    kubelet:
-      serviceMonitor:
-        metricRelabelings:
-        - action: replace
-          sourceLabels:
-          - node
-          targetLabel: instance
     grafana:
       deploymentStrategy:
         type: Recreate
@@ -144,14 +137,17 @@ spec:
           url: https://grafana.net
     kubeEtcd:
       enabled: false
-    # Does not work right in k3s
     kubeControllerManager:
       enabled: false
-    # Does not work right in k3s
     kubeScheduler:
       enabled: false
-    kubeProxy:
-      enabled: false
+    kubelet:
+      serviceMonitor:
+        metricRelabelings:
+        - action: replace
+          sourceLabels:
+          - node
+          targetLabel: instance
     prometheus:
       ingress:
         enabled: true
