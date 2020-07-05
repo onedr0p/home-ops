@@ -1,0 +1,110 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: xteve
+  labels:
+    app.kubernetes.io/instance: xteve
+    app.kubernetes.io/name: xteve
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: xteve
+      app.kubernetes.io/name: xteve
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: xteve
+        app.kubernetes.io/name: xteve
+    spec:
+      containers:
+        - name: xteve
+          image: dmcallejo/xteve:latest
+          imagePullPolicy: Always
+          env:
+            - name: XTEVE_BRANCH
+              value: "master"
+            - name: XTEVE_DEBUG
+              value: "0"
+            - name: TZ
+              value: "America/New_York"
+          ports:
+            - name: http
+              containerPort: 34400
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /web
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 60
+            failureThreshold: 5
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /web
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 60
+            failureThreshold: 5
+            timeoutSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /web
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 60
+            failureThreshold: 30
+            periodSeconds: 10
+          volumeMounts:
+          - mountPath: /data
+            name: xteve-data
+          resources:
+            requests:
+              memory: 500Mi
+              cpu: 1000m
+            limits:
+              memory: 2000Mi
+              cpu: 10000m
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+      - name: xteve-data
+        persistentVolumeClaim:
+          claimName: xteve
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: xteve
+  labels:
+    app.kubernetes.io/name: xteve
+    app.kubernetes.io/instance: xteve
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "1Gi"
+  storageClassName: "nfs-client"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: xteve
+    app.kubernetes.io/name: xteve
+  name: xteve
+  namespace: default
+spec:
+  externalTrafficPolicy: Cluster
+  loadBalancerIP: 192.168.42.145
+  ports:
+  - name: http
+    port: 34400
+  selector:
+    app.kubernetes.io/instance: xteve
+    app.kubernetes.io/name: xteve
+  type: LoadBalancer
