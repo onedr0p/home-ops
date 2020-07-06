@@ -13,10 +13,11 @@ spec:
   rollback:
     enable: false
   chart:
-    git: https://github.com/munnerz/kube-plex
-    ref: master
-    path: charts/kube-plex
+    repository: https://billimek.com/billimek-charts/
+    name: plex
+    version: 1.3.2
   values:
+    fullnameOverride: plex-kube-plex
     image:
       repository: plexinc/pms-docker
       tag: 1.19.4.2935-79e214ead
@@ -34,9 +35,10 @@ spec:
       loadBalancerIP: 192.168.42.140
     persistence:
       config:
-        storageClass: "rook-ceph-block"
-        size: 240Gi
-        accessMode: ReadWriteOnce
+        claimName: "plex-kube-plex-config"
+        # storageClass: "rook-ceph-block"
+        # size: 240Gi
+        # accessMode: ReadWriteOnce
       transcode:
         enabled: true
         storageClass: "local-path"
