@@ -15,7 +15,7 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: plex
-    version: 1.4.0
+    version: 1.5.0
   values:
     fullnameOverride: plex-kube-plex
     image:
@@ -24,16 +24,21 @@ spec:
     hostNetwork: true
     podAnnotations:
       backup.velero.io/backup-volumes: config
-    # kubePlex:
-    #   enabled: false
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
     timezone: "America/New_York"
-    service:
+    serviceTCP:
       type: LoadBalancer
       loadBalancerIP: 192.168.42.140
+      annotations:
+        metallb.universe.tf/allow-shared-ip: plex-svc
+    serviceUDP:
+      type: LoadBalancer
+      loadBalancerIP: 192.168.42.140
+      annotations:
+        metallb.universe.tf/allow-shared-ip: plex-svc
     persistence:
       config:
         claimName: "plex-kube-plex-config"
@@ -53,7 +58,7 @@ spec:
         memory: 1500Mi
       limits:
         gpu.intel.com/i915: 1
-        memory: 20000Mi
+        memory: 15000Mi
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
