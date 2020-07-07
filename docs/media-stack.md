@@ -11,8 +11,9 @@
 - sonarr.default.svc.cluster.local
 - radarr.default.svc.cluster.local
 - plex-kube-plex.default.svc.cluster.local
-- xteve.default.svc.cluster.local
-
+- xteve.default.svc.cluster.local:34400
+- xteve.default.svc.cluster.local:34400/xmltv/xteve.xml
+- 
 ## Debugging connectivity
 
 ```bash
