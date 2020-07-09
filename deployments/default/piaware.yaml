@@ -2,7 +2,7 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: zwave2mqtt
+  name: piaware
   namespace: default
 spec:
   releaseName: zwave2mqtt
@@ -10,26 +10,23 @@ spec:
     enable: false
   chart:
     repository: https://billimek.com/billimek-charts/
-    name: zwave2mqtt
-    version: 2.1.0
+    name: piaware
+    version: 1.0.0
   values:
     image:
-      repository: robertslando/zwave2mqtt
-      tag: 3.4.0
+      repository: mikenye/piaware
+      tag: v3.8.1
     timezone: "America/New_York"
-    device: "/dev/serial/by-id/usb-0658_0200-if00"
+    device: "/dev/bus/usb/001/003"
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
             - matchExpressions:
-                - {key: "feature.node.kubernetes.io/custom-zwave", operator: In, values: ["true"]}
-    persistence:
-      enabled: true
-      storageClass: "nfs-client"
+                - {key: "feature.node.kubernetes.io/custom-flight-aware", operator: In, values: ["true"]}
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
   valueFileSecrets:
-  - name: "zwave2mqtt-helm-values"
+  - name: "piaware-helm-values"
