@@ -12,8 +12,12 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: prometheus-operator
-    version: 8.16.0
+    version: 8.16.1
   values:
+    defaultRules:
+      rules:
+        kubeApiserverAvailability: false
+        kubeApiserver: false
     prometheusOperator:
       createCustomResource: false
     alertmanager:
@@ -120,6 +124,9 @@ spec:
             datasource: Prometheus
           flux:
             url: https://raw.githubusercontent.com/fluxcd/flux/master/chart/flux/dashboards/flux-dashboard.json
+            datasource: Prometheus
+          helm-operator:
+            url: https://raw.githubusercontent.com/fluxcd/helm-operator/master/chart/helm-operator/dashboards/helm-operator-dashboard.json
             datasource: Prometheus
       additionalDataSources:
       - name: loki
