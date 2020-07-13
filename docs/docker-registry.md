@@ -8,7 +8,7 @@ I set up a local registry to cache docker images, as of now the registry is runn
 
 The helm release can be viewed [here](./deployments/default/docker-registry/docker-registry.yaml) also be sure your k3s cluster has been configured to use that registry.
 
-Each node *must* be configured with the file `/etc/rancher/k3s/registries.yaml` on the host:
+Each node **must** be configured with the file `/etc/rancher/k3s/registries.yaml` on the host, where the IP:PORT is the location of your registry.
 
 ```yaml
 mirrors:
