@@ -4,7 +4,7 @@
 
 I set up a local registry to cache docker images, as of now the registry is running in my cluster. This is useful for when applications update, it will first check the private docker registry and use that. If the image is not found it will pull it from dockerhub and store it in my private registry.
 
-# how?
+## how?
 
 The helm release can be viewed [here](./deployments/default/docker-registry/docker-registry.yaml) also be sure your k3s cluster has been configured to use that registry.
 
