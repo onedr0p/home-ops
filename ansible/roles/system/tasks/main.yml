@@ -55,6 +55,13 @@
     regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
     replace: '# \1'
 
+# Set up k3s to use private http registry, for pull-through caching
+- name: Set up k3s to use private http registry
+  template:
+    src: registries.yaml.j2
+    dest: /etc/rancher/k3s/registries.yaml
+  when: private_registry.enabled is defined and private_registry.enabled == true
+
 # Blacklist for PiAware: https://hub.docker.com/r/mikenye/piaware
 - name: Blacklist the rtl2832_sdr driver module
   kernel_blacklist:
