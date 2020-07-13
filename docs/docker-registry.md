@@ -20,4 +20,13 @@ mirrors:
       - "http://192.168.42.120:5000"
 ```
 
+After you set that, restart k3s server and all the agents.
+
+```bash
+# master node
+sudo systemctl restart k3s
+# worker nodes
+sudo systemctl restart k3s-agent
+```
+
 :rocket:
