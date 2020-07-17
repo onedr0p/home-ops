@@ -1,3 +1,14 @@
+query:
+  http:
+    ingress:
+      hosts: [thanos.$DOMAIN]
+      tls:
+      - hosts:
+        - thanos.$DOMAIN
+      annotations:
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: nginx-basic-auth
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
 objstore:
   type: S3
   config:
