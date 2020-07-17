@@ -47,9 +47,17 @@ kubectl label node k3s-worker-c node-role.kubernetes.io/worker=true && \
 kubectl label node k3s-worker-d node-role.kubernetes.io/worker=true && \
 kubectl label node k3s-worker-e node-role.kubernetes.io/worker=true
 
-# Label worker nodes that can accept Intel GPU
+# Label worker nodes that Plex should run on
 kubectl label node k3s-worker-d homelab.gpu/type=intel && \
 kubectl label node k3s-worker-e homelab.gpu/type=intel
+
+# Label nodes as upgrade-able with system-upgrade
+kubectl label node k3s-master k3s-upgrade=true && \
+kubectl label node k3s-worker-a k3s-upgrade=true && \
+kubectl label node k3s-worker-b k3s-upgrade=true && \
+kubectl label node k3s-worker-c k3s-upgrade=true && \
+kubectl label node k3s-worker-d k3s-upgrade=true && \
+kubectl label node k3s-worker-e k3s-upgrade=true
 ```
 
 ## Grab existing kubeconfig
