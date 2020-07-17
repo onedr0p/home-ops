@@ -19,6 +19,13 @@ spec:
       values:
       - "amd64"
   serviceAccountName: system-upgrade
+
+  # Specify which node taints should be tolerated by pods applying the upgrade.
+  # Anything specified here is appended to the default of:
+  # - {key: node.kubernetes.io/unschedulable, effect: NoSchedule, operator: Exists}
+  tolerations:
+    - {key: node-role.kubernetes.io/master, effect: NoSchedule, operator: Equal, value: "true"}
+
   upgrade:
     image: rancher/k3s-upgrade
   channel: https://update.k3s.io/v1-release/channels/stable
