@@ -1,4 +1,4 @@
-# My home Kubernetes cluster driven by [GitOps](https://www.weave.works/blog/what-is-gitops-really)
+# My home Kubernetes cluster driven by GitOps
 
 ![Kubernetes](https://i.imgur.com/p1RzXjQ.png)
 
@@ -7,18 +7,6 @@
 All workloads are in the [deployments](./deployments/) folder and sorted into folders by namespace. 
 
 This repository isn't really a tutorial on how to set up a Kubernetes cluster, checkout my [k3s-gitops-arm](https://github.com/onedr0p/k3s-gitops-arm) repo for more of a A-Z guide on how to setup a cluster on some Raspberry Pis.
-
----
-
-## Deployment namespaces
-
-- [cert-manager](./deployments/cert-manager)
-- [default](./deployments/default)
-- [flux](./deployments/flux)
-- [kube-system](./deployments/kube-system)
-- [logging](./deployments/logging)
-- [monitoring](./deployments/monitoring)
-- [rook-ceph](./deployments/rook-ceph)
 
 ---
 
@@ -35,22 +23,27 @@ All my Kubernetes master and worker nodes below are running bare metal Ubuntu 18
 
 ---
 
-## Services Addresses
+## Services addresses
 
-[MetalLB](https://metallb.universe.tf/) IP Address Range: `192.168.42.100-192.168.42.250`
+MetalLB IP Address Range:
 
-| Deployment          | Address                                                  |
-|---------------------|----------------------------------------------------------|
-| nginx-ingress       | 192.168.42.100                                           |
+```bash
+# 192.168.42.100-192.168.42.250
+```
+
+| Deployment          | Address                                                 |
+|---------------------|---------------------------------------------------------|
+| nginx-ingress       | 192.168.42.100                                          |
 | home-assistant      | [192.168.42.105:8123](http://192.168.42.105:8123)       |
 | zwave2mqtt          | [192.168.42.106:8091](http://192.168.42.106:8091)       |
-| vernemq             | 192.168.42.110                                           |
-| blocky              | 192.168.42.115                                           |
-| qbittorrent         | 192.168.42.130                                           |
-| jackett             | [192.168.42.131:9117](http://192.168.42.131:9117)        |
-| nzbhydra2           | [192.168.42.132:5076](http://192.168.42.132:5076)        |
+| node-red            | [192.168.42.107:1880](http://192.168.42.107:1880)       |
+| vernemq             | 192.168.42.110                                          |
+| blocky              | 192.168.42.115                                          |
+| qbittorrent         | 192.168.42.130                                          |
+| jackett             | [192.168.42.131:9117](http://192.168.42.131:9117)       |
+| nzbhydra2           | [192.168.42.132:5076](http://192.168.42.132:5076)       |
 | plex                | [192.168.42.140:32400](http://192.168.42.140:32400/web) |
-| loki-syslog         | 192.168.42.155                                           |
+| loki-syslog         | 192.168.42.155                                          |
 | rook-ceph-dashboard | [192.168.42.160:7000](http://192.168.42.160:7000)       |
 
 ---

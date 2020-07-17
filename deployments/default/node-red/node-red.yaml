@@ -20,14 +20,13 @@ spec:
     image:
       repository: nodered/node-red
       tag: 1.1.2-12-minimal
+    service:
+      type: LoadBalancer
+      loadBalancerIP: 192.168.42.107
     persistence:
       enabled: true
       storageClass: "nfs-client"
     flows: "flows.json"
-    ingress:
-      enabled: true
-      annotations:
-        kubernetes.io/ingress.class: "nginx"
     podAnnotations:
       backup.velero.io/backup-volumes: data
     timezone: "America/New_York"
@@ -38,5 +37,3 @@ spec:
         cpu: 25m
       limits:
         memory: 500Mi
-  valueFileSecrets:
-  - name: "node-red-helm-values"
