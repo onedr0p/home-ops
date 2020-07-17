@@ -9,15 +9,9 @@ spec:
   cordon: true
   nodeSelector:
     matchExpressions:
-    - key: node-role.kubernetes.io/master
-      operator: In
-      values:
-      - "true"
+    - {key: node-role.kubernetes.io/master, operator: In, values: ["true"]}
     - {key: k3os.io/mode, operator: DoesNotExist}
-    - key: kubernetes.io/arch
-      operator: In
-      values:
-      - "amd64"
+    - {key: kubernetes.io/arch, operator: In, values: ["amd64"]}
   serviceAccountName: system-upgrade
 
   # Specify which node taints should be tolerated by pods applying the upgrade.
@@ -28,7 +22,7 @@ spec:
 
   upgrade:
     image: rancher/k3s-upgrade
-  channel: https://update.k3s.io/v1-release/channels/stable
+  channel: https://update.k3s.io/v1-release/channels/v1.18
 ---
 # Agent plan
 apiVersion: upgrade.cattle.io/v1
@@ -40,7 +34,7 @@ metadata:
     k3s-upgrade: agent
 spec:
   concurrency: 1
-  channel: https://update.k3s.io/v1-release/channels/stable
+  channel: https://update.k3s.io/v1-release/channels/v1.18
   nodeSelector:
     matchExpressions:
       - {key: k3s-upgrade, operator: Exists}
@@ -53,10 +47,10 @@ spec:
   # Specify which node taints should be tolerated by pods applying the upgrade.
   # Anything specified here is appended to the default of:
   # - {key: node.kubernetes.io/unschedulable, effect: NoSchedule, operator: Exists}
-  tolerations:
-    - {key: kubernetes.io/arch, effect: NoSchedule, operator: Equal, value: amd64}
-    - {key: kubernetes.io/arch, effect: NoSchedule, operator: Equal, value: arm64}
-    - {key: kubernetes.io/arch, effect: NoSchedule, operator: Equal, value: arm}
+  # tolerations:
+  #   - {key: kubernetes.io/arch, effect: NoSchedule, operator: Equal, value: amd64}
+  #   - {key: kubernetes.io/arch, effect: NoSchedule, operator: Equal, value: arm64}
+  #   - {key: kubernetes.io/arch, effect: NoSchedule, operator: Equal, value: arm}
 
   prepare:
     # Since v0.5.0-m1 SUC will use the resolved version of the plan for the tag on the prepare container.
