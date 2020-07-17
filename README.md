@@ -35,20 +35,23 @@ All my Kubernetes master and worker nodes below are running bare metal Ubuntu 18
 
 ---
 
-## Load balancer IPs
+## Services Addresses
 
 [MetalLB](https://metallb.universe.tf/) IP Address Range: `192.168.42.100-192.168.42.250`
 
-|Deployment            |IP Address    |
-|----------------------|--------------|
-|nginx-ingress         |192.168.42.100|
-|home-assistant        |192.168.42.105|
-|vernemq               |192.168.42.110|
-|blocky                |192.168.42.115|
-|qbittorrent           |192.168.42.130|
-|plex                  |192.168.42.140|
-|loki-syslog           |192.168.42.155|
-|rook-ceph-dashboard   |192.168.42.160|
+| Deployment          | Address                                                  |
+|---------------------|----------------------------------------------------------|
+| nginx-ingress       | 192.168.42.100                                           |
+| home-assistant      | [192.168.42.105:8123](http://192.168.42.105:8123)       |
+| zwave2mqtt          | [192.168.42.106:8091](http://192.168.42.106:8091)       |
+| vernemq             | 192.168.42.110                                           |
+| blocky              | 192.168.42.115                                           |
+| qbittorrent         | 192.168.42.130                                           |
+| jackett             | [192.168.42.131:9117](http://192.168.42.131:9117)        |
+| nzbhydra2           | [192.168.42.132:5076](http://192.168.42.132:5076)        |
+| plex                | [192.168.42.140:32400](http://192.168.42.140:32400/web) |
+| loki-syslog         | 192.168.42.155                                           |
+| rook-ceph-dashboard | [192.168.42.160:7000](http://192.168.42.160:7000)       |
 
 ---
 
