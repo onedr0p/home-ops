@@ -1,0 +1,37 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: kube-system
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: external-dns
+  chart:
+    repository: https://charts.bitnami.com/bitnami
+    name: external-dns
+    version: 3.2.3
+  values:
+    image:
+      repository: bitnami/external-dns
+      tag: 0.7.2
+    provider: pdns
+    pdns:
+      apiPort: 443
+    createSecret: true
+    crd:
+      create: true
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+    resources:
+      requests:
+        memory: 350Mi
+        cpu: 25m
+      limits:
+        memory: 500Mi
+  valueFileSecrets:
+    - name: "external-dns-helm-values"
