@@ -38,8 +38,6 @@ fi
 # Path to Public Cert
 PUB_CERT="${REPO_ROOT}/secrets/pub-cert.pem"
 
-
-
 # Path to generated secrets file
 GENERATED_SECRETS="${CLUSTER_ROOT}/zz_generated_secrets.yaml"
 
@@ -191,20 +189,3 @@ if ! yq validate "${GENERATED_SECRETS}" > /dev/null 2>&1; then
 else
     echo "** YAML looks good, ready to commit"
 fi
-
-#
-# Kubernetes Manifests w/ Secrets
-#
-
-# for file in "${REPO_ROOT}"/secrets/manifest-templates/*.txt
-# do
-#   # Get the path and basename of the txt file
-#   secret_path="$(dirname "$file")/$(basename -s .txt "$file")"
-#   # Get the filename without extension
-#   secret_name=$(basename "${secret_path}")
-#   echo "  Applying manifest ${secret_name} to cluster..."
-#   # Apply this manifest to our cluster
-#   if output=$(envsubst < "$file"); then
-#     printf '%s' "$output" | kubectl apply -f -
-#   fi
-# done
