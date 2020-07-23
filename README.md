@@ -42,6 +42,7 @@ MetalLB IP Address Range:
 | qbittorrent                    | 192.168.42.130                                          |
 | plex                           | [192.168.42.140:32400](http://192.168.42.140:32400/web) |
 | loki-syslog                    | 192.168.42.155                                          |
+| powerdns                       | 192.168.42.180                                          |
 
 ---
 
