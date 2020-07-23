@@ -1,8 +1,14 @@
 config:
+  upstream:
+    externalResolvers:
+      - https://dns1.nextdns.io/$NEXTDNS_ID
+      - https://dns2.nextdns.io/$NEXTDNS_ID
+      - tcp-tls:$NEXTDNS_ID.dns1.nextdns.io:853
+      - tcp-tls:$NEXTDNS_ID.dns2.nextdns.io:853
+  customDNS:
+    mapping:
+      unifi-controller.$DOMAIN: 192.168.1.2
   conditional:
     mapping:
       $DOMAIN: udp:192.168.42.180
       local: udp:192.168.42.180
-  customDNS:
-    mapping:
-      unifi-controller.$DOMAIN: 192.168.1.2
