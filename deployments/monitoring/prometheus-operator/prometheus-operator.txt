@@ -1,9 +1,10 @@
 alertmanager:
   ingress:
-    hosts: [alert-manager.$DOMAIN]
+    hosts: 
+    - "alert-manager.${DOMAIN}"
     tls:
     - hosts:
-      - alert-manager.$DOMAIN
+      - "alert-manager.${DOMAIN}"
   config:
     global:
       resolve_timeout: 5m
@@ -26,16 +27,18 @@ alertmanager:
             priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
 prometheus:
   ingress:
-    hosts: [prometheus.$DOMAIN]
+    hosts: 
+    - "prometheus.${DOMAIN}"
     tls:
     - hosts:
-      - prometheus.$DOMAIN
+      - "prometheus.${DOMAIN}"
 grafana:
   ingress:
-    hosts: [grafana.$DOMAIN]
+    hosts: 
+    - "grafana.${DOMAIN}"
     tls:
     - hosts:
-      - grafana.$DOMAIN
+      - "grafana.${DOMAIN}"
   adminPassword: "$GRAFANA_PASSWORD"
   grafana.ini:
     server:
