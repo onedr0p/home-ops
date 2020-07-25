@@ -5,9 +5,8 @@ ingress:
   - hosts:
     - "radarr.${DOMAIN}"
   annotations:
-    nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: nginx-basic-auth
-    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+    nginx.ingress.kubernetes.io/auth-url: "https://auth.${DOMAIN}/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://auth.${DOMAIN}/oauth2/start"
 exportarr:
   enabled: true
   image:
@@ -15,7 +14,7 @@ exportarr:
     tag: v0.3.0
     pullPolicy: IfNotPresent
   port: 9708
-  url: http://radarr.default.svc.cluster.local:7878
-  apikey: $RADARR_APIKEY
+  url: "http://radarr.default.svc.cluster.local:7878"
+  apikey: "${RADARR_APIKEY}"
   serviceMonitor:
     enabled: true
