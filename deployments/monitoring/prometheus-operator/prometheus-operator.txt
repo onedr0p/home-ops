@@ -43,6 +43,20 @@ grafana:
   grafana.ini:
     server:
       root_url: https://grafana.${DOMAIN}
+    auth.basic:
+      disable_login_form: true
+    auth.generic_oauth:
+      enabled: true
+      allow_sign_up: true
+      team_ids:
+      allowed_organizations:
+      name: Auth0
+      client_id: $AUTH0_GRAFANA_CLIENT_ID
+      client_secret: $AUTH0_GRAFANA_CLIENT_SECRET
+      scopes: openid profile email
+      auth_url: https://${AUTH0_DOMAIN}.us.auth0.com/authorize
+      token_url: https://${AUTH0_DOMAIN}.us.auth0.com/oauth/token
+      api_url: https://${AUTH0_DOMAIN}.us.auth0.com/userinfo
     smtp:
       enabled: true
       host: smtp.gmail.com:587
