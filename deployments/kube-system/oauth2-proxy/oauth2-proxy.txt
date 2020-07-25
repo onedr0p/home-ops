@@ -1,0 +1,18 @@
+ingress:
+  hosts: 
+  - "auth.${DOMAIN}"
+  tls:
+  - hosts:
+    - "auth.${DOMAIN}"
+config:
+  clientID: "${AUTH0_CLIENT_ID}"
+  clientSecret: "${AUTH0_CLIENT_SECRET}"
+  cookieSecret: "${OAUTH2_PROXY_COOKIE_SECRET}"
+extraArgs:
+  provider: oidc
+  oidc-issuer-url: "https://${AUTH0_DOMAIN}.us.auth0.com/"
+  skip-provider-button:
+  pass-authorization-header:
+  email-domain: "*"
+  cookie-domain: ".${DOMAIN}"
+  whitelist-domain: ".${DOMAIN}"
