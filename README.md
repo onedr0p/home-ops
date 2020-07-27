@@ -6,8 +6,6 @@
 
 All workloads are in the [deployments](./deployments/) folder and sorted into folders by namespace. 
 
-This repository isn't really a tutorial on how to set up a Kubernetes cluster, checkout my [k3s-gitops-arm](https://github.com/onedr0p/k3s-gitops-arm) repo for more of a A-Z guide on how to setup a cluster on some Raspberry Pis.
-
 ---
 
 ## Hardware configuration
@@ -43,32 +41,6 @@ MetalLB IP Address Range:
 | plex                           | [192.168.42.140:32400](http://192.168.42.140:32400/web) |
 | loki-syslog                    | 192.168.42.155                                          |
 | powerdns                       | 192.168.42.180                                          |
-
----
-
-## Applications
-
-Below is a high level overview of some applications that are running in my cluster.
-
-### Blocky
-
-Alternative to Pihole for ad-blocking on your local network. This can be scaled horizontally which makes it a perfect fit in my cluster.
-
-### Sonarr/Radarr/Lidarr
-
-These applications will automatically search and manage content for TV (Sonarr), Movies (Radarr) and Music (Lidarr). Once the content has been searched and added, they will check which files are missing. Depending on configurations, they will then search BitTorrent or Usenet sites for the requested files. After that these applications will then send the information over to NZBGet or qBittorrent. Each time a new episode or film is available, it is automatically searched and downloaded.
-
-### qBittorrent/NZBGet
-
-These applications download content from Bittorrent (qBittorrent) and Usenet (NZBGet) indexers.
-
-### Jackett/NZBHydra2/Bazarr
-
-These applications work alongside Sonarr, Radarr and Lidarr to manage search Bittorrent (Jackett)and Usenet (NZBHydra2) indexers. Bazarr searches popular subtitle websites for media with missing subtitles.
-
-### Plex/Tautulli/Ombi
-
-Plex is media server that allows you to stream your media, it also organizes it to include metadata such as trailers, ratings and reviews and more. For monitoring and tracking what is going on in Plex, there's Tautulli and for giving your family and friends a nice interface for requesting new content checkout Ombi.
 
 ---
 
