@@ -6,7 +6,8 @@ metadata:
   namespace: monitoring
   annotations:
     fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "false"
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.grafana: semver:~7
 spec:
   releaseName: prometheus-operator
   chart:
@@ -43,6 +44,9 @@ spec:
           - __meta_kubernetes_pod_node_name
           targetLabel: kubernetes_node
     grafana:
+      image:
+        repository: grafana/grafana
+        tag: 7.1.1    
       deploymentStrategy:
         type: Recreate
       persistence:
