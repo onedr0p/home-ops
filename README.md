@@ -44,6 +44,11 @@ MetalLB IP Address Range:
 
 ---
 
-## Credits
+## Similar repositories
 
-Huge shout out to [billimek/k8s-gitops](https://github.com/billimek/k8s-gitops) and [carpenike/k8s-gitops](https://github.com/carpenike/k8s-gitops) who continue to be a great resource of information.
+- [billimek/k8s-gitops](https://github.com/billimek/k8s-gitops)
+- [carpenike/k8s-gitops](https://github.com/carpenike/k8s-gitops)
+- [dcplaya/k8s-gitops](https://github.com/dcplaya/k8s-gitops)
+- [rust84/k8s-gitops](https://github.com/rust84/k8s-gitops)
+- [blackjid/homelab-gitops](https://github.com/blackjid/homelab-gitops)
+- [nlopez/k8s_home](https://github.com/nlopez/k8s_home)
