@@ -4,30 +4,27 @@
 
 [![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60&style=flat-square)](https://discord.gg/hk58BZV)
 
-All workloads are in the [deployments](./deployments/) folder and sorted into folders by namespace. 
+All my workloads are in the [deployments](./deployments/) directory and sorted by namespace.
 
 ---
 
 ## Hardware configuration
 
-All my Kubernetes master and worker nodes below are running bare metal Ubuntu 18.04.3.
+_All my Kubernetes master and worker nodes below are running bare metal Ubuntu 19.04_
 
-|Device         |Count  |OS Disk Size|Data Disk Size|Ram    |Purpose                              |
-|---------------|-------|------------|--------------|-------|-------------------------------------|
-|Odroid H2      |1      |256GB NVMe  |N/A           |16GB   |k8s Master                           |
-|Intel NUC8i5BEH|3      |120GB SSD   |1TB NVMe      |32GB   |k8s Workers                          |
-|Intel NUC8i7BEH|2      |750GB SSD   |1TB NVMe      |64GB   |k8s Workers                          |
-|Qnap NAS       |1      |N/A         |8x12TB WD Reds|16GB   |NAS for media and shared file storage|
+|Device             |Count  |OS Disk Size|Data Disk Size|Ram    |Purpose                              |
+|-------------------|-------|------------|--------------|-------|-------------------------------------|
+|Odroid H2          |1      |256GB NVMe  |N/A           |16GB   |k8s Master                           |
+|Intel NUC8i5BEH    |3      |120GB SSD   |1TB NVMe      |32GB   |k8s Workers                          |
+|Intel NUC8i7BEH    |2      |750GB SSD   |1TB NVMe      |64GB   |k8s Workers                          |
+|Qnap NAS           |1      |N/A         |8x12TB RAID6  |16GB   |Media and shared file storage        |
+|Synology NAS       |1      |N/A         |8x12TB RAID6  |4GB    |Media and shared file storage        |
 
 ---
 
 ## Services addresses
 
-MetalLB IP Address Range:
-
-```bash
-# 192.168.42.100-192.168.42.250
-```
+_MetalLB IP Range 192.168.42.100-192.168.42.250_
 
 | Deployment                     | Address                                                 |
 |--------------------------------|---------------------------------------------------------|
