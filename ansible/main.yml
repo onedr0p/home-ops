@@ -20,6 +20,8 @@
       register: apt_upgrade
       retries: 5
       until: apt_upgrade is success
+      tags:
+        - upgrade_system
 
     - name: Upgrade all packages to the latest version
       apt:
@@ -31,6 +33,8 @@
       register: apt_update
       retries: 5
       until: apt_update is success
+      tags:
+        - upgrade_packages
 
     - name: Install Common Packages
       apt:
@@ -72,6 +76,8 @@
       register: apt_install_common
       retries: 5
       until: apt_install_common is success
+      tags:
+        - install_packages
 
     - name: Clean up apt
       apt:
@@ -79,19 +85,31 @@
         # Need the force_apt_get until
         # https://github.com/ansible/ansible/issues/56832
         force_apt_get: true
+      tags:
+        - upgrade_system
+        - upgrade_packages
+        - install_packages
 
   tasks:
     - include_role:
         name: system
+      tags:
+        - system
 
     - include_role:
         name: unattended_upgrades
+      tags:
+        - unattended_upgrades
 
     - include_role:
         name: user
+      tags:
+        - user
 
     - include_role:
         name: networking
+      tags:
+        - networking
 
     - name: Rebooting hosts
       reboot:
