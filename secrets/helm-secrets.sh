@@ -179,6 +179,15 @@ kubeseal --format=yaml --cert="${PUB_CERT}" \
   >> "${GENERATED_SECRETS}"
 echo "---" >> "${GENERATED_SECRETS}"
 
+# Fluxcloud
+# kubectl create secret generic fluxcloud \
+#   --from-literal=webhook_url="https://api.pushover.net/1/messages.json?token=${PUSHOVER_USER_TOKEN}&user=${PUSHOVER_FLUXCLOUD_API_TOKEN}&message='Deployment Updated'" \
+#   --namespace flux --dry-run=client -o json \
+#   | \
+# kubeseal --format=yaml --cert="${PUB_CERT}" \
+#   >> "${GENERATED_SECRETS}"
+# echo "---" >> "${GENERATED_SECRETS}"
+
 # Remove empty new-lines
 sed -i '/^[[:space:]]*$/d' "${GENERATED_SECRETS}"
 
