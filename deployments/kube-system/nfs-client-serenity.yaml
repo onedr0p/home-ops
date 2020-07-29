@@ -1,0 +1,35 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: nfs-client-serenity
+  namespace: kube-system
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: nfs-client-serenity
+  rollback:
+    enable: false
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: nfs-client-provisioner
+    version: 1.2.8
+  values:
+    image:
+      repository: quay.io/external_storage/nfs-client-provisioner
+      tag: v3.1.0-k8s1.11
+    nfs:
+      server: 192.168.1.40
+      path: /volume1/Data/k8s-pvc
+      mountOptions:
+        - tcp
+        - intr
+        - hard
+        - noatime
+        - nodiratime
+        - rsize=1048576
+        - wsize=1048576
+    storageClass:
+      name: nfs-client-serenity
+      defaultClass: false
