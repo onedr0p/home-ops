@@ -50,11 +50,11 @@ spec:
       deploymentStrategy:
         type: Recreate
       persistence:
-        enabled: true
-        storageClassName: "rook-ceph-block"
-        size: 10Gi
-        accessModes:
-        - ReadWriteOnce
+        enabled: false
+        # storageClassName: "rook-ceph-block"
+        # size: 10Gi
+        # accessModes:
+        # - ReadWriteOnce
       extraContainers: |
         - name: renderer
           image: grafana/grafana-image-renderer:latest        
@@ -185,16 +185,16 @@ spec:
         podMonitorSelector: {}
         podMonitorNamespaceSelector: {}
         podMonitorSelectorNilUsesHelmValues: false
-        retention: 60d
+        retention: 7d
         enableAdminAPI: true
         walCompression: true
-        storageSpec:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: rook-ceph-block
-              resources:
-                requests:
-                  storage: 100Gi
+        # storageSpec:
+        #   volumeClaimTemplate:
+        #     spec:
+        #       storageClassName: rook-ceph-block
+        #       resources:
+        #         requests:
+        #           storage: 100Gi
         additionalScrapeConfigs:
         - job_name: 'node-exporter'
           static_configs:
