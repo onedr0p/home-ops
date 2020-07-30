@@ -1,0 +1,40 @@
+---
+- hosts: k3s_worker
+  become: true
+  gather_facts: true
+  vars:
+    lvm_groups:
+      - vgname: longhorn-vg
+        disks:
+          - /dev/nvme0n1
+        # opts: i3
+        create: true
+        lvnames:
+          - lvname: lv0
+            size: 100%FREE
+            create: true
+            filesystem: ext4
+            mount: true
+            mntp: /var/lib/longhorn
+    manage_lvm: true
+
+  tasks:
+    - name: "Create Longhorn LVM Directory"
+      file:
+        path: /var/lib/longhorn
+        state: directory
+
+    - name: Include lvm
+      include_role:
+        name: mrlesmithjr.manage-lvm
+
+    # - name: Upgrade all packages to the latest version
+    #   apt:
+    #     name: "*"
+    #     state: latest
+    #     # Need the force_apt_get until
+    #     # https://github.com/ansible/ansible/issues/56832
+    #     force_apt_get: true
+    #   register: apt_update
+    #   retries: 5
+    #   until: apt_update is success
