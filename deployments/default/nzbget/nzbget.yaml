@@ -15,7 +15,7 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: nzbget
-    version: 3.2.0
+    version: 3.3.0
   values:
     image:
       repository: linuxserver/nzbget
@@ -30,14 +30,16 @@ spec:
     persistence:
       config:
         enabled: true
-        storageClass: "rook-ceph-block"
+        storageClass: "longhorn"
         accessMode: ReadWriteOnce
-        size: 2Gi
+        size: 1Gi
       downloads:
         enabled: false
       extraMounts:
-      - name: media
-        claimName: nfs-media-pvc
+      - name: media-rocinante
+        claimName: nfs-media-rocinante-pvc
+      - name: media-serenity
+        claimName: nfs-media-serenity-pvc
     resources:
       requests:
         memory: 300Mi
