@@ -1,0 +1,76 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: wyzesense2mqtt
+  labels:
+    app.kubernetes.io/instance: wyzesense2mqtt
+    app.kubernetes.io/name: wyzesense2mqtt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: wyzesense2mqtt
+      app.kubernetes.io/name: wyzesense2mqtt
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: wyzesense2mqtt
+        app.kubernetes.io/name: wyzesense2mqtt
+    spec:
+      containers:
+        - name: wyzesense2mqtt
+          image: raetha/wyzesense2mqtt:1.1
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true          
+          env:
+            - name: TZ
+              value: "America/New_York"
+          volumeMounts:
+          - mountPath: /dev/hidraw0
+            name: usb
+          - mountPath: /wyzesense2mqtt/config
+            name: config
+          - mountPath: /wyzesense2mqtt/logs
+            name: config
+            subPath: logs
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 500m
+            limits:
+              memory: 500Mi
+              cpu: 1000m
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: wyzesense2mqtt
+      - name: usb
+        hostPath:
+          path: /dev/hidraw0
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: feature.node.kubernetes.io/custom-wyze-sense
+                operator: In
+                values:
+                - "true"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: wyzesense2mqtt
+  labels:
+    app.kubernetes.io/name: wyzesense2mqtt
+    app.kubernetes.io/instance: wyzesense2mqtt
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "1Gi"
+  storageClassName: "longhorn"
