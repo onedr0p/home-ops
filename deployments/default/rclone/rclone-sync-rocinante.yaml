@@ -1,0 +1,59 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  namespace: default
+  name: rclone-sync-rocinante
+spec:
+  schedule: "0 1 1-31/2 * *"
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: rclone-sync-rocinante
+            image: rclone/rclone:1.52
+            imagePullPolicy: IfNotPresent
+            command: 
+              - "rclone"
+              - "--config"
+              - "/data/rclone.conf"
+              - "--dry-run"
+              - "sync"
+              - "--progress"
+              - "--ignore-errors"
+              - "--transfers"
+              - "8"
+              - "--checkers"
+              - "8"
+              - "--bwlimit"
+              - "40M"
+              - "--exclude"
+              - "'.@__thumb/**'"
+              - "--exclude"
+              - "'.Trashes/**'"
+              - "--exclude"
+              - "'.DS_Store'"
+              - "--max-duration"
+              - "6h"
+              - "/media-rocinante/Library/"
+              - "gdrive-rocinante-crypt:/"
+            volumeMounts:
+              - mountPath: /data
+                name: rclone
+                subPath: rclone
+                readOnly: false
+              - mountPath: /media-rocinante
+                name: media-rocinante
+          restartPolicy: OnFailure
+          volumes:
+          # Location of rclone.conf
+          - name: rclone
+            persistentVolumeClaim:
+              claimName: nfs-data-rocinante-pvc
+          # Location of media to sync
+          - name: media-rocinante
+            persistentVolumeClaim:
+              claimName: nfs-media-rocinante-pvc
