@@ -25,6 +25,13 @@ alertmanager:
           - user_key: "$PUSHOVER_USER_TOKEN"
             token: "$PUSHOVER_ALERT_MANAGER_API_TOKEN"
             priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
+    inhibit_rules:
+    - source_match:
+        severity: 'critical'
+      target_match:
+        severity: 'warning'
+      # Apply inhibition if the alertname is the same.
+      equal: ['alertname', 'namespace']
 prometheus:
   ingress:
     hosts: 
