@@ -179,6 +179,17 @@ kubeseal --format=yaml --cert="${PUB_CERT}" \
   >> "${GENERATED_SECRETS}"
 echo "---" >> "${GENERATED_SECRETS}"
 
+# longhorn backup secret
+kubectl create secret generic longhorn-backup-secret \
+  --from-literal=AWS_ACCESS_KEY_ID="${MINIO_ACCESS_KEY}" \
+  --from-literal=AWS_SECRET_ACCESS_KEY="${MINIO_SECRET_KEY}" \
+  --from-literal=AWS_ENDPOINTS="http://192.168.1.39:9000" \
+  --namespace longhorn-system --dry-run=client -o json \
+  | \
+kubeseal --format=yaml --cert="${PUB_CERT}" \
+  >> "${GENERATED_SECRETS}"
+echo "---" >> "${GENERATED_SECRETS}"
+
 # Fluxcloud
 # kubectl create secret generic fluxcloud \
 #   --from-literal=webhook_url="https://api.pushover.net/1/messages.json?token=${PUSHOVER_USER_TOKEN}&user=${PUSHOVER_FLUXCLOUD_API_TOKEN}&message='Deployment Updated'" \
