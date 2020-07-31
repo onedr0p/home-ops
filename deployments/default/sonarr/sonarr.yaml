@@ -14,7 +14,7 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: sonarr
-    version: 3.2.0
+    version: 4.1.1
   values:
     image:
       repository: linuxserver/sonarr
@@ -29,17 +29,19 @@ spec:
     persistence:
       config:
         enabled: true
-        storageClass: "rook-ceph-block"
+        storageClass: "longhorn"
         accessMode: ReadWriteOnce
-        size: 20Gi
-      downloads:
-        enabled: false
-      tv:
+        size: 25Gi
+      media:
         enabled: false
       extraExistingClaimMounts:
-        - name: media
-          existingClaim: nfs-media-pvc
-          mountPath: /media
+        - name: media-rocinante
+          existingClaim: nfs-media-rocinante-pvc
+          mountPath: /media-rocinante
+          readOnly: false
+        - name: media-serenity
+          existingClaim: nfs-media-serenity-pvc
+          mountPath: /media-serenity
           readOnly: false
     resources:
       requests:
