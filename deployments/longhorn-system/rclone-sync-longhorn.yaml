@@ -2,10 +2,10 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  namespace: default
-  name: rclone-sync-serenity
+  namespace: longhorn-system
+  name: rclone-sync-longhorn
 spec:
-  schedule: "0 2 2-30/2 * *"
+  schedule: "*/30 20 * * *"
   failedJobsHistoryLimit: 1
   successfulJobsHistoryLimit: 1
   jobTemplate:
@@ -29,31 +29,19 @@ spec:
               - "--checkers"
               - "8"
               - "--bwlimit"
-              - "40M"
-              - "--exclude"
-              - "'.@__thumb/**'"
-              - "--exclude"
-              - "'.Trashes/**'"
-              - "--exclude"
-              - "'.DS_Store'"
+              - "20M"
               - "--max-duration"
-              - "6h"
-              - "/media-serenity/Library/"
-              - "gdrive-serenity-crypt:/"
+              - "5h"
+              - "minio:longhorn"
+              - "gdrive-longhorn-crypt:/"
             volumeMounts:
               - mountPath: /data
                 name: rclone
                 subPath: rclone
                 readOnly: false
-              - mountPath: /media-serenity
-                name: media-serenity
           restartPolicy: OnFailure
           volumes:
           # Location of rclone.conf
           - name: rclone
             persistentVolumeClaim:
               claimName: nfs-data-rocinante-pvc
-          # Location of media to sync
-          - name: media-serenity
-            persistentVolumeClaim:
-              claimName: nfs-media-serenity-pvc
