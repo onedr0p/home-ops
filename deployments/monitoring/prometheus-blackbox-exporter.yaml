@@ -1,0 +1,71 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: prometheus-blackbox-exporter
+  namespace: monitoring
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: prometheus-blackbox-exporter
+  rollback:
+    enable: false
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: prometheus-blackbox-exporter
+    version: 4.2.0
+  values:
+    config:
+      modules:
+        http_2xx:
+          prober: http
+          timeout: 30s
+          http:
+            valid_http_versions: ["HTTP/1.1", "HTTP/2"]
+            no_follow_redirects: true
+            preferred_ip_protocol: "ip4"
+    serviceMonitor:
+      enabled: true
+      defaults:
+        labels:
+          release: prometheus
+        interval: 30s
+        scrapeTimeout: 30s
+      targets:
+        - url: https://google.com
+          name: google.com
+    prometheusRule:
+      enabled: true
+      additionalLabels:
+        app: prometheus-operator
+        release: prometheus
+      rules:
+        - alert: UrlDown
+          annotations:
+            message: The status code of {{"{{ $labels.target }}"}} is 4xx or 5xx, or some other failure occurred such as a timeout (60 seconds) for the last 5 minutes.
+          expr: probe_http_status_code >= 400 or probe_http_status_code == 0
+          for: 2m
+          labels:
+            severity: critical
+        - alert: SSLCertExpiry
+          annotations:
+            message: The SSL certificate for {{"{{ $labels.target }}"}} is going to expire in less than 2 weeks.
+          expr: probe_ssl_earliest_cert_expiry - time() < 1209600
+          for: 1m
+          labels:
+            severity: warning
+        - alert: SSLCertExpiry
+          annotations:
+            message: The SSL certificate for {{"{{ $labels.target }}"}} is going to expire in less than 7 days.
+          expr: probe_ssl_earliest_cert_expiry - time() < 604800
+          for: 1m
+          labels:
+            severity: critical
+        - alert: SlowResponseTime
+          annotations:
+            message: The response time for {{"{{ $labels.target }}"}} has been greater than 30 seconds for 5 minutes.
+          expr: probe_duration_seconds > 30
+          for: 5m
+          labels:
+            severity: warning
