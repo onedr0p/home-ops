@@ -1,0 +1,56 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: gitea
+  namespace: default
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: gitea
+  rollback:
+    enable: false
+  chart:
+    repository: https://novumrgi.github.io/helm/
+    name: gitea
+    version: 1.0.0
+  values:
+    image:
+      repository: gitea/gitea
+      tag: 1.12.2
+      pullPolicy: IfNotPresent
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: "longhorn"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+    config:
+      appName: "Devin's wonderful Gitea"
+      adminUser: "devin"
+    respository:
+      defaultPrivate: true
+    server:
+      http: 
+        externalPort: 443
+      ssh:
+        externalPort: 1337
+    database:
+      builtIn:
+        postgresql:
+          enabled: true
+    admin:
+      disableRegularOrgCreation: true
+    security:
+      minPasswordLength: 12
+    service:
+      disableRegistration: true
+      requireSigninView: true
+    postgresql:
+      persistence:
+        storageClass: "longhorn"
+  valueFileSecrets:
+  - name: "gitea-helm-values"
