@@ -1,0 +1,82 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: rclone-web
+  labels:
+    app.kubernetes.io/instance: rclone-web
+    app.kubernetes.io/name: rclone-web
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: rclone-web
+      app.kubernetes.io/name: rclone-web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: rclone-web
+        app.kubernetes.io/name: rclone-web
+    spec:
+      containers:
+        - name: rclone-web
+          image: rclone/rclone:1.52.2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: "America/New_York"
+          command:
+            - "rclone"
+            - "rcd" 
+            - "--rc-web-gui"
+            - "--rc-user"
+            - "admin"
+            - "--rc-pass"
+            - "pass"
+            - "--rc-enable-metrics"
+            - "--rc-serve"
+            - "--rc-addr"
+            - ":5573"
+          ports:
+            - name: http
+              containerPort: 5573
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data
+              name: rclone
+              subPath: rclone
+              readOnly: false
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 2000m
+            limits:
+              memory: 1000Mi
+              cpu: 4000m
+      volumes:
+      # Location of rclone.conf
+      - name: rclone
+        persistentVolumeClaim:
+          claimName: nfs-data-rocinante-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rclone-web
+  namespace: default
+  labels:
+    app.kubernetes.io/name: rclone-web
+    app.kubernetes.io/instance: rclone-web
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: rclone-web
+    app.kubernetes.io/instance: rclone-web
+  ports:
+  - name: http
+    port: 5573
+    protocol: TCP
+    targetPort: http
