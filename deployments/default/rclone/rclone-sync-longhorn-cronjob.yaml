@@ -1,12 +1,15 @@
 ---
+#
+# Cronjob to back up my longhorn backups to the cloud
+#
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   namespace: default
   name: rclone-sync-longhorn
 spec:
-  # Sync to the cloud, once a week, every sunday at starting at 6PM
-  schedule: "0 18 * * 0"
+  # Run once a day, every day, starting at 6PM
+  schedule: "0 18 * * *"
   failedJobsHistoryLimit: 1
   successfulJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
@@ -31,11 +34,11 @@ spec:
               - "--fast-list"
               - "--b2-hard-delete"
               - "--transfers"
-              - "20"
+              - "24"
               - "--checkers"
-              - "8"
+              - "24"
               - "--bwlimit"
-              - "20M"
+              - "50M"
               - "minio:longhorn"
               - "b2-longhorn-crypt:/"
             volumeMounts:
