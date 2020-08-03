@@ -10,6 +10,7 @@ spec:
   failedJobsHistoryLimit: 1
   successfulJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
+  suspend: true  
   jobTemplate:
     spec:
       template:
@@ -27,7 +28,9 @@ spec:
               - "/data/rclone.conf"
               - "--dry-run"
               - "sync"
-              - "--progress"
+              - "--stats"
+              - "30s"
+              - "--stats-one-line-date"
               - "--ignore-errors"
               - "--fast-list"
               - "--transfers"
