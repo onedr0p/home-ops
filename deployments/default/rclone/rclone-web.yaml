@@ -7,6 +7,9 @@ metadata:
   labels:
     app.kubernetes.io/instance: rclone-web
     app.kubernetes.io/name: rclone-web
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.rclone: semver:~1.5
 spec:
   replicas: 1
   strategy:
@@ -22,7 +25,7 @@ spec:
         app.kubernetes.io/name: rclone-web
     spec:
       containers:
-        - name: rclone-web
+        - name: rclone
           image: rclone/rclone:1.52.2
           imagePullPolicy: IfNotPresent
           env:

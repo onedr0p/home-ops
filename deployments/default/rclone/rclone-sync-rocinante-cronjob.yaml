@@ -7,6 +7,9 @@ kind: CronJob
 metadata:
   namespace: default
   name: rclone-sync-rocinante
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.rclone: semver:~1.5
 spec:
   # Run every odd number day, at 1AM to 7AM
   schedule: "0 1 1-31/2 * *"
@@ -21,7 +24,7 @@ spec:
           activeDeadlineSeconds: 21600
           restartPolicy: Never
           containers:
-          - name: rclone-sync-rocinante
+          - name: rclone
             image: rclone/rclone:1.52.2
             imagePullPolicy: IfNotPresent
             env:
@@ -32,7 +35,6 @@ spec:
               - "-v"
               - "--config"
               - "/data/rclone.conf"
-              - "--dry-run"
               - "sync"
               - "--ignore-errors"
               - "--fast-list"
