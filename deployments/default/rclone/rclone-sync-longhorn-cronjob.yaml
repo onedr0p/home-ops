@@ -7,6 +7,9 @@ kind: CronJob
 metadata:
   namespace: default
   name: rclone-sync-longhorn
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.rclone: semver:~1.5
 spec:
   # Run once a day, every day, starting at 6PM
   schedule: "0 18 * * *"
@@ -18,7 +21,7 @@ spec:
       template:
         spec:
           containers:
-          - name: rclone-sync-serenity
+          - name: rclone
             image: rclone/rclone:1.52.2
             imagePullPolicy: IfNotPresent
             env:
@@ -38,7 +41,7 @@ spec:
               - "--checkers"
               - "24"
               - "--bwlimit"
-              - "50M"
+              - "25M"
               - "minio:longhorn"
               - "b2-longhorn-crypt:/"
             volumeMounts:
