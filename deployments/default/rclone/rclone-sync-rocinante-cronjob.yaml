@@ -1,12 +1,15 @@
 ---
+#
+# Cronjob to back up my NAS media files to the cloud
+#
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   namespace: default
   name: rclone-sync-rocinante
 spec:
-  # Run every odd number day at 11:30PM to 5:00AM
-  schedule: "0 23 1-31/2 * *"
+  # Run every odd number day, at 1AM to 7AM
+  schedule: "0 1 1-31/2 * *"
   failedJobsHistoryLimit: 1
   successfulJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
@@ -14,8 +17,8 @@ spec:
     spec:
       template:
         spec:
-          # Do not run the job more than 5 hours (see max-duration below)
-          activeDeadlineSeconds: 18000
+          # Do not run the job more than 6 hours (see max-duration below)
+          activeDeadlineSeconds: 21600
           restartPolicy: Never
           containers:
           - name: rclone-sync-rocinante
@@ -26,23 +29,24 @@ spec:
                 value: "America/New_York"
             command: 
               - "rclone"
+              - "-v"
               - "--config"
               - "/data/rclone.conf"
               - "--dry-run"
               - "sync"
-              - "--progress"
               - "--ignore-errors"
               - "--fast-list"
               - "--transfers"
-              - "8"
+              - "10"
               - "--checkers"
-              - "8"
+              - "10"
               - "--bwlimit"
-              - "40M"
+              - "75M"
               - "--drive-chunk-size"
               - "32M"
               - "--drive-use-trash"
               - "false"
+              - "--drive-stop-on-upload-limit"
               - "--exclude"
               - "'.@__thumb/**'"
               - "--exclude"
@@ -50,7 +54,7 @@ spec:
               - "--exclude"
               - "'.DS_Store'"
               - "--max-duration"
-              - "5h"
+              - "6h"
               - "/media-rocinante/Library/"
               - "gdrive-rocinante-crypt:/"
             volumeMounts:
