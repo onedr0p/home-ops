@@ -7,8 +7,6 @@ metadata:
 spec:
   # Run every even number day at 11:30PM to 5:00AM
   schedule: "0 23 2-30/2 * *"
-  # Do not run the job more than 5 hours (see max-duration below)
-  activeDeadlineSeconds: 18000
   failedJobsHistoryLimit: 1
   successfulJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
@@ -16,6 +14,9 @@ spec:
     spec:
       template:
         spec:
+          # Do not run the job more than 5 hours (see max-duration below)
+          activeDeadlineSeconds: 18000
+          restartPolicy: Never
           containers:
           - name: rclone-sync-serenity
             image: rclone/rclone:1.52.2
@@ -61,7 +62,6 @@ spec:
                 readOnly: false
               - mountPath: /media-serenity
                 name: media-serenity
-          restartPolicy: Never
           volumes:
           # Location of rclone.conf
           - name: rclone
