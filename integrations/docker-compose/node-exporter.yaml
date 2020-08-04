@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  nodeexporter:
+    image: prom/node-exporter:v1.0.1
+    pid: host
+    network_mode: host
+    cap_add:
+      - SYS_TIME
+      - SYS_NICE
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro,rslave
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc|mnt/ext)($$|/)'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9100/metrics"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
