@@ -1,0 +1,21 @@
+# 
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: snmp-exporter-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: snmp-exporter.rules
+    rules:
+    - alert: SnmpExporterDown
+      annotations:
+        message: SNMP Exporter has disappeared from Prometheus target discovery.
+      expr: absent(up{job="snmp-exporter", namespace="monitoring"} == 1)
+      for: 15m
+      labels:
+        severity: critical    
