@@ -1,0 +1,21 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: apcups-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: apcups.rules
+    rules:
+    - alert: UPSOnBattery
+      annotations:
+        description: Power outage detected
+        summary: UPS {{$labels.instance}} is running on batteries
+      expr: upsBasicBatteryTimeOnBattery > 0
+      for: 1m
+      labels:
+        severity: critical
