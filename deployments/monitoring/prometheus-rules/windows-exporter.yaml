@@ -16,7 +16,7 @@ spec:
       expr: windows_exporter_collector_success == 0
       for: 5m
       labels:
-        severity: critical
+        severity: warning
       annotations:
         summary: "Windows Server collector Error (instance {{ $labels.instance }})"
         description: "Collector {{ $labels.collector }} was not successful\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
@@ -24,7 +24,7 @@ spec:
       expr: windows_service_status{status="ok"} != 1
       for: 5m
       labels:
-        severity: critical
+        severity: warning
       annotations:
         summary: "Windows Server service Status (instance {{ $labels.instance }})"
         description: "Windows Service state is not OK\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
@@ -45,10 +45,10 @@ spec:
         summary: "Windows Server memory Usage (instance {{ $labels.instance }})"
         description: "Memory usage is more than 90%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: WindowsServerDiskSpaceUsage
-      expr: 100.0 - 100 * ((windows_logical_disk_free_bytes{} / 1024 / 1024 ) / (windows_logical_disk_size_bytes{} / 1024 / 1024)) > 80
+      expr: 100.0 - 100 * ((windows_logical_disk_free_bytes{} / 1024 / 1024 ) / (windows_logical_disk_size_bytes{} / 1024 / 1024)) > 90
       for: 5m
       labels:
-        severity: critical
+        severity: warning
       annotations:
         summary: "Windows Server disk Space Usage (instance {{ $labels.instance }})"
-        description: "Disk usage is more than 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+        description: "Disk usage is more than 90%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
