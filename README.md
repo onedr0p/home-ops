@@ -2,7 +2,7 @@
 
 ![Kubernetes](https://i.imgur.com/p1RzXjQ.png)
 
-[![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60&style=flat-square)](https://discord.gg/hk58BZV)
+[![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60&style=flat-square)](https://discord.gg/DNCynrJ)
 
 All my workloads are in the [deployments](./deployments/) directory and sorted by namespace.
 
