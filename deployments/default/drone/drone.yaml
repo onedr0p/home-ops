@@ -1,0 +1,34 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: drone
+  namespace: default
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: gitea
+  rollback:
+    enable: false
+  chart:
+    repository: https://charts.drone.io
+    name: drone
+    version: 0.1.6
+  values:
+    image:
+      repository: drone/drone
+      tag: 1.8.1
+      pullPolicy: IfNotPresent
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "80"
+    persistentVolume:
+      enabled: true
+      storageClass: "longhorn"
+  valueFileSecrets:
+  - name: "drone-helm-values"      
