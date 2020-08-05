@@ -1,0 +1,32 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: drone-runner
+  namespace: default
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: drone-runner
+  rollback:
+    enable: false
+  chart:
+    repository: https://charts.drone.io
+    name: drone-runner-kube
+    version: 0.1.3
+  values:
+    image:
+      repository: drone/drone-runner-kube
+      tag: 1.0.0-beta.4
+      pullPolicy: IfNotPresent
+    env:
+      DRONE_RPC_HOST: drone
+      DRONE_RPC_PROTO: http
+      DRONE_NAMESPACE_DEFAULT: default
+    # ingress:
+    #   enabled: true
+    #   annotations:
+    #     kubernetes.io/ingress.class: "internal"
+  valueFileSecrets:
+  - name: "drone-runner-helm-values"      
