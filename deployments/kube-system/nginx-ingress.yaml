@@ -14,7 +14,7 @@ spec:
   chart:
     repository: https://kubernetes.github.io/ingress-nginx
     name: ingress-nginx
-    version: 2.11.1
+    version: 2.11.2
   values:
     controller:
       replicaCount: 2
@@ -43,34 +43,14 @@ spec:
           namespace: kube-system
           namespaceSelector:
             any: true
-        prometheusRule:
-          enabled: true
-          namespace: kube-system
-          rules: 
-            - alert: TooMany500s
-              expr: 100 * ( sum( nginx_ingress_controller_requests{status=~"5.+"} ) / sum(nginx_ingress_controller_requests) ) > 5
-              for: 1m
-              labels:
-                severity: critical
-              annotations:
-                description: Too many 5XXs
-                summary: More than 5% of the all requests did return 5XX, this require your attention
-            - alert: TooMany400s
-              expr: 100 * ( sum( nginx_ingress_controller_requests{status=~"4.+"} ) / sum(nginx_ingress_controller_requests) ) > 5
-              for: 1m
-              labels:
-                severity: critical
-              annotations:
-                description: Too many 4XXs
-                summary: More than 5% of the all requests did return 4XX, this require your attention
       extraArgs:
         default-ssl-certificate: "kube-system/acme-crt-secret"
       resources:
         requests:
-          memory: 500Mi
+          memory: 250Mi
           cpu: 25m
         limits:
-          memory: 600Mi
+          memory: 1000Mi
     defaultBackend:
       enabled: true
       image:
@@ -78,7 +58,7 @@ spec:
         tag: v1.0.1
       resources:
         requests:
-          memory: 250Mi
+          memory: 50Mi
           cpu: 25m
         limits:
-          memory: 350Mi
+          memory: 250Mi
