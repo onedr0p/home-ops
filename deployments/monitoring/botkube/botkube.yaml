@@ -1,0 +1,202 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: botkube
+  namespace: monitoring
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: botkube
+  rollback:
+    enable: false
+  chart:
+    repository: https://infracloudio.github.io/charts
+    name: botkube
+    version: v0.10.0
+  values:
+    image:
+      # Needed for Discord support until merge
+      # https://github.com/infracloudio/botkube/pull/268
+      repository: quay.io/unixfox/botkube
+      tag: latest
+    serviceMonitor:
+      enabled: true
+    config:
+      settings:
+        clustername: k3s
+      resources:
+        - name: pod                 # Name of the resources e.g pod, deployment, ingress, etc. (Resource name must be in singular form)
+          namespaces:
+            include:  
+              - all
+            ignore:                 # List of namespaces to be ignored (omitempty), used only with include: all
+              - longhorn-system     # example : include [all], ignore [x,y,z] 
+          events:                   # List of lifecycle events you want to receive, e.g create, update, delete, error OR all
+            - create
+            - delete
+        - name: service
+          namespaces:
+            include:  
+              - all
+            ignore:
+              - 
+          events:
+            - create
+            - delete
+            - error
+        - name: deployment
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - update
+            - delete
+            - error
+        - name: statefulset
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - update
+            - delete
+            - error
+        - name: ingress
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - delete
+            - error
+        - name: node
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - delete
+            - error
+        - name: namespace
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - delete
+            - error
+        - name: persistentvolume
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - delete
+            - error
+        - name: persistentvolumeclaim
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - delete
+            - error
+        - name: secret
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - delete
+            - error
+        - name: configmap
+          namespaces:
+            include:  
+              - all
+            ignore:
+              - rook-ceph
+          events:
+            - delete
+            - error
+        - name: daemonset
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - delete
+            - error
+        - name: job
+          namespaces:
+            include:  
+              - all
+            ignore:
+              - longhorn-system
+          events:
+            - create
+            - update
+            - delete
+            - error
+        - name: role
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - delete
+            - error
+        - name: rolebinding
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - delete
+            - error
+        - name: clusterrole
+          namespaces:
+            include:
+              - all
+            ignore:
+              - 
+          events:
+            - create
+            - delete
+            - error
+        - name: clusterrolebinding
+          namespaces:
+            include:  
+              - all
+            ignore:
+              -
+          events:
+            - create
+            - delete
+            - error
+  valueFileSecrets:
+  - name: "botkube-helm-values"
