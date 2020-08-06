@@ -4,16 +4,19 @@ kind: CronJob
 metadata:
   namespace: monitoring
   name: uptimerobot-heartbeat
-  annotations:
-    botkube.io/disable: "true"
 spec:
   schedule: "*/15 * * * *"
-  failedJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
   successfulJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       template:
+        metadata:
+          annotations:
+            botkube.io/disable: "true"
         spec:
+          restartPolicy: Never
           containers:
           - name: uptimerobot-heartbeat
             image: curlimages/curl:7.70.0
@@ -41,4 +44,3 @@ spec:
                 fi
                 printf "%s - Success - Heartbeat request received and processed successfully" "$(date -u)"
                 exit 0
-          restartPolicy: OnFailure
