@@ -26,33 +26,44 @@ spec:
     config:
       settings:
         clustername: k3s
-        allowkubectl: true
+        kubectl:
+          enabled: true
+          commands:
+            restrictAccess: true
+            verbs:
+              - get
+              - logs
+              - top
+            resources:
+              - deployments
+              - pods
+              - namespaces
+              - daemonsets
+              - statefulsets
+              - storageclasses
+              - nodes
       resources:
-        - name: pod                 # Name of the resources e.g pod, deployment, ingress, etc. (Resource name must be in singular form)
+        - name: pod
           namespaces:
-            include:  
+            include:
               - all
-            ignore:                 # List of namespaces to be ignored (omitempty), used only with include: all
-              - longhorn-system     # example : include [all], ignore [x,y,z] 
-          events:                   # List of lifecycle events you want to receive, e.g create, update, delete, error OR all
+            ignore:
+              - longhorn-system
+          events:
             - create
             - delete
         - name: service
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              - 
           events:
             - create
             - delete
             - error
         - name: deployment
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - update
@@ -60,10 +71,8 @@ spec:
             - error
         - name: statefulset
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - update
@@ -71,60 +80,48 @@ spec:
             - error
         - name: ingress
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - delete
             - error
         - name: node
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - delete
             - error
         - name: namespace
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - delete
             - error
         - name: persistentvolume
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - delete
             - error
         - name: persistentvolumeclaim
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - delete
             - error
         - name: secret
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - delete
@@ -134,26 +131,23 @@ spec:
             include:  
               - all
             ignore:
-              - rook-ceph
+              - longhorn-system
           events:
             - delete
             - error
         - name: daemonset
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - delete
             - error
         - name: job
           namespaces:
-            include:  
+            include:
               - all
             ignore:
-              - monitoring
               - longhorn-system
           events:
             - create
@@ -162,20 +156,16 @@ spec:
             - error
         - name: role
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - delete
             - error
         - name: rolebinding
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - delete
@@ -184,18 +174,14 @@ spec:
           namespaces:
             include:
               - all
-            ignore:
-              - 
           events:
             - create
             - delete
             - error
         - name: clusterrolebinding
           namespaces:
-            include:  
+            include:
               - all
-            ignore:
-              -
           events:
             - create
             - delete
