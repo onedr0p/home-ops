@@ -20,6 +20,9 @@ spec:
       ingressClass: internal
       replicaCount: 2
       service:
+        # Gitea's SSH service is also using
+        # this IP for SSH, Metallb requires
+        # Cluster policy on shared IPs
         loadBalancerIP: 192.168.42.101
         externalTrafficPolicy: Cluster
         annotations:
@@ -38,34 +41,14 @@ spec:
         serviceMonitor:
           enabled: true
           namespace: kube-system
-        prometheusRule:
-          enabled: true
-          namespace: kube-system
-          rules:
-            - alert: TooMany500s
-              expr: sum(rate(nginx_ingress_controller_requests{status!~"5.*"}[2m])) / sum(rate(nginx_ingress_controller_requests[2m])) < 0.85
-              for: 1m
-              labels:
-                severity: critical
-              annotations:
-                description: Too many 5XXs
-                summary: More than 15% of the all requests did return 5XX, this requires your attention
-            - alert: TooMany400s
-              expr: sum(rate(nginx_ingress_controller_requests{status!~"4.*"}[2m])) / sum(rate(nginx_ingress_controller_requests[2m])) < 0.85
-              for: 1m
-              labels:
-                severity: critical
-              annotations:
-                description: Too many 4XXs
-                summary: More than 15% of the all requests did return 4XX, this requires your attention
       extraArgs:
         default-ssl-certificate: "kube-system/acme-crt-secret"
       resources:
         requests:
-          memory: 500Mi
+          memory: 250Mi
           cpu: 25m
         limits:
-          memory: 600Mi
+          memory: 500Mi
     defaultBackend:
       enabled: true
       image:
@@ -73,7 +56,7 @@ spec:
         tag: v1.0.1
       resources:
         requests:
-          memory: 250Mi
+          memory: 50Mi
           cpu: 25m
         limits:
-          memory: 350Mi
+          memory: 200Mi
