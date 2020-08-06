@@ -1,55 +1,29 @@
 {
     "service": {
         "dns": {
+            "forwarding": {
+                "options": [
+                    "server=/<domain.tld>/<pdns.ip>",
+                    "server=1.1.1.1"
+                ]
+            },
             "dynamic": {
                 "interface": {
-                    "<wan_interface>": {
+                    "eth2": {
                         "service": {
                             "cloudflare": {
                                 "host-name": [
                                     "<domain.tld>"
                                 ],
-                                "login": "<cloudflare_email>",
+                                "login": "<email>",
                                 "options": [
                                     "zone=<domain.tld>"
                                 ],
-                                "password": "<cloudflare_api_key>",
+                                "password": "<cloudflare.apikey>",
                                 "protocol": "cloudflare"
                             }
                         }
                     }
-                }
-            }
-        },
-        "nat": {
-            "rule": {
-                "1": {
-                    "description": "Redirect DNS requests",
-                    "destination": {
-                        "port": "53"
-                    },
-                    "inbound-interface": "<lan_interface>",
-                    "inside-address": {
-                        "address": "<blocky_ip_addess>",
-                        "port": "53"
-                    },
-                    "source": {
-                        "address": "!<blocky_ip_addess>"
-                    },
-                    "log": "disable",
-                    "protocol": "tcp_udp",
-                    "type": "destination"
-                },
-                "6000": {
-                    "description": "MASQ DNS requests to LAN",
-                    "destination": {
-                        "address": "<blocky_ip_addess>",
-                        "port": "53"
-                    },
-                    "log": "disable",
-                    "outbound-interface": "<lan_interface>",
-                    "protocol": "tcp_udp",
-                    "type": "masquerade"
                 }
             }
         }
