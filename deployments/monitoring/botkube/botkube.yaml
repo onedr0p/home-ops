@@ -20,7 +20,8 @@ spec:
       # Needed for Discord support until merge
       # https://github.com/infracloudio/botkube/pull/268
       repository: quay.io/unixfox/botkube
-      tag: latest
+      tag: b5b3a25
+      pullPolicy: IfNotPresent
     serviceMonitor:
       enabled: true
     config:
@@ -32,7 +33,6 @@ spec:
             restrictAccess: true
             verbs:
               - get
-              - logs
               - top
             resources:
               - deployments
@@ -118,23 +118,6 @@ spec:
             - create
             - delete
             - error
-        - name: secret
-          namespaces:
-            include:
-              - all
-          events:
-            - create
-            - delete
-            - error
-        - name: configmap
-          namespaces:
-            include:  
-              - all
-            ignore:
-              - longhorn-system
-          events:
-            - delete
-            - error
         - name: daemonset
           namespaces:
             include:
@@ -153,38 +136,6 @@ spec:
           events:
             - create
             - update
-            - delete
-            - error
-        - name: role
-          namespaces:
-            include:
-              - all
-          events:
-            - create
-            - delete
-            - error
-        - name: rolebinding
-          namespaces:
-            include:
-              - all
-          events:
-            - create
-            - delete
-            - error
-        - name: clusterrole
-          namespaces:
-            include:
-              - all
-          events:
-            - create
-            - delete
-            - error
-        - name: clusterrolebinding
-          namespaces:
-            include:
-              - all
-          events:
-            - create
             - delete
             - error
   valueFileSecrets:
