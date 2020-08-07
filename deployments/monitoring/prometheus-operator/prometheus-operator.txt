@@ -13,18 +13,27 @@ alertmanager:
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 6h
-      receiver: 'pushover'
+      receiver: 'default'
       routes:
         - match:
             alertname: Watchdog
           receiver: 'null'
+          continue: true
+        - match:
+            alertname: APCUPS5MinutesRemain
+          receiver: 'powerloss'
     receivers:
       - name: 'null'
-      - name: 'pushover'
+      - name: 'default'
         pushover_configs:
           - user_key: "$PUSHOVER_USER_TOKEN"
             token: "$PUSHOVER_ALERT_MANAGER_API_TOKEN"
             priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
+      - name: 'powerloss'
+        webhook_configs:
+          - url: ""
+            send_resolved: true
+            max_alerts: 1
     inhibit_rules:
     - source_match:
         severity: 'critical'
