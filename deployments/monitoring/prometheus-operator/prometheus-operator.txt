@@ -13,23 +13,22 @@ alertmanager:
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 6h
-      receiver: 'default'
+      receiver: 'pushover'
       routes:
         - match:
             alertname: Watchdog
           receiver: 'null'
-          continue: true
         - match:
-            alertname: APCUPS5MinutesRemain
-          receiver: 'powerloss'
+            alertname: APCUPS10MinutesRemain
+          receiver: 'webhook'
     receivers:
       - name: 'null'
-      - name: 'default'
+      - name: 'pushover'
         pushover_configs:
-          - user_key: "$PUSHOVER_USER_TOKEN"
-            token: "$PUSHOVER_ALERT_MANAGER_API_TOKEN"
+          - user_key: "${PUSHOVER_USER_TOKEN}"
+            token: "${PUSHOVER_ALERT_MANAGER_API_TOKEN}"
             priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
-      - name: 'powerloss'
+      - name: 'webhook'
         webhook_configs:
           - url: ""
             send_resolved: true
@@ -39,7 +38,6 @@ alertmanager:
         severity: 'critical'
       target_match:
         severity: 'warning'
-      # Apply inhibition if the alertname is the same.
       equal: ['alertname', 'namespace']
 prometheus:
   ingress:
@@ -55,10 +53,10 @@ grafana:
     tls:
     - hosts:
       - "grafana.${DOMAIN}"
-  adminPassword: "$GRAFANA_PASSWORD"
+  adminPassword: "${GRAFANA_PASSWORD}"
   grafana.ini:
     server:
-      root_url: https://grafana.${DOMAIN}
+      root_url: "https://grafana.${DOMAIN}"
     auth.basic:
       disable_login_form: false
     auth.generic_oauth:
@@ -67,17 +65,17 @@ grafana:
       team_ids:
       allowed_organizations:
       name: Auth0
-      client_id: $AUTH0_GRAFANA_CLIENT_ID
-      client_secret: $AUTH0_GRAFANA_CLIENT_SECRET
+      client_id: "${AUTH0_GRAFANA_CLIENT_ID}"
+      client_secret: "${AUTH0_GRAFANA_CLIENT_SECRET}"
       scopes: openid profile email
-      auth_url: https://${AUTH0_DOMAIN}.us.auth0.com/authorize
-      token_url: https://${AUTH0_DOMAIN}.us.auth0.com/oauth/token
-      api_url: https://${AUTH0_DOMAIN}.us.auth0.com/userinfo
+      auth_url: "https://${AUTH0_DOMAIN}.us.auth0.com/authorize"
+      token_url: "https://${AUTH0_DOMAIN}.us.auth0.com/oauth/token"
+      api_url: "https://${AUTH0_DOMAIN}.us.auth0.com/userinfo"
       role_attribute_path: role
     smtp:
       enabled: true
-      host: smtp.gmail.com:587
-      user: $GMAIL_USER
-      password: $GMAIL_PASSWORD
-      from_address: $GMAIL_USER
+      host: "smtp.gmail.com:587"
+      user: "${GMAIL_USER}"
+      password: "${GMAIL_PASSWORD}"
+      from_address: "${GMAIL_USER}"
       from_name: Grafana
