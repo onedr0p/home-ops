@@ -1,0 +1,30 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: ups-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: ups.rules
+    rules:
+    - alert: UPS15MinutesRemaining
+      annotations:
+        description: ZPM almost depleted
+        summary: ZPM {{$labels.instance}} has less than 15 minutes of battery left,
+          systems are starting to power down. Bye
+      expr: upsAdvBatteryRunTimeRemaining/60/100 <= 15
+      for: 30s
+      labels:
+        severity: critical
+    - alert: UPSOnBattery
+      annotations:
+        description: ZPM is running on its battery
+        summary: ZPM {{$labels.instance}} is running on batteries
+      expr: upsBasicBatteryTimeOnBattery > 0
+      for: 5m
+      labels:
+        severity: critical
