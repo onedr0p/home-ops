@@ -1,0 +1,36 @@
+---
+#
+# k3s hosts
+#
+- hosts: k3s
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Shutdown
+      command: /sbin/poweroff --help
+      register: result
+    - name: Show Output
+      debug: msg="{{ result.stdout_lines }}"
+#
+# nas hosts
+#
+- hosts: nas
+  gather_facts: true
+  tasks:
+    - name: Shutdown
+      command: /sbin/poweroff --help
+      register: result
+    - name: Show Output
+      debug: msg="{{ result.stdout_lines }}"
+#
+# unifi hosts
+#
+# - hosts: unifi
+#   become: false
+#   gather_facts: false
+#   tasks:
+#     - name: Shutdown
+#       raw: /sbin/poweroff --help
+#       register: result
+#     - name: Show Output
+#       debug: msg="{{ result.stdout_lines }}"      
