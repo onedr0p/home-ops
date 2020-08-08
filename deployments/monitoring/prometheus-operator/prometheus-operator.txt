@@ -18,9 +18,9 @@ alertmanager:
         - match:
             alertname: Watchdog
           receiver: 'null'
-#        - match:
-#            alertname: APCUPS10MinutesRemain
-#          receiver: 'webhook'
+        - match:
+            alertname: UPS10MinutesRemaining
+          receiver: 'webhook'
     receivers:
       - name: 'null'
       - name: 'pushover'
@@ -28,11 +28,10 @@ alertmanager:
           - user_key: "${PUSHOVER_USER_TOKEN}"
             token: "${PUSHOVER_ALERT_MANAGER_API_TOKEN}"
             priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
-#      - name: 'webhook'
-#        webhook_configs:
-#          - url: ""
-#            send_resolved: true
-#            max_alerts: 1
+      - name: 'webhook'
+        webhook_configs:
+          - url: "http://192.168.1.35:9000/hooks/poweroff"
+            send_resolved: false
     inhibit_rules:
     - source_match:
         severity: 'critical'
