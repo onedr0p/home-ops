@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-touch "$(date "+%FT%T").txt"
+# webhook -hooks integrations/webhook/hooks.json -debug -verbose
+export ANSIBLE_CONFIG=./ansible.cfg
+ansible-playbook -i hosts.yaml zpm-depleted.yaml
