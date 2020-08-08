@@ -15,12 +15,16 @@ alertmanager:
       repeat_interval: 6h
       receiver: 'pushover'
       routes:
-        - match:
+        - receiver: 'null'
+          match:
             alertname: Watchdog
-          receiver: 'null'
-        - match:
+        - receiver: 'pushover'
+          match_re:
+            severity: critical|warning
+          continue: true
+        - receiver: 'poweroff-webhook'
+          match:
             alertname: UPS15MinutesRemaining
-          receiver: 'poweroff-webhook'
           continue: true
     receivers:
       - name: 'null'
@@ -29,6 +33,7 @@ alertmanager:
           - user_key: "${PUSHOVER_USER_TOKEN}"
             token: "${PUSHOVER_ALERT_MANAGER_API_TOKEN}"
             priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
+            send_resolved: true
       - name: 'poweroff-webhook'
         webhook_configs:
           - url: "http://192.168.1.35:9000/hooks/poweroff"
