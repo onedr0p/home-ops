@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: rocinante
+  name: rocinante-dns
   annotations:
     external-dns.alpha.kubernetes.io/hostname: "rocinante.${DOMAIN}."
 spec:
