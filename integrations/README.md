@@ -12,7 +12,7 @@ Custom dashboards for use with [Grafana](https://github.com/grafana/grafana)
 
 Project to shutdown my servers from a raspberry pi using [alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/), [webhook](https://github.com/adnanh/webhook) and [ansible](https://github.com/ansible/ansible).
 
-### Workflow
+**Workflow**
 
 1) [snmp_exporter](https://github.com/prometheus/snmp_exporter) sends Prometheus stats about my UPS, one of these stats is time remaining on battery
 2) [webhook](https://github.com/adnanh/webhook) is deployed on a raspberry pi outside the cluster
