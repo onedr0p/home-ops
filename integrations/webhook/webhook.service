@@ -1,0 +1,13 @@
+# /lib/systemd/system/webhook.service
+[Unit]
+Description=Small server for creating HTTP endpoints (hooks)
+Documentation=https://github.com/adnanh/webhook/
+
+[Service]
+WorkingDirectory=/home/devin/Code/k3s-gitops/integrations/webhook/
+ExecStart=/home/devin/go/bin/webhook -nopanic -hooks hooks.json -debug -logfile /var/log/webhook.log
+User=devin
+Group=users
+
+[Install]
+WantedBy=multi-user.target
