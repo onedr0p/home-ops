@@ -28,13 +28,13 @@ spec:
           timeout: 10s
           icmp:
              preferred_ip_protocol: "ip4"
-        # http_2xx:
-        #   prober: http
-        #   timeout: 30s
-        #   http:
-        #     valid_http_versions: ["HTTP/1.1", "HTTP/2"]
-        #     no_follow_redirects: false
-        #     preferred_ip_protocol: "ip4"
+        http_2xx:
+          prober: http
+          timeout: 30s
+          http:
+            valid_http_versions: ["HTTP/1.1", "HTTP/2"]
+            no_follow_redirects: false
+            preferred_ip_protocol: "ip4"
     serviceMonitor:
       enabled: true
       defaults:
@@ -43,6 +43,9 @@ spec:
         interval: 30s
         scrapeTimeout: 30s
       targets:
+        #
+        # ICMP Probes
+        #
         - name: k3s-master
           url: 192.168.42.11
           module: icmp
@@ -61,12 +64,33 @@ spec:
         - name: k3s-worker-e
           url: 192.168.42.16
           module: icmp
-        - name: rocinante
+        - name: qnap-nas-rocinante
           url: 192.168.1.39
           module: icmp
-        - name: serenity
+        - name: synology-nas-serenity
           url: 192.168.1.40
           module: icmp
+        - name: raspi-moya
+          url: 192.168.1.35
+          module: icmp
+        - name: nvr
+          url: 192.168.1.18
+          module: icmp
+        - name: apc-ups-1
+          url: 192.168.1.15
+          module: icmp
+        - name: cyberpower-pdu-main
+          url: 192.168.1.16
+          module: icmp
+        - name: cyberpower-pdu-guest-1
+          url: 192.168.1.17
+          module: icmp
+        - name: open-garage
+          url: 192.168.1.19
+          module: icmp
+        - name: hdhomerun
+          url: 192.168.1.21
+          module: icmp          
     prometheusRule:
       enabled: true
       additionalLabels:
@@ -75,11 +99,18 @@ spec:
       rules:
         - alert: HostDown
           expr: probe_success == 0
-          for: 10s
+          for: 1m
           labels:
             severity: critical
           annotations:
             message: The host {{"{{ $labels.target }}"}} is currently unreachable
+        - alert: SlowResponseTime
+          annotations:
+            message: The response time for {{"{{ $labels.target }}"}} has been greater than 30 seconds for 5 minutes.
+          expr: probe_duration_seconds > 30
+          for: 5m
+          labels:
+            severity: warning            
         # - alert: UrlDown
         #   annotations:
         #     message: The status code of {{"{{ $labels.target }}"}} is 4xx or 5xx, or some other failure occurred such as a timeout (60 seconds) for the last 5 minutes.
@@ -101,12 +132,6 @@ spec:
         #   for: 1m
         #   labels:
         #     severity: critical
-        # - alert: SlowResponseTime
-        #   annotations:
-        #     message: The response time for {{"{{ $labels.target }}"}} has been greater than 30 seconds for 5 minutes.
-        #   expr: probe_duration_seconds > 30
-        #   for: 5m
-        #   labels:
-        #     severity: warning
+
   valueFileSecrets:
   - name: "blackbox-exporter-helm-values"
