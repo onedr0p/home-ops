@@ -1,3 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unifi-protect
+spec:
+  ports:
+  - name: http
+    port: 7443
+  type: ExternalName
+  externalName: 192.168.1.2
+---
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -16,14 +28,3 @@ spec:
   tls:
   - hosts:
     - "unifi-protect.${DOMAIN}"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: unifi-protect
-spec:
-  ports:
-  - name: http
-    port: 7443
-  type: ExternalName
-  externalName: 192.168.1.2

@@ -29,14 +29,14 @@ if [ "$(uname)" == "Darwin" ]; then
   export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
   # Source secrets.env
   set -a
-  . "${REPO_ROOT}/secrets/.secrets.env"
+  . "${REPO_ROOT}/.cluster-secrets.env"
   set +a
 else
-  . "${REPO_ROOT}/secrets/.secrets.env"
+  . "${REPO_ROOT}/.cluster-secrets.env"
 fi
 
 # Path to Public Cert
-PUB_CERT="${REPO_ROOT}/secrets/pub-cert.pem"
+PUB_CERT="${REPO_ROOT}/pub-cert.pem"
 
 # Path to generated secrets file
 GENERATED_SECRETS="${CLUSTER_ROOT}/zz_generated_secrets.yaml"
@@ -58,20 +58,14 @@ do
   # Get the path and basename of the txt file
   # e.g. "deployments/default/pihole/pihole"
   secret_path="$(dirname "$file")/$(basename -s .txt "$file")"
-
   # Get the filename without extension
   # e.g. "pihole"
-  secret_name=$(basename "${secret_path}")
-
-  # Find namespace by looking for the chart file in the deployments folder
-  # namespace="$(find "${CLUSTER_ROOT}" -type f -name "${secret_name}.yaml" | awk -F/ '{print $(NF-1)}')"
-  
+  secret_name=$(basename "${secret_path}")  
   # Get the relative path of deployment
   deployment=${file#"${CLUSTER_ROOT}"}
   # Get the namespace (based on folder path of manifest)
   namespace=$(echo ${deployment} | awk -F/ '{print $2}')
   echo "  Generating helm secret '${secret_name}' in namespace '${namespace}'..."
-
   # Create secret
   envsubst < "$file" \
     | \
@@ -80,7 +74,6 @@ do
     | \
   kubeseal --format=yaml --cert="${PUB_CERT}" \
     >> "${GENERATED_SECRETS}"
-
   echo "---" >> "${GENERATED_SECRETS}"
 done
 
@@ -206,6 +199,4 @@ sed -i '/^[[:space:]]*$/d' "${GENERATED_SECRETS}"
 if ! yq validate "${GENERATED_SECRETS}" > /dev/null 2>&1; then
     echo "Errors in YAML"
     exit 1
-else
-    echo "** YAML looks good, ready to commit"
 fi

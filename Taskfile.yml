@@ -2,12 +2,14 @@ version: '2'
 
 tasks:
   # Generate and apply secrets
-  secrets:
+  generate:
     cmds:
-      - ./secrets/helm-secrets.sh
-      - ./secrets/k8s-secrets.sh
-      - ./secrets/sample-env.sh
-    silent: true
+      - ./hack/secrets.sh
+      - ./hack/sample-env.sh
+  apply:
+    cmds:
+      - ./hack/templates.sh
+      - kubectl apply -f ./deployments/zz_generated_secrets.yaml
   # Force flux to update
   sync:
     cmds:
