@@ -4,16 +4,15 @@ metadata:
   name: letsencrypt-test
 spec:
   acme:
-    email: $CF_API_EMAIL
+    email: "${CF_API_EMAIL}"
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-test
     solvers:
-    # An empty 'selector' means that this solver matches all domains
     - selector: {}
       dns01:
         cloudflare:
-          email: $CF_API_EMAIL
+          email: "${CF_API_EMAIL}"
           apiKeySecretRef:
             name: cloudflare-api-key
             key: api-key
@@ -24,16 +23,15 @@ metadata:
   name: letsencrypt-prod
 spec:
   acme:
-    email: $CF_API_EMAIL
+    email: "${CF_API_EMAIL}"
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
-    # An empty 'selector' means that this solver matches all domains
     - selector: {}
       dns01:
         cloudflare:
-          email: $CF_API_EMAIL
+          email: "${CF_API_EMAIL}"
           apiKeySecretRef:
             name: cloudflare-api-key
             key: api-key
@@ -49,6 +47,6 @@ spec:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-  - $DOMAIN
-  - '*.$DOMAIN'
-  - '*.nd.$DOMAIN'
+  - "${DOMAIN}"
+  - "*.${DOMAIN}"
+  - "*.nd.${DOMAIN}"

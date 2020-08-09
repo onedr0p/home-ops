@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-shopt -s globstar
-
 # Get Absolute Path of the base repo
 export REPO_ROOT=$(git rev-parse --show-toplevel)
 # Get Absolute Path of where Flux looks for manifests
@@ -15,37 +13,30 @@ need() {
 }
 
 # Verify we have dependencies
-need "kubeseal"
 need "kubectl"
-need "sed"
 need "envsubst"
-need "yq"
 
 # Work-arounds for MacOS
 if [ "$(uname)" == "Darwin" ]; then
-  # brew install gnu-sed
-  need "gsed"
-  # use sed as alias to gsed
-  export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
   # Source secrets.env
   set -a
-  . "${REPO_ROOT}/secrets/.secrets.env"
+  . "${REPO_ROOT}/.cluster-secrets.env"
   set +a
 else
-  . "${REPO_ROOT}/secrets/.secrets.env"
+  . "${REPO_ROOT}/.cluster-secrets.env"
 fi
 
 #
 # Kubernetes Manifests w/ Secrets
 #
 
-for file in "${REPO_ROOT}"/secrets/manifest-templates/*.txt
+for file in "${CLUSTER_ROOT}"/_templates/*.tpl
 do
   # Get the path and basename of the txt file
-  secret_path="$(dirname "$file")/$(basename -s .txt "$file")"
+  secret_path="$(dirname "$file")/$(basename -s .tpl "$file")"
   # Get the filename without extension
   secret_name=$(basename "${secret_path}")
-  echo "  Applying manifest ${secret_name} to cluster..."
+  echo "Applying manifest ${secret_name} to cluster..."
   # Apply this manifest to our cluster
   if output=$(envsubst < "$file"); then
     printf '%s' "$output" | kubectl apply -f -

@@ -1,3 +1,4 @@
+---
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -5,18 +6,18 @@ metadata:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/use-regex: "true"
   labels:
-    app.kubernetes.io/instance: radarr-uhd
-    app.kubernetes.io/name: radarr-uhd
-  name: radarr-uhd-api
+    app.kubernetes.io/instance: radarr
+    app.kubernetes.io/name: radarr
+  name: radarr-api
 spec:
   rules:
-  - host: "radarr-uhd.${DOMAIN}"
+  - host: "radarr.${DOMAIN}"
     http:
       paths:
       - backend:
-          serviceName: radarr-uhd
+          serviceName: radarr
           servicePort: http
         path: /api
   tls:
   - hosts:
-    - "radarr-uhd.${DOMAIN}"
+    - "radarr.${DOMAIN}"
