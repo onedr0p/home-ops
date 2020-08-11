@@ -1,16 +1,47 @@
 version: '2'
 
 tasks:
-  # Generate and apply secrets
   generate:
+    desc: Generate secrets and sample env
     cmds:
-      - ./hack/secrets.sh
-      - ./hack/sample-env.sh
+      - task: generate-secrets
+      - task: generate-sample-env
   apply:
+    desc: Apply manifests and secrets to the Kubernetes cluster
     cmds:
-      - ./hack/templates.sh
-      - kubectl apply -f ./deployments/zz_generated_secrets.yaml
-  # Force flux to update
-  sync:
+      - task: apply-templates
+      - task: apply-secrets
+  flux-sync:
+    desc: Force cluster to run flux
     cmds:
       - fluxctl --k8s-fwd-ns=flux sync
+  generate-secrets:
+    desc: Generate secrets
+    cmds:
+      - ./hack/secrets.sh
+    preconditions:
+      - test -f .cluster-secrets.env
+    status:
+      - test -f ./deployments/zz_generated_secrets.yaml
+  generate-sample-env:
+    desc: Generate sample env
+    cmds:
+      - ./hack/sample-env.sh
+    status:
+      - test -f .cluster-secrets.sample.env
+  apply-templates:
+    desc: Apply manifests to the Kubernetes cluster
+    cmds:
+      - ./hack/templates.sh
+  apply-secrets:
+    desc: Apply secrets to the Kubernetes cluster
+    cmds:
+      - kubectl apply -f ./deployments/zz_generated_secrets.yaml
+  blocky-enable:
+    desc: Interact with Blocky to enable adblocking
+    cmds:
+      - ./hack/blocky.sh enable
+  blocky-disable:
+    desc: Interact with Blocky to disable adblocking
+    cmds:
+      - ./hack/blocky.sh disable

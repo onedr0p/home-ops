@@ -33,10 +33,9 @@ fi
 for file in "${CLUSTER_ROOT}"/_templates/*.tpl
 do
   # Get the path and basename of the txt file
-  secret_path="$(dirname "$file")/$(basename -s .tpl "$file")"
+  # secret_path="$(dirname "$file")/$(basename -s .tpl "$file")"
   # Get the filename without extension
-  secret_name=$(basename "${secret_path}")
-  echo "Applying manifest ${secret_name} to cluster..."
+  # secret_name=$(basename "${secret_path}")
   # Apply this manifest to our cluster
   if output=$(envsubst < "$file"); then
     printf '%s' "$output" | kubectl apply -f -

@@ -4,7 +4,6 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/use-regex: "true"
   labels:
     app.kubernetes.io/instance: sonarr
     app.kubernetes.io/name: sonarr
