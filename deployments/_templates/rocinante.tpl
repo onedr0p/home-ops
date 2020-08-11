@@ -113,3 +113,38 @@ spec:
   tls:
   - hosts:
     - "minio.rocinante.${DOMAIN}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rocinante-registry
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "registry.rocinante.${DOMAIN}."  
+spec:
+  type: ExternalName
+  externalName: 192.168.1.39
+  ports:
+  - name: http
+    port: 5000
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: internal
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  labels:
+    app.kubernetes.io/instance: rocinante-registry
+    app.kubernetes.io/name: rocinante-registry
+  name: rocinante-registry
+spec:
+  rules:
+  - host: "registry.rocinante.${DOMAIN}"
+    http:
+      paths:
+      - backend:
+          serviceName: rocinante-registry
+          servicePort: 5000
+  tls:
+  - hosts:
+    - "registry.rocinante.${DOMAIN}"
