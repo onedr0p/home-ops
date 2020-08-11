@@ -50,3 +50,6 @@ spec:
   - "${DOMAIN}"
   - "*.${DOMAIN}"
   - "*.nd.${DOMAIN}"
+  - "*.serenity.${DOMAIN}"
+  - "*.rocinante.${DOMAIN}"
+  - "*.unifi.${DOMAIN}"
