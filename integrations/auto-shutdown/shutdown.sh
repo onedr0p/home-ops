@@ -19,15 +19,15 @@ NODES=(k3s-worker-a k3s-worker-b k3s-worker-c k3s-worker-d k3s-worker-e)
 # Cordon worker nodes sequentially
 for node in "${NODES[@]}"
 do
-    echo "${node}" | tee -a "${LOGFILE}-cordon.log"
-    # kubectl cordon $node 2>&1 | tee -a "${LOGFILE}-cordon.log"
+    # echo "${node}" | tee -a "${LOGFILE}-cordon.log"
+    kubectl cordon $node 2>&1 | tee -a "${LOGFILE}-cordon.log"
 done
 
 # Drain worker nodes concurrently
 for node in "${NODES[@]}"
 do
-    echo "${node}" | tee -a "${LOGFILE}-drain-${node}.log" &
-    # kubectl drain $node --ignore-daemonsets --force --grace-period=60 --timeout=120s --delete-local-data 2>&1 | tee -a "${LOGFILE}-drain-${node}.log" &
+    # echo "${node}" | tee -a "${LOGFILE}-drain-${node}.log" &
+    kubectl drain $node --ignore-daemonsets --force --grace-period=60 --timeout=120s --delete-local-data 2>&1 | tee -a "${LOGFILE}-drain-${node}.log" &
 done
 
 # Wait for nodes to finish draining
