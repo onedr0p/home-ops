@@ -22,7 +22,7 @@ alertmanager:
           match_re:
             severity: critical|warning
           continue: true
-        - receiver: 'poweroff-webhook'
+        - receiver: 'shutdown-webhook'
           match:
             alertname: UPS15MinutesRemaining
           continue: true
@@ -34,9 +34,9 @@ alertmanager:
             token: "${PUSHOVER_ALERT_MANAGER_API_TOKEN}"
             priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
             send_resolved: true
-      - name: 'poweroff-webhook'
+      - name: 'shutdown-webhook'
         webhook_configs:
-          - url: "http://192.168.1.35:9000/hooks/poweroff"
+          - url: "http://192.168.1.35:9000/hooks/shutdown"
             send_resolved: false
     inhibit_rules:
     - source_match:
