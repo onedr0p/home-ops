@@ -8,6 +8,7 @@ metadata:
   namespace: default
   name: rclone-sync-longhorn
   annotations:
+    fluxcd.io/ignore: "false"
     fluxcd.io/automated: "true"
     fluxcd.io/tag.rclone: semver:~1.5
 spec:
@@ -20,8 +21,18 @@ spec:
     spec:
       template:
         spec:
+          # Custom docker image with my rclone config
+          # Copy my rclone.conf into the rclone container
+          initContainers:
+          - name: rclone-config
+            image: registry.rocinante.devbu.io/rclone-config:latest
+            imagePullPolicy: Always
+            command: ["/bin/sh", "-c", "cp /config/rclone.conf /tmp/config/rclone.conf"]
+            volumeMounts:
+            - name: tmp
+              mountPath: /tmp/config
           containers:
-          - name: rclone
+          - name: rclone-sync
             image: rclone/rclone:1.52.3
             imagePullPolicy: IfNotPresent
             env:
@@ -31,7 +42,7 @@ spec:
               - "rclone"
               - "-v"
               - "--config"
-              - "/data/rclone.conf"
+              - "/tmp/config/rclone.conf"
               - "sync"
               - "--ignore-errors"
               - "--fast-list"
@@ -45,13 +56,9 @@ spec:
               - "minio:longhorn"
               - "b2-longhorn-crypt:/"
             volumeMounts:
-              - mountPath: /data
-                name: rclone
-                subPath: rclone
-                readOnly: false
+            - name: tmp
+              mountPath: /tmp/config
           restartPolicy: Never
           volumes:
-          # Location of rclone.conf
-          - name: rclone
-            persistentVolumeClaim:
-              claimName: nfs-data-rocinante-pvc
+          - name: tmp
+            emptyDir: {}
