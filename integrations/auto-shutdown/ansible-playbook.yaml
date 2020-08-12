@@ -1,8 +1,8 @@
 ---
 #
-# k3s hosts
+# k3s-master hosts
 #
-- hosts: k3s
+- hosts: k3s_masters
   become: true
   gather_facts: true
   tasks:
@@ -12,6 +12,19 @@
       register: result
     - name: Show Output
       debug: msg="{{ result.stdout_lines }}"
+#
+# k3s-workers hosts
+#
+- hosts: k3s_workers
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Shutdown
+      command: /sbin/poweroff --help
+      # command: /sbin/poweroff
+      register: result
+    - name: Show Output
+      debug: msg="{{ result.stdout_lines }}"      
 #
 # nas hosts
 #
