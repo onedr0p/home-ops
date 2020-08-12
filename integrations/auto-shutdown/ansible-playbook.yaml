@@ -1,18 +1,5 @@
 ---
 #
-# k3s-master hosts
-#
-- hosts: k3s_masters
-  become: true
-  gather_facts: true
-  tasks:
-    - name: Shutdown
-      command: /sbin/poweroff --help
-      # command: /sbin/poweroff
-      register: result
-    - name: Show Output
-      debug: msg="{{ result.stdout_lines }}"
-#
 # k3s-workers hosts
 #
 - hosts: k3s_workers
@@ -20,11 +7,24 @@
   gather_facts: true
   tasks:
     - name: Shutdown
-      command: /sbin/poweroff --help
-      # command: /sbin/poweroff
-      register: result
-    - name: Show Output
-      debug: msg="{{ result.stdout_lines }}"      
+      command: /sbin/poweroff
+    #   command: /sbin/poweroff --help
+    #   register: result
+    # - name: Show Output
+    #   debug: msg="{{ result.stdout_lines }}"    
+#
+# k3s-master hosts
+#
+- hosts: k3s_masters
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Shutdown
+      command: /sbin/poweroff
+    #   command: /sbin/poweroff --help
+    #   register: result
+    # - name: Show Output
+    #   debug: msg="{{ result.stdout_lines }}"
 #
 # nas hosts
 #
@@ -32,11 +32,12 @@
   gather_facts: true
   tasks:
     - name: Shutdown
-      command: /sbin/poweroff --help
-      # command: /sbin/poweroff
-      register: result
-    - name: Show Output
-      debug: msg="{{ result.stdout_lines }}"
+      command: /sbin/poweroff
+    #   command: /sbin/poweroff --help
+      
+    #   register: result
+    # - name: Show Output
+    #   debug: msg="{{ result.stdout_lines }}"
 #
 # all hosts
 #
