@@ -8,9 +8,8 @@ metadata:
   namespace: default
   name: rclone-sync-longhorn
   annotations:
-    fluxcd.io/ignore: "false"
-    fluxcd.io/automated: "true"
-    fluxcd.io/tag.rclone: semver:~1.5
+    fluxcd.io/ignored: "false"
+    fluxcd.io/automated: "false"
 spec:
   # Run once a day, every day, starting at 6PM
   schedule: "0 18 * * *"
@@ -21,44 +20,38 @@ spec:
     spec:
       template:
         spec:
-          # Custom docker image with my rclone config
-          # Copy my rclone.conf into the rclone container
-          initContainers:
-          - name: rclone-config
-            image: registry.rocinante.devbu.io/rclone-config:latest
-            imagePullPolicy: Always
-            command: ["/bin/sh", "-c", "cp /config/rclone.conf /tmp/config/rclone.conf"]
-            volumeMounts:
-            - name: tmp
-              mountPath: /tmp/config
           containers:
-          - name: rclone-sync
-            image: rclone/rclone:beta
+          - name: rclone
+            image: rclone/rclone:1.52.3
             imagePullPolicy: IfNotPresent
             env:
-            - name: TZ
-              value: "America/New_York"
-            command:
-            - "rclone"
-            - "-v"
-            - "--config"
-            - "/tmp/config/rclone.conf"
-            - "sync"
-            - "--ignore-errors"
-            - "--fast-list"
-            - "--b2-hard-delete"
-            - "--transfers"
-            - "24"
-            - "--checkers"
-            - "24"
-            - "--bwlimit"
-            - "25M"
-            - "minio:longhorn"
-            - "b2-longhorn-crypt:/"
+              - name: TZ
+                value: "America/New_York"
+            command: 
+              - "rclone"
+              - "-v"
+              - "--config"
+              - "/data/rclone.conf"
+              - "sync"
+              - "--ignore-errors"
+              - "--fast-list"
+              - "--b2-hard-delete"
+              - "--transfers"
+              - "24"
+              - "--checkers"
+              - "24"
+              - "--bwlimit"
+              - "25M"
+              - "minio:longhorn"
+              - "b2-longhorn-crypt:/"
             volumeMounts:
-            - name: tmp
-              mountPath: /tmp/config
+              - mountPath: /data
+                name: rclone
+                subPath: rclone
+                readOnly: false
           restartPolicy: Never
           volumes:
-          - name: tmp
-            emptyDir: {}
+          # Location of rclone.conf
+          - name: rclone
+            persistentVolumeClaim:
+              claimName: nfs-data-rocinante-pvc
