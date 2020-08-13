@@ -17,8 +17,8 @@ spec:
   values:
     defaultRules:
       rules:
-        kubeApiserverAvailability: false
-        kubeApiserver: false
+        kubeApiserverAvailability: true
+        kubeApiserver: true
     server:
       resources:
         requests:
@@ -135,11 +135,11 @@ spec:
             url: https://raw.githubusercontent.com/fluxcd/helm-operator/master/chart/helm-operator/dashboards/helm-operator-dashboard.json
             datasource: Prometheus
       additionalDataSources:
-      - name: Prometheus
-        type: prometheus
-        access: proxy
-        url: http://thanos-query-http:10902/
-        isDefault: true
+      # - name: Prometheus
+      #   type: prometheus
+      #   access: proxy
+      #   url: http://thanos-query-http:10902/
+      #   isDefault: true
       - name: loki
         type: loki
         access: proxy
@@ -186,8 +186,8 @@ spec:
         annotations:
           kubernetes.io/ingress.class: "internal"
       prometheusSpec:
-        replicas: 2
-        replicaExternalLabelName: "replica"
+        # replicas: 2
+        # replicaExternalLabelName: "replica"
         ruleSelector: {}
         ruleNamespaceSelector: {}
         ruleSelectorNilUsesHelmValues: false
@@ -197,7 +197,7 @@ spec:
         podMonitorSelector: {}
         podMonitorNamespaceSelector: {}
         podMonitorSelectorNilUsesHelmValues: false
-        retention: 12h
+        retention: 60d
         enableAdminAPI: true
         walCompression: true
         storageSpec:
@@ -206,7 +206,7 @@ spec:
               storageClassName: "longhorn"
               resources:
                 requests:
-                  storage: 20Gi
+                  storage: 50Gi
         additionalScrapeConfigs:
         - job_name: 'windows-exporter'
           metrics_path: '/metrics'
@@ -226,11 +226,11 @@ spec:
           static_configs:
           - targets:
             - 192.168.1.39:9000
-        thanos:
-          image: quay.io/thanos/thanos:v0.13.0
-          version: v0.13.0
-          objectStorageConfig:
-            name: thanos
-            key: object-store.yaml
+        # thanos:
+        #   image: quay.io/thanos/thanos:v0.13.0
+        #   version: v0.13.0
+        #   objectStorageConfig:
+        #     name: thanos
+        #     key: object-store.yaml
   valueFileSecrets:
   - name: "prometheus-operator-helm-values"
