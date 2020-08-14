@@ -192,6 +192,15 @@ kubeseal --format=yaml --cert="${PUB_CERT}" \
   >> "${GENERATED_SECRETS}"
 echo "---" >> "${GENERATED_SECRETS}"
 
+# Github Runner
+kubectl create secret generic controller-manager \
+  --from-literal=github_token="${GITHUB_RUNNER_ACCESS_TOKEN}" \
+  --namespace actions-runner-system --dry-run=client -o json \
+  | \
+kubeseal --format=yaml --cert="${PUB_CERT}" \
+  >> "${GENERATED_SECRETS}"
+echo "---" >> "${GENERATED_SECRETS}"
+
 # Remove empty new-lines
 sed -i '/^[[:space:]]*$/d' "${GENERATED_SECRETS}"
 
