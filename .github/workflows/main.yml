@@ -7,6 +7,9 @@ on:
     tags-ignore:
       - flux-*
 
+env:
+  KUBECONFIG: ./kubeconfig
+
 jobs:
   main:
     runs-on:
@@ -19,10 +22,6 @@ jobs:
         uses: sliteteam/github-action-git-crypt-unlock@1.1.0
         env:
           GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
-
-      - run: |
-          mkdir -p ~/.kube
-          cp kubeconfig ~/.kube/config
 
       - name: Get Nodes 
         uses: stefanprodan/kube-tools@v1
