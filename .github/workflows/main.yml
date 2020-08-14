@@ -35,28 +35,28 @@ jobs:
             ./hack/secrets.sh
             git status
             
-      - name: Check for modified files
-        id: git-check
-        run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
+#       - name: Check for modified files
+#         id: git-check
+#         run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
           
-      - name: Apply secrets
-        uses: stefanprodan/kube-tools@v1
-        with:
-          kubectl: 1.18.6
-          command: |
-            apt-get update && apt-get install git-crypt -y
-            curl -sL https://github.com/fluxcd/flux/releases/download/1.20.1/fluxctl_linux_amd64 -o /usr/local/bin/fluxctl
-            chmod +x /usr/local/bin/fluxctl
-            fluxctl sync
+#       - name: Apply secrets
+#         uses: stefanprodan/kube-tools@v1
+#         with:
+#           kubectl: 1.18.6
+#           command: |
+#             apt-get update && apt-get install git-crypt -y
+#             curl -sL https://github.com/fluxcd/flux/releases/download/1.20.1/fluxctl_linux_amd64 -o /usr/local/bin/fluxctl
+#             chmod +x /usr/local/bin/fluxctl
+#             fluxctl sync
 
-      - name: Commit secrets
-        if: steps.git-check.outputs.modified == 'true'
-        run: |
-          git config --global user.name "Devin Buhl"
-          git config --global user.email "onedr0p@users.noreply.github.com"
-          git add ./deployments/zz_generated_secrets.yaml
-          git commit -sm "Auto update secrets" || exit 0
-      - name: Push changes
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.PAT }}
+#       - name: Commit secrets
+#         if: steps.git-check.outputs.modified == 'true'
+#         run: |
+#           git config --global user.name "Devin Buhl"
+#           git config --global user.email "onedr0p@users.noreply.github.com"
+#           git add ./deployments/zz_generated_secrets.yaml
+#           git commit -sm "Auto update secrets [ci-skip]" || exit 0
+#       - name: Push changes
+#         uses: ad-m/github-push-action@v0.6.0
+#         with:
+#           github_token: ${{ secrets.PAT }}
