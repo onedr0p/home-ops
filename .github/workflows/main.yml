@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT }}
 
       - name: Unlock secrets
         uses: sliteteam/github-action-git-crypt-unlock@1.1.0
@@ -38,3 +40,18 @@ jobs:
             ./hack/secrets.sh
             pwd
             ls -la
+            
+      - name: Check for modified files
+        id: git-check
+        run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
+
+#       - name: Commit latest release version
+#         if: steps.git-check.outputs.modified == 'true'
+#         run: |
+#           git config --global user.name 'Devin Buhl'
+#           git config --global user.email 'onedr0p@users.noreply.github.com'
+#           git commit -sam "Auto update secrets" || exit 0
+#       - name: Push changes
+#         uses: ad-m/github-push-action@master
+#         with:
+#           github_token: ${{ secrets.PAT }}
