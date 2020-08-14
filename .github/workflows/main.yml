@@ -1,18 +1,14 @@
 name: main
-
 on:
   push:
     branches:
       - master
     tags-ignore:
       - flux-*
-
 env:
   KUBECONFIG: ./kubeconfig
   FLUX_FORWARD_NAMESPACE: flux
-
 # https://github.com/go-task/task/releases/download/v2.8.1/task_linux_amd64.tar.gz
-
 jobs:
   main:
     runs-on:
@@ -49,7 +45,10 @@ jobs:
         id: git-check
         run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
 
-
+      - name: Git status
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git status
 
 #       - name: Commit latest release version
 #         if: steps.git-check.outputs.modified == 'true'
