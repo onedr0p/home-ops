@@ -38,11 +38,6 @@ jobs:
       - name: Check for modified files
         id: git-check
         run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
-
-      - name: Git status
-        if: steps.git-check.outputs.modified == 'true'
-        run: |
-          git status
           
       - name: Apply secrets
         uses: stefanprodan/kube-tools@v1
@@ -58,8 +53,8 @@ jobs:
       - name: Commit secrets
         if: steps.git-check.outputs.modified == 'true'
         run: |
-          git config --global user.name 'Devin Buhl'
-          git config --global user.email 'onedr0p@users.noreply.github.com'
+          git config --global user.name "Devin Buhl"
+          git config --global user.email "onedr0p@users.noreply.github.com"
           git add ./deployments/zz_generated_secrets.yaml
           git commit -sm "Auto update secrets" || exit 0
       - name: Push changes
