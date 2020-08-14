@@ -26,7 +26,7 @@ jobs:
         with:
           kubectl: 1.18.6
           command: |
-            apt update && apt install gettext-base -y
+            apt update && apt install gettext-base git-crypt -y
             curl -sL https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.12.5/kubeseal-linux-amd64 -o /usr/local/bin/kubeseal
             chmod +x /usr/local/bin/kubeseal
             kubeseal --version
@@ -35,6 +35,7 @@ jobs:
             fluxctl --context ${KUBECONFIG} version
             kubectl get nodes
             ./hack/secrets.sh
+            git-crypt lock
             pwd
             ls -la
             git status
