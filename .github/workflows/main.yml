@@ -47,12 +47,20 @@ jobs:
         if: steps.git-check.outputs.modified == 'true'
         run: |
           git status
+          
+      - name: Apply secrets
+        uses: stefanprodan/kube-tools@v1
+        with:
+          kubectl: 1.18.6
+          command: |
+            fluxctl --context ${KUBECONFIG} version
 
 #       - name: Commit latest release version
 #         if: steps.git-check.outputs.modified == 'true'
 #         run: |
 #           git config --global user.name 'Devin Buhl'
 #           git config --global user.email 'onedr0p@users.noreply.github.com'
+#           git add deployments/zz_generated_secrets.yaml
 #           git commit -sam "Auto update secrets" || exit 0
 #       - name: Push changes
 #         uses: ad-m/github-push-action@master
