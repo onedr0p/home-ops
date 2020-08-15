@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - master
-    paths:
-      - '**.txt'
+#     paths:
+#       - '**.txt'
     tags-ignore:
       - flux-*
 env:
@@ -16,7 +16,6 @@ jobs:
   main:
     runs-on:
       - self-hosted
-    container: stefanprodan/kube-tools:latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -36,15 +35,16 @@ jobs:
         run: |
           ./hack/secrets.sh
 
-#       - name: Generate Secrets
-#         uses: stefanprodan/kube-tools@v1
-#         with:
-#           kubectl: 1.18.6
-#           command: |
-#             apt-get update -qq && apt-get install --no-install-recommends -y -qq gettext-base git-crypt
-#             curl -sL https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.12.5/kubeseal-linux-amd64 -o /usr/local/bin/kubeseal
-#             chmod +x /usr/local/bin/kubeseal
-#             ./hack/secrets.sh
+      - name: Generate Secrets
+        uses: stefanprodan/kube-tools@master
+        with:
+          kubectl: 1.18.8
+          command: |
+            apt-get update -qq && apt-get install --no-install-recommends -y -qq gettext-base git-crypt
+            ./hack/secrets.sh
+#            curl -sL https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.12.5/kubeseal-linux-amd64 -o /usr/local/bin/kubeseal
+#            chmod +x /usr/local/bin/kubeseal
+#            ./hack/secrets.sh
 #       - name: Git status
 #         run: | 
 #           git status
