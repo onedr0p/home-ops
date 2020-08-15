@@ -31,7 +31,9 @@ echo "~~~~~~~~~~~~~~~~~~~~~~"
 
 echo "${REPO_ROOT}"
 
-cat "${REPO_ROOT}/.cluster-secrets.env" | grep "TEST_SECRET"
+printenv
+
+cat "${REPO_ROOT}/.cluster-secrets.sample.env" | grep "TEST_SECRET"
 
 echo "Will this subst? \${TEST_SECRET}" | envsubst
 
