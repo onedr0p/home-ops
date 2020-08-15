@@ -213,3 +213,5 @@ sed -i '/^[[:space:]]*$/d' "${GENERATED_SECRETS}"
 #     echo "Errors in YAML"
 #     exit 1
 # fi
+
+exit 0
