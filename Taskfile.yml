@@ -4,36 +4,32 @@ tasks:
   generate:
     desc: Generate secrets and sample env
     cmds:
-      - task: generate-secrets
+      - task: generate-sealed-secrets
       - task: generate-sample-env
   apply:
     desc: Apply manifests and secrets to the Kubernetes cluster
     cmds:
-      - task: apply-templates
-      - task: apply-secrets
+      - task: apply-manifest-templates
+      - task: apply-sealed-secrets
   flux-sync:
     desc: Force cluster to run flux
     cmds:
       - fluxctl --k8s-fwd-ns=flux sync
-  generate-secrets:
+  generate-sealed-secrets:
     desc: Generate secrets
     cmds:
-      - ./hack/secrets.sh
+      - ./hack/generate-sealed-secrets.sh
     preconditions:
       - test -f .cluster-secrets.env
-    # status:
-    #   - test -f ./deployments/zz_generated_secrets.yaml
   generate-sample-env:
     desc: Generate sample env
     cmds:
-      - ./hack/sample-env.sh
-    # status:
-    #   - test -f .cluster-secrets.sample.env
-  apply-templates:
+      - ./hack/generate-sample-env.sh
+  apply-manifest-templates:
     desc: Apply manifests to the Kubernetes cluster
     cmds:
-      - ./hack/templates.sh
-  apply-secrets:
+      - ./hack/apply-manifest-templates.sh
+  apply-sealed-secrets:
     desc: Apply secrets to the Kubernetes cluster
     cmds:
       - kubectl apply -f ./deployments/zz_generated_secrets.yaml
