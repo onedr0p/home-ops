@@ -39,7 +39,7 @@ fi
 
 for file in "${CLUSTER_ROOT}"/_templates/*.tpl
 do
-  if output=$(envsubst < "$file"); then
+  if output=$(envsubst -no-unset -no-empty -fail-fast < "$file"); then
     printf '%s' "$output" | kubectl apply -f -
   fi
 done
