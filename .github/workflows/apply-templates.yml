@@ -36,9 +36,9 @@ jobs:
           echo "$GIT_CRYPT_KEY" | base64 -d > ./git-crypt-key
           git-crypt unlock ./git-crypt-key
           rm ./git-crypt-key
-      # - name: Convert dotenv to setenv
-      #   run: |
-      #     ./hack/dotenv2setenv.sh .cluster-secrets.sample.env
+      - name: Fake environment variables
+        run: |
+          ./hack/dotenv2setenv.sh .cluster-secrets.sample.env
       - name: Apply manifests
         run: |
           source .cluster-secrets.env
