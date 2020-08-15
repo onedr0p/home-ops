@@ -41,7 +41,7 @@ export_envs() {
     fi
     value=$(eval echo "$temp")
     eval export "$key='$value'";
-    echo "::set-env name=$key::$value"
+    # echo "::set-env name=$key::$value"
   done < $1
 }
 
