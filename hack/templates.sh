@@ -17,13 +17,11 @@ need "envsubst"
 if [ "$(uname)" == "Darwin" ]; then
   # Source secrets.env
   set -a
-  . "${REPO_ROOT}/.cluster-secrets.env"
+  . "${REPO_ROOT}/.cluster-secrets.sample.env"
   set +a
 else
-  . "${REPO_ROOT}/.cluster-secrets.env"
+  . "${REPO_ROOT}/.cluster-secrets.sample.env"
 fi
-
-printenv | grep "TEST_SECRET"
 
 echo "~~~~~~~~~~~~~~~~~~~~~~"
 echo ">>> ${TEST_SECRET} <<<"
@@ -33,7 +31,9 @@ echo "~~~~~~~~~~~~~~~~~~~~~~"
 export TEST_TEST="blah"
 echo "Will this subst, ples? \${TEST_TEST}" | envsubst
 
-echo "Will this subst? \${TEST_SECRET}" | envsubst
+echo "Will this subst1? \${TEST_SECRET1}" | envsubst
+echo "Will this subst2? \${TEST_SECRET2}" | envsubst
+echo "Will this subst3? \${TEST_SECRET3}" | envsubst
 
 printenv
 
