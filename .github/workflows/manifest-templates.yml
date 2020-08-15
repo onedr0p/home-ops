@@ -23,6 +23,8 @@ jobs:
       - self-hosted
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT }}
       - name: Install deps
         run: |
           sudo apt-get update -qq && sudo apt-get install --no-install-recommends -y -qq git-crypt gettext-base
@@ -47,3 +49,16 @@ jobs:
       - name: Apply manifests
         run: |
           task apply-manifest-templates
+      - name: Generate sample env
+        run: |
+          task generate-sample-env
+          git status
+      - name: Commit secrets
+        run: |
+          git config --global user.name "Devin Buhl"
+          git config --global user.email "onedr0p@users.noreply.github.com"
+          git add ./.cluster-secrets.sample.env
+          git commit -sm "Auto update sample env [ci-skip]" || exit 0
+      - name: Push secrets
+        run: |
+          git push -o ci.skip
