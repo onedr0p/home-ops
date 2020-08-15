@@ -20,10 +20,10 @@ need "envsubst"
 if [ "$(uname)" == "Darwin" ]; then
   # Source secrets.env
   set -a
-  . "${REPO_ROOT}/.cluster-secrets.env"
+  source "${REPO_ROOT}/.cluster-secrets.env"
   set +a
 else
-  . "${REPO_ROOT}/.cluster-secrets.env"
+  source "${REPO_ROOT}/.cluster-secrets.env"
 fi
 
 #
