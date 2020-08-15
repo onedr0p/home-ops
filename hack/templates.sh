@@ -26,6 +26,10 @@ else
   source "${REPO_ROOT}/.cluster-secrets.env"
 fi
 
+echo "~~~~~~~~~~~~~~~~~~~~~~"
+echo ">>> ${TEST_SECRET} <<<"
+echo "~~~~~~~~~~~~~~~~~~~~~~"
+
 #
 # Kubernetes Manifests w/ Secrets
 #
