@@ -13,7 +13,7 @@
 - plex-tcp.default.svc.cluster.local
 - xteve.default.svc.cluster.local:34400
 - xteve.default.svc.cluster.local:34400/xmltv/xteve.xml
-- 
+
 ## Debugging connectivity
 
 ```bash
