@@ -30,11 +30,15 @@ echo "~~~~~~~~~~~~~~~~~~~~~~"
 echo ">>> ${TEST_SECRET} <<<"
 echo "~~~~~~~~~~~~~~~~~~~~~~"
 
+echo "${REPO_ROOT}"
+
+cat "${REPO_ROOT}/.cluster-secrets.env" | grep "TEST_SECRET"
+
 echo "Will this subst? \$TEST_SECRET" | envsubst -no-empty -no-unset -fail-fast
 
-for file in "${CLUSTER_ROOT}"/_templates/*.tpl
-do
-  if output=$(envsubst -no-empty -no-unset -fail-fast < "$file"); then
-    printf '%s' "$output" | kubectl apply -f -
-  fi
-done
+# for file in "${CLUSTER_ROOT}"/_templates/*.tpl
+# do
+#   if output=$(envsubst -no-empty -no-unset -fail-fast < "$file"); then
+#     printf '%s' "$output" | kubectl apply -f -
+#   fi
+# done
