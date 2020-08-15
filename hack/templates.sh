@@ -30,6 +30,9 @@ echo "~~~~~~~~~~~~~~~~~~~~~~"
 echo ">>> ${TEST_SECRET} <<<"
 echo "~~~~~~~~~~~~~~~~~~~~~~"
 
+echo "Will this subst? ${TEST_SECRET}" | envsubst -no-empty -no-unset
+
+
 #
 # Kubernetes Manifests w/ Secrets
 #
@@ -41,7 +44,7 @@ do
   # Get the filename without extension
   # secret_name=$(basename "${secret_path}")
   # Apply this manifest to our cluster
-  if output=$(envsubst < "$file"); then
+  if output=$(envsubst -no-empty -no-unset < "$file"); then
     printf '%s' "$output" | kubectl apply -f -
   fi
 done
