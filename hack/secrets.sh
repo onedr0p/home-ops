@@ -35,6 +35,10 @@ else
   . "${REPO_ROOT}/.cluster-secrets.env"
 fi
 
+echo "~~~~~~~~~~~~~~~~~~~~~~"
+echo ">>> ${TEST_SECRET} <<<"
+echo "~~~~~~~~~~~~~~~~~~~~~~"
+
 # Path to Public Cert
 PUB_CERT="${REPO_ROOT}/pub-cert.pem"
 
