@@ -35,6 +35,9 @@ printenv
 
 cat "${REPO_ROOT}/.cluster-secrets.sample.env" | grep "TEST_SECRET"
 
+export TEST_TEST="blah"
+echo "Will this subst, ples? \${TEST_TEST}" | envsubst
+
 echo "Will this subst? \${TEST_SECRET}" | envsubst
 
 # for file in "${CLUSTER_ROOT}"/_templates/*.tpl
