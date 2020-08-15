@@ -55,7 +55,7 @@ do
   deployment=${file#"${CLUSTER_ROOT}"}
   # Get the namespace (based on folder path of manifest)
   namespace=$(echo ${deployment} | awk -F/ '{print $2}')
-  echo "  Generating helm secret '${secret_name}' in namespace '${namespace}'..."
+  echo "[*] Generating helm secret '${secret_name}' in namespace '${namespace}'..."
   # Create secret
   envsubst < "$file" \
     | \
