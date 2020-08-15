@@ -20,31 +20,21 @@ need "envsubst"
 if [ "$(uname)" == "Darwin" ]; then
   # Source secrets.env
   set -a
-  source "${REPO_ROOT}/.cluster-secrets.env"
+  . "${REPO_ROOT}/.cluster-secrets.env"
   set +a
 else
-  source "${REPO_ROOT}/.cluster-secrets.env"
+  . "${REPO_ROOT}/.cluster-secrets.env"
 fi
 
 echo "~~~~~~~~~~~~~~~~~~~~~~"
 echo ">>> ${TEST_SECRET} <<<"
 echo "~~~~~~~~~~~~~~~~~~~~~~"
 
-echo "Will this subst? ${TEST_SECRET}" | envsubst -no-empty -no-unset
-
-
-#
-# Kubernetes Manifests w/ Secrets
-#
+echo "Will this subst? \$TEST_SECRET" | envsubst -no-empty -no-unset -fail-fast
 
 for file in "${CLUSTER_ROOT}"/_templates/*.tpl
 do
-  # Get the path and basename of the txt file
-  # secret_path="$(dirname "$file")/$(basename -s .tpl "$file")"
-  # Get the filename without extension
-  # secret_name=$(basename "${secret_path}")
-  # Apply this manifest to our cluster
-  if output=$(envsubst -no-empty -no-unset < "$file"); then
+  if output=$(envsubst -no-empty -no-unset -fail-fast < "$file"); then
     printf '%s' "$output" | kubectl apply -f -
   fi
 done
