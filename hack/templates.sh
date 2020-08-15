@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
-
-# Get Absolute Path of the base repo
-export REPO_ROOT=$(git rev-parse --show-toplevel)
-# Get Absolute Path of where Flux looks for manifests
-export CLUSTER_ROOT="${REPO_ROOT}/deployments"
+REPO_ROOT=$(git rev-parse --show-toplevel)
+CLUSTER_ROOT="${REPO_ROOT}/deployments"
 
 need() {
-    if ! [ -x "$(command -v $1)" ]; then
-      echo "Error: Unable to find binary $1"
-      exit 1
-    fi
+  if ! [ -x "$(command -v $1)" ]; then
+    echo "Error: Unable to find binary $1"
+    exit 1
+  fi
 }
 
 # Verify we have dependencies
@@ -18,7 +15,6 @@ need "envsubst"
 
 # Work-arounds for MacOS
 if [ "$(uname)" == "Darwin" ]; then
-  # Source secrets.env
   set -a
   . "${REPO_ROOT}/.cluster-secrets.env"
   set +a
