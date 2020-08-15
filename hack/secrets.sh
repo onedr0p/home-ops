@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
-
 shopt -s globstar
 
-# Get Absolute Path of the base repo
-export REPO_ROOT=$(git rev-parse --show-toplevel)
-# Get Absolute Path of where Flux looks for manifests
-export CLUSTER_ROOT="${REPO_ROOT}/deployments"
+REPO_ROOT=$(git rev-parse --show-toplevel)
+CLUSTER_ROOT="${REPO_ROOT}/deployments"
+PUB_CERT="${REPO_ROOT}/pub-cert.pem"
+GENERATED_SECRETS="${CLUSTER_ROOT}/zz_generated_secrets.yaml"
 
 need() {
-    if ! [ -x "$(command -v $1)" ]; then
-      echo "Error: Unable to find binary $1"
-      exit 1
-    fi
+  if ! [ -x "$(command -v $1)" ]; then
+    echo "Error: Unable to find binary $1"
+    exit 1
+  fi
 }
 
 # Verify we have dependencies
@@ -23,27 +22,14 @@ need "yq"
 
 # Work-arounds for MacOS
 if [ "$(uname)" == "Darwin" ]; then
-  # brew install gnu-sed
   need "gsed"
-  # use sed as alias to gsed
   export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
-  # Source secrets.env
   set -a
   . "${REPO_ROOT}/.cluster-secrets.env"
   set +a
 else
   . "${REPO_ROOT}/.cluster-secrets.env"
 fi
-
-echo "~~~~~~~~~~~~~~~~~~~~~~"
-echo ">>> ${TEST_SECRET} <<<"
-echo "~~~~~~~~~~~~~~~~~~~~~~"
-
-# Path to Public Cert
-PUB_CERT="${REPO_ROOT}/pub-cert.pem"
-
-# Path to generated secrets file
-GENERATED_SECRETS="${CLUSTER_ROOT}/zz_generated_secrets.yaml"
 
 {
   echo "#"
