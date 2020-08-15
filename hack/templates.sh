@@ -17,29 +17,29 @@ need "envsubst"
 if [ "$(uname)" == "Darwin" ]; then
   # Source secrets.env
   set -a
-  . "${REPO_ROOT}/.cluster-secrets.sample.env"
+  . "${REPO_ROOT}/.cluster-secrets.env"
   set +a
 else
-  . "${REPO_ROOT}/.cluster-secrets.sample.env"
+  . "${REPO_ROOT}/.cluster-secrets.env"
 fi
 
-echo "~~~~~~~~~~~~~~~~~~~~~~"
-echo ">>> ${TEST_SECRET} <<<"
-echo "~~~~~~~~~~~~~~~~~~~~~~"
+# echo "~~~~~~~~~~~~~~~~~~~~~~"
+# echo ">>> ${TEST_SECRET1} <<<"
+# echo "~~~~~~~~~~~~~~~~~~~~~~"
 
 
-export TEST_TEST="blah"
-echo "Will this subst, ples? \${TEST_TEST}" | envsubst
+# export TEST_TEST="blah"
+# echo "Will this subst, ples? \${TEST_TEST}" | envsubst
 
-echo "Will this subst1? \${TEST_SECRET1}" | envsubst
-echo "Will this subst2? \${TEST_SECRET2}" | envsubst
-echo "Will this subst3? \${TEST_SECRET3}" | envsubst
+# echo "Will this subst1? \${TEST_SECRET1}" | envsubst
+# echo "Will this subst2? \${TEST_SECRET2}" | envsubst
+# echo "Will this subst3? \${TEST_SECRET3}" | envsubst
 
-printenv
+# printenv
 
-# for file in "${CLUSTER_ROOT}"/_templates/*.tpl
-# do
-#   if output=$(envsubst -no-empty -no-unset -fail-fast < "$file"); then
-#     printf '%s' "$output" | kubectl apply -f -
-#   fi
-# done
+for file in "${CLUSTER_ROOT}"/_templates/*.tpl
+do
+  if output=$(envsubst < "$file"); then
+    printf '%s' "$output" | kubectl apply -f -
+  fi
+done
