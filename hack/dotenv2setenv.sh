@@ -2,6 +2,7 @@
 set -e
 
 DOTENV_FILE="$1"
+[ -f "${DOTENV_FILE}" ] || { echo "${DOTENV_FILE} must be a valid file" >&2; exit 1; }
 
 is_set() {
   eval val=\""\$$1"\"
