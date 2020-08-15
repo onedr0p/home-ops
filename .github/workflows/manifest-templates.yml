@@ -1,4 +1,4 @@
-name: apply-templates
+name: manifest-templates
 on:
   push:
     branches:
@@ -14,7 +14,7 @@ env:
   KUBECONFIG: "./kubeconfig"
   KUBECTL_VERSION: "1.18.8"
   ENVSUBST_VERSION: "1.2.0"
-
+  TASK_VERSION: "2.8.1"
 
 jobs:
   main:
@@ -28,7 +28,9 @@ jobs:
           sudo curl -sL -o /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl
           sudo chmod +x /usr/local/bin/kubectl
           sudo curl -sL -o /usr/local/bin/envsubst https://github.com/a8m/envsubst/releases/download/v${ENVSUBST_VERSION}/envsubst-Linux-x86_64
-          sudo chmod +x /usr/local/bin/envsubst          
+          sudo chmod +x /usr/local/bin/envsubst
+          sudo curl -sL https://github.com/go-task/task/releases/download/v${TASK_VERSION}/task_linux_amd64.tar.gz | tar xz
+          sudo mv task /usr/local/bin/task && rm task_linux_amd64.tar.gz
       - name: Unlock secrets
         env:
           GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
@@ -38,13 +40,7 @@ jobs:
           rm ./git-crypt-key
       - name: Fake environment variables
         run: |
-          ./hack/dotenv2setenv.sh .cluster-secrets.sample.env
+          ./hack/dotenv2setenv.sh ./.cluster-secrets.sample.env
       - name: Apply manifests
         run: |
-          source .cluster-secrets.env
-          for file in ./deployments/_templates/*.tpl
-          do
-            if output=$(envsubst -no-unset -no-empty < "$file"); then
-              printf '%s' "$output" | kubectl apply -f -
-            fi
-          done
+          task apply-manifest-templates
