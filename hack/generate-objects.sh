@@ -1,22 +1,9 @@
 #!/usr/bin/env bash
 
-export REPO_ROOT
-REPO_ROOT=$(git rev-parse --show-toplevel)
-
-need() {
-    which "$1" &>/dev/null || die "Binary '$1' is missing but required"
-}
-
-need "kubectl"
-need "envsubst"
-
-if [ "$(uname)" == "Darwin" ]; then
-  set -a
-  . "${REPO_ROOT}/secrets/.secrets.env"
-  set +a
-else
-  . "${REPO_ROOT}/secrets/.secrets.env"
-fi
+# Wire up the env and validations
+__dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${__dir}/environment.sh"
 
 message() {
   echo -e "\n######################################################################"
