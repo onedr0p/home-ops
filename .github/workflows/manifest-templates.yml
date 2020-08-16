@@ -5,11 +5,12 @@ on:
     branches:
       - master
     paths:
-      - '**.tpl'
-      - '**.env'
-      - '!.cluster-secrets.sample.env'
+      - "pub-cert.pem"
+      - "**.tpl"
+      - " **.env"
+      - "!.cluster-secrets.sample.env"
     tags-ignore:
-      - flux-*
+      - "flux-*"
 
 env:
   DEBIAN_FRONTEND: "noninteractive"
@@ -19,6 +20,7 @@ jobs:
   main:
     runs-on:
       - self-hosted
+    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
     steps:
       - uses: actions/checkout@v2
         with:
@@ -31,9 +33,6 @@ jobs:
           echo "$GIT_CRYPT_KEY" | base64 -d > ./git-crypt-key
           git-crypt unlock ./git-crypt-key
           rm ./git-crypt-key
-      - name: Fake environment variables
-        run: |
-          ./hack/dotenv2setenv.sh ./.cluster-secrets.sample.env
       - name: Apply manifests
         run: |
           task apply-manifest-templates
