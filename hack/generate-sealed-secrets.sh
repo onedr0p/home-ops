@@ -163,13 +163,13 @@ kubeseal --format=yaml --cert="${PUB_CERT}" \
 echo "---" >> "${GENERATED_SECRETS}"
 
 # Fluxcloud
-kubectl create secret generic fluxcloud \
-  --from-literal=discord_webhook_url="${DISCORD_FLUXCLOUD_WEBHOOK_URL}" \
-  --namespace flux --dry-run=client -o json \
-  | \
-kubeseal --format=yaml --cert="${PUB_CERT}" \
-  >> "${GENERATED_SECRETS}"
-echo "---" >> "${GENERATED_SECRETS}"
+# kubectl create secret generic fluxcloud \
+#   --from-literal=discord_webhook_url="${DISCORD_FLUXCLOUD_WEBHOOK_URL}" \
+#   --namespace flux --dry-run=client -o json \
+#   | \
+# kubeseal --format=yaml --cert="${PUB_CERT}" \
+#   >> "${GENERATED_SECRETS}"
+# echo "---" >> "${GENERATED_SECRETS}"
 
 # Github Runner
 kubectl create secret generic controller-manager \
