@@ -27,6 +27,23 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "internal"
+      hosts: 
+      - host: "drone.devbu.io"
+        paths:
+          - "/"
+      tls:
+      - hosts:
+        - "drone.devbu.io"  
+    env:
+      DRONE_SERVER_HOST: "drone.devbu.io"
+      DRONE_GIT_ALWAYS_AUTH: true
+      DRONE_GITEA_SERVER: "https://git.devbu.io"
+      DRONE_SERVER_PROTO: https
+      DRONE_PROMETHEUS_ANONYMOUS_ACCESS: true
+      DRONE_USER_CREATE: "username:devin,admin:true"
+      DRONE_LOGS_TEXT: true
+      DRONE_LOGS_PRETTY: true
+      DRONE_LOGS_COLOR: true      
     podAnnotations:
       prometheus.io/scrape: "true"
       prometheus.io/port: "80"

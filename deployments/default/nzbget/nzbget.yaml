@@ -25,6 +25,14 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: nginx-basic-auth
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+      hosts: 
+      - "nzbget.devbu.io"
+      tls:
+      - hosts:
+        - "nzbget.devbu.io"
     timezone: "America/New_York"
     puid: 1000
     pgid: 1000
@@ -47,5 +55,3 @@ spec:
         cpu: 250m
       limits:
         memory: 6000Mi
-  valueFileSecrets:
-  - name: "nzbget-helm-values"

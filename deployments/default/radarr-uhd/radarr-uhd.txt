@@ -1,20 +1,2 @@
-ingress:
-  hosts: 
-  - "radarr-uhd.${DOMAIN}"
-  tls:
-  - hosts:
-    - "radarr-uhd.${DOMAIN}"
-  annotations:
-    nginx.ingress.kubernetes.io/auth-url: "https://auth.${DOMAIN}/oauth2/auth"
-    nginx.ingress.kubernetes.io/auth-signin: "https://auth.${DOMAIN}/oauth2/start"
 exportarr:
-  enabled: true
-  image:
-    repository: onedr0p/exportarr
-    tag: v0.3.0
-    pullPolicy: IfNotPresent
-  port: 9708
-  url: "http://radarr-uhd.default.svc.cluster.local:7878"
   apikey: "${RADARR_UHD_APIKEY}"
-  serviceMonitor:
-    enabled: true

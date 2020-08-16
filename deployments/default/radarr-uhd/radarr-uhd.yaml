@@ -24,6 +24,13 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/auth-url: "https://auth.devbu.io/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.devbu.io/oauth2/start"
+      hosts: 
+      - "radarr-uhd.devbu.io"
+      tls:
+      - hosts:
+        - "radarr-uhd.devbu.io"  
     timezone: "America/New_York"
     puid: 1000
     pgid: 1000
@@ -44,6 +51,16 @@ spec:
           existingClaim: nfs-media-serenity-pvc
           mountPath: /media-serenity
           readOnly: false
+    exportarr:
+      enabled: true
+      image:
+        repository: onedr0p/exportarr
+        tag: v0.3.0
+        pullPolicy: IfNotPresent
+      port: 9708
+      url: "http://localhost:7878"
+      serviceMonitor:
+        enabled: true
     resources:
       requests:
         memory: 350Mi
