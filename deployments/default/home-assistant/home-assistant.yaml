@@ -31,6 +31,11 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "nginx"
+      hosts:
+      - "hass.devbu.io"
+      tls:
+      - hosts:
+        - "hass.devbu.io"        
     service:
       type: LoadBalancer
       loadBalancerIP: 192.168.42.105
@@ -49,6 +54,13 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "internal"
+        hosts:
+        - "hass-editor.devbu.io"
+        tls:
+        - hosts:
+          - "hass-editor.devbu.io"
+      extraEnv:
+        HASS_SERVER: "http://localhost:8123"
     resources:
       limits:
         memory: 2500Mi

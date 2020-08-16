@@ -29,6 +29,11 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "internal"
+      hosts: 
+      - "git.devbu.io"
+      tls:
+      - hosts:
+        - "git.devbu.io"        
     service:
       ssh:
         type: LoadBalancer
@@ -39,13 +44,15 @@ spec:
     gitea:
       config:
         appName: "Devin's wonderful Gitea"
-        adminUser: "devin"
+        adminUser: "devin"  
       respository:
         defaultPrivate: true
       server:
         http: 
+          externalDomain: "git.devbu.io"
           externalPort: 443
         ssh:
+          externalDomain: "git.devbu.io"
           externalPort: 1337
       database:
         builtIn:

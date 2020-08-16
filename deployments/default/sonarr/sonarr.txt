@@ -1,21 +1,2 @@
-ingress:
-  hosts: 
-  - "sonarr.${DOMAIN}"
-  tls:
-  - hosts:
-    - "sonarr.${DOMAIN}"
-  annotations:
-    nginx.ingress.kubernetes.io/auth-url: "https://auth.${DOMAIN}/oauth2/auth"
-    nginx.ingress.kubernetes.io/auth-signin: "https://auth.${DOMAIN}/oauth2/start"
 exportarr:
-  enabled: true
-  image:
-    repository: onedr0p/exportarr
-    tag: v0.3.0
-    pullPolicy: IfNotPresent
-  port: 9707
-  url: http://sonarr.default.svc.cluster.local:8989
   apikey: $SONARR_APIKEY
-  enableEpisodeQualityMetrics: true
-  serviceMonitor:
-    enabled: true
