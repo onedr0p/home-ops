@@ -6,29 +6,18 @@ CLUSTER_ROOT="${REPO_ROOT}/deployments"
 PUB_CERT="${REPO_ROOT}/pub-cert.pem"
 GENERATED_SECRETS="${CLUSTER_ROOT}/zz_generated_secrets.yaml"
 
-need() {
-  if ! [ -x "$(command -v $1)" ]; then
-    echo "Error: Unable to find binary $1"
-    exit 1
-  fi
-}
+command -v kubectl >/dev/null 2>&1 || { echo >&2 "kubectl is not installed. Aborting."; exit 1; }
+command -v envsubst >/dev/null 2>&1 || { echo >&2 "envsubst is not installed. Aborting."; exit 1; } 
+command -v kubeseal >/dev/null 2>&1 || { echo >&2 "kubeseal is not installed. Aborting."; exit 1; }
+command -v yq >/dev/null 2>&1 || { echo >&2 "yq is not installed. Aborting."; exit 1; }
 
-# Verify we have dependencies
-need "kubeseal"
-need "kubectl"
-need "sed"
-need "envsubst"
-need "yq"
+set -a
+. "${REPO_ROOT}/.cluster-secrets.env"
+set +a
 
-# Work-arounds for MacOS
 if [ "$(uname)" == "Darwin" ]; then
   need "gsed"
   export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
-  set -a
-  . "${REPO_ROOT}/.cluster-secrets.env"
-  set +a
-else
-  . "${REPO_ROOT}/.cluster-secrets.env"
 fi
 
 {
