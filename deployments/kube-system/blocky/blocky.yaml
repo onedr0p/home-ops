@@ -24,6 +24,17 @@ spec:
     replicas: 3
     timeZone: "America/New_York"
     config:
+      upstream:
+        externalResolvers:
+          - https://dns1.nextdns.io/4838af
+          - https://dns2.nextdns.io/4838af
+          - tcp-tls:4838af.dns1.nextdns.io:853
+          - tcp-tls:4838af.dns2.nextdns.io:853
+      conditional:
+        mapping:
+          status.devbu.io: udp:1.1.1.1
+          devbu.io: udp:192.168.42.180
+          local: udp:192.168.42.180
       # https://www.reddit.com/r/oisd_blocklist/comments/dwxgld/dbloisdnl_internets_1_domain_blocklist/
       blocking:
         blackLists:
@@ -76,5 +87,3 @@ spec:
       limits:
         memory: 500Mi
         cpu: 1000m
-  valueFileSecrets:
-    - name: "blocky-helm-values"
