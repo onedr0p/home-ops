@@ -2,26 +2,12 @@
 REPO_ROOT=$(git rev-parse --show-toplevel)
 CLUSTER_ROOT="${REPO_ROOT}/deployments"
 
-need() {
-  if ! [ -x "$(command -v $1)" ]; then
-    echo "Error: Unable to find binary $1"
-    exit 1
-  fi
-}
+command -v kubectl >/dev/null 2>&1 || { echo >&2 "kubectl is not installed. Aborting."; exit 1; }
+command -v envsubst >/dev/null 2>&1 || { echo >&2 "envsubst is not installed. Aborting."; exit 1; } 
 
-# Verify we have dependencies
-need "kubectl"
-need "envsubst"
-
-# Work-arounds for MacOS
-if [ "$(uname)" == "Darwin" ]; then
-  # Source secrets.env
-  set -a
-  . "${REPO_ROOT}/.cluster-secrets.env"
-  set +a
-else
-  . "${REPO_ROOT}/.cluster-secrets.env"
-fi
+set -a
+. "${REPO_ROOT}/.cluster-secrets.env"
+set +a
 
 for file in "${CLUSTER_ROOT}"/_templates/*.tpl
 do
