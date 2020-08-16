@@ -32,16 +32,15 @@ is_blank() {
 }
 
 export_envs() {
-  while IFS='=' read -r key temp || [ -n "$key" ]; do
+  while IFS='=' read -r key || [ -n "$key" ]; do
     if is_comment "$key"; then
       continue
     fi
     if is_blank "$key"; then
       continue
     fi
-    value=$(eval echo "$temp")
-    eval export "$key='$value'";
-    echo "::set-env name=$key::$value"
+    eval export "$key=''";
+    echo "::set-env name=$key::"
   done < $1
 }
 
