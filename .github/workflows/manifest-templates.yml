@@ -7,7 +7,7 @@ on:
     paths:
       - "pub-cert.pem"
       - "**.tpl"
-      - " **.env"
+      - "**.env"
       - "!.cluster-secrets.sample.env"
     tags-ignore:
       - "flux-*"
@@ -29,7 +29,6 @@ jobs:
         env:
           GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
         run: |
-          git status
           echo "$GIT_CRYPT_KEY" | base64 -d > ./git-crypt-key
           git-crypt unlock ./git-crypt-key
           rm ./git-crypt-key
