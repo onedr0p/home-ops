@@ -47,9 +47,9 @@ spec:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-  - "${DOMAIN}"
-  - "*.${DOMAIN}"
-  - "*.nd.${DOMAIN}"
-  - "*.serenity.${DOMAIN}"
-  - "*.rocinante.${DOMAIN}"
-  - "*.unifi.${DOMAIN}"
+  - "devbu.io"
+  - "*.devbu.io"
+  - "*.nd.devbu.io"
+  - "*.serenity.devbu.io"
+  - "*.rocinante.devbu.io"
+  - "*.unifi.devbu.io"

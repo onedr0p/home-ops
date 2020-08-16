@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: unifi
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: "unifi.${DOMAIN}."
+    external-dns.alpha.kubernetes.io/hostname: "unifi.devbu.io."
 spec:
   type: ExternalName
   externalName: 192.168.1.2
@@ -14,13 +14,12 @@ kind: Service
 metadata:
   name: unifi-controller
   annotations:
-    external-dns.alpha.kubernetes.io/target: "controller.unifi.${DOMAIN}."  
+    external-dns.alpha.kubernetes.io/target: "controller.unifi.devbu.io."  
 spec:
   type: ExternalName
   ports:
   - name: http
     port: 8443
-  type: ExternalName
   externalName: 192.168.1.2
 ---
 apiVersion: networking.k8s.io/v1beta1
@@ -35,7 +34,7 @@ metadata:
   name: unifi-controller
 spec:
   rules:
-  - host: "controller.unifi.${DOMAIN}"
+  - host: "controller.unifi.devbu.io"
     http:
       paths:
       - backend:
@@ -43,20 +42,19 @@ spec:
           servicePort: 8443
   tls:
   - hosts:
-    - "controller.unifi.${DOMAIN}"
+    - "controller.unifi.devbu.io"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: unifi-protect
   annotations:
-    external-dns.alpha.kubernetes.io/target: "protect.unifi.${DOMAIN}."  
+    external-dns.alpha.kubernetes.io/target: "protect.unifi.devbu.io."  
 spec:
   type: ExternalName
   ports:
   - name: http
     port: 7443
-  type: ExternalName
   externalName: 192.168.1.2
 ---
 apiVersion: networking.k8s.io/v1beta1
@@ -71,7 +69,7 @@ metadata:
   name: unifi-protect
 spec:
   rules:
-  - host: "protect.unifi.${DOMAIN}"
+  - host: "protect.unifi.devbu.io"
     http:
       paths:
       - backend:
@@ -79,4 +77,4 @@ spec:
           servicePort: 7443
   tls:
   - hosts:
-    - "protect.unifi.${DOMAIN}"    
+    - "protect.unifi.devbu.io"    
