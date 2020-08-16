@@ -36,10 +36,42 @@ spec:
         repository: jimmidyson/configmap-reload
         tag: v0.3.0
     alertmanager:
+      config:
+        global:
+          resolve_timeout: 5m
+        route:
+          group_by: ['alertname', 'job']
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 6h
+          receiver: 'pushover'
+          routes:
+            - receiver: 'null'
+              match:
+                alertname: Watchdog
+            - receiver: 'pushover'
+              match_re:
+                severity: critical|warning
+              continue: true
+            - receiver: 'shutdown-webhook'
+              match:
+                alertname: UPS15MinutesRemaining
+              continue: true
+        inhibit_rules:
+        - source_match:
+            severity: 'critical'
+          target_match:
+            severity: 'warning'
+          equal: ['alertname', 'namespace']
       ingress:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "internal"
+        hosts: 
+        - "alert-manager.${DOMAIN}"
+        tls:
+        - hosts:
+          - "alert-manager.${DOMAIN}"
       alertmanagerSpec:
         storage:
           volumeClaimTemplate:
@@ -83,6 +115,11 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
+        hosts: 
+        - "grafana.${DOMAIN}"
+        tls:
+        - hosts:
+          - "grafana.${DOMAIN}"
       sidecar:
         datasources:
           enabled: true
@@ -186,6 +223,11 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "internal"
+        hosts: 
+        - "prometheus.${DOMAIN}"
+        tls:
+        - hosts:
+          - "prometheus.${DOMAIN}"
       prometheusSpec:
         # replicas: 2
         # replicaExternalLabelName: "replica"
