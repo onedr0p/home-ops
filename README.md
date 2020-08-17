@@ -48,11 +48,13 @@ _MetalLB IP Range 192.168.42.100-192.168.42.250_
 
 ---
 
-### Similar repositories
+## Thanks
+A lot of inspiration for this repo came from the following people:
 
 - [billimek/k8s-gitops](https://github.com/billimek/k8s-gitops)
 - [carpenike/k8s-gitops](https://github.com/carpenike/k8s-gitops)
 - [dcplaya/k8s-gitops](https://github.com/dcplaya/k8s-gitops)
 - [rust84/k8s-gitops](https://github.com/rust84/k8s-gitops)
 - [blackjid/homelab-gitops](https://github.com/blackjid/homelab-gitops)
+- [bjw-s/k8s-gitops](https://github.com/bjw-s/k8s-gitops)
 - [nlopez/k8s_home](https://github.com/nlopez/k8s_home)
