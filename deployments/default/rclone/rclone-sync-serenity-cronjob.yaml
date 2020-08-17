@@ -7,12 +7,14 @@ kind: CronJob
 metadata:
   namespace: default
   name: rclone-sync-serenity
-  annotations:
-    fluxcd.io/automated: "true"
-    fluxcd.io/tag.rclone: semver:~1.5
+  # annotations:
+  #   fluxcd.io/automated: "false"
+  #   fluxcd.io/tag.rclone: semver:~1.5
 spec:
   # Run every even number day, at 1AM to 7AM
-  schedule: "0 1 2-30/2 * *"
+  # schedule: "0 1 2-30/2 * *"
+  # Run every day, at 10PM to 3AM
+  schedule: "0 22 * * *"
   failedJobsHistoryLimit: 1
   successfulJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
@@ -43,11 +45,10 @@ spec:
               - "--checkers"
               - "10"
               - "--bwlimit"
-              - "75M"
+              - "25M"
               - "--drive-chunk-size"
               - "32M"
               - "--drive-use-trash=false"
-              - "--drive-stop-on-upload-limit"
               - "--exclude"
               - "'.@__thumb/**'"
               - "--exclude"
@@ -55,7 +56,7 @@ spec:
               - "--exclude"
               - "'.DS_Store'"
               - "--max-duration"
-              - "6h"
+              - "5h"
               - "/media-serenity/Library/"
               - "gdrive-crypt:/Serenity"
             volumeMounts:
