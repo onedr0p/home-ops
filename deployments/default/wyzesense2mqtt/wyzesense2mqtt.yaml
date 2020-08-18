@@ -20,29 +20,29 @@ spec:
         app.kubernetes.io/name: wyzesense2mqtt
     spec:
       containers:
-        - name: wyzesense2mqtt
-          image: raetha/wyzesense2mqtt:1.1
-          imagePullPolicy: IfNotPresent
-          securityContext:
-            privileged: true          
-          env:
-            - name: TZ
-              value: "America/New_York"
-          volumeMounts:
-          - mountPath: /dev/hidraw0
-            name: usb
-          - mountPath: /wyzesense2mqtt/config
-            name: config
-          - mountPath: /wyzesense2mqtt/logs
-            name: config
-            subPath: logs
-          resources:
-            requests:
-              memory: 128Mi
-              cpu: 500m
-            limits:
-              memory: 500Mi
-              cpu: 1000m
+      - name: wyzesense2mqtt
+        image: raetha/wyzesense2mqtt:1.1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        env:
+        - name: TZ
+          value: "America/New_York"
+        volumeMounts:
+        - mountPath: /dev/hidraw0
+          name: usb
+        - mountPath: /wyzesense2mqtt/config
+          name: config
+        - mountPath: /wyzesense2mqtt/logs
+          name: config
+          subPath: logs
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 500m
+          limits:
+            memory: 500Mi
+            cpu: 1000m
       volumes:
       - name: config
         persistentVolumeClaim:
@@ -69,7 +69,7 @@ metadata:
     app.kubernetes.io/instance: wyzesense2mqtt
 spec:
   accessModes:
-    - "ReadWriteOnce"
+  - "ReadWriteOnce"
   resources:
     requests:
       storage: "1Gi"

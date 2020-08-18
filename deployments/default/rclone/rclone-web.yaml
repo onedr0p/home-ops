@@ -25,44 +25,44 @@ spec:
         app.kubernetes.io/name: rclone-web
     spec:
       containers:
-        - name: rclone
-          image: rclone/rclone:1.52.3
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: TZ
-              value: "America/New_York"
-          command:
-            - "rclone"
-            - "--config"
-            - "/data/rclone.conf"
-            - "rcd" 
-            - "--rc-web-gui"
-            - "--rc-user"
-            - "admin"
-            - "--rc-pass"
-            - "pass"
-            - "--rc-enable-metrics"
-            - "--rc-no-auth"
-            - "--rc-serve"
-            - "--rc-addr"
-            - ":5573"
-            - "--rc-web-gui-no-open-browser"
-          ports:
-            - name: http
-              containerPort: 5573
-              protocol: TCP
-          volumeMounts:
-            - mountPath: /data
-              name: rclone
-              subPath: rclone
-              readOnly: false
-          resources:
-            requests:
-              memory: 128Mi
-              cpu: 2000m
-            limits:
-              memory: 1000Mi
-              cpu: 4000m
+      - name: rclone
+        image: rclone/rclone:1.52.3
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TZ
+          value: "America/New_York"
+        command:
+        - "rclone"
+        - "--config"
+        - "/data/rclone.conf"
+        - "rcd"
+        - "--rc-web-gui"
+        - "--rc-user"
+        - "admin"
+        - "--rc-pass"
+        - "pass"
+        - "--rc-enable-metrics"
+        - "--rc-no-auth"
+        - "--rc-serve"
+        - "--rc-addr"
+        - ":5573"
+        - "--rc-web-gui-no-open-browser"
+        ports:
+        - name: http
+          containerPort: 5573
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /data
+          name: rclone
+          subPath: rclone
+          readOnly: false
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 2000m
+          limits:
+            memory: 1000Mi
+            cpu: 4000m
       volumes:
       # Location of rclone.conf
       - name: rclone

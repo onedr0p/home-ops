@@ -26,10 +26,10 @@ spec:
     config:
       upstream:
         externalResolvers:
-          - https://dns1.nextdns.io/4838af
-          - https://dns2.nextdns.io/4838af
-          - tcp-tls:4838af.dns1.nextdns.io:853
-          - tcp-tls:4838af.dns2.nextdns.io:853
+        - https://dns1.nextdns.io/4838af
+        - https://dns2.nextdns.io/4838af
+        - tcp-tls:4838af.dns1.nextdns.io:853
+        - tcp-tls:4838af.dns2.nextdns.io:853
       conditional:
         mapping:
           status.devbu.io: udp:1.1.1.1
@@ -39,14 +39,14 @@ spec:
       blocking:
         blackLists:
           ads:
-            - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
+          - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
         whiteLists:
           ads:
-            - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
-            - https://raw.githubusercontent.com/onedr0p/k3s-gitops/master/integrations/adblock/whitelist.txt
+          - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+          - https://raw.githubusercontent.com/onedr0p/k3s-gitops/master/integrations/adblock/whitelist.txt
         clientGroupsBlock:
           default:
-            - ads
+          - ads
       clientLookup:
         upstream: udp:192.168.1.1
       prometheus:
@@ -73,13 +73,13 @@ spec:
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values: 
-                - blocky
-            topologyKey: "kubernetes.io/hostname"
+        - labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - blocky
+          topologyKey: "kubernetes.io/hostname"
     resources:
       requests:
         memory: 275Mi

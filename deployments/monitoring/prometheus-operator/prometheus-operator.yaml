@@ -46,17 +46,17 @@ spec:
           repeat_interval: 6h
           receiver: 'pushover'
           routes:
-            - receiver: 'null'
-              match:
-                alertname: Watchdog
-            - receiver: 'pushover'
-              match_re:
-                severity: critical|warning
-              continue: true
-            - receiver: 'shutdown-webhook'
-              match:
-                alertname: UPS15MinutesRemaining
-              continue: true
+          - receiver: 'null'
+            match:
+              alertname: Watchdog
+          - receiver: 'pushover'
+            match_re:
+              severity: critical|warning
+            continue: true
+          - receiver: 'shutdown-webhook'
+            match:
+              alertname: UPS15MinutesRemaining
+            continue: true
         inhibit_rules:
         - source_match:
             severity: 'critical'
@@ -67,7 +67,7 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "internal"
-        hosts: 
+        hosts:
         - "alert-manager.devbu.io"
         tls:
         - hosts:
@@ -103,7 +103,7 @@ spec:
         - ReadWriteOnce
       # extraContainers: |
       #   - name: renderer
-      #     image: grafana/grafana-image-renderer:latest        
+      #     image: grafana/grafana-image-renderer:latest
       env:
         GF_EXPLORE_ENABLED: true
         GF_PANELS_DISABLE_SANITIZE_HTML: true
@@ -115,7 +115,7 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
-        hosts: 
+        hosts:
         - "grafana.devbu.io"
         tls:
         - hosts:
@@ -126,7 +126,7 @@ spec:
           defaultDatasourceEnabled: false
         dashboards:
           enabled: true
-          searchNamespace: ALL        
+          searchNamespace: ALL
           provider:
             disableDelete: false
             allowUiUpdates: true
@@ -203,12 +203,12 @@ spec:
       enabled: false
     kubeControllerManager:
       enabled: false
-#       endpoints:
-#       - 192.168.42.11
+      # endpoints:
+      # - 192.168.42.11
     kubeScheduler:
       enabled: false
-#       endpoints:
-#       - 192.168.42.11
+      # endpoints:
+      # - 192.168.42.11
     kubeProxy:
       enabled: false
     kubelet:
@@ -223,7 +223,7 @@ spec:
         enabled: true
         annotations:
           kubernetes.io/ingress.class: "internal"
-        hosts: 
+        hosts:
         - "prometheus.devbu.io"
         tls:
         - hosts:
