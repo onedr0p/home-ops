@@ -45,7 +45,8 @@ jobs:
                 echo "Processing ${chart_name}@${chart_version} from ${chart_repo}"
                 ./helm repo add ${chart_md5} ${chart_repo} 1>/dev/null
                 ./helm repo update 1>/dev/null
-                ./helm fetch --version ${chart_version} --untar ${chart_md5}/${chart_name} --untardir ${tmp_dir} 1>/dev/null
+                ./helm pull --repo ${chart_repo}/${chart_name} --version ${chart_version}
+                # ./helm fetch --version ${chart_version} --untar ${chart_md5}/${chart_name} --untardir ${tmp_dir} 1>/dev/null
               fi
             fi
           done
