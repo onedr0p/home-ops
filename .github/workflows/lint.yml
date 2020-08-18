@@ -40,9 +40,10 @@ jobs:
               chart_name=$(./yq r ${f} spec.chart.name)
               chart_version=$(./yq r ${f} spec.chart.version)
               chart_md5=$(/bin/echo $chart_repo | /usr/bin/md5sum | cut -f1 -d" ")
-              ./helm repo add ${chart_md5} ${chart_repo}
-              ./helm repo update
-              ./helm fetch --version ${chart_version} --untar ${chart_md5}/${chart_name} --untardir ${tmp_dir}
+              echo "Processing ${chart_name}@${chart_version} from ${chart_repo}"
+              ./helm repo add ${chart_md5} ${chart_repo} 1>/dev/null
+              ./helm repo update 1>/dev/null
+              ./helm fetch --version ${chart_version} --untar ${chart_md5}/${chart_name} --untardir ${tmp_dir} 1>/dev/null
             fi
           done
   lint-yaml:
