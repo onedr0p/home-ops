@@ -24,17 +24,16 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[ci-skip]')"
     steps:
       - uses: actions/checkout@v2
-      - name: Lint Yaml
-        uses: ibiqlik/action-yamllint@v1
+      - name: Lint yaml
+        uses: ibiqlik/action-yamllint@latest
   lint-shell:
     runs-on:
       - ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci-skip]')"
     steps:
       - uses: actions/checkout@v2
-      - name: Shellcheck
-        uses: reviewdog/action-shellcheck@v1
+      - name: Lint scripts
+        uses: azohra/shell-linter@latest
         with:
-          path: "./hack"
-          pattern: "*.sh"
-          exclude: "./.git/*"
+          path: "hack"
+          severity: "error"
