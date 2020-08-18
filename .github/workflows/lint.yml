@@ -4,50 +4,36 @@ on:
     branches:
       - master
 jobs:
-## Too flakey
-#   lint-helmrelease:
+#   lint-charts:
 #     runs-on:
 #     - ubuntu-latest
 #     if: "!contains(github.event.head_commit.message, '[ci-skip]')"
 #     steps:
-#     - uses: actions/checkout@v2
-#     - name: Lint helmrelease
-#       uses: stefanprodan/hrval-action@v3.3.1
-#       with:
-#         helmRelease: deployments/
-#         helmVersion: v3
-#         kubernetesVersion: 1.18.8
-#         ignoreValues: true
-  verify-charts-exist:
-    runs-on:
-    - ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
-    steps:
-      - uses: actions/checkout@v2
-      - name: Download charts
-        run: |
-          curl -sL https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -o kubectl && chmod +x kubectl
-          ./kubectl version --client
-          curl -sL https://github.com/mikefarah/yq/releases/download/3.1.0/yq_linux_amd64 -o yq && chmod +x yq
-          ./yq --version
-          curl -sSL https://get.helm.sh/helm-v3.3.0-linux-amd64.tar.gz | tar xz && mv linux-amd64/helm helm && rm -rf linux-amd64
-          ./helm version
-          for f in `find ./deployments -type f -name '*.yaml' -or -name '*.yml'`; do
-            kind=$(./yq r ${f} kind)
-            if [[ ${kind} == "HelmRelease" ]]; then
-              chart_path=$(./yq r ${f} spec.chart.path)
-              if [[ -z "${chart_path}" ]]; then
-                chart_repo=$(./yq r ${f} spec.chart.repository)
-                chart_name=$(./yq r ${f} spec.chart.name)
-                chart_version=$(./yq r ${f} spec.chart.version)
-                chart_md5=$(/bin/echo $chart_repo | /usr/bin/md5sum | cut -f1 -d" ")
-                echo "Processing ${chart_name}@${chart_version} from ${chart_repo}"
-                ./helm repo add ${chart_md5} ${chart_repo} 1>/dev/null
-                ./helm repo update 1>/dev/null
-                ./helm pull ${chart_md5}/${chart_name} --version ${chart_version}
-              fi
-            fi
-          done
+#       - uses: actions/checkout@v2
+#       - name: Download charts
+#         run: |
+#           curl -sL https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -o kubectl && chmod +x kubectl
+#           ./kubectl version --client
+#           curl -sL https://github.com/mikefarah/yq/releases/download/3.1.0/yq_linux_amd64 -o yq && chmod +x yq
+#           ./yq --version
+#           curl -sSL https://get.helm.sh/helm-v3.3.0-linux-amd64.tar.gz | tar xz && mv linux-amd64/helm helm && rm -rf linux-amd64
+#           ./helm version
+#           for f in `find ./deployments -type f -name '*.yaml' -or -name '*.yml'`; do
+#             kind=$(./yq r ${f} kind)
+#             if [[ ${kind} == "HelmRelease" ]]; then
+#               chart_path=$(./yq r ${f} spec.chart.path)
+#               if [[ -z "${chart_path}" ]]; then
+#                 chart_repo=$(./yq r ${f} spec.chart.repository)
+#                 chart_name=$(./yq r ${f} spec.chart.name)
+#                 chart_version=$(./yq r ${f} spec.chart.version)
+#                 chart_md5=$(/bin/echo $chart_repo | /usr/bin/md5sum | cut -f1 -d" ")
+#                 echo "Processing ${chart_name}@${chart_version} from ${chart_repo}"
+#                 ./helm repo add ${chart_md5} ${chart_repo} 1>/dev/null
+#                 ./helm repo update 1>/dev/null
+#                 ./helm pull ${chart_md5}/${chart_name} --version ${chart_version}
+#               fi
+#             fi
+#           done
   lint-yaml:
     runs-on:
     - ubuntu-latest
