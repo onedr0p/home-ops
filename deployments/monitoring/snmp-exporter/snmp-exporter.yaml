@@ -13,8 +13,8 @@ spec:
     app.kubernetes.io/name: snmp-exporter
     app.kubernetes.io/instance: snmp-exporter
   ports:
-    - name: monitoring
-      port: 9116
+  - name: monitoring
+    port: 9116
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -31,42 +31,42 @@ spec:
       app.kubernetes.io/name: snmp-exporter
       app.kubernetes.io/instance: snmp-exporter
   endpoints:
-    - interval: 60s
-      port: monitoring
-      params:
-        module: 
-          - apcups
-        target:
-          - 192.168.1.15
-      path: "/snmp"
-      targetPort: 9116
-      relabelings:
-        - sourceLabels: [__param_target]
-          targetLabel: instance
-    - interval: 60s
-      port: monitoring
-      params:
-        module: 
-          - cyberpower
-        target:
-          - 192.168.1.16
-      path: "/snmp"
-      targetPort: 9116
-      relabelings:
-        - sourceLabels: [__param_target]
-          targetLabel: instance
-    - interval: 60s
-      port: monitoring
-      params:
-        module: 
-          - cyberpower
-        target:
-          - 192.168.1.17
-      path: "/snmp"
-      targetPort: 9116
-      relabelings:
-        - sourceLabels: [__param_target]
-          targetLabel: instance
+  - interval: 60s
+    port: monitoring
+    params:
+      module:
+      - apcups
+      target:
+      - 192.168.1.15
+    path: "/snmp"
+    targetPort: 9116
+    relabelings:
+    - sourceLabels: [__param_target]
+      targetLabel: instance
+  - interval: 60s
+    port: monitoring
+    params:
+      module:
+      - cyberpower
+      target:
+      - 192.168.1.16
+    path: "/snmp"
+    targetPort: 9116
+    relabelings:
+    - sourceLabels: [__param_target]
+      targetLabel: instance
+  - interval: 60s
+    port: monitoring
+    params:
+      module:
+      - cyberpower
+    target:
+    - 192.168.1.17
+    path: "/snmp"
+    targetPort: 9116
+    relabelings:
+    - sourceLabels: [__param_target]
+      targetLabel: instance
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -89,24 +89,24 @@ spec:
         app.kubernetes.io/instance: snmp-exporter
     spec:
       containers:
-        - name: snmp-exporter
-          image: prom/snmp-exporter:v0.17.0
-          imagePullPolicy: IfNotPresent
-          ports:
-            - name: monitoring
-              containerPort: 9116
-          volumeMounts:
-            - name: snmp-etc
-              mountPath: /etc/snmp_exporter/snmp.yml
-              subPath: snmp.yml
-              readOnly: true
-      volumes:
+      - name: snmp-exporter
+        image: prom/snmp-exporter:v0.17.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: monitoring
+          containerPort: 9116
+        volumeMounts:
         - name: snmp-etc
-          projected:
-            defaultMode: 0444
-            sources:
-              - configMap:
-                  name: snmp-exporter
-                  items:
-                    - key: snmp.yml
-                      path: snmp.yml
+          mountPath: /etc/snmp_exporter/snmp.yml
+          subPath: snmp.yml
+          readOnly: true
+      volumes:
+      - name: snmp-etc
+        projected:
+          defaultMode: 0444
+          sources:
+          - configMap:
+              name: snmp-exporter
+              items:
+              - key: snmp.yml
+                path: snmp.yml

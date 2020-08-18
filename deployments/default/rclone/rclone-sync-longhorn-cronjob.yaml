@@ -26,30 +26,30 @@ spec:
             image: rclone/rclone:1.52.3
             imagePullPolicy: IfNotPresent
             env:
-              - name: TZ
-                value: "America/New_York"
-            command: 
-              - "rclone"
-              - "-v"
-              - "--config"
-              - "/data/rclone.conf"
-              - "sync"
-              - "--ignore-errors"
-              - "--fast-list"
-              - "--b2-hard-delete"
-              - "--transfers"
-              - "24"
-              - "--checkers"
-              - "24"
-              - "--bwlimit"
-              - "25M"
-              - "minio:longhorn"
-              - "b2-longhorn-crypt:/"
+            - name: TZ
+              value: "America/New_York"
+            command:
+            - "rclone"
+            - "-v"
+            - "--config"
+            - "/data/rclone.conf"
+            - "sync"
+            - "--ignore-errors"
+            - "--fast-list"
+            - "--b2-hard-delete"
+            - "--transfers"
+            - "24"
+            - "--checkers"
+            - "24"
+            - "--bwlimit"
+            - "25M"
+            - "minio:longhorn"
+            - "b2-longhorn-crypt:/"
             volumeMounts:
-              - mountPath: /data
-                name: rclone
-                subPath: rclone
-                readOnly: false
+            - mountPath: /data
+              name: rclone
+              subPath: rclone
+              readOnly: false
           volumes:
           # Location of rclone.conf
           - name: rclone

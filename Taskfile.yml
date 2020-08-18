@@ -1,3 +1,4 @@
+---
 version: '3'
 
 env:
@@ -8,44 +9,44 @@ tasks:
   generate:
     desc: Generate secrets and sample env
     cmds:
-      - task: generate-sealed-secrets
-      - task: generate-sample-env
+    - task: generate-sealed-secrets
+    - task: generate-sample-env
   apply:
     desc: Apply manifests and secrets to the Kubernetes cluster
     cmds:
-      - task: apply-manifest-templates
-      - task: apply-sealed-secrets
+    - task: apply-manifest-templates
+    - task: apply-sealed-secrets
   flux-sync:
     desc: Force cluster to run flux
     cmds:
-      - fluxctl sync
+    - fluxctl sync
   generate-sealed-secrets:
     desc: Generate secrets
     cmds:
-      - ./hack/generate-sealed-secrets.sh
+    - ./hack/generate-sealed-secrets.sh
     preconditions:
-      - test -f .cluster-secrets.env
+    - test -f .cluster-secrets.env
   generate-sample-env:
     desc: Generate sample env
     cmds:
-      - ./hack/generate-sample-env.sh
+    - ./hack/generate-sample-env.sh
   validate-sealed-secrets:
     desc: Validate sealed-secrets
     cmds:
-      - kubeseal --validate < ./deployments/zz_generated_secrets.yaml --controller-name=sealed-secrets
+    - kubeseal --validate < ./deployments/zz_generated_secrets.yaml --controller-name=sealed-secrets
   apply-manifest-templates:
     desc: Apply manifests to the Kubernetes cluster
     cmds:
-      - ./hack/apply-manifest-templates.sh
+    - ./hack/apply-manifest-templates.sh
   apply-sealed-secrets:
     desc: Apply secrets to the Kubernetes cluster
     cmds:
-      - kubectl apply -f ./deployments/zz_generated_secrets.yaml
+    - kubectl apply -f ./deployments/zz_generated_secrets.yaml
   blocky-enable:
     desc: Interact with Blocky to enable adblocking
     cmds:
-      - ./hack/blocky.sh enable
+    - ./hack/blocky.sh enable
   blocky-disable:
     desc: Interact with Blocky to disable adblocking
     cmds:
-      - ./hack/blocky.sh disable
+    - ./hack/blocky.sh disable
