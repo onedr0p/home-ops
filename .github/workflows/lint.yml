@@ -4,36 +4,34 @@ on:
     branches:
       - master
 jobs:
-#  helmrelease:
-#    runs-on:
-#      - ubuntu-latest
-#    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Lint
-#       run: |
-#          sudo curl -L -o hrval-all.sh https://raw.githubusercontent.com/stefanprodan/hrval-action/master/src/hrval-all.sh
-#          sudo chmod +x hrval-all.sh
-#          sudo curl -L -o hrval.sh https://raw.githubusercontent.com/stefanprodan/hrval-action/master/src/hrval.sh
-#          sudo sed -i -e 's/helmv3/helm/g' hrval.sh
-#          sudo chmod +x hrval.sh
-#          ./hrval-all.sh deployments false 1.18.8 v3
+  lint-helmrelease:
+    runs-on:
+    - ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Lint helmrelease
+      uses: stefanprodan/hrval-action@v3.2.0
+      with:
+        helmRelease: deployments/
+        helmVersion: v3
+        kubernetesVersion: 1.18.8
   lint-yaml:
     runs-on:
-      - ubuntu-latest
+    - ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci-skip]')"
     steps:
-      - uses: actions/checkout@v2
-      - name: Lint yaml
-        uses: ibiqlik/action-yamllint@v1
+    - uses: actions/checkout@v2
+    - name: Lint yaml
+      uses: ibiqlik/action-yamllint@v1
   lint-shell:
     runs-on:
-      - ubuntu-latest
+    - ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci-skip]')"
     steps:
-      - uses: actions/checkout@v2
-      - name: Lint scripts
-        uses: azohra/shell-linter@latest
-        with:
-          path: "hack"
-          severity: "error"
+    - uses: actions/checkout@v2
+    - name: Lint scripts
+      uses: azohra/shell-linter@latest
+      with:
+        path: "hack"
+        severity: "error"
