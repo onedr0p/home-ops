@@ -123,7 +123,8 @@ spec:
       sidecar:
         datasources:
           enabled: true
-          defaultDatasourceEnabled: false
+          # Disable for thanos
+          defaultDatasourceEnabled: true
         dashboards:
           enabled: true
           searchNamespace: ALL
@@ -203,11 +204,11 @@ spec:
             revision: 8
             datasource: Prometheus
       additionalDataSources:
-      # - name: Prometheus
-      #   type: prometheus
-      #   access: proxy
-      #   url: http://thanos-query-http:10902/
-      #   isDefault: true
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://thanos-query-http:10902/
+        isDefault: true
       - name: loki
         type: loki
         access: proxy
