@@ -35,7 +35,6 @@ jobs:
           for f in `find ./deployments -type f -name '*.yaml' -or -name '*.yml'`; do
             kind=$(./yq r ${f} kind)
             if [[ ${kind} == "HelmRelease" ]]; then
-              tmp_dir=$(mktemp -d)
               chart_path=$(./yq r ${f} spec.chart.path)
               if [[ -z "${chart_path}" ]]; then
                 chart_repo=$(./yq r ${f} spec.chart.repository)
@@ -43,7 +42,9 @@ jobs:
                 chart_version=$(./yq r ${f} spec.chart.version)
                 chart_md5=$(/bin/echo $chart_repo | /usr/bin/md5sum | cut -f1 -d" ")
                 echo "Processing ${chart_name}@${chart_version} from ${chart_repo}"
-                ./helm pull --repo ${chart_repo}/${chart_name} --version ${chart_version}
+                ./helm repo add ${chart_md5} ${chart_repo} 1>/dev/null
+                ./helm repo update 1>/dev/null
+                ./helm pull ${chart_repo}/${chart_name} --version ${chart_version}
               fi
             fi
           done
