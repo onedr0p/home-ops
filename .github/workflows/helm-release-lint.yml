@@ -1,0 +1,29 @@
+name: helm-release-lint
+on:
+  push:
+    branches:
+      - master
+    # paths:
+    #   - "depl**.txt"
+    #   - "**.env"
+    #   - "!.cluster-secrets.sample.env"
+    tags-ignore:
+      - "flux-*"
+# env:
+#   DEBIAN_FRONTEND: "noninteractive"
+#   KUBECONFIG: "./kubeconfig"
+#   FLUX_FORWARD_NAMESPACE: "flux"
+jobs:
+  main:
+    runs-on:
+      - self-hosted
+    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Lint
+        run: |
+          sudo curl -sL -o hrval-all.sh https://raw.githubusercontent.com/stefanprodan/hrval-action/master/src/hrval-all.sh
+          sudo chmod +x hrval-all.sh
+          sudo curl -sL -o hrval.sh https://raw.githubusercontent.com/stefanprodan/hrval-action/master/src/hrval.sh
+          sudo chmod +x hrval.sh
+          ./hrval.sh deployments false 1.18.8 v3
