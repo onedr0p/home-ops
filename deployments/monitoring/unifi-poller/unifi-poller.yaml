@@ -1,0 +1,42 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: unifi-poller
+  namespace: monitoring
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: unifi-poller
+  helmVersion: v3
+  rollback:
+    enable: false
+  chart:
+    repository: https://github.com/halkeye/helm-charts
+    name: unifi-poller
+    version: 0.1.1
+  values:
+    image:
+      repository: golift/unifi-poller
+      tag: 2.0.1
+    config:
+      prometheus:
+        disable: false
+        http_listen: "0.0.0.0:9130"
+        report_errors: false
+      influxdb:
+        disable: true
+      unifi:
+        dynamic: false
+        defaults:
+          role: "main-controller"
+          url:  "https://192.168.1.2:8443"
+          sites:
+          - Homelab
+          verify_ssl: false
+          save_ids: false
+          save_dpi: false
+          save_sites: true
+  valueFileSecrets:
+  - name: "unifi-poller-helm-values"
