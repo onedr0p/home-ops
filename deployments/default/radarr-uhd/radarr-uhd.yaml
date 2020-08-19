@@ -26,11 +26,14 @@ spec:
         kubernetes.io/ingress.class: "nginx"
         nginx.ingress.kubernetes.io/auth-url: "https://auth.devbu.io/oauth2/auth"
         nginx.ingress.kubernetes.io/auth-signin: "https://auth.devbu.io/oauth2/start"
-        nginx.ingress.kubernetes.io/configuration-snippet: |
-          satisfy any;
-          allow 192.168.1.1/24;
-          allow 10.0.0.0/8;
-          deny all;
+        # nginx.ingress.kubernetes.io/configuration-snippet: |
+        #   # Bypass auth for requests from local network
+        #   # This works, but are there some security concerns?
+        #   satisfy any;
+        #   allow 192.168.0.0/16;
+        #   allow 172.16.0.0/12;
+        #   allow 10.0.0.0/8;
+        #   deny all;
       hosts:
       - "radarr-uhd.devbu.io"
       tls:
