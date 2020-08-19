@@ -15,11 +15,11 @@ spec:
   chart:
     repository: https://kubernetes.github.io/ingress-nginx
     name: ingress-nginx
-    version: 2.11.2
+    version: 2.11.3
   values:
     controller:
       ingressClass: internal
-      replicaCount: 2
+      replicaCount: 3
       service:
         # Gitea's SSH service is also using
         # this IP for SSH, Metallb requires
@@ -32,10 +32,9 @@ spec:
         enabled: true
       config:
         ssl-protocols: "TLSv1.3 TLSv1.2"
-        custom-http-errors: "404,403,500,503"
         # Setting use-proxy-protocol to true will break the proxy
         use-proxy-protocol: "false"
-        proxy-body-size: "50m"
+        proxy-body-size: "0"
         use-forwarded-headers: "true"
       metrics:
         enabled: true
@@ -51,13 +50,4 @@ spec:
         limits:
           memory: 500Mi
     defaultBackend:
-      enabled: true
-      image:
-        repository: onedr0p/custom-error-pages
-        tag: v1.0.1
-      resources:
-        requests:
-          memory: 50Mi
-          cpu: 25m
-        limits:
-          memory: 200Mi
+      enabled: false
