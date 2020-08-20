@@ -9,7 +9,7 @@ source "${__dir}/environment.sh"
 # Apply the templates to the cluster
 #
 for file in "${CLUSTER_ROOT}"/_templates/*.tpl; do
-    if output=$(envsubst < "$file"); then
+    if output=$(envsubst <"$file"); then
         printf '%s' "$output" | kubectl apply -f -
     fi
 done
