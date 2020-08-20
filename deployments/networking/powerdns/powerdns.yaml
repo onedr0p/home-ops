@@ -21,7 +21,7 @@ spec:
       repository: psitrax/powerdns
       tag: v4.3.0
       pullPolicy: IfNotPresent
-    replicaCount: 3
+    replicaCount: 1
     service:
       type: LoadBalancer
       externalTrafficPolicy: Local
@@ -34,20 +34,12 @@ spec:
         default-soa-name: "ns1.devbu.io"
         default-ttl: 300
         master: yes
-    mariadb:
-      enabled: true
-      image:
-        repository: bitnami/mariadb
-        tag: 10.5.4
-      db:
-        name: pdns
-        user: pdns
-      replication:
+      mariadb:
         enabled: false
-      master:
-        persistence:
-          enabled: true
-          storageClass: "longhorn"
-          size: 10Gi
+      postgres:
+        enabled: true
+        global:
+          persistence:
+            enabled: false
   valueFileSecrets:
   - name: "powerdns-helm-values"
