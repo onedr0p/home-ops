@@ -22,7 +22,7 @@ fi
 
 # Ensure these cli utils exist
 command -v kubectl >/dev/null 2>&1 || { echo >&2 "kubectl is not installed. Aborting."; exit 1; }
-command -v envsubst >/dev/null 2>&1 || { echo >&2 "envsubst is not installed. Aborting."; exit 1; } 
+command -v envsubst >/dev/null 2>&1 || { echo >&2 "envsubst is not installed. Aborting."; exit 1; }
 command -v kubeseal >/dev/null 2>&1 || { echo >&2 "kubeseal is not installed. Aborting."; exit 1; }
 command -v yq >/dev/null 2>&1 || { echo >&2 "yq is not installed. Aborting."; exit 1; }
 
