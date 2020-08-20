@@ -25,7 +25,7 @@ for file in "${CLUSTER_ROOT}"/**/*.txt; do
     secret_path="$(dirname "$file")/$(basename -s .txt "$file")"
     # Get the filename without extension
     # e.g. "pihole"
-    secret_name=$(basename "${secret_path}")  
+    secret_name=$(basename "${secret_path}")
     # Get the relative path of deployment
     deployment=${file#"${CLUSTER_ROOT}"}
     # Get the namespace (based on folder path of manifest)
