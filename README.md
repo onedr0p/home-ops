@@ -8,10 +8,7 @@
 
 ## Overview
 
-Welcome to my home Kubernetes cluster. You will find my cluster is setup for home automation using [Home Assistant](https://www.home-assistant.io/) and media automation using [Sonarr](https://sonarr.tv/), [Radarr](https://radarr.video/) and [Plex](https://www.plex.tv/sign-in/?forwardUrl=https%3A%2F%2Fwww.plex.tv%2F). But wait! That's not all. I also use [Gitea](https://gitea.io/en-us/) and [Drone](https://drone.io/) for development automation too.
-
-Lots more fun stuff, poke around my [deployments](./deployments/) directory to see what my cluster is running. Feel free to open a [GitHub Issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join our [Discord](https://discord.gg/DNCynrJ) if you have any questions.
-
+Welcome to my home Kubernetes cluster. You will find my cluster is setup for home automation using [Home Assistant](https://www.home-assistant.io/) and media automation using [Sonarr](https://sonarr.tv/), [Radarr](https://radarr.video/) and [Plex](https://www.plex.tv/sign-in/?forwardUrl=https%3A%2F%2Fwww.plex.tv%2F). I also use [Gitea](https://gitea.io/en-us/) and [Drone](https://drone.io/) for development automation too. It would take too long to describe all the technologies my cluster is running so poke around my [deployments](./deployments/) directory to see what my cluster is running. Feel free to open a [GitHub Issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join our [Discord](https://discord.gg/DNCynrJ) if you have any questions.
 
 ### Hardware configuration
 
