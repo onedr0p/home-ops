@@ -62,22 +62,6 @@ kubectl create secret generic nginx-basic-auth \
         >>"${GENERATED_SECRETS}"
 echo "---" >>"${GENERATED_SECRETS}"
 
-# NginX Basic Auth - kube-system namespace
-kubectl create secret generic nginx-basic-auth \
-    --from-literal=auth="${NGINX_BASIC_AUTH}" \
-    --namespace kube-system --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" \
-        >>"${GENERATED_SECRETS}"
-echo "---" >>"${GENERATED_SECRETS}"
-
-# NginX Basic Auth - monitoring namespace
-kubectl create secret generic nginx-basic-auth \
-    --from-literal=auth="${NGINX_BASIC_AUTH}" \
-    --namespace monitoring --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" \
-        >>"${GENERATED_SECRETS}"
-echo "---" >>"${GENERATED_SECRETS}"
-
 # Cloudflare API Key - cert-manager namespace
 kubectl create secret generic cloudflare-api-key \
     --from-literal=api-key="${CF_API_KEY}" \

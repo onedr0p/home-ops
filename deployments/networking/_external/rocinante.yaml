@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: rocinante
+  namespace: networking
   annotations:
     external-dns.alpha.kubernetes.io/hostname: "rocinante.devbu.io."
 spec:
@@ -13,6 +14,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: rocinante-portal
+  namespace: networking
   annotations:
     external-dns.alpha.kubernetes.io/target: "portal.rocinante.devbu.io."
 spec:
@@ -25,13 +27,14 @@ spec:
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
+  name: rocinante-portal
+  namespace: networking
   annotations:
-    kubernetes.io/ingress.class: internal
+    kubernetes.io/ingress.class: "internal"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
   labels:
     app.kubernetes.io/instance: rocinante-portal
     app.kubernetes.io/name: rocinante-portal
-  name: rocinante-portal
 spec:
   rules:
   - host: "portal.rocinante.devbu.io"
@@ -48,6 +51,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: rocinante-nexus
+  namespace: networking
   annotations:
     external-dns.alpha.kubernetes.io/target: "nexus.rocinante.devbu.io."
 spec:
@@ -60,13 +64,14 @@ spec:
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
+  name: rocinante-nexus
+  namespace: networking
   annotations:
-    kubernetes.io/ingress.class: internal
+    kubernetes.io/ingress.class: "internal"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
   labels:
     app.kubernetes.io/instance: rocinante-nexus
     app.kubernetes.io/name: rocinante-nexus
-  name: rocinante-nexus
 spec:
   rules:
   - host: "nexus.rocinante.devbu.io"
@@ -83,6 +88,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: rocinante-minio
+  namespace: networking
   annotations:
     external-dns.alpha.kubernetes.io/target: "minio.rocinante.devbu.io."
 spec:
@@ -95,13 +101,14 @@ spec:
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
+  name: rocinante-minio
+  namespace: networking
   annotations:
-    kubernetes.io/ingress.class: internal
+    kubernetes.io/ingress.class: "internal"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
   labels:
     app.kubernetes.io/instance: rocinante-minio
     app.kubernetes.io/name: rocinante-minio
-  name: rocinante-minio
 spec:
   rules:
   - host: "minio.rocinante.devbu.io"
@@ -118,6 +125,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: rocinante-registry
+  namespace: networking
   annotations:
     external-dns.alpha.kubernetes.io/target: "registry.rocinante.devbu.io."
 spec:
@@ -130,13 +138,14 @@ spec:
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
+  name: rocinante-registry
+  namespace: networking
   annotations:
-    kubernetes.io/ingress.class: internal
+    kubernetes.io/ingress.class: "internal"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
   labels:
     app.kubernetes.io/instance: rocinante-registry
     app.kubernetes.io/name: rocinante-registry
-  name: rocinante-registry
 spec:
   rules:
   - host: "registry.rocinante.devbu.io"
