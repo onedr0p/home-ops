@@ -15,11 +15,11 @@ spec:
   chart:
     repository: https://novumrgi.github.io/helm/
     name: gitea
-    version: 1.0.4
+    version: 1.4.1
   values:
     image:
       repository: gitea/gitea
-      tag: 1.12.2
+      tag: 1.12.3
       pullPolicy: IfNotPresent
     persistence:
       enabled: true
@@ -42,29 +42,26 @@ spec:
         annotations:
           metallb.universe.tf/allow-shared-ip: 'nginx-internal'
     gitea:
+      admin:
+        username: "devin"
       config:
-        appName: "Devin's wonderful Gitea"
-        adminUser: "devin"
-      respository:
-        defaultPrivate: true
-      server:
-        http:
-          externalDomain: "git.devbu.io"
-          externalPort: 443
-        ssh:
-          externalDomain: "git.devbu.io"
-          externalPort: 1337
+        APP_NAME: "Devin's wonderful Gitea"
+        respository:
+          DEFAULT_PRIVATE: true
+        server:
+          HTTP_PORT: 443
+          SSH_PORT: 1337
+        admin:
+          DISABLE_REGULAR_ORG_CREATION: true
+        security:
+          MIN_PASSWORD_LENGTH: 12
+        service:
+          DISABLE_REGISTRATION: true
+          REQUIRE_SIGNIN_VIEW: true
       database:
         builtIn:
           postgresql:
             enabled: true
-      admin:
-        disableRegularOrgCreation: true
-      security:
-        minPasswordLength: 12
-      service:
-        disableRegistration: true
-        requireSigninView: true
     postgresql:
       persistence:
         storageClass: "longhorn"
