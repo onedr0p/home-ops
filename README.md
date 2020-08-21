@@ -12,7 +12,7 @@ Welcome to my home Kubernetes cluster. You will find my cluster is setup for hom
 
 ### Hardware configuration
 
-_All my Kubernetes master and worker nodes below are running bare metal Ubuntu 19.04_
+_All my Kubernetes master and worker nodes below are running bare metal Ubuntu 20.04.x_
 
 | Device                  | Count | OS Disk Size | Data Disk Size      | Ram  | Purpose                                |
 |-------------------------|-------|--------------|---------------------|------|----------------------------------------|
