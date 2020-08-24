@@ -29,7 +29,7 @@ spec:
         summary: "Windows Server service Status (instance {{ $labels.instance }})"
         description: "Windows Service state is not OK\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: WindowsServerCpuUsage
-      expr: 100 - (avg by (instance) (rate(windows_cpu_time_total{mode="idle"}[2m])) * 100) > 80
+      expr: 100 - (avg by (instance) (rate(windows_cpu_time_total{mode="idle"}[2m])) * 100) > 90
       for: 5m
       labels:
         severity: warning
@@ -37,7 +37,7 @@ spec:
         summary: "Windows Server CPU Usage (instance {{ $labels.instance }})"
         description: "CPU Usage is more than 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: WindowsServerMemoryUsage
-      expr: 100 * (windows_os_physical_memory_free_bytes) / windows_cs_physical_memory_bytes > 90
+      expr: 100 * (windows_os_physical_memory_free_bytes) / windows_cs_physical_memory_bytes > 95
       for: 5m
       labels:
         severity: warning
