@@ -1,0 +1,30 @@
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: runnerdeployment-gitops
+  namespace: actions-runner-system
+spec:
+  minReplicas: 1
+  maxReplicas: 3
+  template:
+    spec:
+      repository: onedr0p/k3s-gitops
+      image: onedr0p/actions-runner:latest
+      imagePullPolicy: Always
+      env: []
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: runnerdeployment-gitops-autoscaler
+  namespace: actions-runner-system
+spec:
+  scaleTargetRef:
+    name: runnerdeployment-gitops
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: TotalNumberOfQueuedAndInProgressWorkflowRuns
+      repositoryNames:
+        - onedr0p/k3s-gitops
