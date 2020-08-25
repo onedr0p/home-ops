@@ -29,21 +29,21 @@ _All my Kubernetes master and worker nodes below are running bare metal Ubuntu 2
 
 ### Services addresses
 
-_MetalLB IP Range 192.168.42.100-192.168.42.250_
+_This chart is to reference Load Balancer IP addresses in my deployments and may not be fully up-to-date_
 
-| Deployment               | Address                                                 |
-|--------------------------|---------------------------------------------------------|
-| nginx-ingress (external) | 192.168.42.100                                          |
-| nginx-ingress (internal) | 192.168.42.101                                          |
-| home-assistant           | [192.168.42.105:8123](http://192.168.42.105:8123)       |
-| influxdb                 | 192.168.42.109                                          |
-| vernemq                  | 192.168.42.110                                          |
-| blocky                   | 192.168.42.115                                          |
-| gitea                    | 192.168.42.125                                          |
-| qbittorrent              | 192.168.42.130                                          |
-| plex                     | [192.168.42.140:32400](http://192.168.42.140:32400/web) |
-| loki-syslog              | 192.168.42.155                                          |
-| powerdns                 | 192.168.42.180                                          |
+| Deployment               | Address        |
+|--------------------------|----------------|
+| nginx-ingress (external) | 192.168.42.100 |
+| nginx-ingress (internal) | 192.168.42.101 |
+| home-assistant           | 192.168.42.105 |
+| influxdb                 | 192.168.42.109 |
+| vernemq                  | 192.168.42.110 |
+| blocky                   | 192.168.42.115 |
+| gitea                    | 192.168.42.125 |
+| qbittorrent              | 192.168.42.130 |
+| plex                     | 192.168.42.140 |
+| loki-syslog              | 192.168.42.155 |
+| powerdns                 | 192.168.42.180 |
 
 ---
 
