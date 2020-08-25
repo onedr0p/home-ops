@@ -8,11 +8,11 @@
 
 ## Overview
 
-Welcome to my home Kubernetes cluster. This repo _is_ my Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux) and [Helm Operator](https://github.com/fluxcd/helm-operator) read my [deployments](./deployments/) folder and makes the changes to my cluster based on the yaml manifests.
+Welcome to my home Kubernetes cluster. This repo _is_ my Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux) and [Helm Operator](https://github.com/fluxcd/helm-operator) watch my [deployments](./deployments/) folder and makes the changes to my cluster based on the yaml manifests.
 
 You'll find this is setup for home automation using [Home Assistant](https://www.home-assistant.io/) and media automation using [Sonarr](https://sonarr.tv/), [Radarr](https://radarr.video/) and [Plex](https://www.plex.tv/sign-in/?forwardUrl=https%3A%2F%2Fwww.plex.tv%2F). I also use [Gitea](https://gitea.io/en-us/) and [Drone](https://drone.io/) for development automation too. It would take too long to describe all the technologies running so poke around my [deployments](./deployments/) directory to see what's happening. 
 
-Feel free to open a [GitHub Issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join our [Discord](https://discord.gg/DNCynrJ) if you have any questions.
+Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join our [Discord](https://discord.gg/DNCynrJ) if you have any questions.
 
 ### Hardware configuration
 
@@ -50,6 +50,7 @@ _This chart is a reference to Load Balancer IP addresses in my deployments and m
 ---
 
 ## Thanks
+
 A lot of inspiration for this repo came from the following people:
 
 - [billimek/k8s-gitops](https://github.com/billimek/k8s-gitops)
