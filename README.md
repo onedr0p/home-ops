@@ -31,7 +31,7 @@ _All my Kubernetes master and worker nodes below are running bare metal Ubuntu 2
 
 ### Load Balancer IP addresses
 
-_This chart is a reference to Load Balancer IP addresses in my deployments and may not be fully up-to-date_
+_This table is a reference to Load Balancer IP addresses in my deployments and may not be fully up-to-date_
 
 | Deployment               | Address        |
 |--------------------------|----------------|
