@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-ACTION=$1
-DURATION=$2
+ACTION="${1}"
+DURATION="${2}"
 
-NAMESPACE="kube-system"
+NAMESPACE="networking"
 BLOCKY_PODS=$(kubectl get pods -n "${NAMESPACE}" -o=jsonpath="{range .items[*]}{.metadata.name} " -l app.kubernetes.io/name=blocky)
 
 for pod in $BLOCKY_PODS; do
