@@ -1,5 +1,3 @@
-# :sailboat:&nbsp; My home Kubernetes cluster managed by GitOps
-
 <h1 align="center">
   <img src="https://i.imgur.com/p1RzXjQ.png">
 </h1>
@@ -12,7 +10,7 @@
 
 ---
 
-## :book:&nbsp; Overview
+# :sailboat:&nbsp; My home Kubernetes cluster managed by GitOps
 
 Welcome to my home Kubernetes cluster. This repo _is_ my Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux) and [Helm Operator](https://github.com/fluxcd/helm-operator) watch my [deployments](./deployments/) folder and makes the changes to my cluster based on the yaml manifests.
 
@@ -22,7 +20,7 @@ Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/
 
 ---
 
-### :computer:&nbsp; Hardware configuration
+## :computer:&nbsp; Hardware configuration
 
 _All my Kubernetes master and worker nodes below are running bare metal Ubuntu 20.04.x_
 
@@ -37,7 +35,7 @@ _All my Kubernetes master and worker nodes below are running bare metal Ubuntu 2
 
 ---
 
-### :memo:&nbsp; Load Balancer IP addresses
+## :memo:&nbsp; Load Balancer IP addresses
 
 _This table is a reference to Load Balancer IP addresses in my deployments and may not be fully up-to-date_
 
