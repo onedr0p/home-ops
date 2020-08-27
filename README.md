@@ -1,4 +1,7 @@
 <h1 align="center">
+  My home Kubernetes cluster :sailboat:
+  <br />
+  <br />
   <img src="https://i.imgur.com/p1RzXjQ.png">
 </h1>
 
@@ -10,7 +13,7 @@
 
 ---
 
-# :sailboat:&nbsp; My home Kubernetes cluster managed by GitOps
+# :book:&nbsp; Overview
 
 Welcome to my home Kubernetes cluster. This repo _is_ my Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux) and [Helm Operator](https://github.com/fluxcd/helm-operator) watch my [deployments](./deployments/) folder and makes the changes to my cluster based on the yaml manifests.
 
