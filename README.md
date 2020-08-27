@@ -1,4 +1,4 @@
-# My home Kubernetes cluster managed by GitOps
+# :sailboat:&nbsp; My home Kubernetes cluster managed by GitOps
 
 <p align="center">
 <img src="https://i.imgur.com/p1RzXjQ.png">
@@ -8,7 +8,7 @@
 
 ---
 
-## Overview
+## :book:&nbsp; Overview
 
 Welcome to my home Kubernetes cluster. This repo _is_ my Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux) and [Helm Operator](https://github.com/fluxcd/helm-operator) watch my [deployments](./deployments/) folder and makes the changes to my cluster based on the yaml manifests.
 
@@ -16,7 +16,9 @@ You'll find this is setup for home automation using [Home Assistant](https://www
 
 Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join our [Discord](https://discord.gg/DNCynrJ) if you have any questions.
 
-### Hardware configuration
+---
+
+### :computer:&nbsp; Hardware configuration
 
 _All my Kubernetes master and worker nodes below are running bare metal Ubuntu 20.04.x_
 
@@ -31,7 +33,7 @@ _All my Kubernetes master and worker nodes below are running bare metal Ubuntu 2
 
 ---
 
-### Load Balancer IP addresses
+### :memo:&nbsp; Load Balancer IP addresses
 
 _This table is a reference to Load Balancer IP addresses in my deployments and may not be fully up-to-date_
 
@@ -51,7 +53,7 @@ _This table is a reference to Load Balancer IP addresses in my deployments and m
 
 ---
 
-## Thanks
+## :handshake:&nbsp; Thanks
 
 A lot of inspiration for this repo came from the following people:
 
