@@ -5,6 +5,7 @@ metadata:
   name: plex
   namespace: default
   annotations:
+    replicas-max: "1"
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "true"
     fluxcd.io/tag.chart-image: 'regexp:^(1\.[0-9]+\.[0-9]+\.[0-9]+-.*)$'
@@ -16,7 +17,7 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: plex
-    version: 1.8.0
+    version: 1.8.1
   values:
     image:
       repository: plexinc/pms-docker
@@ -63,33 +64,9 @@ spec:
         claimName: nfs-media-serenity-pvc
     logging:
       promtail:
-        enabled: false
-        # image:
-        #   repository: grafana/promtail
-        #   tag: 1.6.0
-        #   pullPolicy: IfNotPresent
-        # config:
-        #   server:
-        #     disable: true
-        #   positions:
-        #     filename: /tmp/positions.yaml
-        #   clients:
-        #   - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
-        #   scrape_configs:
-        #   - job_name: plex-logs
-        #     static_configs:
-        #     - targets:
-        #       - localhost
-        #       labels:
-        #         job: plex-logs
-        #         __path__: "/plex-logs/*.log"
-        #   - job_name: plex-plugin-logs
-        #     static_configs:
-        #     - targets:
-        #       - localhost
-        #       labels:
-        #         job: plex-plugin-logs
-        #         __path__: "/plex-logs/PMS Plugin Logs/*.log"
+        enabled: true
+        loki:
+          url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
     resources:
       requests:
         cpu: 35m
