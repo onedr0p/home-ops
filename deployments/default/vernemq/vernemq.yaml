@@ -24,17 +24,24 @@ spec:
     serviceMonitor:
       create: true
     service:
-      type: LoadBalancer
-      loadBalancerIP: 192.168.69.110
+      type: NodePort
+      externalIPs:
+      - 192.168.69.110
+      # type: LoadBalancer
+      # loadBalancerIP: 192.168.69.110
       ws:
         enabled: true
-    statefulset:
-      podAnnotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8888"
+        nodePort: 32080
+      mqtt:
+        enabled: true
+        nodePort: 31883
+    # statefulset:
+    #   podAnnotations:
+    #     prometheus.io/scrape: "true"
+    #     prometheus.io/port: "8888"
     additionalEnv:
-      - name: DOCKER_VERNEMQ_ACCEPT_EULA
-        value: "yes"
-      - name: DOCKER_VERNEMQ_ALLOW_ANONYMOUS
-        value: "on"
+    - name: DOCKER_VERNEMQ_ACCEPT_EULA
+      value: "yes"
+    - name: DOCKER_VERNEMQ_ALLOW_ANONYMOUS
+      value: "on"
     podAntiAffinity: hard
