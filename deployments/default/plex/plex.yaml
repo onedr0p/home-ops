@@ -63,33 +63,33 @@ spec:
         claimName: nfs-media-serenity-pvc
     logging:
       promtail:
-        enabled: true
-        image:
-          repository: grafana/promtail
-          tag: 1.6.0
-          pullPolicy: IfNotPresent
-        config:
-          server:
-            disable: true
-          positions:
-            filename: /tmp/positions.yaml
-          clients:
-          - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
-          scrape_configs:
-          - job_name: plex-logs
-            static_configs:
-            - targets:
-              - localhost
-              labels:
-                job: plex-logs
-                __path__: "/plex-logs/*.log"
-          - job_name: plex-plugin-logs
-            static_configs:
-            - targets:
-              - localhost
-              labels:
-                job: plex-plugin-logs
-                __path__: "/plex-logs/PMS Plugin Logs/*.log"
+        enabled: false
+        # image:
+        #   repository: grafana/promtail
+        #   tag: 1.6.0
+        #   pullPolicy: IfNotPresent
+        # config:
+        #   server:
+        #     disable: true
+        #   positions:
+        #     filename: /tmp/positions.yaml
+        #   clients:
+        #   - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+        #   scrape_configs:
+        #   - job_name: plex-logs
+        #     static_configs:
+        #     - targets:
+        #       - localhost
+        #       labels:
+        #         job: plex-logs
+        #         __path__: "/plex-logs/*.log"
+        #   - job_name: plex-plugin-logs
+        #     static_configs:
+        #     - targets:
+        #       - localhost
+        #       labels:
+        #         job: plex-plugin-logs
+        #         __path__: "/plex-logs/PMS Plugin Logs/*.log"
     resources:
       requests:
         cpu: 35m
