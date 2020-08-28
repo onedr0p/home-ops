@@ -29,8 +29,26 @@ spec:
       prometheusRule:
         enabled: true
     configInline:
+      peers:
+        - peer-address: 192.168.42.1
+          peer-asn: 64512
+          my-asn: 64512
       address-pools:
-      - name: default
-        protocol: layer2
-        addresses:
-        - 192.168.42.100-192.168.42.250
+        - name: layer2
+          protocol: layer2
+          addresses:
+            - 192.168.42.100-192.168.42.250
+          avoid-buggy-ips: true
+        - name: bgp
+          protocol: bgp
+          avoid-buggy-ips: true
+          addresses:
+            - 192.168.69.0/24
+          bgp-advertisements:
+            - localpref: 100
+    # configInline:
+    #   address-pools:
+    #   - name: default
+    #     protocol: layer2
+    #     addresses:
+    #     - 192.168.42.100-192.168.42.250
