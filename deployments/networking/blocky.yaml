@@ -16,7 +16,7 @@ spec:
   chart:
     repository: https://billimek.com/billimek-charts/
     name: blocky
-    version: 3.2.0
+    version: 3.3.0
   values:
     image:
       repository: spx01/blocky
@@ -57,20 +57,33 @@ spec:
         path: /metrics
       httpPort: 4000
       logLevel: info
+    service:
+      type: NodePort
+      externalIPs:
+      - 192.168.69.115
+      externalTrafficPolicy: Local
     serviceTCP:
       enabled: true
-      type: LoadBalancer
+      type: NodePort
+      externalIPs:
+      - 192.168.69.115
       externalTrafficPolicy: Local
-      loadBalancerIP: 192.168.69.115
-      annotations:
-        metallb.universe.tf/allow-shared-ip: blocky
+      # type: LoadBalancer
+      # externalTrafficPolicy: Local
+      # loadBalancerIP: 192.168.69.115
+      # annotations:
+      #   metallb.universe.tf/allow-shared-ip: blocky
     serviceUDP:
       enabled: true
-      type: LoadBalancer
+      type: NodePort
+      externalIPs:
+      - 192.168.69.115
       externalTrafficPolicy: Local
-      loadBalancerIP: 192.168.69.115
-      annotations:
-        metallb.universe.tf/allow-shared-ip: blocky
+      # type: LoadBalancer
+      # externalTrafficPolicy: Local
+      # loadBalancerIP: 192.168.69.115
+      # annotations:
+      #   metallb.universe.tf/allow-shared-ip: blocky
     serviceMonitor:
       enabled: true
     affinity:
