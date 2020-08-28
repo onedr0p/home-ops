@@ -22,37 +22,42 @@ k3sup install --ip "192.168.42.11" \
                       --flannel-backend=none \
                       --cluster-cidr=10.42.0.0/16 \
                       --service-cidr=10.43.0.0/16 \
-                      --kubelet-arg='feature-gates=ExternalPolicyForExternalIP=true'"
+                      --kubelet-arg=\"feature-gates=ExternalPolicyForExternalIP=true\""
 
 # k3s-worker-a
 k3sup join --ip "192.168.42.12" \
     --server-ip "192.168.42.11" \
     --k3s-version "v1.18.8+k3s1" \
-    --user "devin"
+    --user "devin" \
+    --k3s-extra-args "--kubelet-arg=\"feature-gates=ExternalPolicyForExternalIP=true\""
 
 # k3s-worker-b
 k3sup join --ip "192.168.42.13" \
     --server-ip "192.168.42.11" \
     --k3s-version "v1.18.8+k3s1" \
-    --user "devin"
+    --user "devin" \
+    --k3s-extra-args "--kubelet-arg=\"feature-gates=ExternalPolicyForExternalIP=true\""
 
 # k3s-worker-c
 k3sup join --ip "192.168.42.14" \
     --server-ip "192.168.42.11" \
     --k3s-version "v1.18.8+k3s1" \
-    --user "devin"
+    --user "devin" \
+    --k3s-extra-args "--kubelet-arg=\"feature-gates=ExternalPolicyForExternalIP=true\""
 
 # k3s-worker-d
 k3sup join --ip "192.168.42.15" \
     --server-ip "192.168.42.11" \
     --k3s-version "v1.18.8+k3s1" \
-    --user "devin"
+    --user "devin" \
+    --k3s-extra-args "--kubelet-arg=\"feature-gates=ExternalPolicyForExternalIP=true\""
 
 # k3s-worker-e
 k3sup join --ip "192.168.42.16" \
     --server-ip "192.168.42.11" \
     --k3s-version "v1.18.8+k3s1" \
-    --user "devin"
+    --user "devin" \
+    --k3s-extra-args "--kubelet-arg=\"feature-gates=ExternalPolicyForExternalIP=true\""
 
 # Label worker nodes as such
 kubectl label node k3s-worker-a node-role.kubernetes.io/worker=true && \
