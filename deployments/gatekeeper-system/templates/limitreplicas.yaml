@@ -1,0 +1,31 @@
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8slimitreplicas
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sLimitReplicas
+        listKind: K8sLimitReplicasList
+        plural: k8slimitreplicas
+        singular: k8slimitreplicas
+  targets:
+  - target: admission.k8s.gatekeeper.sh
+    rego: |
+      package k8slimitreplicas
+      violation[{"msg": msg, "details": details}] {
+        replicas := input.review.object.spec.replicas
+        replicas_min := to_number(input.review.object.metadata.annotations["replicas-min"])
+        replicas < replicas_min
+        details := {"replicas": replicas, "replicas_min": replicas_min}
+        msg := sprintf("You must set spec.replicas to a value >= %v", [replicas_min])
+      }
+      violation[{"msg": msg, "details": details}] {
+        replicas := input.review.object.spec.replicas
+        replicas_max := to_number(input.review.object.metadata.annotations["replicas-max"])
+        replicas > replicas_max
+        details := {"replicas": replicas, "replicas_max": replicas_max}
+        msg := sprintf("You must set spec.replicas to a value <= %v", [replicas_max])
+      }
