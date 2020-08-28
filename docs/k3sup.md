@@ -5,39 +5,53 @@
 ## Install k3s with k3sup
 
 ```bash
+# # k3s-master
+# k3sup install --ip "192.168.42.11" \
+#     --k3s-version "v1.18.8+k3s1" \
+#     --user "devin" \
+#     --k3s-extra-args "--no-deploy servicelb --no-deploy traefik --no-deploy metrics-server --default-local-storage-path=/dev/shm --flannel-backend=host-gw"
+
+# k3s-master - calico
 k3sup install --ip "192.168.42.11" \
-    --k3s-version "v1.18.4+k3s1" \
+    --k3s-version "v1.18.8+k3s1" \
     --user "devin" \
-    --k3s-extra-args "--no-deploy servicelb --no-deploy traefik --no-deploy metrics-server --default-local-storage-path=/dev/shm --flannel-backend=host-gw"
+    --k3s-extra-args "--disable=servicelb \
+                      --disable=traefik \
+                      --disable=metrics-server \
+                      --disable=local-storage \
+                      --flannel-backend=none \
+                      --cluster-cidr=10.42.0.0/16 \
+                      --service-cidr=10.43.0.0/16 \
+                      --kubelet-arg='feature-gates=ExternalPolicyForExternalIP=true'"
 
 # k3s-worker-a
 k3sup join --ip "192.168.42.12" \
     --server-ip "192.168.42.11" \
-    --k3s-version "v1.18.4+k3s1" \
+    --k3s-version "v1.18.8+k3s1" \
     --user "devin"
 
 # k3s-worker-b
 k3sup join --ip "192.168.42.13" \
     --server-ip "192.168.42.11" \
-    --k3s-version "v1.18.4+k3s1" \
+    --k3s-version "v1.18.8+k3s1" \
     --user "devin"
 
 # k3s-worker-c
 k3sup join --ip "192.168.42.14" \
     --server-ip "192.168.42.11" \
-    --k3s-version "v1.18.4+k3s1" \
+    --k3s-version "v1.18.8+k3s1" \
     --user "devin"
 
 # k3s-worker-d
 k3sup join --ip "192.168.42.15" \
     --server-ip "192.168.42.11" \
-    --k3s-version "v1.18.4+k3s1" \
+    --k3s-version "v1.18.8+k3s1" \
     --user "devin"
 
 # k3s-worker-e
 k3sup join --ip "192.168.42.16" \
     --server-ip "192.168.42.11" \
-    --k3s-version "v1.18.4+k3s1" \
+    --k3s-version "v1.18.8+k3s1" \
     --user "devin"
 
 # Label worker nodes as such
@@ -64,7 +78,7 @@ kubectl label node k3s-worker-e k3s-upgrade=true
 
 ```bash
 k3sup install --ip "192.168.42.11" \
-    --k3s-version "v1.18.4+k3s1" \
+    --k3s-version "v1.18.8+k3s1" \
     --user "devin" \
     --skip-install
 ```
