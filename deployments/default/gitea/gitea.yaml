@@ -13,7 +13,7 @@ spec:
   rollback:
     enable: false
   chart:
-    repository: https://novumrgi.github.io/helm/
+    repository: https://dl.gitea.io/charts/
     name: gitea
     version: 1.4.1
   values:
@@ -37,8 +37,11 @@ spec:
     service:
       ssh:
         type: LoadBalancer
-        loadBalancerIP: 192.168.69.101
         port: 1337
+        # externalIPs:
+        # - 192.168.69.101
+        # externalTrafficPolicy: Local
+        loadBalancerIP: 192.168.69.101
         annotations:
           metallb.universe.tf/allow-shared-ip: 'nginx-internal'
     gitea:
