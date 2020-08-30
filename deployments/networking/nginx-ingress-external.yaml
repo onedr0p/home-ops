@@ -55,6 +55,16 @@ spec:
           cpu: 25m
         limits:
           memory: 750Mi
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - nginx-ingress-external
+            topologyKey: "kubernetes.io/hostname"
     defaultBackend:
       enabled: true
       image:
