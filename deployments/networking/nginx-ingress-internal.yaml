@@ -40,6 +40,16 @@ spec:
           namespace: networking
       extraArgs:
         default-ssl-certificate: "networking/acme-crt-secret"
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - nginx-ingress-internal
+            topologyKey: "kubernetes.io/hostname"
       resources:
         requests:
           memory: 250Mi
