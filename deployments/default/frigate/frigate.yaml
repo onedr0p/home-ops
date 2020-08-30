@@ -1,0 +1,76 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: frigate
+  namespace: default
+  annotations:
+    fluxcd.io/ignored: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: frigate
+  rollback:
+    enable: false
+  chart:
+    repository: https://k8s-at-home.com/charts/
+    name: frigate
+    version: 4.0.0
+  values:
+    image:
+      repository: blakeblackshear/frigate
+      tag: 0.5.2
+    coral:
+      enabled: true
+    config: |
+      web_port: 5000
+      mqtt:
+        host: vernemq.default.svc
+        topic_prefix: frigate
+      objects:
+        track:
+          - person
+          - dog
+          - cat
+        filters:
+          person:
+            min_area: 2500
+            max_area: 100000
+            threshold: 0.85
+          dog:
+            min_area: 1000
+            max_area: 10000
+            threshold: 0.85
+          cat:
+            min_area: 1000
+            max_area: 10000
+            threshold: 0.85
+      cameras:
+        doorbell:
+          ffmpeg:
+            input: rtsp://192.168.1.2:7447/818ALvS1HQ744KND
+          snapshots:
+            show_timestamp: false
+          height: 720
+          width: 960
+          take_frame: 1
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - frigate.devbu.io
+      tls:
+      - hosts:
+        - frigate.devbu.io
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - {key: "feature.node.kubernetes.io/custom-coral-tpu", operator: In, values: ["true"]}
+    resources:
+      requests:
+        memory: 1000Mi
+        cpu: 750m
+      limits:
+        memory: 2500Mi
