@@ -1,0 +1,33 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: etcd-coredns
+  namespace: networking
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: etcd-coredns
+  helmVersion: v3
+  rollback:
+    enable: false
+  chart:
+    repository: https://charts.bitnami.com/bitnami
+    name: etcd
+    version: 4.10.1
+  values:
+    image:
+      registry: docker.io
+      repository: bitnami/etcd
+      tag: 3.4.13
+    statefulset:
+      replicaCount: 1
+    persistence:
+      enabled: true
+      storageClass: "longhorn"
+      size: 8Gi
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
