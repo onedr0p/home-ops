@@ -21,12 +21,14 @@ spec:
     ref: master
     path: stable/coredns
   values:
+    rbac:
+      create: true
     isClusterService: false
     serviceType: LoadBalancer
     service:
       externalIPs:
       - 192.168.69.169
-      externalTrafficPolicy: "Local"
+      externalTrafficPolicy: Local
     servers:
     - zones:
       - zone: devbu.io.
@@ -53,6 +55,12 @@ spec:
       - name: loop
       - name: reload
       - name: loadbalance
+      - name: etcd
+        parameters: devbu.io
+        configBlock: |-
+          stubzones
+          path /skydns
+          endpoint http://etcd-coredns:2379
     prometheus:
       service:
         enabled: true
