@@ -2,13 +2,13 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: coredns-external
+  name: coredns
   namespace: networking
   annotations:
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "false"
 spec:
-  releaseName: coredns-external
+  releaseName: coredns
   helmVersion: v3
   rollback:
     enable: false
@@ -38,6 +38,12 @@ spec:
         configBlock: |-
           lameduck 5s
       - name: ready
+      - name: kubernetes
+        parameters: cluster.local in-addr.arpa ip6.arpa
+        configBlock: |-
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+          ttl 30
       - name: prometheus
         parameters: 0.0.0.0:9153
       - name: forward
