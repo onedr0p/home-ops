@@ -27,12 +27,13 @@ spec:
     serviceType: LoadBalancer
     service:
       externalIPs:
-      - 192.168.69.169
+      - 192.168.69.180
       externalTrafficPolicy: Local
     servers:
     - zones:
       - zone: devbu.io.
         scheme: dns://
+        use_tcp: true
       port: 53
       plugins:
       - name: errors
@@ -60,7 +61,7 @@ spec:
         configBlock: |-
           stubzones
           path /skydns
-          endpoint http://etcd-coredns:2379
+          endpoint http://etcd:2379
     prometheus:
       service:
         enabled: true
