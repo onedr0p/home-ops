@@ -20,11 +20,14 @@ spec:
       repository: k8s-artifacts-prod/external-dns/external-dns
       tag: v0.7.3
     logLevel: debug
-    provider: pdns
-    policy: sync
-    pdns:
-      apiUrl: "http://powerdns-webserver"
-      apiPort: 8081
+    # provider: pdns
+    # policy: sync
+    # pdns:
+    #   apiUrl: "http://powerdns-webserver"
+    #   apiPort: 8081
+    provider: coredns
+    coredns:
+      etcdEndpoints: http://etcd-coredns:2379
     sources:
     - service
     - ingress
@@ -43,5 +46,5 @@ spec:
         cpu: 25m
       limits:
         memory: 500Mi
-  valueFileSecrets:
-  - name: "external-dns-helm-values"
+  # valueFileSecrets:
+  # - name: "external-dns-helm-values"
