@@ -12,15 +12,20 @@ spec:
   helmVersion: v3
   rollback:
     enable: false
+  # chart:
+  #   repository: https://kubernetes-charts.storage.googleapis.com/
+  #   name: coredns
+  #   version: 1.13.3
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
-    name: coredns
-    version: 1.13.3
+    git: https://github.com/onedr0p/charts
+    ref: master
+    path: stable/coredns
   values:
     isClusterService: false
     serviceType: LoadBalancer
     service:
-      loadbalancerIP: 192.168.69.181
+      externalIPs:
+      - 192.168.69.169
       externalTrafficPolicy: "Local"
     servers:
     - zones:
