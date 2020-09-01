@@ -1,0 +1,29 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: coredns-external
+  namespace: networking
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: coredns-external
+  helmVersion: v3
+  rollback:
+    enable: false
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: coredns
+    version: 1.13.3
+  values:
+    isClusterService: false
+    serviceType: "Loadbalancer" 
+    service:
+      loadbalancerIP: 192.168.69.181
+      externalTrafficPolicy: "Local"
+    servers:
+    - zones:
+      - zone: devbu.io.
+        scheme: dns://
+      port: 53
