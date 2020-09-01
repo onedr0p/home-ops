@@ -10,6 +10,8 @@ metadata:
 spec:
   releaseName: external-dns
   helmVersion: v3
+  rollback:
+    enable: false
   chart:
     repository: https://charts.bitnami.com/bitnami
     name: external-dns
@@ -20,17 +22,9 @@ spec:
       repository: k8s-artifacts-prod/external-dns/external-dns
       tag: v0.7.3
     logLevel: debug
-    # provider: pdns
-    # policy: sync
-    # pdns:
-    #   apiUrl: "http://powerdns-webserver"
-    #   apiPort: 8081
     provider: coredns
     coredns:
-      etcdEndpoints: http://etcd-coredns:2379
-    sources:
-    - service
-    - ingress
+      etcdEndpoints: http://etcd:2379
     domainFilters:
     - devbu.io
     createSecret: true
@@ -46,5 +40,3 @@ spec:
         cpu: 25m
       limits:
         memory: 500Mi
-  # valueFileSecrets:
-  # - name: "external-dns-helm-values"
