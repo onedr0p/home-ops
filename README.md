@@ -54,7 +54,7 @@ _This table is a reference to IP addresses in my deployments and may not be full
 | qbittorrent              | 192.168.69.130 |
 | plex                     | 192.168.69.140 |
 | loki-syslog              | 192.168.69.155 |
-| powerdns                 | 192.168.69.180 |
+| coredns                  | 192.168.69.180 |
 
 ---
 
