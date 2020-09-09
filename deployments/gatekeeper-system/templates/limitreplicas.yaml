@@ -17,14 +17,14 @@ spec:
       package k8slimitreplicas
       violation[{"msg": msg, "details": details}] {
         replicas := input.review.object.spec.replicas
-        replicas_min := to_number(input.review.object.metadata.annotations["replicas-min"])
+        replicas_min := to_number(input.review.object.spec.templatemetadata.annotations["replicas-min"])
         replicas < replicas_min
         details := {"replicas": replicas, "replicas_min": replicas_min}
         msg := sprintf("You must set spec.replicas to a value >= %v", [replicas_min])
       }
       violation[{"msg": msg, "details": details}] {
         replicas := input.review.object.spec.replicas
-        replicas_max := to_number(input.review.object.metadata.annotations["replicas-max"])
+        replicas_max := to_number(input.review.object.spec.template.metadata.annotations["replicas-max"])
         replicas > replicas_max
         details := {"replicas": replicas, "replicas_max": replicas_max}
         msg := sprintf("You must set spec.replicas to a value <= %v", [replicas_max])
