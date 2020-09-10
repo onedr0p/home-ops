@@ -28,15 +28,21 @@ spec:
         server: "mqtt://vernemq"
       serial:
         port: /dev/ttyUSB0
-    ingress:
+    assistant:
       enabled: true
-      annotations:
-        kubernetes.io/ingress.class: "internal"
-      hosts:
-      - "zigbee2mqtt.devbu.io"
-      tls:
-      - hosts:
+      image:
+        repository: carldebilly/zigbee2mqttassistant
+        tag: 0.3.178
+        pullPolicy: IfNotPresent
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "internal"
+        hosts:
         - "zigbee2mqtt.devbu.io"
+        tls:
+        - hosts:
+          - "zigbee2mqtt.devbu.io"
     persistence:
       enabled: true
       storageClass: "longhorn"
