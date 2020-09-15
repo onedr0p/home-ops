@@ -23,6 +23,20 @@ Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/
 
 ---
 
+## :wrench:&nbsp; Tools
+
+_Below are some of the tools I find useful for working with my cluster_
+
+| Tool                                                   | Purpose                                                                                                   |
+|--------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| [direnv](https://github.com/direnv/direnv)             | Set `KUBECONFIG` environment variable based on present working directory                                  |
+| [git-crypt](https://github.com/AGWA/git-crypt)         | Encrypt certain files in my repository that can only be decrypted with a key on my computers              |
+| [go-task](https://github.com/go-task/task)             | Replacement for make and makefiles, who honestly likes that?                                              |
+| [pre-commit](https://github.com/pre-commit/pre-commit) | Ensure the YAML and shell script in my repo are consistent                                                |
+| [kubetail](https://github.com/johanhaleby/kubetail)    | Tail logs in Kubernetes, also check out [stern](https://github.com/wercker/stern) (which fork? good luck) |
+
+---
+
 ## :computer:&nbsp; Hardware configuration
 
 _All my Kubernetes master and worker nodes below are running bare metal Ubuntu 20.04.x_
