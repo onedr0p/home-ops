@@ -8,8 +8,12 @@
 
 ## Adjust BIOS
 
-- Set defaults
+- F9 (Set defaults)
 - Use settings in [these photos](https://photos.app.goo.gl/r5pk2wqpugLCyQxM8)
+
+## Update BIOS no monitor
+
+Insert USB, Power on, Spam F7, 5 sec, Enter, Down arrow, Enter, Enter
 
 ## Install Ubuntu 20.04
 
