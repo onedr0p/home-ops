@@ -1,17 +1,17 @@
 alertmanager:
   config:
     receivers:
-      - name: 'null'
-      - name: 'pushover'
-        pushover_configs:
-          - user_key: "${PUSHOVER_USER_TOKEN}"
-            token: "${PUSHOVER_ALERT_MANAGER_API_TOKEN}"
-            priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
-            send_resolved: true
-      - name: 'shutdown-webhook'
-        webhook_configs:
-          - url: "http://192.168.1.35:9000/hooks/shutdown"
-            send_resolved: false
+    - name: 'null'
+    - name: 'pushover'
+      pushover_configs:
+      - user_key: "${PUSHOVER_USER_TOKEN}"
+        token: "${PUSHOVER_ALERT_MANAGER_API_TOKEN}"
+        priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
+        send_resolved: true
+    - name: 'webhook-ups'
+      webhook_configs:
+      - url: "http://192.168.1.35:9000/hooks/webhook-ups"
+        send_resolved: false
 grafana:
   adminPassword: "${GRAFANA_PASSWORD}"
   grafana.ini:
