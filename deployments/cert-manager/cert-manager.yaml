@@ -9,14 +9,14 @@ metadata:
     fluxcd.io/automated: "false"
 spec:
   releaseName: cert-manager
-  helmVersion: v3
   rollback:
     enable: false
   chart:
     repository: https://charts.jetstack.io/
     name: cert-manager
-    version: v0.16.1
+    version: v1.0.3
   values:
+    installCRDs: true
     webhook:
       enabled: true
     extraArgs:
@@ -24,10 +24,8 @@ spec:
     - --dns01-recursive-nameservers-only
     cainjector:
       replicaCount: 1
-      extraArgs:
-      - --leader-elect=false
     prometheus:
       enabled: true
       servicemonitor:
         enabled: true
-        namespace: cert-manager
+        prometheusInstance: monitoring
