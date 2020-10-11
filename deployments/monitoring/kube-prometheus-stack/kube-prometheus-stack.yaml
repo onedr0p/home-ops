@@ -2,24 +2,19 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: prometheus-operator
+  name: kube-prometheus-stack
   namespace: monitoring
   annotations:
     fluxcd.io/ignore: "false"
     fluxcd.io/automated: "true"
     fluxcd.io/tag.grafana: semver:~7
 spec:
-  releaseName: prometheus-operator
-  helmVersion: v3
+  releaseName: kube-prometheus-stack
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com/
-    name: prometheus-operator
-    version: 9.2.2
+    repository: https://prometheus-community.github.io/helm-charts
+    name: kube-prometheus-stack
+    version: 9.4.10
   values:
-    defaultRules:
-      rules:
-        kubeApiserverAvailability: true
-        kubeApiserver: true
     server:
       resources:
         requests:
@@ -29,9 +24,6 @@ spec:
           memory: 2000Mi
     prometheusOperator:
       createCustomResource: false
-      prometheusConfigReloaderImage:
-        repository: quay.io/coreos/prometheus-config-reloader
-        tag: v0.39.0
       configmapReloadImage:
         repository: jimmidyson/configmap-reload
         tag: v0.3.0
@@ -53,7 +45,7 @@ spec:
             match_re:
               severity: critical|warning
             continue: true
-          - receiver: 'shutdown-webhook'
+          - receiver: 'webhook-ups'
             match:
               alertname: UPS15MinutesRemaining
             continue: true
@@ -101,16 +93,11 @@ spec:
         size: 10Gi
         accessModes:
         - ReadWriteOnce
-      # extraContainers: |
-      #   - name: renderer
-      #     image: grafana/grafana-image-renderer:latest
       env:
         GF_EXPLORE_ENABLED: true
         GF_PANELS_DISABLE_SANITIZE_HTML: true
-        # GF_RENDERING_SERVER_URL: http://localhost:8081/render
-        # GF_RENDERING_CALLBACK_URL: http://localhost:3000/
         GF_LOG_FILTERS: rendering:debug
-        VAR_BLOCKY_URL: "http://blocky.kube-system.svc.cluster.local:4000"
+        VAR_BLOCKY_URL: "http://blocky.networking.svc.cluster.local:4000"
       ingress:
         enabled: true
         annotations:
@@ -128,9 +115,6 @@ spec:
         dashboards:
           enabled: true
           searchNamespace: ALL
-          provider:
-            disableDelete: false
-            allowUiUpdates: true
       plugins:
       - natel-discrete-panel
       - pr0ps-trackmap-panel
@@ -175,10 +159,10 @@ spec:
             url: https://raw.githubusercontent.com/fluxcd/helm-operator/master/chart/helm-operator/dashboards/helm-operator-dashboard.json
             datasource: Prometheus
           # Ref: https://grafana.com/grafana/dashboards/11310
-          unifi-client-dpi:
-            gnetId: 11310
-            revision: 4
-            datasource: Prometheus
+          # unifi-client-dpi:
+          #   gnetId: 11310
+          #   revision: 4
+          #   datasource: Prometheus
           # Ref: https://grafana.com/grafana/dashboards/11315
           unifi-client-insights:
             gnetId: 11315
@@ -195,33 +179,28 @@ spec:
             revision: 9
             datasource: Prometheus
           # Ref: https://grafana.com/grafana/dashboards/11313
-          unifi-usg-insights:
-            gnetId: 11313
-            revision: 8
-            datasource: Prometheus
+          # unifi-usg-insights:
+          #   gnetId: 11313
+          #   revision: 8
+          #   datasource: Prometheus
           # Ref: https://grafana.com/grafana/dashboards/11312
           unifi-usw-insights:
             gnetId: 11312
             revision: 8
             datasource: Prometheus
-          windows-node:
-            gnetId: 12422
-            revision: 1
-            datasource: Prometheus
-          windows-exporter-cn:
-            gnetId: 10467
-            revision: 3
-            datasource: Prometheus
+          # windows-node:
+          #   gnetId: 12422
+          #   revision: 1
+          #   datasource: Prometheus
+          # windows-exporter-cn:
+          #   gnetId: 10467
+          #   revision: 3
+          #   datasource: Prometheus
           # version-checker:
           #   gnetId: 12833
           #   revision: 1
           #   datasource: Prometheus
       additionalDataSources:
-      # - name: Prometheus
-      #   type: prometheus
-      #   access: proxy
-      #   url: http://thanos-query-http:10902/
-      #   isDefault: true
       - name: loki
         type: loki
         access: proxy
@@ -246,13 +225,13 @@ spec:
     kubeEtcd:
       enabled: false
     kubeControllerManager:
-      enabled: false
-      # endpoints:
-      # - 192.168.42.11
+      enabled: true
+      endpoints:
+      - 192.168.42.11
     kubeScheduler:
-      enabled: false
-      # endpoints:
-      # - 192.168.42.11
+      enabled: true
+      endpoints:
+      - 192.168.42.11
     kubeProxy:
       enabled: false
     kubelet:
@@ -273,8 +252,6 @@ spec:
         - hosts:
           - "prometheus.devbu.io"
       prometheusSpec:
-        # replicas: 2
-        # replicaExternalLabelName: "replica"
         ruleSelector: {}
         ruleNamespaceSelector: {}
         ruleSelectorNilUsesHelmValues: false
@@ -284,7 +261,7 @@ spec:
         podMonitorSelector: {}
         podMonitorNamespaceSelector: {}
         podMonitorSelectorNilUsesHelmValues: false
-        retention: 60d
+        retention: 45d
         enableAdminAPI: true
         walCompression: true
         storageSpec:
@@ -314,11 +291,5 @@ spec:
           static_configs:
           - targets:
             - 192.168.1.39:9000
-        # thanos:
-        #   image: quay.io/thanos/thanos:v0.13.0
-        #   version: v0.13.0
-        #   objectStorageConfig:
-        #     name: thanos
-        #     key: object-store.yaml
   valueFileSecrets:
   - name: "prometheus-operator-helm-values"
