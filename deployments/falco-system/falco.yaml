@@ -30,3 +30,42 @@ spec:
         enabled: true
       grpcOutput:
         enabled: true
+    # https://securityhub.dev/
+    customRules:
+      rules-admin-activities.yaml: |-
+        - rule: Detect su or sudo
+          desc: detect sudo activities
+          condition:
+            spawned_process and proc.name in (sudo, su)
+          output: >
+            Detected sudo or su privilege escalation activity (user=%user.name command=%proc.cmdline)
+          priority: WARNING
+          tags: [process]
+        - rule: Package Management Launched
+          desc: detect package management launched
+          condition: >
+            spawned_process and user.name != "_apt" and package_mgmt_procs and not package_mgmt_ancestor_procs
+          output: >
+            Package management process launched in container (user=%user.name
+            command=%proc.cmdline container_id=%container.id container_name=%container.name image=%container.image.repository:%container.image.tag)
+          priority: ERROR
+          tags: [process]
+      rules-ssh-connections.yaml: |-
+        - rule: Inbound SSH Connection
+          desc: Detect Inbound SSH Connection
+          condition: >
+            ((evt.type in (accept,listen) and evt.dir=<) or
+              (evt.type in (recvfrom,recvmsg))) and ssh_port
+          output: >
+            Inbound SSH connection (user=%user.name client_ip=%fd.cip client_port=%fd.cport server_ip=%fd.sip)
+          priority: WARNING
+          tags: [network]
+        - rule: Outbound SSH Connection
+          desc: Detect Outbound SSH Connection
+          condition: >
+            ((evt.type = connect and evt.dir=<) or
+              (evt.type in (sendto,sendmsg))) and ssh_port
+          output: >
+            Outbound SSH connection (user=%user.name server_ip=%fd.sip server_port=%fd.sport client_ip=%fd.cip)
+          priority: WARNING
+          tags: [network]
