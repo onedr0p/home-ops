@@ -1,0 +1,32 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: falco
+  namespace: falco-system
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: falco
+  rollback:
+    enabled: false
+  chart:
+    repository: https://falcosecurity.github.io/charts
+    name: falcosecurity/falco
+    version: 1.5.1
+  values:
+    containerd:
+      enabled: true
+      socket: /var/run/k3s/containerd/containerd.sock
+    docker:
+      enabled: false
+    ebpf:
+      enabled: true
+      settings:
+        hostNetwork: true
+    falco:
+      grpc:
+        enabled: true
+      grpcOutput:
+        enabled: true
