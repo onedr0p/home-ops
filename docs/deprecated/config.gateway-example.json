@@ -1,31 +1,91 @@
 {
-    "service": {
-        "dns": {
-            "forwarding": {
-                "options": [
-                    "server=/<domain.tld>/<pdns.ip>",
-                    "server=1.1.1.1"
-                ]
-            },
-            "dynamic": {
-                "interface": {
-                    "eth2": {
-                        "service": {
-                            "cloudflare": {
-                                "host-name": [
-                                    "<domain.tld>"
-                                ],
-                                "login": "<email>",
-                                "options": [
-                                    "zone=<domain.tld>"
-                                ],
-                                "password": "<cloudflare.apikey>",
-                                "protocol": "cloudflare"
-                            }
-                        }
-                    }
-                }
-            }
+  "system": {
+    "static-host-mapping": {
+      "host-name": {
+        "k8s-api.lan": {
+          "alias": [
+            "k8s-masters"
+          ],
+          "inet": [
+            "192.168.42.200",
+            "192.168.42.201",
+            "192.168.42.202"
+          ]
         }
+      }
     }
+  },
+  "protocols": {
+    "bgp": {
+      "64512": {
+        "neighbor": {
+          "192.168.42.11": {
+            "remote-as": "64512"
+          },
+          "192.168.42.13": {
+            "remote-as": "64512"
+          },
+          "192.168.42.14": {
+            "remote-as": "64512"
+          },
+          "192.168.42.15": {
+            "remote-as": "64512"
+          },
+          "192.168.42.16": {
+            "remote-as": "64512"
+          },
+          "192.168.42.200": {
+            "remote-as": "64512"
+          },
+          "192.168.42.201": {
+            "remote-as": "64512"
+          },
+          "192.168.42.202": {
+            "remote-as": "64512"
+          },
+          "192.168.42.203": {
+            "remote-as": "64512"
+          },
+          "192.168.42.220": {
+            "remote-as": "64512"
+          },
+          "192.168.42.225": {
+            "remote-as": "64512"
+          }
+        },
+        "parameters": {
+          "router-id": "192.168.1.1"
+        }
+      }
+    }
+  },
+  "service": {
+    "dns": {
+      "dynamic": {
+        "interface": {
+          "eth2": {
+            "service": {
+              "cloudflare": {
+                "host-name": [
+                  "devbu.io"
+                ],
+                "login": "devin.kray@gmail.com",
+                "options": [
+                  "zone=devbu.io"
+                ],
+                "password": "",
+                "protocol": "cloudflare"
+              }
+            }
+          }
+        }
+      },
+      "forwarding": {
+        "options": [
+          "server=/devbu.io/192.168.69.180",
+          "server=1.1.1.1"
+        ]
+      }
+    }
+  }
 }
