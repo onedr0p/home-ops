@@ -82,4 +82,5 @@ A lot of inspiration for this repo came from the following people:
 - [rust84/k8s-gitops](https://github.com/rust84/k8s-gitops)
 - [blackjid/homelab-gitops](https://github.com/blackjid/homelab-gitops)
 - [bjw-s/k8s-gitops](https://github.com/bjw-s/k8s-gitops)
+- [toboshii/k8s-gitops](https://github.com/toboshii/k8s-gitops)
 - [nlopez/k8s_home](https://github.com/nlopez/k8s_home)
