@@ -1,0 +1,47 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: jackett-test
+  namespace: testing
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: semver:~0.16.
+spec:
+  releaseName: jackett-test
+  rollback:
+    enable: false
+  chart:
+    repository: https://k8s-at-home.com/charts/
+    name: jackett
+    version: 5.0.0
+  values:
+    controllerType: deployment
+    image:
+      repository: k8sathome/jackett
+      tag: 0.16.2080
+    env:
+      TZ: "America/New_York"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - "jackett-test.devbu.io"
+      tls:
+      - hosts:
+        - "jackett-test.devbu.io"
+    persistence:
+      config:
+        enabled: true
+        storageClass: "longhorn"
+        accessMode: ReadWriteOnce
+        size: "1Gi"
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 750Mi
+        cpu: 1000m
