@@ -1,0 +1,49 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: radarr-test
+  namespace: testing
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: semver:~3.0.0.
+spec:
+  releaseName: radarr-test
+  rollback:
+    enable: false
+  chart:
+    repository: https://k8s-at-home.com/charts/
+    name: radarr
+    version: 7.0.0
+  values:
+    controllerType: deployment
+    image:
+      repository: k8sathome/radarr
+      tag: 3.0.0.3989
+    env:
+      TZ: "America/New_York"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - host: radarr-test.devbu.io
+        paths:
+        - path: /
+      tls:
+      - hosts:
+        - "radarr-test.devbu.io"
+    persistence:
+      config:
+        enabled: true
+        storageClass: "longhorn"
+        accessMode: ReadWriteOnce
+        size: "1Gi"
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 750Mi
+        cpu: 1000m
