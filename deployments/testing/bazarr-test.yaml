@@ -1,0 +1,49 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: bazarr-test
+  namespace: testing
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: semver:~0.9.0.
+spec:
+  releaseName: bazarr-test
+  rollback:
+    enable: false
+  chart:
+    repository: https://k8s-at-home.com/charts/
+    name: bazarr
+    version: 4.0.0
+  values:
+    controllerType: deployment
+    image:
+      repository: k8sathome/bazarr
+      tag: 0.9.0.5
+    env:
+      TZ: "America/New_York"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - host: bazarr-test.devbu.io
+        paths:
+        - path: /
+      tls:
+      - hosts:
+        - "bazarr-test.devbu.io"
+    persistence:
+      config:
+        enabled: true
+        storageClass: "longhorn"
+        accessMode: ReadWriteOnce
+        size: "1Gi"
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 750Mi
+        cpu: 1000m
