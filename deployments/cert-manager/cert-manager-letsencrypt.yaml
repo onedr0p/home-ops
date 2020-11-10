@@ -1,43 +1,41 @@
 ---
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-test
+  name: letsencrypt-production
 spec:
   acme:
-    email: "devin.kray@gmail.com"
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    privateKeySecretRef:
-      name: letsencrypt-test
-    solvers:
-    - selector: {}
-      dns01:
-        cloudflare:
-          email: "devin.kray@gmail.com"
-          apiKeySecretRef:
-            name: cloudflare-api-key
-            key: api-key
----
-apiVersion: cert-manager.io/v1alpha2
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-prod
-spec:
-  acme:
-    email: "devin.kray@gmail.com"
     server: https://acme-v02.api.letsencrypt.org/directory
+    email: devin.kray@gmail.com
     privateKeySecretRef:
-      name: letsencrypt-prod
+      name: letsencrypt-production
     solvers:
-    - selector: {}
-      dns01:
+    - dns01:
         cloudflare:
-          email: "devin.kray@gmail.com"
+          email: devin.kray@gmail.com
           apiKeySecretRef:
             name: cloudflare-api-key
             key: api-key
 ---
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: devin.kray@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-staging
+    solvers:
+    - dns01:
+        cloudflare:
+          email: devin.kray@gmail.com
+          apiKeySecretRef:
+            name: cloudflare-api-key
+            key: api-key
+---
+apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: acme-crt
@@ -45,7 +43,7 @@ metadata:
 spec:
   secretName: acme-crt-secret
   issuerRef:
-    name: letsencrypt-prod
+    name: letsencrypt-production
     kind: ClusterIssuer
   dnsNames:
   - "devbu.io"
