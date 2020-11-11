@@ -1,0 +1,93 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: blocky
+  namespace: kube-system
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: blocky
+      version: 4.0.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: spx01/blocky
+      tag: v0.10
+    replicas: 3
+    timeZone: "America/New_York"
+    config:
+      upstream:
+        externalResolvers:
+        - https://dns1.nextdns.io/4838af
+        - https://dns2.nextdns.io/4838af
+        - tcp-tls:4838af.dns1.nextdns.io:853
+        - tcp-tls:4838af.dns2.nextdns.io:853
+      conditional:
+        mapping:
+          # UptimeRobot Status Page
+          status.devbu.io: udp:1.1.1.1
+          # PowerDNS IP
+          devbu.io: udp:192.168.69.180
+          # PowerDNS IP
+          local: udp:192.168.69.180
+      # https://www.reddit.com/r/oisd_blocklist/comments/dwxgld/dbloisdnl_internets_1_domain_blocklist/
+      blocking:
+        blackLists:
+          ads:
+          - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
+        whiteLists:
+          ads:
+          - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+          - https://raw.githubusercontent.com/onedr0p/home-operations/main/adblock/whitelist.txt
+        clientGroupsBlock:
+          default:
+          - ads
+      clientLookup:
+        upstream: udp:192.168.1.1
+      prometheus:
+        enable: true
+        path: /metrics
+      httpPort: 4000
+      logLevel: info
+    service:
+      type: LoadBalancer
+      externalIPs:
+      - 192.168.69.115
+      externalTrafficPolicy: Local
+    serviceTCP:
+      enabled: true
+      type: LoadBalancer
+      externalIPs:
+      - 192.168.69.115
+      externalTrafficPolicy: Local
+    serviceUDP:
+      enabled: true
+      type: LoadBalancer
+      externalIPs:
+      - 192.168.69.115
+      externalTrafficPolicy: Local
+    serviceMonitor:
+      enabled: true
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - blocky
+          topologyKey: "kubernetes.io/hostname"
+    resources:
+      requests:
+        memory: 275Mi
+        cpu: 50m
+      limits:
+        memory: 500Mi
+        cpu: 1000m
