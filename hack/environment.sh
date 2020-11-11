@@ -3,9 +3,9 @@ shopt -s globstar
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
 export REPO_ROOT
-CLUSTER_ROOT="${REPO_ROOT}/deployments"
+CLUSTER_ROOT="${REPO_ROOT}/cluster"
 export CLUSTER_ROOT
-PUB_CERT="${REPO_ROOT}/pub-cert.pem"
+PUB_CERT="${REPO_ROOT}/sealed-secrets-public-cert.pem"
 export PUB_CERT
 SECRETS_ENV="${REPO_ROOT}/.cluster-secrets.env"
 export SECRETS_ENV
