@@ -1,0 +1,59 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: ingress-nginx-internal
+  namespace: kube-system
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: ingress-nginx
+      version: 3.7.1
+      sourceRef:
+        kind: HelmRepository
+        name: ingress-nginx-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    controller:
+      ingressClass: internal
+      replicaCount: 2
+      service:
+        type: LoadBalancer
+        externalIPs:
+        - 192.168.69.101
+        externalTrafficPolicy: Local
+      publishService:
+        enabled: true
+      config:
+        ssl-protocols: "TLSv1.3 TLSv1.2"
+        # Setting use-proxy-protocol to true will break the proxy
+        use-proxy-protocol: "false"
+        proxy-body-size: "0"
+        use-forwarded-headers: "true"
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          namespace: networking
+      extraArgs:
+        default-ssl-certificate: "kube-system/devbu-io-tls"
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - nginx-ingress-internal
+            topologyKey: "kubernetes.io/hostname"
+      resources:
+        requests:
+          memory: 250Mi
+          cpu: 25m
+        limits:
+          memory: 500Mi
+    defaultBackend:
+      enabled: false
