@@ -1,0 +1,274 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: 11.1.1
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community-charts
+        namespace: flux-system
+      interval: 5m
+  dependsOn:
+  - name: sealed-secrets
+    namespace: kube-system
+  timeout: 20m
+  values:
+    server:
+      resources:
+        requests:
+          memory: 1000Mi
+          cpu: 25m
+        limits:
+          memory: 2000Mi
+    prometheusOperator:
+      createCustomResource: false
+      configmapReloadImage:
+        repository: jimmidyson/configmap-reload
+        tag: v0.3.0
+    alertmanager:
+      config:
+        global:
+          resolve_timeout: 5m
+        route:
+          group_by: ['alertname', 'job']
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 6h
+          receiver: 'pushover'
+          routes:
+          - receiver: 'null'
+            match:
+              alertname: Watchdog
+          - receiver: 'pushover'
+            match_re:
+              severity: critical|warning
+            continue: true
+          - receiver: 'webhook-ups'
+            match:
+              alertname: UPS15MinutesRemaining
+            continue: true
+        inhibit_rules:
+        - source_match:
+            severity: 'critical'
+          target_match:
+            severity: 'warning'
+          equal: ['alertname', 'namespace']
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "internal"
+        hosts:
+        - "alert-manager.devbu.io"
+        tls:
+        - hosts:
+          - "alert-manager.devbu.io"
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: "longhorn"
+              resources:
+                requests:
+                  storage: 10Gi
+    nodeExporter:
+      serviceMonitor:
+        relabelings:
+        - action: replace
+          regex: (.*)
+          replacement: $1
+          sourceLabels:
+          - __meta_kubernetes_pod_node_name
+          targetLabel: kubernetes_node
+    grafana:
+      image:
+        repository: grafana/grafana
+        tag: 7.3.1
+      deploymentStrategy:
+        type: Recreate
+      persistence:
+        enabled: false
+        storageClassName: "longhorn"
+        size: 10Gi
+        accessModes:
+        - ReadWriteOnce
+      env:
+        GF_EXPLORE_ENABLED: true
+        GF_PANELS_DISABLE_SANITIZE_HTML: true
+        GF_LOG_FILTERS: rendering:debug
+        VAR_BLOCKY_URL: "http://blocky.kube-system.svc.cluster.local:4000"
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "external"
+        hosts:
+        - "grafana.devbu.io"
+        tls:
+        - hosts:
+          - "grafana.devbu.io"
+      sidecar:
+        datasources:
+          enabled: true
+          # Disable for thanos
+          defaultDatasourceEnabled: true
+        dashboards:
+          enabled: true
+          searchNamespace: ALL
+      plugins:
+      - natel-discrete-panel
+      - pr0ps-trackmap-panel
+      - grafana-piechart-panel
+      - vonage-status-panel
+      - grafana-worldmap-panel
+      - grafana-clock-panel
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+          - name: 'default'
+            orgId: 1
+            folder: ''
+            type: file
+            disableDeletion: false
+            allowUiUpdates: true
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+      dashboards:
+        default:
+          ceph-cluster:
+            url: https://grafana.com/api/dashboards/2842/revisions/11/download
+            datasource: Prometheus
+          ceph-osd:
+            url: https://grafana.com/api/dashboards/5336/revisions/3/download
+            datasource: Prometheus
+          ceph-pools:
+            url: https://grafana.com/api/dashboards/5342/revisions/3/download
+            datasource: Prometheus
+          vernemq:
+            url: https://raw.githubusercontent.com/vernemq/vernemq/master/metrics_scripts/grafana/VerneMQ%20Node%20Metrics.json
+            datasource: Prometheus
+          nginx-dashboard:
+            url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
+            datasource: Prometheus
+          blocky:
+            url: https://raw.githubusercontent.com/0xERR0R/blocky/master/docs/blocky-grafana.json
+            datasource: Prometheus
+          apc-ups:
+            url: https://raw.githubusercontent.com/onedr0p/home-operations/main/grafana-dashboards/apc-ups.json
+            datasource: Prometheus
+          cyberpower-pdu:
+            url: https://raw.githubusercontent.com/onedr0p/home-operations/main/grafana-dashboards/cyberpower-pdu.json
+            datasource: Prometheus
+          # Ref: https://grafana.com/grafana/dashboards/11315
+          unifi-client-insights:
+            gnetId: 11315
+            revision: 8
+            datasource: Prometheus
+          # Ref: https://grafana.com/grafana/dashboards/11311
+          unifi-network-sites:
+            gnetId: 11311
+            revision: 4
+            datasource: Prometheus
+          # Ref: https://grafana.com/grafana/dashboards/11314
+          unifi-uap-insights:
+            gnetId: 11314
+            revision: 9
+            datasource: Prometheus
+          # Ref: https://grafana.com/grafana/dashboards/11312
+          unifi-usw-insights:
+            gnetId: 11312
+            revision: 8
+            datasource: Prometheus
+      additionalDataSources:
+      - name: loki
+        type: loki
+        access: proxy
+        url: http://loki:3100
+      # - name: home_assistant
+      #   type: influxdb
+      #   access: proxy
+      #   url: http://influxdb:8086
+      #   database: home_assistant
+      grafana.ini:
+        paths:
+          data: /var/lib/grafana/data
+          logs: /var/log/grafana
+          plugins: /var/lib/grafana/plugins
+          provisioning: /etc/grafana/provisioning
+        analytics:
+          check_for_updates: true
+        log:
+          mode: console
+        grafana_net:
+          url: https://grafana.net
+    kubeEtcd:
+      enabled: false
+    kubeControllerManager:
+      enabled: false
+      endpoints:
+      - 192.168.42.100
+    kubeScheduler:
+      enabled: false
+      endpoints:
+      - 192.168.42.100
+    kubeProxy:
+      enabled: false
+    kubelet:
+      serviceMonitor:
+        metricRelabelings:
+        - action: replace
+          sourceLabels:
+          - node
+          targetLabel: instance
+    prometheus:
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "internal"
+        hosts:
+        - "prometheus.devbu.io"
+        tls:
+        - hosts:
+          - "prometheus.devbu.io"
+      prometheusSpec:
+        ruleSelector: {}
+        ruleNamespaceSelector: {}
+        ruleSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelector: {}
+        podMonitorNamespaceSelector: {}
+        podMonitorSelectorNilUsesHelmValues: false
+        retention: 45d
+        enableAdminAPI: true
+        walCompression: true
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: "longhorn"
+              resources:
+                requests:
+                  storage: 50Gi
+        additionalScrapeConfigs:
+        - job_name: 'node-exporter'
+          static_configs:
+          - targets:
+            - 192.168.1.1:9100
+            - 192.168.1.39:9100
+            - 192.168.1.40:9100
+        - job_name: 'minio'
+          metrics_path: /minio/prometheus/metrics
+          static_configs:
+          - targets:
+            - 192.168.1.39:9000
+  valuesFrom:
+  - kind: Secret
+    name: "kube-prometheus-stack-helm-values"
