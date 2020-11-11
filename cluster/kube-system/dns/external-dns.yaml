@@ -1,0 +1,37 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: kube-system
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: external-dns
+      version: 4.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    logLevel: debug
+    provider: coredns
+    coredns:
+      etcdEndpoints: http://etcd:2379
+    domainFilters:
+    - devbu.io
+    createSecret: true
+    crd:
+      create: true
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 25m
+      limits:
+        memory: 500Mi
