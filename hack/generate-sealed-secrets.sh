@@ -77,6 +77,14 @@ kubectl create secret generic controller-manager \
         >>"${GENERATED_SECRETS}"
 echo "---" >>"${GENERATED_SECRETS}"
 
+# uptimerobot heartbeat
+kubectl create secret generic uptimerobot-heartbeat \
+    --from-literal=url="${UPTIMEROBOT_HEARTBEAT_URL}" \
+    --namespace monitoring --dry-run=client -o json |
+    kubeseal --format=yaml --cert="${PUB_CERT}" \
+        >>"${GENERATED_SECRETS}"
+echo "---" >>"${GENERATED_SECRETS}"
+
 # # qBittorrent Prune - default namespace
 # kubectl create secret generic qbittorrent-prune \
 #     --from-literal=username="${QB_USERNAME}" \
@@ -105,14 +113,6 @@ echo "---" >>"${GENERATED_SECRETS}"
 # # radarr exporter
 # kubectl create secret generic radarr-exporter \
 #     --from-literal=api-key="${RADARR_APIKEY}" \
-#     --namespace monitoring --dry-run=client -o json |
-#     kubeseal --format=yaml --cert="${PUB_CERT}" \
-#         >>"${GENERATED_SECRETS}"
-# echo "---" >>"${GENERATED_SECRETS}"
-
-# uptimerobot heartbeat
-# kubectl create secret generic uptimerobot-heartbeat \
-#     --from-literal=url="${UPTIMEROBOT_HEARTBEAT_URL}" \
 #     --namespace monitoring --dry-run=client -o json |
 #     kubeseal --format=yaml --cert="${PUB_CERT}" \
 #         >>"${GENERATED_SECRETS}"
