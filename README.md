@@ -15,9 +15,9 @@
 
 # :book:&nbsp; Overview
 
-Welcome to my home Kubernetes cluster. This repo _is_ my Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux) and [Helm Operator](https://github.com/fluxcd/helm-operator) watch my [deployments](./deployments/) folder and makes the changes to my cluster based on the yaml manifests.
+Welcome to my home Kubernetes cluster. This repo _is_ my Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux) and [Helm Operator](https://github.com/fluxcd/helm-operator) watch my [cluster](./cluster/) folder and makes the changes to my cluster based on the yaml manifests.
 
-You'll find this is setup for home automation using [Home Assistant](https://www.home-assistant.io/) and media automation using [Sonarr](https://sonarr.tv/), [Radarr](https://radarr.video/) and [Plex](https://www.plex.tv/sign-in/?forwardUrl=https%3A%2F%2Fwww.plex.tv%2F). I also use [Gitea](https://gitea.io/en-us/) and [Drone](https://drone.io/) for development automation too. It would take too long to describe all the technologies running so poke around my [deployments](./deployments/) directory to see what's happening.
+You'll find this is setup for home automation using [Home Assistant](https://www.home-assistant.io/) and media automation using [Sonarr](https://sonarr.tv/), [Radarr](https://radarr.video/) and [Plex](https://www.plex.tv/sign-in/?forwardUrl=https%3A%2F%2Fwww.plex.tv%2F). I also use [Gitea](https://gitea.io/en-us/) and [Drone](https://drone.io/) for development automation too. It would take too long to describe all the technologies running so poke around my [cluster](./cluster/) directory to see what's happening.
 
 Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join our [Discord](https://discord.gg/DNCynrJ) if you have any questions.
 
@@ -54,7 +54,7 @@ _All my Kubernetes master and worker nodes below are running bare metal Ubuntu 2
 
 ## :memo:&nbsp; IP addresses
 
-_This table is a reference to IP addresses in my deployments and may not be fully up-to-date_
+_This table is a reference to IP addresses in my cluster and may not be fully up-to-date_
 
 | Deployment               | Address        |
 |--------------------------|----------------|
@@ -71,6 +71,18 @@ _This table is a reference to IP addresses in my deployments and may not be full
 | coredns                  | 192.168.69.180 |
 
 ---
+
+## Bootstrap Flux
+
+```bash
+flux bootstrap github \
+  --version=v0.2.3 \
+  --owner=onedr0p \
+  --repository=home-cluster \
+  --path=cluster \
+  --personal \
+  --network-policy=false
+```
 
 ## :handshake:&nbsp; Thanks
 
