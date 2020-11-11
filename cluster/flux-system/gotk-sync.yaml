@@ -1,0 +1,27 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: main
+  secretRef:
+    name: flux-system
+  url: ssh://git@github.com/onedr0p/home-cluster
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./cluster
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  validation: client
