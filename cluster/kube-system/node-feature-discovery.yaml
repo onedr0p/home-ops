@@ -1,0 +1,75 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: node-feature-discovery
+  namespace: kube-system
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: node-feature-discovery
+      version: 2.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "node-feature-discovery"
+    image:
+      repository: quay.io/kubernetes_incubator/node-feature-discovery
+      tag: v0.6.0
+    sources:
+      - custom
+      - pci
+      - usb
+    config: |
+      sources:
+        usb:
+          deviceClassWhitelist:
+            - "02"
+            - "03"
+            - "0e"
+            - "ef"
+            - "fe"
+            - "ff"
+          deviceLabelFields:
+            - "class"
+            - "vendor"
+            - "device"
+        custom:
+          - name: "zwave"
+            matchOn:
+              - usbId:
+                  class: ["02"]
+                  vendor: ["0658"]
+                  device: ["0200"]
+          - name: "intel-gpu"
+            matchOn:
+              - pciId:
+                  class: ["0300"]
+                  vendor: ["8086"]
+          - name: "coral-tpu"
+            matchOn:
+              - usbId:
+                  vendor: ["1a6e", "18d1"]
+          - name: "wyze-sense"
+            matchOn:
+              - usbId:
+                  class: ["03"]
+                  vendor: ["1a86"]
+                  device: ["e024"]
+          - name: "flight-aware"
+            matchOn:
+              - usbId:
+                  class: ["ff"]
+                  vendor: ["0bda"]
+                  device: ["2832"]
+          - name: "zigbee"
+            matchOn:
+              - usbId:
+                  class: ["ff"]
+                  vendor: ["1a86"]
+                  device: ["7523"]
