@@ -1,0 +1,45 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: unifi-poller
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: unifi-poller
+      version: 2.0.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: golift/unifi-poller
+      tag: 2.0.1
+    prometheus:
+      serviceMonitor:
+        enabled: true
+        interval: 2m
+    config:
+      prometheus:
+        disable: false
+        http_listen: "0.0.0.0:9130"
+        report_errors: false
+      influxdb:
+        disable: true
+      unifi:
+        dynamic: false
+        defaults:
+          role: "homelab-controller"
+          user: "unifipoller"
+          pass: "unifipoller"
+          url: "https://192.168.1.2:8443"
+          sites:
+          - Homelab
+          verify_ssl: false
+          save_ids: false
+          save_dpi: false
+          save_sites: true
