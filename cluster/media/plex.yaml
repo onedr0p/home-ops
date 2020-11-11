@@ -1,0 +1,72 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: plex
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: plex
+      version: 2.0.4
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: plexinc/pms-docker
+      tag: 1.20.4.3517-ab5e1197c
+      pullPolicy: IfNotPresent
+    # hostNetwork: true
+    ingress:
+      enabled: false
+      annotations:
+        kubernetes.io/ingress.class: "external"
+      hosts:
+      - "plex.devbu.io"
+      tls:
+      - hosts:
+        - "plex.devbu.io"
+    advertiseIp: "http://192.168.69.140:32400"
+    timezone: "America/New_York"
+    serviceTCP:
+      type: LoadBalancer
+      externalIPs:
+      - 192.168.69.140
+      externalTrafficPolicy: Local
+    serviceUDP:
+      type: LoadBalancer
+      externalIPs:
+      - 192.168.69.140
+      externalTrafficPolicy: Local
+    persistence:
+      config:
+        storageClass: "rook-ceph-block"
+        size: 250Gi
+        accessMode: ReadWriteOnce
+      transcode:
+        enabled: false
+        emptyDir:
+          medium: "Memory"
+      data:
+        enabled: false
+      extraMounts:
+      - name: media-rocinante
+        claimName: nfs-media-rocinante-pvc
+      - name: media-serenity
+        claimName: nfs-media-serenity-pvc
+    logging:
+      promtail:
+        enabled: true
+        loki:
+          url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+    resources:
+      requests:
+        cpu: 4000m
+        memory: 10000Mi
+      limits:
+        gpu.intel.com/i915: 1
+        memory: 30000Mi
