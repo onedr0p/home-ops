@@ -1,0 +1,63 @@
+---
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: rook-ceph
+  namespace: rook-ceph
+spec:
+  cephVersion:
+    image: ceph/ceph:v15.2.5
+    allowUnsupported: false
+  dataDirHostPath: /var/lib/rook
+  skipUpgradeChecks: false
+  continueUpgradeAfterChecksEvenIfNotHealthy: false
+  removeOSDsIfOutAndSafeToRemove: false
+  mon:
+    count: 3
+    allowMultiplePerNode: false
+  monitoring:
+    enabled: false
+    rulesNamespace: rook-ceph
+  network:
+  crashCollector:
+    disable: false
+  cleanupPolicy:
+    confirmation: ""
+    sanitizeDisks:
+      method: quick
+      dataSource: zero
+      iteration: 1
+  mgr:
+    modules:
+    - name: pg_autoscaler
+      enabled: true
+  dashboard:
+    enabled: true
+    # ssl: false
+  disruptionManagement:
+    managePodBudgets: false
+    osdMaintenanceTimeout: 30
+    manageMachineDisruptionBudgets: false
+    machineDisruptionBudgetNamespace: openshift-machine-api
+  storage:
+    useAllNodes: false
+    useAllDevices: false
+    config:
+      metadataDevice:
+      osdsPerDevice: "1"
+    nodes:
+    - name: "k8s-worker-a"
+      devices:
+      - name: "nvme0n1"
+    - name: "k8s-worker-b"
+      devices:
+      - name: "nvme0n1"
+    - name: "k8s-worker-c"
+      devices:
+      - name: "nvme0n1"
+    - name: "k8s-worker-d"
+      devices:
+      - name: "nvme0n1"
+    - name: "k8s-worker-e"
+      devices:
+      - name: "nvme0n1"
