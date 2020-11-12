@@ -60,7 +60,7 @@ spec:
         claimName: nfs-media-serenity-pvc
     logging:
       promtail:
-        enabled: true
+        enabled: false
         loki:
           url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
     resources:
@@ -70,3 +70,13 @@ spec:
       limits:
         gpu.intel.com/i915: 1
         memory: 40000Mi
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+              - k8s-worker-d
+              - k8s-worker-e
