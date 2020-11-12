@@ -1,0 +1,44 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: node-red
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: node-red
+      version: 3.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: nodered/node-red
+      tag: 1.2.3
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - "node-red.devbu.io"
+      tls:
+      - hosts:
+        - "node-red.devbu.io"
+    persistence:
+      enabled: true
+      storageClass: "rook-ceph-block"
+      size: "5Gi"
+    flows: "flows.json"
+    timezone: "America/New_York"
+    enableProjects: true
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 1500Mi
+        cpu: 2000m
