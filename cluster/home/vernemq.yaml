@@ -1,0 +1,37 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: vernemq
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: vernemq
+      version: 1.6.6
+      sourceRef:
+        kind: HelmRepository
+        name: vernemq-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    replicaCount: 1
+    serviceMonitor:
+      create: true
+    service:
+      type: LoadBalancer
+      externalIPs:
+      - 192.168.69.110
+      ws:
+        enabled: true
+        nodePort: 32080
+      mqtt:
+        enabled: true
+        nodePort: 31883
+    additionalEnv:
+    - name: DOCKER_VERNEMQ_ACCEPT_EULA
+      value: "yes"
+    - name: DOCKER_VERNEMQ_ALLOW_ANONYMOUS
+      value: "on"
+    podAntiAffinity: hard
