@@ -8,17 +8,18 @@ spec:
   capacity:
     storage: 1Mi
   accessModes:
-    - ReadWriteMany
+  - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
     server: 192.168.1.40
     path: /volume1/Media
   mountOptions:
-    - tcp
-    - intr
-    - hard
-    - noatime
-    - nodiratime
+  - nfsvers=3
+  - tcp
+  - intr
+  - hard
+  - noatime
+  - nodiratime
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -27,7 +28,7 @@ metadata:
   namespace: media
 spec:
   accessModes:
-    - ReadWriteMany
+  - ReadWriteMany
   storageClassName: media-serenity
   resources:
     requests:
