@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: ombi
+  name: nzbhydra2
   namespace: media
 spec:
   interval: 5m
   chart:
     spec:
-      chart: ombi
-      version: 5.2.0
+      chart: nzbhydra2
+      version: 4.2.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -18,8 +18,8 @@ spec:
   values:
     controllerType: deployment
     image:
-      repository: k8sathome/ombi
-      tag: 4.0.681
+      repository: k8sathome/nzbhydra2
+      tag: 3.4.3
       pullPolicy: Always
     env:
       TZ: "America/New_York"
@@ -28,13 +28,13 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "internal"
       hosts:
-      - host: ombi.devbu.io
+      - host: nzbhydra2.devbu.io
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - "ombi.devbu.io"
+        - "nzbhydra2.devbu.io"
     persistence:
       config:
         enabled: true
@@ -46,5 +46,5 @@ spec:
         memory: 250Mi
         cpu: 500m
       limits:
-        memory: 1500Mi
-        cpu: 2000m
+        memory: 750Mi
+        cpu: 1000m
