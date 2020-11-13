@@ -1,0 +1,43 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: zwave2mqtt
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: zwave2mqtt
+      version: 4.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: robertslando/zwave2mqtt
+      tag: 4.0.6
+    timezone: "America/New_York"
+    device: "/dev/serial/by-id/usb-0658_0200-if00"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - "zwave2mqtt.devbu.io"
+      tls:
+      - hosts:
+        - "zwave2mqtt.devbu.io"
+    persistence:
+      enabled: true
+      storageClass: "rook-ceph-block"
+      accessMode: ReadWriteOnce
+      size: 1Gi
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - {key: "feature.node.kubernetes.io/custom-zwave", operator: In, values: ["true"]}
