@@ -1,8 +1,10 @@
 name: lint
+
 on:
   push:
     branches:
-      - master
+      - main
+
 jobs:
   lint-yaml:
     runs-on:
@@ -13,7 +15,10 @@ jobs:
       with:
         fetch-depth: 1
     - name: Lint yaml
-      uses: ibiqlik/action-yamllint@v1
+      uses: ibiqlik/action-yamllint@v3
+      with:
+        file_or_dir: "cluster/**/*.yaml"
+        config_file: ".yamllint.yml"
   lint-shell:
     runs-on:
     - ubuntu-latest
@@ -23,7 +28,7 @@ jobs:
       with:
         fetch-depth: 1
     - name: Lint scripts
-      uses: azohra/shell-linter@latest
+      uses: reviewdog/action-shellcheck@v1
       with:
-        path: "hack"
-        severity: "error"
+        path: "./hack"
+        level: "error"
