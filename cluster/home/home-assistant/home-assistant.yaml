@@ -1,0 +1,96 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: home-assistant
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: home-assistant
+      version: 2.6.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  dependsOn:
+  - name: sealed-secrets
+    namespace: kube-system
+  values:
+    image:
+      repository: homeassistant/home-assistant
+      tag: 0.117.5
+    extraEnv:
+      TZ: "America/New_York"
+    hostNetwork: true
+    service:
+      type: LoadBalancer
+      externalIPs:
+      - 192.168.69.105
+      externalTrafficPolicy: Local
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "external"
+      hosts:
+      - "hass.devbu.io"
+      tls:
+      - hosts:
+        - "hass.devbu.io"
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: "longhorn"
+    monitoring:
+      enabled: false
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+    resources:
+      limits:
+        memory: 2500Mi
+      requests:
+        cpu: 35m
+        memory: 2000Mi
+    postgresql:
+      enabled: true
+      global:
+        postgresql:
+          postgresqlUsername: home-assistant
+          postgresqlDatabase: home-assistant
+          postgresqlPassword: home-assistant
+      persistence:
+        enabled: true
+        storageClass: "rook-ceph-block"
+    influxdb:
+      enabled: true
+      architecture: standalone
+      database: home_assistant
+      authEnabled: false
+      persistence:
+        enabled: true
+        storageClass: "rook-ceph-block"
+        size: 8Gi
+    vscode:
+      enabled: true
+      image:
+        repository: codercom/code-server
+        tag: 3.4.1
+      extraEnv:
+        HASS_SERVER: "http://localhost:8123"
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "internal"
+        hosts:
+        - "hass-editor.devbu.io"
+        tls:
+        - hosts:
+          - "hass-editor.devbu.io"
+  valuesFrom:
+  - kind: Secret
+    name: "home-assistant-helm-values"
