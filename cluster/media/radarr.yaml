@@ -26,7 +26,9 @@ spec:
     ingress:
       enabled: true
       annotations:
-        kubernetes.io/ingress.class: "internal"
+        kubernetes.io/ingress.class: "external"
+        nginx.ingress.kubernetes.io/auth-url: "https://auth.devbu.io/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.devbu.io/oauth2/start"
       hosts:
       - host: radarr.devbu.io
         paths:
@@ -39,7 +41,7 @@ spec:
       - enabled: true
         nameSuffix: "api"
         annotations:
-          kubernetes.io/ingress.class: "internal"
+          kubernetes.io/ingress.class: "external"
         hosts:
         - host: radarr.devbu.io
           paths:
