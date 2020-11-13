@@ -35,6 +35,19 @@ spec:
       tls:
       - hosts:
         - "radarr.devbu.io"
+      additionalIngresses:
+      - enabled: true
+        nameSuffix: "api"
+        annotations:
+          kubernetes.io/ingress.class: "internal"
+        hosts:
+        - host: radarr.devbu.io
+          paths:
+          - path: /api
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "radarr.devbu.io"
     persistence:
       config:
         enabled: true
