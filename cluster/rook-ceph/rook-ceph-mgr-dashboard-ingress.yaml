@@ -1,0 +1,27 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rook-ceph-mgr-dashboard
+  namespace: rook-ceph
+  annotations:
+    kubernetes.io/ingress.class: "internal"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  labels:
+    app.kubernetes.io/instance: rook-ceph-mgr-dashboard
+    app.kubernetes.io/name: rook-ceph-mgr-dashboard
+spec:
+  rules:
+  - host: rook.devbu.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: rook-ceph-mgr-dashboard
+            port:
+              name: dashboard
+  tls:
+  - hosts:
+    - rook.devbu.io
