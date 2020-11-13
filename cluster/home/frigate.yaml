@@ -1,0 +1,95 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: frigate
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: frigate
+      version: 4.0.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: blakeblackshear/frigate
+      tag: 0.7.3-amd64
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "frigate"
+    timezone: America/New_York
+    coral:
+      enabled: true
+    config: |
+      web_port: 5000
+      mqtt:
+        host: vernemq
+        topic_prefix: frigate
+      objects:
+        track:
+          - person
+          - dog
+          - cat
+        filters:
+          person:
+            min_area: 2500
+            max_area: 100000
+            threshold: 0.85
+          dog:
+            min_area: 1000
+            max_area: 10000
+            threshold: 0.85
+          cat:
+            min_area: 1000
+            max_area: 10000
+            threshold: 0.85
+      cameras:
+        doorbell:
+          ffmpeg:
+            input: rtsp://192.168.1.2:7447/818ALvS1HQ744KND
+          snapshots:
+            show_timestamp: false
+          height: 720
+          width: 960
+          take_frame: 1
+        house-garage:
+          ffmpeg:
+            input: rtsp://192.168.1.2:7447/q8nsMk5GB8lEnb7y
+          snapshots:
+            show_timestamp: false
+          height: 576
+          width: 1024
+          take_frame: 1
+        living-room:
+          ffmpeg:
+            input: rtsp://192.168.1.2:7447/pp1jGiFpb1AuVHRl
+          snapshots:
+            show_timestamp: false
+          height: 576
+          width: 1024
+          take_frame: 1
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - "frigate.devbu.io"
+      tls:
+      - hosts:
+        - "frigate.devbu.io"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - {key: "feature.node.kubernetes.io/custom-coral-tpu", operator: In, values: ["true"]}
+    resources:
+      requests:
+        memory: 1000Mi
+        cpu: 750m
+      limits:
+        memory: 2500Mi
