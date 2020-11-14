@@ -39,7 +39,7 @@ _Below are some of the tools I find useful for working with my cluster_
 
 ## :computer:&nbsp; Cluster setup
 
-See my project over at [home-operations](https://github.com/onedr0p/home-operations) for my Ansible, and other work that supports running this cluster.
+See my project over at [home-operations](https://github.com/onedr0p/home-operations) for how I provisioned my nodes and other work that supports running this cluster.
 
 ---
 
