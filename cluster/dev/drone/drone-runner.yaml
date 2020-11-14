@@ -1,0 +1,28 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: drone-runner-kube
+  namespace: dev
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: drone-runner-kube
+      version: 0.1.4
+      sourceRef:
+        kind: HelmRepository
+        name: drone-charts
+        namespace: flux-system
+      interval: 5m
+  # dependsOn:
+  # - name: sealed-secrets
+  #   namespace: kube-system
+  values:
+    env:
+      DRONE_RPC_HOST: drone
+      DRONE_RPC_PROTO: http
+      DRONE_NAMESPACE_DEFAULT: dev
+  valuesFrom:
+  - kind: Secret
+    name: "drone-runner-helm-values"
