@@ -146,6 +146,7 @@ spec:
           description: RunnerReplicaSetSpec defines the desired state of RunnerDeployment
           properties:
             replicas:
+              nullable: true
               type: integer
             template:
               properties:
@@ -1709,6 +1710,7 @@ spec:
           description: RunnerReplicaSetSpec defines the desired state of RunnerReplicaSet
           properties:
             replicas:
+              nullable: true
               type: integer
             template:
               properties:
@@ -3201,7 +3203,6 @@ spec:
                   type: object
               type: object
           required:
-          - replicas
           - template
           type: object
         status:
@@ -5117,6 +5118,7 @@ spec:
       - args:
         - --metrics-addr=127.0.0.1:8080
         - --enable-leader-election
+        - --sync-period=10m
         command:
         - /manager
         env:
@@ -5140,7 +5142,7 @@ spec:
               optional: true
         - name: GITHUB_APP_PRIVATE_KEY
           value: /etc/actions-runner-controller/github_app_private_key
-        image: summerwind/actions-runner-controller:v0.11.2
+        image: summerwind/actions-runner-controller:v0.11.3
         name: manager
         ports:
         - containerPort: 9443
@@ -5149,7 +5151,7 @@ spec:
         resources:
           limits:
             cpu: 100m
-            memory: 30Mi
+            memory: 100Mi
           requests:
             cpu: 100m
             memory: 20Mi
