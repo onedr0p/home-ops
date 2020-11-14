@@ -2,7 +2,6 @@
 version: '3'
 
 env:
-  FLUX_FORWARD_NAMESPACE: flux
   KUBECONFIG: ./kubeconfig
 
 tasks:
@@ -33,7 +32,7 @@ tasks:
   validate-sealed-secrets:
     desc: Validate sealed-secrets
     cmds:
-    - kubeseal --validate < ./deployments/zz_generated_secrets.yaml --controller-name=sealed-secrets
+    - kubeseal --validate < ./cluster/zz_generated_secrets.yaml --controller-name=sealed-secrets
   apply-manifest-templates:
     desc: Apply manifests to the Kubernetes cluster
     cmds:
@@ -41,7 +40,7 @@ tasks:
   apply-sealed-secrets:
     desc: Apply secrets to the Kubernetes cluster
     cmds:
-    - kubectl apply -f ./deployments/zz_generated_secrets.yaml
+    - kubectl apply -f ./cluster/zz_generated_secrets.yaml
   blocky-enable:
     desc: Interact with Blocky to enable adblocking
     cmds:
