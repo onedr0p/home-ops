@@ -17,7 +17,7 @@
 
 Welcome to my home Kubernetes cluster. This repo _is_ my Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux) and [Helm Operator](https://github.com/fluxcd/helm-operator) watch my [cluster](./cluster/) folder and makes the changes to my cluster based on the yaml manifests.
 
-You'll find this is setup for home automation using [Home Assistant](https://www.home-assistant.io/) and media automation using [Sonarr](https://sonarr.tv/), [Radarr](https://radarr.video/) and [Plex](https://www.plex.tv/sign-in/?forwardUrl=https%3A%2F%2Fwww.plex.tv%2F). I also use [Gitea](https://gitea.io/en-us/) and [Drone](https://drone.io/) for development automation too. It would take too long to describe all the technologies running so poke around my [cluster](./cluster/) directory to see what's happening.
+You'll find this is setup for home automation using [Home Assistant](https://www.home-assistant.io/) and media automation using [Sonarr](https://sonarr.tv/), [Radarr](https://radarr.video/) and [Plex](https://www.plex.tv). I also use [Gitea](https://gitea.io/en-us/) and [Drone](https://drone.io/) for development automation too. It would take too long to describe all the technologies running so poke around my [cluster](./cluster/) directory to see what's happening.
 
 Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join our [Discord](https://discord.gg/DNCynrJ) if you have any questions.
 
@@ -37,18 +37,9 @@ _Below are some of the tools I find useful for working with my cluster_
 
 ---
 
-## :computer:&nbsp; Hardware configuration
+## :computer:&nbsp; Cluster setup
 
-_All my Kubernetes master and worker nodes below are running bare metal Ubuntu 20.04.x_
-
-| Device                  | Count | OS Disk Size | Data Disk Size      | Ram  | Purpose                                |
-|-------------------------|-------|--------------|---------------------|------|----------------------------------------|
-| Odroid H2               | 1     | 256GB NVMe   | N/A                 | 16GB | k8s Master                             |
-| Intel NUC8i5BEH         | 3     | 120GB SSD    | 1TB NVMe (longhorn) | 32GB | k8s Workers                            |
-| Intel NUC8i7BEH         | 2     | 750GB SSD    | 1TB NVMe (longhorn) | 64GB | k8s Workers                            |
-| Qnap NAS (rocinante)    | 1     | N/A          | 8x12TB RAID6        | 16GB | Media and shared file storage          |
-| Synology NAS (serenity) | 1     | N/A          | 8x12TB RAID6        | 4GB  | Media and shared file storage          |
-| Raspberry Pi 4          | 1     | 64GB         | N/A                 | 8 GB | Wireguard VPN & General Purpose Device |
+See my project over at [home-operations](https://github.com/onedr0p/home-operations) for my Ansible, and other work that supports running this cluster.
 
 ---
 
@@ -71,18 +62,6 @@ _This table is a reference to IP addresses in my cluster and may not be fully up
 | coredns                  | 192.168.69.180 |
 
 ---
-
-## Bootstrap Flux
-
-```bash
-flux bootstrap github \
-  --version=v0.2.3 \
-  --owner=onedr0p \
-  --repository=home-cluster \
-  --path=cluster \
-  --personal \
-  --network-policy=false
-```
 
 ## :handshake:&nbsp; Thanks
 
