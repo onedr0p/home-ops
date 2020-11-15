@@ -9,16 +9,13 @@ spec:
   chart:
     spec:
       chart: metrics-server
-      version: 2.11.2
+      version: 5.0.1
       sourceRef:
         kind: HelmRepository
-        name: kubernetes-stable-charts
+        name: bitnami-charts
         namespace: flux-system
       interval: 5m
   values:
-    image:
-      repository: k8s.gcr.io/metrics-server/metrics-server
-      tag: v0.3.7
-    args:
-      - --kubelet-insecure-tls=true
-      - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+    extraArgs:
+      kubelet-insecure-tls: true
+      kubelet-preferred-address-types: InternalIP,ExternalIP,Hostname
