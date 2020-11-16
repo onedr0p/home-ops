@@ -27,22 +27,32 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "internal"
+        nginx.ingress.kubernetes.io/proxy-body-size: 128m
       hosts:
       - "gitea.devbu.io"
       tls:
       - hosts:
         - "gitea.devbu.io"
     service:
-      ssh:
-        type: ClusterIP
+      http:
+        port: 3000
+      # ssh:
+      #   type: LoadBalancer
+      #   port: 1337
+      #   externalTrafficPolicy: Local
+      #   externalIPs:
+      #   - 192.168.69.101
     gitea:
       admin:
         username: "devin"
         email: "devin.kray@gmail.com"
       config:
-        server:
-          root_url: https://gitea.devbu.io
         APP_NAME: "Home Gitea"
+        server:
+          ROOT_URL: https://gitea.devbu.io
+          DISABLE_SSH: true
+          # SSH_PORT: 1337
+          # SSH_LISTEN_PORT: 22
         respository:
           DEFAULT_PRIVATE: true
         admin:
