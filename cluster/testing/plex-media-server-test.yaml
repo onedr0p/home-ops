@@ -1,0 +1,72 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: plex-media-server-test
+  namespace: testing
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: plex-media-server
+      version: 0.0.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    controllerType: deployment
+    image:
+      repository: k8sathome/plex-media-server
+      tag: v1.20.4.3517-ab5e1197c
+      pullPolicy: Always
+    env:
+      TZ: "America/New_York"
+    securityContext:
+      privileged: true
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - host: plex-media-server-test.devbu.io
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "plex-media-server-test.devbu.io"
+    persistence:
+      config:
+        enabled: true
+        storageClass: "rook-ceph-block"
+        accessMode: ReadWriteOnce
+        size: "10Gi"
+      transcode:
+        enabled: false
+        emptyDir:
+          medium: "Memory"
+    additionalVolumeMounts:
+    - name: media-rocinante
+      mountPath: "/media-rocinante"
+    additionalVolumes:
+    - name: media-rocinante
+      persistentVolumeClaim:
+        claimName: nfs-media-rocinante-pvc
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+              - k8s-worker-c
+    resources:
+      requests:
+        cpu: 2000m
+        memory: 1000Mi
+      limits:
+        gpu.intel.com/i915: 1
+        memory: 6000Mi
