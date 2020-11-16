@@ -28,11 +28,11 @@ In your shell...
 
 ```bash
 # Scale app to 0 replicas
-kubectl scale deploy/home-assistant --replicas 0 -n media
+kubectl scale deploy/ombi --replicas 0 -n media
 
 # Get RBD image name for the app
-kubectl get pv/(k get pv | grep home-assistant-config | awk -F' ' '{print $1}') -n media -o json | jq -r '.spec.csi.volumeAttributes.imageName'
-# csi-vol-08134adb-2555-11eb-80c7-2298c6796a25
+kubectl get pv/(k get pv | grep ombi-config | awk -F' ' '{print $1}') -n media -o json | jq -r '.spec.csi.volumeAttributes.imageName'
+# csi-vol-b4c065be-2450-11eb-80c7-2298c6796a25
 ```
 
 In another shell tab...
@@ -49,12 +49,12 @@ mount -t nfs -o "tcp,intr,rw,noatime,nodiratime,rsize=1048576,wsize=1048576,hard
 # optional list rbds
 rbd list --pool replicapool
 
-rbd map -p replicapool csi-vol-08134adb-2555-11eb-80c7-2298c6796a25
+rbd map -p replicapool csi-vol-b4c065be-2450-11eb-80c7-2298c6796a25
 mount /dev/rbd4 /mnt/tmp
 
-tar xvf /mnt/Data/backups/home-assistant.tar.gz -C /mnt/tmp
+tar xvf /mnt/Data/backups/ombi.tar.gz -C /mnt/tmp
 chown -R 568:568 /mnt/tmp/
 
 umount /mnt/tmp
-rbd unmap -p replicapool csi-vol-08134adb-2555-11eb-80c7-2298c6796a25
+rbd unmap -p replicapool csi-vol-b4c065be-2450-11eb-80c7-2298c6796a25
 ```
