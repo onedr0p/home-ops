@@ -15,11 +15,13 @@
 
 # :book:&nbsp; Overview
 
-Welcome to my home Kubernetes cluster. This repo _is_ my Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux) and [Helm Operator](https://github.com/fluxcd/helm-operator) watch my [cluster](./cluster/) folder and makes the changes to my cluster based on the yaml manifests.
+Welcome to my home Kubernetes cluster. This repository _is_ my Kubernetes cluster in a declarative state. [Flux2](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder and makes the changes to my cluster based on the YAML manifests.
 
-You'll find this is setup for home automation using [Home Assistant](https://www.home-assistant.io/) and media automation using [Sonarr](https://sonarr.tv/), [Radarr](https://radarr.video/) and [Plex](https://www.plex.tv). I also use [Gitea](https://gitea.io/en-us/) and [Drone](https://drone.io/) for development automation too. It would take too long to describe all the technologies running so poke around my [cluster](./cluster/) directory to see what's happening.
+[Renovatebot](https://github.com/renovatebot/renovate) keeps my applications up-to-date by scanning my repo and opening pull requests when it notices a new container image update.
 
-Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join our [Discord](https://discord.gg/DNCynrJ) if you have any questions.
+[Actions Runner Controller](https://github.com/summerwind/actions-runner-controller) operates a self-hosted Github runner in my cluster which I use to generate and apply Sealed Secrets to my cluster. 
+
+Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join the k8s@home [Discord](https://discord.gg/DNCynrJ) if you have any questions.
 
 ---
 
@@ -52,10 +54,8 @@ _This table is a reference to IP addresses in my cluster and may not be fully up
 | nginx-ingress (external) | 192.168.69.100 |
 | nginx-ingress (internal) | 192.168.69.101 |
 | home-assistant           | 192.168.69.105 |
-| influxdb                 | 192.168.69.109 |
 | vernemq                  | 192.168.69.110 |
 | blocky                   | 192.168.69.115 |
-| gitea                    | 192.168.69.125 |
 | qbittorrent              | 192.168.69.130 |
 | plex                     | 192.168.69.140 |
 | loki-syslog              | 192.168.69.155 |
