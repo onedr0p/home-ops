@@ -93,14 +93,14 @@ kubectl create secret generic discord-webhook \
         >>"${GENERATED_SECRETS}"
 echo "---" >>"${GENERATED_SECRETS}"
 
-# # qBittorrent Prune - default namespace
-# kubectl create secret generic qbittorrent-prune \
-#     --from-literal=username="${QB_USERNAME}" \
-#     --from-literal=password="${QB_PASSWORD}" \
-#     --namespace default --dry-run=client -o json |
-#     kubeseal --format=yaml --cert="${PUB_CERT}" \
-#         >>"${GENERATED_SECRETS}"
-# echo "---" >>"${GENERATED_SECRETS}"
+# qBittorrent Prune - default namespace
+kubectl create secret generic qbittorrent-prune \
+    --from-literal=username="${QB_USERNAME}" \
+    --from-literal=password="${QB_PASSWORD}" \
+    --namespace media --dry-run=client -o json |
+    kubeseal --format=yaml --cert="${PUB_CERT}" \
+        >>"${GENERATED_SECRETS}"
+echo "---" >>"${GENERATED_SECRETS}"
 
 # # sonarr episode prune - default namespace
 # kubectl create secret generic sonarr-episode-prune \
