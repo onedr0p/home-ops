@@ -1,0 +1,94 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: blackbox-exporter
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: prometheus-blackbox-exporter
+      version: 4.10.0
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - "blackbox.devbu.io"
+      tls:
+      - hosts:
+        - "blackbox.devbu.io"
+    allowIcmp: true
+    config:
+      modules:
+        icmp:
+          prober: icmp
+          timeout: 30s
+          icmp:
+            preferred_ip_protocol: "ip4"
+        http_2xx:
+          prober: http
+          timeout: 30s
+          http:
+            valid_http_versions: ["HTTP/1.1", "HTTP/2"]
+            no_follow_redirects: false
+            preferred_ip_protocol: "ip4"
+    serviceMonitor:
+      enabled: true
+      defaults:
+        labels:
+          release: prometheus
+        interval: 30s
+        scrapeTimeout: 30s
+      targets:
+      - name: k8s-master
+        url: 192.168.42.100
+        module: icmp
+      - name: k8s-worker-a
+        url: 192.168.42.120
+        module: icmp
+      - name: k8s-worker-b
+        url: 192.168.42.121
+        module: icmp
+      - name: k8s-worker-c
+        url: 192.168.42.122
+        module: icmp
+      - name: k8s-worker-d
+        url: 192.168.42.123
+        module: icmp
+      - name: k8s-worker-e
+        url: 192.168.42.124
+        module: icmp
+      - name: nas-rocinante
+        url: 192.168.1.39
+        module: icmp
+      - name: nas-serenity
+        url: 192.168.1.40
+        module: icmp
+    prometheusRule:
+      enabled: true
+      additionalLabels:
+        app: prometheus-operator
+        release: prometheus
+      rules:
+      - alert: HostDown
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          message: The host {{"{{ $labels.target }}"}} is currently unreachable
+      - alert: SlowResponseTime
+        annotations:
+          message: The response time for {{"{{ $labels.target }}"}} has been greater than 30 seconds for 5 minutes.
+        expr: probe_duration_seconds > 30
+        for: 5m
+        labels:
+          severity: warning
