@@ -85,6 +85,14 @@ kubectl create secret generic uptimerobot-heartbeat \
         >>"${GENERATED_SECRETS}"
 echo "---" >>"${GENERATED_SECRETS}"
 
+# flux discord
+kubectl create secret generic discord-webhook \
+    --from-literal=address="${FLUX_DISCORD_WEBHOOK}" \
+    --namespace flux-system --dry-run=client -o json |
+    kubeseal --format=yaml --cert="${PUB_CERT}" \
+        >>"${GENERATED_SECRETS}"
+echo "---" >>"${GENERATED_SECRETS}"
+
 # # qBittorrent Prune - default namespace
 # kubectl create secret generic qbittorrent-prune \
 #     --from-literal=username="${QB_USERNAME}" \
