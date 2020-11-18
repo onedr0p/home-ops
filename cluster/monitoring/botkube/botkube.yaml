@@ -28,32 +28,15 @@ spec:
     config:
       settings:
         clustername: home-cluster
-        kubectl:
-          enabled: true
-          commands:
-            restrictAccess: true
-            verbs:
-            - get
-            - top
-            resources:
-            - deployments
-            - pods
-            - namespaces
-            - daemonsets
-            - statefulsets
-            - storageclasses
-            - nodes
       resources:
-      - name: pod
+      - name: v1/pods
         namespaces:
           include:
           - all
-          # ignore:
-          # - rook-ceph
         events:
         - create
         - delete
-      - name: service
+      - name: v1/services
         namespaces:
           include:
           - all
@@ -61,7 +44,7 @@ spec:
         - create
         - delete
         - error
-      - name: deployment
+      - name: apps/v1/deployments
         namespaces:
           include:
           - all
@@ -70,7 +53,7 @@ spec:
         - update
         - delete
         - error
-      - name: statefulset
+      - name: apps/v1/statefulsets
         namespaces:
           include:
           - all
@@ -79,7 +62,7 @@ spec:
         - update
         - delete
         - error
-      - name: ingress
+      - name: networking.k8s.io/v1beta1/ingresses
         namespaces:
           include:
           - all
@@ -87,7 +70,7 @@ spec:
         - create
         - delete
         - error
-      - name: node
+      - name: v1/nodes
         namespaces:
           include:
           - all
@@ -95,7 +78,7 @@ spec:
         - create
         - delete
         - error
-      - name: namespace
+      - name: v1/namespaces
         namespaces:
           include:
           - all
@@ -103,7 +86,7 @@ spec:
         - create
         - delete
         - error
-      - name: persistentvolume
+      - name: v1/persistentvolumes
         namespaces:
           include:
           - all
@@ -111,7 +94,7 @@ spec:
         - create
         - delete
         - error
-      - name: persistentvolumeclaim
+      - name: v1/persistentvolumeclaims
         namespaces:
           include:
           - all
@@ -119,7 +102,7 @@ spec:
         - create
         - delete
         - error
-      - name: daemonset
+      - name: v1/configmaps
         namespaces:
           include:
           - all
@@ -127,17 +110,45 @@ spec:
         - create
         - delete
         - error
-      - name: job
+      - name: apps/v1/daemonsets
         namespaces:
           include:
           - all
-          # ignore:
-          # - rook-ceph
-          # - monitoring
-          # - kube-system
+        events:
+        - create
+        - delete
+        - error
+      - name: batch/v1/jobs
+        namespaces:
+          include:
+          - all
         events:
         - create
         - update
+        - delete
+        - error
+      - name: rbac.authorization.k8s.io/v1/rolebindings
+        namespaces:
+          include:
+          - all
+        events:
+        - create
+        - delete
+        - error
+      - name: rbac.authorization.k8s.io/v1/clusterrolebindings
+        namespaces:
+          include:
+          - all
+        events:
+        - create
+        - delete
+        - error
+      - name: rbac.authorization.k8s.io/v1/clusterroles
+        namespaces:
+          include:
+          - all
+        events:
+        - create
         - delete
         - error
   valuesFrom:
