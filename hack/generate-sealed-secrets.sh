@@ -94,7 +94,7 @@ kubectl create secret generic discord-webhook \
 echo "---" >>"${GENERATED_SECRETS}"
 
 # qBittorrent Prune - default namespace
-kubectl create secret generic qbittorrent-prune \
+kubectl create secret generic qbittorrent \
     --from-literal=username="${QB_USERNAME}" \
     --from-literal=password="${QB_PASSWORD}" \
     --namespace media --dry-run=client -o json |
