@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: node-red
-      version: 3.1.0
+      version: 4.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -19,22 +19,30 @@ spec:
     image:
       repository: nodered/node-red
       tag: 1.2.5
+      pullPolicy: Always
+    env:
+      TZ: "America/New_York"
+      NODE_RED_ENABLE_PROJECTS: "true"
+      NODE_RED_ENABLE_SAFE_MODE: "false"
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "internal"
       hosts:
-      - "node-red.devbu.io"
+      - host: node-red.devbu.io
+        paths:
+        - path: /
+          pathType: Prefix
       tls:
       - hosts:
         - "node-red.devbu.io"
     persistence:
-      enabled: true
-      storageClass: "rook-ceph-block"
-      size: "5Gi"
-    flows: "flows.json"
-    timezone: "America/New_York"
-    enableProjects: true
+      data:
+        enabled: true
+        mountPath: /data
+        storageClass: "rook-ceph-block"
+        accessMode: ReadWriteOnce
+        size: "5Gi"
     resources:
       requests:
         memory: 250Mi
