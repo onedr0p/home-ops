@@ -23,6 +23,10 @@ This repository _is_ my homelab Kubernetes cluster in a declarative state. [Flux
 
 Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join the k8s@home [Discord](https://discord.gg/DNCynrJ) if you have any questions.
 
+## :computer:&nbsp; Cluster setup
+
+See my project over at [home-operations](https://github.com/onedr0p/home-operations) for how I provisioned my nodes and other work that supports running this cluster.
+
 ## :wrench:&nbsp; Tools
 
 _Below are some of the tools I find useful for working with my cluster_
@@ -34,10 +38,6 @@ _Below are some of the tools I find useful for working with my cluster_
 | [go-task](https://github.com/go-task/task)             | Replacement for make and makefiles, who honestly likes that?                                              |
 | [pre-commit](https://github.com/pre-commit/pre-commit) | Ensure the YAML and shell script in my repo are consistent                                                |
 | [kubetail](https://github.com/johanhaleby/kubetail)    | Tail logs in Kubernetes, also check out [stern](https://github.com/wercker/stern) ([which fork? good luck](https://techgaun.github.io/active-forks/index.html#https://github.com/wercker/stern)) |
-
-## :computer:&nbsp; Cluster setup
-
-See my project over at [home-operations](https://github.com/onedr0p/home-operations) for how I provisioned my nodes and other work that supports running this cluster.
 
 ## :memo:&nbsp; IP addresses
 
