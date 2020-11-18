@@ -1,0 +1,46 @@
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta1
+kind: Alert
+metadata:
+  name: home-cluster
+  namespace: flux-system
+spec:
+  providerRef:
+    name: discord
+  eventSeverity: info
+  eventSources:
+    - kind: GitRepository
+      name: '*'
+    - kind: Kustomization
+      name: '*'
+  suspend: false
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta1
+kind: Alert
+metadata:
+  name: helmreleases
+  namespace: flux-system
+spec:
+  providerRef:
+    name: discord
+  eventSeverity: error
+  eventSources:
+    - kind: HelmRelease
+      namespace: 'observability'
+      name: '*'
+    - kind: HelmRelease
+      namespace: 'network'
+      name: '*'
+    - kind: HelmRelease
+      namespace: 'kube-system'
+      name: '*'
+    - kind: HelmRelease
+      namespace: 'backups'
+      name: '*'
+    - kind: HelmRelease
+      namespace: 'litmus'
+      name: '*'
+    - kind: HelmRelease
+      namespace: 'openebs'
+      name: '*'
+  suspend: false
