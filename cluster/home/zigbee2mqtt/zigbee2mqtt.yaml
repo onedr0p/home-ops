@@ -24,6 +24,7 @@ spec:
       tag: 1.16.1
     env:
       TZ: America/New_York
+      ZIGBEE2MQTT_DATA: /data
     securityContext:
       privileged: true
     ingress:
@@ -45,6 +46,13 @@ spec:
         storageClass: "rook-ceph-block"
         accessMode: ReadWriteOnce
         size: "1Gi"
+    additionalVolumeMounts:
+    - name: usb
+      mountPath: /dev/ttyUSB0
+    additionalVolumes:
+    - name: usb
+      hostPath:
+        path: /dev/ttyUSB0
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
