@@ -1,6 +1,6 @@
 <img src="https://camo.githubusercontent.com/5b298bf6b0596795602bd771c5bddbb963e83e0f/68747470733a2f2f692e696d6775722e636f6d2f7031527a586a512e706e67" align="left" width="144px" height="144px"/>
 
-#### My home Kubernetes cluster :sailboat:
+### My home Kubernetes cluster :sailboat:
 _... managed by Flux_
 
 [![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60&style=flat-square)](https://discord.gg/DNCynrJ)
@@ -13,8 +13,6 @@ _... managed by Flux_
 
 <br/>
 
----
-
 ## :book:&nbsp; Overview
 
 This repository _is_ my homelab Kubernetes cluster in a declarative state. [Flux2](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder and makes the changes to my cluster based on the YAML manifests.
@@ -24,8 +22,6 @@ This repository _is_ my homelab Kubernetes cluster in a declarative state. [Flux
 [Actions Runner Controller](https://github.com/summerwind/actions-runner-controller) operates a self-hosted Github runner in my cluster which I use to generate and apply Sealed Secrets to my cluster. 
 
 Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join the k8s@home [Discord](https://discord.gg/DNCynrJ) if you have any questions.
-
----
 
 ## :wrench:&nbsp; Tools
 
@@ -39,13 +35,9 @@ _Below are some of the tools I find useful for working with my cluster_
 | [pre-commit](https://github.com/pre-commit/pre-commit) | Ensure the YAML and shell script in my repo are consistent                                                |
 | [kubetail](https://github.com/johanhaleby/kubetail)    | Tail logs in Kubernetes, also check out [stern](https://github.com/wercker/stern) ([which fork? good luck](https://techgaun.github.io/active-forks/index.html#https://github.com/wercker/stern)) |
 
----
-
 ## :computer:&nbsp; Cluster setup
 
 See my project over at [home-operations](https://github.com/onedr0p/home-operations) for how I provisioned my nodes and other work that supports running this cluster.
-
----
 
 ## :memo:&nbsp; IP addresses
 
@@ -62,8 +54,6 @@ _This table is a reference to IP addresses in my cluster and may not be fully up
 | plex                     | 192.168.69.140 |
 | loki-syslog              | 192.168.69.155 |
 | coredns                  | 192.168.69.180 |
-
----
 
 ## :handshake:&nbsp; Thanks
 
