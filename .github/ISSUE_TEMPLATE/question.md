@@ -2,7 +2,7 @@
 name: Question
 about: Ask a question to the maintainer
 title: ''
-labels: question
+labels: kind/question
 assignees: ''
 
 ---
