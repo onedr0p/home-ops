@@ -1,0 +1,51 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: jackett-test
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: jackett
+      version: 5.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    controllerType: deployment
+    image:
+      repository: k8sathome/jackett
+      tag: v0.16.2199
+      pullPolicy: Always
+    env:
+      TZ: "America/New_York"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - host: jackett-test.devbu.io
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "jackett-test.devbu.io"
+    persistence:
+      config:
+        enabled: true
+        storageClass: "rook-ceph-block"
+        accessMode: ReadWriteOnce
+        size: "1Gi"
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 1500Mi
