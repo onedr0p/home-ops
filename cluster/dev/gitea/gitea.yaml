@@ -67,9 +67,14 @@ spec:
         builtIn:
           postgresql:
             enabled: true
+      podAnnotations:
+        backup.velero.io/backup-volumes: data
     postgresql:
       persistence:
         storageClass: "rook-ceph-block"
+      primary:
+        podAnnotations:
+          backup.velero.io/backup-volumes: data
       metrics:
         enabled: true
         serviceMonitor:
