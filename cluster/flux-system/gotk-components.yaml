@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: flux-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -11,7 +11,7 @@ kind: Role
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: crd-controller-flux-system
   namespace: flux-system
 rules:
@@ -59,7 +59,7 @@ kind: RoleBinding
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: crd-controller-flux-system
   namespace: flux-system
 roleRef:
@@ -76,7 +76,7 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: cluster-reconciler-flux-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -95,7 +95,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: buckets.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -205,29 +205,50 @@ spec:
               conditions:
                 description: Conditions holds the conditions for the Bucket.
                 items:
-                  description: Condition contains condition information of a toolkit resource.
+                  description: "Condition contains details for one aspect of the current state of this API Resource. --- This struct is intended for direct use as an array at the field path .status.conditions.  For example, type FooStatus struct{     // Represents the observations of a foo's current state.     // Known .status.conditions.type are: \"Available\", \"Progressing\", and \"Degraded\"     // +patchMergeKey=type     // +patchStrategy=merge     // +listType=map     // +listMapKey=type     Conditions []metav1.Condition `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"` \n     // other fields }"
                   properties:
                     lastTransitionTime:
-                      description: LastTransitionTime is the timestamp corresponding to the last status change of this condition.
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
-                      description: Message is a human readable description of the details of the last transition, complementing reason.
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      maxLength: 32768
                       type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
                     reason:
-                      description: Reason is a brief machine readable explanation for the condition's last transition.
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
                       type: string
                     status:
-                      description: Status of the condition, one of ('True', 'False', 'Unknown').
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
                       type: string
                     type:
-                      description: Type of the condition.
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase. --- Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
                       type: string
                   required:
+                  - lastTransitionTime
+                  - message
+                  - reason
                   - status
                   - type
                   type: object
                 type: array
+              lastHandledReconcileAt:
+                description: LastHandledReconcileAt holds the value of the most recent reconcile request value, so a change can be detected.
+                type: string
               observedGeneration:
                 description: ObservedGeneration is the last observed generation.
                 format: int64
@@ -256,7 +277,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: gitrepositories.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -385,29 +406,50 @@ spec:
               conditions:
                 description: Conditions holds the conditions for the GitRepository.
                 items:
-                  description: Condition contains condition information of a toolkit resource.
+                  description: "Condition contains details for one aspect of the current state of this API Resource. --- This struct is intended for direct use as an array at the field path .status.conditions.  For example, type FooStatus struct{     // Represents the observations of a foo's current state.     // Known .status.conditions.type are: \"Available\", \"Progressing\", and \"Degraded\"     // +patchMergeKey=type     // +patchStrategy=merge     // +listType=map     // +listMapKey=type     Conditions []metav1.Condition `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"` \n     // other fields }"
                   properties:
                     lastTransitionTime:
-                      description: LastTransitionTime is the timestamp corresponding to the last status change of this condition.
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
-                      description: Message is a human readable description of the details of the last transition, complementing reason.
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      maxLength: 32768
                       type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
                     reason:
-                      description: Reason is a brief machine readable explanation for the condition's last transition.
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
                       type: string
                     status:
-                      description: Status of the condition, one of ('True', 'False', 'Unknown').
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
                       type: string
                     type:
-                      description: Type of the condition.
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase. --- Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
                       type: string
                   required:
+                  - lastTransitionTime
+                  - message
+                  - reason
                   - status
                   - type
                   type: object
                 type: array
+              lastHandledReconcileAt:
+                description: LastHandledReconcileAt holds the value of the most recent reconcile request value, so a change can be detected.
+                type: string
               observedGeneration:
                 description: ObservedGeneration is the last observed generation.
                 format: int64
@@ -436,7 +478,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: helmcharts.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -552,29 +594,50 @@ spec:
               conditions:
                 description: Conditions holds the conditions for the HelmChart.
                 items:
-                  description: Condition contains condition information of a toolkit resource.
+                  description: "Condition contains details for one aspect of the current state of this API Resource. --- This struct is intended for direct use as an array at the field path .status.conditions.  For example, type FooStatus struct{     // Represents the observations of a foo's current state.     // Known .status.conditions.type are: \"Available\", \"Progressing\", and \"Degraded\"     // +patchMergeKey=type     // +patchStrategy=merge     // +listType=map     // +listMapKey=type     Conditions []metav1.Condition `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"` \n     // other fields }"
                   properties:
                     lastTransitionTime:
-                      description: LastTransitionTime is the timestamp corresponding to the last status change of this condition.
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
-                      description: Message is a human readable description of the details of the last transition, complementing reason.
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      maxLength: 32768
                       type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
                     reason:
-                      description: Reason is a brief machine readable explanation for the condition's last transition.
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
                       type: string
                     status:
-                      description: Status of the condition, one of ('True', 'False', 'Unknown').
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
                       type: string
                     type:
-                      description: Type of the condition.
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase. --- Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
                       type: string
                   required:
+                  - lastTransitionTime
+                  - message
+                  - reason
                   - status
                   - type
                   type: object
                 type: array
+              lastHandledReconcileAt:
+                description: LastHandledReconcileAt holds the value of the most recent reconcile request value, so a change can be detected.
+                type: string
               observedGeneration:
                 description: ObservedGeneration is the last observed generation.
                 format: int64
@@ -603,7 +666,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: helmrepositories.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -693,29 +756,50 @@ spec:
               conditions:
                 description: Conditions holds the conditions for the HelmRepository.
                 items:
-                  description: Condition contains condition information of a toolkit resource.
+                  description: "Condition contains details for one aspect of the current state of this API Resource. --- This struct is intended for direct use as an array at the field path .status.conditions.  For example, type FooStatus struct{     // Represents the observations of a foo's current state.     // Known .status.conditions.type are: \"Available\", \"Progressing\", and \"Degraded\"     // +patchMergeKey=type     // +patchStrategy=merge     // +listType=map     // +listMapKey=type     Conditions []metav1.Condition `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"` \n     // other fields }"
                   properties:
                     lastTransitionTime:
-                      description: LastTransitionTime is the timestamp corresponding to the last status change of this condition.
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
-                      description: Message is a human readable description of the details of the last transition, complementing reason.
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      maxLength: 32768
                       type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
                     reason:
-                      description: Reason is a brief machine readable explanation for the condition's last transition.
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
                       type: string
                     status:
-                      description: Status of the condition, one of ('True', 'False', 'Unknown').
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
                       type: string
                     type:
-                      description: Type of the condition.
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase. --- Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
                       type: string
                   required:
+                  - lastTransitionTime
+                  - message
+                  - reason
                   - status
                   - type
                   type: object
                 type: array
+              lastHandledReconcileAt:
+                description: LastHandledReconcileAt holds the value of the most recent reconcile request value, so a change can be detected.
+                type: string
               observedGeneration:
                 description: ObservedGeneration is the last observed generation.
                 format: int64
@@ -741,7 +825,7 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
     control-plane: controller
   name: source-controller
   namespace: flux-system
@@ -760,7 +844,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
     control-plane: controller
   name: source-controller
   namespace: flux-system
@@ -790,7 +874,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/source-controller:v0.2.2
+        image: ghcr.io/fluxcd/source-controller:v0.3.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -839,7 +923,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: kustomizations.kustomize.toolkit.fluxcd.io
 spec:
   group: kustomize.toolkit.fluxcd.io
@@ -937,7 +1021,7 @@ spec:
                 description: The interval at which to reconcile the kustomization.
                 type: string
               kubeConfig:
-                description: The KubeConfig for reconciling the Kustomization on a remote cluster.
+                description: The KubeConfig for reconciling the Kustomization on a remote cluster. When specified, KubeConfig takes precedence over ServiceAccountName.
                 properties:
                   secretRef:
                     description: SecretRef holds the name to a secret that contains a 'value' key with the kubeconfig file as the value. It must be in the same namespace as the Kustomization. It is recommended that the kubeconfig is self-contained, and the secret is regularly updated if credentials such as a cloud-access-token expire. Cloud specific `cmd-path` auth helpers will not function without adding binaries and credentials to the Pod that is responsible for reconciling the Kustomization.
@@ -954,19 +1038,9 @@ spec:
               prune:
                 description: Prune enables garbage collection.
                 type: boolean
-              serviceAccount:
-                description: The Kubernetes service account used for applying the kustomization.
-                properties:
-                  name:
-                    description: Name is the name of the service account being referenced.
-                    type: string
-                  namespace:
-                    description: Namespace is the namespace of the service account being referenced.
-                    type: string
-                required:
-                - name
-                - namespace
-                type: object
+              serviceAccountName:
+                description: The name of the Kubernetes service account to impersonate when reconciling this Kustomization.
+                type: string
               sourceRef:
                 description: Reference of the source where the kustomization file is.
                 properties:
@@ -1018,25 +1092,43 @@ spec:
             properties:
               conditions:
                 items:
-                  description: Condition contains condition information of a toolkit resource.
+                  description: "Condition contains details for one aspect of the current state of this API Resource. --- This struct is intended for direct use as an array at the field path .status.conditions.  For example, type FooStatus struct{     // Represents the observations of a foo's current state.     // Known .status.conditions.type are: \"Available\", \"Progressing\", and \"Degraded\"     // +patchMergeKey=type     // +patchStrategy=merge     // +listType=map     // +listMapKey=type     Conditions []metav1.Condition `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"` \n     // other fields }"
                   properties:
                     lastTransitionTime:
-                      description: LastTransitionTime is the timestamp corresponding to the last status change of this condition.
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
-                      description: Message is a human readable description of the details of the last transition, complementing reason.
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      maxLength: 32768
                       type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
                     reason:
-                      description: Reason is a brief machine readable explanation for the condition's last transition.
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
                       type: string
                     status:
-                      description: Status of the condition, one of ('True', 'False', 'Unknown').
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
                       type: string
                     type:
-                      description: Type of the condition.
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase. --- Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
                       type: string
                   required:
+                  - lastTransitionTime
+                  - message
+                  - reason
                   - status
                   - type
                   type: object
@@ -1099,7 +1191,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
     control-plane: controller
   name: kustomize-controller
   namespace: flux-system
@@ -1128,7 +1220,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/kustomize-controller:v0.2.2
+        image: ghcr.io/fluxcd/kustomize-controller:v0.3.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -1161,6 +1253,8 @@ spec:
       nodeSelector:
         kubernetes.io/arch: amd64
         kubernetes.io/os: linux
+      securityContext:
+        fsGroup: 1337
       terminationGracePeriodSeconds: 10
       volumes:
       - emptyDir: {}
@@ -1174,7 +1268,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: helmreleases.helm.toolkit.fluxcd.io
 spec:
   group: helm.toolkit.fluxcd.io
@@ -1255,6 +1349,7 @@ spec:
                         description: Alternative values file to use as the default chart values, expected to be a relative path in the SourceRef. Ignored when omitted.
                         type: string
                       version:
+                        default: '*'
                         description: Version semver expression, ignored for charts from v1beta1.GitRepository and v1beta1.Bucket sources. Defaults to latest when omitted.
                         type: string
                     required:
@@ -1482,25 +1577,43 @@ spec:
               conditions:
                 description: Conditions holds the conditions for the HelmRelease.
                 items:
-                  description: Condition contains condition information of a toolkit resource.
+                  description: "Condition contains details for one aspect of the current state of this API Resource. --- This struct is intended for direct use as an array at the field path .status.conditions.  For example, type FooStatus struct{     // Represents the observations of a foo's current state.     // Known .status.conditions.type are: \"Available\", \"Progressing\", and \"Degraded\"     // +patchMergeKey=type     // +patchStrategy=merge     // +listType=map     // +listMapKey=type     Conditions []metav1.Condition `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"` \n     // other fields }"
                   properties:
                     lastTransitionTime:
-                      description: LastTransitionTime is the timestamp corresponding to the last status change of this condition.
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
-                      description: Message is a human readable description of the details of the last transition, complementing reason.
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      maxLength: 32768
                       type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
                     reason:
-                      description: Reason is a brief machine readable explanation for the condition's last transition.
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
                       type: string
                     status:
-                      description: Status of the condition, one of ('True', 'False', 'Unknown').
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
                       type: string
                     type:
-                      description: Type of the condition.
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase. --- Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
                       type: string
                   required:
+                  - lastTransitionTime
+                  - message
+                  - reason
                   - status
                   - type
                   type: object
@@ -1557,7 +1670,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
     control-plane: controller
   name: helm-controller
   namespace: flux-system
@@ -1586,7 +1699,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/helm-controller:v0.2.1
+        image: ghcr.io/fluxcd/helm-controller:v0.3.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -1625,7 +1738,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: alerts.notification.toolkit.fluxcd.io
 spec:
   group: notification.toolkit.fluxcd.io
@@ -1720,25 +1833,43 @@ spec:
             properties:
               conditions:
                 items:
-                  description: Condition contains condition information of a toolkit resource.
+                  description: "Condition contains details for one aspect of the current state of this API Resource. --- This struct is intended for direct use as an array at the field path .status.conditions.  For example, type FooStatus struct{     // Represents the observations of a foo's current state.     // Known .status.conditions.type are: \"Available\", \"Progressing\", and \"Degraded\"     // +patchMergeKey=type     // +patchStrategy=merge     // +listType=map     // +listMapKey=type     Conditions []metav1.Condition `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"` \n     // other fields }"
                   properties:
                     lastTransitionTime:
-                      description: LastTransitionTime is the timestamp corresponding to the last status change of this condition.
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
-                      description: Message is a human readable description of the details of the last transition, complementing reason.
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      maxLength: 32768
                       type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
                     reason:
-                      description: Reason is a brief machine readable explanation for the condition's last transition.
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
                       type: string
                     status:
-                      description: Status of the condition, one of ('True', 'False', 'Unknown').
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
                       type: string
                     type:
-                      description: Type of the condition.
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase. --- Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
                       type: string
                   required:
+                  - lastTransitionTime
+                  - message
+                  - reason
                   - status
                   - type
                   type: object
@@ -1764,7 +1895,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: providers.notification.toolkit.fluxcd.io
 spec:
   group: notification.toolkit.fluxcd.io
@@ -1842,25 +1973,43 @@ spec:
             properties:
               conditions:
                 items:
-                  description: Condition contains condition information of a toolkit resource.
+                  description: "Condition contains details for one aspect of the current state of this API Resource. --- This struct is intended for direct use as an array at the field path .status.conditions.  For example, type FooStatus struct{     // Represents the observations of a foo's current state.     // Known .status.conditions.type are: \"Available\", \"Progressing\", and \"Degraded\"     // +patchMergeKey=type     // +patchStrategy=merge     // +listType=map     // +listMapKey=type     Conditions []metav1.Condition `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"` \n     // other fields }"
                   properties:
                     lastTransitionTime:
-                      description: LastTransitionTime is the timestamp corresponding to the last status change of this condition.
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
-                      description: Message is a human readable description of the details of the last transition, complementing reason.
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      maxLength: 32768
                       type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
                     reason:
-                      description: Reason is a brief machine readable explanation for the condition's last transition.
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
                       type: string
                     status:
-                      description: Status of the condition, one of ('True', 'False', 'Unknown').
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
                       type: string
                     type:
-                      description: Type of the condition.
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase. --- Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
                       type: string
                   required:
+                  - lastTransitionTime
+                  - message
+                  - reason
                   - status
                   - type
                   type: object
@@ -1886,7 +2035,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
   name: receivers.notification.toolkit.fluxcd.io
 spec:
   group: notification.toolkit.fluxcd.io
@@ -1988,25 +2137,43 @@ spec:
             properties:
               conditions:
                 items:
-                  description: Condition contains condition information of a toolkit resource.
+                  description: "Condition contains details for one aspect of the current state of this API Resource. --- This struct is intended for direct use as an array at the field path .status.conditions.  For example, type FooStatus struct{     // Represents the observations of a foo's current state.     // Known .status.conditions.type are: \"Available\", \"Progressing\", and \"Degraded\"     // +patchMergeKey=type     // +patchStrategy=merge     // +listType=map     // +listMapKey=type     Conditions []metav1.Condition `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"` \n     // other fields }"
                   properties:
                     lastTransitionTime:
-                      description: LastTransitionTime is the timestamp corresponding to the last status change of this condition.
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
-                      description: Message is a human readable description of the details of the last transition, complementing reason.
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      maxLength: 32768
                       type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
                     reason:
-                      description: Reason is a brief machine readable explanation for the condition's last transition.
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
                       type: string
                     status:
-                      description: Status of the condition, one of ('True', 'False', 'Unknown').
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
                       type: string
                     type:
-                      description: Type of the condition.
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase. --- Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
                       type: string
                   required:
+                  - lastTransitionTime
+                  - message
+                  - reason
                   - status
                   - type
                   type: object
@@ -2032,7 +2199,7 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
     control-plane: controller
   name: notification-controller
   namespace: flux-system
@@ -2051,7 +2218,7 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
     control-plane: controller
   name: webhook-receiver
   namespace: flux-system
@@ -2070,7 +2237,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.2.6
+    app.kubernetes.io/version: v0.3.0
     control-plane: controller
   name: notification-controller
   namespace: flux-system
@@ -2098,7 +2265,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/notification-controller:v0.2.1
+        image: ghcr.io/fluxcd/notification-controller:v0.3.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
