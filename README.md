@@ -68,4 +68,5 @@ A lot of inspiration for this repo came from the following people:
 - [toboshii/k8s-gitops](https://github.com/toboshii/k8s-gitops)
 - [raspbernetes/k8s-gitops](https://github.com/raspbernetes/k8s-gitops)
 - [auricom/home-cluster](https://github.com/auricom/home-cluster)
+- [npawelek/k8s-gitops](https://github.com/npawelek/k8s-gitops)
 - [nlopez/k8s_home](https://github.com/nlopez/k8s_home)
