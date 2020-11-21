@@ -25,6 +25,40 @@ spec:
     env:
       TZ: America/New_York
       ZIGBEE2MQTT_DATA: /data
+    config:
+      homeassistant: true
+      device_options:
+        retain: true
+      permit_join: true
+      mqtt:
+        base_topic: zigbee2mqtt
+        server: "mqtt://vernemq"
+      serial:
+        port: /dev/ttyUSB0
+      advanced:
+        log_output:
+        - console
+        network_key:
+        - 204
+        - 61
+        - 75
+        - 23
+        - 44
+        - 230
+        - 24
+        - 203
+        - 53
+        - 5
+        - 248
+        - 32
+        - 50
+        - 84
+        - 44
+        - 159
+      frontend:
+        port: 8080
+      experimental:
+        new_api: true
     securityContext:
       privileged: true
     ingress:
@@ -61,17 +95,6 @@ spec:
           nodeSelectorTerms:
           - matchExpressions:
             - {key: "feature.node.kubernetes.io/custom-zigbee", operator: In, values: ["true"]}
-    config:
-      homeassistant: true
-      mqtt:
-        base_topic: zigbee2mqtt
-        server: "mqtt://vernemq"
-      serial:
-        port: /dev/ttyUSB0
-      frontend:
-        port: 8080
-      experimental:
-        new_api: true
   valuesFrom:
   - kind: Secret
     name: "zigbee2mqtt-helm-values"
