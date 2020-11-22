@@ -67,19 +67,26 @@ spec:
         builtIn:
           postgresql:
             enabled: true
+      cache:
+        builtIn:
+          enabled: true
       podAnnotations:
         backup.velero.io/backup-volumes: data
+    memcached:
+      image:
+        repository: bitnami/memcached
+        tag: 1.6.9
+      service:
+        port: 11211
     postgresql:
+      image:
+        repository: bitnami/postgresql
+        tag: 11.10.0
       persistence:
         storageClass: "rook-ceph-block"
       primary:
         podAnnotations:
           backup.velero.io/backup-volumes: data
-      metrics:
-        enabled: true
-        serviceMonitor:
-          enabled: true
-          namespace: dev
   valuesFrom:
   - kind: Secret
     name: "gitea-helm-values"
