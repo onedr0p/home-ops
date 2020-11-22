@@ -53,7 +53,7 @@ fi
 # shellcheck disable=SC2129
 printf "%s\n%s\n%s\n" "#" "# Auto-generated generic secrets -- DO NOT EDIT." "#" >> "${GENERATED_SECRETS}"
 
-# NginX Basic Auth
+# nginx basic auth
 kubectl create secret generic nginx-basic-auth \
     --from-literal=auth="${NGINX_BASIC_AUTH}" \
     --namespace media --dry-run=client -o json |
@@ -61,7 +61,7 @@ kubectl create secret generic nginx-basic-auth \
         >>"${GENERATED_SECRETS}"
 echo "---" >>"${GENERATED_SECRETS}"
 
-# Cloudflare API Key
+# cloudflare api key
 kubectl create secret generic cloudflare-api-key \
     --from-literal=api-key="${CF_API_KEY}" \
     --namespace cert-manager --dry-run=client -o json |
@@ -69,7 +69,7 @@ kubectl create secret generic cloudflare-api-key \
         >>"${GENERATED_SECRETS}"
 echo "---" >>"${GENERATED_SECRETS}"
 
-# Github Runner
+# github runner
 kubectl create secret generic controller-manager \
     --from-literal=github_token="${GITHUB_RUNNER_ACCESS_TOKEN}" \
     --namespace actions-runner-system --dry-run=client -o json |
@@ -93,11 +93,19 @@ kubectl create secret generic discord-webhook \
         >>"${GENERATED_SECRETS}"
 echo "---" >>"${GENERATED_SECRETS}"
 
-# qBittorrent
+# qbittorrent credentials
 kubectl create secret generic qbittorrent \
     --from-literal=username="${QB_USERNAME}" \
     --from-literal=password="${QB_PASSWORD}" \
     --namespace media --dry-run=client -o json |
+    kubeseal --format=yaml --cert="${PUB_CERT}" \
+        >>"${GENERATED_SECRETS}"
+echo "---" >>"${GENERATED_SECRETS}"
+
+# gitea personal access token
+kubectl create secret generic gitea-pat \
+    --from-literal=token="${GITEA_PAT}" \
+    --namespace velero --dry-run=client -o json |
     kubeseal --format=yaml --cert="${PUB_CERT}" \
         >>"${GENERATED_SECRETS}"
 echo "---" >>"${GENERATED_SECRETS}"
