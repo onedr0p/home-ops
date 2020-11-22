@@ -113,7 +113,7 @@ spec:
         datasources:
           enabled: true
           # Disable for thanos
-          defaultDatasourceEnabled: true
+          defaultDatasourceEnabled: false
         dashboards:
           enabled: true
           searchNamespace: ALL
@@ -189,6 +189,11 @@ spec:
             revision: 1
             datasource: Prometheus
       additionalDataSources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://thanos-query-http:10902/
+        isDefault: true
       - name: loki
         type: loki
         access: proxy
@@ -249,7 +254,7 @@ spec:
         podMonitorSelector: {}
         podMonitorNamespaceSelector: {}
         podMonitorSelectorNilUsesHelmValues: false
-        retention: 45d
+        retention: 12h
         enableAdminAPI: true
         walCompression: true
         storageSpec:
@@ -258,7 +263,13 @@ spec:
               storageClassName: "rook-ceph-block"
               resources:
                 requests:
-                  storage: 50Gi
+                  storage: 10Gi
+        thanos:
+          image: quay.io/thanos/thanos:v0.15.0
+          version: v0.15.0
+          objectStorageConfig:
+            name: thanos
+            key: object-store.yaml
         additionalScrapeConfigs:
         - job_name: 'node-exporter'
           static_configs:
