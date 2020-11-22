@@ -1,0 +1,72 @@
+---
+#
+# Cronjob to back up my longhorn backups to the cloud
+#
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  namespace: velero
+  name: velero-minio-b2-sync
+spec:
+  schedule: "0 */12 * * *"
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          initContainers:
+          - name: rclone-conf
+            image: alpine/git:v2.26.2
+            env:
+            - name: GITEA_PAT
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-pat
+                  key: token
+            command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              set -o nounset
+              set -o errexit
+              if [ -z "${GITEA_PAT}" ]; then
+                printf "%s - Error - Missing GITEA_PAT environment variable" "$(date -u)"
+                exit 1
+              fi
+              git clone --depth 1 "https://${GITEA_PAT}@gitea.devbu.io/devin/rclone-config.git" /shared/rclone-conf
+              exit 0
+            volumeMounts:
+            - name: shared
+              mountPath: /shared
+          containers:
+          - name: rclone
+            image: rclone/rclone:1.53
+            env:
+            - name: TZ
+              value: "America/New_York"
+            command: ["rclone"]
+            args:
+            - "-v"
+            - "--config"
+            - "/shared/rclone-conf/rclone.conf"
+            - "sync"
+            - "--ignore-errors"
+            - "--fast-list"
+            - "--b2-hard-delete"
+            - "--transfers"
+            - "24"
+            - "--checkers"
+            - "24"
+            - "--bwlimit"
+            - "25M"
+            - "minio:velero"
+            - "b2-velero-crypt:/"
+            volumeMounts:
+            - name: shared
+              mountPath: /shared
+          volumes:
+          - name: shared
+            emptyDir: {}
