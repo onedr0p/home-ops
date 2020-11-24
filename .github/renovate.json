@@ -8,6 +8,15 @@
   "helm-values": {
     "fileMatch": ["cluster/.+\\.yaml$"]
   },
+  "regexManagers": [
+    {
+      "fileMatch": ["cluster/.+\\.yaml$"],
+      "matchStrings": [
+        "chart:\n *renovatebotRepository: (?<registryUrl>.*?)\n *chart: (?<depName>.*?)\n *version: (?<currentValue>.*)\n"
+      ],
+      "datasourceTemplate": "helm"
+    }
+  ],
   "packageRules": [
     {
       "datasources": ["docker"],
