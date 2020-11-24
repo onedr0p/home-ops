@@ -7,25 +7,6 @@ source "${__dir}/environment.sh"
 
 export repository_files="${CLUSTER_ROOT}/flux-system/helm-chart-repositories"
 
-# ---
-# apiVersion: helm.toolkit.fluxcd.io/v2beta1
-# kind: HelmRelease
-# metadata:
-#   name: plex-media-server-test
-#   namespace: testing
-# spec:
-#   interval: 5m
-#   chart:
-#     spec:
-#       # renovatebot.helm.repository: https://k8s-at-home.com/charts/
-#       chart: plex-media-server
-#       version: 0.0.1
-#       sourceRef:
-#         kind: HelmRepository
-#         name: k8s-at-home-charts
-#         namespace: flux-system
-#       interval: 5m
-
 # loop thru and get all repository name and URLs
 for file in "${repository_files}"/*.yaml; do
     chart_name=$(yq r "$file" metadata.name)
