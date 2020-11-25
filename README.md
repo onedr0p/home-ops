@@ -30,7 +30,7 @@ See my project over at [home-operations](https://github.com/onedr0p/home-operati
 
 ## :globe_with_meridians:&nbsp; Networking
 
-In my cluster I run [coredns](https://github.com/coredns/coredns), [etcd](https://github.com/etcd-io/etcd), and [external-dns](https://github.com/kubernetes-sigs/external-dns). **External-DNS** populates **CoreDNS** with all my ingress records and stores it in **etcd**, both internal and external ingress records. When I'm browsing any of the webapps while on my home network, the traffic is being routed internally and never makes a round trip. The way I set this up is in my router. When a DNS request is made for my domain or any of my subdomains it uses **coredns** as the DNS server, otherwise it uses whatever upstream DNS I provided.
+In my cluster I run [coredns](https://github.com/coredns/coredns), [etcd](https://github.com/etcd-io/etcd), and [external-dns](https://github.com/kubernetes-sigs/external-dns). **External-DNS** populates **CoreDNS** with all my ingress records and stores it in **etcd**. When I'm browsing any of the webapps while on my home network, the traffic is being routed internally and never makes a round trip. The way I set this up is in my router. When a DNS request is made for my domain or any of my subdomains it uses **coredns** as the DNS server, otherwise it uses whatever upstream DNS I provided.
 
 ## :wrench:&nbsp; Tools
 
