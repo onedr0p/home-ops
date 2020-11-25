@@ -23,6 +23,8 @@ spec:
       pullPolicy: Always
     env:
       TZ: "America/New_York"
+      UID: 1000
+      GID: 1000
     additionalContainers:
     - name: vscode
       image: codercom/code-server:3.7.2
@@ -40,6 +42,9 @@ spec:
       volumeMounts:
       - name: config
         mountPath: /www/assets
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
     service:
       port:
         port: 8080
