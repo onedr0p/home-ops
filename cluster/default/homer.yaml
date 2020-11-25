@@ -31,10 +31,10 @@ spec:
         nameSuffix: vscode
         type: ClusterIP
         port:
-          port: 80
+          port: 12431
           name: vscode
           protocol: TCP
-          targetPort: 80
+          targetPort: 12431
     ingress:
       enabled: true
       annotations:
@@ -51,7 +51,7 @@ spec:
       - enabled: true
         nameSuffix: "vscode"
         serviceName: homer-vscode
-        servicePort: 80
+        servicePort: 12431
         annotations:
           kubernetes.io/ingress.class: "internal"
         hosts:
@@ -66,10 +66,12 @@ spec:
     - name: vscode
       image: codercom/code-server:3.7.2
       imagePullPolicy: IfNotPresent
+      args:
+      - "--port=12431"
       # workingDir: /www/assets
       ports:
       - name: vscode
-        containerPort: 80
+        containerPort: 12431
         protocol: TCP
     persistence:
       config:
