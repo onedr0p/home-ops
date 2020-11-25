@@ -5,52 +5,49 @@ env:
   KUBECONFIG: ./kubeconfig
 
 tasks:
-  generate:
-    desc: Generate secrets and sample env
+  secrets:create:
+    desc: Create secrets
     cmds:
-    - task: generate-sealed-secrets
-    - task: generate-sample-env
-  apply:
-    desc: Apply manifests and secrets to the Kubernetes cluster
-    cmds:
-    - task: apply-manifest-templates
-    - task: apply-sealed-secrets
-  generate-sealed-secrets:
-    desc: Generate secrets
-    cmds:
-    - ./hack/generate-sealed-secrets.sh
+    - ./hack/create-secrets.sh
     preconditions:
+    - test -f ./hack/create-secrets.sh
     - test -f .cluster-secrets.env
-  generate-sample-env:
-    desc: Generate sample env
-    cmds:
-    - ./hack/generate-sample-env.sh
-  validate-sealed-secrets:
-    desc: Validate sealed-secrets
-    cmds:
-    - kubeseal --validate < ./cluster/zz_generated_secrets.yaml --controller-name=sealed-secrets
-  apply-manifest-templates:
-    desc: Apply manifests to the Kubernetes cluster
-    cmds:
-    - ./hack/apply-manifest-templates.sh
-  apply-sealed-secrets:
+
+  secrets:apply:
     desc: Apply secrets to the Kubernetes cluster
     cmds:
     - kubectl apply -f ./cluster/zz_generated_secrets.yaml
-  blocky-enable:
-    desc: Interact with Blocky to enable adblocking
+    preconditions:
+    - test -f ./cluster/zz_generated_secrets.yaml
+
+  renovate:helm-releases:
+    desc: Create renovate annotations for HelmReleases
+    cmds:
+    - ./hack/create-helmrelease-annotations.sh
+    preconditions:
+    - test -f ./hack/create-helmrelease-annotations.sh
+
+  blocky:enable:
+    desc: Enable adblocking in blocky
     cmds:
     - ./hack/blocky.sh enable
-  blocky-disable:
-    desc: Interact with Blocky to disable adblocking
+    preconditions:
+    - test -f ./hack/blocky.sh
+
+  blocky:disable:
+    desc: Disable adblocking in blocky
     cmds:
     - ./hack/blocky.sh disable
+    preconditions:
+    - test -f ./hack/blocky.sh
+
   #
   # WIP
   #
-  generate-helm-secret:
-    desc: Generate helm value file secrets
+  generate:helm-secret:
+    desc: Create helm value file secrets
     cmds:
-    - ./hack/generate-helm-secret.sh {{.TXT_FILE}}
+    - ./hack/create-helm-secret.sh {{.TXT_FILE}}
     preconditions:
+    - test -f ./hack/create-helm-secret.sh
     - test -f .cluster-secrets.env
