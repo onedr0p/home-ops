@@ -1,0 +1,31 @@
+name: renovate
+
+on:
+  schedule:
+    - cron: '0 */10 * * *'
+
+jobs:
+  helm-releases:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.PAT }}
+        fetch-depth: 1
+
+    - name: Create HelmRelease annotations
+      run: task renovate:helm-releases
+
+    - name: Create pull request for HelmRelease annotations
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: renovate/helmrelease-annotations
+        title: "[renovate] create helmrelease annotations [ci-skip]"
+        signoff: true
+        committer: "Devin Buhl <onedr0p@users.noreply.github.com>"
+        author: "Devin Buhl <onedr0p@users.noreply.github.com>"
+        commit-message: Create renovatebot helmrelease annotations
+        body: |
+          Signed-off-by: Devin Buhl <onedr0p@users.noreply.github.com>
+        labels: renovate/helmrelease-annotations
