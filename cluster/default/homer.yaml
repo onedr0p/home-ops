@@ -23,6 +23,23 @@ spec:
       pullPolicy: Always
     env:
       TZ: "America/New_York"
+    additionalContainers:
+    - name: vscode
+      image: codercom/code-server:3.7.2
+      imagePullPolicy: IfNotPresent
+      workingDir: /www/assets
+      args:
+      - "--port"
+      - "12431"
+      - "--auth"
+      - "none"
+      ports:
+      - name: vscode
+        containerPort: 12431
+        protocol: TCP
+      volumeMounts:
+      - name: config
+        mountPath: /www/assets
     service:
       port:
         port: 8080
@@ -62,20 +79,8 @@ spec:
         tls:
         - hosts:
           - start-editor.devbu.io
-    additionalContainers:
-    - name: vscode
-      image: codercom/code-server:3.7.2
-      imagePullPolicy: IfNotPresent
-      args:
-      - "--port"
-      - "12431"
-      - "--auth"
-      - "none"
-      # workingDir: /www/assets
-      ports:
-      - name: vscode
-        containerPort: 12431
-        protocol: TCP
+    additionalVolumes: []
+    additionalVolumeMounts: []
     persistence:
       config:
         enabled: true
