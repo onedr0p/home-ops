@@ -35,12 +35,47 @@ spec:
       tls:
       - hosts:
         - start.devbu.io
+      additionalIngresses:
+      - enabled: true
+        nameSuffix: "vscode"
+        annotations:
+          kubernetes.io/ingress.class: "internal"
+        hosts:
+        - host: start-editor.devbu.io
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "start-editor.devbu.io"
+    additionalServices:
+    - enabled: true
+      nameSuffix: vscode
+      type: ClusterIP
+      port:
+        port: 80
+        name: vscode
+        protocol: TCP
+        targetPort: 80
+    additionalContainers:
+    - name: vscode
+      image: codercom/code-server:3.7.2
+      imagePullPolicy: IfNotPresent
+      workingDir: /www/assets
+      ports:
+      - name: vscode
+        containerPort: 80
+        protocol: TCP
     persistence:
       config:
         enabled: true
         storageClass: "rook-ceph-block"
         accessMode: ReadWriteOnce
         size: "1Gi"
+      shared:
+        enabled: true
+        emptyDir: true
+        mountPath: /www/assets
     podAnnotations:
       backup.velero.io/backup-volumes: config
     resources:
