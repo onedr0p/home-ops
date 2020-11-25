@@ -23,6 +23,18 @@ spec:
       pullPolicy: Always
     env:
       TZ: "America/New_York"
+    service:
+      port:
+        port: 8080
+      additionalServices:
+      - enabled: true
+        nameSuffix: vscode
+        type: ClusterIP
+        port:
+          port: 80
+          name: vscode
+          protocol: TCP
+          targetPort: 80
     ingress:
       enabled: true
       annotations:
@@ -48,15 +60,6 @@ spec:
         tls:
         - hosts:
           - editor.start.devbu.io
-    additionalServices:
-    - enabled: true
-      nameSuffix: vscode
-      type: ClusterIP
-      port:
-        port: 80
-        name: vscode
-        protocol: TCP
-        targetPort: 80
     additionalContainers:
     - name: vscode
       image: codercom/code-server:3.7.2
