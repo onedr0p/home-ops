@@ -46,16 +46,4 @@ _Below are some of the tools I find useful for working with my cluster_
 
 ## :handshake:&nbsp; Thanks
 
-A lot of inspiration for this repo came from the following people:
-
-- [billimek/k8s-gitops](https://github.com/billimek/k8s-gitops)
-- [carpenike/k8s-gitops](https://github.com/carpenike/k8s-gitops)
-- [dcplaya/k8s-gitops](https://github.com/dcplaya/k8s-gitops)
-- [rust84/k8s-gitops](https://github.com/rust84/k8s-gitops)
-- [blackjid/homelab-gitops](https://github.com/blackjid/homelab-gitops)
-- [bjw-s/k8s-gitops](https://github.com/bjw-s/k8s-gitops)
-- [toboshii/k8s-gitops](https://github.com/toboshii/k8s-gitops)
-- [raspbernetes/k8s-gitops](https://github.com/raspbernetes/k8s-gitops)
-- [auricom/home-cluster](https://github.com/auricom/home-cluster)
-- [npawelek/k8s-gitops](https://github.com/npawelek/k8s-gitops)
-- [nlopez/k8s_home](https://github.com/nlopez/k8s_home)
+A lot of inspiration for my cluster came from the people that have shared their clusters over at [awesome-home-kubernetes](https://github.com/k8s-at-home/awesome-home-kubernetes)
