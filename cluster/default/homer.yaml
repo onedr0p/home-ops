@@ -23,8 +23,6 @@ spec:
       pullPolicy: Always
     env:
       TZ: "America/New_York"
-      UID: 1000
-      GID: 1000
     additionalContainers:
     - name: vscode
       image: codercom/code-server:3.7.2
@@ -43,8 +41,8 @@ spec:
       - name: config
         mountPath: /www/assets
       securityContext:
-        runAsUser: 1000
-        fsGroup: 1000
+        runAsUser: 0
+        fsGroup: 0
     service:
       port:
         port: 8080
@@ -92,9 +90,9 @@ spec:
         storageClass: "rook-ceph-block"
         accessMode: ReadWriteOnce
         size: "1Gi"
-    podSecurityContext:
-      runAsUser: 1000
-      fsGroup: 1000
+    # podSecurityContext:
+    #   runAsUser: 0
+    #   fsGroup: 0
     resources:
       requests:
         memory: 250Mi
