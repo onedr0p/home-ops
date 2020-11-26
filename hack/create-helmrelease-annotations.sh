@@ -23,9 +23,9 @@ for helm_release in "${CLUSTER_ROOT}"/**/*.yaml; do
 
         # only helmreleases where helm_release is related to chart_url
         if [[ $(yq r "${helm_release}" spec.chart.spec.sourceRef.name) == "${chart_name}" ]]; then
-            # remove "renovatebot.helm.repository" line
+            # delete "renovate: registryUrl=" line
             sed -i "/renovate: registryUrl=/d" "${helm_release}"
-            # add "renovatebot.helm.repository" line
+            # insert "renovate: registryUrl=" line
             sed -i "/.*chart: .*/i \ \ \ \ \ \ # renovate: registryUrl=${chart_url}" "${helm_release}"
             echo "Annotated $(basename "${helm_release%.*}") with ${chart_name} for renovatebot..."
             break
