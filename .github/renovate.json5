@@ -21,52 +21,95 @@
     }
   ],
   "packageRules": [
+
+    //
+    // labels
+    //
+
     {
       "datasources": ["docker"],
-      "labels": ["renovate/image-release"]
+      "updateTypes": ["major"],
+      "labels": ["renovate/image-release", "dependency/major"]
+    },
+    {
+      "datasources": ["docker"],
+      "updateTypes": ["minor"],
+      "labels": ["renovate/image-release", "dependency/minor"]
+    },
+    {
+      "datasources": ["docker"],
+      "updateTypes": ["patch"],
+      "labels": ["renovate/image-release", "dependency/patch"]
     },
     {
       "datasources": ["helm"],
-      "labels": ["renovate/helm-release"]
-    },
-    {
       "updateTypes": ["major"],
-      "labels": ["dependency/major"]
+      "labels": ["renovate/helm-release", "dependency/major"]
     },
     {
+      "datasources": ["helm"],
       "updateTypes": ["minor"],
-      "labels": ["dependency/minor"]
+      "labels": ["renovate/helm-release", "dependency/minor"]
     },
     {
+      "datasources": ["helm"],
       "updateTypes": ["patch"],
-      "labels": ["dependency/patch"]
+      "labels": ["renovate/helm-release", "dependency/patch"]
     },
+
+    //
+    // interesting image tags
+    //
+
     {
       "datasources": ["docker"],
       "versionScheme": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.*)$",
       "packageNames": ["blakeblackshear/frigate"]
+    },
+
+    //
+    // pin versions
+    //
+    
+    {
+      "datasources": ["docker"],
+      "allowedVersions": "<4.3.0",
+      "packageNames": ["k8sathome/qbittorrent"]
+    },
+
+    //
+    // versioning
+    //
+
+    {
+      "datasources": ["docker"],
+      "versioning": "nuget",
+      "packageNames": [
+        "k8sathome/radarr",
+        "k8sathome/sonarr",
+        "k8sathome/lidarr",
+        "k8sathome/bazarr"
+      ]
     },
     {
       "datasources": ["docker"],
       "versioning": "loose",
       "packageNames": ["plexinc/pms-docker"]
     },
-    {
-      "datasources": ["docker"],
-      "allowedVersions": "<4.3.0",
-      "packageNames": ["k8sathome/qbittorrent"]
-    },
-    {
-      "datasources": ["docker"],
-      "versioning": "nuget",
-      "packageNames": ["k8sathome/radarr", "k8sathome/sonarr", "k8sathome/lidarr", "k8sathome/bazarr"]
-    },
+
+    //
+    // auto-updates
+    //
+
     {
       "datasources": ["docker"],
       "automerge": true,
       "requiredStatusChecks": null,
       "updateTypes": ["minor", "patch"],
-      "packageNames": ["k8sathome/ombi", "k8sathome/jackett"]
+      "packageNames": [
+        "k8sathome/ombi",
+        "k8sathome/jackett"
+      ]
     }
   ]
 }
