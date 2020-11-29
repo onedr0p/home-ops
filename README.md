@@ -17,16 +17,18 @@ _... managed by Flux and serviced with RenovateBot_ :robot:
 
 This repository _is_ my homelab Kubernetes cluster in a declarative state. [Flux2](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder and makes the changes to my cluster based on the YAML manifests.
 
-[Renovatebot](https://github.com/renovatebot/renovate) keeps my application charts and container images up-to-date by scanning my repo and opening pull requests when it notices updates.
-
-[Actions Runner Controller](https://github.com/summerwind/actions-runner-controller) operates a self-hosted Github runner in my cluster which I use to generate and apply Sealed Secrets to my cluster. 
-
 Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join the k8s@home [Discord](https://discord.gg/DNCynrJ) if you have any questions.
 
 ## :computer:&nbsp; Cluster setup
 
 See my project over at [home-operations](https://github.com/onedr0p/home-operations) for how I provisioned my nodes and other work that supports running this cluster.
 
+## :robot:&nbsp; Automate all the things!
+
+- [Kured](https://github.com/weaveworks/kured) to apply OS patches to my nodes.
+- [System Controller Upgrader](https://github.com/rancher/system-upgrade-controller) to apply updates to Kubernetes.
+- [Renovate](https://github.com/renovatebot/renovate) keeps my application charts and container images up-to-date by scanning my repo and opening pull requests when it notices updates.
+- [Actions Runner Controller](https://github.com/summerwind/actions-runner-controller) operates a self-hosted Github runner in my cluster which I use to generate and apply Sealed Secrets to my cluster.
 
 ## :globe_with_meridians:&nbsp; Networking
 
