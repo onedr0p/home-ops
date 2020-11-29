@@ -3,6 +3,8 @@
 ### My home Kubernetes cluster :sailboat:
 _... managed by Flux and serviced with RenovateBot_ :robot:
 
+<br/>
+
 [![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60&style=for-the-badge)](https://discord.gg/DNCynrJ)
 [![k3s](https://img.shields.io/badge/k3s-v1.19.3-orange?style=for-the-badge)](https://k3s.io/)
 [![GitHub stars](https://img.shields.io/github/stars/onedr0p/k3s-gitops?color=green&style=for-the-badge)](https://github.com/onedr0p/k3s-gitops/stargazers)
