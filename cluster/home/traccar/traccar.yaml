@@ -1,0 +1,68 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: traccar
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: traccar
+      version: 1.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    controllerType: deployment
+    image:
+      repository: traccar/traccar
+      tag: 4.11
+      pullPolicy: IfNotPresent
+    env:
+      TZ: "America/New_York"
+      CONFIG_USE_ENVIRONMENT_VARIABLES: true
+      LOGGER_CONSOLE: true
+      DATABASE_DRIVER: "com.mysql.cj.jdbc.Driver"
+      DATABASE_URL: "jdbc:mysql://traccar-mariadb:3306/traccar?serverTimezone=UTC&useSSL=false&allowMultiQueries=true&autoReconnect=true&useUnicode=yes&characterEncoding=UTF-8&sessionVariables=sql_mode=''"
+      DATABASE_USER: "traccar"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - host: traccar.devbu.io
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "traccar.devbu.io"
+    persistence:
+      data:
+        enabled: false
+    probes:
+      startup:
+        enabled: true
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 4000Mi
+    mariadb:
+      enabled: true
+      architecture: standalone
+      auth:
+        database: traccar
+        username: traccar
+      primary:
+        persistence:
+          enabled: true
+          storageClass: "rook-ceph-block"
+  valuesFrom:
+  - kind: Secret
+    name: "traccar-helm-values"
