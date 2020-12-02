@@ -1,0 +1,39 @@
+name: flux-upgrade-schedule
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: "0 * * * *"
+
+jobs:
+  update-components:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - name: Setup Flux CLI
+      uses: fluxcd/flux2/action@main
+
+    - name: Update component versions
+      id: upgrade
+      run: |
+        flux install --export > ./cluster/flux-system/gotk-components.yaml
+        VERSION="$(flux -v)"
+        echo "::set-output name=flux_version::$VERSION"
+
+    - name: Create pull request for Flux upgrade
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: "flux/upgrade-${{ steps.update.outputs.flux_version }}"
+        title: "[flux] upgrade components to ${{ steps.update.outputs.flux_version }}"
+        signoff: true
+        committer: "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
+        author: "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
+        reviewers: "${{ github.actor }}"
+        commit-message: "Upgrade flux components to ${{ steps.update.outputs.flux_version }}"
+        body: |
+          Signed-off-by: Devin Buhl <onedr0p@users.noreply.github.com>
+        labels: flux/upgrade
