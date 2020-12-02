@@ -16,7 +16,6 @@ jobs:
     - name: Setup Flux CLI
       uses: fluxcd/flux2/action@main
 
-    # flux version 0.4.2
     - name: Update component versions
       id: update
       run: |
@@ -24,6 +23,7 @@ jobs:
         VERSION="v${UGLY_VERSION#*flux version }"
         echo "::set-output name=flux_version::$VERSION"
         flux install --version="${VERSION}" --network-policy=false --export > ./cluster/flux-system/gotk-components.yaml
+        rm -rf flux bin/flux
 
     - name: Create pull request for Flux update
       uses: peter-evans/create-pull-request@v3
@@ -32,9 +32,9 @@ jobs:
         branch: "flux/update-${{ steps.update.outputs.flux_version }}"
         title: "Update Flux components to ${{ steps.update.outputs.flux_version }}"
         signoff: true
-        committer: "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
-        author: "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
-        reviewers: "${{ github.actor }}"
+        committer: "Devin Buhl <onedr0p@users.noreply.github.com>"
+        author: "Devin Buhl <onedr0p@users.noreply.github.com>"
+        reviewers: "onedr0p"
         commit-message: "Update Flux components to ${{ steps.update.outputs.flux_version }}"
         body: |
           Signed-off-by: Devin Buhl <onedr0p@users.noreply.github.com>
