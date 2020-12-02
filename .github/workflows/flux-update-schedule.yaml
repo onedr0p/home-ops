@@ -1,4 +1,4 @@
-name: flux-upgrade-schedule
+name: flux-update-schedule
 
 on:
   workflow_dispatch:
@@ -23,17 +23,17 @@ jobs:
         VERSION="$(flux -v)"
         echo "::set-output name=flux_version::$VERSION"
 
-    - name: Create pull request for Flux upgrade
+    - name: Create pull request for Flux update
       uses: peter-evans/create-pull-request@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        branch: "flux/upgrade-${{ steps.update.outputs.flux_version }}"
-        title: "[flux] upgrade components to ${{ steps.update.outputs.flux_version }}"
+        branch: "flux/update-${{ steps.update.outputs.flux_version }}"
+        title: "Update Flux components to ${{ steps.update.outputs.flux_version }}"
         signoff: true
         committer: "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
         author: "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
         reviewers: "${{ github.actor }}"
-        commit-message: "Upgrade flux components to ${{ steps.update.outputs.flux_version }}"
+        commit-message: "Update Flux components to ${{ steps.update.outputs.flux_version }}"
         body: |
           Signed-off-by: Devin Buhl <onedr0p@users.noreply.github.com>
-        labels: flux/upgrade
+        labels: flux/update
