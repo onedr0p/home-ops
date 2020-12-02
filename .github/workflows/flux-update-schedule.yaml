@@ -21,7 +21,7 @@ jobs:
       id: update
       run: |
         UGLY_VERSION="$(flux -v)"
-        VERSION="v${VERSION#*flux version }"
+        VERSION="v${UGLY_VERSION#*flux version }"
         echo "::set-output name=flux_version::$VERSION"
         flux install --version="${VERSION}" --network-policy=false --export > ./cluster/flux-system/gotk-components.yaml
 
