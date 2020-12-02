@@ -16,10 +16,12 @@ jobs:
     - name: Setup Flux CLI
       uses: fluxcd/flux2/action@main
 
+    # flux version 0.4.2
     - name: Update component versions
       id: update
       run: |
-        VERSION="$(flux -v)"
+        UGLY_VERSION="$(flux -v)"
+        VERSION="v${VERSION#*flux\ version\ }"
         echo "::set-output name=flux_version::$VERSION"
         flux install --version="${VERSION}" --network-policy=false --export > ./cluster/flux-system/gotk-components.yaml
 
