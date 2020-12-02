@@ -19,9 +19,9 @@ jobs:
     - name: Update component versions
       id: upgrade
       run: |
-        flux install --export > ./cluster/flux-system/gotk-components.yaml
         VERSION="$(flux -v)"
         echo "::set-output name=flux_version::$VERSION"
+        flux install --version="${VERSION}" --network-policy=false --export > ./cluster/flux-system/gotk-components.yaml
 
     - name: Create pull request for Flux update
       uses: peter-evans/create-pull-request@v3
