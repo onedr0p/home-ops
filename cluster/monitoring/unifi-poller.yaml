@@ -20,27 +20,21 @@ spec:
     image:
       repository: golift/unifi-poller
       tag: 2.0.1
+    env:
+      TZ: "America/New_York"
+      UP_UNIFI_DEFAULT_ROLE: "homelab-controller"
+      UP_UNIFI_DEFAULT_URL: "https://192.168.1.2:8443"
+      UP_UNIFI_DEFAULT_VERIFY_SSL: false
+      UP_UNIFI_DEFAULT_USER: "unifipoller"
+      UP_UNIFI_DEFAULT_PASS: "unifipoller"
+      UP_PROMETHEUS_DISABLE: false
+      UP_INFLUXDB_DISABLE: true
+      UP_UNIFI_DEFAULT_SAVE_SITES: true
+      UP_UNIFI_DEFAULT_SAVE_DPI: false
+      UP_UNIFI_DEFAULT_SITE_0: "['Homelab']"
+      UP_PROMETHEUS_DISABLE: false
+      UP_PROMETHEUS_NAMESPACE: "monitoring"
     prometheus:
       serviceMonitor:
         enabled: true
         interval: 2m
-    config:
-      prometheus:
-        disable: false
-        http_listen: "0.0.0.0:9130"
-        report_errors: false
-      influxdb:
-        disable: true
-      unifi:
-        dynamic: false
-        defaults:
-          role: "homelab-controller"
-          user: "unifipoller"
-          pass: "unifipoller"
-          url: "https://192.168.1.2:8443"
-          sites:
-          - Homelab
-          verify_ssl: false
-          save_ids: false
-          save_dpi: false
-          save_sites: true
