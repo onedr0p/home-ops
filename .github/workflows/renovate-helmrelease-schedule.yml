@@ -15,8 +15,10 @@ jobs:
 
     - name: Install yq
       run: |
-        curl -sL -o "${GITHUB_PATH}/yq" https://github.com/mikefarah/yq/releases/download/3.4.1/yq_linux_amd64
-        chmod +x "${GITHUB_PATH}/yq"
+        mkdir -p "${GITHUB_WORKSPACE}/bin"
+        echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
+        curl -sL -o "${GITHUB_WORKSPACE}/bin/yq" https://github.com/mikefarah/yq/releases/download/3.4.1/yq_linux_amd64
+        chmod +x "${GITHUB_WORKSPACE}/bin/yq"
 
     - name: Create HelmRelease annotations
       run: ./hack/create-helmrelease-annotations.sh
