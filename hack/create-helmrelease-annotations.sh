@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
+shopt -s globstar
 
-# Wire up the env and cli validations
-__dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=/dev/null
-source "${__dir}/environment.sh"
+# shellcheck disable=SC2155
+REPO_ROOT=$(git rev-parse --show-toplevel)
+CLUSTER_ROOT="${REPO_ROOT}/cluster"
+HELM_REPOSITORIES="${CLUSTER_ROOT}/flux-system/helm-chart-repositories"
 
-export helm_repositories="${CLUSTER_ROOT}/flux-system/helm-chart-repositories"
+# Ensure yq exist
+command -v yq >/dev/null 2>&1 || {
+    echo >&2 "yq is not installed. Aborting."
+    exit 1
+}
 
 for helm_release in "${CLUSTER_ROOT}"/**/*.yaml; do
     # ignore flux-system namespace
@@ -17,7 +22,7 @@ for helm_release in "${CLUSTER_ROOT}"/**/*.yaml; do
         continue
     fi
 
-    for helm_repository in "${helm_repositories}"/*.yaml; do
+    for helm_repository in "${HELM_REPOSITORIES}"/*.yaml; do
         chart_name=$(yq r "${helm_repository}" metadata.name)
         chart_url=$(yq r "${helm_repository}" spec.url)
 
