@@ -26,8 +26,8 @@ See my project over at [home-operations](https://github.com/onedr0p/home-operati
 
 ## :robot:&nbsp; Automate all the things!
 
-- [Kured](https://github.com/weaveworks/kured) to apply OS patches to my nodes.
-- [System Controller Upgrader](https://github.com/rancher/system-upgrade-controller) to apply updates to Kubernetes.
+- ~~[Kured](https://github.com/weaveworks/kured) to apply OS patches to my nodes.~~
+- [System Upgrade Controller](https://github.com/rancher/system-upgrade-controller) to apply updates to k3s.
 - [Renovate](https://github.com/renovatebot/renovate) keeps my application charts and container images up-to-date by scanning my repo and opening pull requests when it notices updates.
 - [Actions Runner Controller](https://github.com/summerwind/actions-runner-controller) operates a self-hosted Github runner in my cluster which I use to generate and apply Sealed Secrets to my cluster.
 
