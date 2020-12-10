@@ -1,0 +1,98 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: appdaemon
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: appdaemon
+      version: 1.0.2
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: k8sathome/appdaemon
+      tag: v4.0.5
+      pullPolicy: Always
+    env:
+      TZ: "America/New_York"
+      DASH_URL: "http://0.0.0.0:5050"
+      HA_URL: "http://home-assistant:8123"
+    additionalContainers:
+    - name: vscode
+      image: codercom/code-server:3.7.2
+      imagePullPolicy: IfNotPresent
+      workingDir: /www/assets
+      args:
+      - "--port"
+      - "12431"
+      - "--auth"
+      - "none"
+      ports:
+      - name: vscode
+        containerPort: 12431
+        protocol: TCP
+      volumeMounts:
+      - name: config
+        mountPath: /www/assets
+      securityContext:
+        runAsUser: 0
+    service:
+      port:
+        port: 5050
+      additionalServices:
+      - enabled: true
+        nameSuffix: vscode
+        type: ClusterIP
+        port:
+          port: 12431
+          name: vscode
+          protocol: TCP
+          targetPort: 12431
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - host: appdaemon.devbu.io
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - appdaemon.devbu.io
+      additionalIngresses:
+      - enabled: true
+        nameSuffix: "vscode"
+        serviceName: appdaemon-vscode
+        servicePort: 12431
+        annotations:
+          kubernetes.io/ingress.class: "internal"
+        hosts:
+        - host: appdaemon-editor.devbu.io
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - appdaemon-editor.devbu.io
+    persistence:
+      config:
+        enabled: true
+        storageClass: "rook-ceph-block"
+        accessMode: ReadWriteOnce
+        size: "1Gi"
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 1500Mi
+        cpu: 2000m
