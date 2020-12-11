@@ -1,0 +1,60 @@
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta1
+kind: Receiver
+metadata:
+  name: home-cluster
+  namespace: flux-system
+spec:
+  type: github
+  events:
+  - "ping"
+  - "push"
+  secretRef:
+    name: webhook-token
+  resources:
+  - kind: GitRepository
+    name: home-cluster
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: receiver
+#   namespace: flux-system
+#   annotations:
+#     external-dns.alpha.kubernetes.io/target: "flux-receiver.devbu.io."
+# spec:
+#   type: ClusterIP
+#   selector:
+#     app: notification-controller
+#   ports:
+#   - name: http
+#     port: 80
+#     protocol: TCP
+#     targetPort: 9292
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webhook-receiver
+  namespace: flux-system
+  annotations:
+    kubernetes.io/ingress.class: "external"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  # labels:
+  #   app.kubernetes.io/instance: webhook-receiver
+  #   app.kubernetes.io/name: webhook-receiver
+spec:
+  rules:
+  - host: "flux-receiver.devbu.io"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: webhook-receiver
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - "flux-receiver.devbu.io"
