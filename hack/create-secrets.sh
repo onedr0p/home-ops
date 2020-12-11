@@ -93,6 +93,14 @@ kubectl create secret generic discord-webhook \
         >>"${GENERATED_SECRETS}"
 echo "---" >>"${GENERATED_SECRETS}"
 
+# flux github
+kubectl create secret generic webhook-token \
+    --from-literal=token="${FLUX_GITHUB_TOKEN}" \
+    --namespace flux-system --dry-run=client -o json |
+    kubeseal --format=yaml --cert="${PUB_CERT}" \
+        >>"${GENERATED_SECRETS}"
+echo "---" >>"${GENERATED_SECRETS}"
+
 # qbittorrent credentials
 kubectl create secret generic qbittorrent \
     --from-literal=username="${QB_USERNAME}" \
