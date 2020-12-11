@@ -13,24 +13,7 @@ spec:
     name: webhook-token
   resources:
   - kind: GitRepository
-    name: home-cluster
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: receiver
-#   namespace: flux-system
-#   annotations:
-#     external-dns.alpha.kubernetes.io/target: "flux-receiver.devbu.io."
-# spec:
-#   type: ClusterIP
-#   selector:
-#     app: notification-controller
-#   ports:
-#   - name: http
-#     port: 80
-#     protocol: TCP
-#     targetPort: 9292
+    name: flux-system
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -39,10 +22,6 @@ metadata:
   namespace: flux-system
   annotations:
     kubernetes.io/ingress.class: "external"
-  #   nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-  # labels:
-  #   app.kubernetes.io/instance: webhook-receiver
-  #   app.kubernetes.io/name: webhook-receiver
 spec:
   rules:
   - host: "flux-receiver.devbu.io"
