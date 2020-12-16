@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: appdaemon
-      version: 1.0.2
+      version: 2.1.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -25,37 +25,9 @@ spec:
       TZ: "America/New_York"
       DASH_URL: "http://0.0.0.0:5050"
       HA_URL: "http://home-assistant:8123"
-    additionalContainers:
-    - name: vscode
-      image: codercom/code-server:3.7.2
-      imagePullPolicy: IfNotPresent
-      workingDir: /www/assets
-      args:
-      - "--port"
-      - "12431"
-      - "--auth"
-      - "none"
-      ports:
-      - name: vscode
-        containerPort: 12431
-        protocol: TCP
-      volumeMounts:
-      - name: config
-        mountPath: /www/assets
-      securityContext:
-        runAsUser: 0
     service:
       port:
         port: 5050
-      additionalServices:
-      - enabled: true
-        nameSuffix: vscode
-        type: ClusterIP
-        port:
-          port: 12431
-          name: vscode
-          protocol: TCP
-          targetPort: 12431
     ingress:
       enabled: true
       annotations:
@@ -68,27 +40,31 @@ spec:
       tls:
       - hosts:
         - appdaemon.devbu.io
-      additionalIngresses:
-      - enabled: true
-        nameSuffix: "vscode"
-        serviceName: appdaemon-vscode
-        servicePort: 12431
-        annotations:
-          kubernetes.io/ingress.class: "internal"
-        hosts:
-        - host: appdaemon-editor.devbu.io
-          paths:
-          - path: /
-            pathType: Prefix
-        tls:
-        - hosts:
-          - appdaemon-editor.devbu.io
     persistence:
       config:
         enabled: true
         storageClass: "rook-ceph-block"
         accessMode: ReadWriteOnce
         size: "1Gi"
+    addons:
+      codeserver:
+        enabled: true
+        workingDir: "/config"
+        ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/ingress.class: "internal"
+          hosts:
+          - host: appdaemon-config.devbu.io
+            paths:
+            - path: /
+              pathType: Prefix
+          tls:
+          - hosts:
+            - appdaemon-config.devbu.io
+        volumeMounts:
+        - name: config
+          mountPath: /config
     resources:
       requests:
         memory: 250Mi
