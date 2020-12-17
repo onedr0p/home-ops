@@ -13,15 +13,18 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Install Flux
-      run: |
-        mkdir -p "${GITHUB_WORKSPACE}/bin"
-        echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
-        FLUX_VERSION=$(curl -s "https://api.github.com/repos/fluxcd/flux2/releases" | jq --raw-output '.[0].tag_name')
-        FLUX_VERSION=${FLUX_VERSION:1}
-        curl -sL -o /tmp/flux.tar.gz https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/flux_${FLUX_VERSION}_linux_amd64.tar.gz
-        tar xf /tmp/flux.tar.gz -C ${GITHUB_WORKSPACE}/bin flux
-        chmod +x "${GITHUB_WORKSPACE}/bin/flux"
+    - name: Setup Flux CLI
+      uses: fluxcd/flux2/action@main
+
+#     - name: Install Flux
+#       run: |
+#         mkdir -p "${GITHUB_WORKSPACE}/bin"
+#         echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
+#         FLUX_VERSION=$(curl -s "https://api.github.com/repos/fluxcd/flux2/releases" | jq --raw-output '.[0].tag_name')
+#         FLUX_VERSION=${FLUX_VERSION:1}
+#         curl -sL -o /tmp/flux.tar.gz https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/flux_${FLUX_VERSION}_linux_amd64.tar.gz
+#         tar xf /tmp/flux.tar.gz -C ${GITHUB_WORKSPACE}/bin flux
+#         chmod +x "${GITHUB_WORKSPACE}/bin/flux"
 
     - name: Update Flux components
       id: update
