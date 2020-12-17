@@ -20,12 +20,14 @@ spec:
   # - name: sealed-secrets
   #   namespace: kube-system
   values:
+    controllerType: deployment
     image:
       repository: homeassistant/home-assistant
       tag: 2020.12.1
-    extraEnv:
+    env:
       TZ: "America/New_York"
     hostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
     service:
       type: LoadBalancer
       externalIPs:
@@ -36,23 +38,50 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "external"
       hosts:
-      - "hass.devbu.io"
+      - host: hass.devbu.io
+        paths:
+        - path: /
+          pathType: Prefix
       tls:
       - hosts:
         - "hass.devbu.io"
-    persistence:
-      enabled: true
-      size: 10Gi
-      storageClass: "rook-ceph-block"
-    podAnnotations:
-      backup.velero.io/backup-volumes: config
-    monitoring:
-      enabled: false
+    prometheus:
+      serviceMonitor:
+        enabled: false
     probes:
       liveness:
         enabled: false
       readiness:
         enabled: false
+      startup:
+        enabled: false
+    persistence:
+      config:
+        enabled: true
+        storageClass: "rook-ceph-block"
+        accessMode: ReadWriteOnce
+        size: "10Gi"
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
+    addons:
+      codeserver:
+        enabled: true
+        workingDir: "/config"
+        ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/ingress.class: "internal"
+          hosts:
+          - host: hass-config.devbu.io
+            paths:
+            - path: /
+              pathType: Prefix
+          tls:
+          - hosts:
+            - hass-config.devbu.io
+        volumeMounts:
+        - name: config
+          mountPath: /config
     resources:
       requests:
         cpu: 500m
@@ -66,32 +95,6 @@ spec:
       persistence:
         enabled: true
         storageClass: "rook-ceph-block"
-    influxdb:
-      enabled: false
-      # architecture: standalone
-      # database: home_assistant
-      # authEnabled: false
-      # updateStrategy: Recreate
-      # persistence:
-      #   enabled: true
-      #   storageClass: "rook-ceph-block"
-      #   size: 8Gi
-    vscode:
-      enabled: true
-      image:
-        repository: codercom/code-server
-        tag: 3.7.4
-      extraEnv:
-        HASS_SERVER: "http://localhost:8123"
-      ingress:
-        enabled: true
-        annotations:
-          kubernetes.io/ingress.class: "internal"
-        hosts:
-        - "hass-editor.devbu.io"
-        tls:
-        - hosts:
-          - "hass-editor.devbu.io"
   valuesFrom:
   - kind: Secret
     name: "home-assistant-helm-values"
