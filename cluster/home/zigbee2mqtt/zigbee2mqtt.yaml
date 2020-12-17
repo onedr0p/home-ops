@@ -96,6 +96,25 @@ spec:
           nodeSelectorTerms:
           - matchExpressions:
             - {key: "feature.node.kubernetes.io/custom-zigbee", operator: In, values: ["true"]}
+    addons:
+      codeserver:
+        enabled: true
+        workingDir: "/data"
+        ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/ingress.class: "internal"
+          hosts:
+          - host: zigbee2mqtt-config.devbu.io
+            paths:
+            - path: /
+              pathType: Prefix
+          tls:
+          - hosts:
+            - zigbee2mqtt-config.devbu.io
+        volumeMounts:
+        - name: data
+          mountPath: /data
   valuesFrom:
   - kind: Secret
     name: "zigbee2mqtt-helm-values"
