@@ -23,37 +23,9 @@ spec:
       pullPolicy: Always
     env:
       TZ: "America/New_York"
-    additionalContainers:
-    - name: vscode
-      image: codercom/code-server:3.7.2
-      imagePullPolicy: IfNotPresent
-      workingDir: /www/assets
-      args:
-      - "--port"
-      - "12431"
-      - "--auth"
-      - "none"
-      ports:
-      - name: vscode
-        containerPort: 12431
-        protocol: TCP
-      volumeMounts:
-      - name: config
-        mountPath: /www/assets
-      securityContext:
-        runAsUser: 0
     service:
       port:
         port: 8080
-      additionalServices:
-      - enabled: true
-        nameSuffix: vscode
-        type: ClusterIP
-        port:
-          port: 12431
-          name: vscode
-          protocol: TCP
-          targetPort: 12431
     ingress:
       enabled: true
       annotations:
@@ -66,27 +38,31 @@ spec:
       tls:
       - hosts:
         - start.devbu.io
-      additionalIngresses:
-      - enabled: true
-        nameSuffix: "vscode"
-        serviceName: homer-vscode
-        servicePort: 12431
-        annotations:
-          kubernetes.io/ingress.class: "internal"
-        hosts:
-        - host: start-editor.devbu.io
-          paths:
-          - path: /
-            pathType: Prefix
-        tls:
-        - hosts:
-          - start-editor.devbu.io
     persistence:
       config:
         enabled: true
         storageClass: "rook-ceph-block"
         accessMode: ReadWriteOnce
         size: "1Gi"
+    addons:
+      codeserver:
+        enabled: true
+        workingDir: "/www/assets"
+        ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/ingress.class: "internal"
+          hosts:
+          - host: start-config.devbu.io
+            paths:
+            - path: /
+              pathType: Prefix
+          tls:
+          - hosts:
+            - start-config.devbu.io
+        volumeMounts:
+        - name: config
+          mountPath: /www/assets
     resources:
       requests:
         memory: 250Mi
