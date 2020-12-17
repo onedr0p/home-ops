@@ -5,9 +5,9 @@
   "dependencyDashboardTitle": "Renovate Dashboard",
   "commitMessageSuffix": "[ci-skip]",
   "commitBody": "Signed-off-by: Devin Buhl <onedr0p@users.noreply.github.com>",
-  // do not notify on closed, unmerged PRs
+  // Do not notify on closed unmerged PRs
   "suppressNotifications": ["prIgnoreNotification"],
-  // do not rebase PRs
+  // Do not rebase PRs
   "rebaseWhen": "conflicted",
   "assignees": ["@onedr0p"],
   "helm-values": {
@@ -23,7 +23,13 @@
     }
   ],
   "packageRules": [
-    // labels
+    // Setup datasources
+    {
+      "datasources": ["helm"],
+      "commitMessageTopic": "Helm chart {{depName}}",
+      "separateMinorPatch": true
+    },
+    // Add labels according to package and update types
     {
       "datasources": ["docker"],
       "updateTypes": ["major"],
@@ -54,35 +60,25 @@
       "updateTypes": ["patch"],
       "labels": ["renovate/helm-release", "dependency/patch"]
     },
-    // interesting image tags
+    // Custom version schemes
     {
       "datasources": ["docker"],
       "versionScheme": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.*)$",
       "packageNames": ["blakeblackshear/frigate"]
     },
-    // pin versions
+    // Pin package versions
     {
       "datasources": ["docker"],
       "allowedVersions": "<4.3.0",
       "packageNames": ["k8sathome/qbittorrent"]
     },
-    // versioning
-    // {
-    //   "datasources": ["docker"],
-    //   "versioning": "nuget",
-    //   "packageNames": [
-    //     "k8sathome/radarr",
-    //     "k8sathome/sonarr",
-    //     "k8sathome/lidarr",
-    //     "k8sathome/bazarr"
-    //   ]
-    // },
+    // Version strategies
     {
       "datasources": ["docker"],
       "versioning": "loose",
       "packageNames": ["plexinc/pms-docker"]
     },
-    // auto-updates
+    // Enable auto-merge
     {
       "datasources": ["docker"],
       "automerge": true,
