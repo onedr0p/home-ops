@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: appdaemon
-      version: 2.1.0
+      version: 2.2.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -49,7 +49,15 @@ spec:
     addons:
       codeserver:
         enabled: true
+        image:
+          repository: codercom/code-server
+          tag: 3.8.0
         workingDir: "/config"
+        args:
+          - --user-data-dir
+          - "/config/.vscode"
+          - --auth
+          - "none"
         ingress:
           enabled: true
           annotations:
