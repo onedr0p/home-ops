@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: zigbee2mqtt
-      version: 4.0.0
+      version: 4.1.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -99,7 +99,15 @@ spec:
     addons:
       codeserver:
         enabled: true
+        image:
+          repository: codercom/code-server
+          tag: 3.8.0
         workingDir: "/data"
+        args:
+        - --user-data-dir
+        - "/data/.vscode"
+        - --auth
+        - "none"
         ingress:
           enabled: true
           annotations:
