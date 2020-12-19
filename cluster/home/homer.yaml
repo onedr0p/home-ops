@@ -3,14 +3,14 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: homer
-  namespace: default
+  namespace: home
 spec:
   interval: 5m
   chart:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: homer
-      version: 2.1.0
+      version: 2.2.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -20,7 +20,6 @@ spec:
     image:
       repository: b4bz/homer
       tag: 20.12.07
-      pullPolicy: Always
     env:
       TZ: "America/New_York"
     service:
@@ -31,13 +30,13 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "internal"
       hosts:
-      - host: start.devbu.io
+      - host: home.devbu.io
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - start.devbu.io
+        - home.devbu.io
     persistence:
       config:
         enabled: true
@@ -47,19 +46,27 @@ spec:
     addons:
       codeserver:
         enabled: true
+        image:
+          repository: codercom/code-server
+          tag: 3.8.0
         workingDir: "/www/assets"
+        args:
+        - --user-data-dir
+        - "/www/assets/.vscode"
+        - --auth
+        - "none"
         ingress:
           enabled: true
           annotations:
             kubernetes.io/ingress.class: "internal"
           hosts:
-          - host: start-config.devbu.io
+          - host: home-config.devbu.io
             paths:
             - path: /
               pathType: Prefix
           tls:
           - hosts:
-            - start-config.devbu.io
+            - home-config.devbu.io
         volumeMounts:
         - name: config
           mountPath: /www/assets
