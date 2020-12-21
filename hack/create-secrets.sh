@@ -34,16 +34,24 @@ then
         namespace=$(echo "${deployment}" | awk -F/ '{print $2}')
         echo "[*] Generating helm secret '${secret_name}' in namespace '${namespace}'..."
         # Create secret
-        envsubst <"$file" |
+        envsubst < "$file" |
+            # Create the Kubernetes secret
             kubectl -n "${namespace}" create secret generic "${secret_name}-helm-values" \
                 --from-file=/dev/stdin --dry-run=client -o json |
-            kubeseal --format=yaml --cert="${PUB_CERT}" \
-                >>"${GENERATED_SECRETS}"
-        echo "---" >>"${GENERATED_SECRETS}"
+            # Seal the Kubernetes secret
+            kubeseal --format=yaml --cert="${PUB_CERT}" |
+            # Remove null keys
+            # yq eval 'del( .[] | select(. == null) )' - |
+            # yq eval-all 'del(.metadata.creationTimestamp) | del(.spec.template.metadata.creationTimestamp)' - |
+            # yq eval 'del([*].creationTimestamp)' - |
+            # Format yaml file
+            sed \
+                -e 's/stdin\:/values.yaml\:/g' \
+                -e '/^[[:space:]]*$/d' \
+                -e '1s/^/---\n/' |
+            # Write secret
+            tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
     done
-
-    # Replace stdin with values.yaml
-    sed -i 's/stdin\:/values.yaml\:/g' "${GENERATED_SECRETS}"
 fi
 
 #
@@ -51,7 +59,7 @@ fi
 #
 
 # shellcheck disable=SC2129
-printf "%s\n%s\n%s\n" "#" "# Auto-generated generic secrets -- DO NOT EDIT." "#" >> "${GENERATED_SECRETS}"
+printf "%s\n%s\n%s\n%s\n" "---" "#" "# Auto-generated generic secrets -- DO NOT EDIT." "#" >> "${GENERATED_SECRETS}"
 
 # nginx basic auth
 kubectl create secret generic nginx-basic-auth \

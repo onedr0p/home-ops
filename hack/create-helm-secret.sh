@@ -46,8 +46,8 @@ envsubst <"$TXT_FILE" |
     # Seal the Kubernetes secret
     kubeseal --format=yaml --cert="${PUB_CERT}" |
     # Remove null keys
-    yq d - "metadata.creationTimestamp" |
-    yq d - "spec.template.metadata.creationTimestamp" |
+    # yq d - "metadata.creationTimestamp" |
+    # yq d - "spec.template.metadata.creationTimestamp" |
     # Format yaml file
     sed \
         -e 's/stdin\:/values.yaml\:/g' \
