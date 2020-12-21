@@ -156,7 +156,7 @@ echo "---" >>"${GENERATED_SECRETS}"
 sed -i '/^[[:space:]]*$/d' "${GENERATED_SECRETS}"
 
 # Validate Yaml
-if ! yq validate "${GENERATED_SECRETS}" >/dev/null 2>&1; then
+if ! yq eval "${GENERATED_SECRETS}" >/dev/null 2>&1; then
     echo "Errors in YAML"
     exit 1
 fi
