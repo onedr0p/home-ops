@@ -41,9 +41,8 @@ then
             # Seal the Kubernetes secret
             kubeseal --format=yaml --cert="${PUB_CERT}" |
             # Remove null keys
-            # yq eval 'del( .[] | select(. == null) )' - |
-            # yq eval-all 'del(.metadata.creationTimestamp) | del(.spec.template.metadata.creationTimestamp)' - |
-            # yq eval 'del([*].creationTimestamp)' - |
+            yq eval 'del(.metadata.creationTimestamp)' - |
+            yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
             # Format yaml file
             sed \
                 -e 's/stdin\:/values.yaml\:/g' \
