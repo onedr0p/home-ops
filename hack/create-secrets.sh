@@ -58,72 +58,112 @@ fi
 #
 
 # shellcheck disable=SC2129
-printf "%s\n%s\n%s\n%s\n" "---" "#" "# Auto-generated generic secrets -- DO NOT EDIT." "#" >> "${GENERATED_SECRETS}"
+printf "%s\n%s\n%s\n" "#" "# Auto-generated generic secrets -- DO NOT EDIT." "#" >> "${GENERATED_SECRETS}"
 
 # nginx basic auth
 kubectl create secret generic nginx-basic-auth \
     --from-literal=auth="${NGINX_BASIC_AUTH}" \
     --namespace media --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" \
-        >>"${GENERATED_SECRETS}"
-echo "---" >>"${GENERATED_SECRETS}"
+    kubeseal --format=yaml --cert="${PUB_CERT}" |
+    # Remove null keys
+    yq eval 'del(.metadata.creationTimestamp)' - |
+    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+    # Format yaml file
+    sed -e '1s/^/---\n/' |
+    # Write secret
+    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # cloudflare api key
 kubectl create secret generic cloudflare-api-key \
     --from-literal=api-key="${CF_API_KEY}" \
     --namespace cert-manager --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" \
-        >>"${GENERATED_SECRETS}"
-echo "---" >>"${GENERATED_SECRETS}"
+    kubeseal --format=yaml --cert="${PUB_CERT}" |
+    # Remove null keys
+    yq eval 'del(.metadata.creationTimestamp)' - |
+    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+    # Format yaml file
+    sed -e '1s/^/---\n/' |
+    # Write secret
+    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # github runner
 kubectl create secret generic controller-manager \
     --from-literal=github_token="${GITHUB_RUNNER_ACCESS_TOKEN}" \
     --namespace actions-runner-system --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" \
-        >>"${GENERATED_SECRETS}"
-echo "---" >>"${GENERATED_SECRETS}"
+    kubeseal --format=yaml --cert="${PUB_CERT}" |
+    # Remove null keys
+    yq eval 'del(.metadata.creationTimestamp)' - |
+    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+    # Format yaml file
+    sed -e '1s/^/---\n/' |
+    # Write secret
+    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # uptimerobot heartbeat
 kubectl create secret generic uptimerobot-heartbeat \
     --from-literal=url="${UPTIMEROBOT_HEARTBEAT_URL}" \
     --namespace monitoring --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" \
-        >>"${GENERATED_SECRETS}"
-echo "---" >>"${GENERATED_SECRETS}"
+    kubeseal --format=yaml --cert="${PUB_CERT}" |
+    # Remove null keys
+    yq eval 'del(.metadata.creationTimestamp)' - |
+    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+    # Format yaml file
+    sed -e '1s/^/---\n/' |
+    # Write secret
+    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # flux discord
 kubectl create secret generic discord-webhook \
     --from-literal=address="${FLUX_DISCORD_WEBHOOK}" \
     --namespace flux-system --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" \
-        >>"${GENERATED_SECRETS}"
-echo "---" >>"${GENERATED_SECRETS}"
+    kubeseal --format=yaml --cert="${PUB_CERT}" |
+    # Remove null keys
+    yq eval 'del(.metadata.creationTimestamp)' - |
+    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+    # Format yaml file
+    sed -e '1s/^/---\n/' |
+    # Write secret
+    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # flux github
 kubectl create secret generic webhook-token \
     --from-literal=token="${FLUX_GITHUB_TOKEN}" \
     --namespace flux-system --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" \
-        >>"${GENERATED_SECRETS}"
-echo "---" >>"${GENERATED_SECRETS}"
+    kubeseal --format=yaml --cert="${PUB_CERT}" |
+    # Remove null keys
+    yq eval 'del(.metadata.creationTimestamp)' - |
+    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+    # Format yaml file
+    sed -e '1s/^/---\n/' |
+    # Write secret
+    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # qbittorrent credentials
 kubectl create secret generic qbittorrent \
     --from-literal=username="${QB_USERNAME}" \
     --from-literal=password="${QB_PASSWORD}" \
     --namespace media --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" \
-        >>"${GENERATED_SECRETS}"
-echo "---" >>"${GENERATED_SECRETS}"
+    kubeseal --format=yaml --cert="${PUB_CERT}" |
+    # Remove null keys
+    yq eval 'del(.metadata.creationTimestamp)' - |
+    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+    # Format yaml file
+    sed -e '1s/^/---\n/' |
+    # Write secret
+    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # gitea personal access token
 kubectl create secret generic gitea-pat \
     --from-literal=token="${GITEA_PAT}" \
     --namespace velero --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" \
-        >>"${GENERATED_SECRETS}"
-echo "---" >>"${GENERATED_SECRETS}"
+    kubeseal --format=yaml --cert="${PUB_CERT}" |
+    # Remove null keys
+    yq eval 'del(.metadata.creationTimestamp)' - |
+    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+    # Format yaml file
+    sed -e '1s/^/---\n/' |
+    # Write secret
+    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # # sonarr episode prune - default namespace
 # kubectl create secret generic sonarr-episode-prune \
