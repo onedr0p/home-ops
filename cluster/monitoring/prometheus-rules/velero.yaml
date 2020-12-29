@@ -8,21 +8,19 @@ spec:
   groups:
   - name: velero
     rules:
-    - alert: FailedBackup
+    - alert: VeleroBackupPartialFailures
       annotations:
-        description: A backup has failed in the last 1d
-        summary: A backup has failed in the last 1d
-          attention
-      expr: rate(velero_backup_failure_total[1d]) > 0
-      for: 30s
+        message: Velero backup {{ $labels.schedule }} has {{ $value | humanizePercentage }} partialy failed backups.
+      expr: |-
+        velero_backup_partial_failure_total{schedule!=""} / velero_backup_attempt_total{schedule!=""} > 0.25
+      for: 15m
       labels:
         severity: warning
-    - alert: PartialFailedBackup
+    - alert: VeleroBackupFailures
       annotations:
-        description: A backup has partially failed in the last 1d
-        summary: A backup has partially failed in the last 1d
-          attention
-      expr: rate(velero_backup_partial_failure_total[1d]) > 0
-      for: 30s
+        message: Velero backup {{ $labels.schedule }} has {{ $value | humanizePercentage }} failed backups.
+      expr: |-
+        velero_backup_failure_total{schedule!=""} / velero_backup_attempt_total{schedule!=""} > 0.25
+      for: 15m
       labels:
         severity: warning
