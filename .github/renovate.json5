@@ -1,6 +1,7 @@
 {
   "enabled": true,
   "timezone": "America/New_York",
+  "semanticCommits": true,
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Renovate Dashboard",
   "commitMessageSuffix": "[ci-skip]",
@@ -8,12 +9,12 @@
   // Do not notify on closed unmerged PRs
   "suppressNotifications": ["prIgnoreNotification"],
   "assignees": ["@onedr0p"],
-  "ignorePaths": [
-    "cluster/flux-system/",
-    "cluster/actions-runner-system/"
-  ],
   "kubernetes": {
     "fileMatch": ["cluster/.+\\.yaml$"],
+    "ignorePaths": [
+      "cluster/flux-system/",
+      "cluster/actions-runner-system/"
+    ]
   },
   "helm-values": {
     "fileMatch": ["cluster/.+\\.yaml$"]
@@ -31,7 +32,13 @@
     // Setup datasources
     {
       "datasources": ["helm"],
-      "commitMessageTopic": "Helm chart {{depName}}",
+      "separateMinorPatch": true
+    },
+    // Global docker datasource settings
+    {
+      "datasources": ["docker"],
+      "enabled": true,
+      "updateTypes": ["major", "minor", "patch"],
       "separateMinorPatch": true
     },
     // Add labels according to package and update types
