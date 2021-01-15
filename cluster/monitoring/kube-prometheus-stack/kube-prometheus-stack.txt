@@ -1,14 +1,28 @@
 alertmanager:
   config:
+    global:
+      slack_api_url: "${ALERT_MANAGER_DISCORD_WEBHOOK}"
     receivers:
     - name: 'null'
-    - name: 'pushover'
-      pushover_configs:
-      - user_key: "${PUSHOVER_USER_TOKEN}"
-        token: "${PUSHOVER_ALERT_MANAGER_API_TOKEN}"
-        priority: '{{ if eq .Status "firing" }}1{{ else }}0{{ end }}'
+    - name: 'discord'
+      slack_configs:
+      - channel: '#prometheus'
+        icon_url: https://avatars3.githubusercontent.com/u/3380462
+        username: 'Prometheus'
         send_resolved: true
-    - name: 'webhook-ups'
+        title: |-
+          [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }} {{ else if ne .CommonAnnotations.message ""}}{{ .CommonAnnotations.message }} {{ else if ne .CommonAnnotations.description ""}}{{ .CommonAnnotations.description }} {{ else }}{{ .CommonLabels.alertname }}{{ end }}
+        text: >-
+          {{ range .Alerts -}}
+            *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+
+          {{ if ne .Annotations.summary ""}}*Summary:* {{ .Annotations.summary }} {{ else if ne .Annotations.message ""}}*Message:* {{ .Annotations.message }} {{ else if ne .Annotations.description ""}}*Description:* {{ .Annotations.description }}{{ end }}
+
+          *Details:*
+            {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+            {{ end }}
+          {{ end }}
+    - name: 'webhook'
       webhook_configs:
       - url: "http://192.168.1.35:9000/hooks/webhook-ups"
         send_resolved: false
