@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://grafana.github.io/helm-charts
       chart: loki-stack
-      version: 2.3.1
+      version: 2.3.0
       sourceRef:
         kind: HelmRepository
         name: grafana-charts
@@ -45,7 +45,7 @@ spec:
           - loki-headless:7946
         schema_config:
           configs:
-          - from: 2020-10-24
+          - from: 2020-05-15
             store: boltdb-shipper
             object_store: s3
             schema: v11
@@ -54,9 +54,9 @@ spec:
               period: 24h
         storage_config:
           boltdb_shipper:
-            active_index_directory: /data/loki/boltdb-shipper-active
-            cache_location: /data/loki/boltdb-shipper-cache
-            cache_ttl: 24h
+            active_index_directory: /data/loki/index
+            cache_location: /data/loki/index_cache
+            resync_interval: 5s
             shared_store: s3
         limits_config:
           enforce_metric_name: false
@@ -80,7 +80,7 @@ spec:
         syslog:
           listen_address: 0.0.0.0:1514
           idle_timeout: 60s
-          label_structured_data: true
+          label_structured_data: yes
           labels:
             job: "syslog"
         relabel_configs:
