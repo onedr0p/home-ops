@@ -17,7 +17,7 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    # features: "EnableCSI"
+    features: "EnableCSI"
     configuration:
       provider: aws
       backupStorageLocation:
@@ -34,9 +34,9 @@ spec:
           region: us-east-1
       resticTimeout: 6h
     initContainers:
-    # - name: velero-plugin-for-csi
-    #   image: velero/velero-plugin-for-csi:v0.1.2
-    #   imagePullPolicy: IfNotPresent
+    - name: velero-plugin-for-csi
+      image: velero/velero-plugin-for-csi:v0.1.2
+      imagePullPolicy: IfNotPresent
     - name: velero-plugin-for-aws
       image: velero/velero-plugin-for-aws:v1.1.0
       imagePullPolicy: IfNotPresent
@@ -47,7 +47,7 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
-    snapshotsEnabled: false
+    snapshotsEnabled: true
     deployRestic: true
     restic:
       podVolumePath: /var/lib/kubelet/pods
