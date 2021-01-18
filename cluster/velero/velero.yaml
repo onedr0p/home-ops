@@ -55,11 +55,25 @@ spec:
     restic:
       podVolumePath: /var/lib/kubelet/pods
       privileged: false
+      resources:
+        requests:
+          memory: 512Mi
+          cpu: 500m
+        limits:
+          memory: 1024Mi
+          cpu: 1000m
     schedules:
-      daily-backup:
-        schedule: "0 2 * * *"
+      bi-daily-backup:
+        schedule: "0 6,18 * * *"
         template:
           ttl: "120h"
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 500m
+      limits:
+        memory: 256Mi
+        cpu: 1000m
   valuesFrom:
   - kind: Secret
     name: "velero-helm-values"
