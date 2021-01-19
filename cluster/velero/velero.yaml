@@ -17,8 +17,10 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    # features: "EnableCSI"
     configuration:
+      extraEnvVars:
+        TZ: "America/New_York"
+      features: "EnableCSI"
       provider: aws
       backupStorageLocation:
         name: default
@@ -34,12 +36,12 @@ spec:
           region: us-east-1
       resticTimeout: 6h
     initContainers:
-    # - name: velero-plugin-for-csi
-    #   image: velero/velero-plugin-for-csi:v0.1.2
-    #   imagePullPolicy: IfNotPresent
-    #   volumeMounts:
-    #   - mountPath: /target
-    #     name: plugins
+    - name: velero-plugin-for-csi
+      image: velero/velero-plugin-for-csi:v0.1.2
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+      - mountPath: /target
+        name: plugins
     - name: velero-plugin-for-aws
       image: velero/velero-plugin-for-aws:v1.1.0
       imagePullPolicy: IfNotPresent
@@ -50,8 +52,8 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
-    # snapshotsEnabled: true
-    snapshotsEnabled: false
+    snapshotsEnabled: true
+    # snapshotsEnabled: false
     deployRestic: true
     restic:
       podVolumePath: /var/lib/kubelet/pods
@@ -62,7 +64,6 @@ spec:
           cpu: 500m
         limits:
           memory: 1024Mi
-          cpu: 1000m
     schedules:
       bi-daily-backup:
         schedule: "0 6,18 * * *"
@@ -74,7 +75,6 @@ spec:
         cpu: 500m
       limits:
         memory: 256Mi
-        cpu: 1000m
   valuesFrom:
   - kind: Secret
     name: "velero-helm-values"
