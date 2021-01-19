@@ -20,7 +20,7 @@ spec:
     configuration:
       extraEnvVars:
         TZ: "America/New_York"
-      features: "EnableCSI"
+      # features: "EnableCSI"
       provider: aws
       backupStorageLocation:
         name: default
@@ -36,12 +36,12 @@ spec:
           region: us-east-1
       resticTimeout: 6h
     initContainers:
-    - name: velero-plugin-for-csi
-      image: velero/velero-plugin-for-csi:v0.1.2
-      imagePullPolicy: IfNotPresent
-      volumeMounts:
-      - mountPath: /target
-        name: plugins
+    # - name: velero-plugin-for-csi
+    #   image: velero/velero-plugin-for-csi:v0.1.2
+    #   imagePullPolicy: IfNotPresent
+    #   volumeMounts:
+    #   - mountPath: /target
+    #     name: plugins
     - name: velero-plugin-for-aws
       image: velero/velero-plugin-for-aws:v1.1.0
       imagePullPolicy: IfNotPresent
@@ -52,29 +52,17 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
-    snapshotsEnabled: true
-    # snapshotsEnabled: false
+    # snapshotsEnabled: true
+    snapshotsEnabled: false
     deployRestic: true
     restic:
       podVolumePath: /var/lib/kubelet/pods
       privileged: false
-      resources:
-        requests:
-          memory: 512Mi
-          cpu: 500m
-        limits:
-          memory: 1024Mi
     schedules:
       bi-daily-backup:
         schedule: "0 6,18 * * *"
         template:
           ttl: "120h"
-    resources:
-      requests:
-        memory: 128Mi
-        cpu: 500m
-      limits:
-        memory: 256Mi
   valuesFrom:
   - kind: Secret
     name: "velero-helm-values"
