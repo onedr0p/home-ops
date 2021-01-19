@@ -1,0 +1,54 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: overseerr
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: overseerr
+      version: 1.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    controllerType: deployment
+    image:
+      repository: sctx/overseerr
+      tag: 1.16.0
+      pullPolicy: Always
+    env:
+      TZ: "America/New_York"
+      LOG_LEVEL: "info"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "external"
+      hosts:
+      - host: overseerr.devbu.io
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "overseerr.devbu.io"
+    persistence:
+      config:
+        enabled: true
+        mountPath: /app/config
+        storageClass: "rook-ceph-block"
+        accessMode: ReadWriteOnce
+        size: "1Gi"
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 1500Mi
