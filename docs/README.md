@@ -20,9 +20,13 @@ This repository _is_ my homelab Kubernetes cluster in a declarative state. [Flux
 
 Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join the k8s@home [Discord](https://discord.gg/DNCynrJ) if you have any questions.
 
+---
+
 ## :computer:&nbsp; Cluster setup
 
 See my project over at [home-operations](https://github.com/onedr0p/home-operations) for how I provisioned my nodes and other work that supports running this cluster.
+
+---
 
 ## :robot:&nbsp; Automate all the things!
 
@@ -31,9 +35,27 @@ See my project over at [home-operations](https://github.com/onedr0p/home-operati
 - [Renovate](https://github.com/renovatebot/renovate) keeps my application charts and container images up-to-date by scanning my repo and opening pull requests when it notices updates.
 - [Actions Runner Controller](https://github.com/summerwind/actions-runner-controller) operates a self-hosted Github runner in my cluster which I use to generate and apply Sealed Secrets to my cluster.
 
+---
+
+## :computer:&nbsp; Hardware configuration
+
+_My Kubernetes master and worker nodes below are running bare metal Ubuntu 20.04.x_
+
+| Device                  | Count | OS Disk Size | Data Disk Size       | Ram  | Purpose                       |
+|-------------------------|-------|--------------|----------------------|------|-------------------------------|
+| Intel NUC8i3BEK         | 1     | 256GB NVMe   | N/A                  | 16GB | Kubernetes k3s Master         |
+| Intel NUC8i5BEH         | 3     | 120GB SSD    | 1TB NVMe (rook-ceph) | 32GB | Kubernetes k3s Workers        |
+| Intel NUC8i7BEH         | 2     | 750GB SSD    | 1TB NVMe (rook-ceph) | 64GB | Kubernetes k3s Workers        |
+| Qnap NAS (rocinante)    | 1     | N/A          | 8x12TB RAID6         | 16GB | Media and shared file storage |
+| Synology NAS (serenity) | 1     | N/A          | 8x12TB RAID6         | 4GB  | Media and shared file storage |
+
+---
+
 ## :globe_with_meridians:&nbsp; Networking
 
 In my cluster I run [coredns](https://github.com/coredns/coredns), [etcd](https://github.com/etcd-io/etcd), and [external-dns](https://github.com/kubernetes-sigs/external-dns). **External-DNS** populates **CoreDNS** with all my ingress records and stores it in **etcd**. When I'm browsing any of the webapps while on my home network, the traffic is being routed internally and never makes a round trip. The way I set this up is in my router. When a DNS request is made for my domain or any of my subdomains it uses **coredns** as the DNS server, otherwise it uses whatever upstream DNS I provided.
+
+---
 
 ## :wrench:&nbsp; Tools
 
@@ -46,6 +68,8 @@ _Below are some of the tools I find useful for working with my cluster_
 | [go-task](https://github.com/go-task/task)             | Replacement for make and makefiles, who honestly likes that?                                              |
 | [pre-commit](https://github.com/pre-commit/pre-commit) | Ensure the YAML and shell script in my repo are consistent                                                |
 | [kubetail](https://github.com/johanhaleby/kubetail)    | Tail logs in Kubernetes, also check out [stern](https://github.com/wercker/stern) ([which fork? good luck](https://techgaun.github.io/active-forks/index.html#https://github.com/wercker/stern)) |
+
+---
 
 ## :handshake:&nbsp; Thanks
 
