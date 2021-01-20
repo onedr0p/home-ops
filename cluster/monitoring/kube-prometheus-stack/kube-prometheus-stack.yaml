@@ -21,13 +21,6 @@ spec:
   #   namespace: kube-system
   timeout: 20m
   values:
-    server:
-      resources:
-        requests:
-          memory: 1000Mi
-          cpu: 25m
-        limits:
-          memory: 2000Mi
     prometheusOperator:
       createCustomResource: false
     alertmanager:
@@ -113,8 +106,6 @@ spec:
       sidecar:
         datasources:
           enabled: true
-          # Disable for thanos
-          defaultDatasourceEnabled: false
         dashboards:
           enabled: true
           searchNamespace: ALL
@@ -191,20 +182,10 @@ spec:
             revision: 8
             datasource: Prometheus
       additionalDataSources:
-      - name: Prometheus
-        type: prometheus
-        access: proxy
-        url: http://thanos-query-http:10902/
-        isDefault: true
       - name: Loki
         type: loki
         access: proxy
         url: http://loki:3100
-      # - name: home_assistant
-      #   type: influxdb
-      #   access: proxy
-      #   url: http://influxdb:8086
-      #   database: home_assistant
       grafana.ini:
         paths:
           data: /var/lib/grafana/data
@@ -247,9 +228,6 @@ spec:
         - hosts:
           - "prometheus.devbu.io"
       prometheusSpec:
-        replicas: 2
-        replicaExternalLabelName: "replica"
-        podAntiAffinity: "hard"
         ruleSelector: {}
         ruleNamespaceSelector: {}
         ruleSelectorNilUsesHelmValues: false
@@ -259,7 +237,7 @@ spec:
         podMonitorSelector: {}
         podMonitorNamespaceSelector: {}
         podMonitorSelectorNilUsesHelmValues: false
-        retention: 24h
+        retention: 672h
         enableAdminAPI: true
         walCompression: true
         storageSpec:
@@ -268,19 +246,16 @@ spec:
               storageClassName: "rook-ceph-block"
               resources:
                 requests:
-                  storage: 10Gi
-        thanos:
-          image: quay.io/thanos/thanos:v0.17.1
-          version: v0.17.1
-          objectStorageConfig:
-            name: thanos
-            key: object-store.yaml
+                  storage: 50Gi
         additionalScrapeConfigs:
         - job_name: 'node-exporter'
           static_configs:
           - targets:
+            # opnsense
             - 192.168.1.1:9100
+            # rocinante nas
             - 192.168.1.39:9100
+            # serenity nas
             - 192.168.1.40:9100
         - job_name: 'minio'
           metrics_path: /minio/prometheus/metrics
