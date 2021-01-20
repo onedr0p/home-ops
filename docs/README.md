@@ -37,7 +37,7 @@ See my project over at [home-operations](https://github.com/onedr0p/home-operati
 
 ---
 
-## :computer:&nbsp; Hardware
+## :gear:&nbsp; Hardware
 
 _My Kubernetes master and worker nodes below are running bare metal Ubuntu 20.04.x_
 
