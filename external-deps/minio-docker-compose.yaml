@@ -1,0 +1,20 @@
+---
+version: '3.7'
+services:
+  minio:
+    image: minio/minio:RELEASE.2021-01-16T02-19-44Z
+    ports:
+    - 9000:9000
+    volumes:
+    - /share/Data/ContainerStation/minio:/data
+    environment:
+      MINIO_ACCESS_KEY: ""
+      MINIO_SECRET_KEY: ""
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"
+      MINIO_UPDATE: "off"
+    command: server /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
