@@ -27,6 +27,30 @@ spec:
       config:
         global:
           resolve_timeout: 5m
+        receivers:
+        - name: 'null'
+        - name: 'discord'
+          slack_configs:
+          - channel: '#prometheus'
+            icon_url: https://avatars3.githubusercontent.com/u/3380462
+            username: 'Prometheus'
+            send_resolved: true
+            title: |-
+              [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }} {{ else if ne .CommonAnnotations.message ""}}{{ .CommonAnnotations.message }} {{ else if ne .CommonAnnotations.description ""}}{{ .CommonAnnotations.description }} {{ else }}{{ .CommonLabels.alertname }}{{ end }}
+            text: >-
+              {{ range .Alerts -}}
+                *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+
+              {{ if ne .Annotations.summary ""}}*Summary:* {{ .Annotations.summary }} {{ else if ne .Annotations.message ""}}*Message:* {{ .Annotations.message }} {{ else if ne .Annotations.description ""}}*Description:* {{ .Annotations.description }}{{ end }}
+
+              *Details:*
+                {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+                {{ end }}
+              {{ end }}
+        - name: 'webhook'
+          webhook_configs:
+          - url: "http://192.168.1.35:9000/hooks/webhook-ups"
+            send_resolved: false
         route:
           group_by: ['alertname', 'job']
           group_wait: 30s
@@ -78,126 +102,127 @@ spec:
           - __meta_kubernetes_pod_node_name
           targetLabel: kubernetes_node
     grafana:
-      image:
-        repository: grafana/grafana
-        tag: 7.3.7
-      deploymentStrategy:
-        type: Recreate
-      persistence:
-        enabled: false
-        storageClassName: "rook-ceph-block"
-        size: 10Gi
-        accessModes:
-        - ReadWriteOnce
-      env:
-        GF_EXPLORE_ENABLED: true
-        GF_PANELS_DISABLE_SANITIZE_HTML: true
-        GF_LOG_FILTERS: rendering:debug
-        VAR_BLOCKY_URL: "http://blocky.kube-system.svc.cluster.local:4000"
-      ingress:
-        enabled: true
-        annotations:
-          kubernetes.io/ingress.class: "external"
-        hosts:
-        - "grafana.devbu.io"
-        tls:
-        - hosts:
-          - "grafana.devbu.io"
-      sidecar:
-        datasources:
-          enabled: true
-        dashboards:
-          enabled: true
-          searchNamespace: ALL
-      plugins:
-      - natel-discrete-panel
-      - pr0ps-trackmap-panel
-      - grafana-piechart-panel
-      - vonage-status-panel
-      - grafana-worldmap-panel
-      - grafana-clock-panel
-      dashboardProviders:
-        dashboardproviders.yaml:
-          apiVersion: 1
-          providers:
-          - name: 'default'
-            orgId: 1
-            folder: ''
-            type: file
-            disableDeletion: false
-            allowUiUpdates: true
-            editable: true
-            options:
-              path: /var/lib/grafana/dashboards/default
-      dashboards:
-        default:
-          # Ref: https://grafana.com/grafana/dashboards/2842
-          ceph-cluster:
-            gnetId: 2842
-            revision: 14
-            datasource: Prometheus
-          # Ref: https://grafana.com/grafana/dashboards/5336
-          ceph-osd:
-            gnetId: 5336
-            revision: 5
-            datasource: Prometheus
-          # Ref: https://grafana.com/grafana/dashboards/5342
-          ceph-pools:
-            gnetId: 5342
-            revision: 5
-            datasource: Prometheus
-          vernemq:
-            url: https://raw.githubusercontent.com/vernemq/vernemq/master/metrics_scripts/grafana/VerneMQ%20Node%20Metrics.json
-            datasource: Prometheus
-          nginx-dashboard:
-            url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
-            datasource: Prometheus
-          blocky:
-            url: https://raw.githubusercontent.com/0xERR0R/blocky/master/docs/blocky-grafana.json
-            datasource: Prometheus
-          apc-ups:
-            url: https://raw.githubusercontent.com/onedr0p/home-operations/main/grafana-dashboards/apc-ups.json
-            datasource: Prometheus
-          cyberpower-pdu:
-            url: https://raw.githubusercontent.com/onedr0p/home-operations/main/grafana-dashboards/cyberpower-pdu.json
-            datasource: Prometheus
-          # Ref: https://grafana.com/grafana/dashboards/11315
-          unifi-client-insights:
-            gnetId: 11315
-            revision: 8
-            datasource: Prometheus
-          # Ref: https://grafana.com/grafana/dashboards/11311
-          unifi-network-sites:
-            gnetId: 11311
-            revision: 4
-            datasource: Prometheus
-          # Ref: https://grafana.com/grafana/dashboards/11314
-          unifi-uap-insights:
-            gnetId: 11314
-            revision: 9
-            datasource: Prometheus
-          # Ref: https://grafana.com/grafana/dashboards/11312
-          unifi-usw-insights:
-            gnetId: 11312
-            revision: 8
-            datasource: Prometheus
-      additionalDataSources:
-      - name: Loki
-        type: loki
-        access: proxy
-        url: http://loki:3100
-      grafana.ini:
-        paths:
-          data: /var/lib/grafana/data
-          logs: /var/log/grafana
-          plugins: /var/lib/grafana/plugins
-          provisioning: /etc/grafana/provisioning
-        analytics:
-          check_for_updates: true
-        log:
-          mode: console
-        grafana_net:
-          url: https://grafana.net
+      enabled: false
+      # image:
+      #   repository: grafana/grafana
+      #   tag: 7.3.7
+      # deploymentStrategy:
+      #   type: Recreate
+      # persistence:
+      #   enabled: false
+      #   storageClassName: "rook-ceph-block"
+      #   size: 10Gi
+      #   accessModes:
+      #   - ReadWriteOnce
+      # env:
+      #   GF_EXPLORE_ENABLED: true
+      #   GF_PANELS_DISABLE_SANITIZE_HTML: true
+      #   GF_LOG_FILTERS: rendering:debug
+      #   VAR_BLOCKY_URL: "http://blocky.kube-system.svc.cluster.local:4000"
+      # ingress:
+      #   enabled: true
+      #   annotations:
+      #     kubernetes.io/ingress.class: "external"
+      #   hosts:
+      #   - "grafana.devbu.io"
+      #   tls:
+      #   - hosts:
+      #     - "grafana.devbu.io"
+      # sidecar:
+      #   datasources:
+      #     enabled: true
+      #   dashboards:
+      #     enabled: true
+      #     searchNamespace: ALL
+      # plugins:
+      # - natel-discrete-panel
+      # - pr0ps-trackmap-panel
+      # - grafana-piechart-panel
+      # - vonage-status-panel
+      # - grafana-worldmap-panel
+      # - grafana-clock-panel
+      # dashboardProviders:
+      #   dashboardproviders.yaml:
+      #     apiVersion: 1
+      #     providers:
+      #     - name: 'default'
+      #       orgId: 1
+      #       folder: ''
+      #       type: file
+      #       disableDeletion: false
+      #       allowUiUpdates: true
+      #       editable: true
+      #       options:
+      #         path: /var/lib/grafana/dashboards/default
+      # dashboards:
+      #   default:
+      #     # Ref: https://grafana.com/grafana/dashboards/2842
+      #     ceph-cluster:
+      #       gnetId: 2842
+      #       revision: 14
+      #       datasource: Prometheus
+      #     # Ref: https://grafana.com/grafana/dashboards/5336
+      #     ceph-osd:
+      #       gnetId: 5336
+      #       revision: 5
+      #       datasource: Prometheus
+      #     # Ref: https://grafana.com/grafana/dashboards/5342
+      #     ceph-pools:
+      #       gnetId: 5342
+      #       revision: 5
+      #       datasource: Prometheus
+      #     vernemq:
+      #       url: https://raw.githubusercontent.com/vernemq/vernemq/master/metrics_scripts/grafana/VerneMQ%20Node%20Metrics.json
+      #       datasource: Prometheus
+      #     nginx-dashboard:
+      #       url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
+      #       datasource: Prometheus
+      #     blocky:
+      #       url: https://raw.githubusercontent.com/0xERR0R/blocky/master/docs/blocky-grafana.json
+      #       datasource: Prometheus
+      #     apc-ups:
+      #       url: https://raw.githubusercontent.com/onedr0p/home-operations/main/grafana-dashboards/apc-ups.json
+      #       datasource: Prometheus
+      #     cyberpower-pdu:
+      #       url: https://raw.githubusercontent.com/onedr0p/home-operations/main/grafana-dashboards/cyberpower-pdu.json
+      #       datasource: Prometheus
+      #     # Ref: https://grafana.com/grafana/dashboards/11315
+      #     unifi-client-insights:
+      #       gnetId: 11315
+      #       revision: 8
+      #       datasource: Prometheus
+      #     # Ref: https://grafana.com/grafana/dashboards/11311
+      #     unifi-network-sites:
+      #       gnetId: 11311
+      #       revision: 4
+      #       datasource: Prometheus
+      #     # Ref: https://grafana.com/grafana/dashboards/11314
+      #     unifi-uap-insights:
+      #       gnetId: 11314
+      #       revision: 9
+      #       datasource: Prometheus
+      #     # Ref: https://grafana.com/grafana/dashboards/11312
+      #     unifi-usw-insights:
+      #       gnetId: 11312
+      #       revision: 8
+      #       datasource: Prometheus
+      # additionalDataSources:
+      # - name: Loki
+      #   type: loki
+      #   access: proxy
+      #   url: http://loki:3100
+      # grafana.ini:
+      #   paths:
+      #     data: /var/lib/grafana/data
+      #     logs: /var/log/grafana
+      #     plugins: /var/lib/grafana/plugins
+      #     provisioning: /etc/grafana/provisioning
+      #   analytics:
+      #     check_for_updates: true
+      #   log:
+      #     mode: console
+      #   grafana_net:
+      #     url: https://grafana.net
     kubeEtcd:
       enabled: false
     kubeControllerManager:
