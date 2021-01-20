@@ -1,0 +1,19 @@
+---
+version: '3'
+services:
+  vault:
+    image: vault:1.5.0
+    restart: always
+    cap_add:
+    - IPC_LOCK
+    environment:
+      VAULT_ADDR: "http://0.0.0.0:8200"
+      VAULT_API_ADDR: "http://0.0.0.0:8200"
+      VAULT_ADDRESS: "http://0.0.0.0:8200"
+    ports:
+    - 8200:8200
+    volumes:
+    - /share/Data/ContainerStation/vault/config:/vault/config
+    - /share/Data/ContainerStation/vault/policies:/vault/policies
+    - /share/Data/ContainerStation/vault/data:/vault/data
+    command: vault server -config=/vault/config/vault.json
