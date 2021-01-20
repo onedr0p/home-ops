@@ -31,6 +31,19 @@ spec:
         clustername: home-cluster
       recommendations: false
       resources:
+      - name: velero.io/v1/backups
+        namespaces:
+          include:
+          - all
+        events:
+        - create
+        - update
+        - delete
+        - error
+        updateSetting:
+          includeDiff: true
+          fields:
+          - status.phase
       - name: v1/pods
         namespaces:
           include:
