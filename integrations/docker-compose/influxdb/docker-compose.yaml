@@ -1,0 +1,25 @@
+---
+version: '3.7'
+services:
+  influxdb:
+    image: influxdb:1.8.3
+    restart: always
+    environment:
+      INFLUXDB_ADMIN_USER: "admin"
+      INFLUXDB_ADMIN_PASSWORD: ""
+    ports:
+    - 8086:8086
+    volumes:
+    - influxdb-data:/var/lib/influxdb
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/ping"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+volumes:
+  influxdb-data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/share/Data/ContainerStation/influxdb'
