@@ -64,24 +64,29 @@ spec:
         service:
           DISABLE_REGISTRATION: true
           REQUIRE_SIGNIN_VIEW: true
+        database:
+          DB_TYPE: postgres
+          HOST: 192.168.1.39:5432
+          NAME: gitea
+          USER: admin
       database:
         builtIn:
           postgresql:
-            enabled: true
+            enabled: false
       cache:
         builtIn:
           enabled: true
       podAnnotations:
         backup.velero.io/backup-volumes: data
-    postgresql:
-      image:
-        repository: bitnami/postgresql
-        tag: 11.10.0
-      persistence:
-        storageClass: "rook-ceph-block"
-      master:
-        podAnnotations:
-          backup.velero.io/backup-volumes: data
+    # postgresql:
+    #   image:
+    #     repository: bitnami/postgresql
+    #     tag: 11.10.0
+    #   persistence:
+    #     storageClass: "rook-ceph-block"
+    #   master:
+    #     podAnnotations:
+    #       backup.velero.io/backup-volumes: data
   valuesFrom:
   - kind: Secret
     name: "gitea-helm-values"
