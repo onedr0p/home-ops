@@ -22,7 +22,7 @@ spec:
       tag: v0.12
     replicas: 2
     timeZone: "America/New_York"
-    config:
+    config: |
       upstream:
         externalResolvers:
         - https://dns1.nextdns.io/4838af
@@ -37,15 +37,14 @@ spec:
           devbu.io: udp:192.168.69.180
           # CoreDNS IP
           local: udp:192.168.69.180
-      # https://www.reddit.com/r/oisd_blocklist/comments/dwxgld/dbloisdnl_internets_1_domain_blocklist/
       blocking:
         blackLists:
           ads:
+          # https://oisd.nl/
           - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
         whiteLists:
           ads:
           - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
-          - https://raw.githubusercontent.com/onedr0p/home-operations/main/adblock/whitelist.txt
         clientGroupsBlock:
           default:
           - ads
@@ -75,6 +74,8 @@ spec:
       externalTrafficPolicy: Local
     serviceMonitor:
       enabled: true
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "blocky"
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -87,8 +88,7 @@ spec:
           topologyKey: "kubernetes.io/hostname"
     resources:
       requests:
-        memory: 275Mi
+        memory: 100Mi
         cpu: 50m
       limits:
         memory: 500Mi
-        cpu: 1000m
