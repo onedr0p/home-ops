@@ -1,0 +1,32 @@
+---
+
+- name: filesystem | update max_user_watches
+  ansible.posix.sysctl:
+    name: fs.inotify.max_user_watches
+    value: "524288"
+    state: present
+    sysctl_file: /etc/sysctl.d/98-kubernetes-fs.conf
+
+- name: filesystem | mount bpffs
+  become: true
+  ansible.posix.mount:
+    src: bpffs
+    path: /sys/fs/bpf
+    fstype: bpf
+    state: mounted
+    opts: rw,nosuid,nodev,noexec,relatime,mode=700
+
+- name: filesystem | swap
+  become: true
+  block:
+  - name: disable swap
+    command: swapoff -a
+    when: ansible_swaptotal_mb > 0
+  - name: disable swap system start
+    ansible.posix.mount:
+      name: "{{ item }}"
+      fstype: swap
+      state: absent
+    loop:
+      - swap
+      - none

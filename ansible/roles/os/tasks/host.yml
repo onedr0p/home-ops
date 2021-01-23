@@ -1,0 +1,27 @@
+---
+
+- name: host | update hostname to inventory hostname
+  become: true
+  hostname:
+    name: "{{ inventory_hostname }}"
+  when:
+  - ansible_hostname != inventory_hostname
+
+- name: host | update etc hosts
+  become: true
+  blockinfile:
+    path: /etc/hosts
+    create: true
+    block: |
+      127.0.0.1 localhost
+      127.0.1.1 {{ inventory_hostname }}
+
+      # k8s master
+      {% for host in groups['master'] %}
+      {{ hostvars[host].ansible_default_ipv4.address }}  {{ host }}
+      {% endfor %}
+
+      # k8s worker
+      {% for host in groups['worker'] %}
+      {{ hostvars[host].ansible_default_ipv4.address }}  {{ host }}
+      {% endfor %}

@@ -1,0 +1,59 @@
+---
+
+- hosts:
+  - master
+  - worker
+  become: true
+  gather_facts: true
+  vars_prompt:
+    name: "nuke_confirmation"
+    prompt: "This will DESTROY rook-ceph disks. Do you wish to continue? [Y/n]"
+    default: "n"
+    private: no
+  any_errors_fatal: yes
+  pre_tasks:
+  - name: check confirmation
+    fail:
+      msg: "Abort."
+    when: nuke_confirmation != "Y"
+
+  tasks:
+  - name: rook-ceph | remove /var/lib/rook
+    become: true
+    file:
+      state: absent
+      path: "/var/lib/rook"
+    when:
+    - rook_ceph.enabled is defined
+    - rook_ceph.enabled
+
+  - name: rook-ceph | zap the drives
+    become: true
+    shell: >
+      sgdisk --zap-all {{ item }} || true
+    loop:
+    - "{{ rook_ceph.devices }}"
+    when:
+    - rook_ceph.enabled is defined
+    - rook_ceph.enabled
+
+  - name: rook-ceph | remove lvm partitions
+    become: true
+    shell: "{{ item }}"
+    loop:
+    - ls /dev/mapper/ceph--* | xargs -I% -- fuser --kill %
+    - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup clear %
+    - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup remove -f %
+    - ls /dev/mapper/ceph--* | xargs -I% -- rm -rf %
+    when:
+    - rook_ceph.enabled is defined
+    - rook_ceph.enabled
+
+  - name: rook-ceph | wipe the block device
+    become: true
+    command: "wipefs -af {{ item }}"
+    with_items:
+    - "{{ rook_ceph.devices }}"
+    when:
+    - rook_ceph.enabled is defined
+    - rook_ceph.enabled

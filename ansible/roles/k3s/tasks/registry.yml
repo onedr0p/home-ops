@@ -1,0 +1,21 @@
+---
+
+- name: cluster-registry | create /etc/rancher/k3s
+  become: true
+  file:
+    path: "/etc/rancher/k3s"
+    state: directory
+
+- name: cluster-registry | configure mirrors and custom registries
+  become: true
+  template:
+    src: "registries.yaml.j2"
+    dest: "/etc/rancher/k3s/registries.yaml"
+    mode: 0644
+
+- name: cluster-registry | restart k3s systemd service
+  systemd:
+    name: k3s.service
+    daemon_reload: yes
+    enabled: yes
+    state: restarted

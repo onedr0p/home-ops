@@ -1,0 +1,76 @@
+---
+
+- name: kernel | disable apparmor
+  become: true
+  replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
+    replace: '\1 {{ option }}={{ value }}\2'
+  vars:
+    option: apparmor
+    value: 0
+
+- name: kernel | disable mitigations
+  become: true
+  replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
+    replace: '\1 {{ option }}={{ value }}\2'
+  vars:
+    option: mitigations
+    value: "off"
+
+- name: kernel | increase loop device count
+  become: true
+  replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
+    replace: '\1 {{ option }}={{ value }}\2'
+  vars:
+    option: max_loop
+    value: 32
+
+- name: kernel | enable modules
+  become: true
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+  - br_netfilter
+  - nf_conntrack
+  - overlay
+  - rbd
+  - ip_vs
+
+- name: kernel | enable modules on boot
+  become: true
+  copy:
+    content: "{{ item }}"
+    dest: "/etc/modules-load.d/{{ item }}.conf"
+  loop:
+  - br_netfilter
+  - overlay
+  - rbd
+  - ip_vs
+
+# Blacklist for PiAware: https://hub.docker.com/r/mikenye/piaware
+- name: kernel | blacklist modules
+  become: true
+  community.general.kernel_blacklist:
+    name: "{{ item }}"
+    state: present
+  loop:
+  - dvb_usb_rtl28xxu
+  - rtl2832
+  - rtl2832_sdr
+
+# Blacklist for PiAware: https://hub.docker.com/r/mikenye/piaware
+- name: kernel | blacklist modules on boot
+  become: true
+  copy:
+    content: "blacklist {{ item }}"
+    dest: "/etc/modprobe.d/{{ item }}.conf"
+  loop:
+  - dvb_usb_rtl28xxu
+  - rtl2832
+  - rtl2832_sdr

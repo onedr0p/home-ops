@@ -1,0 +1,20 @@
+---
+
+- hosts:
+  - master
+  - worker
+  become: true
+  gather_facts: true
+  vars_prompt:
+    - name: "run_confirmation"
+      prompt: "Are you sure you want to run this over the cluster? [Y/n]"
+      default: "n"
+      private: no
+  any_errors_fatal: yes
+  pre_tasks:
+  - name: cluster | check confirmation
+    fail:
+      msg: "Abort."
+    when: run_confirmation != "Y"
+  roles:
+  - xanmanning.k3s

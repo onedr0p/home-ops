@@ -24,7 +24,9 @@ Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/
 
 ## :computer:&nbsp; Cluster setup
 
-See my project over at [home-operations](https://github.com/onedr0p/home-operations) for how I provisioned my nodes and other work that supports running this cluster.
+My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.04.x using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s).
+
+See my [ansible](../ansible/) folder for my playbooks and roles.
 
 ---
 
