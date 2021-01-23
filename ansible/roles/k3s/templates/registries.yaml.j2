@@ -1,0 +1,18 @@
+#jinja2:lstrip_blocks: True
+---
+{% if registry.cache.enabled is defined and registry.cache.enabled %}
+mirrors:
+  "docker.io":
+    endpoint:
+    - "{{ registry.cache.address }}"
+  "*":
+    endpoint:
+    - "{{ registry.cache.address }}"
+{% endif %}
+{% if registry.custom.enabled is defined and registry.custom.enabled %}
+configs:
+  "{{ registry.custom.address }}":
+    auth:
+      username: "{{ registry.custom.username }}"
+      password: "{{ registry.custom.password }}"
+{% endif %}

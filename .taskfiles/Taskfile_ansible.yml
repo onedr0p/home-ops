@@ -1,0 +1,22 @@
+---
+version: '3'
+
+vars:
+  ANSIBLE_HOSTS: ./ansible/inventory/cluster/hosts.yml
+  ANSIBLE_GROUPS: master:worker
+
+tasks:
+  deps:
+    desc: Install Ansible Galaxy dependencies
+    cmds:
+    - ansible-galaxy install -r requirements.yml
+
+  ping:
+    desc: Ping all the k8s nodes
+    cmds:
+    - ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_HOSTS}} --one-line -m ping
+
+  list:
+    desc: List all the k8s nodes
+    cmds:
+    - ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_HOSTS}} --list-hosts

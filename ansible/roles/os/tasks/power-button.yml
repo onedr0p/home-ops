@@ -1,0 +1,10 @@
+---
+
+- name: power-button | disable single power button press shutdown
+  lineinfile:
+    path: /etc/systemd/logind.conf
+    regexp: "{{ item.setting }}"
+    line: "{{ item.setting }}={{ item.value }}"
+  loop:
+    - { setting: HandlePowerKey, value: ignore }
+  notify: restart logind

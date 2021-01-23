@@ -1,0 +1,38 @@
+---
+
+- name: unattended-upgrades | delete 20auto-upgrades config
+  become: true
+  file:
+    path: /etc/apt/apt.conf.d/20auto-upgrades
+    state: absent
+
+- name: unattended-upgrades | copy 10periodic config
+  become: true
+  copy:
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Download-Upgradeable-Packages "1";
+      APT::Periodic::AutocleanInterval "7";
+      APT::Periodic::Unattended-Upgrade "1";
+    dest: /etc/apt/apt.conf.d/10periodic
+  notify: unattended-upgrades configuration changed
+
+- name: unattended-upgrades | copy 50unattended-upgrades config
+  become: true
+  copy:
+    content: |
+      Unattended-Upgrade::Automatic-Reboot "false";
+      Unattended-Upgrade::Remove-Unused-Dependencies "true";
+      Unattended-Upgrade::Allowed-Origins {
+          "${distro_id}:${distro_codename}";
+          "${distro_id} ${distro_codename}-security";
+      };
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+  notify: unattended-upgrades configuration changed
+
+- name: unattended-upgrades | start systemd service
+  become: true
+  systemd:
+    name: unattended-upgrades
+    enabled: true
+    state: started

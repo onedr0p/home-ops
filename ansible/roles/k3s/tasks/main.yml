@@ -1,0 +1,30 @@
+---
+
+- include: kubeconfig.yml
+  tags:
+  - kubeconfig
+
+- include: meta.yml
+  tags:
+  - meta
+
+- include: prometheus-operator-crds.yml
+  tags:
+  - prometheus-operator-crds
+
+- include: registry.yml
+  when: (registry.cache.enabled is defined
+          and registry.cache.enabled)
+        or (registry.custom.enabled is defined
+          and registry.custom.enabled)
+  tags:
+  - registry
+
+- include: cni-calico.yml
+  when:
+  - k3s_control_node is defined
+  - k3s_control_node
+  - calico.enabled is defined
+  - calico.enabled
+  tags:
+  - cni-calico
