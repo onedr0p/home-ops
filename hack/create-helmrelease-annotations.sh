@@ -12,7 +12,7 @@ command -v yq >/dev/null 2>&1 || {
     exit 1
 }
 
-for helm_release in "${CLUSTER_ROOT}"/**/*.yaml; do
+for helm_release in "${CLUSTER_ROOT}"/**/helmrelease.yaml; do
     # ignore flux-system namespace
     # ignore wrong apiVersion
     # ignore non HelmReleases
@@ -28,11 +28,11 @@ for helm_release in "${CLUSTER_ROOT}"/**/*.yaml; do
 
         # only helmreleases where helm_release is related to chart_url
         if [[ $(yq eval '.spec.chart.spec.sourceRef.name' "${helm_release}") == "${chart_name}" ]]; then
+            echo "Annotating $(basename "${helm_release%.*}") with ${chart_name} for renovatebot..."
             # delete "renovate: registryUrl=" line
             sed -i "/renovate: registryUrl=/d" "${helm_release}"
             # insert "renovate: registryUrl=" line
             sed -i "/.*chart: .*/i \ \ \ \ \ \ # renovate: registryUrl=${chart_url}" "${helm_release}"
-            echo "Annotated $(basename "${helm_release%.*}") with ${chart_name} for renovatebot..."
             break
         fi
     done
