@@ -20,6 +20,10 @@ This repository _is_ my homelab Kubernetes cluster in a declarative state. [Flux
 
 Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/new) or join the k8s@home [Discord](https://discord.gg/DNCynrJ) if you have any questions.
 
+<p align="center">
+  <img src="./cluster-events-discord.gif" />
+</p>
+
 ---
 
 ## :computer:&nbsp; Cluster setup
