@@ -1,0 +1,61 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: gonic
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: gonic
+      version: 1.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    controllerType: deployment
+    image:
+      repository: sentriz/gonic
+      tag: latest
+    env:
+      TZ: "America/New_York"
+      GONIC_MUSIC_PATH: "/media-serenity/Library/Music"
+      GONIC_SCAN_INTERVAL: "120"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+      hosts:
+      - host: music.devbu.io
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "music.devbu.io"
+    persistence:
+      data:
+        enabled: true
+        storageClass: "rook-ceph-block"
+        accessMode: ReadWriteOnce
+        size: "1Gi"
+    podAnnotations:
+      backup.velero.io/backup-volumes: data
+    additionalVolumeMounts:
+    - name: media-serenity
+      mountPath: "/media-serenity"
+      readOnly: true
+    additionalVolumes:
+    - name: media-serenity
+      persistentVolumeClaim:
+        claimName: nfs-media-serenity-pvc
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 1500Mi
