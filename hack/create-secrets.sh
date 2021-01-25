@@ -152,18 +152,18 @@ kubectl create secret generic gitea-pat \
     tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # external-secrets credentials
-kubectl create secret generic aws-credentials \
-    --from-literal=id="${AWS_ACCESS_KEY_ID}" \
-    --from-literal=key="${AWS_SECRET_ACCESS_KEY}" \
-    --namespace kube-system --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" |
-    # Remove null keys
-    yq eval 'del(.metadata.creationTimestamp)' - |
-    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
-    # Format yaml file
-    sed -e '1s/^/---\n/' |
-    # Write secret
-    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
+# kubectl create secret generic aws-credentials \
+#     --from-literal=id="${AWS_ACCESS_KEY_ID}" \
+#     --from-literal=key="${AWS_SECRET_ACCESS_KEY}" \
+#     --namespace kube-system --dry-run=client -o json |
+#     kubeseal --format=yaml --cert="${PUB_CERT}" |
+#     # Remove null keys
+#     yq eval 'del(.metadata.creationTimestamp)' - |
+#     yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+#     # Format yaml file
+#     sed -e '1s/^/---\n/' |
+#     # Write secret
+#     tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # # sonarr episode prune - default namespace
 # kubectl create secret generic sonarr-episode-prune \
