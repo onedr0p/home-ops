@@ -59,45 +59,6 @@ fi
 # shellcheck disable=SC2129
 printf "%s\n%s\n%s\n" "#" "# Auto-generated generic secrets -- DO NOT EDIT." "#" >> "${GENERATED_SECRETS}"
 
-# github runner
-kubectl create secret generic controller-manager \
-    --from-literal=github_token="${GITHUB_RUNNER_ACCESS_TOKEN}" \
-    --namespace actions-runner-system --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" |
-    # Remove null keys
-    yq eval 'del(.metadata.creationTimestamp)' - |
-    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
-    # Format yaml file
-    sed -e '1s/^/---\n/' |
-    # Write secret
-    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
-
-# flux discord
-kubectl create secret generic discord-webhook \
-    --from-literal=address="${FLUX_DISCORD_WEBHOOK}" \
-    --namespace flux-system --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" |
-    # Remove null keys
-    yq eval 'del(.metadata.creationTimestamp)' - |
-    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
-    # Format yaml file
-    sed -e '1s/^/---\n/' |
-    # Write secret
-    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
-
-# flux github
-kubectl create secret generic webhook-token \
-    --from-literal=token="${FLUX_GITHUB_TOKEN}" \
-    --namespace flux-system --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" |
-    # Remove null keys
-    yq eval 'del(.metadata.creationTimestamp)' - |
-    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
-    # Format yaml file
-    sed -e '1s/^/---\n/' |
-    # Write secret
-    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
-
 # qbittorrent credentials
 kubectl create secret generic qbittorrent \
     --from-literal=username="${QB_USERNAME}" \
@@ -111,6 +72,32 @@ kubectl create secret generic qbittorrent \
     sed -e '1s/^/---\n/' |
     # Write secret
     tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
+
+# # flux discord
+# kubectl create secret generic discord-webhook \
+#     --from-literal=address="${FLUX_DISCORD_WEBHOOK}" \
+#     --namespace flux-system --dry-run=client -o json |
+#     kubeseal --format=yaml --cert="${PUB_CERT}" |
+#     # Remove null keys
+#     yq eval 'del(.metadata.creationTimestamp)' - |
+#     yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+#     # Format yaml file
+#     sed -e '1s/^/---\n/' |
+#     # Write secret
+#     tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
+
+# # flux github
+# kubectl create secret generic webhook-token \
+#     --from-literal=token="${FLUX_GITHUB_TOKEN}" \
+#     --namespace flux-system --dry-run=client -o json |
+#     kubeseal --format=yaml --cert="${PUB_CERT}" |
+#     # Remove null keys
+#     yq eval 'del(.metadata.creationTimestamp)' - |
+#     yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+#     # Format yaml file
+#     sed -e '1s/^/---\n/' |
+#     # Write secret
+#     tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # # uptimerobot heartbeat
 # kubectl create secret generic uptimerobot-heartbeat \
@@ -203,6 +190,19 @@ kubectl create secret generic qbittorrent \
 # kubectl create secret generic cloudflare-api-key \
 #     --from-literal=api-key="${CF_API_KEY}" \
 #     --namespace cert-manager --dry-run=client -o json |
+#     kubeseal --format=yaml --cert="${PUB_CERT}" |
+#     # Remove null keys
+#     yq eval 'del(.metadata.creationTimestamp)' - |
+#     yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+#     # Format yaml file
+#     sed -e '1s/^/---\n/' |
+#     # Write secret
+#     tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
+
+# # github runner
+# kubectl create secret generic controller-manager \
+#     --from-literal=github_token="${GITHUB_RUNNER_ACCESS_TOKEN}" \
+#     --namespace actions-runner-system --dry-run=client -o json |
 #     kubeseal --format=yaml --cert="${PUB_CERT}" |
 #     # Remove null keys
 #     yq eval 'del(.metadata.creationTimestamp)' - |

@@ -28,11 +28,24 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
 metadata:
-  name: flux-system-notifications
+  name: flux-system-github
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./cluster/flux-system/discord-notifications
+  path: ./cluster/flux-system/github
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: flux-system-discord
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./cluster/flux-system/discord
   prune: true
   sourceRef:
     kind: GitRepository
