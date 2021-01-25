@@ -4,7 +4,7 @@ version: '3'
 services:
   postgres:
     image: postgres:12.5
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: "postgres"
       POSTGRES_USER: "admin"
@@ -16,7 +16,7 @@ services:
     - "5432:5432"
   pgadmin:
     image: dpage/pgadmin4:4.29
-    restart: always
+    restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: ""
       PGADMIN_DEFAULT_PASSWORD: ""
@@ -31,7 +31,7 @@ services:
     - postgres
   pgbackups:
     image: prodrigestivill/postgres-backup-local:12
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_HOST: "pgsql-server"
       POSTGRES_DB: "gitea,home-assistant,postgres"
