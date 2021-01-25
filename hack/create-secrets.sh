@@ -59,19 +59,6 @@ fi
 # shellcheck disable=SC2129
 printf "%s\n%s\n%s\n" "#" "# Auto-generated generic secrets -- DO NOT EDIT." "#" >> "${GENERATED_SECRETS}"
 
-# cloudflare api key
-kubectl create secret generic cloudflare-api-key \
-    --from-literal=api-key="${CF_API_KEY}" \
-    --namespace cert-manager --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" |
-    # Remove null keys
-    yq eval 'del(.metadata.creationTimestamp)' - |
-    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
-    # Format yaml file
-    sed -e '1s/^/---\n/' |
-    # Write secret
-    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
-
 # github runner
 kubectl create secret generic controller-manager \
     --from-literal=github_token="${GITHUB_RUNNER_ACCESS_TOKEN}" \
@@ -203,6 +190,19 @@ kubectl create secret generic qbittorrent \
 # kubectl create secret generic nginx-basic-auth \
 #     --from-literal=auth="${NGINX_BASIC_AUTH}" \
 #     --namespace media --dry-run=client -o json |
+#     kubeseal --format=yaml --cert="${PUB_CERT}" |
+#     # Remove null keys
+#     yq eval 'del(.metadata.creationTimestamp)' - |
+#     yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+#     # Format yaml file
+#     sed -e '1s/^/---\n/' |
+#     # Write secret
+#     tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
+
+# # cloudflare api key
+# kubectl create secret generic cloudflare-api-key \
+#     --from-literal=api-key="${CF_API_KEY}" \
+#     --namespace cert-manager --dry-run=client -o json |
 #     kubeseal --format=yaml --cert="${PUB_CERT}" |
 #     # Remove null keys
 #     yq eval 'del(.metadata.creationTimestamp)' - |
