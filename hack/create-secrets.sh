@@ -85,18 +85,18 @@ kubectl create secret generic controller-manager \
     # Write secret
     tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
-# uptimerobot heartbeat
-kubectl create secret generic uptimerobot-heartbeat \
-    --from-literal=url="${UPTIMEROBOT_HEARTBEAT_URL}" \
-    --namespace monitoring --dry-run=client -o json |
-    kubeseal --format=yaml --cert="${PUB_CERT}" |
-    # Remove null keys
-    yq eval 'del(.metadata.creationTimestamp)' - |
-    yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
-    # Format yaml file
-    sed -e '1s/^/---\n/' |
-    # Write secret
-    tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
+# # uptimerobot heartbeat
+# kubectl create secret generic uptimerobot-heartbeat \
+#     --from-literal=url="${UPTIMEROBOT_HEARTBEAT_URL}" \
+#     --namespace monitoring --dry-run=client -o json |
+#     kubeseal --format=yaml --cert="${PUB_CERT}" |
+#     # Remove null keys
+#     yq eval 'del(.metadata.creationTimestamp)' - |
+#     yq eval 'del(.spec.template.metadata.creationTimestamp)' - |
+#     # Format yaml file
+#     sed -e '1s/^/---\n/' |
+#     # Write secret
+#     tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
 
 # flux discord
 kubectl create secret generic discord-webhook \
