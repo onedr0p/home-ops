@@ -21,22 +21,22 @@ spec:
           - name: rclone-conf
             image: alpine/git:v2.30.0
             env:
-            - name: GITEA_PAT
+            - name: GITEA_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: gitea-pat
-                  key: token
+                  name: gitea-token
+                  key: gitea-token
             command:
             - "/bin/sh"
             - "-ec"
             - |
               set -o nounset
               set -o errexit
-              if [ -z "${GITEA_PAT}" ]; then
-                printf "%s - Error - Missing GITEA_PAT environment variable" "$(date -u)"
+              if [ -z "${GITEA_TOKEN}" ]; then
+                printf "%s - Error - Missing GITEA_TOKEN environment variable" "$(date -u)"
                 exit 1
               fi
-              git clone --depth 1 "https://${GITEA_PAT}@gitea.devbu.io/devin/rclone-config.git" /shared/rclone-conf
+              git clone --depth 1 "https://${GITEA_TOKEN}@gitea.devbu.io/devin/rclone-config.git" /shared/rclone-conf
               exit 0
             volumeMounts:
             - name: shared

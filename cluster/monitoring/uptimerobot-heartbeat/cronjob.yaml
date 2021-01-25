@@ -22,10 +22,10 @@ spec:
             image: curlimages/curl:7.74.0
             imagePullPolicy: IfNotPresent
             env:
-            - name: HEALTHCHECK_URL
+            - name: UPTIMEROBOT_HEARTBEAT_URL
               valueFrom:
                 secretKeyRef:
-                  name: uptimerobot-heartbeat
+                  name: uptimerobot-heartbeat-url
                   key: uptimerobot-heartbeat-url
             command:
             - "/bin/sh"
@@ -33,11 +33,11 @@ spec:
             - |
               set -o nounset
               set -o errexit
-              if [ -z "${HEALTHCHECK_URL}" ]; then
-                printf "%s - Error - Missing HEALTHCHECK_URL environment variable" "$(date -u)"
+              if [ -z "${UPTIMEROBOT_HEARTBEAT_URL}" ]; then
+                printf "%s - Error - Missing UPTIMEROBOT_HEARTBEAT_URL environment variable" "$(date -u)"
                 exit 1
               fi
-              status_code=$(curl --connect-timeout 10 --max-time 30 -I -s -o /dev/null -w '%{http_code}' "${HEALTHCHECK_URL}")
+              status_code=$(curl --connect-timeout 10 --max-time 30 -I -s -o /dev/null -w '%{http_code}' "${UPTIMEROBOT_HEARTBEAT_URL}")
               if [ "${status_code}" != 200 ]; then
                 printf "%s - ERROR - Heartbeat request failed, http code: %s" "$(date -u)" "${status_code}"
                 exit 1
