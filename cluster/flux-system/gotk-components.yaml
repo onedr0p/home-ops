@@ -1,12 +1,12 @@
 ---
-# GitOps Toolkit revision v0.6.3
+# GitOps Toolkit revision v0.7.2
 # Components: source-controller,kustomize-controller,helm-controller,notification-controller
 apiVersion: v1
 kind: Namespace
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
   name: flux-system
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -17,7 +17,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
   name: alerts.notification.toolkit.fluxcd.io
 spec:
   group: notification.toolkit.fluxcd.io
@@ -79,6 +79,8 @@ spec:
                       - HelmChart
                       - HelmRepository
                       - ImageRepository
+                      - ImagePolicy
+                      - ImageUpdateAutomation
                       type: string
                     name:
                       description: Name of the referent
@@ -98,8 +100,10 @@ spec:
                 description: Send events using this provider
                 properties:
                   name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                    description: Name of the referent
                     type: string
+                required:
+                - name
                 type: object
               summary:
                 description: Short description of the impact and affected cluster.
@@ -178,7 +182,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
   name: buckets.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -247,8 +251,10 @@ spec:
                 description: The name of the secret containing authentication credentials for the Bucket.
                 properties:
                   name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                    description: Name of the referent
                     type: string
+                required:
+                - name
                 type: object
               suspend:
                 description: This flag tells the controller to suspend the reconciliation of this source.
@@ -363,7 +369,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
   name: gitrepositories.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -437,8 +443,10 @@ spec:
                 description: The secret name containing the Git credentials. For HTTPS repositories the secret must contain username and password fields. For SSH repositories the secret must contain identity, identity.pub and known_hosts fields.
                 properties:
                   name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                    description: Name of the referent
                     type: string
+                required:
+                - name
                 type: object
               suspend:
                 description: This flag tells the controller to suspend the reconciliation of this source.
@@ -463,8 +471,10 @@ spec:
                     description: The secret name containing the public keys of all trusted Git authors.
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                        description: Name of the referent
                         type: string
+                    required:
+                    - name
                     type: object
                 required:
                 - mode
@@ -574,7 +584,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
   name: helmcharts.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -765,7 +775,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
   name: helmreleases.helm.toolkit.fluxcd.io
 spec:
   group: helm.toolkit.fluxcd.io
@@ -919,8 +929,10 @@ spec:
                     description: SecretRef holds the name to a secret that contains a 'value' key with the kubeconfig file as the value. It must be in the same namespace as the HelmRelease. It is recommended that the kubeconfig is self-contained, and the secret is regularly updated if credentials such as a cloud-access-token expire. Cloud specific `cmd-path` auth helpers will not function without adding binaries and credentials to the Pod that is responsible for reconciling the HelmRelease.
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                        description: Name of the referent
                         type: string
+                    required:
+                    - name
                     type: object
                 type: object
               maxHistory:
@@ -955,6 +967,11 @@ spec:
                 type: object
               serviceAccountName:
                 description: The name of the Kubernetes service account to impersonate when reconciling this HelmRelease.
+                type: string
+              storageNamespace:
+                description: StorageNamespace used for the Helm storage. Defaults to the namespace of the HelmRelease.
+                maxLength: 63
+                minLength: 1
                 type: string
               suspend:
                 description: Suspend tells the controller to suspend reconciliation for this HelmRelease, it does not apply to already started reconciliations. Defaults to false.
@@ -1176,7 +1193,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
   name: helmrepositories.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -1223,8 +1240,10 @@ spec:
                 description: The name of the secret containing authentication credentials for the Helm repository. For HTTP/S basic auth the secret must contain username and password fields. For TLS the secret must contain a certFile and keyFile, and/or caCert fields.
                 properties:
                   name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                    description: Name of the referent
                     type: string
+                required:
+                - name
                 type: object
               suspend:
                 description: This flag tells the controller to suspend the reconciliation of this source.
@@ -1341,7 +1360,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
   name: kustomizations.kustomize.toolkit.fluxcd.io
 spec:
   group: kustomize.toolkit.fluxcd.io
@@ -1392,8 +1411,10 @@ spec:
                     description: The secret name containing the private OpenPGP keys used for decryption.
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                        description: Name of the referent
                         type: string
+                    required:
+                    - name
                     type: object
                 required:
                 - provider
@@ -1416,10 +1437,10 @@ spec:
               healthChecks:
                 description: A list of resources to be included in the health assessment.
                 items:
-                  description: CrossNamespaceObjectReference contains enough information to let you locate the typed referenced object at cluster level
+                  description: NamespacedObjectKindReference contains enough information to let you locate the typed referenced object in any namespace
                   properties:
                     apiVersion:
-                      description: API version of the referent, defaults to 'apps/v1'
+                      description: API version of the referent, if not specified the Kubernetes preferred version will be used
                       type: string
                     kind:
                       description: Kind of the referent
@@ -1428,7 +1449,7 @@ spec:
                       description: Name of the referent
                       type: string
                     namespace:
-                      description: Namespace of the referent
+                      description: Namespace of the referent, when not specified it acts as LocalObjectReference
                       type: string
                   required:
                   - kind
@@ -1465,8 +1486,10 @@ spec:
                     description: SecretRef holds the name to a secret that contains a 'value' key with the kubeconfig file as the value. It must be in the same namespace as the Kustomization. It is recommended that the kubeconfig is self-contained, and the secret is regularly updated if credentials such as a cloud-access-token expire. Cloud specific `cmd-path` auth helpers will not function without adding binaries and credentials to the Pod that is responsible for reconciling the Kustomization.
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                        description: Name of the referent
                         type: string
+                    required:
+                    - name
                     type: object
                 type: object
               path:
@@ -1475,6 +1498,9 @@ spec:
               prune:
                 description: Prune enables garbage collection.
                 type: boolean
+              retryInterval:
+                description: The interval at which to retry a previously failed reconciliation. When not specified, the controller uses the KustomizationSpec.Interval value to retry failures.
+                type: string
               serviceAccountName:
                 description: The name of the Kubernetes service account to impersonate when reconciling this Kustomization.
                 type: string
@@ -1630,7 +1656,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
   name: providers.notification.toolkit.fluxcd.io
 spec:
   group: notification.toolkit.fluxcd.io
@@ -1682,8 +1708,10 @@ spec:
                 description: Secret reference containing the provider webhook URL using "address" as data key
                 properties:
                   name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                    description: Name of the referent
                     type: string
+                required:
+                - name
                 type: object
               type:
                 description: Type of provider
@@ -1771,7 +1799,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
   name: receivers.notification.toolkit.fluxcd.io
 spec:
   group: notification.toolkit.fluxcd.io
@@ -1831,6 +1859,8 @@ spec:
                       - HelmChart
                       - HelmRepository
                       - ImageRepository
+                      - ImagePolicy
+                      - ImageUpdateAutomation
                       type: string
                     name:
                       description: Name of the referent
@@ -1850,8 +1880,10 @@ spec:
                 description: Secret reference containing the token used to validate the payload authenticity
                 properties:
                   name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                    description: Name of the referent
                     type: string
+                required:
+                - name
                 type: object
               suspend:
                 description: This flag tells the controller to suspend subsequent events handling. Defaults to false.
@@ -1860,6 +1892,7 @@ spec:
                 description: Type of webhook sender, used to determine the validation procedure and payload deserialization.
                 enum:
                 - generic
+                - generic-hmac
                 - github
                 - gitlab
                 - bitbucket
@@ -1867,6 +1900,7 @@ spec:
                 - dockerhub
                 - quay
                 - gcr
+                - nexus
                 type: string
             required:
             - resources
@@ -1934,14 +1968,49 @@ status:
   conditions: []
   storedVersions: []
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+apiVersion: v1
+kind: ServiceAccount
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
-  name: crd-controller-flux-system
+    app.kubernetes.io/version: v0.7.2
+  name: helm-controller
   namespace: flux-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/version: v0.7.2
+  name: kustomize-controller
+  namespace: flux-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/version: v0.7.2
+  name: notification-controller
+  namespace: flux-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/version: v0.7.2
+  name: source-controller
+  namespace: flux-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/version: v0.7.2
+  name: crd-controller-flux-system
 rules:
 - apiGroups:
   - source.toolkit.fluxcd.io
@@ -1968,12 +2037,19 @@ rules:
   verbs:
   - '*'
 - apiGroups:
-  - ""
+  - image.toolkit.fluxcd.io
   resources:
-  - configmaps
-  - configmaps/status
+  - '*'
   verbs:
   - '*'
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -1981,30 +2057,38 @@ rules:
   verbs:
   - create
   - patch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  labels:
-    app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
-  name: crd-controller-flux-system
-  namespace: flux-system
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: crd-controller-flux-system
-subjects:
-- kind: ServiceAccount
-  name: default
-  namespace: flux-system
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - configmaps/status
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
   name: cluster-reconciler-flux-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -2012,7 +2096,41 @@ roleRef:
   name: cluster-admin
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: kustomize-controller
+  namespace: flux-system
+- kind: ServiceAccount
+  name: helm-controller
+  namespace: flux-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/version: v0.7.2
+  name: crd-controller-flux-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: crd-controller-flux-system
+subjects:
+- kind: ServiceAccount
+  name: kustomize-controller
+  namespace: flux-system
+- kind: ServiceAccount
+  name: helm-controller
+  namespace: flux-system
+- kind: ServiceAccount
+  name: source-controller
+  namespace: flux-system
+- kind: ServiceAccount
+  name: notification-controller
+  namespace: flux-system
+- kind: ServiceAccount
+  name: image-reflector-controller
+  namespace: flux-system
+- kind: ServiceAccount
+  name: image-automation-controller
   namespace: flux-system
 ---
 apiVersion: v1
@@ -2020,7 +2138,7 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
     control-plane: controller
   name: notification-controller
   namespace: flux-system
@@ -2039,7 +2157,7 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
     control-plane: controller
   name: source-controller
   namespace: flux-system
@@ -2058,7 +2176,7 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
     control-plane: controller
   name: webhook-receiver
   namespace: flux-system
@@ -2077,7 +2195,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
     control-plane: controller
   name: helm-controller
   namespace: flux-system
@@ -2106,7 +2224,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/helm-controller:v0.5.2
+        image: ghcr.io/fluxcd/helm-controller:v0.6.1
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -2138,6 +2256,7 @@ spec:
           name: temp
       nodeSelector:
         kubernetes.io/os: linux
+      serviceAccountName: helm-controller
       terminationGracePeriodSeconds: 600
       volumes:
       - emptyDir: {}
@@ -2148,7 +2267,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
     control-plane: controller
   name: kustomize-controller
   namespace: flux-system
@@ -2177,7 +2296,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/kustomize-controller:v0.6.3
+        image: ghcr.io/fluxcd/kustomize-controller:v0.7.2
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -2211,6 +2330,7 @@ spec:
         kubernetes.io/os: linux
       securityContext:
         fsGroup: 1337
+      serviceAccountName: kustomize-controller
       terminationGracePeriodSeconds: 60
       volumes:
       - emptyDir: {}
@@ -2221,7 +2341,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
     control-plane: controller
   name: notification-controller
   namespace: flux-system
@@ -2249,7 +2369,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/notification-controller:v0.6.2
+        image: ghcr.io/fluxcd/notification-controller:v0.7.1
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -2285,6 +2405,7 @@ spec:
           name: temp
       nodeSelector:
         kubernetes.io/os: linux
+      serviceAccountName: notification-controller
       terminationGracePeriodSeconds: 10
       volumes:
       - emptyDir: {}
@@ -2295,7 +2416,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.6.3
+    app.kubernetes.io/version: v0.7.2
     control-plane: controller
   name: source-controller
   namespace: flux-system
@@ -2326,7 +2447,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/source-controller:v0.6.3
+        image: ghcr.io/fluxcd/source-controller:v0.7.1
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -2359,6 +2480,7 @@ spec:
           name: tmp
       nodeSelector:
         kubernetes.io/os: linux
+      serviceAccountName: source-controller
       terminationGracePeriodSeconds: 10
       volumes:
       - emptyDir: {}
