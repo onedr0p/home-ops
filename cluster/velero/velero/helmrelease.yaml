@@ -48,6 +48,9 @@ spec:
       volumeMounts:
       - mountPath: /target
         name: plugins
+    credentials:
+      useSecret: true
+      existingSecret: credentials
     metrics:
       enabled: true
       serviceMonitor:
@@ -63,6 +66,3 @@ spec:
         schedule: "0 6,18 * * *"
         template:
           ttl: "120h"
-  valuesFrom:
-  - kind: Secret
-    name: "velero-helm-values"
