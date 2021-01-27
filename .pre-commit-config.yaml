@@ -36,12 +36,9 @@ repos:
   rev: v4.3.7
   hooks:
   - id: ansible-lint
-    always_run: true
+    always_run: false
+    files: ^ansible/
     pass_filenames: false
-    # do not add file filters here as ansible-lint does not give reliable
-    # results when called with individual files.
-    # https://github.com/ansible/ansible-lint/issues/611
-    verbose: true
-    entry: env ANSIBLE_LIBRARY=./ansible ansible-lint --force-color --exclude ansible/roles/xanmanning.k3s/ -p -v ./ansible/playbooks/*.yml
+    entry: ansible-lint --force-color
     additional_dependencies:
     - 'ansible>2.9'
