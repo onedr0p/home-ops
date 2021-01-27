@@ -26,9 +26,6 @@ RUN apt-get -qq update \
         /var/cache/apt/* \
         /var/tmp/*
 
-RUN curl -L -o ubuntu-20.04.1-live-server-amd64.iso https://mirror.umd.edu/ubuntu-iso/20.04.1/ubuntu-20.04.1-live-server-amd64.iso
-RUN 7z x ubuntu-20.04.1-live-server-amd64.iso -oiso
-
 COPY master-nodes.yaml autoinstall-masters.yml
 COPY worker-nodes.yaml autoinstall-workers.yml
 COPY entrypoint.sh .

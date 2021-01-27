@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+rm /build/ubuntu-20.04.1-live-server-amd64-autoinstall-masters.iso
+rm /build/ubuntu-20.04.1-live-server-amd64-autoinstall-workers.iso
+
+if [ ! -f /build/ubuntu-20.04.1-live-server-amd64.iso ]; then
+    curl -L -o /build/ubuntu-20.04.1-live-server-amd64.iso https://releases.ubuntu.com/20.04/ubuntu-20.04.1-live-server-amd64.iso
+fi
+
+7z x /build/ubuntu-20.04.1-live-server-amd64.iso -oiso
+
 mkdir -p iso/nocloud/
 touch iso/nocloud/meta-data
 rm -rf 'iso/[BOOT]/'
