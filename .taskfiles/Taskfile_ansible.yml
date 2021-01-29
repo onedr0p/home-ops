@@ -2,6 +2,7 @@
 version: '3'
 
 vars:
+  ANSIBLE_CONFIG: ./ansible/ansible.cfg
   ANSIBLE_HOSTS: ./ansible/inventory/cluster/hosts.yml
   ANSIBLE_GROUPS: master:worker
 
@@ -9,14 +10,14 @@ tasks:
   deps:
     desc: Install Ansible Galaxy dependencies
     cmds:
-    - ansible-galaxy install -r requirements.yml
+    - env ANSIBLE_CONFIG={{.ANSIBLE_CONFIG}} ansible-galaxy install -r requirements.yml
 
   ping:
     desc: Ping all the k8s nodes
     cmds:
-    - ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_HOSTS}} --one-line -m ping
+    - env ANSIBLE_CONFIG={{.ANSIBLE_CONFIG}} ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_HOSTS}} --one-line -m ping
 
   list:
     desc: List all the k8s nodes
     cmds:
-    - ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_HOSTS}} --list-hosts
+    - env ANSIBLE_CONFIG={{.ANSIBLE_CONFIG}} ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_HOSTS}} --list-hosts
