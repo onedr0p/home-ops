@@ -5,7 +5,6 @@ __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=/dev/null
 source "${__dir}/environment.sh"
 
-
 # Create secrets file
 truncate -s 0 "${GENERATED_SECRETS}"
 

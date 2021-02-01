@@ -11,7 +11,7 @@
   register: calicoctl_latest_release
 
 - name: cluster | calico | download latest calicoctl
-  become: yes
+  become: true
   get_url:
     url: "https://github.com/projectcalico/calicoctl/releases/download/{{ calicoctl_latest_release.stdout_lines[0] }}/calicoctl-linux-amd64"
     dest: "/usr/local/bin/calicoctl"
@@ -39,7 +39,7 @@
         calicoNetwork:
           ipPools:
           - blockSize: 26
-            cidr: "{{ k3s_cluster_cidr }}"
+            cidr: "{{ k3s_server["cluster-cidr"] }}"
             encapsulation: IPIPCrossSubnet
             natOutgoing: Enabled
             nodeSelector: all()
