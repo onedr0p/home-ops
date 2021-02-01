@@ -1,0 +1,29 @@
+---
+version: '3.7'
+services:
+  nginxproxymanager:
+    image: jc21/nginx-proxy-manager:2.7.3
+    restart: unless-stopped
+    environment:
+      TZ: "America/New_York"
+      DB_SQLITE_FILE: "/data/database.sqlite"
+    ports:
+    - 30080:80
+    - 30443:443
+    - 30081:81
+    volumes:
+    - nginx-proxy-manager-data:/data
+    - letsencrypt-data:/etc/letsencrypt
+volumes:
+  nginx-proxy-manager-data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/share/Data/ContainerStation/nginx-proxy-manager/data'
+  letsencrypt-data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/share/Data/ContainerStation/nginx-proxy-manager/letsencrypt'
