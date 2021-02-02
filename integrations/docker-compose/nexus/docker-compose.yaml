@@ -1,18 +1,26 @@
 ---
+
 version: '3.7'
 services:
   nexus:
     image: sonatype/nexus3:3.29.2
     restart: unless-stopped
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: "-Xms2703m -Xmx2703m -XX:ActiveProcessorCount=4 -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-data/javaprefs"
     ports:
     - 8081:8081
     - 8082:8082
     - 5000:5000
-    environment:
-      INSTALL4J_ADD_VM_PARAMS: "-Xms2703m -Xmx2703m -XX:ActiveProcessorCount=4 -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-data/javaprefs"
     ulimits:
       nofile:
         soft: "65536"
         hard: "65536"
     volumes:
-    - /share/Data/ContainerStation/nexus:/nexus-data
+    - nexus-data:/nexus-data
+volumes:
+  nexus-data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/share/Data/ContainerStation/nexus'
