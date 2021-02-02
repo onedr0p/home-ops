@@ -1,4 +1,5 @@
 ---
+
 version: '3'
 services:
   vault:
@@ -10,10 +11,29 @@ services:
       VAULT_ADDR: "http://0.0.0.0:8200"
       VAULT_API_ADDR: "http://0.0.0.0:8200"
       VAULT_ADDRESS: "http://0.0.0.0:8200"
+    command: vault server -config=/vault/config/vault.json
     ports:
     - 8200:8200
     volumes:
-    - /share/Data/ContainerStation/vault/config:/vault/config
-    - /share/Data/ContainerStation/vault/policies:/vault/policies
-    - /share/Data/ContainerStation/vault/data:/vault/data
-    command: vault server -config=/vault/config/vault.json
+    - vault-config:/vault/config
+    - vault-policies:/vault/policies
+    - vault-data:/vault/data
+volumes:
+  vault-config:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/share/Data/ContainerStation/vault/config'
+  vault-policies:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/share/Data/ContainerStation/vault/policies'
+  vault-data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/share/Data/ContainerStation/vault/data'

@@ -1,6 +1,6 @@
 ---
-version: '3.7'
 
+version: '3.7'
 services:
   node-exporter:
     image: prom/node-exporter:v1.0.1
@@ -10,10 +10,6 @@ services:
     cap_add:
     - SYS_TIME
     - SYS_NICE
-    volumes:
-    - /proc:/host/proc:ro
-    - /sys:/host/sys:ro
-    - /:/rootfs:ro,rslave
     command:
     - '--path.procfs=/host/proc'
     - '--path.rootfs=/rootfs'
@@ -21,6 +17,10 @@ services:
     - '--no-collector.time'
     - '--no-collector.timex'
     - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc|mnt/ext)($$|/)'
+    volumes:
+    - /proc:/host/proc:ro
+    - /sys:/host/sys:ro
+    - /:/rootfs:ro,rslave
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9100/metrics"]
       interval: 30s

@@ -1,4 +1,5 @@
 ---
+
 version: '3.7'
 services:
   minio:
@@ -9,11 +10,11 @@ services:
       MINIO_SECRET_KEY: ""
       MINIO_PROMETHEUS_AUTH_TYPE: "public"
       MINIO_UPDATE: "off"
+    command: server /data
     ports:
     - 9000:9000
     volumes:
     - minio-data:/data
-    command: server /data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
