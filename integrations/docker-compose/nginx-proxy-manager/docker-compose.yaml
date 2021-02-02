@@ -4,15 +4,11 @@ services:
   nginx-proxy-manager:
     image: jc21/nginx-proxy-manager:2.7.3
     restart: unless-stopped
-    pid: host
     network_mode: host
     environment:
       TZ: "America/New_York"
       DB_SQLITE_FILE: "/data/database.sqlite"
-    # ports:
-    # - 80:80
-    # - 443:443
-    # - 81:81
+      DISABLE_IPV6: "true"
     volumes:
     - nginx-proxy-manager-data:/data
     - letsencrypt-data:/etc/letsencrypt
