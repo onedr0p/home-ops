@@ -9,31 +9,31 @@
   tasks:
 
   #
-  # Turn off master and workker devices in 2 minutes
+  # Turn off master and worker devices in 2 minutes
   #
 
-  - name: power-outage | turn off master nodes
+  - name: turn off master nodes
     # command: /sbin/shutdown -h 2
     command: /sbin/shutdown --help
     when: "'master' in group_names"
 
-  - name: power-outage | turn off worker nodes
+  - name: turn off worker nodes
     # command: /sbin/shutdown -h 2
     command: /sbin/shutdown --help
     when: "'worker' in group_names"
 
   #
-  # Turn off NAS devices in 6 minutes
+  # Turn off NAS devices in 5 minutes
   #
 
   # Qnap devices do not have /sbin/shutdown and
   # instead use busybox /sbin/poweroff
-  - name: power-outage | turn off storage nodes
-    # command: /sbin/poweroff -d 360
+  - name: turn off storage nodes
+    # command: /sbin/poweroff -d 300
     command: /sbin/poweroff --help
     when: inventory_hostname == "nas-rocinante"
 
-  - name: power-outage | turn off storage nodes
-    # command: /sbin/shutdown -h 6
+  - name: turn off storage nodes
+    # command: /sbin/shutdown -h 5
     command: /sbin/shutdown --help
     when: inventory_hostname == "nas-serenity"
