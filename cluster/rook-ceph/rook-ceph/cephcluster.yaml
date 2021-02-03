@@ -12,7 +12,6 @@ spec:
   skipUpgradeChecks: false
   continueUpgradeAfterChecksEvenIfNotHealthy: false
   removeOSDsIfOutAndSafeToRemove: false
-  waitTimeoutForHealthyOSDInMinutes: 10
   mon:
     count: 3
     allowMultiplePerNode: false
@@ -41,6 +40,19 @@ spec:
     osdMaintenanceTimeout: 30
     manageMachineDisruptionBudgets: false
     machineDisruptionBudgetNamespace: openshift-machine-api
+  resources:
+    mon:
+      requests:
+        cpu: 35m
+        memory: 800Mi
+      limits:
+        memory: 1024Mi
+    osd:
+      requests:
+        cpu: 35m
+        memory: 2048Mi
+      limits:
+        memory: 4096Mi
   storage:
     useAllNodes: false
     useAllDevices: false
