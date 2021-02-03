@@ -5,7 +5,7 @@
   become: true
   gather_facts: true
   vars_prompt:
-    name: "run_confirmation"
+  - name: "run_confirmation"
     prompt: "This will DESTROY your longhorn volumes. Do you wish to continue? [Y/n]"
     default: "n"
     private: no
@@ -16,13 +16,11 @@
       msg: "Abort."
     when:
     - run_confirmation != "Y"
-
   - name: check longhorn is enabled
     fail:
       msg: "Abort."
     when:
     - longhorn.enabled is defined
     - not longhorn.enabled
-
   roles:
   - longhorn
