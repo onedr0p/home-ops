@@ -1,22 +1,5 @@
 ---
 
-- name: cluster | calico | get all calicoctl releases
-  get_url:
-    url: https://api.github.com/repos/projectcalico/calicoctl/releases
-    dest: /tmp/calicoctl.releases.json
-
-- name: cluster | calico | get latest calicoctl release version
-  shell: >
-    cat /tmp/calicoctl.releases.json | jq --raw-output '.[0].tag_name'
-  register: calicoctl_latest_release
-
-- name: cluster | calico | download latest calicoctl
-  become: true
-  get_url:
-    url: "https://github.com/projectcalico/calicoctl/releases/download/{{ calicoctl_latest_release.stdout_lines[0] }}/calicoctl-linux-amd64"
-    dest: "/usr/local/bin/calicoctl"
-    mode: 0755
-
 - name: cluster | calico | deploy tigera operator to k3s manifest directory
   become: true
   get_url:
@@ -28,6 +11,7 @@
   become: true
   blockinfile:
     path: "{{ k3s_server_manifests_dir }}/calico-installation.yaml"
+    mode: 0644
     create: true
     block: |
       ---
@@ -48,6 +32,7 @@
   become: true
   blockinfile:
     path: "{{ k3s_server_manifests_dir }}/calico-bgppeer.yaml"
+    mode: 0644
     create: true
     block: |
       ---
@@ -66,6 +51,7 @@
   become: true
   blockinfile:
     path: "{{ k3s_server_manifests_dir }}/calico-bgpconfiguration.yaml"
+    mode: 0644
     create: true
     block: |
       ---

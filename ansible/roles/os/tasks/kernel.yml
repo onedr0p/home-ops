@@ -45,6 +45,7 @@
 - name: kernel | enable modules on boot
   become: true
   copy:
+    mode: 0644
     content: "{{ item }}"
     dest: "/etc/modules-load.d/{{ item }}.conf"
   loop:
@@ -68,6 +69,7 @@
 - name: kernel | blacklist modules on boot
   become: true
   copy:
+    mode: 0644
     content: "blacklist {{ item }}"
     dest: "/etc/modprobe.d/{{ item }}.conf"
   loop:
