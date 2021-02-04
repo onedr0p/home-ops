@@ -20,11 +20,12 @@ spec:
     controllerType: deployment
     image:
       repository: sentriz/gonic
-      tag: latest
-      pullPolicy: Always
+      tag: v0.12.0
     env:
       TZ: "America/New_York"
       GONIC_MUSIC_PATH: "/media-serenity/Library/Music"
+      GONIC_PODCAST_PATH: "/media-senerity/Library/Podcasts"
+      GONIC_CACHE_PATH: "/cache"
       GONIC_SCAN_INTERVAL: "120"
     ingress:
       enabled: true
@@ -45,6 +46,12 @@ spec:
         storageClass: "rook-ceph-block"
         accessMode: ReadWriteOnce
         size: "1Gi"
+      cache:
+        enabled: true
+        mountPath: "/cache"
+        storageClass: "rook-ceph-block"
+        accessMode: ReadWriteOnce
+        size: "10Gi"
     podAnnotations:
       backup.velero.io/backup-volumes: data
     additionalVolumeMounts:
