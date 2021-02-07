@@ -11,4 +11,9 @@ k3s_control_node: false
 # k3s settings for all worker nodes
 # ...see https://github.com/PyratLabs/ansible-role-k3s#agent-worker-configuration
 k3s_agent:
+  # HAProxy LB deployed on OPNsense
+  server: https://192.168.1.1:6443
   node-ip: "{{ ansible_host }}"
+  node-label:
+  - "k3s-upgrade=true"
+  - "node-role.kubernetes.io/worker=true"
