@@ -1,18 +1,20 @@
 #jinja2:lstrip_blocks: True
 ---
-{% if registry.cache.enabled is defined and registry.cache.enabled %}
+{% if mirror_registry is defined %}
 mirrors:
   "docker.io":
     endpoint:
-    - "{{ registry.cache.address }}"
+    - "{{ mirror_registry.address }}"
   "*":
     endpoint:
-    - "{{ registry.cache.address }}"
+    - "{{ mirror_registry.address }}"
 {% endif %}
-{% if registry.custom.enabled is defined and registry.custom.enabled %}
+{% if private_registries is defined and private_registries|length > 0 %}
 configs:
-  "{{ registry.custom.address }}":
+  {% for private_registry in private_registries %}
+  "{{ private_registry.address }}":
     auth:
-      username: "{{ registry.custom.username }}"
-      password: "{{ registry.custom.password }}"
+      username: "{{ private_registry.username }}"
+      password: "{{ private_registry.password }}"
+  {% endfor %}
 {% endif %}

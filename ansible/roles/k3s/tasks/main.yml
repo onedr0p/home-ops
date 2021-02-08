@@ -5,18 +5,18 @@
   - kubeconfig
 
 - include: registry.yml
-  when: (registry.cache.enabled is defined
-          and registry.cache.enabled)
-        or (registry.custom.enabled is defined
-          and registry.custom.enabled)
+  when: mirror_registry is defined
+        or (private_registries is defined
+          and private_registries|length > 0)
   tags:
   - registry
 
-- include: cni-calico.yml
+- include: calico.yml
   when:
+  # - "'k8s-master-a' in inventory_hostname"
   - k3s_control_node is defined
   - k3s_control_node
   - calico.enabled is defined
   - calico.enabled
   tags:
-  - cni-calico
+  - calico

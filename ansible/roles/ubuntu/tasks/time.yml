@@ -1,0 +1,37 @@
+---
+
+- name: time | set timezone
+  become: true
+  community.general.timezone:
+    name: "{{ timezone | default('America/New_York') }}"
+#   notify: systemd-timesyncd configuration changed
+
+# - name: time | copy timesyncd config
+#   become: true
+#   copy:
+#     mode: 0644
+#     content: |
+#       [Time]
+#       NTP={{ ntp_servers.primary | default("") | join(" ") }}
+#       FallbackNTP={{ ntp_servers.fallback | join(" ") }}
+#     dest: /etc/systemd/timesyncd.conf
+#   notify: systemd-timesyncd configuration changed
+
+# - name: time | start systemd service
+#   become: true
+#   systemd:
+#     name: systemd-timesyncd
+#     enabled: true
+#     state: started
+
+# - name: time | run timedatectl status
+#   command: /usr/bin/timedatectl show
+#   changed_when: false
+#   check_mode: false
+#   register: timedatectl_result
+
+# - name: time | enable ntp
+#   become: true
+#   command: /usr/bin/timedatectl set-ntp true
+#   when:
+#   - "'NTP=no' in timedatectl_result.stdout"
