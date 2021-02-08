@@ -11,7 +11,8 @@ k3s_control_node: true
 # k3s settings for master nodes node
 k3s_server:
   node-ip: "{{ ansible_host }}"
-
+  # tls-san:
+  # - opnsense.devbu.io
   docker: false
   flannel-backend: 'none' # This needs to be in quotes
   disable:
@@ -20,18 +21,14 @@ k3s_server:
     - servicelb
     - metrics-server
     - local-storage
-
   disable-network-policy: true
   disable-cloud-controller: true
-
+  write-kubeconfig-mode: "644"
   # Network CIDR to use for pod IPs
   cluster-cidr: "10.69.0.0/16"
-
   # Network CIDR to use for service IPs
   service-cidr: "10.96.0.0/16"
-
   node-label:
   - "k3s-upgrade=true"
-
   node-taint:
   - "node-role.kubernetes.io/master=true:NoSchedule"
