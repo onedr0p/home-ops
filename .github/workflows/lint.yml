@@ -5,34 +5,41 @@ on:
   push:
     branches:
     - main
+  pull_request:
 
 jobs:
-  lint-yaml:
+  lint-cluster-manifests:
     runs-on:
     - ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 1
-
-    - name: Lint YAML
+    - name: Lint Cluster Manifests
       uses: ibiqlik/action-yamllint@v3
       with:
         file_or_dir: "./cluster"
         config_file: "./.github/yamllint.config.yaml"
 
-  lint-shell:
+  lint-hack-scripts:
     runs-on:
     - ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 1
-
-    - name: Lint shell scripts
+    - name: Lint Hack Scripts
       uses: reviewdog/action-shellcheck@v1
       with:
         path: "./hack"
         level: "error"
+
+  lint-ansible-playbooks:
+    runs-on:
+    - ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - name: Lint Ansible Playbooks
+      uses: ansible/ansible-lint-action@v4
