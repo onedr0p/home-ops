@@ -13,21 +13,18 @@ truncate -s 0 "${GENERATED_SECRETS}"
 #
 
 # Generate Helm Secrets
-txt=$(find "${CLUSTER_ROOT}" -type f -name "helmsecrets.txt")
+txt=$(find "${CLUSTER_ROOT}" -type f -name "helm-values-secret.txt")
 
 if [[ ( -n $txt ) ]];
 then
-    # shellcheck disable=SC2129
-    printf "%s\n%s\n%s\n" "#" "# Auto-generated secrets -- DO NOT EDIT." "#" >> "${GENERATED_SECRETS}"
-
-    for file in "${CLUSTER_ROOT}"/**/helmsecrets.txt; do
-        # Get the absolute directory path of the helmsecrets file
+    for file in "${CLUSTER_ROOT}"/**/helm-values-secret.txt; do
+        # Get the absolute directory path of the helm-values-secret file
         # e.g. "/Users/devin/Code/homelab/home-cluster/cluster/media/flood"
         secret_path="$(dirname "$file")"
         # Get the last folder name
         # e.g. "flood"
         secret_name=$(basename "${secret_path}")
-        # Get the namespace (based on parent folder path of helmsecrets.txt)
+        # Get the namespace (based on parent folder path of helm-values-secret.txt)
         # e.g. "media"
         namespace=$(basename "$(dirname "${secret_path}")")
         echo "[*] Generating helm secret '${secret_name}' in namespace '${namespace}'..."
@@ -47,17 +44,6 @@ then
                 -e '/^[[:space:]]*$/d' \
                 -e '1s/^/---\n/' |
             # Write secret
-            tee -a "${GENERATED_SECRETS}" >/dev/null 2>&1
+            tee -a "${secret_path}/sealed-secret.yaml" >/dev/null 2>&1
     done
 fi
-
-# Remove empty new-lines
-sed -i '/^[[:space:]]*$/d' "${GENERATED_SECRETS}"
-
-# Validate Yaml
-if ! yq eval "${GENERATED_SECRETS}" >/dev/null 2>&1; then
-    echo "Errors in YAML"
-    exit 1
-fi
-
-exit 0

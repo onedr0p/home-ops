@@ -12,7 +12,7 @@ command -v yq >/dev/null 2>&1 || {
     exit 1
 }
 
-for helm_release in "${CLUSTER_ROOT}"/**/helmrelease.yaml; do
+for helm_release in "${CLUSTER_ROOT}"/**/helm-release.yaml; do
     # ignore flux-system namespace
     # ignore wrong apiVersion
     # ignore non HelmReleases

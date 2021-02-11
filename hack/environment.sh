@@ -6,7 +6,6 @@ export REPO_ROOT=$(git rev-parse --show-toplevel)
 export CLUSTER_ROOT="${REPO_ROOT}/cluster"
 export PUB_CERT="${REPO_ROOT}/sealed-secrets-public-cert.pem"
 export SECRETS_ENV="${REPO_ROOT}/.cluster-secrets.env"
-export GENERATED_SECRETS="${CLUSTER_ROOT}/zz_generated_secrets.yaml"
 
 # MacOS work-around for sed
 if [ "$(uname)" == "Darwin" ]; then
