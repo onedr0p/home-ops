@@ -49,18 +49,18 @@
   - "'snapd' in packages.apt_remove"
 
 # Until focal has https://launchpad.net/ubuntu/+source/htop
-- name: packages | install latest htop
-  become: true
-  apt:
-    deb: "https://launchpad.net/ubuntu/+archive/primary/+files/htop_{{ packages.deb.htop_version | default('3.0.2-1') }}_amd64.deb"
-  register: apt_install_htop
-  retries: 5
-  until: apt_install_htop is success
-  when:
-  - "'htop' not in ansible_facts.packages"
-  - "'htop' not in packages.apt_install"
-  - packages.deb.htop_version is defined
-  - packages.deb.htop_version
+# - name: packages | install latest htop
+#   become: true
+#   apt:
+#     deb: "https://launchpad.net/ubuntu/+archive/primary/+files/htop_{{ packages.deb.htop_version | default('3.0.2-1') }}_amd64.deb"
+#   register: apt_install_htop
+#   retries: 5
+#   until: apt_install_htop is success
+#   when:
+#   - "'htop' not in ansible_facts.packages"
+#   - "'htop' not in packages.apt_install"
+#   - packages.deb.htop_version is defined
+#   - packages.deb.htop_version
 
 - name: packages | check if snap is installed
   debug:
