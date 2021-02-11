@@ -16,9 +16,9 @@ spec:
         name: gitea-charts
         namespace: flux-system
       interval: 5m
-  # dependsOn:
-  # - name: sealed-secrets
-  #   namespace: kube-system
+  dependsOn:
+  - name: sealed-secrets
+    namespace: kube-system
   values:
     persistence:
       enabled: true
@@ -37,12 +37,6 @@ spec:
     service:
       http:
         port: 3000
-      # ssh:
-      #   type: LoadBalancer
-      #   port: 1337
-      #   externalTrafficPolicy: Local
-      #   externalIPs:
-      #   - 192.168.69.101
     gitea:
       admin:
         username: "devin"
@@ -53,8 +47,6 @@ spec:
           ROOT_URL: https://gitea.devbu.io
           DISABLE_SSH: true
           PPROF_ENABLED: true
-          # SSH_PORT: 1337
-          # SSH_LISTEN_PORT: 22
         respository:
           DEFAULT_PRIVATE: true
         admin:
@@ -83,15 +75,6 @@ spec:
           enabled: true
       podAnnotations:
         backup.velero.io/backup-volumes: data
-    # postgresql:
-    #   image:
-    #     repository: bitnami/postgresql
-    #     tag: 11.10.0
-    #   persistence:
-    #     storageClass: "rook-ceph-block"
-    #   master:
-    #     podAnnotations:
-    #       backup.velero.io/backup-volumes: data
   valuesFrom:
   - kind: Secret
     name: "gitea-helm-values"
