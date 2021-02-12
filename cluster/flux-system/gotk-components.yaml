@@ -1,12 +1,12 @@
 ---
-# GitOps Toolkit revision v0.7.7
+# Flux version: v0.8.0
 # Components: source-controller,kustomize-controller,helm-controller,notification-controller
 apiVersion: v1
 kind: Namespace
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: flux-system
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -17,7 +17,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: alerts.notification.toolkit.fluxcd.io
 spec:
   group: notification.toolkit.fluxcd.io
@@ -62,7 +62,7 @@ spec:
                 - error
                 type: string
               eventSources:
-                description: Filter events based on the involved objects
+                description: Filter events based on the involved objects.
                 items:
                   description: CrossNamespaceObjectReference contains enough information to let you locate the typed referenced object at cluster level
                   properties:
@@ -96,8 +96,13 @@ spec:
                   - name
                   type: object
                 type: array
+              exclusionList:
+                description: A list of Golang regular expressions to be used for excluding messages.
+                items:
+                  type: string
+                type: array
               providerRef:
-                description: Send events using this provider
+                description: Send events using this provider.
                 properties:
                   name:
                     description: Name of the referent
@@ -182,7 +187,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: buckets.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -369,7 +374,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: gitrepositories.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -584,7 +589,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: helmcharts.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -775,7 +780,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: helmreleases.helm.toolkit.fluxcd.io
 spec:
   group: helm.toolkit.fluxcd.io
@@ -938,6 +943,103 @@ spec:
               maxHistory:
                 description: MaxHistory is the number of revisions saved by Helm for this HelmRelease. Use '0' for an unlimited number of revisions; defaults to '10'.
                 type: integer
+              postRenderers:
+                description: PostRenderers holds an array of Helm PostRenderers, which will be applied in order of their definition.
+                items:
+                  description: PostRenderer contains a Helm PostRenderer specification.
+                  properties:
+                    kustomize:
+                      description: Kustomization to apply as PostRenderer.
+                      properties:
+                        images:
+                          description: Images is a list of (image name, new name, new tag or digest) for changing image names, tags or digests. This can also be achieved with a patch, but this operator is simpler to specify.
+                          items:
+                            description: Image contains an image name, a new name, a new tag or digest, which will replace the original name and tag.
+                            properties:
+                              digest:
+                                description: Digest is the value used to replace the original image tag. If digest is present NewTag value is ignored.
+                                type: string
+                              name:
+                                description: Name is a tag-less image name.
+                                type: string
+                              newName:
+                                description: NewName is the value used to replace the original name.
+                                type: string
+                              newTag:
+                                description: NewTag is the value used to replace the original tag.
+                                type: string
+                            required:
+                            - name
+                            type: object
+                          type: array
+                        patchesJson6902:
+                          description: JSON 6902 patches, defined as inline YAML objects.
+                          items:
+                            description: JSON6902Patch contains a JSON6902 patch and the target the patch should be applied to.
+                            properties:
+                              patch:
+                                description: Patch contains the JSON6902 patch document with an array of operation objects.
+                                items:
+                                  description: JSON6902 is a JSON6902 operation object. https://tools.ietf.org/html/rfc6902#section-4
+                                  properties:
+                                    from:
+                                      type: string
+                                    op:
+                                      enum:
+                                      - test
+                                      - remove
+                                      - add
+                                      - replace
+                                      - move
+                                      - copy
+                                      type: string
+                                    path:
+                                      type: string
+                                    value:
+                                      x-kubernetes-preserve-unknown-fields: true
+                                  required:
+                                  - op
+                                  - path
+                                  type: object
+                                type: array
+                              target:
+                                description: Target points to the resources that the patch document should be applied to.
+                                properties:
+                                  annotationSelector:
+                                    description: AnnotationSelector is a string that follows the label selection expression https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api It matches with the resource annotations.
+                                    type: string
+                                  group:
+                                    description: Group is the API group to select resources from. Together with Version and Kind it is capable of unambiguously identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
+                                    type: string
+                                  kind:
+                                    description: Kind of the API Group to select resources from. Together with Group and Version it is capable of unambiguously identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
+                                    type: string
+                                  labelSelector:
+                                    description: LabelSelector is a string that follows the label selection expression https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api It matches with the resource labels.
+                                    type: string
+                                  name:
+                                    description: Name to match resources with.
+                                    type: string
+                                  namespace:
+                                    description: Namespace to select resources from.
+                                    type: string
+                                  version:
+                                    description: Version of the API Group to select resources from. Together with Group and Kind it is capable of unambiguously identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
+                                    type: string
+                                type: object
+                            required:
+                            - patch
+                            - target
+                            type: object
+                          type: array
+                        patchesStrategicMerge:
+                          description: Strategic merge patches, defined as inline YAML objects.
+                          items:
+                            x-kubernetes-preserve-unknown-fields: true
+                          type: array
+                      type: object
+                  type: object
+                type: array
               releaseName:
                 description: ReleaseName used for the Helm release. Defaults to a composition of '[TargetNamespace-]Name'.
                 maxLength: 53
@@ -1193,7 +1295,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: helmrepositories.source.toolkit.fluxcd.io
 spec:
   group: source.toolkit.fluxcd.io
@@ -1360,7 +1462,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: kustomizations.kustomize.toolkit.fluxcd.io
 spec:
   group: kustomize.toolkit.fluxcd.io
@@ -1457,23 +1559,24 @@ spec:
                   type: object
                 type: array
               images:
-                description: A list of images used to override or set the name and tag for container images.
+                description: Images is a list of (image name, new name, new tag or digest) for changing image names, tags or digests. This can also be achieved with a patch, but this operator is simpler to specify.
                 items:
-                  description: Image contains the name, new name and new tag that will replace the original container image.
+                  description: Image contains an image name, a new name, a new tag or digest, which will replace the original name and tag.
                   properties:
+                    digest:
+                      description: Digest is the value used to replace the original image tag. If digest is present NewTag value is ignored.
+                      type: string
                     name:
-                      description: Name of the image to be replaced.
+                      description: Name is a tag-less image name.
                       type: string
                     newName:
-                      description: NewName is the name of the image used to replace the original one.
+                      description: NewName is the value used to replace the original name.
                       type: string
                     newTag:
-                      description: NewTag is the image tag used to replace the original tag.
+                      description: NewTag is the value used to replace the original tag.
                       type: string
                   required:
                   - name
-                  - newName
-                  - newTag
                   type: object
                 type: array
               interval:
@@ -1492,9 +1595,83 @@ spec:
                     - name
                     type: object
                 type: object
+              patchesJson6902:
+                description: JSON 6902 patches, defined as inline YAML objects.
+                items:
+                  description: JSON6902Patch contains a JSON6902 patch and the target the patch should be applied to.
+                  properties:
+                    patch:
+                      description: Patch contains the JSON6902 patch document with an array of operation objects.
+                      items:
+                        description: JSON6902 is a JSON6902 operation object. https://tools.ietf.org/html/rfc6902#section-4
+                        properties:
+                          from:
+                            type: string
+                          op:
+                            enum:
+                            - test
+                            - remove
+                            - add
+                            - replace
+                            - move
+                            - copy
+                            type: string
+                          path:
+                            type: string
+                          value:
+                            x-kubernetes-preserve-unknown-fields: true
+                        required:
+                        - op
+                        - path
+                        type: object
+                      type: array
+                    target:
+                      description: Target points to the resources that the patch document should be applied to.
+                      properties:
+                        annotationSelector:
+                          description: AnnotationSelector is a string that follows the label selection expression https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api It matches with the resource annotations.
+                          type: string
+                        group:
+                          description: Group is the API group to select resources from. Together with Version and Kind it is capable of unambiguously identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
+                          type: string
+                        kind:
+                          description: Kind of the API Group to select resources from. Together with Group and Version it is capable of unambiguously identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
+                          type: string
+                        labelSelector:
+                          description: LabelSelector is a string that follows the label selection expression https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api It matches with the resource labels.
+                          type: string
+                        name:
+                          description: Name to match resources with.
+                          type: string
+                        namespace:
+                          description: Namespace to select resources from.
+                          type: string
+                        version:
+                          description: Version of the API Group to select resources from. Together with Group and Kind it is capable of unambiguously identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
+                          type: string
+                      type: object
+                  required:
+                  - patch
+                  - target
+                  type: object
+                type: array
+              patchesStrategicMerge:
+                description: Strategic merge patches, defined as inline YAML objects.
+                items:
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
               path:
                 description: Path to the directory containing the kustomization.yaml file, or the set of plain YAMLs a kustomization.yaml should be generated for. Defaults to 'None', which translates to the root path of the SourceRef.
                 type: string
+              postBuild:
+                description: PostBuild describes which actions to perform on the YAML manifest generated by building the kustomize overlay.
+                properties:
+                  substitute:
+                    additionalProperties:
+                      type: string
+                    description: Substitute holds a map of key/value pairs. The variables defined in your YAML manifests that match any of the keys defined in the map will be substituted with the set value. Includes support for bash string replacement functions e.g. ${var:=default}, ${var:position} and ${var/substring/replacement}.
+                    type: object
+                type: object
               prune:
                 description: Prune enables garbage collection.
                 type: boolean
@@ -1656,7 +1833,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: providers.notification.toolkit.fluxcd.io
 spec:
   group: notification.toolkit.fluxcd.io
@@ -1799,7 +1976,7 @@ metadata:
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: receivers.notification.toolkit.fluxcd.io
 spec:
   group: notification.toolkit.fluxcd.io
@@ -1973,7 +2150,7 @@ kind: ServiceAccount
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: helm-controller
   namespace: flux-system
 ---
@@ -1982,7 +2159,7 @@ kind: ServiceAccount
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: kustomize-controller
   namespace: flux-system
 ---
@@ -1991,7 +2168,7 @@ kind: ServiceAccount
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: notification-controller
   namespace: flux-system
 ---
@@ -2000,7 +2177,7 @@ kind: ServiceAccount
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: source-controller
   namespace: flux-system
 ---
@@ -2009,7 +2186,7 @@ kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: crd-controller-flux-system
 rules:
 - apiGroups:
@@ -2088,7 +2265,7 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: cluster-reconciler-flux-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -2107,7 +2284,7 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
   name: crd-controller-flux-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -2138,7 +2315,7 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
     control-plane: controller
   name: notification-controller
   namespace: flux-system
@@ -2157,7 +2334,7 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
     control-plane: controller
   name: source-controller
   namespace: flux-system
@@ -2176,7 +2353,7 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
     control-plane: controller
   name: webhook-receiver
   namespace: flux-system
@@ -2195,7 +2372,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
     control-plane: controller
   name: helm-controller
   namespace: flux-system
@@ -2224,7 +2401,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/helm-controller:v0.6.1
+        image: ghcr.io/fluxcd/helm-controller:v0.7.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -2232,11 +2409,11 @@ spec:
             port: healthz
         name: manager
         ports:
-        - containerPort: 8080
-          name: http-prom
         - containerPort: 9440
           name: healthz
           protocol: TCP
+        - containerPort: 8080
+          name: http-prom
         readinessProbe:
           httpGet:
             path: /readyz
@@ -2267,7 +2444,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
     control-plane: controller
   name: kustomize-controller
   namespace: flux-system
@@ -2296,7 +2473,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/kustomize-controller:v0.7.4
+        image: ghcr.io/fluxcd/kustomize-controller:v0.8.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -2304,11 +2481,11 @@ spec:
             port: healthz
         name: manager
         ports:
-        - containerPort: 8080
-          name: http-prom
         - containerPort: 9440
           name: healthz
           protocol: TCP
+        - containerPort: 8080
+          name: http-prom
         readinessProbe:
           httpGet:
             path: /readyz
@@ -2341,7 +2518,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
     control-plane: controller
   name: notification-controller
   namespace: flux-system
@@ -2369,7 +2546,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/notification-controller:v0.7.1
+        image: ghcr.io/fluxcd/notification-controller:v0.8.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -2377,15 +2554,15 @@ spec:
             port: healthz
         name: manager
         ports:
+        - containerPort: 9440
+          name: healthz
+          protocol: TCP
         - containerPort: 9090
           name: http
         - containerPort: 9292
           name: http-webhook
         - containerPort: 8080
           name: http-prom
-        - containerPort: 9440
-          name: healthz
-          protocol: TCP
         readinessProbe:
           httpGet:
             path: /readyz
@@ -2416,7 +2593,7 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: flux-system
-    app.kubernetes.io/version: v0.7.7
+    app.kubernetes.io/version: v0.8.0
     control-plane: controller
   name: source-controller
   namespace: flux-system
@@ -2449,7 +2626,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: ghcr.io/fluxcd/source-controller:v0.7.4
+        image: ghcr.io/fluxcd/source-controller:v0.8.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -2484,6 +2661,8 @@ spec:
           name: tmp
       nodeSelector:
         kubernetes.io/os: linux
+      securityContext:
+        fsGroup: 1337
       serviceAccountName: source-controller
       terminationGracePeriodSeconds: 10
       volumes:
