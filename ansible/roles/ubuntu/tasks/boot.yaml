@@ -1,12 +1,12 @@
 ---
 
-- name: boot | set cmdline options
-  lineinfile:
-    path: /boot/firmware/cmdline.txt
-    backrefs: yes
-    regexp: '^((?!.*\bcgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory apparmor=0 mitigations=off max_loop=32\b).*)$'
-    line: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory apparmor=0 mitigations=off max_loop=32'
-  when: ansible_architecture | regex_search('arm|aarch')
+# - name: boot | set cmdline options
+#   lineinfile:
+#     path: /boot/firmware/cmdline.txt
+#     backrefs: yes
+#     regexp: '^((?!.*\bcgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory apparmor=0 mitigations=off max_loop=32\b).*)$'
+#     line: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory apparmor=0 mitigations=off max_loop=32'
+#   when: ansible_architecture | regex_search('arm|aarch')
 
 - name: boot | set apparmor=0
   become: true
@@ -17,7 +17,7 @@
   vars:
     option: apparmor
     value: 0
-  when: ansible_architecture == 'x86_64'
+  # when: ansible_architecture == 'x86_64'
 
 - name: boot | set mitigations=off
   become: true
@@ -28,7 +28,7 @@
   vars:
     option: mitigations
     value: "off"
-  when: ansible_architecture == 'x86_64'
+  # when: ansible_architecture == 'x86_64'
 
 - name: boot | set max_loop=32
   become: true
@@ -39,4 +39,4 @@
   vars:
     option: max_loop
     value: 32
-  when: ansible_architecture == 'x86_64'
+  # when: ansible_architecture == 'x86_64'
