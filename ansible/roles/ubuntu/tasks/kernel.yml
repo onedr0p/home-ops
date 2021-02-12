@@ -1,35 +1,5 @@
 ---
 
-- name: kernel | disable apparmor
-  become: true
-  replace:
-    path: /etc/default/grub
-    regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
-    replace: '\1 {{ option }}={{ value }}\2'
-  vars:
-    option: apparmor
-    value: 0
-
-- name: kernel | disable mitigations
-  become: true
-  replace:
-    path: /etc/default/grub
-    regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
-    replace: '\1 {{ option }}={{ value }}\2'
-  vars:
-    option: mitigations
-    value: "off"
-
-- name: kernel | increase loop device count
-  become: true
-  replace:
-    path: /etc/default/grub
-    regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
-    replace: '\1 {{ option }}={{ value }}\2'
-  vars:
-    option: max_loop
-    value: 32
-
 - name: kernel | enable modules
   become: true
   community.general.modprobe:
