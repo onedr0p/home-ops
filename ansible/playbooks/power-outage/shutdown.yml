@@ -1,7 +1,7 @@
 ---
 
 - hosts:
-  - master
+  - control-plane
   - worker
   - storage
   become: true
@@ -9,13 +9,13 @@
   tasks:
 
   #
-  # Turn off master and worker devices in 2 minutes
+  # Turn off control-plane and worker devices in 2 minutes
   #
 
-  - name: turn off master nodes
+  - name: turn off control-plane nodes
     # command: /sbin/shutdown -h 2
     command: /sbin/shutdown --help
-    when: "'master' in group_names"
+    when: "'control-plane' in group_names"
 
   - name: turn off worker nodes
     # command: /sbin/shutdown -h 2
