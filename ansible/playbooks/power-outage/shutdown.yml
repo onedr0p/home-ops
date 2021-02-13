@@ -1,26 +1,26 @@
 ---
 
 - hosts:
-  - control-plane
-  - worker
+  - control-nodes
+  - generic-nodes
   - storage
   become: true
   gather_facts: true
   tasks:
 
   #
-  # Turn off control-plane and worker devices in 2 minutes
+  # Turn off control-nodes and generic-nodes devices in 2 minutes
   #
 
-  - name: turn off control-plane nodes
+  - name: turn off control-nodes
     # command: /sbin/shutdown -h 2
     command: /sbin/shutdown --help
-    when: "'control-plane' in group_names"
+    when: "'control-nodes' in group_names"
 
-  - name: turn off worker nodes
+  - name: turn off generic-nodes
     # command: /sbin/shutdown -h 2
     command: /sbin/shutdown --help
-    when: "'worker' in group_names"
+    when: "'generic-nodes' in group_names"
 
   #
   # Turn off NAS devices in 5 minutes
