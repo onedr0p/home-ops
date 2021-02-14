@@ -1,0 +1,35 @@
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: runner-deployment
+  namespace: actions-runner-system
+spec:
+  template:
+    spec:
+      repository: onedr0p/home-cluster
+      image: ghcr.io/k8s-at-home/actions-runner:v2.277.1
+      imagePullPolicy: Always
+      env: []
+      resources:
+        requests:
+          cpu: 1
+          memory: 1Gi
+        limits:
+          cpu: 4
+          memory: 4Gi
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: runner-deployment-autoscaler
+  namespace: actions-runner-system
+spec:
+  scaleTargetRef:
+    name: runner-deployment
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: TotalNumberOfQueuedAndInProgressWorkflowRuns
+    repositoryNames:
+    - onedr0p/home-cluster
