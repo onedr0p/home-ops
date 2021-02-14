@@ -11,12 +11,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 1
 
-    - name: Install yq
+    - name: Set up directories
       run: |
         mkdir -p "${GITHUB_WORKSPACE}/bin"
         echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
+
+    - name: Install yq
+      run: |
         curl -sL -o "${GITHUB_WORKSPACE}/bin/yq" "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
         chmod +x "${GITHUB_WORKSPACE}/bin/yq"
 
@@ -25,21 +29,21 @@ jobs:
         curl -sL https://taskfile.dev/install.sh | sh
         chmod +x ${GITHUB_WORKSPACE}/bin/task
 
-    - name: Create HelmRelease annotations
+    - name: Create renovatebot helm-release annotations
       run: task renovate:helm-releases
 
-    - name: Create pull request for HelmRelease annotations
+    - name: Create pull request for renovatebot helm-release annotations
       uses: peter-evans/create-pull-request@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        branch: helm-release-annotations
+        branch: renovate-helm-release-annotations
         delete-branch: true
-        title: "Update HelmRelease annotations for Renovate"
+        title: "Update renovatebot helm-release annotations"
         signoff: true
         committer: "Devin Buhl <onedr0p@users.noreply.github.com>"
         author: "Devin Buhl <onedr0p@users.noreply.github.com>"
         assignees: "onedr0p"
-        commit-message: "Update HelmRelease annotations for Renovate"
+        commit-message: "Update renovatebot helm-release annotations"
         body: |
-          Add comment annotations to HelmReleases inorder for Renovate to pick up new versions of Helm charts
+          Add special annotations to HelmReleases inorder for Renovate to pick up new versions of Helm charts
         labels: renovate/helm-release-annotations
