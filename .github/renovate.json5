@@ -4,11 +4,11 @@
   "semanticCommits": true,
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Renovate Dashboard",
-  // "commitMessageSuffix": "[ci-skip]",
   "commitBody": "Signed-off-by: Devin Buhl <onedr0p@users.noreply.github.com>",
-  // Do not notify on closed unmerged PRs
+  // do not notify on closed unmerged PRs
   "suppressNotifications": ["prIgnoreNotification"],
-  "assignees": ["@onedr0p"],
+  // only rebase PRs when there's a conflict
+  "rebaseWhen": "conflicted",
   "kubernetes": {
     "fileMatch": ["cluster/.+\\.yaml$"],
     "ignorePaths": [
@@ -20,28 +20,41 @@
     "fileMatch": ["cluster/.+helm-release\\.yaml$"]
   },
   "regexManagers": [
+    // regexManager to read and process HelmRelease files
     {
       "fileMatch": ["cluster/.+helm-release\\.yaml$"],
       "matchStrings": [
         "registryUrl=(?<registryUrl>.*?)\n *chart: (?<depName>.*?)\n *version: (?<currentValue>.*)\n"
       ],
       "datasourceTemplate": "helm"
+    },
+    // regexManager to read and process actions-runner-controller runner images
+    {
+      "fileMatch": [
+        "cluster/actions-runner-system/runners/.+\\.yaml$"
+      ],
+      "matchStrings": [
+        "image: (?<depName>.*?):(?<currentValue>.*?)\n"
+      ],
+      "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [
-    // Setup datasources
+    // setup datasources
     {
       "datasources": ["helm"],
       "separateMinorPatch": true
     },
-    // Global docker datasource settings
+    // global docker datasource settings
     {
       "datasources": ["docker"],
       "enabled": true,
+      "commitMessageTopic": "container image {{depName}}",
+      "commitMessageExtra": "to {{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}",
       "updateTypes": ["major", "minor", "patch"],
       "separateMinorPatch": true
     },
-    // Add labels according to package and update types
+    // add labels according to package and update types
     {
       "datasources": ["docker"],
       "updateTypes": ["major"],
@@ -72,7 +85,7 @@
       "updateTypes": ["patch"],
       "labels": ["renovate/helm-release", "dependency/patch"]
     },
-    // Custom version schemes
+    // custom version schemes
     {
       "datasources": ["docker"],
       "versionScheme": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.*)$",
@@ -83,7 +96,7 @@
       "versionScheme": "regex:^RELEASE\\.(?<major>\\d{4})-(?<minor>\\d{2})-(?<patch>\\d{2})",
       "packageNames": ["minio/minio"]
     },
-    // Pin package versions
+    // pin package versions
     {
       "datasources": ["docker"],
       "allowedVersions": "<13",
@@ -97,13 +110,13 @@
     //   "allowedVersions": "<=13.2.0",
     //   "packageNames": ["kube-prometheus-stack"]
     // },
-    // Version strategies
+    // version strategies
     {
       "datasources": ["docker"],
       "versioning": "loose",
       "packageNames": ["plexinc/pms-docker"]
     },
-    // Enable auto-merge
+    // enable auto-merge
     {
       "datasources": ["docker"],
       "automerge": true,
