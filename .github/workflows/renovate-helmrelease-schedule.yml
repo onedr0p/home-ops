@@ -14,18 +14,10 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 1
 
-    - name: Set up directories
-      run: |
-        mkdir -p "${GITHUB_WORKSPACE}/bin"
-        echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
-
-    - name: Install task
-      run: |
-        curl -sL https://taskfile.dev/install.sh | sh
-        chmod +x ${GITHUB_WORKSPACE}/bin/task
-
-    - name: Create renovatebot helm-release annotations
-      run: task renovate:helm-releases
+    - name: Renovate Helm Releases
+      uses: k8s-at-home/renovate-helm-releases@v1
+      with:
+        cluster-path: "./cluster"
 
     - name: Create pull request for renovatebot helm-release annotations
       uses: peter-evans/create-pull-request@v3
