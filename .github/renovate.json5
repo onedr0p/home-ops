@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "timezone": "America/New_York",
-  "semanticCommits": true,
+  "semanticCommits": "enabled",
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Renovate Dashboard",
   "commitBody": "Signed-off-by: Devin Buhl <onedr0p@users.noreply.github.com>",
@@ -42,87 +42,87 @@
   "packageRules": [
     // setup datasources
     {
-      "datasources": ["helm"],
+      "matchDatasources": ["helm"],
       "separateMinorPatch": true
     },
     // global docker datasource settings
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "enabled": true,
       "commitMessageTopic": "container image {{depName}}",
       "commitMessageExtra": "to {{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}",
-      "updateTypes": ["major", "minor", "patch"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
       "separateMinorPatch": true
     },
     // add labels according to package and update types
     {
-      "datasources": ["docker"],
-      "updateTypes": ["major"],
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["major"],
       "labels": ["renovate/image-release", "dependency/major"]
     },
     {
-      "datasources": ["docker"],
-      "updateTypes": ["minor"],
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["minor"],
       "labels": ["renovate/image-release", "dependency/minor"]
     },
     {
-      "datasources": ["docker"],
-      "updateTypes": ["patch"],
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["patch"],
       "labels": ["renovate/image-release", "dependency/patch"]
     },
     {
-      "datasources": ["helm"],
-      "updateTypes": ["major"],
+      "matchDatasources": ["helm"],
+      "matchUpdateTypes": ["major"],
       "labels": ["renovate/helm-release", "dependency/major"]
     },
     {
-      "datasources": ["helm"],
-      "updateTypes": ["minor"],
+      "matchDatasources": ["helm"],
+      "matchUpdateTypes": ["minor"],
       "labels": ["renovate/helm-release", "dependency/minor"]
     },
     {
-      "datasources": ["helm"],
-      "updateTypes": ["patch"],
+      "matchDatasources": ["helm"],
+      "matchUpdateTypes": ["patch"],
       "labels": ["renovate/helm-release", "dependency/patch"]
     },
     // custom version schemes
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "versionScheme": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.*)$",
       "packageNames": ["blakeblackshear/frigate"]
     },
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "versionScheme": "regex:^RELEASE\\.(?<major>\\d{4})-(?<minor>\\d{2})-(?<patch>\\d{2})",
       "packageNames": ["minio/minio"]
     },
     // pin package versions
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "allowedVersions": "<13",
-      "packageNames": [
+      "matchPackageNames": [
         "postgres",
         "prodrigestivill/postgres-backup-local"
       ]
     },
     // {
-    //   "datasources": ["helm"],
+    //   "matchDatasources": ["helm"],
     //   "allowedVersions": "<=13.2.0",
-    //   "packageNames": ["kube-prometheus-stack"]
+    //   "matchPackageNames": ["kube-prometheus-stack"]
     // },
     // version strategies
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "versioning": "loose",
-      "packageNames": ["plexinc/pms-docker"]
+      "matchPackageNames": ["plexinc/pms-docker"]
     },
     // enable auto-merge
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "automerge": true,
       "requiredStatusChecks": null,
       "updateTypes": ["minor", "patch"],
-      "packageNames": [
+      "matchPackageNames": [
         "ghcr.io/k8s-at-home/jackett"
       ]
     }
