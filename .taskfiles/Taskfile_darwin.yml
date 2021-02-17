@@ -1,15 +1,54 @@
 ---
 version: '3'
 
+vars:
+  BINARY_REQS: |-
+    brew docker flux helm jq kubectl kubeseal pre-commit python3 shellcheck sops sshpass velero wget yamllint yq yolo yolo2
+  BREW_REQS: |-
+    coreutils findutils yolo
+
 tasks:
 
-  install:
-    desc: Install required Homebrew apps
-    cmds:
-    - brew install kubernetes-cli helm python3 velero fluxcd/tap/flux kubeseal sops
+  check:
+    desc: Check for all required binaries and brew packages
+    deps:
+    - binary:reqs
+    - brew:reqs
 
-  install:dev:
-    desc: Install required Homebrew apps for development
+  binary:reqs:
+    desc: Check for required binaries
     cmds:
-    - brew tap esolitos/ipa
-    - brew install pre-commit yamllint jq yq shellcheck sshpass coreutils findutils
+    - |
+      for req in {{.BINARY_REQS}}; do
+        task deps:binary:check BIN=${req}
+      done
+    silent: true
+    ignore_error: true
+
+  binary:check:
+    desc: Check if binary is present
+    cmds:
+    - |
+      command -v {{.BIN}} >/dev/null 2>&1 || {
+        echo >&2 "* Error: binary '{{.BIN}}' not found"
+      }
+    silent: true
+    ignore_error: true
+
+  brew:reqs:
+    desc: Check for required brew packages
+    cmds:
+    - |
+      for req in {{.BREW_REQS}}; do
+        task deps:brew:check BIN=${req}
+      done
+    silent: true
+
+  brew:check:
+    desc: Check if brew package is present
+    cmds:
+    - |
+      brew list {{.BIN}} >/dev/null 2>&1 || {
+        echo >&2 "* Error: brew package '{{.BIN}}' not found"
+      }
+    silent: true
