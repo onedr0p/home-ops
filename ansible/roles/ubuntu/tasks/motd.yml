@@ -1,8 +1,14 @@
 ---
 
+- name: motd | check for motd-news
+  ansible.builtin.stat:
+    path: /etc/default/motd-news
+  register: motd_result
+
 - name: motd | disable
   ansible.builtin.lineinfile:
     dest: /etc/default/motd-news
     state: present
     regexp: '^ENABLED='
     line: 'ENABLED=0'
+  when: motd_result.stat.exists

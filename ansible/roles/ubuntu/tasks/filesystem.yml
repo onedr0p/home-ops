@@ -19,10 +19,10 @@
 - name: filesystem | swap
   become: true
   block:
-  - name: disable swap
+  - name: filesystem | disable swap
     ansible.builtin.command: swapoff -a
     when: ansible_swaptotal_mb > 0
-  - name: disable swap system start
+  - name: filesystem | disable swap system start
     ansible.posix.mount:
       name: "{{ item }}"
       fstype: swap
@@ -30,12 +30,14 @@
     loop:
       - swap
       - none
+  when:
+  - molecule_is_test is defined and not molecule_is_test
 
-# - name: filesystem | journald sdcard fix
-#   ansible.builtin.copy:
-#     content: |-
-#       [Journal]
-#       Storage=volatile
-#     dest: /etc/systemd/journald.conf
-#     mode: 0644
-#   when: ansible_architecture | regex_search('arm|aarch')
+- name: filesystem | journald sdcard fix
+  ansible.builtin.copy:
+    content: |-
+      [Journal]
+      Storage=volatile
+    dest: /etc/systemd/journald.conf
+    mode: 0644
+  when: ansible_architecture | regex_search('arm|aarch')
