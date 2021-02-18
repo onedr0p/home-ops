@@ -16,7 +16,7 @@
 
 - name: network | sysctl
   become: true
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /etc/sysctl.d/99-kubernetes-cri.conf
     mode: 0644
     create: true
@@ -27,7 +27,7 @@
 
 # - name: network | sysctl
 #   become: true
-#   blockinfile:
+#   ansible.builtin.blockinfile:
 #     path: /etc/sysctl.d/99-kubernetes-cri.conf
 #     mode: 0644
 #     create: true
@@ -39,5 +39,5 @@
 
 - name: network | reload sysctl
   become: true
-  shell: sysctl -p /etc/sysctl.d/99-kubernetes-cri.conf
+  ansible.builtin.shell: sysctl -p /etc/sysctl.d/99-kubernetes-cri.conf
   when: sysctl_network.changed

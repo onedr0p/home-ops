@@ -2,27 +2,14 @@
 
 - name: host | update hostname to inventory hostname
   become: true
-  hostname:
+  ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
   when:
   - ansible_hostname != inventory_hostname
 
 - name: host | update etc hosts
   become: true
-  blockinfile:
-    path: /etc/hosts
+  ansible.builtin.template:
+    src: "host-hosts.j2"
+    dest: "/etc/hosts"
     mode: 0644
-    create: true
-    block: |
-      127.0.0.1 localhost
-      127.0.1.1 {{ inventory_hostname }}
-
-      # k8s control-nodes
-      {% for host in groups['control-nodes'] %}
-      {{ hostvars[host].ansible_default_ipv4.address }}  {{ host }}
-      {% endfor %}
-
-      # k8s generic-nodes
-      {% for host in groups['generic-nodes'] %}
-      {{ hostvars[host].ansible_default_ipv4.address }}  {{ host }}
-      {% endfor %}

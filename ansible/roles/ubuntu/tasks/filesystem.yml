@@ -20,7 +20,7 @@
   become: true
   block:
   - name: disable swap
-    command: swapoff -a
+    ansible.builtin.command: swapoff -a
     when: ansible_swaptotal_mb > 0
   - name: disable swap system start
     ansible.posix.mount:
@@ -32,7 +32,7 @@
       - none
 
 # - name: filesystem | journald sdcard fix
-#   copy:
+#   ansible.builtin.copy:
 #     content: |-
 #       [Journal]
 #       Storage=volatile

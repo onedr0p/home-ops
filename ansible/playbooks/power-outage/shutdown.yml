@@ -13,13 +13,13 @@
   #
 
   - name: turn off control-nodes
-    # command: /sbin/shutdown -h 2
-    command: /sbin/shutdown --help
+    # ansible.builtin.command: /sbin/shutdown -h 2
+    ansible.builtin.command: /sbin/shutdown --help
     when: "'control-nodes' in group_names"
 
   - name: turn off generic-nodes
-    # command: /sbin/shutdown -h 2
-    command: /sbin/shutdown --help
+    # ansible.builtin.command: /sbin/shutdown -h 2
+    ansible.builtin.command: /sbin/shutdown --help
     when: "'generic-nodes' in group_names"
 
   #
@@ -29,11 +29,11 @@
   # Qnap devices do not have /sbin/shutdown and
   # instead use busybox /sbin/poweroff
   - name: turn off storage nodes
-    # command: /sbin/poweroff -d 300
-    command: /sbin/poweroff --help
+    # ansible.builtin.command: /sbin/poweroff -d 300
+    ansible.builtin.command: /sbin/poweroff --help
     when: inventory_hostname == "nas-rocinante"
 
   - name: turn off storage nodes
-    # command: /sbin/shutdown -h 5
-    command: /sbin/shutdown --help
+    # ansible.builtin.command: /sbin/shutdown -h 5
+    ansible.builtin.command: /sbin/shutdown --help
     when: inventory_hostname == "nas-serenity"

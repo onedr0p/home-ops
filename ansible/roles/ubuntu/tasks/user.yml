@@ -2,7 +2,7 @@
 
 - name: user | add to sudoers
   become: true
-  copy:
+  ansible.builtin.copy:
     content: "{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
     dest: "/etc/sudoers.d/{{ ansible_user }}_nopasswd"
     mode: "0440"
@@ -23,7 +23,7 @@
   register: hushlogin
 
 - name: user | silence the login prompt
-  file:
+  ansible.builtin.file:
     dest: "/home/{{ ansible_user }}/.hushlogin"
     state: touch
     owner: "{{ ansible_user }}"
@@ -31,7 +31,7 @@
   when: not hushlogin.stat.exists
 
 - name: user | create config directory
-  file:
+  ansible.builtin.file:
     path: "/home/{{ ansible_user }}/.config"
     state: directory
     recurse: true
@@ -39,7 +39,7 @@
     mode: "0775"
 
 - name: user | create neofetch directory
-  file:
+  ansible.builtin.file:
     path: "/home/{{ ansible_user }}/.config/neofetch"
     state: directory
     recurse: true
@@ -47,40 +47,21 @@
     mode: "0775"
 
 - name: user | copy neofetch configuration
-  copy:
+  ansible.builtin.copy:
     owner: "{{ ansible_user }}"
     mode: "0775"
-    content: |
-      print_info() {
-          prin
-          info title
-          info "OS" distro
-          info "Kernel" kernel
-          info "CPU Usage" cpu_usage
-          info "Memory Usage" memory
-          info "Disk" disk
-          info "Local IP" local_ip
-          info "Uptime" uptime
-      }
+    src: user-neofetch-config.conf
     dest: "/home/{{ ansible_user }}/.config/neofetch/config.conf"
 
 - name: user | copy ascii art
-  copy:
+  ansible.builtin.copy:
     owner: "{{ ansible_user }}"
     mode: "0775"
-    content: |
-      ${c1}
-      :::    ::: ::::::::   ::::::::
-      :+:   :+: :+:    :+: :+:    :+:
-      +:+  +:+  +:+    +:+ +:+
-      +#++:++    +#++:++#  +#++:++#++
-      +#+  +#+  +#+    +#+        +#+
-      #+#   #+# #+#    #+# #+#    #+#
-      ###    ### ########   ########
+    src: user-neofetch.art
     dest: "/home/{{ ansible_user }}/.config/neofetch/k8s.art"
 
 - name: user | enable neofetch on login
-  copy:
+  ansible.builtin.copy:
     content: "neofetch --source /home/{{ ansible_user }}/.config/neofetch/k8s.art --ascii_colors 5 --colors 5 --separator ' :'"
     dest: "/home/{{ ansible_user }}/.bash_profile"
     owner: "{{ ansible_user }}"

@@ -2,29 +2,25 @@
 
 - name: packages | disable recommends
   become: true
-  copy:
+  ansible.builtin.copy:
     mode: 0644
-    content: |
-      APT::Install-Recommends "false";
-      APT::Install-Suggests "false";
-      APT::Get::Install-Recommends "false";
-      APT::Get::Install-Suggests "false";
+    src: packages-02norecommends
     dest: /etc/apt/apt.conf.d/02norecommends
 
 - name: packages | upgrade all packages
-  apt:
+  ansible.builtin.apt:
     upgrade: full
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 3600
-    autoclean: yes
-    autoremove: yes
+    autoclean: true
+    autoremove: true
   register: apt_upgrade
   retries: 5
   until: apt_upgrade is success
 
 - name: packages | install common
   become: true
-  apt:
+  ansible.builtin.apt:
     name: "{{ packages.apt_install }}"
     install_recommends: false
     update_cache: true
@@ -40,7 +36,7 @@
   - packages.apt_install | length > 0
 
 - name: packages | gather install packages
-  package_facts:
+  ansible.builtin.package_facts:
     manager: auto
   when:
   - packages.apt_remove is defined
@@ -51,7 +47,7 @@
 # Until focal has https://launchpad.net/ubuntu/+source/htop
 # - name: packages | install latest htop
 #   become: true
-#   apt:
+#   ansible.builtin.apt:
 #     deb: "https://launchpad.net/ubuntu/+archive/primary/+files/htop_{{ packages.deb.htop_version | default('3.0.2-1') }}_amd64.deb"
 #   register: apt_install_htop
 #   retries: 5
@@ -63,7 +59,7 @@
 #   - packages.deb.htop_version
 
 - name: packages | check if snap is installed
-  debug:
+  ansible.builtin.debug:
     msg: "snapd is installed"
   register: snapd_check
   when:
@@ -75,7 +71,7 @@
 
 - name: packages | remove snap packages
   become: true
-  command: snap remove {{ item }}
+  ansible.builtin.command: snap remove {{ item }}
   loop:
   - lxd
   - core18
@@ -90,7 +86,7 @@
 
 - name: packages | remove packages
   become: true
-  apt:
+  ansible.builtin.apt:
     name: "{{ packages.apt_remove }}"
     state: absent
     autoremove: true
@@ -101,7 +97,7 @@
 
 - name: packages | remove file and directory cruft
   become: true
-  file:
+  ansible.builtin.file:
     state: absent
     path: "{{ item }}"
   loop:

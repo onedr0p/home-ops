@@ -8,8 +8,8 @@
   - name: "nuke_confirmation"
     prompt: "This will DESTROY rook-ceph disks. Do you wish to continue? [Y/n]"
     default: "n"
-    private: no
-  any_errors_fatal: yes
+    private: false
+  any_errors_fatal: true
   pre_tasks:
   - name: check confirmation
     fail:
@@ -18,7 +18,7 @@
   tasks:
   - name: remove /var/lib/rook
     become: true
-    file:
+    ansible.builtin.file:
       state: absent
       path: "/var/lib/rook"
     when:
@@ -26,7 +26,7 @@
     - rook_ceph.enabled
   - name: zap the drives
     become: true
-    shell: >
+    ansible.builtin.shell: >
       sgdisk --zap-all {{ item }} || true
     loop:
     - "{{ rook_ceph.devices }}"
@@ -35,7 +35,7 @@
     - rook_ceph.enabled
   - name: remove lvm partitions
     become: true
-    shell: "{{ item }}"
+    ansible.builtin.shell: "{{ item }}"
     loop:
     - ls /dev/mapper/ceph--* | xargs -I% -- fuser --kill %
     - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup clear %
@@ -46,7 +46,7 @@
     - rook_ceph.enabled
   - name: wipe the block device
     become: true
-    command: "wipefs -af {{ item }}"
+    ansible.builtin.command: "wipefs -af {{ item }}"
     with_items:
     - "{{ rook_ceph.devices }}"
     when:

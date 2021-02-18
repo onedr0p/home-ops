@@ -9,8 +9,8 @@
   - name: "run_confirmation"
     prompt: "This will DESTROY your cluster. Do you wish to continue? [Y/n]"
     default: "n"
-    private: no
-  any_errors_fatal: yes
+    private: false
+  any_errors_fatal: true
   pre_tasks:
   - name: check confirmation
     fail:
@@ -18,13 +18,13 @@
     when: run_confirmation != "Y"
   tasks:
   - name: kill k3s
-    command: /usr/local/bin/k3s-killall.sh
+    ansible.builtin.command: /usr/local/bin/k3s-killall.sh
   - name: uninstall k3s
-    command:
+    ansible.builtin.command:
       cmd: /usr/local/bin/k3s-uninstall.sh
       removes: /usr/local/bin/k3s-uninstall.sh
   - name: uninstall k3s agent
-    command:
+    ansible.builtin.command:
       cmd: /usr/local/bin/k3s-agent-uninstall.sh
       removes: /usr/local/bin/k3s-agent-uninstall.sh
   - name: gather list of CNI files to delete
@@ -33,11 +33,11 @@
       patterns: "*"
     register: files_to_delete
   - name: delete CNI files
-    file:
+    ansible.builtin.file:
       path: "{{ item.path }}"
       state: absent
     loop: "{{ files_to_delete.files }}"
   - name: reboot
-    reboot:
+    ansible.builtin.reboot:
       msg: "Nodes are being rebooted..."
     ignore_errors: true

@@ -9,21 +9,21 @@
   - name: "restart_confirmation"
     prompt: "Restart nodes when complete? [Y/n]"
     default: "n"
-    private: no
+    private: false
   tasks:
   - name: upgrade
-    apt:
+    ansible.builtin.apt:
       upgrade: full
-      update_cache: yes
+      update_cache: true
       cache_valid_time: 3600
-      autoclean: yes
-      autoremove: yes
+      autoclean: true
+      autoremove: true
     register: apt_upgrade
     retries: 5
     until: apt_upgrade is success
   - name: reboot
     ignore_errors: true
-    reboot:
+    ansible.builtin.reboot:
       msg: "Nodes are being rebooted..."
     when: restart_confirmation == "Y"
     tags:

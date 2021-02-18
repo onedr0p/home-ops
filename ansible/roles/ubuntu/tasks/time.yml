@@ -8,7 +8,7 @@
 
 # - name: time | copy timesyncd config
 #   become: true
-#   copy:
+#   ansible.builtin.copy:
 #     mode: 0644
 #     content: |
 #       [Time]
@@ -19,19 +19,19 @@
 
 # - name: time | start systemd service
 #   become: true
-#   systemd:
+#   ansible.builtin.systemd:
 #     name: systemd-timesyncd
 #     enabled: true
 #     state: started
 
 # - name: time | run timedatectl status
-#   command: /usr/bin/timedatectl show
+#   ansible.builtin.command: /usr/bin/timedatectl show
 #   changed_when: false
 #   check_mode: false
 #   register: timedatectl_result
 
 # - name: time | enable ntp
 #   become: true
-#   command: /usr/bin/timedatectl set-ntp true
+#   ansible.builtin.command: /usr/bin/timedatectl set-ntp true
 #   when:
 #   - "'NTP=no' in timedatectl_result.stdout"

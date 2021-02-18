@@ -3,7 +3,7 @@
 - name: cluster | calico | deploy tigera operator to k3s manifest directory
   become: true
   # run_once: true
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ calico.operator_manifest }}"
     dest: "{{ k3s_server_manifests_dir }}/tigera-operator.yaml"
     mode: 0644
@@ -11,7 +11,7 @@
 - name: cluster | calico | deploy configuration to k3s manifest directory
   become: true
   # run_once: true
-  template:
+  ansible.builtin.template:
     src: "calico-installation.yaml.j2"
     dest: "{{ k3s_server_manifests_dir }}/calico-installation.yaml"
     mode: 0644
@@ -19,7 +19,7 @@
 - name: cluster | calico | deploy BGP-peer to k3s manifest directory
   become: true
   # run_once: true
-  template:
+  ansible.builtin.template:
     src: "calico-bgppeer.yaml.j2"
     dest: "{{ k3s_server_manifests_dir }}/calico-bgppeer.yaml"
     mode: 0644
@@ -30,7 +30,7 @@
 - name: cluster | calico | deploy BGP-configuration to k3s manifest directory
   become: true
   # run_once: true
-  template:
+  ansible.builtin.template:
     src: "calico-bgpconfiguration.yaml.j2"
     dest: "{{ k3s_server_manifests_dir }}/calico-bgpconfiguration.yaml"
     mode: 0644
