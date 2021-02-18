@@ -2,7 +2,7 @@
 
 [Velero](https://velero.io/) is a cluster backup & restore solution.  I can also leverage restic to backup persistent volumes to S3 storage buckets.
 
-In order to backup and restore a given workload, the follow steps should work.
+In order to backup and restore a given workload, the following steps should work.
 
 ### Backup
 
