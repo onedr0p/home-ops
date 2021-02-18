@@ -9,8 +9,10 @@ driver:
 #   # yamllint -s .
 #   ansible-lint --exclude molecule/
 platforms:
-- name: node1
-  image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+- name: k8s-control-node
+  groups:
+  - control-nodes
+  image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2004}-ansible:latest"
   command: ${MOLECULE_DOCKER_COMMAND:-""}
   volumes:
   - /sys/fs/cgroup:/sys/fs/cgroup:ro
@@ -18,8 +20,10 @@ platforms:
   pre_build_image: ${MOLECULE_PREBUILT:-true}
   networks:
   - name: k3snet
-- name: node2
-  image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+- name: k8s-generic-node-a
+  groups:
+  - generic-nodes
+  image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2004}-ansible:latest"
   command: ${MOLECULE_DOCKER_COMMAND:-""}
   volumes:
   - /sys/fs/cgroup:/sys/fs/cgroup:ro
@@ -27,8 +31,10 @@ platforms:
   pre_build_image: ${MOLECULE_PREBUILT:-true}
   networks:
   - name: k3snet
-- name: node3
-  image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+- name: k8s-generic-node-b
+  groups:
+  - generic-nodes
+  image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2004}-ansible:latest"
   command: ${MOLECULE_DOCKER_COMMAND:-""}
   volumes:
   - /sys/fs/cgroup:/sys/fs/cgroup:ro
@@ -38,6 +44,13 @@ platforms:
   - name: k3snet
 provisioner:
   name: ansible
+  env:
+    ANSIBLE_CONFIG: ../../ansible.cfg
+    ANSIBLE_ROLES_PATH: ../../roles
+  # inventory:
+  #   links:
+  #     group_vars: ../../inventory/group_vars
+  #     host_vars: ../../inventory/host_vars
   options:
     verbose: true
 verifier:
