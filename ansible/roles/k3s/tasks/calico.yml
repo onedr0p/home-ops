@@ -11,41 +11,18 @@
 - name: cluster | calico | deploy configuration to k3s manifest directory
   become: true
   # run_once: true
-  blockinfile:
-    path: "{{ k3s_server_manifests_dir }}/calico-installation.yaml"
+  template:
+    src: "calico-installation.yaml.j2"
+    dest: "{{ k3s_server_manifests_dir }}/calico-installation.yaml"
     mode: 0644
-    create: true
-    block: |
-      ---
-      apiVersion: operator.tigera.io/v1
-      kind: Installation
-      metadata:
-        name: default
-      spec:
-        calicoNetwork:
-          ipPools:
-          - blockSize: 26
-            cidr: "{{ k3s_server["cluster-cidr"] }}"
-            encapsulation: IPIPCrossSubnet
-            natOutgoing: Enabled
-            nodeSelector: all()
 
 - name: cluster | calico | deploy BGP-peer to k3s manifest directory
   become: true
   # run_once: true
-  blockinfile:
-    path: "{{ k3s_server_manifests_dir }}/calico-bgppeer.yaml"
+  template:
+    src: "calico-bgppeer.yaml.j2"
+    dest: "{{ k3s_server_manifests_dir }}/calico-bgppeer.yaml"
     mode: 0644
-    create: true
-    block: |
-      ---
-      apiVersion: crd.projectcalico.org/v1
-      kind: BGPPeer
-      metadata:
-        name: global
-      spec:
-        peerIP: {{ calico.bgp.peer }}
-        asNumber: {{ calico.bgp.as }}
   when:
   - calico.bgp.enabled is defined
   - calico.bgp.enabled
@@ -53,19 +30,10 @@
 - name: cluster | calico | deploy BGP-configuration to k3s manifest directory
   become: true
   # run_once: true
-  blockinfile:
-    path: "{{ k3s_server_manifests_dir }}/calico-bgpconfiguration.yaml"
+  template:
+    src: "calico-bgpconfiguration.yaml.j2"
+    dest: "{{ k3s_server_manifests_dir }}/calico-bgpconfiguration.yaml"
     mode: 0644
-    create: true
-    block: |
-      ---
-      apiVersion: crd.projectcalico.org/v1
-      kind: BGPConfiguration
-      metadata:
-        name: default
-      spec:
-        serviceExternalIPs:
-        - cidr: {{ calico.bgp.externalIPs }}
   when:
   - calico.bgp.enabled is defined
   - calico.bgp.enabled
