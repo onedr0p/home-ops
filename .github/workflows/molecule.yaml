@@ -10,6 +10,10 @@ on:
     paths:
     - "ansible/**"
 
+defaults:
+  run:
+    working-directory: ./ansible
+
 jobs:
   molecule:
     name: Molecule
@@ -19,13 +23,8 @@ jobs:
         include:
         - distro: ubuntu2010
           scenario: default
-    defaults:
-      run:
-        working-directory: ./ansible
     steps:
     - uses: actions/checkout@v2
-      with:
-        path: "ansible"
 
     - name: Set up Python 3
       uses: actions/setup-python@v2
@@ -33,8 +32,7 @@ jobs:
         python-version: "3.x"
 
     - name: Install test dependencies
-      run: ls -la
-      # run: pip3 install -r molecule/requirements.txt
+      run: pip3 install -r molecule/requirements.txt
 
     - name: Run Molecule tests
       run: molecule test --scenario-name "${{ matrix.scenario }}"
