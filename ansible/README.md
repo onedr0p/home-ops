@@ -8,7 +8,8 @@ Commands to run can be found in my Ansible Taskfile located [here](https://githu
 
 ```bash
 # List hosts in my Ansible inventory
-task ansible:ping
+task ansible:list
+
 # Ping hosts in my Ansible inventory
 task ansible:ping
 ```
