@@ -18,7 +18,7 @@ _If you know your NIC interfaces and block devices you want to install Ubuntu on
 # Build the docker image to generate the ISOs
 docker build -t autoinstall-ubuntu:latest .
 # Generate the ISOs
-docker run --rm -v (pwd)/build:/build autoinstall-ubuntu
+docker run --rm -v $(pwd)/build:/build autoinstall-ubuntu
 ```
 
 Flash these ISOs onto a USB thumbdrive, insert them into your NUC and reboot. In roughly 4 minutes the NUC will poweroff, remove the USB thumbdrive and power it back on. You should be able to pick up the IP assigned via DHCP in your router settings. You may also want to make it staticly assigned in your router.
