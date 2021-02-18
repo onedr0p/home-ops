@@ -1,0 +1,44 @@
+---
+
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint: |
+  set -e
+  yamllint -s .
+  ansible-lint --exclude molecule/
+platforms:
+- name: node1
+  image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+  command: ${MOLECULE_DOCKER_COMMAND:-""}
+  volumes:
+  - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  privileged: true
+  pre_build_image: ${MOLECULE_PREBUILT:-true}
+  networks:
+  - name: k3snet
+- name: node2
+  image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+  command: ${MOLECULE_DOCKER_COMMAND:-""}
+  volumes:
+  - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  privileged: true
+  pre_build_image: ${MOLECULE_PREBUILT:-true}
+  networks:
+  - name: k3snet
+- name: node3
+  image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+  command: ${MOLECULE_DOCKER_COMMAND:-""}
+  volumes:
+  - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  privileged: true
+  pre_build_image: ${MOLECULE_PREBUILT:-true}
+  networks:
+  - name: k3snet
+provisioner:
+  name: ansible
+  options:
+    verbose: true
+verifier:
+  name: ansible

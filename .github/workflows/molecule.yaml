@@ -1,0 +1,46 @@
+---
+
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+    paths:
+    - "ansible/"
+
+defaults:
+  run:
+    working-directory: "xanmanning.k3s"
+
+jobs:
+  molecule:
+    name: Molecule
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - distro: ubuntu2010
+          scenario: default
+
+    steps:
+    - name: Checkout codebase
+      uses: actions/checkout@v2
+      with:
+        path: "ansible"
+
+    - name: Set up Python 3
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.x"
+
+    - name: Install test dependencies
+      run: pip3 install -r molecule/requirements.txt
+
+    - name: Run Molecule tests
+      run: molecule test --scenario-name "${{ matrix.scenario }}"
+      env:
+        PY_COLORS: '1'
+        ANSIBLE_FORCE_COLOR: '1'
+        MOLECULE_DISTRO: ${{ matrix.distro }}
