@@ -1,0 +1,33 @@
+---
+
+name: pulumi
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+    # paths:
+    # - "ansible/**"
+
+# PULUMI_ACCESS_TOKEN
+# DIGITALOCEAN_TOKEN
+
+defaults:
+  run:
+    working-directory: ./ansible
+
+jobs:
+  test-ubuntu-prepare:
+
+    runs-on:
+    - ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - name: Install Ansible
+      run: |
+        apt-get install python3 python3-pip
+        pip3 install -r requirements.txt
