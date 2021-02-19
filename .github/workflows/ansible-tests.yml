@@ -27,7 +27,28 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Install Ansible
+    # - name: Install Ansible
+    #   run: |
+    #     sudo apt update
+    #     sudo apt install software-properties-common
+    #     sudo apt-add-repository --yes --update ppa:ansible/ansible
+    #     sudo apt install ansible
+    #     ansible --version
+
+    # - name: Install Pulumi
+    #   run: |
+    #     curl -fsSL https://get.pulumi.com | sh
+    #     echo $GITHUB_PATH
+    #     echo "/github/home/.pulumi/bin/" >> $GITHUB_PATH
+    #     pulumi version
+
+    - name: Install go-task
       run: |
-        python3 -m pip install -U pip
-        pip3 install -U -r requirements.txt
+        mkdir -p "${GITHUB_WORKSPACE}/bin"
+        echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
+        sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+        mv ./bin/task ${GITHUB_WORKSPACE}/bin/task
+        task --version
+
+    # - name: Run Tests
+    #   run: |
