@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -eu
 
-# shellcheck disable=SC2155
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
 CLUSTER_ROOT="${PROJECT_ROOT}/cluster"
 PUB_CERT="${PROJECT_ROOT}/sealed-secrets-public-cert.pem"

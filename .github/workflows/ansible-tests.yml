@@ -27,28 +27,30 @@ jobs:
       with:
         fetch-depth: 1
 
-    # - name: Install Ansible
-    #   run: |
-    #     sudo apt update
-    #     sudo apt install software-properties-common
-    #     sudo apt-add-repository --yes --update ppa:ansible/ansible
-    #     sudo apt install ansible
-    #     ansible --version
+    - name: Install Ansible
+      run: |
+        sudo apt update
+        sudo apt install software-properties-common
+        sudo apt-add-repository --yes --update ppa:ansible/ansible
+        sudo apt install ansible
+        ansible --version
 
-    # - name: Install Pulumi
-    #   run: |
-    #     curl -fsSL https://get.pulumi.com | sh
-    #     echo $GITHUB_PATH
-    #     echo "/github/home/.pulumi/bin/" >> $GITHUB_PATH
-    #     pulumi version
+    - name: Install Pulumi
+      run: |
+        curl -fsSL https://get.pulumi.com | sh
+        sudo mv /github/home/.pulumi/bin/pulumi /usr/local/bin
+        pulumi version
 
     - name: Install go-task
       run: |
-        mkdir -p "${GITHUB_WORKSPACE}/bin"
-        echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
         sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
-        mv ./bin/task ${GITHUB_WORKSPACE}/bin/task
+        sudo mv ./bin/task /usr/local/bin
         task --version
 
-    # - name: Run Tests
-    #   run: |
+    - name: Run Tests
+      working-directory: ./ansible/tests
+      env:
+        PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      run: |
+        bash run-test.sh
