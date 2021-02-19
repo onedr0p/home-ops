@@ -10,12 +10,9 @@ on:
     # paths:
     # - "ansible/**"
 
-# PULUMI_ACCESS_TOKEN
-# DIGITALOCEAN_TOKEN
-
 defaults:
   run:
-    working-directory: ./ansible
+    working-directory: ./ansible/test
 
 jobs:
   test-ubuntu-prepare:
@@ -27,45 +24,56 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Install Ansible
-      run: |
-        sudo apt update
-        sudo apt install software-properties-common
-        sudo apt-add-repository --yes --update ppa:ansible/ansible
-        sudo apt install ansible
-        ansible --version
+    # - name: Install Ansible
+    #   run: |
+    #     sudo apt update
+    #     sudo apt install software-properties-common
+    #     sudo apt-add-repository --yes --update ppa:ansible/ansible
+    #     sudo apt install ansible
+    #     ansible --version
 
-    - name: Install Pulumi
-      run: |
-        curl -fsSL https://get.pulumi.com | sh
-        sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
-        pulumi version
+    # - name: Install Pulumi
+    #   run: |
+    #     curl -fsSL https://get.pulumi.com | sh
+    #     sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
+    #     pulumi version
 
-    - name: Install yq
-      run: |
-        curl -sL -o yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-        sudo mv yq /usr/local/bin
-        chmod +x /usr/local/bin/yq
-        yq --version
+    # - name: Install deps
+    #   run: |
+    #     curl -sL -o yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
+    #     sudo mv yq /usr/local/bin
+    #     chmod +x /usr/local/bin/yq
+    #     yq --version
 
-    - name: Install go-task
-      run: |
-        curl -fsSL https://taskfile.dev/install.sh | sh
-        sudo mv ./bin/task /usr/local/bin
-        task --version
-
-    - name: Run Tests
-      working-directory: ./ansible/tests
+    - uses: pulumi/actions@v1
+      with:
+        command: up
       env:
         PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
         DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
-      run: |
-        bash run-test.sh
+        PULUMI_STACK_NAME: "ubuntu-2010"
 
-    - name: Clean up
-      working-directory: ./ansible/tests
+    - uses: pulumi/actions@v1
+      with:
+        command: destroy
       env:
         PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
         DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
-      run: |
-        bash run-test.sh
+        PULUMI_ROOT: ./ansible/tests
+        PULUMI_STACK_NAME: ubuntu-2010
+
+    # - name: Run Tests
+    #   working-directory: ./ansible/tests
+    #   env:
+    #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+    #     DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+    #   run: |
+    #     bash run-test.sh
+
+    # - name: Clean up
+    #   working-directory: ./ansible/tests
+    #   env:
+    #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+    #     DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+    #   run: |
+    #     pulumi destroy --yes
