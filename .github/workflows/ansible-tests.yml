@@ -45,6 +45,7 @@ jobs:
       run: |
         curl -sL -o yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
         sudo mv yq /usr/local/bin
+        chmod +x /usr/local/bin/yq
         yq --version
 
     - name: Install go-task
@@ -54,6 +55,14 @@ jobs:
         task --version
 
     - name: Run Tests
+      working-directory: ./ansible/tests
+      env:
+        PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      run: |
+        bash run-test.sh
+
+    - name: Clean up
       working-directory: ./ansible/tests
       env:
         PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
