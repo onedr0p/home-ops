@@ -67,7 +67,7 @@ jobs:
       run: pulumi stack output --json | yq eval -P - > /tmp/hosts.yml
     - name: Run playbook
       working-directory: ./ansible
-      run: echo "n" | ansible-playbook -i /tmp/hosts.yml ./playbooks/ubuntu/prepare.yml"
+      run: echo "n" | ansible-playbook -i /tmp/hosts.yml ./playbooks/ubuntu/prepare.yml
 
   clean-up:
     needs:
@@ -75,6 +75,17 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+    - name: Install Pulumi
+      run: |
+        curl -fsSL https://get.pulumi.com | sh
+        sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
+        pulumi version
+    - name: Install npm deps
+      working-directory: ./ansible/tests
+      run: npm install
+    - name: Change Pulumi stack
+      working-directory: ./ansible/tests
+      run: pulumi stack select ubuntu-2010
     - name: Destroy cloud resources
       working-directory: ./ansible/tests
       run: pulumi destroy --yes
