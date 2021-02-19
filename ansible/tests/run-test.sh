@@ -6,6 +6,9 @@ ansible_root="${project_root}/ansible"
 
 export ANSIBLE_CONFIG="${ansible_root}/ansible.cfg"
 
+# Install deps
+npm install
+
 # Switch to the right stack
 pulumi stack select ubuntu-2010
 
