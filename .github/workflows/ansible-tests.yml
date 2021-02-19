@@ -26,23 +26,24 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Set up Python 3.6
+    - name: Set up Python 3.8
       uses: actions/setup-python@v1
       with:
-        python-version: 3.6
+        python-version: 3.8
 
     - name: Upgrade pip and display Python and PIP versions
       run: |
         sudo apt-get update
         sudo apt-get remove ansible
+        sudo apt-get auto-remove -y
         sudo apt-get install -y python*-wheel python*-yaml
-        python -m pip install --upgrade pip
-        python -V
+        python3 -m pip install --upgrade pip
+        python3 -V
         pip --version
 
     - name: Install Ansible
       run: |
-        python3 -m pip install --user --force-reinstall --upgrade 'ansible>=2.10.0'
+        python3 -m pip install --force-reinstall --upgrade 'ansible>=3.0.0'
         ansible --version
 
     # - name: Install Pulumi
