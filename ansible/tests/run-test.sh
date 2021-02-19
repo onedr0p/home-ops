@@ -6,6 +6,9 @@ ansible_root="${project_root}/ansible"
 
 export ANSIBLE_CONFIG="${ansible_root}/ansible.cfg"
 
+# Switch to the right stack
+pulumi stack select ubuntu-2010
+
 # Destroy cloud resouces
 pulumi destroy --yes || true
 
