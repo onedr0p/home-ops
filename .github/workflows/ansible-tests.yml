@@ -20,7 +20,9 @@ jobs:
     runs-on:
     - ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+
+    - name: Checkout source code
+      uses: actions/checkout@v2
       with:
         fetch-depth: 1
 
@@ -32,6 +34,7 @@ jobs:
     - name: Upgrade pip and display Python and PIP versions
       run: |
         sudo apt-get update
+        sudo apt-get remove ansible
         sudo apt-get install -y python*-wheel python*-yaml
         python -m pip install --upgrade pip
         python -V
@@ -41,14 +44,6 @@ jobs:
       run: |
         python3 -m pip install --user --force-reinstall --upgrade 'ansible>=2.10.0'
         ansible --version
-
-    # - name: Install Ansible
-    #   run: |
-    #     sudo apt update
-    #     sudo apt install software-properties-common
-    #     sudo apt-add-repository --yes --update ppa:ansible/ansible
-    #     sudo apt install ansible
-    #     ansible --version
 
     # - name: Install Pulumi
     #   run: |
