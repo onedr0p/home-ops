@@ -15,12 +15,11 @@ on:
 #     working-directory: ./ansible/tests
 
 jobs:
-  test-ubuntu-prepare:
-
+  playbook-ubuntu-prepare:
     runs-on:
     - ubuntu-latest
-    steps:
 
+    steps:
     - name: Checkout source code
       uses: actions/checkout@v2
       with:
@@ -39,23 +38,53 @@ jobs:
         python3 -V
         pip --version
 
-    - name: Install Ansible
+    - name: Upgrade Ansible
       run: |
         python3 -m pip install --force-reinstall --upgrade 'ansible>=3.0.0'
         ansible --version
 
-    # - name: Install Pulumi
-    #   run: |
-    #     curl -fsSL https://get.pulumi.com | sh
-    #     sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
-    #     pulumi version
+    - name: Install yq
+      run: |
+        curl -sL -o yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
+        sudo mv yq /usr/local/bin
+        chmod +x /usr/local/bin/yq
+        yq --version
 
-    # - name: Install deps
-    #   run: |
-    #     curl -sL -o yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-    #     sudo mv yq /usr/local/bin
-    #     chmod +x /usr/local/bin/yq
-    #     yq --version
+    - name: Install Pulumi
+      run: |
+        curl -fsSL https://get.pulumi.com | sh
+        sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
+        pulumi version
+
+    - name: Change Pulumi stack
+      working-directory: ./ansible/tests
+      env:
+        PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      run: pulumi stack select ubuntu-2010
+
+    - name: Create cloud resources
+      working-directory: ./ansible/tests
+      env:
+        PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      run: pulumi up --yes
+
+    - name: Get Ansible inventory
+      working-directory: ./ansible/tests
+      env:
+        PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      run: pulumi stack output --json
+
+    - name: Destroy cloud resources
+      working-directory: ./ansible/tests
+      env:
+        PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      run: pulumi destroy --yes
+
+
 
     # - name: Create cloud resources
     #   uses: pulumi/actions@v1
