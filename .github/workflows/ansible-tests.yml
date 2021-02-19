@@ -64,9 +64,13 @@ jobs:
     - name: Save Ansible inventory
       working-directory: ./ansible/tests
       run: pulumi stack output --json | yq eval -P - > /tmp/hosts.yml
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
     - name: Run playbook
       working-directory: ./ansible
-      run: echo "n" | ansible-playbook -i /tmp/hosts.yml ./playbooks/ubuntu/prepare.yml
+      run: ansible-playbook -i /tmp/hosts.yml ./playbooks/ubuntu/prepare.yml
 
   clean-up:
     needs:
