@@ -3,14 +3,14 @@ version: '3'
 
 vars:
   BINARY_REQS: |-
-    brew docker flux helm jq kubectl kubeseal pre-commit python3 shellcheck sops sshpass velero wget yamllint yq yolo yolo2
+    brew docker flux helm jq kubectl kubeseal pre-commit python3 shellcheck sops sshpass velero wget yamllint yq envsubst
   BREW_REQS: |-
-    coreutils findutils yolo
+    coreutils findutils gnu-sed
 
 tasks:
 
   check:
-    desc: Check for all required binaries and brew packages
+    desc: Check for all required binaries
     deps:
     - binary:reqs
     - brew:reqs
@@ -23,17 +23,15 @@ tasks:
         task deps:binary:check BIN=${req}
       done
     silent: true
-    ignore_error: true
 
   binary:check:
     desc: Check if binary is present
     cmds:
     - |
       command -v {{.BIN}} >/dev/null 2>&1 || {
-        echo >&2 "* Error: binary '{{.BIN}}' not found"
+        echo >&2 "* Error: binary '{{.BIN}}' not found... aborting."
       }
     silent: true
-    ignore_error: true
 
   brew:reqs:
     desc: Check for required brew packages
@@ -49,6 +47,6 @@ tasks:
     cmds:
     - |
       brew list {{.BIN}} >/dev/null 2>&1 || {
-        echo >&2 "* Error: brew package '{{.BIN}}' not found"
+        echo >&2 "* Error: brew package '{{.BIN}}' not found... aborting."
       }
     silent: true
