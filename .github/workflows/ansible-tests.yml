@@ -1,6 +1,6 @@
 ---
 
-name: pulumi
+name: ansible-tests
 
 on:
   workflow_dispatch:
@@ -20,17 +20,65 @@ env:
 #     working-directory: ./ansible/tests
 
 jobs:
-  run-playbook:
+  cloud-resources:
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout source code
       uses: actions/checkout@v2
       with:
         fetch-depth: 1
+
+    - name: Install yq
+      run: |
+        curl -sL -o yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
+        sudo mv yq /usr/local/bin
+        chmod +x /usr/local/bin/yq
+        yq --version
+
+    - name: Install Pulumi
+      run: |
+        curl -fsSL https://get.pulumi.com | sh
+        sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
+        pulumi version
+
+    - name: Install npm deps
+      working-directory: ./ansible/tests
+      run: npm install
+
+    - name: Change Pulumi stack
+      working-directory: ./ansible/tests
+      run: pulumi stack select ubuntu-2010
+
+    - name: Create cloud resources
+      working-directory: ./ansible/tests
+      run: pulumi up --yes
+
+    - name: Save Ansible inventory
+      working-directory: ./ansible/tests
+      run: pulumi stack output --json | yq eval -P - > /tmp/hosts.yml
+
+    - name: Upload Ansible inventory
+      uses: actions/upload-artifact@v2
+      with:
+        name: hosts
+        path: /tmp/hosts.yml
+
+  ansible-playbook:
+    needs:
+    - cloud-resources
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+
     - name: Upgrade pip and display Python and PIP versions
       run: |
         sudo apt-get update
@@ -38,41 +86,22 @@ jobs:
         python3 -m pip install --upgrade pip
         python3 -V
         pip --version
+
     - name: Upgrade Ansible
       run: |
         python3 -m pip install --force-reinstall --upgrade 'ansible>=3.0.0'
         ansible --version
-    - name: Install yq
-      run: |
-        curl -sL -o yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-        sudo mv yq /usr/local/bin
-        chmod +x /usr/local/bin/yq
-        yq --version
-    - name: Install Pulumi
-      run: |
-        curl -fsSL https://get.pulumi.com | sh
-        sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
-        pulumi version
-    - name: Install npm deps
-      working-directory: ./ansible/tests
-      run: npm install
-    - name: Change Pulumi stack
-      working-directory: ./ansible/tests
-      run: pulumi stack select ubuntu-2010
-    - name: Create cloud resources
-      working-directory: ./ansible/tests
-      run: pulumi up --yes
-    - name: Save Ansible inventory
-      working-directory: ./ansible/tests
-      run: pulumi stack output --json | yq eval -P - > /tmp/hosts.yml
+
     - name: Install SSH key
       uses: webfactory/ssh-agent@v0.5.0
       with:
         ssh-private-key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
-      # uses: shimataro/ssh-key-action@v2
-      # with:
-      #   key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
-      #   known_hosts: github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+
+    - name: Download Ansible inventory
+      uses: actions/download-artifact@v2
+      with:
+        name: hosts
+        path: /tmp/hosts.yml
 
     - name: Waiting for all hosts to become ready
       uses: nick-invision/retry@v2
@@ -81,31 +110,38 @@ jobs:
         max_attempts: 4
         retry_on: error
         command: ansible all -i /tmp/hosts.yml --one-line -m ping
+
     - name: Run playbook
       working-directory: ./ansible
       run: ansible-playbook -i /tmp/hosts.yml ./playbooks/ubuntu/prepare.yml
 
-  clean-up:
+  cleanup:
     needs:
-    - run-playbook
+    - cloud-resources
+    - ansible-playbook
     if: always()
     runs-on: ubuntu-20.04
+
     steps:
     - name: Checkout source code
       uses: actions/checkout@v2
       with:
         fetch-depth: 1
+
     - name: Install Pulumi
       run: |
         curl -fsSL https://get.pulumi.com | sh
         sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
         pulumi version
+
     - name: Install npm deps
       working-directory: ./ansible/tests
       run: npm install
+
     - name: Change Pulumi stack
       working-directory: ./ansible/tests
       run: pulumi stack select ubuntu-2010
+
     - name: Destroy cloud resources
       working-directory: ./ansible/tests
       run: pulumi destroy --yes

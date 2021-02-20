@@ -1,7 +1,5 @@
 import * as digitalocean from "@pulumi/digitalocean";
 import * as pulumi from "@pulumi/pulumi";
-// import * as YAML from 'YAML';
-// import * as fs from 'fs';
 
 const region = digitalocean.Regions.NYC3;
 const dropletTypeTag = new digitalocean.Tag(`ansible-${pulumi.getStack()}`);
