@@ -7,6 +7,15 @@
     src: packages-02norecommends
     dest: /etc/apt/apt.conf.d/02norecommends
 
+- name: packages | gather install packages
+  ansible.builtin.package_facts:
+    manager: auto
+  when:
+  - packages.apt_remove is defined
+  - packages.apt_remove is iterable
+  - packages.apt_remove | length > 0
+  - "'snapd' in packages.apt_remove"
+
 - name: packages | check if snap is installed
   ansible.builtin.debug:
     msg: "snapd is installed"
@@ -92,15 +101,6 @@
   - packages.apt_install is defined
   - packages.apt_install is iterable
   - packages.apt_install | length > 0
-
-- name: packages | gather install packages
-  ansible.builtin.package_facts:
-    manager: auto
-  when:
-  - packages.apt_remove is defined
-  - packages.apt_remove is iterable
-  - packages.apt_remove | length > 0
-  - "'snapd' in packages.apt_remove"
 
 # Until focal has https://launchpad.net/ubuntu/+source/htop
 # - name: packages | install latest htop
