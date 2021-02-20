@@ -72,13 +72,14 @@ jobs:
       # with:
       #   key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
       #   known_hosts: github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
-    - name: Waiting for hosts to become ready
-      working-directory: ./ansible
-      run: |
-        while ! ansible all -i /tmp/hosts.yml --one-line -m ping &> /dev/null
-        do
-            printf "%c" "."
-        done
+
+    - name: Waiting for all hosts to become ready
+      uses: nick-invision/retry@v2
+      with:
+        timeout_seconds: 15
+        max_attempts: 4
+        retry_on: error
+        command: ansible all -i /tmp/hosts.yml --one-line -m ping
     - name: Run playbook
       working-directory: ./ansible
       run: ansible-playbook -i /tmp/hosts.yml ./playbooks/ubuntu/prepare.yml
