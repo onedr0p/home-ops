@@ -35,7 +35,7 @@ for (let i = 0; i < dropletGenericCount; i++) {
         privateNetworking: true,
         size: digitalocean.DropletSlugs.DropletS2VCPU2GB,
         tags: [nameTag.id, dropletTypeTag.id],
-        sshKeys: ["29649448"],
+        sshKeys: ["29649448", "29653368"],
     }));
 }
 
