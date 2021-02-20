@@ -7,6 +7,64 @@
     src: packages-02norecommends
     dest: /etc/apt/apt.conf.d/02norecommends
 
+- name: packages | check if snap is installed
+  ansible.builtin.debug:
+    msg: "snapd is installed"
+  register: snapd_check
+  when:
+  - "'snapd' in ansible_facts.packages"
+  - packages.apt_remove is defined
+  - packages.apt_remove is iterable
+  - packages.apt_remove | length > 0
+  - "'snapd' in packages.apt_remove"
+
+- name: packages | remove snap packages
+  become: true
+  ansible.builtin.command: snap remove {{ item }}
+  loop:
+  - lxd
+  - core18
+  - snapd
+  when:
+  - ansible_distribution == 'Ubuntu'
+  - snapd_check.failed is defined
+  - packages.apt_remove is defined
+  - packages.apt_remove is iterable
+  - packages.apt_remove | length > 0
+  - "'snapd' in packages.apt_remove"
+
+- name: packages | remove packages
+  become: true
+  ansible.builtin.apt:
+    name: "{{ packages.apt_remove }}"
+    state: absent
+    autoremove: true
+  when:
+  - packages.apt_remove is defined
+  - packages.apt_remove is iterable
+  - packages.apt_remove | length > 0
+
+- name: packages | remove file and directory cruft
+  become: true
+  ansible.builtin.file:
+    state: absent
+    path: "{{ item }}"
+  loop:
+  - "/home/{{ ansible_user }}/.snap"
+  - "/snap"
+  - "/var/snap"
+  - "/var/lib/snapd"
+  - "/var/cache/snapd"
+  - "/usr/lib/snapd"
+  - "/etc/cloud"
+  - "/var/lib/cloud"
+  when:
+  - packages.apt_remove is defined
+  - packages.apt_remove is iterable
+  - packages.apt_remove | length > 0
+  - "'snapd' in packages.apt_remove"
+  - "'cloud-init' in packages.apt_remove"
+
 - name: packages | upgrade all packages
   ansible.builtin.apt:
     upgrade: full
