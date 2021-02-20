@@ -16,7 +16,7 @@ for (let i = 0; i < dropletControlCount; i++) {
         image: "ubuntu-20-10-x64",
         region: region,
         privateNetworking: true,
-        size: digitalocean.DropletSlugs.DropletS2VCPU2GB,
+        size: digitalocean.DropletSlugs.DropletC2,
         tags: [nameTag.id, dropletTypeTag.id],
         sshKeys: ["29649448", "29653368"],
     }));
@@ -31,7 +31,7 @@ for (let i = 0; i < dropletGenericCount; i++) {
         image: "ubuntu-20-10-x64",
         region: region,
         privateNetworking: true,
-        size: digitalocean.DropletSlugs.DropletS2VCPU2GB,
+        size: digitalocean.DropletSlugs.DropletC2,
         tags: [nameTag.id, dropletTypeTag.id],
         sshKeys: ["29649448", "29653368"],
     }));
