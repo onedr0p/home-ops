@@ -1,0 +1,49 @@
+---
+
+- name: locale | set timezone
+  become: true
+  community.general.timezone:
+    name: "{{ timezone | default('America/New_York') }}"
+
+- name: locale | copy timesyncd config
+  become: true
+  ansible.builtin.copy:
+    mode: 0644
+    content: |
+      [Time]
+      NTP={{ ntp_servers.primary | default("") | join(" ") }}
+      FallbackNTP={{ ntp_servers.fallback | join(" ") }}
+    dest: /etc/systemd/timesyncd.conf
+  when:
+  - ntp_servers.primary is defined
+  - ntp_servers.primary is iterable
+  - ntp_servers.primary | length > 0
+  - ntp_servers.fallback is defined
+  - ntp_servers.fallback is iterable
+  - ntp_servers.fallback | length > 0
+
+- name: locale | start systemd service
+  become: true
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    enabled: true
+    state: started
+
+- name: locale | restart systemd service
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    daemon_reload: true
+    enabled: true
+    state: restarted
+
+- name: locale | run timedatectl status
+  ansible.builtin.command: /usr/bin/timedatectl show
+  changed_when: false
+  check_mode: false
+  register: timedatectl_result
+
+- name: locale | enable ntp
+  become: true
+  ansible.builtin.command: /usr/bin/timedatectl set-ntp true
+  when:
+  - "'NTP=no' in timedatectl_result.stdout"

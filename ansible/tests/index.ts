@@ -44,6 +44,7 @@ export const all = {
                 "k8s-control-node-a": {
                     "ansible_host": controlDroplets[0].ipv4Address,
                     "ansible_user": "root",
+                    "k3s_node_ip_address": controlDroplets[0].ipv4AddressPrivate
                 }
             },
         },
@@ -52,10 +53,12 @@ export const all = {
                 "k8s-generic-node-a": {
                     "ansible_host": genericDroplets[0].ipv4Address,
                     "ansible_user": "root",
+                    "k3s_node_ip_address": genericDroplets[0].ipv4AddressPrivate
                 },
                 "k8s-generic-node-b": {
                     "ansible_host": genericDroplets[1].ipv4Address,
                     "ansible_user": "root",
+                    "k3s_node_ip_address": genericDroplets[0].ipv4AddressPrivate
                 }
             },
         },

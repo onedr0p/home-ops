@@ -41,6 +41,18 @@ jobs:
         sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
         pulumi version
 
+    - name: Cache node modules
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ./ansible/tests/node_modules
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
     - name: Install npm deps
       working-directory: ./ansible/tests
       run: npm install
@@ -107,19 +119,19 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: hosts
-        path: /tmp/hosts.yml
+        path: ./ansible/inventory/e2e/hosts.yml
 
     - name: Waiting for all hosts to become ready
       uses: nick-invision/retry@v2
       with:
         timeout_seconds: 30
-        max_attempts: 3
+        max_attempts: 10
         retry_on: error
-        command: ansible all -i /tmp/hosts.yml --one-line -m ping
+        command: ansible all -i ./ansible/inventory/e2e/hosts.yml --one-line -m ping
 
-    - name: Run playbook
+    - name: Run ubuntu/prepare playbook
       working-directory: ./ansible
-      run: ansible-playbook -i /tmp/hosts.yml ./playbooks/ubuntu/prepare.yml
+      run: ansible-playbook -i ./inventory/e2e/hosts.yml ./playbooks/ubuntu/prepare.yml
 
   cleanup:
     needs:
@@ -139,6 +151,18 @@ jobs:
         curl -fsSL https://get.pulumi.com | sh
         sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
         pulumi version
+
+    - name: Cache node modules
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ./ansible/tests/node_modules
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
 
     - name: Install npm deps
       working-directory: ./ansible/tests
