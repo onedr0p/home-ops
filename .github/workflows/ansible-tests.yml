@@ -42,6 +42,7 @@ jobs:
         pulumi version
 
     - name: Cache node modules
+      id: node_modules_cache
       uses: actions/cache@v2
       env:
         cache-name: cache-node-modules
@@ -56,6 +57,7 @@ jobs:
     - name: Install npm deps
       working-directory: ./ansible/tests
       run: npm install
+      if: steps.node_modules_cache.outputs.cache-hit != 'true'
 
     - name: Change Pulumi stack
       working-directory: ./ansible/tests
@@ -153,6 +155,7 @@ jobs:
         pulumi version
 
     - name: Cache node modules
+      id: node_modules_cache
       uses: actions/cache@v2
       env:
         cache-name: cache-node-modules
@@ -167,6 +170,7 @@ jobs:
     - name: Install npm deps
       working-directory: ./ansible/tests
       run: npm install
+      if: steps.node_modules_cache.outputs.cache-hit != 'true'
 
     - name: Change Pulumi stack
       working-directory: ./ansible/tests
