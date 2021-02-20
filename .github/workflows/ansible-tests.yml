@@ -26,6 +26,21 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 1
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Upgrade pip and display Python and PIP versions
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python*-wheel python*-yaml
+        python3 -m pip install --upgrade pip
+        python3 -V
+        pip --version
+    - name: Upgrade Ansible
+      run: |
+        python3 -m pip install --force-reinstall --upgrade 'ansible>=3.0.0'
+        ansible --version
     - name: Install yq
       run: |
         curl -sL -o yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
@@ -57,25 +72,13 @@ jobs:
       # with:
       #   key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
       #   known_hosts: github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
-
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-
-    - name: Upgrade pip and display Python and PIP versions
+    - name: Waiting for hosts to become ready
+      working-directory: ./ansible
       run: |
-        sudo apt-get update
-        sudo apt-get install -y python*-wheel python*-yaml
-        python3 -m pip install --upgrade pip
-        python3 -V
-        pip --version
-
-    - name: Upgrade Ansible
-      run: |
-        python3 -m pip install --force-reinstall --upgrade 'ansible>=3.0.0'
-        ansible --version
-
+        while ! ansible all -i /tmp/hosts.yml --one-line -m ping &> /dev/null
+        do
+            printf "%c" "."
+        done
     - name: Run playbook
       working-directory: ./ansible
       run: ansible-playbook -i /tmp/hosts.yml ./playbooks/ubuntu/prepare.yml
