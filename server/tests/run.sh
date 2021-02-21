@@ -44,7 +44,13 @@ done
 # Run the Ansible k3s install playbook
 ansible-playbook -i "${inventory}" "${ansible_root}/playbooks/k3s/install.yml"
 
-kubectl --kubeconfig "/tmp/kubeconfig" get nodes -o wide
+# kubectl --kubeconfig /tmp/kubeconfig get nodes -o wide
+# kubectl --kubeconfig /tmp/kubeconfig -n kube-system wait pod --label app=coredns --for=condition=ready
+# kubectl --kubeconfig /tmp/kubeconfig -n kube-system wait deployment.apps/coredns --for=condition=available --timeout=2m
+# kubectl --kubeconfig /tmp/kubeconfig -n tigera-operator wait deployment.apps/tigera-operator --for=condition=available --timeout=2m
+# kubectl --kubeconfig /tmp/kubeconfig -n calico-system wait daemonset.apps/calico-node --for=condition=available --timeout=2m
+# kubectl --kubeconfig /tmp/kubeconfig -n calico-system wait deployment.apps/calico-typha --for=condition=available --timeout=2m
+# kubectl --kubeconfig /tmp/kubeconfig -n calico-system wait deployment.apps/calico-kube-controllers --for=condition=available --timeout=2m
 
 # Destroy cloud resouces
 # pulumi destroy --yes

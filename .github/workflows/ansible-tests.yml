@@ -142,7 +142,7 @@ jobs:
         name: hosts
         path: ./server/ansible/inventory/e2e/
 
-    - name: Waiting for all hosts to become ready
+    - name: Wait for all hosts to become ready
       uses: nick-invision/retry@v2
       with:
         timeout_seconds: 30
@@ -220,76 +220,95 @@ jobs:
         path: ./server/ansible/
 
     - name: Get HTTP Load Balancer IP
+      id: ip
       run: |
-        IP=$(yq e '.all | .. | select(.digitalocean_http_ip) | .digitalocean_http_ip' ./server/ansible/inventory/e2e/hosts.yml | head -n 1)
-        echo ::set-output name=ip::${IP}
+        LOAD_BALANCER_IP=$(yq e '.all | .. | select(.digitalocean_http_ip) | .digitalocean_http_ip' ./server/ansible/inventory/e2e/hosts.yml | head -n 1)
+        echo ::set-output name=ip::${LOAD_BALANCER_IP}
 
-    - name: Verify coredns
+    - name: Wait for nodes to become ready
       run: |
-        kubectl --kubeconfig ./server/ansible/kubeconfig -n kube-system wait deployment.apps/coredns --for=condition=ready --timeout=3m
+        nodes=$(yq eval '.all.children.**.* | keys | .[]' ./server/ansible/inventory/e2e/hosts.yml)
+        for node in $nodes; do
+            kubectl --kubeconfig ./server/ansible/kubeconfig wait "nodes/${node}" --for=condition=ready --timeout=2m
+        done
 
-    - name: Verify calico
-      run: |
-        kubectl --kubeconfig ./server/ansible/kubeconfig -n tigera-operator wait deployment.apps/tigera-operator --for=condition=ready --timeout=3m
-        kubectl --kubeconfig ./server/ansible/kubeconfig -n calico-system wait daemonset.apps/calico-node --for=condition=ready --timeout=3m
-        kubectl --kubeconfig ./server/ansible/kubeconfig -n calico-system wait deployment.apps/calico-typha --for=condition=ready --timeout=3m
-        kubectl --kubeconfig ./server/ansible/kubeconfig -n calico-system wait deployment.apps/calico-kube-controllers --for=condition=ready --timeout=3m
+    - name: Wait for coredns deployment to rollout
+      run: kubectl --kubeconfig ./server/ansible/kubeconfig -n kube-system wait deployment.apps/coredns --for=condition=available --timeout=2m
+
+    - name: Wait for calico deployment to rollout
+      run: kubectl --kubeconfig ./server/ansible/kubeconfig -n tigera-operator wait deployment.apps/tigera-operator --for=condition=available --timeout=2m
+
+    - name: Create nginx service and deployment
+      run: kubectl --kubeconfig ./server/ansible/kubeconfig apply -f ./server/tests/nginx-deployment.yaml
+
+    - name: Wait for nginx deployment to rollout
+      run: kubectl --kubeconfig ./server/ansible/kubeconfig -n default wait deployment.apps/nginx --for=condition=available --timeout=2m
+
+    - name: Wait for connections to nginx
+      uses: nick-invision/retry@v2
+      with:
+        timeout_seconds: 30
+        max_attempts: 10
+        retry_on: error
+        command: curl --output /dev/null --silent --head --fail --url ${{ steps.verify.outputs.ip }}
 
     - name: Debug failure
       if: failure()
       run: |
+        kubectl --kubeconfig ./server/ansible/kubeconfig get nodes
+        kubectl --kubeconfig ./server/ansible/kubeconfig -n default get all
         kubectl --kubeconfig ./server/ansible/kubeconfig -n tigera-operator get all
         kubectl --kubeconfig ./server/ansible/kubeconfig -n calico-system get all
         kubectl --kubeconfig ./server/ansible/kubeconfig -n kube-system get all
 
-  # teardown:
-  #   needs:
-  #   - setup
-  #   - install
-  #   - verify
-  #   if: always()
-  #   runs-on: ubuntu-20.04
+  teardown:
+    needs:
+    - setup
+    - install
+    - verify
+    if: always()
+    runs-on: ubuntu-20.04
 
-  #   steps:
-  #   - name: Checkout source code
-  #     uses: actions/checkout@v2
-  #     with:
-  #       fetch-depth: 1
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
 
-  #   - name: Create local PATH
-  #     run: |
-  #       mkdir -p "${HOME}/.local/bin"
-  #       echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+    - name: Create local PATH
+      run: |
+        mkdir -p "${HOME}/.local/bin"
+        echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
 
-  #   - name: Install Pulumi
-  #     run: |
-  #       curl -fsSL https://get.pulumi.com | sh
-  #       mv /home/runner/.pulumi/bin/pulumi "${HOME}/.local/bin/pulumi"
-  #       chmod +x "${HOME}/.local/bin/pulumi"
-  #       pulumi version
+    - name: Install Pulumi
+      run: |
+        curl -fsSL https://get.pulumi.com | sh
+        mv /home/runner/.pulumi/bin/pulumi "${HOME}/.local/bin/pulumi"
+        chmod +x "${HOME}/.local/bin/pulumi"
+        pulumi version
 
-  #   - name: Cache node modules
-  #     id: node_modules_cache
-  #     uses: actions/cache@v2
-  #     env:
-  #       cache-name: cache-node-modules
-  #     with:
-  #       path: "./server/tests/node_modules"
-  #       key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-  #       restore-keys: |
-  #         ${{ runner.os }}-build-${{ env.cache-name }}-
-  #         ${{ runner.os }}-build-
-  #         ${{ runner.os }}-
+    - name: Cache node modules
+      id: node_modules_cache
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: "./server/tests/node_modules"
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
 
-  #   - name: Install npm deps
-  #     working-directory: "./server/tests"
-  #     run: npm install
-  #     if: steps.node_modules_cache.outputs.cache-hit != 'true'
+    - name: Install npm deps
+      working-directory: "./server/tests"
+      run: npm install
+      if: steps.node_modules_cache.outputs.cache-hit != 'true'
 
-  #   - name: Change Pulumi stack
-  #     working-directory: "./server/tests"
-  #     run: pulumi stack select ubuntu-2010
+    - name: Change Pulumi stack
+      working-directory: "./server/tests"
+      run: pulumi stack select ubuntu-2010
 
-  #   - name: Destroy cloud resources
-  #     working-directory: "./server/tests"
-  #     run: pulumi destroy --yes
+    - name: Destroy cloud resources
+      working-directory: "./server/tests"
+      run: pulumi destroy --yes

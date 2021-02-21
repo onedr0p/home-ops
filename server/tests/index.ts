@@ -60,11 +60,11 @@ const httpLoadBalancer = new digitalocean.LoadBalancer("http-public", {
     forwardingRules: [{
         entryPort: 80,
         entryProtocol: digitalocean.Protocols.HTTP,
-        targetPort: 80,
+        targetPort: 30420,
         targetProtocol: digitalocean.Protocols.HTTP,
     }],
     healthcheck: {
-        port: 80,
+        port: 30420,
         protocol: digitalocean.Protocols.TCP,
     },
     region: region,
