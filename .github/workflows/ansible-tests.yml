@@ -24,9 +24,9 @@ env:
   # Ansible config
   ANSIBLE_HOST_KEY_CHECKING: "False"
   # Path config
-  CUSTOM_ANSIBLE_DIR: "${{ env.GITHUB_WORKSPACE}}/server/ansible"
-  CUSTOM_ANSIBLE_INVENTORY_FILE: "${{ env.GITHUB_WORKSPACE}}/server/ansible/inventory/e2e/hosts.yml"
-  CUSTOM_TESTS_DIR: "${{ env.GITHUB_WORKSPACE}}/server/tests"
+  CUSTOM_ANSIBLE_DIR: "server/ansible"
+  CUSTOM_ANSIBLE_INVENTORY_FILE: "server/ansible/inventory/e2e/hosts.yml"
+  CUSTOM_TESTS_DIR: "server/tests"
 
 # defaults:
 #   run:
@@ -74,27 +74,27 @@ jobs:
           ${{ runner.os }}-
 
     - name: Install npm deps
-      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
+      working-directory: "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_TESTS_DIR }}"
       run: npm install
       if: steps.node_modules_cache.outputs.cache-hit != 'true'
 
     - name: Change Pulumi stack
-      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
+      working-directory: "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_TESTS_DIR }}"
       run: pulumi stack select ubuntu-2010
 
     - name: Create cloud resources
-      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
+      working-directory: "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_TESTS_DIR }}"
       run: pulumi up --yes
 
     - name: Save Ansible inventory
-      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
-      run: pulumi stack output --json | yq eval -P - > "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
+      working-directory: "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_TESTS_DIR }}"
+      run: pulumi stack output --json | yq eval -P - > "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
 
     - name: Upload Ansible inventory
       uses: actions/upload-artifact@v2
       with:
         name: hosts
-        path: "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
+        path: "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
 
   # playbooks:
   #   needs:
@@ -247,11 +247,11 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: hosts
-        path: "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
+        path: "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
 
     - name: Read hosts.yml
       run: |
-        cat "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
+        cat "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
 
   test2:
     needs:
@@ -269,11 +269,11 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: hosts
-        path: "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
+        path: "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
 
     - name: Read hosts.yml
       run: |
-        cat "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
+        cat "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
 
   cleanup:
     needs:
@@ -309,7 +309,7 @@ jobs:
       env:
         cache-name: cache-node-modules
       with:
-        path: "${{ env.CUSTOM_TESTS_DIR }}/node_modules"
+        path: "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_TESTS_DIR }}/node_modules"
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -317,14 +317,14 @@ jobs:
           ${{ runner.os }}-
 
     - name: Install npm deps
-      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
+      working-directory: "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_TESTS_DIR }}"
       run: npm install
       if: steps.node_modules_cache.outputs.cache-hit != 'true'
 
     - name: Change Pulumi stack
-      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
+      working-directory: "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_TESTS_DIR }}"
       run: pulumi stack select ubuntu-2010
 
     - name: Destroy cloud resources
-      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
+      working-directory: "${{ env.GITHUB_WORKSPACE}}/${{ env.CUSTOM_TESTS_DIR }}"
       run: pulumi destroy --yes
