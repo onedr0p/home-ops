@@ -77,6 +77,11 @@ jobs:
       working-directory: ./server/tests
       run: pulumi stack output --json | yq eval -P - > /tmp/hosts.yml
 
+    # - name: Save Ansible inventory
+    #   working-directory: ./server/tests
+    #   run: pulumi stack output --json | python3 -c 'import sys, yaml, json; print(yaml.dump(json.loads(sys.stdin.read()),sort_keys=False))'
+
+
     - name: Upload Ansible inventory
       uses: actions/upload-artifact@v2
       with:
@@ -98,13 +103,6 @@ jobs:
       run: |
         mkdir -p "${HOME}/.local/bin"
         echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
-
-    - name: Install yq
-      run: |
-        curl -sLO "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-        mv yq_linux_amd64 "${HOME}/.local/bin/yq"
-        chmod +x "${HOME}/.local/bin/yq"
-        yq --version
 
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
@@ -196,12 +194,12 @@ jobs:
         mkdir -p "${HOME}/.local/bin"
         echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
 
-    - name: Install yq
-      run: |
-        curl -sLO "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-        mv yq_linux_amd64 "${HOME}/.local/bin/yq"
-        chmod +x "${HOME}/.local/bin/yq"
-        yq --version
+    # - name: Install yq
+    #   run: |
+    #     curl -sLO "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
+    #     mv yq_linux_amd64 "${HOME}/.local/bin/yq"
+    #     chmod +x "${HOME}/.local/bin/yq"
+    #     yq --version
 
     - name: Install kubectl
       run: |
@@ -222,15 +220,28 @@ jobs:
         name: kubeconfig
         path: ./server/ansible/
 
+    # - name: Get HTTP Load Balancer IP
+    #   id: ip
+    #   run: |
+    #     LOAD_BALANCER_IP=$(yq e '.all | .. | select(.digitalocean_http_ip) | .digitalocean_http_ip' ./server/ansible/inventory/e2e/hosts.yml | head -n 1)
+    #     echo ::set-output name=ip::${LOAD_BALANCER_IP}
+
     - name: Get HTTP Load Balancer IP
       id: ip
       run: |
-        LOAD_BALANCER_IP=$(yq e '.all | .. | select(.digitalocean_http_ip) | .digitalocean_http_ip' ./server/ansible/inventory/e2e/hosts.yml | head -n 1)
+        LOAD_BALANCER_IP=$(grep -Po 'digitalocean_http_ip: \K[^\n]*' ./server/ansible/inventory/e2e/hosts.yml | head -n 1)
         echo ::set-output name=ip::${LOAD_BALANCER_IP}
+
+    # - name: Wait for nodes to become ready
+    #   run: |
+    #     nodes=$(yq eval '.all.children.**.* | keys | .[]' ./server/ansible/inventory/e2e/hosts.yml)
+    #     for node in $nodes; do
+    #         kubectl --kubeconfig ./server/ansible/kubeconfig wait "nodes/${node}" --for=condition=ready --timeout=2m
+    #     done
 
     - name: Wait for nodes to become ready
       run: |
-        nodes=$(yq eval '.all.children.**.* | keys | .[]' ./server/ansible/inventory/e2e/hosts.yml)
+        nodes=$(grep -Po 'k8s-[a-z-_]+' ./server/ansible/inventory/e2e/hosts.yml)
         for node in $nodes; do
             kubectl --kubeconfig ./server/ansible/kubeconfig wait "nodes/${node}" --for=condition=ready --timeout=2m
         done
