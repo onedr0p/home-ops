@@ -26,16 +26,17 @@ Feel free to open a [Github issue](https://github.com/onedr0p/k3s-gitops/issues/
 
 My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.10 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s).
 
-See my [ansible](../ansible/) folder for my playbooks and roles.
+See my [server/ansible](../server/ansible/) directory for my playbooks and roles.
 
 ---
 
 ## :robot:&nbsp; Automate all the things!
 
-- ~~[Kured](https://github.com/weaveworks/kured) to apply OS patches to my nodes.~~
-- [System Upgrade Controller](https://github.com/rancher/system-upgrade-controller) to apply updates to k3s.
-- [Renovate](https://github.com/renovatebot/renovate) keeps my application charts and container images up-to-date by scanning my repo and opening pull requests when it notices updates.
-- [Actions Runner Controller](https://github.com/summerwind/actions-runner-controller) operates a self-hosted Github runner in my cluster which I use to generate and apply Sealed Secrets to my cluster.
+- [Github Actions](https://docs.github.com/en/actions) for running automated Ansible tests and checking code formatting.
+- Rancher [System Upgrade Controller](https://github.com/rancher/system-upgrade-controller) to apply updates to k3s
+- [Renovate](https://github.com/renovatebot/renovate) with the help of the [k8s-at-home/renovate-helm-releases](https://github.com/k8s-at-home/renovate-helm-releases) Github action keeps my application charts and container images up-to-date
+- [Actions Runner Controller](https://github.com/summerwind/actions-runner-controller) operates a self-hosted Github runner in my cluster that updates Sealed Secrets when needed
+- ~~[Kured](https://github.com/weaveworks/kured) to apply OS patches to my nodes~~
 
 ---
 
