@@ -176,6 +176,10 @@ jobs:
         name: hosts
         path: ./ansible/inventory/e2e/hosts.yml
 
+    - name: Install Ansible Galaxy roles
+      working-directory: ./ansible
+      run: ansible-galaxy install -r .requirements.yml --force
+
     - name: Waiting for all hosts to become ready
       uses: nick-invision/retry@v2
       with:
