@@ -2,7 +2,7 @@
 set -eu
 
 project_root=$(git rev-parse --show-toplevel)
-ansible_root="${project_root}/ansible"
+ansible_root="${project_root}/server/ansible"
 inventory="${ansible_root}/inventory/e2e/hosts.yml"
 
 export ANSIBLE_CONFIG="${ansible_root}/ansible.cfg"

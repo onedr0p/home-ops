@@ -8,23 +8,22 @@ on:
     branches:
     - main
     paths:
-    - 'ansible/**'
-  pull_request:
-    paths:
-    - 'ansible/inventory/e2e/**/*.yml'
-    - 'ansible/playbooks/**/*.yml'
-    - 'ansible/roles/**/*.yml'
-    - 'ansible/tests/**'
-    - 'ansible/requirements.yml'
+    - 'server/ansible/**'
+  # pull_request:
+  #   paths:
+  #   - 'server/ansible/inventory/e2e/**/*.yml'
+  #   - 'server/ansible/playbooks/**/*.yml'
+  #   - 'server/ansible/roles/**/*.yml'
+  #   - 'server/ansible/requirements.yml'
+  #   - 'server/tests/**'
 
 env:
   PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
   DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
   ANSIBLE_HOST_KEY_CHECKING: "False"
-
-# defaults:
-#   run:
-#     working-directory: ./ansible/tests
+  CUSTOM_ANSIBLE_DIR: "./server/ansible"
+  CUSTOM_ANSIBLE_INVENTORY_FILE: "./server/ansible/inventory/e2e/hosts.yml"
+  CUSTOM_TESTS_DIR: "./server/tests"
 
 jobs:
   cloud-resources:
@@ -35,17 +34,23 @@ jobs:
       with:
         fetch-depth: 1
 
+    - name: Set up a local PATH
+      run: |
+        mkdir "${HOME}/.local/bin"
+        echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+
     - name: Install yq
       run: |
         curl -sLO "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-        sudo mv yq_linux_amd64 /usr/local/bin/yq
-        chmod +x /usr/local/bin/yq
+        mv yq_linux_amd64 "${HOME}/.local/yq"
+        chmod +x "${HOME}/.local/yq"
         yq --version
 
     - name: Install Pulumi
       run: |
         curl -fsSL https://get.pulumi.com | sh
-        sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
+        mv /home/runner/.pulumi/bin/pulumi "${HOME}/.local/pulumi"
+        chmod +x "${HOME}/.local/pulumi"
         pulumi version
 
     - name: Cache node modules
@@ -54,7 +59,7 @@ jobs:
       env:
         cache-name: cache-node-modules
       with:
-        path: ./ansible/tests/node_modules
+        path: "${CUSTOM_TESTS_DIR}/node_modules"
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -62,20 +67,20 @@ jobs:
           ${{ runner.os }}-
 
     - name: Install npm deps
-      working-directory: ./ansible/tests
+      working-directory: "${CUSTOM_TESTS_DIR}"
       run: npm install
       if: steps.node_modules_cache.outputs.cache-hit != 'true'
 
     - name: Change Pulumi stack
-      working-directory: ./ansible/tests
+      working-directory: "${CUSTOM_TESTS_DIR}"
       run: pulumi stack select ubuntu-2010
 
     - name: Create cloud resources
-      working-directory: ./ansible/tests
+      working-directory: "${CUSTOM_TESTS_DIR}"
       run: pulumi up --yes
 
     - name: Save Ansible inventory
-      working-directory: ./ansible/tests
+      working-directory: "${CUSTOM_TESTS_DIR}"
       run: pulumi stack output --json | yq eval -P - > /tmp/hosts.yml
 
     - name: Upload Ansible inventory
@@ -84,147 +89,147 @@ jobs:
         name: hosts
         path: /tmp/hosts.yml
 
-  playbooks:
-    needs:
-    - cloud-resources
-    runs-on: ubuntu-20.04
+  # playbooks:
+  #   needs:
+  #   - cloud-resources
+  #   runs-on: ubuntu-20.04
 
-    steps:
-    - name: Checkout source code
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
+  #   steps:
+  #   - name: Checkout source code
+  #     uses: actions/checkout@v2
+  #     with:
+  #       fetch-depth: 1
 
-    - name: Install yq
-      run: |
-        curl -sLO "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-        sudo mv yq_linux_amd64 /usr/local/bin/yq
-        chmod +x /usr/local/bin/yq
-        yq --version
+  #   - name: Install yq
+  #     run: |
+  #       curl -sLO "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
+  #       sudo mv yq_linux_amd64 /usr/local/bin/yq
+  #       chmod +x /usr/local/bin/yq
+  #       yq --version
 
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
+  #   - name: Set up Python 3.8
+  #     uses: actions/setup-python@v2
+  #     with:
+  #       python-version: 3.8
 
-    - name: Upgrade pip and display Python and PIP versions
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python*-wheel python*-yaml
-        python3 -m pip install --no-cache-dir --upgrade pip
-        python3 -V
-        pip --version
+  #   - name: Upgrade pip and display Python and PIP versions
+  #     run: |
+  #       sudo apt-get update
+  #       sudo apt-get install -y python*-wheel python*-yaml
+  #       python3 -m pip install --no-cache-dir --upgrade pip
+  #       python3 -V
+  #       pip --version
 
-    - name: Upgrade Ansible
-      run: |
-        python3 -m pip install --no-cache-dir --force-reinstall --upgrade 'ansible>=3.0.0'
-        ansible --version
+  #   - name: Upgrade Ansible
+  #     run: |
+  #       python3 -m pip install --no-cache-dir --force-reinstall --upgrade 'ansible>=3.0.0'
+  #       ansible --version
 
-    - name: Install SSH key
-      uses: webfactory/ssh-agent@v0.5.0
-      with:
-        ssh-private-key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
+  #   - name: Install SSH key
+  #     uses: webfactory/ssh-agent@v0.5.0
+  #     with:
+  #       ssh-private-key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
 
-    - name: Install Ansible Galaxy roles
-      working-directory: ./ansible
-      run: ansible-galaxy install -r requirements.yml --force
+  #   - name: Install Ansible Galaxy roles
+  #     working-directory: ./ansible
+  #     run: ansible-galaxy install -r requirements.yml --force
 
-    - name: Download Ansible inventory
-      uses: actions/download-artifact@v2
-      with:
-        name: hosts
-        path: ./ansible/inventory/e2e/hosts.yml
+  #   - name: Download Ansible inventory
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: hosts
+  #       path: ./ansible/inventory/e2e/hosts.yml
 
-    - name: Waiting for all hosts to become ready
-      uses: nick-invision/retry@v2
-      with:
-        timeout_seconds: 30
-        max_attempts: 10
-        retry_on: error
-        command: ansible all -i ./ansible/inventory/e2e/hosts.yml --one-line -m ping
+  #   - name: Waiting for all hosts to become ready
+  #     uses: nick-invision/retry@v2
+  #     with:
+  #       timeout_seconds: 30
+  #       max_attempts: 10
+  #       retry_on: error
+  #       command: ansible all -i ./ansible/inventory/e2e/hosts.yml --one-line -m ping
 
-    - name: Run ubuntu/upgrade playbook
-      working-directory: ./ansible
-      run: ansible-playbook -i ./inventory/e2e/hosts.yml ./playbooks/ubuntu/upgrade.yml
+  #   - name: Run ubuntu/upgrade playbook
+  #     working-directory: ./ansible
+  #     run: ansible-playbook -i ./inventory/e2e/hosts.yml ./playbooks/ubuntu/upgrade.yml
 
-    - name: Reboot all nodes
-      working-directory: ./ansible
-      run: ansible all -i ./inventory/e2e/hosts.yml --one-line -m reboot
+  #   - name: Reboot all nodes
+  #     working-directory: ./ansible
+  #     run: ansible all -i ./inventory/e2e/hosts.yml --one-line -m reboot
 
-    - name: Run ubuntu/prepare playbook
-      working-directory: ./ansible
-      run: ansible-playbook -i ./inventory/e2e/hosts.yml ./playbooks/ubuntu/prepare.yml
+  #   - name: Run ubuntu/prepare playbook
+  #     working-directory: ./ansible
+  #     run: ansible-playbook -i ./inventory/e2e/hosts.yml ./playbooks/ubuntu/prepare.yml
 
-    - name: Reboot all nodes
-      working-directory: ./ansible
-      run: ansible all -i ./inventory/e2e/hosts.yml --one-line -m reboot
+  #   - name: Reboot all nodes
+  #     working-directory: ./ansible
+  #     run: ansible all -i ./inventory/e2e/hosts.yml --one-line -m reboot
 
-    - name: Run k3s/install playbook
-      working-directory: ./ansible
-      run: ansible-playbook -i ./inventory/e2e/hosts.yml ./playbooks/k3s/install.yml
+  #   - name: Run k3s/install playbook
+  #     working-directory: ./ansible
+  #     run: ansible-playbook -i ./inventory/e2e/hosts.yml ./playbooks/k3s/install.yml
 
-    - name: Upload kubeconfig
-      uses: actions/upload-artifact@v2
-      with:
-        name: kubeconfig
-        path: /tmp/k3s.yaml
+  #   - name: Upload kubeconfig
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: kubeconfig
+  #       path: /tmp/k3s.yaml
 
-  deploy-nginx:
-    needs:
-    - cloud-resources
-    - playbooks
-    runs-on: ubuntu-20.04
+  # deploy-nginx:
+  #   needs:
+  #   - cloud-resources
+  #   - playbooks
+  #   runs-on: ubuntu-20.04
 
-    steps:
-    - name: Checkout source code
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
+  #   steps:
+  #   - name: Checkout source code
+  #     uses: actions/checkout@v2
+  #     with:
+  #       fetch-depth: 1
 
-    - name: Install yq
-      run: |
-        curl -sLO "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-        sudo mv yq_linux_amd64 /usr/local/bin/yq
-        chmod +x /usr/local/bin/yq
-        yq --version
+  #   - name: Install yq
+  #     run: |
+  #       curl -sLO "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
+  #       sudo mv yq_linux_amd64 /usr/local/bin/yq
+  #       chmod +x /usr/local/bin/yq
+  #       yq --version
 
-    - name: Install kubectl
-      run: |
-        curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        sudo mv kubectl /usr/local/bin/kubectl
-        chmod +x /usr/local/bin/kubectl
-        kubectl version --client
+  #   - name: Install kubectl
+  #     run: |
+  #       curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  #       sudo mv kubectl /usr/local/bin/kubectl
+  #       chmod +x /usr/local/bin/kubectl
+  #       kubectl version --client
 
-    - name: Download Ansible inventory
-      uses: actions/download-artifact@v2
-      with:
-        name: hosts
-        path: ./ansible/inventory/e2e/hosts.yml
+  #   - name: Download Ansible inventory
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: hosts
+  #       path: ./ansible/inventory/e2e/hosts.yml
 
-    - name: Download kubeconfig
-      uses: actions/download-artifact@v2
-      with:
-        name: kubeconfig
-        path: /tmp/k3s.yaml
+  #   - name: Download kubeconfig
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: kubeconfig
+  #       path: /tmp/k3s.yaml
 
-    - name: Display structure of downloaded files
-      run: ls -R
-      working-directory: /tmp/k3s.yaml
+  #   - name: Display structure of downloaded files
+  #     run: ls -R
+  #     working-directory: /tmp/k3s.yaml
 
-    - name: Get HTTP Load Balancer IP
-      run: |
-        IP=$(yq e '.all | .. | select(.digitalocean_http_ip) | .digitalocean_http_ip' ./ansible/inventory/e2e/hosts.yml | head -n 1)
-        echo ::set-output name=ip::${IP}
+  #   - name: Get HTTP Load Balancer IP
+  #     run: |
+  #       IP=$(yq e '.all | .. | select(.digitalocean_http_ip) | .digitalocean_http_ip' ./ansible/inventory/e2e/hosts.yml | head -n 1)
+  #       echo ::set-output name=ip::${IP}
 
-    - name: Run kubectl
-      run: |
-        kubectl --kubeconfig /tmp/k3s.yaml/k3s.yaml get nodes -o wide
+  #   - name: Run kubectl
+  #     run: |
+  #       kubectl --kubeconfig /tmp/k3s.yaml/k3s.yaml get nodes -o wide
 
   cleanup:
     needs:
     - cloud-resources
-    - playbooks
-    - deploy-nginx
+    # - playbooks
+    # - deploy-nginx
     if: always()
     runs-on: ubuntu-20.04
 
@@ -234,10 +239,16 @@ jobs:
       with:
         fetch-depth: 1
 
+    - name: Set up a local PATH
+      run: |
+        mkdir "${HOME}/.local/bin"
+        echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+
     - name: Install Pulumi
       run: |
         curl -fsSL https://get.pulumi.com | sh
-        sudo mv /home/runner/.pulumi/bin/pulumi /usr/local/bin
+        mv /home/runner/.pulumi/bin/pulumi "${HOME}/.local/pulumi"
+        chmod +x "${HOME}/.local/pulumi"
         pulumi version
 
     - name: Cache node modules
@@ -246,7 +257,7 @@ jobs:
       env:
         cache-name: cache-node-modules
       with:
-        path: ./ansible/tests/node_modules
+        path: "${CUSTOM_TESTS_DIR}/node_modules"
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -254,14 +265,14 @@ jobs:
           ${{ runner.os }}-
 
     - name: Install npm deps
-      working-directory: ./ansible/tests
+      working-directory: "${CUSTOM_TESTS_DIR}"
       run: npm install
       if: steps.node_modules_cache.outputs.cache-hit != 'true'
 
     - name: Change Pulumi stack
-      working-directory: ./ansible/tests
+      working-directory: "${CUSTOM_TESTS_DIR}"
       run: pulumi stack select ubuntu-2010
 
     - name: Destroy cloud resources
-      working-directory: ./ansible/tests
+      working-directory: "${CUSTOM_TESTS_DIR}"
       run: pulumi destroy --yes
