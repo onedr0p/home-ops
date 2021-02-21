@@ -229,9 +229,54 @@ jobs:
   #     run: |
   #       kubectl --kubeconfig /tmp/k3s.yaml/k3s.yaml get nodes -o wide
 
+  test1:
+    needs:
+    - cloud-resources
+
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - name: Download Ansible inventory
+      uses: actions/download-artifact@v2
+      with:
+        name: hosts
+        path: "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
+
+    - name: Read hosts.yml
+      run: |
+        cat "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
+
+  test2:
+    needs:
+    - cloud-resources
+    - test1
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - name: Download Ansible inventory
+      uses: actions/download-artifact@v2
+      with:
+        name: hosts
+        path: "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
+
+    - name: Read hosts.yml
+      run: |
+        cat "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
+
   cleanup:
     needs:
     - cloud-resources
+    - test1
+    - test2
     # - playbooks
     # - deploy-nginx
     if: always()
