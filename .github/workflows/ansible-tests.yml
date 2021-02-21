@@ -167,7 +167,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: kubeconfig
-        path: /tmp/kubeconfig
+        path: /tmp/k3s.yaml
 
   deploy-nginx:
     needs:
@@ -205,7 +205,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: kubeconfig
-        path: /tmp/kubeconfig
+        path: /tmp/k3s.yaml
 
     - name: Get HTTP Load Balancer IP
       run: |
@@ -214,7 +214,7 @@ jobs:
 
     - name: Run kubectl
       run: |
-        kubectl --kubeconfig /tmp/kubeconfig get nodes -o wide
+        kubectl --kubeconfig /tmp/k3s.yaml get nodes -o wide
 
   cleanup:
     needs:
