@@ -148,7 +148,7 @@ jobs:
 
     - name: Reboot all nodes
       working-directory: ./ansible
-      run: ansible all -i ./inventory/e2e/hosts.yml --forks 1 -m reboot
+      run: ansible all -i ./inventory/e2e/hosts.yml --one-line -m reboot
 
     - name: Run ubuntu/prepare playbook
       working-directory: ./ansible
@@ -156,15 +156,7 @@ jobs:
 
     - name: Reboot all nodes
       working-directory: ./ansible
-      run: ansible all -i ./inventory/e2e/hosts.yml --forks 1 -m reboot
-
-    - name: Waiting for all hosts to become ready
-      uses: nick-invision/retry@v2
-      with:
-        timeout_seconds: 30
-        max_attempts: 10
-        retry_on: error
-        command: ansible all -i ./ansible/inventory/e2e/hosts.yml --one-line -m ping
+      run: ansible all -i ./inventory/e2e/hosts.yml --one-line -m reboot
 
     - name: Run k3s/install playbook
       working-directory: ./ansible
@@ -174,7 +166,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: kubeconfig
-        path: ./ansible/kubeconfig
+        path: /tmp/kubeconfig
 
   deploy-nginx:
     needs:
@@ -212,7 +204,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: kubeconfig
-        path: ./ansible/kubeconfig
+        path: /tmp/kubeconfig
 
     - name: Get HTTP Load Balancer IP
       run: |
@@ -221,7 +213,7 @@ jobs:
 
     - name: Run kubectl
       run: |
-        kubectl --kubeconfig ./ansible/kubeconfig get nodes -o wide
+        kubectl --kubeconfig /tmp/kubeconfig get nodes -o wide
 
   cleanup:
     needs:

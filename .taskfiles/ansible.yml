@@ -20,7 +20,12 @@ tasks:
     cmds:
     - ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_HOSTS}} --list-hosts
 
-  upgrade:nodes:
+  upgrade:
     desc: Upgrade all the k8s node's operating system
     cmds:
     - ansible-playbook -i {{.ANSIBLE_HOSTS}} ./ansible/playbooks/ubuntu/upgrade.yml
+
+  reboot:
+    desc: Reboot all the k8s nodes
+    cmds:
+    - ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_HOSTS}} -m reboot
