@@ -143,12 +143,18 @@ jobs:
         path: ./server/ansible/inventory/e2e/
 
     - name: Wait for all hosts to become ready
-      uses: nick-invision/retry@v2
-      with:
-        timeout_seconds: 30
-        max_attempts: 10
-        retry_on: error
-        command: ansible all -i ./server/ansible/inventory/e2e/hosts.yml --one-line -m ping
+      run: |
+        attempt_counter=0
+        max_attempts=10
+        until $(ansible all -i ./server/ansible/inventory/e2e/hosts.yml --one-line -m ping >/dev/null 2>&1); do
+            if [ ${attempt_counter} -eq ${max_attempts} ];then
+              echo "Max attempts reached"
+              exit 1
+            fi
+            printf '.'
+            attempt_counter=$(($attempt_counter+1))
+            sleep 5
+        done
 
     - name: Run ubuntu/upgrade playbook
       working-directory: ./server/ansible
@@ -233,10 +239,10 @@ jobs:
         done
 
     - name: Wait for coredns deployment to rollout
-      run: kubectl --kubeconfig ./server/ansible/kubeconfig -n kube-system wait deployment.apps/coredns --for=condition=available --timeout=2m
+      run: kubectl --kubeconfig ./server/ansible/kubeconfig -n kube-system wait deployment.apps/coredns --for=condition=available --timeout=1m
 
     - name: Wait for calico deployment to rollout
-      run: kubectl --kubeconfig ./server/ansible/kubeconfig -n tigera-operator wait deployment.apps/tigera-operator --for=condition=available --timeout=2m
+      run: kubectl --kubeconfig ./server/ansible/kubeconfig -n tigera-operator wait deployment.apps/tigera-operator --for=condition=available --timeout=1m
 
     - name: Create nginx service and deployment
       run: kubectl --kubeconfig ./server/ansible/kubeconfig apply -f ./server/tests/nginx-deployment.yaml
@@ -244,13 +250,19 @@ jobs:
     - name: Wait for nginx deployment to rollout
       run: kubectl --kubeconfig ./server/ansible/kubeconfig -n default wait deployment.apps/nginx --for=condition=available --timeout=2m
 
-    - name: Wait for connections to nginx
-      uses: nick-invision/retry@v2
-      with:
-        timeout_seconds: 30
-        max_attempts: 10
-        retry_on: error
-        command: curl --silent --url http://${{ steps.ip.outputs.ip }}:80
+    - name: Wait for 200 HTTP status from nginx deployment
+      run: |
+        attempt_counter=0
+        max_attempts=10
+        until [[ $(curl --head --silent --max-time 5 --output /dev/null -w %{http_code} http://${{ steps.ip.outputs.ip }}:80) =~ 2[0-9][0-9]  ]]; do
+            if [ ${attempt_counter} -eq ${max_attempts} ];then
+              echo "Max attempts reached"
+              exit 1
+            fi
+            printf '.'
+            attempt_counter=$(($attempt_counter+1))
+            sleep 5
+        done
 
     - name: Debug failure
       if: failure()
