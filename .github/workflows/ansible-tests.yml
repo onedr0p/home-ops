@@ -36,8 +36,8 @@ jobs:
 
     - name: Install yq
       run: |
-        curl -sL -o yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-        sudo mv yq /usr/local/bin
+        curl -sLO "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
+        sudo mv yq_linux_amd64 /usr/local/bin/yq
         chmod +x /usr/local/bin/yq
         yq --version
 
@@ -96,8 +96,8 @@ jobs:
 
     - name: Install yq
       run: |
-        curl -sL -o yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-        sudo mv yq /usr/local/bin
+        curl -sLO "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
+        sudo mv yq_linux_amd64 /usr/local/bin/yq
         chmod +x /usr/local/bin/yq
         yq --version
 
@@ -182,27 +182,29 @@ jobs:
 
     - name: Install yq
       run: |
-        curl -sL -o yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-        sudo mv yq /usr/local/bin
+        curl -sLO "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
+        sudo mv yq_linux_amd64 /usr/local/bin/yq
         chmod +x /usr/local/bin/yq
         yq --version
 
     - name: Install kubectl
-      uses: azure/setup-kubectl@v1
-      with:
-        version: stable
+      run: |
+        curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        sudo mv kubectl /usr/local/bin/kubectl
+        chmod +x /usr/local/bin/kubectl
+        kubectl version --client
 
     - name: Download Ansible inventory
       uses: actions/download-artifact@v2
       with:
         name: hosts
-        path: hosts.yml
+        path: ./ansible/inventory/e2e/hosts.yml
 
     - name: Download kubeconfig
       uses: actions/download-artifact@v2
       with:
         name: kubeconfig
-        path: kubeconfig
+        path: ./ansible/kubeconfig
 
     - name: Get HTTP Load Balancer IP
       run: |
@@ -211,7 +213,7 @@ jobs:
 
     - name: Run kubectl
       run: |
-        kubectl --kubeconfig kubeconfig get nodes -o wide
+        kubectl --kubeconfig ./ansible/kubeconfig get nodes -o wide
 
   cleanup:
     needs:
