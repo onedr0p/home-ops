@@ -146,9 +146,17 @@ jobs:
       working-directory: ./ansible
       run: ansible-playbook -i ./inventory/e2e/hosts.yml ./playbooks/ubuntu/upgrade.yml
 
+    - name: Reboot all nodes
+      working-directory: ./ansible
+      run: ansible all -i ./inventory/e2e/hosts.yml --forks 1 -m reboot
+
     - name: Run ubuntu/prepare playbook
       working-directory: ./ansible
       run: ansible-playbook -i ./inventory/e2e/hosts.yml ./playbooks/ubuntu/prepare.yml
+
+    - name: Reboot all nodes
+      working-directory: ./ansible
+      run: ansible all -i ./inventory/e2e/hosts.yml --forks 1 -m reboot
 
     - name: Waiting for all hosts to become ready
       uses: nick-invision/retry@v2
@@ -166,7 +174,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: kubeconfig
-        path: ./kubeconfig
+        path: ./ansible/kubeconfig
 
   deploy-nginx:
     needs:
