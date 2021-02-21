@@ -9,6 +9,7 @@ const dropletGenericTypeTag = new digitalocean.Tag(`ansible-generic-${pulumi.get
 const dropletControlCount = 1;
 const dropletGenericCount = 2;
 
+// Create 'master' nodes
 const controlDroplets = [];
 for (let i = 0; i < dropletControlCount; i++) {
     const nodeLetter = String.fromCharCode(97 + i);
@@ -18,12 +19,13 @@ for (let i = 0; i < dropletControlCount; i++) {
         image: "ubuntu-20-10-x64",
         region: region,
         privateNetworking: true,
-        size: digitalocean.DropletSlugs.DropletC2,
+        size: digitalocean.DropletSlugs.DropletS1VCPU2GB,
         tags: [nameTag.id, dropletControlTypeTag.id],
         sshKeys: ["29649448", "29653368"],
     }));
 }
 
+// Create 'worker' nodes
 const genericDroplets = [];
 for (let i = 0; i < dropletGenericCount; i++) {
     const nodeLetter = String.fromCharCode(97 + i);
@@ -33,12 +35,13 @@ for (let i = 0; i < dropletGenericCount; i++) {
         image: "ubuntu-20-10-x64",
         region: region,
         privateNetworking: true,
-        size: digitalocean.DropletSlugs.DropletC2,
+        size: digitalocean.DropletSlugs.DropletS1VCPU2GB,
         tags: [nameTag.id, dropletGenericTypeTag.id],
         sshKeys: ["29649448", "29653368"],
     }));
 }
 
+// Create Load Balancer for the Kubernetes API
 const kubernetesLoadBalancer = new digitalocean.LoadBalancer("kubernetes-public", {
     dropletTag: dropletControlTypeTag.name,
     forwardingRules: [{
@@ -55,6 +58,7 @@ const kubernetesLoadBalancer = new digitalocean.LoadBalancer("kubernetes-public"
     region: region,
 });
 
+// Create Load Balancer for the NGINX Deployment
 const httpLoadBalancer = new digitalocean.LoadBalancer("http-public", {
     dropletTag: dropletGenericTypeTag.name,
     forwardingRules: [{
@@ -70,6 +74,8 @@ const httpLoadBalancer = new digitalocean.LoadBalancer("http-public", {
     region: region,
 });
 
+// Export in format interoperable with Ansible
+// e.g. using yq@v4 'pulumi stack output --json | yq eval -P - > hosts.yml'
 export const all = {
     children: {
         "control-nodes": {
