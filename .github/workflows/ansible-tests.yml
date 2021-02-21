@@ -85,13 +85,13 @@ jobs:
 
     - name: Save Ansible inventory
       working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
-      run: pulumi stack output --json | yq eval -P - > /tmp/hosts.yml
+      run: pulumi stack output --json | yq eval -P - > "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
 
     - name: Upload Ansible inventory
       uses: actions/upload-artifact@v2
       with:
         name: hosts
-        path: /tmp/hosts.yml
+        path: "${{ env.CUSTOM_ANSIBLE_INVENTORY_FILE }}"
 
   # playbooks:
   #   needs:
