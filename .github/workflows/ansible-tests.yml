@@ -21,13 +21,13 @@ env:
   PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
   DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
   ANSIBLE_HOST_KEY_CHECKING: "False"
-  # CUSTOM_ANSIBLE_DIR: "./server/ansible"
-  # CUSTOM_ANSIBLE_INVENTORY_FILE: "./server/ansible/inventory/e2e/hosts.yml"
-  # CUSTOM_TESTS_DIR: "./server/tests"
+  CUSTOM_ANSIBLE_DIR: "./server/ansible"
+  CUSTOM_ANSIBLE_INVENTORY_FILE: "./server/ansible/inventory/e2e/hosts.yml"
+  CUSTOM_TESTS_DIR: "./server/tests"
 
-defaults:
-  run:
-    working-directory: ./server
+# defaults:
+#   run:
+#     working-directory: ./server
 
 jobs:
   cloud-resources:
@@ -63,7 +63,7 @@ jobs:
       env:
         cache-name: cache-node-modules
       with:
-        path: "./tests/node_modules"
+        path: "${{ env.CUSTOM_TESTS_DIR }}/node_modules"
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -71,20 +71,20 @@ jobs:
           ${{ runner.os }}-
 
     - name: Install npm deps
-      working-directory: "./tests"
+      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
       run: npm install
       if: steps.node_modules_cache.outputs.cache-hit != 'true'
 
     - name: Change Pulumi stack
-      working-directory: "./tests"
+      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
       run: pulumi stack select ubuntu-2010
 
     - name: Create cloud resources
-      working-directory: "./tests"
+      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
       run: pulumi up --yes
 
     - name: Save Ansible inventory
-      working-directory: "./tests"
+      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
       run: pulumi stack output --json | yq eval -P - > /tmp/hosts.yml
 
     - name: Upload Ansible inventory
@@ -261,7 +261,7 @@ jobs:
       env:
         cache-name: cache-node-modules
       with:
-        path: "./tests/node_modules"
+        path: "${{ env.CUSTOM_TESTS_DIR }}/node_modules"
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -269,14 +269,14 @@ jobs:
           ${{ runner.os }}-
 
     - name: Install npm deps
-      working-directory: "./tests"
+      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
       run: npm install
       if: steps.node_modules_cache.outputs.cache-hit != 'true'
 
     - name: Change Pulumi stack
-      working-directory: "./tests"
+      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
       run: pulumi stack select ubuntu-2010
 
     - name: Destroy cloud resources
-      working-directory: "./tests"
+      working-directory: "${{ env.CUSTOM_TESTS_DIR }}"
       run: pulumi destroy --yes
