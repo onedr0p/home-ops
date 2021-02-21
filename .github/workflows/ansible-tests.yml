@@ -207,6 +207,10 @@ jobs:
         name: kubeconfig
         path: /tmp/k3s.yaml
 
+    - name: Display structure of downloaded files
+      run: ls -R
+      working-directory: /tmp/k3s.yaml
+
     - name: Get HTTP Load Balancer IP
       run: |
         IP=$(yq e '.all | .. | select(.digitalocean_http_ip) | .digitalocean_http_ip' hosts.yml | head -n 1)
