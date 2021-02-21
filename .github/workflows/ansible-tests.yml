@@ -7,15 +7,13 @@ on:
   push:
     branches:
     - main
-  #   paths:
-  #   - 'server/ansible/**'
-  # pull_request:
-  #   paths:
-  #   - 'server/ansible/inventory/e2e/**/*.yml'
-  #   - 'server/ansible/playbooks/**/*.yml'
-  #   - 'server/ansible/roles/**/*.yml'
-  #   - 'server/ansible/requirements.yml'
-  #   - 'server/tests/**'
+    paths:
+    - 'server/ansible/**'
+    - 'server/tests/**'
+  pull_request:
+    paths:
+    - 'server/ansible/**'
+    - 'server/tests/**'
 
 env:
   # Pulumi config
@@ -226,58 +224,72 @@ jobs:
         IP=$(yq e '.all | .. | select(.digitalocean_http_ip) | .digitalocean_http_ip' ./server/ansible/inventory/e2e/hosts.yml | head -n 1)
         echo ::set-output name=ip::${IP}
 
-    - name: Run kubectl
+    - name: Verify coredns
       run: |
-        kubectl --kubeconfig ./server/ansible/kubeconfig get nodes -o wide
+        kubectl --kubeconfig ./server/ansible/kubeconfig -n kube-system wait deployment.apps/coredns --for=condition=ready --timeout=3m
 
-  teardown:
-    needs:
-    - setup
-    - install
-    - verify
-    if: always()
-    runs-on: ubuntu-20.04
-
-    steps:
-    - name: Checkout source code
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
-
-    - name: Create local PATH
+    - name: Verify calico
       run: |
-        mkdir -p "${HOME}/.local/bin"
-        echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+        kubectl --kubeconfig ./server/ansible/kubeconfig -n tigera-operator wait deployment.apps/tigera-operator --for=condition=ready --timeout=3m
+        kubectl --kubeconfig ./server/ansible/kubeconfig -n calico-system wait daemonset.apps/calico-node --for=condition=ready --timeout=3m
+        kubectl --kubeconfig ./server/ansible/kubeconfig -n calico-system wait deployment.apps/calico-typha --for=condition=ready --timeout=3m
+        kubectl --kubeconfig ./server/ansible/kubeconfig -n calico-system wait deployment.apps/calico-kube-controllers --for=condition=ready --timeout=3m
 
-    - name: Install Pulumi
+    - name: Debug failure
+      if: failure()
       run: |
-        curl -fsSL https://get.pulumi.com | sh
-        mv /home/runner/.pulumi/bin/pulumi "${HOME}/.local/bin/pulumi"
-        chmod +x "${HOME}/.local/bin/pulumi"
-        pulumi version
+        kubectl --kubeconfig ./server/ansible/kubeconfig -n tigera-operator get all
+        kubectl --kubeconfig ./server/ansible/kubeconfig -n calico-system get all
+        kubectl --kubeconfig ./server/ansible/kubeconfig -n kube-system get all
 
-    - name: Cache node modules
-      id: node_modules_cache
-      uses: actions/cache@v2
-      env:
-        cache-name: cache-node-modules
-      with:
-        path: "./server/tests/node_modules"
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
+  # teardown:
+  #   needs:
+  #   - setup
+  #   - install
+  #   - verify
+  #   if: always()
+  #   runs-on: ubuntu-20.04
 
-    - name: Install npm deps
-      working-directory: "./server/tests"
-      run: npm install
-      if: steps.node_modules_cache.outputs.cache-hit != 'true'
+  #   steps:
+  #   - name: Checkout source code
+  #     uses: actions/checkout@v2
+  #     with:
+  #       fetch-depth: 1
 
-    - name: Change Pulumi stack
-      working-directory: "./server/tests"
-      run: pulumi stack select ubuntu-2010
+  #   - name: Create local PATH
+  #     run: |
+  #       mkdir -p "${HOME}/.local/bin"
+  #       echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
 
-    - name: Destroy cloud resources
-      working-directory: "./server/tests"
-      run: pulumi destroy --yes
+  #   - name: Install Pulumi
+  #     run: |
+  #       curl -fsSL https://get.pulumi.com | sh
+  #       mv /home/runner/.pulumi/bin/pulumi "${HOME}/.local/bin/pulumi"
+  #       chmod +x "${HOME}/.local/bin/pulumi"
+  #       pulumi version
+
+  #   - name: Cache node modules
+  #     id: node_modules_cache
+  #     uses: actions/cache@v2
+  #     env:
+  #       cache-name: cache-node-modules
+  #     with:
+  #       path: "./server/tests/node_modules"
+  #       key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+  #       restore-keys: |
+  #         ${{ runner.os }}-build-${{ env.cache-name }}-
+  #         ${{ runner.os }}-build-
+  #         ${{ runner.os }}-
+
+  #   - name: Install npm deps
+  #     working-directory: "./server/tests"
+  #     run: npm install
+  #     if: steps.node_modules_cache.outputs.cache-hit != 'true'
+
+  #   - name: Change Pulumi stack
+  #     working-directory: "./server/tests"
+  #     run: pulumi stack select ubuntu-2010
+
+  #   - name: Destroy cloud resources
+  #     working-directory: "./server/tests"
+  #     run: pulumi destroy --yes

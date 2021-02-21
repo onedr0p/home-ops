@@ -44,7 +44,7 @@ done
 # Run the Ansible k3s install playbook
 ansible-playbook -i "${inventory}" "${ansible_root}/playbooks/k3s/install.yml"
 
-watch kubectl --kubeconfig "/tmp/k3s.yaml" get nodes -o wide
+kubectl --kubeconfig "/tmp/kubeconfig" get nodes -o wide
 
 # Destroy cloud resouces
 # pulumi destroy --yes
