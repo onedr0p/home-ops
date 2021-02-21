@@ -1,0 +1,53 @@
+---
+version: '3'
+
+vars:
+  PACKAGES: |-
+    coreutils findutils gnu-sed grep fluxcd/tap/flux helm jq kubectl kubeseal pre-commit python3 shellcheck sops sshpass velero wget yamllint yq gettext direnv
+
+tasks:
+
+  #
+  # OS deps
+  #
+
+  install:
+    desc: Verify all required dependencies are installed
+    cmds:
+    - brew install {{.PACKAGES}}
+    - |
+      cat <<EOL
+
+        # Packages installed, make sure to update your fish config to make use of the GNU tools
+
+        set -g fish_user_paths "/usr/local/opt/coreutils/libexec/gnubin" $fish_user_paths
+        set -g fish_user_paths "/usr/local/opt/findutils/libexec/gnubin" $fish_user_paths
+        set -g fish_user_paths "/usr/local/opt/gettext/bin" $fish_user_paths
+        set -g fish_user_paths "/usr/local/opt/grep/libexec/gnubin" $fish_user_paths
+        set -g fish_user_paths "/usr/local/opt/libiconv/bin" $fish_user_paths
+      EOL
+    silent: true
+
+  #
+  # Ansible deps
+  #
+
+  ansible:install:
+    desc: Install required Ansible deps
+    cmds:
+    - task: ansible:galaxy
+    - task: ansible:python
+    - echo "* All dependencies were successfully installed"
+    silent: true
+
+  # Install Ansible Galaxy dependencies
+  ansible:galaxy:
+    cmds:
+    - ansible-galaxy install -r ./ansible/requirements.yml --force
+    silent: true
+
+  # Install Python 3 dependencies
+  ansible:python:
+    cmds:
+    - pip3 install -r ./ansible/requirements.txt
+    silent: true

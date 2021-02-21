@@ -5,15 +5,10 @@ env:
   ANSIBLE_CONFIG: ./ansible/ansible.cfg
 
 vars:
-  ANSIBLE_HOSTS: ./ansible/inventory/k3s-single-control-plane/hosts.yml
+  ANSIBLE_HOSTS: ./ansible/inventory/home-cluster/hosts.yml
   ANSIBLE_GROUPS: control-nodes:generic-nodes
 
 tasks:
-  deps:
-    desc: Install Ansible dependencies
-    cmds:
-    - ansible-galaxy install -r ./ansible/requirements.yml --force
-    - pip3 install -r ./ansible/requirements.txt
 
   ping:
     desc: Ping all the k8s nodes
@@ -25,7 +20,7 @@ tasks:
     cmds:
     - ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_HOSTS}} --list-hosts
 
-  playbook:ubuntu:upgrade:
+  upgrade:nodes:
     desc: Upgrade all the k8s node's operating system
     cmds:
     - ansible-playbook -i {{.ANSIBLE_HOSTS}} ./ansible/playbooks/ubuntu/upgrade.yml
