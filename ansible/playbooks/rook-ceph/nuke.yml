@@ -4,17 +4,7 @@
   - generic-nodes
   become: true
   gather_facts: true
-  vars_prompt:
-  - name: "nuke_confirmation"
-    prompt: "This will DESTROY rook-ceph disks. Do you wish to continue? [Y/n]"
-    default: "n"
-    private: false
   any_errors_fatal: true
-  pre_tasks:
-  - name: check confirmation
-    fail:
-      msg: "Abort."
-    when: nuke_confirmation != "Y"
   tasks:
   - name: remove /var/lib/rook
     become: true

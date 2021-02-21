@@ -110,13 +110,13 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y python*-wheel python*-yaml
-        python3 -m pip install --upgrade pip
+        python3 -m pip install --no-cache-dir --upgrade pip
         python3 -V
         pip --version
 
     - name: Upgrade Ansible
       run: |
-        python3 -m pip install --force-reinstall --upgrade 'ansible>=3.0.0'
+        python3 -m pip install --no-cache-dir --force-reinstall --upgrade 'ansible>=3.0.0'
         ansible --version
 
     - name: Install SSH key
@@ -141,6 +141,10 @@ jobs:
         max_attempts: 10
         retry_on: error
         command: ansible all -i ./ansible/inventory/e2e/hosts.yml --one-line -m ping
+
+    - name: Run ubuntu/upgrade playbook
+      working-directory: ./ansible
+      run: ansible-playbook -i ./inventory/e2e/hosts.yml ./playbooks/ubuntu/upgrade.yml
 
     - name: Run ubuntu/prepare playbook
       working-directory: ./ansible

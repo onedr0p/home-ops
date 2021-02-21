@@ -5,17 +5,7 @@
   - generic-nodes
   become: true
   gather_facts: true
-  vars_prompt:
-  - name: "run_confirmation"
-    prompt: "This will DESTROY your cluster. Do you wish to continue? [Y/n]"
-    default: "n"
-    private: false
   any_errors_fatal: true
-  pre_tasks:
-  - name: check confirmation
-    fail:
-      msg: "Abort."
-    when: run_confirmation != "Y"
   tasks:
   - name: kill k3s
     ansible.builtin.command: /usr/local/bin/k3s-killall.sh
@@ -39,5 +29,4 @@
     loop: "{{ files_to_delete.files }}"
   - name: reboot
     ansible.builtin.reboot:
-      msg: "Nodes are being rebooted..."
     ignore_errors: true

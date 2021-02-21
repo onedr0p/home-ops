@@ -7,6 +7,34 @@
     src: packages-02norecommends
     dest: /etc/apt/apt.conf.d/02norecommends
 
+- name: packages | upgrade all packages
+  ansible.builtin.apt:
+    upgrade: full
+    update_cache: true
+    cache_valid_time: 3600
+    autoclean: true
+    autoremove: true
+  register: apt_upgrade
+  retries: 5
+  until: apt_upgrade is success
+
+- name: packages | install common
+  become: true
+  ansible.builtin.apt:
+    name: "{{ packages.apt_install }}"
+    install_recommends: false
+    update_cache: true
+    cache_valid_time: 3600
+    autoclean: true
+    autoremove: true
+  register: apt_install_common
+  retries: 5
+  until: apt_install_common is success
+  when:
+  - packages.apt_install is defined
+  - packages.apt_install is iterable
+  - packages.apt_install | length > 0
+
 - name: packages | gather install packages
   ansible.builtin.package_facts:
     manager: auto
@@ -73,34 +101,6 @@
   - packages.apt_remove | length > 0
   - "'snapd' in packages.apt_remove"
   - "'cloud-init' in packages.apt_remove"
-
-- name: packages | upgrade all packages
-  ansible.builtin.apt:
-    upgrade: full
-    update_cache: true
-    cache_valid_time: 3600
-    autoclean: true
-    autoremove: true
-  register: apt_upgrade
-  retries: 5
-  until: apt_upgrade is success
-
-- name: packages | install common
-  become: true
-  ansible.builtin.apt:
-    name: "{{ packages.apt_install }}"
-    install_recommends: false
-    update_cache: true
-    cache_valid_time: 3600
-    autoclean: true
-    autoremove: true
-  register: apt_install_common
-  retries: 5
-  until: apt_install_common is success
-  when:
-  - packages.apt_install is defined
-  - packages.apt_install is iterable
-  - packages.apt_install | length > 0
 
 # Until focal has https://launchpad.net/ubuntu/+source/htop
 # - name: packages | install latest htop
