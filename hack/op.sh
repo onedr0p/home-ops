@@ -2,7 +2,7 @@
 set -eu
 
 #
-# Pre-requisite: run `op signin <op-domain>` once
+# Pre-requisite: run `op signin <op-domain>` once, then
 #
 # Usage: ./op.sh <op-domain> <op-email> <op-vault>
 #
