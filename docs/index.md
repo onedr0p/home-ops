@@ -1,0 +1,3 @@
+# Hi
+
+Welcome to mkdocs :)
