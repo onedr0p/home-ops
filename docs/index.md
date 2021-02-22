@@ -1,3 +1,3 @@
-# Hi
+# Home Cluster
 
-Welcome to mkdocs :)
+My home Kubernetes (k3s) cluster managed by GitOps (Flux2)
