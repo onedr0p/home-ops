@@ -17,6 +17,8 @@
   register: apt_upgrade
   retries: 5
   until: apt_upgrade is success
+  when:
+  - (skip_upgrade_packages is not defined or (skip_upgrade_packages is defined and not skip_upgrade_packages))
 
 - name: packages | install common
   become: true
@@ -35,83 +37,57 @@
   - packages.apt_install is iterable
   - packages.apt_install | length > 0
 
-- name: packages | gather install packages
-  ansible.builtin.package_facts:
-    manager: auto
-  when:
-  - packages.apt_remove is defined
-  - packages.apt_remove is iterable
-  - packages.apt_remove | length > 0
-  - "'snapd' in packages.apt_remove"
-
-- name: packages | check if snap is installed
-  ansible.builtin.debug:
-    msg: "snapd is installed"
-  register: snapd_check
-  when:
-  - "'snapd' in ansible_facts.packages"
-  - packages.apt_remove is defined
-  - packages.apt_remove is iterable
-  - packages.apt_remove | length > 0
-  - "'snapd' in packages.apt_remove"
-
-- name: packages | remove snap packages
+- name: packages | remove crufty packages
   become: true
-  ansible.builtin.command: snap remove {{ item }}
-  loop:
-  - lxd
-  - core18
-  - snapd
+  block:
+  - name: packages | remove crufty packages | gather install packages
+    ansible.builtin.package_facts:
+      manager: auto
+    when:
+    - "'snapd' in packages.apt_remove"
+  - name: packages | remove crufty packages | check if snap is installed
+    ansible.builtin.debug:
+      msg: "snapd is installed"
+    register: snapd_check
+    when:
+    - "'snapd' in packages.apt_remove"
+    - "'snapd' in ansible_facts.packages"
+  - name: packages | remove crufty packages | remove snap packages
+    become: true
+    ansible.builtin.command: snap remove {{ item }}
+    loop:
+    - lxd
+    - core18
+    - snapd
+    when:
+    - "'snapd' in packages.apt_remove"
+    - "'snapd' in ansible_facts.packages"
+    - snapd_check.failed is defined
+  - name: packages | remove crufty packages | remove packages
+    become: true
+    ansible.builtin.apt:
+      name: "{{ packages.apt_remove }}"
+      state: absent
+      autoremove: true
+  - name: packages | remove crufty packages | remove crufty files
+    become: true
+    ansible.builtin.file:
+      state: absent
+      path: "{{ item }}"
+    loop:
+    - "/home/{{ ansible_user }}/.snap"
+    - "/snap"
+    - "/var/snap"
+    - "/var/lib/snapd"
+    - "/var/cache/snapd"
+    - "/usr/lib/snapd"
+    - "/etc/cloud"
+    - "/var/lib/cloud"
+    when:
+    - "'snapd' in packages.apt_remove"
+    - "'cloud-init' in packages.apt_remove"
   when:
-  - ansible_distribution == 'Ubuntu'
-  - snapd_check.failed is defined
   - packages.apt_remove is defined
   - packages.apt_remove is iterable
   - packages.apt_remove | length > 0
-  - "'snapd' in packages.apt_remove"
-
-- name: packages | remove packages
-  become: true
-  ansible.builtin.apt:
-    name: "{{ packages.apt_remove }}"
-    state: absent
-    autoremove: true
-  when:
-  - packages.apt_remove is defined
-  - packages.apt_remove is iterable
-  - packages.apt_remove | length > 0
-
-- name: packages | remove file and directory cruft
-  become: true
-  ansible.builtin.file:
-    state: absent
-    path: "{{ item }}"
-  loop:
-  - "/home/{{ ansible_user }}/.snap"
-  - "/snap"
-  - "/var/snap"
-  - "/var/lib/snapd"
-  - "/var/cache/snapd"
-  - "/usr/lib/snapd"
-  - "/etc/cloud"
-  - "/var/lib/cloud"
-  when:
-  - packages.apt_remove is defined
-  - packages.apt_remove is iterable
-  - packages.apt_remove | length > 0
-  - "'snapd' in packages.apt_remove"
-  - "'cloud-init' in packages.apt_remove"
-
-# Until focal has https://launchpad.net/ubuntu/+source/htop
-# - name: packages | install latest htop
-#   become: true
-#   ansible.builtin.apt:
-#     deb: "https://launchpad.net/ubuntu/+archive/primary/+files/htop_{{ packages.deb.htop_version | default('3.0.2-1') }}_amd64.deb"
-#   register: apt_install_htop
-#   retries: 5
-#   until: apt_install_htop is success
-#   when:
-#   - "'htop' not in ansible_facts.packages"
-#   - "'htop' not in packages.apt_install"
-#   - packages.deb.htop_version is defined
-#   - packages.deb.htop_version
+  - (skip_remove_packages is not defined or (skip_remove_packages is defined and not skip_remove_packages))
