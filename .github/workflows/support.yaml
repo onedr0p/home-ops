@@ -1,0 +1,28 @@
+---
+
+name: 'Support requests'
+
+on:
+  issues:
+    types:
+    - labeled
+    - unlabeled
+    - reopened
+
+jobs:
+  support:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: dessant/support-requests@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        support-label: 'support'
+        issue-comment: >
+          :wave: @{issue-author}, we use the issue tracker exclusively
+          for bug reports and feature requests. However, this issue appears
+          to be a support request. Please use our support channels
+          to get help with.
+          - [Discord](https://discord.gg/sTMX7Vh)
+        close-issue: true
+        lock-issue: false
+        issue-lock-reason: 'off-topic'
