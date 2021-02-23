@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -eu
 
-project_root=$(git rev-parse --show-toplevel)
-ansible_root="${project_root}/server/ansible"
+git_root=$(git rev-parse --show-toplevel)
+ansible_root="${git_root}/server/ansible"
 inventory="${ansible_root}/inventory/e2e/hosts.yml"
+# tests_root="${ansible_root}/tests"
 
 export ANSIBLE_CONFIG="${ansible_root}/ansible.cfg"
 
@@ -11,7 +12,7 @@ export ANSIBLE_CONFIG="${ansible_root}/ansible.cfg"
 npm install
 
 # Switch to the right stack
-pulumi stack select ubuntu-2010
+pulumi stack select single-control-plane
 
 # Destroy cloud resouces
 pulumi destroy --yes || true
@@ -24,7 +25,7 @@ pulumi stack output --json | yq eval -P - > "${inventory}"
 cat "${inventory}"
 
 # Install Ansible Galaxy roles
-ansible-galaxy install -r "${ansible_root}/requirements.yml" --force
+ansible-galaxy install -r "${ansible_root}/requirements.yml"
 
 # Wait for Droplets to come online
 while ! ansible all -i "${inventory}" --one-line -m ping &> /dev/null

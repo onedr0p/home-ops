@@ -12,7 +12,6 @@ on: # yamllint disable-line rule:truthy
   pull_request:
     paths:
     - 'server/ansible/**'
-    - 'server/tests/**'
 
 env:
   PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
@@ -53,7 +52,7 @@ jobs:
       env:
         cache-name: cache-node-modules
       with:
-        path: ./server/tests/node_modules
+        path: ./server/ansible/tests/node_modules
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -61,24 +60,24 @@ jobs:
           ${{ runner.os }}-
 
     - name: Install npm deps
-      working-directory: ./server/tests
+      working-directory: ./server/ansible/tests
       run: npm install
       if: steps.node_modules_cache.outputs.cache-hit != 'true'
 
     - name: Change Pulumi stack
-      working-directory: ./server/tests
-      run: pulumi stack select ubuntu-2010
+      working-directory: ./server/ansible/tests
+      run: pulumi stack select single-control-plane
 
     - name: Create cloud resources
-      working-directory: ./server/tests
+      working-directory: ./server/ansible/tests
       run: pulumi up --yes
 
     - name: Save Ansible inventory
-      working-directory: ./server/tests
+      working-directory: ./server/ansible/tests
       run: pulumi stack output --json | yq eval -P - > /tmp/hosts.yml
 
     # - name: Save Ansible inventory
-    #   working-directory: ./server/tests
+    #   working-directory: ./server/ansible/tests
     #   run: pulumi stack output --json | python3 -c 'import sys, yaml, json; print(yaml.dump(json.loads(sys.stdin.read()),sort_keys=False))'
 
 
@@ -122,20 +121,20 @@ jobs:
         python3 -m pip install --no-cache-dir --force-reinstall --upgrade 'ansible>=3.0.0'
         ansible --version
 
-    - name: Install SSH key
-      uses: webfactory/ssh-agent@v0.5.0
-      with:
-        ssh-private-key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
-
     - name: Install Ansible Galaxy roles
       working-directory: ./server/ansible
-      run: ansible-galaxy install -r requirements.yml --force
+      run: ansible-galaxy install -r requirements.yml
 
     - name: Download Ansible inventory
       uses: actions/download-artifact@v2
       with:
         name: hosts
         path: ./server/ansible/inventory/e2e/
+
+    - name: Install SSH key
+      uses: webfactory/ssh-agent@v0.5.0
+      with:
+        ssh-private-key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
 
     - name: Wait for all hosts to become ready
       run: |
@@ -249,7 +248,7 @@ jobs:
       run: kubectl --kubeconfig ./server/ansible/kubeconfig -n tigera-operator wait deployment.apps/tigera-operator --for=condition=available --timeout=1m
 
     - name: Create nginx service and deployment
-      run: kubectl --kubeconfig ./server/ansible/kubeconfig apply -f ./server/tests/nginx-deployment.yaml
+      run: kubectl --kubeconfig ./server/ansible/kubeconfig apply -f ./server/ansible/tests/nginx-deployment.yaml
 
     - name: Wait for nginx deployment to rollout
       run: kubectl --kubeconfig ./server/ansible/kubeconfig -n default wait deployment.apps/nginx --for=condition=available --timeout=2m
@@ -309,7 +308,7 @@ jobs:
       env:
         cache-name: cache-node-modules
       with:
-        path: "./server/tests/node_modules"
+        path: "./server/ansible/tests/node_modules"
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -317,14 +316,14 @@ jobs:
           ${{ runner.os }}-
 
     - name: Install npm deps
-      working-directory: "./server/tests"
+      working-directory: "./server/ansible/tests"
       run: npm install
       if: steps.node_modules_cache.outputs.cache-hit != 'true'
 
     - name: Change Pulumi stack
-      working-directory: "./server/tests"
-      run: pulumi stack select ubuntu-2010
+      working-directory: "./server/ansible/tests"
+      run: pulumi stack select single-control-plane
 
     - name: Destroy cloud resources
-      working-directory: "./server/tests"
+      working-directory: "./server/ansible/tests"
       run: pulumi destroy --yes

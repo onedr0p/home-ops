@@ -1,7 +1,7 @@
 import * as digitalocean from "@pulumi/digitalocean";
 import * as pulumi from "@pulumi/pulumi";
 
-const region = digitalocean.Regions.NYC3;
+const region = digitalocean.Regions.SFO3;
 
 const dropletControlTypeTag = new digitalocean.Tag(`ansible-control-${pulumi.getStack()}`);
 const dropletGenericTypeTag = new digitalocean.Tag(`ansible-generic-${pulumi.getStack()}`);
