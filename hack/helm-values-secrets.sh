@@ -25,8 +25,7 @@ set +a
 # Generate Helm Secrets
 txt_files=$(find "${CLUSTER_ROOT}" -type f -name "helm-values-secret.txt")
 
-if [[ ( -n ${txt_files} ) ]];
-then
+if [[ ( -n ${txt_files} ) ]]; then
     for txt_file in ${txt_files}; do
         # Get the absolute directory path of the helm-values-secret file
         # e.g. "/Users/devin/Code/homelab/home-cluster/cluster/media/flood"
