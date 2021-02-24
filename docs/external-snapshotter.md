@@ -1,4 +1,4 @@
-# external-shapshotter
+# external-snapshotter
 
 ## Version
 
