@@ -1,7 +1,7 @@
 # sealed-secrets
 
 !!! note "Work in progress"
-This document is a work in progress.
+    This document is a work in progress.
 
 ## Installation
 
