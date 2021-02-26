@@ -5,11 +5,19 @@
 ## Installation
 
 ```
---8<--​ "./cluster/kube-system/sealed-secrets/helm-release.yaml"
+--8<--​ "../cluster/kube-system/sealed-secrets/helm-release.yaml"
+```
+
+## Install kubeseal
+
+```sh
+brew install kubeseal
 ```
 
 ## Fetch Sealed Secrets Cert
 
-```bash
-kubeseal --controller-name sealed-secrets --fetch-cert > ./secrets/pub-cert.pem
+```sh
+kubeseal \
+    --controller-name sealed-secrets \
+    --fetch-cert > ./sealed-secrets-public-cert.pem
 ```
