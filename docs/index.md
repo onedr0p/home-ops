@@ -18,4 +18,12 @@ This is where [Flux](https://toolkit.fluxcd.io/) comes into play. Flux is an awe
 
 ### Renovate
 
-So I have my cluster running, I have Flux running inside and it is synced to my Git repository. How do I handle application updates? Flux has this built into their application using the [image-automation-controller](https://toolkit.fluxcd.io/components/image/controller/)
+So I have my cluster running, I have Flux running inside and it is synced to my Git repository. How do I handle application updates? Flux has this built into their application using the [image-automation-controller](https://toolkit.fluxcd.io/components/image/controller/) but I am not a fan of having applications auto-update. Sometimes I want to read application changelogs or review source code before I commit to upgrading.
+
+I decided that [Renovate](https://www.whitesourcesoftware.com/free-developer-tools/renovate) would be a good solution to my problem.Renovate works by scanning my Git repository and offering changes in the form of a pull request when a new container image update or helm chart update is found.
+
+### Conclusion
+
+Overall I am very happy being off my Portainer/Docker Swarm cluster and finally using Kubernetes.
+
+It should go without saying a lot of what is built upon here is not only my ideas. A lot of work is being done by other people in the k8s@home community.

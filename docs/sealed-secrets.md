@@ -1,6 +1,12 @@
 # sealed-secrets
 
-> *Note*: this document is a work in progress
+!!! note "Work in progress" This document is a work in progress.
+
+## Installation
+
+```
+--8<--​ "./cluster/kube-system/sealed-secrets/helm-release.yaml"
+```
 
 ## Fetch Sealed Secrets Cert
 

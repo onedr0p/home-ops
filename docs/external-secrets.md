@@ -1,6 +1,6 @@
 # external-secrets
 
-> *Note*: this document is a work in progress
+!!! note "Work in progress" This document is a work in progress.
 
 ## Create secret for External Secrets using AWS Secrets Manager
 
@@ -11,7 +11,7 @@ kubectl create secret generic aws-credentials \
     --namespace kube-system
 ```
 
-## Create any secret using aws-cli
+## Create a secret using aws-cli
 
 ```bash
 aws secretsmanager create-secret \
