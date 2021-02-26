@@ -6,7 +6,7 @@
 ## Installation
 
 ```
---8<--​ "https://raw.githubusercontent.com/onedr0p/home-cluster/main/cluster/kube-system/sealed-secrets/helm-release.yaml"
+--8<--​ "./_files/sealed-secrets.yaml"
 ```
 
 ## Install kubeseal
