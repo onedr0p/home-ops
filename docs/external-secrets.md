@@ -1,10 +1,11 @@
 # external-secrets
 
-!!! note "Work in progress" This document is a work in progress.
+!!! note "Work in progress"
+    This document is a work in progress.
 
 ## Create secret for External Secrets using AWS Secrets Manager
 
-```bash
+```sh
 kubectl create secret generic aws-credentials \
     --from-literal=id="access-key-id" \
     --from-literal=key="access-secret-key" \
@@ -13,7 +14,7 @@ kubectl create secret generic aws-credentials \
 
 ## Create a secret using aws-cli
 
-```bash
+```sh
 aws secretsmanager create-secret \
     --name namespace/secret-name \
     --secret-string "secret-data"
