@@ -10,7 +10,7 @@
 ```
 
 
-{% include "_files/sealed-secrets.yaml" %}
+{% include "cluster/kube-system/sealed-secrets/helm-release.yaml" %}
 
 ## Install kubeseal
 
