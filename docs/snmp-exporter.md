@@ -2,7 +2,7 @@
 
 Retrieve metrics from devices that only support monitoring via SNMP. For now I am usng snmp-exporter for getting metrics from my Cyberpower PDUs (model PDU41001) and my APC UPS (Smart-UPS 1500)
 
-## Clone and build the snmp-exporter generator
+## clone and build the snmp-exporter generator
 
 ```sh
 sudo apt-get install unzip build-essential libsnmp-dev golang
@@ -12,7 +12,7 @@ go build
 make mibs
 ```
 
-## Update generator.yml
+## update generator.yml
 
 Kubernetes configmaps have a max size. I needed to srip out all the other modules.
 
@@ -70,7 +70,7 @@ modules:
       - envirHumidity               ## relative humidity (%)
 ```
 
-## Get the Cyberpower MIB
+## get the cyberpower MIB
 
 ```bash
 wget https://dl4jz3rbrsfum.cloudfront.net/software/CyberPower_MIB_v2.9.MIB.zip
@@ -78,7 +78,7 @@ unzip CyberPower_MIB_v2.9.MIB.zip
 mv CyberPower_MIB_v2.9.MIB mibs/
 ```
 
-## Generate the snmp.yml
+## generate the snmp.yml
 
 This will create a `snmp.yml` file which will be needed for the configmap for snmp-exporter
 

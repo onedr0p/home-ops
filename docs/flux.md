@@ -1,10 +1,10 @@
-# Flux
+# flux
 
 !!! note "Work in progress"
     This document is a work in progress.
 
 
-## Installation
+## installation
 
 _For full installation guide visit the [Flux installation guide](https://toolkit.fluxcd.io/guides/installation/)_
 
@@ -40,7 +40,7 @@ flux bootstrap github \
 
 **Note**: When using k3s I found that the network-policy flag has to be set to false, or Flux will not work
 
-## Useful commands
+## useful commands
 
 ```sh
 # force flux to sync your repository

@@ -3,7 +3,7 @@
 !!! note "Work in progress"
     This document is a work in progress.
 
-## Installation
+## installation
 
 ```yaml
 ---
@@ -28,13 +28,13 @@ spec:
       enabled: false
 ```
 
-## Install kubeseal
+## install kubeseal
 
 ```sh
 brew install kubeseal
 ```
 
-## Fetch Sealed Secrets Cert
+## fetch sealed secrets cert
 
 ```sh
 kubeseal \
