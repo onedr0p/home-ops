@@ -1,3 +1,21 @@
 # Home Cluster
 
-My home Kubernetes (k3s) cluster managed by GitOps (Flux2)
+Welcome to the docs on my home Kubernetes cluster.
+
+## Story
+
+Two years ago my homelab setup was very different that what it is today. I was running a [Docker Swarm](https://docs.docker.com/engine/swarm/) cluster and doing deployments with [Portainer](https://www.portainer.io/). While this was working, I was unsure about Docker Swarm's future and I was also looking at a better way to handle application updates. I knew I wanted to keep using open source software and decided it was a good time to start getting familiar with Kubernetes... in came k3s.
+
+### k3s
+
+[k3s](https://k3s.io/) comes with a very low barrier to entry in getting a Kubernetes cluster running. After deploying it with [k3sup](https://github.com/alexellis/k3sup) I fell in love with the simplicity and love the single binary approach. With k3sup the time it took from getting a Kubernetes cluster up and running was literally minutes. Without much Kubernetes knowledge this allowed me to teardown the cluster and install it again, each time learning new things like how to deploy applications with [Helm](https://helm.sh/), set up a load balancer using [Metallb](https://metallb.universe.tf/), how to handle ingress and storage.
+
+### Flux
+
+After awhile of tinkering with k3s, I started reading up on GitOps principles and fell in love with the idea of having a Git repository drive a Kubernetes cluster state. No more missing configuration files, backing up compose files in fear of losing them. I could have mostly everything Kubernetes cares about tracked in a Git repo, while having an operator running in my cluster reading from my Git repo.
+
+This is where [Flux](https://toolkit.fluxcd.io/) comes into play. Flux is an awesome tool that syncs my Git repo with my cluster. Any change I make in my Git repo will be directly applied by Flux in my Kubernetes cluster.
+
+### Renovate
+
+So I have my cluster running, I have Flux running inside and it is synced to my Git repository. How do I handle application updates? Flux has this built into their application using the [image-automation-controller](https://toolkit.fluxcd.io/components/image/controller/)
