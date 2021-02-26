@@ -9,6 +9,9 @@
 --8<--​ "_files/sealed-secrets.yaml"
 ```
 
+
+{% include "_files/sealed-secrets.yaml" %}
+
 ## Install kubeseal
 
 ```sh
