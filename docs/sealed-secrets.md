@@ -3,7 +3,13 @@
 !!! note "Work in progress"
     This document is a work in progress.
 
-## installation
+## install cli tool
+
+```sh
+brew install kubeseal
+```
+
+## install cluster components
 
 ```yaml
 ---
@@ -26,12 +32,6 @@ spec:
   values:
     ingress:
       enabled: false
-```
-
-## install kubeseal
-
-```sh
-brew install kubeseal
 ```
 
 ## fetch sealed secrets cert

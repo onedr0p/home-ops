@@ -1,6 +1,6 @@
-# Ubuntu 20.04 Network boot using Opnsense
+# ubuntu 20.04 Network boot using opnsense
 
-## Opnsense settings
+## opnsense settings
 
 - Enable `dnsmasq` in the Opnsense services settings (set port to `63`)
 - Copy over `pxe.conf` to `/usr/local/etc/dnsmasq.conf.d/pxe.conf`

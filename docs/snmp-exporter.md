@@ -1,6 +1,6 @@
 # snmp-exporter
 
-Retrieve metrics from devices that only support monitoring via SNMP. For now I am usng snmp-exporter for getting metrics from my Cyberpower PDUs (model PDU41001) and my APC UPS (Smart-UPS 1500)
+ I am using `snmp-exporter` for getting metrics from my Cyberpower PDUs (`PDU41001`) and my APC UPS (`Smart-UPS 1500`) into Prometheus
 
 ## clone and build the snmp-exporter generator
 
@@ -14,7 +14,7 @@ make mibs
 
 ## update generator.yml
 
-Kubernetes configmaps have a max size. I needed to srip out all the other modules.
+Kubernetes `configmap`'s have a max size. I needed to strip out all the other modules.
 
 ```yaml
 modules:
@@ -72,7 +72,7 @@ modules:
 
 ## get the cyberpower MIB
 
-```bash
+```sh
 wget https://dl4jz3rbrsfum.cloudfront.net/software/CyberPower_MIB_v2.9.MIB.zip
 unzip CyberPower_MIB_v2.9.MIB.zip
 mv CyberPower_MIB_v2.9.MIB mibs/
@@ -82,7 +82,7 @@ mv CyberPower_MIB_v2.9.MIB mibs/
 
 This will create a `snmp.yml` file which will be needed for the configmap for snmp-exporter
 
-```bash
+```sh
 export MIBDIRS=mibs
 ./generator generate
 ```

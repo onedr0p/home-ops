@@ -4,15 +4,15 @@
     This document is a work in progress.
 
 
-## installation
-
-_For full installation guide visit the [Flux installation guide](https://toolkit.fluxcd.io/guides/installation/)_
-
-Install the Flux CLI tool
+## install cli tool
 
 ```sh
 brew install fluxcd/tap/flux
 ```
+
+## install cluster components
+
+_For full installation guide visit the [Flux installation guide](https://toolkit.fluxcd.io/guides/installation/)_
 
 Set the `GITHUB_TOKEN` environment variable to a personal access token you created in Github.
 

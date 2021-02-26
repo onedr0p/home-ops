@@ -4,7 +4,13 @@
 
 In order to backup and restore a given workload, the following steps should work.
 
-### Backup
+## install cli tool
+
+```sh
+brew install velero
+```
+
+## backup
 
 > A backup should already be created by either a scheduled, or manual backup
 
@@ -15,7 +21,7 @@ velero backup create manually-backup-1 --from-schedule velero-daily-backup
 velero backup create jackett-test-abc --include-namespaces testing --selector "app.kubernetes.io/instance=jackett-test" --wait
 ```
 
-### Delete Resources
+## delete resources
 
 ```bash
 # delete the helmrelease
@@ -28,7 +34,7 @@ kubectl delete deployment/jackett-test -n jackett
 kubectl delete pvc/jackett-test-config
 ```
 
-### Restore
+## restore
 
 ```bash
 velero restore create --from-backup velero-daily-backup-20201120020022 --include-namespaces testing --selector "app.kubernetes.io/instance=jackett-test" --wait
