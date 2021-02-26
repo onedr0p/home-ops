@@ -10,7 +10,7 @@
 ```
 
 ```
-{% include "cluster/kube-system/sealed-secrets/helm-release.yaml" %}
+--8<--​ "pxe.md"
 ```
 
 ## Install kubeseal
