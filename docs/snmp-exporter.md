@@ -1,5 +1,8 @@
 # snmp-exporter
 
+!!! note "Work in progress"
+    This document is a work in progress.
+
  I am using `snmp-exporter` for getting metrics from my Cyberpower PDUs (`PDU41001`) and my APC UPS (`Smart-UPS 1500`) into Prometheus
 
 ## clone and build the snmp-exporter generator
