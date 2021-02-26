@@ -5,7 +5,9 @@
 
 ## Installation
 
+```
 --8<--​ "_files/sealed-secrets.yaml"
+```
 
 ## Install kubeseal
 

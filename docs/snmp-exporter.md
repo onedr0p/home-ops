@@ -4,7 +4,7 @@ Retrieve metrics from devices that only support monitoring via SNMP. For now I a
 
 ## Clone and build the snmp-exporter generator
 
-```bash
+```sh
 sudo apt-get install unzip build-essential libsnmp-dev golang
 go get github.com/prometheus/snmp_exporter/generator
 cd ${GOPATH-$HOME/go}/src/github.com/prometheus/snmp_exporter/generator
