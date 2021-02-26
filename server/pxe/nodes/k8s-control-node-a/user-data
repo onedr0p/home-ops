@@ -1,0 +1,88 @@
+#cloud-config
+autoinstall:
+  version: 1
+  refresh-installer:
+    update: true
+  apt:
+    geoip: true
+    preserve_sources_list: false
+    primary:
+    - arches: [amd64, i386]
+      uri: http://archive.ubuntu.com/ubuntu
+    - arches: [default]
+      uri: http://ports.ubuntu.com/ubuntu-ports
+  identity:
+    hostname: k8s-control-node-a
+    # docker run --rm -it alpine:latest mkpasswd -m sha512 ubuntu
+    password: $6$hg2y5aO5DRejj9yl$2lW4Jkvi989B5QyeWmB7Qb2ulxwEXQYBshcGDv9ChBrcWYfidQ5uX/n8qSI7pLm3Ho7HeMKEKmRBnotTBlgtq0
+    realname: Ubuntu
+    username: ubuntu
+  keyboard:
+    layout: us
+    toggle: null
+    variant: ''
+  locale: en_US.UTF-8
+  network:
+    version: 2
+    ethernets:
+      eno1:
+        addresses:
+        - 192.168.42.10/24
+        critical: true
+        dhcp-identifier: mac
+        gateway4: 192.168.1.1
+        nameservers:
+          addresses:
+          - 192.168.1.1
+  ssh:
+    allow-pw: true
+    install-server: true
+  storage:
+    grub:
+      reorder_uefi: false
+    swap:
+      size: 0
+    config:
+    - id: root-disk-0
+      type: disk
+      path: /dev/nvme0n1
+      wipe: superblock-recursive
+      preserve: false
+      grub_device: false
+      name: ''
+      ptable: gpt
+    - id: root-partition-0
+      type: partition
+      device: root-disk-0
+      size: 512M
+      wipe: superblock
+      flag: boot
+      number: 1
+      preserve: false
+      grub_device: true
+    - id: root-format-0
+      type: format
+      fstype: fat32
+      volume: root-partition-0
+      preserve: false
+    - id: root-partition-1
+      type: partition
+      device: root-disk-0
+      size: -1
+      wipe: superblock
+      flag: ''
+      number: 2
+      preserve: false
+    - id: root-format-1
+      type: format
+      fstype: ext4
+      volume: root-partition-1
+      preserve: false
+    - id: root-mount-0
+      type: mount
+      device: root-format-0
+      path: /boot/efi
+    - id: root-mount-1
+      type: mount
+      device: root-format-1
+      path: /
