@@ -1,6 +1,9 @@
-# ubuntu 20.04 Network boot using opnsense
+# Opnsense | PXE
 
-## opnsense settings
+!!! note "Work in progress"
+    This document is a work in progress.
+
+## Setting up TFTP
 
 - Enable `dnsmasq` in the Opnsense services settings (set port to `63`)
 - Copy over `pxe.conf` to `/usr/local/etc/dnsmasq.conf.d/pxe.conf`

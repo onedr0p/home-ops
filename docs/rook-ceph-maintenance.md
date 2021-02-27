@@ -3,8 +3,6 @@
 !!! note "Work in progress"
     This document is a work in progress.
 
-[Main article](https://rook.io/docs/rook/v1.5/ceph-common-issues.html)
-
 ## Accessing volumes
 
 Sometimes I am required to access the data in the `pvc`, below is an example on how I access the `pvc` data for my `zigbee2mqtt` deployment.
@@ -110,3 +108,7 @@ ceph crash archive <id>
 # or, archive all crash reports
 ceph crash archive-all
 ```
+
+## Helpful links
+
+* [Common issues](https://rook.io/docs/rook/v1.5/ceph-common-issues.html)
