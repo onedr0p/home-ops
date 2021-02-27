@@ -1,16 +1,16 @@
-# flux
+# Flux
 
 !!! note "Work in progress"
     This document is a work in progress.
 
 
-## install cli tool
+## Install the CLI tool
 
 ```sh
 brew install fluxcd/tap/flux
 ```
 
-## install cluster components
+## Install the cluster components
 
 _For full installation guide visit the [Flux installation guide](https://toolkit.fluxcd.io/guides/installation/)_
 
@@ -40,15 +40,22 @@ flux bootstrap github \
 
 **Note**: When using k3s I found that the network-policy flag has to be set to false, or Flux will not work
 
-## useful commands
+## Useful commands
+
+Force flux to sync your repository:
 
 ```sh
-# force flux to sync your repository
 flux reconcile source git flux-system
+```
 
-# force flux to sync a helm release
+Force flux to sync a helm release:
+
+```sh
 flux reconcile helmrelease sonarr -n default
+```
 
-# force flux to sync a helm repository
+Force flux to sync a helm repository:
+
+```sh
 flux reconcile source helm ingress-nginx-charts -n flux-system
 ```
