@@ -1,8 +1,11 @@
-# rook-ceph maintenance
+# Rook-Ceph Maintenance
 
-Main article: https://rook.io/docs/rook/v1.5/ceph-common-issues.html
+!!! note "Work in progress"
+    This document is a work in progress.
 
-## accessing volume data
+[Main article](https://rook.io/docs/rook/v1.5/ceph-common-issues.html)
+
+## Accessing volumes
 
 Sometimes I am required to access the data in the `pvc`, below is an example on how I access the `pvc` data for my `zigbee2mqtt` deployment.
 
@@ -74,10 +77,10 @@ At this point you'll be able to access the volume data under `/mnt/data`, you ca
     chown -R 568:568 /mnt/data/
     ```
 
-    Backing up data
+    Backing up data:
 
     ```sh
-    tar czvf /mnt/nfsdata/backups/nzbget.tar.gz -C /mnt/data/ .
+    tar czvf /mnt/nfsdata/backups/zigbee2mqtt.tar.gz -C /mnt/data/ .
     ```
 
 When done you can unmount `/mnt/data` and unmap the `rbd` device:
@@ -93,7 +96,7 @@ Lastly you need to scale the deployment replicas back up to 1:
 kubectl scale deploy/zigbee2mqtt --replicas 1 -n home
 ```
 
-## crashes
+## Handling crashes
 
 Sometimes rook-ceph will report a `HEALTH_WARN` even when the health is fine, in order to get ceph to report back healthy do the following...
 

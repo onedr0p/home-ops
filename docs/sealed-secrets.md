@@ -1,15 +1,15 @@
-# sealed-secrets
+# Sealed Secrets
 
 !!! note "Work in progress"
     This document is a work in progress.
 
-## install cli tool
+## Install the CLI tool
 
 ```sh
 brew install kubeseal
 ```
 
-## install cluster components
+## Install the cluster components
 
 ```yaml
 ---
@@ -34,7 +34,7 @@ spec:
       enabled: false
 ```
 
-## fetch sealed secrets cert
+## Fetch the Sealed Secrets public certificate
 
 ```sh
 kubeseal \

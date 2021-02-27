@@ -1,11 +1,11 @@
-# snmp-exporter
+# SNMP Exporter
 
 !!! note "Work in progress"
     This document is a work in progress.
 
- I am using `snmp-exporter` for getting metrics from my Cyberpower PDUs (`PDU41001`) and my APC UPS (`Smart-UPS 1500`) into Prometheus
+ I am using [snmp-exporter](https://github.com/prometheus/snmp_exporter) for getting metrics from my Cyberpower PDUs (`PDU41001`) and my APC UPS (`Smart-UPS 1500`) into Prometheus
 
-## clone and build the snmp-exporter generator
+## Clone and build the snmp-exporter generator
 
 ```sh
 sudo apt-get install unzip build-essential libsnmp-dev golang
@@ -15,9 +15,10 @@ go build
 make mibs
 ```
 
-## update generator.yml
+## Update generator.yml
 
-Kubernetes `configmap`'s have a max size. I needed to strip out all the other modules.
+!!! hint "Dealing with configmaps"
+    Kubernetes `configmap`'s have a max size. I needed to strip out all the other modules.
 
 ```yaml
 modules:
@@ -73,7 +74,7 @@ modules:
       - envirHumidity               ## relative humidity (%)
 ```
 
-## get the cyberpower MIB
+## Get the Cyberpower MIB
 
 ```sh
 wget https://dl4jz3rbrsfum.cloudfront.net/software/CyberPower_MIB_v2.9.MIB.zip
@@ -81,9 +82,9 @@ unzip CyberPower_MIB_v2.9.MIB.zip
 mv CyberPower_MIB_v2.9.MIB mibs/
 ```
 
-## generate the snmp.yml
+## Generate the snmp.yml
 
-This will create a `snmp.yml` file which will be needed for the configmap for snmp-exporter
+This will create a `snmp.yml` file which will be needed for the `configmap` for the `snmp-exporter` deployment
 
 ```sh
 export MIBDIRS=mibs
