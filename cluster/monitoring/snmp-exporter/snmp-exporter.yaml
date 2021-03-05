@@ -41,8 +41,10 @@ spec:
     path: "/snmp"
     targetPort: 9116
     relabelings:
-    - sourceLabels: [__param_target]
-      targetLabel: instance
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
   - interval: 60s
     port: monitoring
     params:
@@ -53,8 +55,10 @@ spec:
     path: "/snmp"
     targetPort: 9116
     relabelings:
-    - sourceLabels: [__param_target]
-      targetLabel: instance
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
   - interval: 60s
     port: monitoring
     params:
@@ -65,8 +69,24 @@ spec:
     path: "/snmp"
     targetPort: 9116
     relabelings:
-    - sourceLabels: [__param_target]
-      targetLabel: instance
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+  - interval: 60s
+    port: monitoring
+    params:
+      module:
+      - qnap
+      target:
+      - 192.168.1.39
+    path: "/snmp"
+    targetPort: 9116
+    relabelings:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
 ---
 kind: Deployment
 apiVersion: apps/v1
