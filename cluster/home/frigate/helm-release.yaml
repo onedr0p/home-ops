@@ -64,6 +64,7 @@ spec:
         - /dev/dri/renderD128
 
       cameras:
+        # --
         porch:
           ffmpeg:
             inputs:
@@ -96,7 +97,41 @@ spec:
             timestamp: False
             retain:
               default: 14
-
+        # --
+        garage:
+          ffmpeg:
+            inputs:
+            - path: rtsp://192.168.1.2:7447/3mzDU0htPbIcPPFH
+              roles:
+              - detect
+            - path: rtsp://192.168.1.2:7447/Cpb9YqiSgX16LjsX
+              roles:
+              - clips
+              - record
+              - rtmp
+          height: 576
+          width: 1024
+          fps: 5
+          objects:
+            filters:
+              person:
+                min_area: 1500
+                max_area: 100000
+                threshold: 0.75
+                min_score: 0.60
+          clips:
+            enabled: True
+            objects:
+            - car
+            - person
+            - dog
+            - cat
+          snapshots:
+            enabled: True
+            timestamp: False
+            retain:
+              default: 14
+        # --
         study:
           ffmpeg:
             inputs:
@@ -104,6 +139,39 @@ spec:
               roles:
               - detect
             - path: rtsp://192.168.1.2:7447/BwmH0xgM3fZotFIa
+              roles:
+              - clips
+              - record
+              - rtmp
+          height: 576
+          width: 1024
+          fps: 5
+          objects:
+            filters:
+              person:
+                min_area: 1500
+                max_area: 100000
+                threshold: 0.75
+                min_score: 0.60
+          clips:
+            enabled: True
+            objects:
+            - person
+            - dog
+            - cat
+          snapshots:
+            enabled: True
+            timestamp: False
+            retain:
+              default: 14
+        # --
+        living-room:
+          ffmpeg:
+            inputs:
+            - path: rtsp://192.168.1.2:7447/PgTHLlRmqRH6Z6wV
+              roles:
+              - detect
+            - path: rtsp://192.168.1.2:7447/dGFODTTigTod247N
               roles:
               - clips
               - record
