@@ -8,138 +8,137 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      # renovate: registryUrl=https://blakeblackshear.github.io/blakeshome-charts/
       chart: frigate
-      version: 4.0.1
+      version: 5.0.1
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home-charts
+        name: blakeshome-charts
         namespace: flux-system
       interval: 5m
   values:
     image:
       repository: blakeblackshear/frigate
-      tag: 0.7.3-amd64
-    podAnnotations:
-      configmap.reloader.stakater.com/reload: "frigate"
-    timezone: America/New_York
+      tag: 0.8.4-amd64
     coral:
       enabled: true
+    shmSize: 2Gi
+    timezone: "America/New_York"
     config: |
-      web_port: 5000
       mqtt:
         host: vernemq
         topic_prefix: frigate
+      database:
+        path: /data/frigate.db
+      detectors:
+        coral:
+          type: edgetpu
+          device: usb
       objects:
         track:
         - person
+        - dog
+        - cat
         filters:
           person:
-            min_area: 5000
+            min_area: 2500
             max_area: 100000
-            threshold: 0.85
+            threshold: 0.7
+          dog:
+            min_area: 1000
+            max_area: 10000
+            threshold: 0.7
+          cat:
+            min_area: 1000
+            max_area: 10000
+            threshold: 0.7
+      ffmpeg:
+        hwaccel_args:
+        - -hwaccel
+        - qsv
+        - -qsv_device
+        - /dev/dri/renderD128
       cameras:
-        basement-1:
-          ffmpeg:
-            input: rtsp://192.168.1.2:7447/5pXj1v9ZyXf8ssmc
-          snapshots:
-            show_timestamp: false
-          height: 576
-          width: 1024
-          take_frame: 1
-        basement-2:
-          ffmpeg:
-            input: rtsp://192.168.1.2:7447/pp1jGiFpb1AuVHRl
-          snapshots:
-            show_timestamp: false
-          height: 576
-          width: 1024
-          take_frame: 1
-        driveway:
-          ffmpeg:
-            input: rtsp://192.168.1.2:7447/G3Uq8HXgG4lSdw7g
-          snapshots:
-            show_timestamp: false
-          height: 720
-          width: 1280
-          take_frame: 1
-        garage:
-          ffmpeg:
-            input: rtsp://192.168.1.2:7447/q8nsMk5GB8lEnb7y
-          snapshots:
-            show_timestamp: false
-          height: 576
-          width: 1024
-          take_frame: 1
-          objects:
-            track:
-            - person
-            - car
-            filters:
-              person:
-                min_area: 5000
-                max_area: 100000
-                threshold: 0.85
-        living-room:
-          ffmpeg:
-            input: rtsp://192.168.1.2:7447/PgTHLlRmqRH6Z6wV
-          snapshots:
-            show_timestamp: false
-          height: 576
-          width: 1024
-          take_frame: 1
         porch:
           ffmpeg:
-            input: rtsp://192.168.1.2:7447/818ALvS1HQ744KND
-          snapshots:
-            show_timestamp: false
+            inputs:
+            - path: rtsp://192.168.1.2:7447/818ALvS1HQ744KND
+              roles:
+              - detect
+            - path: rtsp://192.168.1.2:7447/OLL9WgMx3FNx7Yfy
+              roles:
+              - clips
+              - record
+              - rtmp
           height: 720
           width: 960
-          take_frame: 1
+          fps: 5
           objects:
-            track:
+            filters:
+              person:
+                min_area: 1500
+                max_area: 100000
+                threshold: 0.75
+                min_score: 0.60
+          clips:
+            enabled: True
+            objects:
             - person
             - dog
             - cat
-            filters:
-              person:
-                min_area: 5000
-                max_area: 100000
-                threshold: 0.85
-              dog:
-                min_area: 5000
-                max_area: 10000
-                threshold: 0.85
-              cat:
-                min_area: 5000
-                max_area: 10000
-                threshold: 0.85
-        study:
-          ffmpeg:
-            input: rtsp://192.168.1.2:7447/25BixzVyRA74DHfP
           snapshots:
-            show_timestamp: false
-          height: 576
-          width: 1024
-          take_frame: 1
+            enabled: True
+            timestamp: False
+            retain:
+              default: 14
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "frigate"
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "internal"
       hosts:
-      - "frigate.devbu.io"
+      - frigate.devbu.io
       tls:
       - hosts:
-        - "frigate.devbu.io"
+        - frigate.devbu.io
+    persistence:
+      data:
+        enabled: true
+        storageClass: rook-ceph-block
+        accessMode: ReadWriteOnce
+        size: 5Gi
+    extraVolumes:
+    - name: media-rocinante
+      persistentVolumeClaim:
+        claimName: nfs-media-rocinante-pvc
+    - name: cache
+      emptyDir:
+        medium: Memory
+    extraVolumeMounts:
+    - mountPath: /media
+      name: media-rocinante
+      subPath: Videos
+    - mountPath: /tmp/cache
+      name: cache
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
           - matchExpressions:
-            - {key: "feature.node.kubernetes.io/custom-coral-tpu", operator: In, values: ["true"]}
+            - key: feature.node.kubernetes.io/custom-coral-tpu
+              operator: In
+              values:
+              - "true"
+            - key: feature.node.kubernetes.io/custom-intel-gpu
+              operator: In
+              values:
+              - "true"
     resources:
       requests:
         memory: 1000Mi
-        cpu: 750m
+        cpu: 500m
+        gpu.intel.com/i915: 1
       limits:
         memory: 4000Mi
+        gpu.intel.com/i915: 1
