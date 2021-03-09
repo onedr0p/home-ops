@@ -28,12 +28,15 @@ spec:
       mqtt:
         host: vernemq
         topic_prefix: frigate
+
       database:
         path: /data/frigate.db
+
       detectors:
         coral:
           type: edgetpu
           device: usb
+
       objects:
         track:
         - person
@@ -52,12 +55,14 @@ spec:
             min_area: 1000
             max_area: 10000
             threshold: 0.7
+
       ffmpeg:
         hwaccel_args:
         - -hwaccel
         - qsv
         - -qsv_device
         - /dev/dri/renderD128
+
       cameras:
         porch:
           ffmpeg:
@@ -72,6 +77,39 @@ spec:
               - rtmp
           height: 720
           width: 960
+          fps: 5
+          objects:
+            filters:
+              person:
+                min_area: 1500
+                max_area: 100000
+                threshold: 0.75
+                min_score: 0.60
+          clips:
+            enabled: True
+            objects:
+            - person
+            - dog
+            - cat
+          snapshots:
+            enabled: True
+            timestamp: False
+            retain:
+              default: 14
+
+        study:
+          ffmpeg:
+            inputs:
+            - path: rtsp://192.168.1.2:7447/25BixzVyRA74DHfP
+              roles:
+              - detect
+            - path: rtsp://192.168.1.2:7447/BwmH0xgM3fZotFIa
+              roles:
+              - clips
+              - record
+              - rtmp
+          height: 576
+          width: 1024
           fps: 5
           objects:
             filters:
