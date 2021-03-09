@@ -1,21 +1,11 @@
 ---
 
-- name: boot | set cmdline options
-  ansible.builtin.lineinfile:
-    path: /boot/firmware/cmdline.txt
-    backrefs: true
-    regexp: '^((?!.*\bcgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory apparmor=0 mitigations=off max_loop=32\b).*)$'
-    line: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory apparmor=0 mitigations=off max_loop=32'
-  when: ansible_architecture | regex_search('arm|aarch')
-
-- name: boot | check for /etc/default/grub
+- name: boot | grub | check for existence of grub
   ansible.builtin.stat:
     path: /etc/default/grub
-  when: ansible_architecture == 'x86_64'
   register: grub_result
 
-- name: boot | set apparmor=0
-  become: true
+- name: boot | grub | set apparmor=0
   ansible.builtin.replace:
     path: /etc/default/grub
     regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
@@ -24,11 +14,9 @@
     option: apparmor
     value: 0
   when:
-  - ansible_architecture == 'x86_64'
   - grub_result.stat.exists
 
-- name: boot | set mitigations=off
-  become: true
+- name: boot | grub | set mitigations=off
   ansible.builtin.replace:
     path: /etc/default/grub
     regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
@@ -37,24 +25,9 @@
     option: mitigations
     value: "off"
   when:
-  - ansible_architecture == 'x86_64'
   - grub_result.stat.exists
 
-- name: boot | set max_loop=32
-  become: true
-  ansible.builtin.replace:
-    path: /etc/default/grub
-    regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
-    replace: '\1 {{ option }}={{ value }}\2'
-  vars:
-    option: max_loop
-    value: 32
-  when:
-  - ansible_architecture == 'x86_64'
-  - grub_result.stat.exists
-
-- name: boot | run grub-mkconfig
+- name: boot | grub | run grub-mkconfig
   ansible.builtin.command: grub-mkconfig -o /boot/grub/grub.cfg
   when:
-  - ansible_architecture == 'x86_64'
   - grub_result.stat.exists

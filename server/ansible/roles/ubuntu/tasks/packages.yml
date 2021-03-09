@@ -1,11 +1,15 @@
 ---
 
 - name: packages | disable recommends
-  become: true
-  ansible.builtin.copy:
+  ansible.builtin.blockinfile:
+    path: /etc/apt/apt.conf.d/02norecommends
     mode: 0644
-    src: packages-02norecommends
-    dest: /etc/apt/apt.conf.d/02norecommends
+    create: true
+    block: |
+      APT::Install-Recommends "false";
+      APT::Install-Suggests "false";
+      APT::Get::Install-Recommends "false";
+      APT::Get::Install-Suggests "false";
 
 - name: packages | upgrade all packages
   ansible.builtin.apt:
@@ -21,7 +25,6 @@
   - (skip_upgrade_packages is not defined or (skip_upgrade_packages is defined and not skip_upgrade_packages))
 
 - name: packages | install common
-  become: true
   ansible.builtin.apt:
     name: "{{ packages.apt_install }}"
     install_recommends: false
@@ -38,7 +41,6 @@
   - packages.apt_install | length > 0
 
 - name: packages | remove crufty packages
-  become: true
   block:
   - name: packages | remove crufty packages | gather install packages
     ansible.builtin.package_facts:
@@ -53,7 +55,7 @@
     - "'snapd' in packages.apt_remove"
     - "'snapd' in ansible_facts.packages"
   - name: packages | remove crufty packages | remove snap packages
-    become: true
+
     ansible.builtin.command: snap remove {{ item }}
     loop:
     - lxd
@@ -64,13 +66,13 @@
     - "'snapd' in ansible_facts.packages"
     - snapd_check.failed is defined
   - name: packages | remove crufty packages | remove packages
-    become: true
+
     ansible.builtin.apt:
       name: "{{ packages.apt_remove }}"
       state: absent
       autoremove: true
   - name: packages | remove crufty packages | remove crufty files
-    become: true
+
     ansible.builtin.file:
       state: absent
       path: "{{ item }}"

@@ -1,27 +1,11 @@
 ---
 
-# # Below should not be needed anymore since k3s 1.19+
-# # https://github.com/k3s-io/k3s/issues/2260#issuecomment-693657919
-# # k3s still recommended use legacy iptables
-# # https://rancher.com/docs/k3s/latest/en/known-issues/
-# - name: network | configure nodes to use legacy iptables
-#   become: true
-#   community.general.alternatives:
-#     name: "{{ item }}"
-#     path: /usr/sbin/{{ item }}-legacy
-#   loop:
-#   - "iptables"
-#   - "ip6tables"
-#   # - "ebtables"
-
-- name: boot | check for /proc/sys/net/bridge/bridge-nf-call-iptables
+- name: network | check for bridge-nf-call-iptables
   ansible.builtin.stat:
     path: /proc/sys/net/bridge/bridge-nf-call-iptables
-  when: ansible_architecture == 'x86_64'
   register: bridge_nf_call_iptables_result
 
-- name: network | sysctl
-  become: true
+- name: network | sysctl | set config
   ansible.builtin.blockinfile:
     path: /etc/sysctl.d/99-kubernetes-cri.conf
     mode: 0644
@@ -33,20 +17,7 @@
   - bridge_nf_call_iptables_result.stat.exists
   register: sysctl_network
 
-# - name: network | sysctl
-#   become: true
-#   ansible.builtin.blockinfile:
-#     path: /etc/sysctl.d/99-kubernetes-cri.conf
-#     mode: 0644
-#     create: true
-#     block: |
-#       net.ipv4.ip_forward = 1
-#       net.bridge.bridge-nf-call-arptables = 1
-#       net.bridge.bridge-nf-call-iptables = 1
-#   register: sysctl_network
-
-- name: network | reload sysctl
-  become: true
+- name: network | sysctl | reload
   ansible.builtin.shell: sysctl -p /etc/sysctl.d/99-kubernetes-cri.conf
   when:
   - sysctl_network.changed

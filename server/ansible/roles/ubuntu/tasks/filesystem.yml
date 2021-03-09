@@ -1,43 +1,21 @@
 ---
 
-- name: filesystem | update max_user_watches
+- name: filesystem | sysctl | update max_user_watches
   ansible.posix.sysctl:
     name: fs.inotify.max_user_watches
     value: "524288"
     state: present
     sysctl_file: /etc/sysctl.d/98-kubernetes-fs.conf
 
-# - name: filesystem | mount bpffs
-#   become: true
-#   ansible.posix.mount:
-#     src: bpffs
-#     path: /sys/fs/bpf
-#     fstype: bpf
-#     state: mounted
-#     opts: rw,nosuid,nodev,noexec,relatime,mode=700
+- name: filesystem | swap | disable at runtime
+  ansible.builtin.command: swapoff -a
+  when: ansible_swaptotal_mb > 0
 
-- name: filesystem | swap
-  become: true
-  block:
-  - name: filesystem | disable swap
-    ansible.builtin.command: swapoff -a
-    when: ansible_swaptotal_mb > 0
-  - name: filesystem | disable swap system start
-    ansible.posix.mount:
-      name: "{{ item }}"
-      fstype: swap
-      state: absent
-    loop:
-      - swap
-      - none
-  when:
-  - molecule_is_test is defined and not molecule_is_test
-
-- name: filesystem | journald sdcard fix
-  ansible.builtin.copy:
-    content: |-
-      [Journal]
-      Storage=volatile
-    dest: /etc/systemd/journald.conf
-    mode: 0644
-  when: ansible_architecture | regex_search('arm|aarch')
+- name: filesystem | swap| disable on boot
+  ansible.posix.mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  loop:
+    - swap
+    - none
