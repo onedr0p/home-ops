@@ -7,7 +7,6 @@
   register: user_home
 
 - name: user | add to sudoers
-  become: true
   ansible.builtin.copy:
     content: "{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
     dest: "/etc/sudoers.d/{{ ansible_user }}_nopasswd"
@@ -35,40 +34,3 @@
     owner: "{{ ansible_user }}"
     mode: "0775"
   when: not hushlogin_result.stat.exists
-
-- name: user | create config directory
-  ansible.builtin.file:
-    path: "/{{ user_home.stdout }}/.config"
-    state: directory
-    recurse: true
-    owner: "{{ ansible_user }}"
-    mode: "0775"
-
-- name: user | create neofetch directory
-  ansible.builtin.file:
-    path: "/{{ user_home.stdout }}/.config/neofetch"
-    state: directory
-    recurse: true
-    owner: "{{ ansible_user }}"
-    mode: "0775"
-
-- name: user | copy neofetch configuration
-  ansible.builtin.copy:
-    owner: "{{ ansible_user }}"
-    mode: "0775"
-    src: user-neofetch-config.conf
-    dest: "/{{ user_home.stdout }}/.config/neofetch/config.conf"
-
-- name: user | copy ascii art
-  ansible.builtin.copy:
-    owner: "{{ ansible_user }}"
-    mode: "0775"
-    src: user-neofetch.art
-    dest: "/{{ user_home.stdout }}/.config/neofetch/k8s.art"
-
-- name: user | enable neofetch on login
-  ansible.builtin.copy:
-    content: "neofetch --source /{{ user_home.stdout }}/.config/neofetch/k8s.art --ascii_colors 5 --colors 5 --separator ' :'"
-    dest: "/{{ user_home.stdout }}/.bash_profile"
-    owner: "{{ ansible_user }}"
-    mode: "0775"

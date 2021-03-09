@@ -1,27 +1,30 @@
 ---
 
-- name: unattended-upgrades | delete 20auto-upgrades config
-  become: true
-  ansible.builtin.file:
+- name: unattended-upgrades | copy 20auto-upgrades config
+  ansible.builtin.blockinfile:
     path: /etc/apt/apt.conf.d/20auto-upgrades
-    state: absent
-
-- name: unattended-upgrades | copy 10periodic config
-  become: true
-  ansible.builtin.copy:
     mode: 0644
-    src: unattended-upgrades-10periodic
-    dest: /etc/apt/apt.conf.d/10periodic
+    create: true
+    block: |
+      APT::Periodic::Update-Package-Lists "14";
+      APT::Periodic::Download-Upgradeable-Packages "14";
+      APT::Periodic::AutocleanInterval "7";
+      APT::Periodic::Unattended-Upgrade "1";
 
 - name: unattended-upgrades | copy 50unattended-upgrades config
-  become: true
-  ansible.builtin.copy:
+  ansible.builtin.blockinfile:
+    path: /etc/apt/apt.conf.d/50unattended-upgrades
     mode: 0644
-    src: unattended-upgrades-50unattended-upgrades
-    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    create: true
+    block: |
+      Unattended-Upgrade::Automatic-Reboot "false";
+      Unattended-Upgrade::Remove-Unused-Dependencies "true";
+      Unattended-Upgrade::Allowed-Origins {
+          "${distro_id}:${distro_codename}";
+          "${distro_id} ${distro_codename}-security";
+      };
 
 - name: unattended-upgrades | start systemd service
-  become: true
   ansible.builtin.systemd:
     name: unattended-upgrades
     enabled: true

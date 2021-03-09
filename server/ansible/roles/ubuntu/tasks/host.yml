@@ -1,17 +1,7 @@
 ---
 
-- name: host | update hostname to inventory hostname
-  become: true
+- name: host | hostname | update inventory hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
   when:
   - ansible_hostname != inventory_hostname
-
-- name: host | update etc hosts
-  become: true
-  ansible.builtin.template:
-    src: "host-hosts.j2"
-    dest: "/etc/hosts"
-    mode: 0644
-  when:
-  - molecule_is_test is defined and not molecule_is_test
