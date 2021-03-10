@@ -2,15 +2,33 @@
 version: '3'
 
 vars:
-  PACKAGES: |-
-    coreutils findutils gnu-sed grep fluxcd/tap/flux helm jq kubectl kubeseal pre-commit python3 shellcheck sops sshpass velero wget yamllint yq gettext direnv
+  PACKAGES: >
+    ansible
+    calicoctl
+    coreutils
+    direnv
+    findutils
+    fluxcd/tap/flux
+    gettext
+    gnu-sed
+    grep
+    helm
+    jq
+    kubectl
+    kubeseal
+    pre-commit
+    python3
+    shellcheck
+    sops
+    sshpass
+    velero
+    wget
+    yamllint
+    yq
 
 tasks:
 
-  #
-  # OS deps
-  #
-
+  # Install OS dependencies
   install:
     desc: Verify all required dependencies are installed
     cmds:
@@ -28,10 +46,7 @@ tasks:
       EOL
     silent: true
 
-  #
-  # Ansible deps
-  #
-
+  # Install Ansible dependencies
   ansible:install:
     desc: Install required Ansible deps
     cmds:
@@ -43,11 +58,11 @@ tasks:
   # Install Ansible Galaxy dependencies
   ansible:galaxy:
     cmds:
-    - ansible-galaxy install -r ./ansible/requirements.yml --force
+    - ansible-galaxy install -r "{{.PROJECT_DIR}}/server/ansible/requirements.yml" --force
     silent: true
 
   # Install Python 3 dependencies
   ansible:python:
     cmds:
-    - pip3 install -r ./ansible/requirements.txt
+    - pip3 install -r "{{.PROJECT_DIR}}/server/ansible/requirements.txt"
     silent: true

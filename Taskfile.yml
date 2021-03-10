@@ -2,8 +2,13 @@
 version: '3'
 
 vars:
-  PROJECT_ROOT:
-    sh: git rev-parse --show-toplevel
+  PROJECT_DIR:
+    sh: "git rev-parse --show-toplevel"
+  CLUSTER_DIR: "{{.PROJECT_DIR}}/cluster"
+  ANSIBLE_DIR: "{{.PROJECT_DIR}}/server/ansible"
+
+env:
+  KUBECONFIG: "{{.PROJECT_DIR}}/kubeconfig"
 
 includes:
   ansible: .taskfiles/ansible.yml
