@@ -10,17 +10,27 @@ on: # yamllint disable-line rule:truthy
     - main
     paths:
     - '.github/workflows/docs.yaml'
-    - 'mkdocs.yml'
+    - 'mkdocs.yaml'
     - 'docs/**'
 
-jobs:
-  build:
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Checkout branch
-      uses: actions/checkout@v2
+env:
+  MKDOCS_MATERIAL_INSIDER_TOKEN: ${{ secrets.MKDOCS_MATERIAL_INSIDER_TOKEN }}
 
-    - name: Deploy docs
-      uses: mhausenblas/mkdocs-deploy-gh-pages@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    if: github.event.pull_request.head.repo.fork == false
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: git config --global user.name "${GITHUB_ACTOR}"
+      - run: git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+      - run: pip install git+https://${MKDOCS_MATERIAL_INSIDER_TOKEN}@github.com/squidfunk/mkdocs-material-insiders.git
+      - run: |
+          pip install \
+            mkdocs-minify-plugin>=0.3 \
+            mkdocs-redirects>=1.0
+      - run: mkdocs gh-deploy --config-file ./mkdocs.yaml --force
+      - run: mkdocs --version
