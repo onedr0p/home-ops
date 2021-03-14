@@ -83,7 +83,7 @@ export const all = {
                 "k8s-control-node-a": {
                     "ansible_host": controlDroplets[0].ipv4Address,
                     "ansible_user": "root",
-                    "k3s_control_node_address": kubernetesLoadBalancer.ip,
+                    "k3s_registration_address": kubernetesLoadBalancer.ip,
                     "digitalocean_private_ip": controlDroplets[0].ipv4AddressPrivate,
                     "digitalocean_http_ip": httpLoadBalancer.ip,
                 }
@@ -94,14 +94,14 @@ export const all = {
                 "k8s-generic-node-a": {
                     "ansible_host": genericDroplets[0].ipv4Address,
                     "ansible_user": "root",
-                    "k3s_control_node_address": kubernetesLoadBalancer.ip,
+                    "k3s_registration_address": kubernetesLoadBalancer.ip,
                     "digitalocean_private_ip": genericDroplets[0].ipv4AddressPrivate,
                     "digitalocean_http_ip": httpLoadBalancer.ip,
                 },
                 "k8s-generic-node-b": {
                     "ansible_host": genericDroplets[1].ipv4Address,
                     "ansible_user": "root",
-                    "k3s_control_node_address": kubernetesLoadBalancer.ip,
+                    "k3s_registration_address": kubernetesLoadBalancer.ip,
                     "digitalocean_private_ip": genericDroplets[1].ipv4AddressPrivate,
                     "digitalocean_http_ip": httpLoadBalancer.ip,
                 }
