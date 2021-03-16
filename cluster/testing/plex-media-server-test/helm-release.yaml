@@ -26,7 +26,13 @@ spec:
       TZ: "America/New_York"
       ADVERTISE_IP: "http://192.168.69.200:32400"
     securityContext:
-      privileged: true
+      # privileged: true
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      supplementalGroups:
+      - 44
+      - 109
     service:
       enabled: true
       type: LoadBalancer
@@ -57,18 +63,11 @@ spec:
         enabled: false
         emptyDir:
           medium: "Memory"
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-          - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-              - k8s-worker-c
     resources:
       requests:
+        gpu.intel.com/i915: 1
         cpu: 2000m
         memory: 1000Mi
       limits:
+        gpu.intel.com/i915: 1
         memory: 6000Mi
