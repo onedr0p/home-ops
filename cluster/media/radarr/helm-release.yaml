@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: radarr
-      version: 9.3.0
+      version: 9.4.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -84,3 +84,27 @@ spec:
         cpu: 500m
       limits:
         memory: 1500Mi
+    prometheus:
+      podMonitor:
+        enabled: true
+        interval: 5m
+        scrapeTimeout: 1m30s
+    additionalContainers:
+    - name: exportarr
+      image: ghcr.io/onedr0p/exportarr:v0.6.0
+      imagePullPolicy: IfNotPresent
+      args: ["exportarr", "radarr"]
+      env:
+      - name: PORT
+        value: "32123"
+      - name: URL
+        value: "http://localhost"
+      - name: CONFIG
+        value: "/config/config.xml"
+      ports:
+      - name: exportarr
+        containerPort: 32123
+      volumeMounts:
+      - name: config
+        mountPath: /config
+        readOnly: true
