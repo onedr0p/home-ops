@@ -84,3 +84,27 @@ spec:
         cpu: 500m
       limits:
         memory: 1500Mi
+    prometheus:
+      podMonitor:
+        enabled: true
+        interval: 5m
+        scrapeTimeout: 1m30s
+    additionalContainers:
+    - name: exportarr
+      image: ghcr.io/onedr0p/exportarr:v0.6.0
+      imagePullPolicy: IfNotPresent
+      args: ["exportarr", "sonarr"]
+      env:
+      - name: PORT
+        value: "32123"
+      - name: URL
+        value: "http://localhost"
+      - name: CONFIG
+        value: "/config/config.xml"
+      ports:
+      - name: exportarr
+        containerPort: 32123
+      volumeMounts:
+      - name: config
+        mountPath: /config
+        readOnly: true
