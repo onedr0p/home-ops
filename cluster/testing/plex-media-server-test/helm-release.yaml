@@ -43,7 +43,7 @@ spec:
     ingress:
       enabled: true
       annotations:
-        kubernetes.io/ingress.class: "internal"
+        kubernetes.io/ingress.class: "external"
       hosts:
       - host: plex-media-server-test.devbu.io
         paths:
@@ -66,10 +66,19 @@ spec:
     - name: testing-rocinante
       mountPath: "/media-rocinante"
       readOnly: true
+    - name: cert
+      mountPath: "/config/certs"
+      readOnly: true
     additionalVolumes:
     - name: testing-rocinante
       persistentVolumeClaim:
         claimName: nfs-testing-rocinante-pvc
+    - name: cert
+      secret:
+        secretName: devbu-io-tls
+        items:
+        - key: keystore.p12
+          path: devbu-io-tls.p12
     resources:
       requests:
         gpu.intel.com/i915: 1
