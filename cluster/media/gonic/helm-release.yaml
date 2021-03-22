@@ -17,7 +17,13 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    controllerType: deployment
+    initContainers:
+    - name: make-cache-dir
+      image: busybox
+      command: ["sh", "-c", "mkdir -p /data/cache"]
+      volumeMounts:
+      - name: config
+        mountPath: /data
     image:
       repository: sentriz/gonic
       tag: v0.12.2
