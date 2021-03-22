@@ -15,7 +15,7 @@ spec:
         velero_backup_partial_failure_total{schedule!=""} / velero_backup_attempt_total{schedule!=""} > 0.25
       for: 15m
       labels:
-        severity: warning
+        severity: critical
     - alert: VeleroBackupFailures
       annotations:
         message: Velero backup {{ $labels.schedule }} has {{ $value | humanizePercentage }} failed backups.
@@ -23,4 +23,4 @@ spec:
         velero_backup_failure_total{schedule!=""} / velero_backup_attempt_total{schedule!=""} > 0.25
       for: 15m
       labels:
-        severity: warning
+        severity: critical
