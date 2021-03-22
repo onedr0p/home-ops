@@ -25,7 +25,7 @@ spec:
       TZ: "America/New_York"
       GONIC_MUSIC_PATH: "/media-serenity/Library/Music"
       GONIC_PODCAST_PATH: "/media-serenity/Library/Podcasts"
-      GONIC_CACHE_PATH: "/cache"
+      GONIC_CACHE_PATH: "/data/cache"
       GONIC_SCAN_INTERVAL: "120"
     ingress:
       enabled: true
@@ -40,18 +40,10 @@ spec:
       - hosts:
         - "music.devbu.io"
     persistence:
-      data:
+      config:
         enabled: true
+        existingClaim: gonic-config-v1
         mountPath: "/data"
-        storageClass: "rook-ceph-block"
-        accessMode: ReadWriteOnce
-        size: "1Gi"
-      cache:
-        enabled: true
-        mountPath: "/cache"
-        storageClass: "rook-ceph-block"
-        accessMode: ReadWriteOnce
-        size: "10Gi"
     podAnnotations:
       backup.velero.io/backup-volumes: data
     additionalVolumeMounts:
@@ -64,7 +56,7 @@ spec:
         claimName: nfs-media-serenity-pvc
     resources:
       requests:
-        memory: 250Mi
-        cpu: 500m
+        memory: 100Mi
+        cpu: 100m
       limits:
         memory: 1500Mi
