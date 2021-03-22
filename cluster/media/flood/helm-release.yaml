@@ -38,19 +38,18 @@ spec:
       - hosts:
         - "flood.devbu.io"
     persistence:
-      data:
+      config:
         enabled: true
-        storageClass: "rook-ceph-block"
-        accessMode: ReadWriteOnce
-        size: "1Gi"
+        existingClaim: flood-config-v1
+        mountPath: /data
     podAnnotations:
-      backup.velero.io/backup-volumes: data
+      backup.velero.io/backup-volumes: config
     resources:
       requests:
-        memory: 250Mi
-        cpu: 500m
+        memory: 100Mi
+        cpu: 100m
       limits:
-        memory: 1500Mi
+        memory: 1000Mi
   valuesFrom:
   - kind: Secret
     name: "flood-helm-values"
