@@ -8,69 +8,82 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      # renovate: registryUrl=https://kubernetes-sigs.github.io/node-feature-discovery/charts
       chart: node-feature-discovery
-      version: 2.1.2
+      version: 0.8.0
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home-charts
+        name: node-feature-discovery-charts
         namespace: flux-system
       interval: 5m
   values:
-    podAnnotations:
-      configmap.reloader.stakater.com/reload: "node-feature-discovery"
-    image:
-      repository: quay.io/kubernetes_incubator/node-feature-discovery
-      tag: v0.6.0
-    sources:
-      - custom
-      - pci
-      - usb
-    config: |
-      sources:
-        usb:
-          deviceClassWhitelist:
-            - "02"
-            - "03"
-            - "0e"
-            - "ef"
-            - "fe"
-            - "ff"
-          deviceLabelFields:
-            - "class"
-            - "vendor"
-            - "device"
-        custom:
-          - name: "zwave"
-            matchOn:
+    master:
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Equal"
+        value: ""
+        effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: In
+                values: [""]
+    worker:
+      config: |-
+        core:
+            sources:
+            - custom
+            - pci
+            - usb
+          sources:
+            usb:
+              deviceClassWhitelist:
+              - "02"
+              - "03"
+              - "0e"
+              - "ef"
+              - "fe"
+              - "ff"
+              deviceLabelFields:
+              - "class"
+              - "vendor"
+              - "device"
+            custom:
+            - name: "zwave"
+              matchOn:
               - usbId:
                   class: ["02"]
                   vendor: ["0658"]
                   device: ["0200"]
-          - name: "intel-gpu"
-            matchOn:
+            - name: "intel-gpu"
+              matchOn:
               - pciId:
                   class: ["0300"]
                   vendor: ["8086"]
-          - name: "coral-tpu"
-            matchOn:
+            - name: "coral-tpu"
+              matchOn:
               - usbId:
                   vendor: ["1a6e", "18d1"]
-          - name: "wyze-sense"
-            matchOn:
-              - usbId:
-                  class: ["03"]
-                  vendor: ["1a86"]
-                  device: ["e024"]
-          - name: "flight-aware"
-            matchOn:
+            - name: "flight-aware"
+              matchOn:
               - usbId:
                   class: ["ff"]
                   vendor: ["0bda"]
                   device: ["2832"]
-          - name: "zigbee"
-            matchOn:
+            - name: "zigbee"
+              matchOn:
               - usbId:
                   class: ["ff"]
                   vendor: ["1a86"]
                   device: ["7523"]
+      annotations:
+        configmap.reloader.stakater.com/reload: "nfd-worker-conf"
+      tolerations:
+      - effect: "NoExecute"
+        operator: "Exists"
+      - effect: "NoSchedule"
+        operator: "Exists"
