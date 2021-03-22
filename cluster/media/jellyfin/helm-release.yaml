@@ -21,10 +21,8 @@ spec:
       tag: 10.7.1
     env:
       TZ: "America/New_York"
+      JELLYFIN_CACHE_DIR: "/config/cache"
     podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
       supplementalGroups:
       - 44
       - 109
@@ -51,14 +49,7 @@ spec:
     persistence:
       config:
         enabled: true
-        storageClass: "rook-ceph-block"
-        accessMode: ReadWriteOnce
-        size: "5Gi"
-      cache:
-        enabled: true
-        storageClass: "rook-ceph-block"
-        accessMode: ReadWriteOnce
-        size: "5Gi"
+        existingClaim: jellyfin-config-v1
       transcode:
         enabled: false
         emptyDir:
