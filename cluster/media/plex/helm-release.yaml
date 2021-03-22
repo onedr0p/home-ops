@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: plex
-      version: 2.3.3
+      version: 3.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -18,53 +18,72 @@ spec:
       interval: 5m
   values:
     image:
-      repository: plexinc/pms-docker
-      tag: 1.22.0.4163-d8c4875dd
-      pullPolicy: IfNotPresent
+      repository: ghcr.io/k8s-at-home/plex
+      tag: v1.22.0.4163-d8c4875dd
+    env:
+      TZ: "America/New_York"
+      ADVERTISE_IP: "http://192.168.69.140:32400"
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      supplementalGroups:
+      - 44
+      - 109
+    service:
+      enabled: true
+      type: LoadBalancer
+      externalIPs:
+      - 192.168.69.140
+      externalTrafficPolicy: Local
+      port:
+        port: 32400
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "external"
       hosts:
-      - "plex.devbu.io"
+      - host: plex.devbu.io
+        paths:
+        - path: /
+          pathType: Prefix
       tls:
       - hosts:
         - "plex.devbu.io"
-    advertiseIp: "http://192.168.69.140:32400"
-    timezone: "America/New_York"
-    serviceTCP:
-      type: LoadBalancer
-      externalIPs:
-      - 192.168.69.140
-      externalTrafficPolicy: Local
-    serviceUDP:
-      type: LoadBalancer
-      externalIPs:
-      - 192.168.69.140
-      externalTrafficPolicy: Local
     persistence:
       config:
-        storageClass: "rook-ceph-block"
-        size: 250Gi
-        accessMode: ReadWriteOnce
+        enabled: true
+        existingClaim: plex-config-v1
       transcode:
         enabled: false
         emptyDir:
           medium: "Memory"
-      data:
-        enabled: false
-      extraMounts:
-      - name: media-rocinante
+    additionalVolumeMounts:
+    - name: media-rocinante
+      mountPath: "/media-rocinante"
+      readOnly: true
+    - name: media-serenity
+      mountPath: "/media-serenity"
+      readOnly: true
+    - name: cert
+      mountPath: "/config/certs"
+      readOnly: true
+    additionalVolumes:
+    - name: media-rocinante
+      persistentVolumeClaim:
         claimName: nfs-media-rocinante-pvc
-      - name: media-serenity
+    - name: media-serenity
+      persistentVolumeClaim:
         claimName: nfs-media-serenity-pvc
+    - name: cert
+      secret:
+        secretName: devbu-io-tls
+        items:
+        - key: keystore.p12
+          path: devbu-io-tls.p12
     podAnnotations:
       backup.velero.io/backup-volumes: config
-    logging:
-      promtail:
-        enabled: false
-        loki:
-          url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+      secret.reloader.stakater.com/reload: "devbu-io-tls"
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -78,8 +97,8 @@ spec:
     resources:
       requests:
         gpu.intel.com/i915: 1
-        cpu: 4000m
-        memory: 12000Mi
+        cpu: 1000m
+        memory: 1000Mi
       limits:
         gpu.intel.com/i915: 1
-        memory: 24000Mi
+        memory: 12000Mi
