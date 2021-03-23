@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: plex
-      version: 3.0.0
+      version: 4.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -54,29 +54,18 @@ spec:
         storageClass: "rook-ceph-block"
         accessMode: ReadWriteOnce
         size: "10Gi"
-      transcode:
-        enabled: false
-        emptyDir:
-          medium: "Memory"
+      # transcode:
+      #   enabled: true
+      #   emptyDir:
+      #     medium: "Memory"
     additionalVolumeMounts:
     - name: testing-rocinante
       mountPath: "/media-rocinante"
-      readOnly: true
-    - name: cert
-      mountPath: "/config/certs"
       readOnly: true
     additionalVolumes:
     - name: testing-rocinante
       persistentVolumeClaim:
         claimName: nfs-testing-rocinante-pvc
-    - name: cert
-      secret:
-        secretName: devbu-io-tls
-        items:
-        - key: keystore.p12
-          path: devbu-io-tls.p12
-    podAnnotations:
-      secret.reloader.stakater.com/reload: "devbu-io-tls"
     resources:
       requests:
         gpu.intel.com/i915: 1
