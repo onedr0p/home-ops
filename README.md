@@ -26,7 +26,7 @@ Feel free to open a [Github issue](https://github.com/onedr0p/home-cluster/issue
 
 My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.10 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s).
 
-Additional cluster components:
+Key cluster components:
 
   - [calico](https://docs.projectcalico.org/about/about-calico): For internal cluster networking using BGP
   - [rook-ceph](https://rook.io/): Provides persistent volumes, allowing any application to use the external ceph storage cluster
