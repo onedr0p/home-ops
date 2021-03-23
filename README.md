@@ -18,13 +18,15 @@ _... managed by Flux and serviced with RenovateBot_ :robot:
 
 This repository _is_ my homelab Kubernetes cluster in a declarative state. [Flux2](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder and makes the changes to my cluster based on the YAML manifests.
 
-Feel free to open a [Github issue](https://github.com/onedr0p/home-cluster/issues/new/choose) or join the k8s@home [Discord](https://discord.gg/sTMX7Vh) if you have any questions. See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
+Feel free to open a [Github issue](https://github.com/onedr0p/home-cluster/issues/new/choose) or join the k8s@home [Discord](https://discord.gg/sTMX7Vh) if you have any questions.
 
 ---
 
 ## :computer:&nbsp; Cluster setup
 
 My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.10 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s).
+
+See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
 
 Key cluster components:
 
