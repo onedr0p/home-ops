@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: plex
-      version: 3.0.0
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -46,12 +46,14 @@ spec:
       tls:
       - hosts:
         - "plex.devbu.io"
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
     persistence:
       config:
         enabled: true
         existingClaim: plex-config-v1
       transcode:
-        enabled: false
+        enabled: true
         emptyDir:
           medium: "Memory"
     additionalVolumeMounts:
@@ -61,9 +63,6 @@ spec:
     - name: media-serenity
       mountPath: "/media-serenity"
       readOnly: true
-    - name: cert
-      mountPath: "/cert"
-      readOnly: true
     additionalVolumes:
     - name: media-rocinante
       persistentVolumeClaim:
@@ -71,15 +70,6 @@ spec:
     - name: media-serenity
       persistentVolumeClaim:
         claimName: nfs-media-serenity-pvc
-    - name: cert
-      secret:
-        secretName: devbu-io-tls
-        items:
-        - key: keystore.p12
-          path: devbu-io-tls.p12
-    podAnnotations:
-      backup.velero.io/backup-volumes: config
-      secret.reloader.stakater.com/reload: "devbu-io-tls"
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -97,4 +87,4 @@ spec:
         memory: 1000Mi
       limits:
         gpu.intel.com/i915: 1
-        memory: 12000Mi
+        memory: 16000Mi
