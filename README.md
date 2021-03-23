@@ -18,7 +18,7 @@ _... managed by Flux and serviced with RenovateBot_ :robot:
 
 This repository _is_ my homelab Kubernetes cluster in a declarative state. [Flux2](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder and makes the changes to my cluster based on the YAML manifests.
 
-Feel free to open a [Github issue](https://github.com/onedr0p/home-cluster/issues/new/choose) or join the k8s@home [Discord](https://discord.gg/sTMX7Vh) if you have any questions.
+Feel free to open a [Github issue](https://github.com/onedr0p/home-cluster/issues/new/choose) or join the k8s@home [Discord](https://discord.gg/sTMX7Vh) if you have any questions. See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
 
 ---
 
@@ -26,7 +26,14 @@ Feel free to open a [Github issue](https://github.com/onedr0p/home-cluster/issue
 
 My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.10 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s).
 
-See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
+Additional cluster components:
+
+  - [calico](https://docs.projectcalico.org/about/about-calico): For internal cluster networking using BGP
+  - [rook-ceph](https://rook.io/): Provides persistent volumes, allowing any application to use the external ceph storage cluster
+  - [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets): Encrypts Secrets into a SealedSecret, which is safe to store - even to a public repository.
+  - [external-secrets](https://github.com/external-secrets/kubernetes-external-secrets): Allows usage of external secret management systems like [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/) or [HashiCorp Vault](https://www.vaultproject.io/), to securely add secrets in Kubernetes.
+  - [external-dns](https://github.com/kubernetes-sigs/external-dns): Creates DNS entries in a separate [coredns](https://github.com/coredns/coredns) deployment which is backed by a separate [etcd](https://github.com/etcd-io/etcd) deployment.
+  - [cert-manager](https://cert-manager.io/docs/): Configured to create TLS certs for all ingress services automatically using LetsEncrypt.
 
 ---
 
@@ -49,12 +56,6 @@ See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
 | Intel NUC8i7BEH         | 2     | 750GB SSD    | 1TB NVMe (rook-ceph) | 64GB | Kubernetes k3s Workers        |
 | Qnap NAS (rocinante)    | 1     | N/A          | 8x12TB RAID6         | 16GB | Media and shared file storage |
 | Synology NAS (serenity) | 1     | N/A          | 8x12TB RAID6         | 4GB  | Media and shared file storage |
-
----
-
-## :globe_with_meridians:&nbsp; Networking
-
-In my cluster I run [coredns](https://github.com/coredns/coredns), [etcd](https://github.com/etcd-io/etcd), and [external-dns](https://github.com/kubernetes-sigs/external-dns). **External-DNS** populates **CoreDNS** with all my ingress records and stores it in **etcd**. When I'm browsing any of the webapps while on my home network, the traffic is being routed internally and never makes a round trip. The way I set this up is in my router. When a DNS request is made for my domain or any of my subdomains it uses **coredns** as the DNS server, otherwise it uses whatever upstream DNS I provided.
 
 ---
 
