@@ -20,8 +20,9 @@ spec:
     image:
       repository: spx01/blocky
       tag: v0.13
+    env:
+      TZ: "America/New_York"
     replicas: 2
-    timeZone: "America/New_York"
     config: |
       upstream:
         externalResolvers:
@@ -50,24 +51,24 @@ spec:
       httpPort: 4000
       logLevel: info
     service:
-      type: LoadBalancer
-      externalIPs:
-      - 192.168.69.115
-      externalTrafficPolicy: Local
-    serviceTCP:
-      enabled: true
-      type: LoadBalancer
-      externalIPs:
-      - 192.168.69.115
-      externalTrafficPolicy: Local
-    serviceUDP:
-      enabled: true
-      type: LoadBalancer
-      externalIPs:
-      - 192.168.69.115
-      externalTrafficPolicy: Local
-    serviceMonitor:
-      enabled: true
+      port:
+        port: 4000
+      additionalServices:
+      - enabled: true
+        nameSuffix: dns-tcp
+        type: LoadBalancer
+        externalIPs:
+        - 192.168.69.115
+        externalTrafficPolicy: Local
+      - enabled: true
+        nameSuffix: dns-udp
+        type: LoadBalancer
+        externalIPs:
+        - 192.168.69.115
+        externalTrafficPolicy: Local
+    prometheus:
+      serviceMonitor:
+        enabled: true
     podAnnotations:
       configmap.reloader.stakater.com/reload: "blocky"
     affinity:
@@ -82,7 +83,7 @@ spec:
           topologyKey: "kubernetes.io/hostname"
     resources:
       requests:
-        memory: 250Mi
+        memory: 100Mi
         cpu: 100m
       limits:
         memory: 750Mi
