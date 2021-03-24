@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: blocky
-      version: 5.0.2
+      version: 6.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -20,8 +20,9 @@ spec:
     image:
       repository: spx01/blocky
       tag: v0.13
+    env:
+      TZ: "America/New_York"
     replicas: 2
-    timeZone: "America/New_York"
     config: |
       upstream:
         externalResolvers:
@@ -50,24 +51,34 @@ spec:
       httpPort: 4000
       logLevel: info
     service:
-      type: LoadBalancer
-      externalIPs:
-      - 192.168.69.115
-      externalTrafficPolicy: Local
-    serviceTCP:
-      enabled: true
-      type: LoadBalancer
-      externalIPs:
-      - 192.168.69.115
-      externalTrafficPolicy: Local
-    serviceUDP:
-      enabled: true
-      type: LoadBalancer
-      externalIPs:
-      - 192.168.69.115
-      externalTrafficPolicy: Local
-    serviceMonitor:
-      enabled: true
+      port:
+        port: 4000
+      additionalServices:
+      - enabled: true
+        nameSuffix: dns-tcp
+        type: LoadBalancer
+        externalIPs:
+        - 192.168.69.115
+        port:
+          port: 53
+          name: dns-tcp
+          protocol: TCP
+          targetPort: 53
+        externalTrafficPolicy: Local
+      - enabled: true
+        nameSuffix: dns-udp
+        type: LoadBalancer
+        externalIPs:
+        - 192.168.69.115
+        port:
+          port: 53
+          name: dns-udp
+          protocol: UDP
+          targetPort: 53
+        externalTrafficPolicy: Local
+    prometheus:
+      serviceMonitor:
+        enabled: true
     podAnnotations:
       configmap.reloader.stakater.com/reload: "blocky"
     affinity:
@@ -82,7 +93,7 @@ spec:
           topologyKey: "kubernetes.io/hostname"
     resources:
       requests:
-        memory: 250Mi
+        memory: 100Mi
         cpu: 100m
       limits:
         memory: 750Mi
