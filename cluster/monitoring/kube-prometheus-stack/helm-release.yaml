@@ -104,126 +104,6 @@ spec:
           targetLabel: kubernetes_node
     grafana:
       enabled: false
-      # image:
-      #   repository: grafana/grafana
-      #   tag: 7.3.7
-      # deploymentStrategy:
-      #   type: Recreate
-      # persistence:
-      #   enabled: false
-      #   storageClassName: "rook-ceph-block"
-      #   size: 10Gi
-      #   accessModes:
-      #   - ReadWriteOnce
-      # env:
-      #   GF_EXPLORE_ENABLED: true
-      #   GF_PANELS_DISABLE_SANITIZE_HTML: true
-      #   GF_LOG_FILTERS: rendering:debug
-      #   VAR_BLOCKY_URL: "http://blocky.kube-system.svc.cluster.local:4000"
-      # ingress:
-      #   enabled: true
-      #   annotations:
-      #     kubernetes.io/ingress.class: "external"
-      #   hosts:
-      #   - "grafana.devbu.io"
-      #   tls:
-      #   - hosts:
-      #     - "grafana.devbu.io"
-      # sidecar:
-      #   datasources:
-      #     enabled: true
-      #   dashboards:
-      #     enabled: true
-      #     searchNamespace: ALL
-      # plugins:
-      # - natel-discrete-panel
-      # - pr0ps-trackmap-panel
-      # - grafana-piechart-panel
-      # - vonage-status-panel
-      # - grafana-worldmap-panel
-      # - grafana-clock-panel
-      # dashboardProviders:
-      #   dashboardproviders.yaml:
-      #     apiVersion: 1
-      #     providers:
-      #     - name: 'default'
-      #       orgId: 1
-      #       folder: ''
-      #       type: file
-      #       disableDeletion: false
-      #       allowUiUpdates: true
-      #       editable: true
-      #       options:
-      #         path: /var/lib/grafana/dashboards/default
-      # dashboards:
-      #   default:
-      #     # Ref: https://grafana.com/grafana/dashboards/2842
-      #     ceph-cluster:
-      #       gnetId: 2842
-      #       revision: 14
-      #       datasource: Prometheus
-      #     # Ref: https://grafana.com/grafana/dashboards/5336
-      #     ceph-osd:
-      #       gnetId: 5336
-      #       revision: 5
-      #       datasource: Prometheus
-      #     # Ref: https://grafana.com/grafana/dashboards/5342
-      #     ceph-pools:
-      #       gnetId: 5342
-      #       revision: 5
-      #       datasource: Prometheus
-      #     vernemq:
-      #       url: https://raw.githubusercontent.com/vernemq/vernemq/master/metrics_scripts/grafana/VerneMQ%20Node%20Metrics.json
-      #       datasource: Prometheus
-      #     nginx-dashboard:
-      #       url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
-      #       datasource: Prometheus
-      #     blocky:
-      #       url: https://raw.githubusercontent.com/0xERR0R/blocky/master/docs/blocky-grafana.json
-      #       datasource: Prometheus
-      #     apc-ups:
-      #       url: https://raw.githubusercontent.com/onedr0p/home-operations/main/grafana-dashboards/apc-ups.json
-      #       datasource: Prometheus
-      #     cyberpower-pdu:
-      #       url: https://raw.githubusercontent.com/onedr0p/home-operations/main/grafana-dashboards/cyberpower-pdu.json
-      #       datasource: Prometheus
-      #     # Ref: https://grafana.com/grafana/dashboards/11315
-      #     unifi-client-insights:
-      #       gnetId: 11315
-      #       revision: 8
-      #       datasource: Prometheus
-      #     # Ref: https://grafana.com/grafana/dashboards/11311
-      #     unifi-network-sites:
-      #       gnetId: 11311
-      #       revision: 4
-      #       datasource: Prometheus
-      #     # Ref: https://grafana.com/grafana/dashboards/11314
-      #     unifi-uap-insights:
-      #       gnetId: 11314
-      #       revision: 9
-      #       datasource: Prometheus
-      #     # Ref: https://grafana.com/grafana/dashboards/11312
-      #     unifi-usw-insights:
-      #       gnetId: 11312
-      #       revision: 8
-      #       datasource: Prometheus
-      # additionalDataSources:
-      # - name: Loki
-      #   type: loki
-      #   access: proxy
-      #   url: http://loki:3100
-      # grafana.ini:
-      #   paths:
-      #     data: /var/lib/grafana/data
-      #     logs: /var/log/grafana
-      #     plugins: /var/lib/grafana/plugins
-      #     provisioning: /etc/grafana/provisioning
-      #   analytics:
-      #     check_for_updates: true
-      #   log:
-      #     mode: console
-      #   grafana_net:
-      #     url: https://grafana.net
     kubeEtcd:
       enabled: false
     kubeControllerManager:
@@ -275,6 +155,7 @@ spec:
                   storage: 50Gi
         additionalScrapeConfigs:
         - job_name: 'node-exporter'
+          honor_timestamps: true
           static_configs:
           - targets:
             # opnsense
@@ -284,11 +165,13 @@ spec:
             # serenity nas
             - 192.168.1.40:9100
         - job_name: 'minio'
+          honor_timestamps: true
           metrics_path: /minio/prometheus/metrics
           static_configs:
           - targets:
             - 192.168.1.39:9000
         - job_name: 'nexus'
+          honor_timestamps: true
           metrics_path: /service/metrics/prometheus
           basic_auth:
             username: admin
@@ -296,6 +179,150 @@ spec:
           static_configs:
           - targets:
             - 192.168.1.39:8081
+        - job_name: auth
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - auth-svc.kasten-io.svc.cluster.local:8000
+            labels:
+              application: k10
+              service: auth
+        - job_name: catalog
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - catalog-svc.kasten-io.svc.cluster.local:8000
+            labels:
+              application: k10
+              service: catalog
+        - job_name: crypto
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - crypto-svc.kasten-io.svc.cluster.local:8000
+            labels:
+              application: k10
+              service: crypto
+        - job_name: dashboardbff
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - dashboardbff-svc.kasten-io.svc.cluster.local:8000
+            labels:
+              application: k10
+              service: dashboardbff
+        - job_name: executor
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - executor-svc.kasten-io.svc.cluster.local:8000
+            labels:
+              application: k10
+              service: executor
+        - job_name: jobs
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - jobs-svc.kasten-io.svc.cluster.local:8000
+            labels:
+              application: k10
+              service: jobs
+        - job_name: logging
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - logging-svc.kasten-io.svc.cluster.local:8000
+            labels:
+              application: k10
+              service: logging
+        - job_name: metering
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - metering-svc.kasten-io.svc.cluster.local:8000
+            labels:
+              application: k10
+              service: metering
+        - job_name: state
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - state-svc.kasten-io.svc.cluster.local:8000
+            labels:
+              application: k10
+              service: state
+        - job_name: gateway
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - gateway-admin.kasten-io.svc.cluster.local:8877
+            labels:
+              application: k10
+              service: gateway
+        - job_name: config
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - config-svc.kasten-io.svc.cluster.local:8000
+            labels:
+              application: k10
+              service: config
+        - job_name: kanister
+          honor_timestamps: true
+          scrape_interval: 1m
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+          - targets:
+            - kanister-svc.kasten-io.svc.cluster.local:8000
+            labels:
+              application: k10
+              service: kanister
   valuesFrom:
   - kind: Secret
     name: "kube-prometheus-stack-helm-values"
