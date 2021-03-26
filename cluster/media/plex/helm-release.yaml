@@ -38,6 +38,7 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "external"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
       hosts:
       - host: plex.devbu.io
         paths:
@@ -48,6 +49,7 @@ spec:
         - "plex.devbu.io"
     podAnnotations:
       backup.velero.io/backup-volumes: config
+      secret.reloader.stakater.com/reload: "devbu-io-tls"
     persistence:
       config:
         enabled: true
@@ -64,6 +66,9 @@ spec:
     - name: media-serenity
       mountPath: "/media-serenity"
       readOnly: true
+    - name: cert
+      mountPath: "/cert"
+      readOnly: true
     additionalVolumes:
     - name: media-rocinante
       persistentVolumeClaim:
@@ -71,6 +76,12 @@ spec:
     - name: media-serenity
       persistentVolumeClaim:
         claimName: nfs-media-serenity-pvc
+    - name: cert
+      secret:
+        secretName: devbu-io-tls
+        items:
+        - key: keystore.p12
+          path: devbu-io-tls.p12
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
