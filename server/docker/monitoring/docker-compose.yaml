@@ -2,6 +2,15 @@
 
 version: '3.7'
 services:
+  cadvisor:
+    image: gcr.io/google-containers/cadvisor:v0.36.0
+    ports:
+    - 9123:8080
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
   node-exporter:
     image: prom/node-exporter:v1.1.2
     restart: unless-stopped
