@@ -17,6 +17,13 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
+    initContainers:
+    - name: update-perms
+      image: busybox
+      command: ["sh", "-c", "chown -R 568:568 /config"]
+      volumeMounts:
+      - name: config
+        mountPath: /config
     image:
       repository: jesec/rtorrent-flood
       tag: latest@sha256:378853e3af5ba59ed68a757ca740db65717ee4c6562a2886a96d8559d26e3db4
@@ -29,11 +36,11 @@ spec:
     config: |
       session.use_lock.set = no
       method.insert = cfg.basedir,  private|const|string, (cat,(fs.homedir),"/.local/share/rtorrent/")
-      method.insert = cfg.download, private|const|string, (cat,"/media-rocinante/Downloads/rtorrent-flood/","download/")
-      method.insert = cfg.logs,     private|const|string, (cat,(cfg.download),"log/")
+      method.insert = cfg.download, private|const|string, (cat,"/media-rocinante/Downloads/rtorrent-flood/","completed/")
+      method.insert = cfg.logs,     private|const|string, (cat,"/media-rocinante/Downloads/rtorrent-flood/","log/")
       method.insert = cfg.logfile,  private|const|string, (cat,(cfg.logs),"rtorrent-",(system.time),".log")
       method.insert = cfg.session,  private|const|string, (cat,(cfg.basedir),".session/")
-      method.insert = cfg.watch,    private|const|string, (cat,(cfg.download),"watch/")
+      method.insert = cfg.watch,    private|const|string, (cat,"/media-rocinante/Downloads/rtorrent-flood/","watch/")
       fs.mkdir.recursive = (cat,(cfg.basedir))
       fs.mkdir = (cat,(cfg.download))
       fs.mkdir = (cat,(cfg.logs))
@@ -88,13 +95,13 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "internal"
       hosts:
-      - host: rtorrent-flood.devbu.io
+      - host: flood.devbu.io
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - "rtorrent-flood.devbu.io"
+        - "flood.devbu.io"
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
