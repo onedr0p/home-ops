@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: rtorrent-flood
-      version: 6.0.0
+      version: 6.0.1
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -22,16 +22,17 @@ spec:
       tag: latest@sha256:378853e3af5ba59ed68a757ca740db65717ee4c6562a2886a96d8559d26e3db4
     env:
       TZ: "America/New_York"
+      HOME: "/config"
     args:
     - "--port 3000"
     - "--allowedpath /media-rocinante/Downloads/rtorrent-flood"
     config: |
       method.insert = cfg.basedir,  private|const|string, (cat,(fs.homedir),"/.local/share/rtorrent/")
-      method.insert = cfg.download, private|const|string, (cat,(cfg.basedir),"download/")
-      method.insert = cfg.logs,     private|const|string, (cat,(cfg.basedir),"log/")
+      method.insert = cfg.download, private|const|string, (cat,"/media-rocinante/Downloads/rtorrent-flood/","download/")
+      method.insert = cfg.logs,     private|const|string, (cat,(cfg.download),"log/")
       method.insert = cfg.logfile,  private|const|string, (cat,(cfg.logs),"rtorrent-",(system.time),".log")
       method.insert = cfg.session,  private|const|string, (cat,(cfg.basedir),".session/")
-      method.insert = cfg.watch,    private|const|string, (cat,(cfg.basedir),"watch/")
+      method.insert = cfg.watch,    private|const|string, (cat,(cfg.download),"watch/")
       fs.mkdir.recursive = (cat,(cfg.basedir))
       fs.mkdir = (cat,(cfg.download))
       fs.mkdir = (cat,(cfg.logs))
