@@ -1,4 +1,9 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    "default:pinDigestsDisabled"
+  ],
   "enabled": true,
   "timezone": "America/New_York",
   "semanticCommits": "enabled",
@@ -112,21 +117,24 @@
         "influxdb",
       ]
     },
-    {
-       "matchDatasources": ["helm"],
-       "allowedVersions": "<15",
-       "matchPackageNames": ["kube-prometheus-stack"]
-    },
+    // {
+    //    "matchDatasources": ["helm"],
+    //    "allowedVersions": "<15",
+    //    "matchPackageNames": ["kube-prometheus-stack"]
+    // },
     // version strategies
     {
       "matchDatasources": ["docker"],
       "versioning": "loose",
-      "matchPackageNames": ["ghcr.io/k8s-at-home/plex"]
+      "matchPackageNames": [
+        "ghcr.io/k8s-at-home/plex"
+      ]
     },
     // enable auto-merge
     {
       "matchDatasources": ["docker"],
       "automerge": true,
+      "automergeType": "branch",
       "requiredStatusChecks": null,
       "matchUpdateTypes": ["minor", "patch"],
       "matchPackageNames": [
