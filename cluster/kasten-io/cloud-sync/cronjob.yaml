@@ -1,0 +1,51 @@
+---
+#
+# Cronjob to back up my k10 backups to the cloud
+#
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  namespace: kasten-io
+  name: cloud-sync
+spec:
+  schedule: "0 */12 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: rclone
+            image: rclone/rclone:1.54
+            env:
+            - name: TZ
+              value: "America/New_York"
+            command:
+            - "rclone"
+            args:
+            - "-v"
+            - "--config"
+            - "/config/rclone.conf"
+            - "sync"
+            - "--ignore-errors"
+            - "--fast-list"
+            - "--b2-hard-delete"
+            - "--transfers"
+            - "24"
+            - "--checkers"
+            - "24"
+            - "--bwlimit"
+            - "25M"
+            - "minio:kasten-io"
+            - "b2-velero-crypt:/"
+            volumeMounts:
+            - name: rclone-config
+              mountPath: "/config"
+          volumes:
+          - name: rclone-config
+            secret:
+              secretName: rclone-config
+              items:
+              - key: rclone-config
+                path: rclone.conf
