@@ -16,9 +16,9 @@ spec:
         name: k8s-at-home-charts
         namespace: flux-system
       interval: 5m
-  # dependsOn:
-  # - name: sealed-secrets
-  #   namespace: kube-system
+  dependsOn:
+  - name: sealed-secrets
+    namespace: kube-system
   values:
     image:
       repository: koenkk/zigbee2mqtt
@@ -75,12 +75,10 @@ spec:
       - hosts:
         - "zigbee2mqtt.devbu.io"
     persistence:
-      data:
+      config:
         enabled: true
-        mountPath: /data
-        storageClass: "rook-ceph-block"
-        accessMode: ReadWriteOnce
-        size: "1Gi"
+        existingClaim: zigbee2mqtt-config-v1
+        mountPath: "/data"
     additionalVolumeMounts:
     - name: usb
       mountPath: /dev/ttyUSB0
@@ -119,7 +117,7 @@ spec:
           - hosts:
             - zigbee2mqtt-config.devbu.io
         volumeMounts:
-        - name: data
+        - name: config
           mountPath: /data
   valuesFrom:
   - kind: Secret
