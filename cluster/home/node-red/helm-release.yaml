@@ -37,18 +37,13 @@ spec:
       - hosts:
         - "node-red.devbu.io"
     persistence:
-      data:
+      config:
         enabled: true
-        mountPath: /data
-        storageClass: "rook-ceph-block"
-        accessMode: ReadWriteOnce
-        size: "5Gi"
-    podAnnotations:
-      backup.velero.io/backup-volumes: data
+        existingClaim: node-red-config-v1
+        mountPath: "/data"
     resources:
       requests:
-        memory: 250Mi
-        cpu: 500m
+        memory: 100Mi
+        cpu: 100m
       limits:
-        memory: 1500Mi
-        cpu: 2000m
+        memory: 1000Mi
