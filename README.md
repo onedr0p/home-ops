@@ -49,6 +49,18 @@ Key cluster components:
 
 ---
 
+## :spider_web:&nbsp; Networking
+
+In my network Calico is configured with BGP on my Opnsense router. Instead of the standard way of using Metallb this allows me to advertize a load balancer using `externalIPs` on my Kubernetes services without needing Metallb. Another benefit to this is that I can directly hit any pods IP directly from any device on my local network.
+
+## :man_shrugging:&nbsp; DNS
+
+To prefix this, I should mention that I only use one domain name for internal and externally facing applications. Also this is the most complicated thing to explain but I will try to sum it up.
+
+On Opnsense under `Services: Unbound DNS: Overrides` I have a `Domain Override` set to my domain with the address pointing to my _non-cluster service_ CoreDNS server IP. This allows me to use [Split-horizon DNS](https://en.wikipedia.org/wiki/Split-horizon_DNS). [external-dns](https://github.com/kubernetes-sigs/external-dns) reads my clusters `Ingress`'s and inserts DNS records containing the sub-domain and service IP into the _non-cluster service_ CoreDNS service. The records are stored into a _non-cluster service_ etcd instance.
+
+---
+
 ## :gear:&nbsp; Hardware
 
 | Device                  | Count | OS Disk Size | Data Disk Size       | Ram  | Purpose                       |
@@ -60,16 +72,6 @@ Key cluster components:
 | Synology NAS (serenity) | 1     | N/A          | 8x12TB RAID6         | 4GB  | Media and shared file storage |
 
 ---
-
-## :spider_web:&nbsp; Networking
-
-In my network Calico is configured with BGP on my Opnsense router. Instead of the standard way of using Metallb this allows me to advertize a load balancer using `externalIPs` on my Kubernetes services without needing Metallb. Another benefit to this is that I can directly hit any pods IP directly from any device on my local network.
-
-## :man_shrugging:&nbsp; DNS
-
-To prefix this, I should mention that I only use one domain name for internal and externally facing applications. Also this is the most complicated thing to explain but I will try to sum it up.
-
-On Opnsense under `Services: Unbound DNS: Overrides` I have a `Domain Override` set to my domain with the address pointing to my _non-cluster service_ CoreDNS server IP. This allows me to use [Split-horizon DNS](https://en.wikipedia.org/wiki/Split-horizon_DNS). [external-dns](https://github.com/kubernetes-sigs/external-dns) reads my clusters `Ingress`'s and inserts DNS records containing the sub-domain and service IP into the _non-cluster service_ CoreDNS service. The records are stored into a _non-cluster service_ etcd instance.
 
 ## :wrench:&nbsp; Tools
 
