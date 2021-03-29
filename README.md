@@ -51,6 +51,8 @@ Key cluster components:
 
 ## :spider_web:&nbsp; Networking
 
+In my network Calico is configured with BGP on my Opnsense router. Instead of the standard way of using Metallb this allows me to advertize a load balancer using `externalIPs` on my Kubernetes services without needing Metallb. Another benefit to this is that I can directly hit any pods IP directly from any device on my local network.
+
 | Name                        | CIDR              |
 |-----------------------------|-------------------|
 | Management                  | `192.168.1.0/24`  |
@@ -58,8 +60,6 @@ Key cluster components:
 | k8s external services (BGP) | `192.168.69.0/24` |
 | k8s pods                    | `10.69.0.0/16`    |
 | k8s services                | `10.96.0.0/16`    |
-
-In my network Calico is configured with BGP on my Opnsense router. Instead of the standard way of using Metallb this allows me to advertize a load balancer using `externalIPs` on my Kubernetes services without needing Metallb. Another benefit to this is that I can directly hit any pods IP directly from any device on my local network.
 
 ## :man_shrugging:&nbsp; DNS
 
