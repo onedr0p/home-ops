@@ -17,6 +17,15 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
+    initContainers:
+    - name: update-perms
+      image: busybox
+      command: ["sh", "-c", "chown -R 568:568 /config"]
+      volumeMounts:
+      - name: config
+        mountPath: /config
+      securityContext:
+        runAsUser: 0
     image:
       repository: jesec/rtorrent-flood
       tag: latest@sha256:11bb596881bc5cdba15028d280d40aae1501a8498be48df544f8d296eea6b6db
@@ -100,6 +109,9 @@ spec:
         enabled: true
         existingClaim: rtorrent-flood-config-v1
     podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
       supplementalGroups:
       - 100
     additionalVolumeMounts:
