@@ -28,16 +28,15 @@ spec:
         runAsUser: 0
     image:
       repository: jesec/rtorrent-flood
-      tag: latest@sha256:d0631cb81060417e582a986b053b7bc418f9ee46fcff1ea7282dacbb4cbf0ee6
+      tag: latest@sha256:5ff0125ea0e2befbc2ba2f2143e130819db645cb5ef68b44a0712b8162a16f47
     env:
       TZ: "America/New_York"
       HOME: "/config"
-    args:
-    - "flood"
-    - "--host 0.0.0.0"
-    - "--rtorrent"
-    - "--port 3000"
-    - "--allowedpath /media-rocinante/Downloads/rtorrent-flood"
+      FLOOD_OPTION_HOST: "0.0.0.0"
+      FLOOD_OPTION_PORT: "3000"
+      FLOOD_OPTION_RTORRENT: "true"
+      FLOOD_OPTION_ALLOWEDPATH: "/media-rocinante/Downloads/rtorrent-flood"
+    args: []
     config: |
       session.use_lock.set = no
       method.insert = cfg.basedir,  private|const|string, (cat,(fs.homedir),"/.local/share/rtorrent/")
