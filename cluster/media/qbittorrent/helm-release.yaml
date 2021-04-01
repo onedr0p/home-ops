@@ -72,3 +72,19 @@ spec:
         cpu: 500m
       limits:
         memory: 6000Mi
+    addon:
+      promtail:
+        enabled: true
+        image:
+          repository: grafana/promtail
+          tag: 2.2.0
+        loki: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+        logs:
+        - name: log
+          path: /config/data/qBittorrent/logs/*.log
+        volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+        securityContext:
+          runAsUser: 0
