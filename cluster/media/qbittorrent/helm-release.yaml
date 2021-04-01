@@ -72,6 +72,8 @@ spec:
         cpu: 500m
       limits:
         memory: 6000Mi
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "qbittorrent-promtail"
     addons:
       promtail:
         enabled: true
@@ -80,7 +82,7 @@ spec:
           tag: 2.2.0
         loki: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
         logs:
-        - name: log
+        - name: promtail/qbittorrent
           path: /config/data/qBittorrent/logs/*.log
         volumeMounts:
         - name: config
