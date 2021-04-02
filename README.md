@@ -16,15 +16,15 @@ _... managed by Flux and serviced with RenovateBot_ :robot:
 
 ## :book:&nbsp; Overview
 
-This repository _is_ my homelab Kubernetes cluster in a declarative state. [Flux2](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder and makes the changes to my cluster based on the YAML manifests.
+This repository _is_ my homelab Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder and makes the changes to my cluster based on the YAML manifests.
 
-Feel free to open a [Github issue](https://github.com/onedr0p/home-cluster/issues/new/choose) or join the k8s@home [Discord](https://discord.gg/sTMX7Vh) if you have any questions.
+Feel free to open a [Github issue](https://github.com/onedr0p/home-cluster/issues/new/choose) or join the [k8s@home Discord](https://discord.gg/sTMX7Vh) if you have any questions.
 
 ---
 
 ## :computer:&nbsp; Cluster setup
 
-My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.10 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s).
+My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.10 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a hyper-converged cluster, workloads and storage are sharing the same available resources on my nodes.
 
 See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
 
@@ -51,7 +51,7 @@ Key cluster components:
 
 ## :spider_web:&nbsp; Networking
 
-In my network Calico is configured with BGP on my Opnsense router. Instead of the standard way of using Metallb this allows me to advertize a load balancer using `externalIPs` on my Kubernetes services without needing Metallb. Another benefit to this is that I can directly hit any pods IP directly from any device on my local network.
+In my network Calico is configured with BGP on my Opnsense router. With BGP enabled, I advertize a load balancer using `externalIPs` on my Kubernetes services. This makes it so I do not need `Metallb`. Another benefit to this is that I can directly hit any pods IP directly from any device on my local network.
 
 | Name                        | CIDR              |
 |-----------------------------|-------------------|
@@ -65,7 +65,7 @@ In my network Calico is configured with BGP on my Opnsense router. Instead of th
 
 To prefix this, I should mention that I only use one domain name for internal and externally facing applications. Also this is the most complicated thing to explain but I will try to sum it up.
 
-On Opnsense under `Services: Unbound DNS: Overrides` I have a `Domain Override` set to my domain with the address pointing to my _non-cluster service_ CoreDNS server IP. This allows me to use [Split-horizon DNS](https://en.wikipedia.org/wiki/Split-horizon_DNS). [external-dns](https://github.com/kubernetes-sigs/external-dns) reads my clusters `Ingress`'s and inserts DNS records containing the sub-domain and service IP into the _non-cluster service_ CoreDNS service. The records are stored into a _non-cluster service_ etcd instance.
+On Opnsense under `Services: Unbound DNS: Overrides` I have a `Domain Override` set to my domain with the address pointing to my _non-cluster service_ CoreDNS load balancer IP. This allows me to use [Split-horizon DNS](https://en.wikipedia.org/wiki/Split-horizon_DNS). [external-dns](https://github.com/kubernetes-sigs/external-dns) reads my clusters `Ingress`'s and inserts DNS records containing the sub-domain and load balancer IP (of ingress-nginx) into the _non-cluster service_ CoreDNS service. The records are stored into a _non-cluster service_ etcd instance without persistence.
 
 ---
 
@@ -73,9 +73,9 @@ On Opnsense under `Services: Unbound DNS: Overrides` I have a `Domain Override` 
 
 | Device                  | Count | OS Disk Size | Data Disk Size       | Ram  | Purpose                       |
 |-------------------------|-------|--------------|----------------------|------|-------------------------------|
-| Intel NUC8i3BEK         | 1     | 256GB NVMe   | N/A                  | 16GB | Kubernetes k3s Master         |
-| Intel NUC8i5BEH         | 3     | 120GB SSD    | 1TB NVMe (rook-ceph) | 32GB | Kubernetes k3s Workers        |
-| Intel NUC8i7BEH         | 2     | 750GB SSD    | 1TB NVMe (rook-ceph) | 64GB | Kubernetes k3s Workers        |
+| Intel NUC8i3BEK         | 1     | 256GB NVMe   | N/A                  | 16GB | k3s Master                    |
+| Intel NUC8i5BEH         | 3     | 120GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                   |
+| Intel NUC8i7BEH         | 2     | 750GB SSD    | 1TB NVMe (rook-ceph) | 64GB | k3s Workers                   |
 | Qnap NAS (rocinante)    | 1     | N/A          | 8x12TB RAID6         | 16GB | Media and shared file storage |
 | Synology NAS (serenity) | 1     | N/A          | 8x12TB RAID6         | 4GB  | Media and shared file storage |
 
