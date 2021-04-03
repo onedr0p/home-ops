@@ -41,6 +41,9 @@ spec:
         kubernetes.io/ingress.class: "external"
         # Custom themes provided by https://github.com/gilbN/theme.park
         nginx.ingress.kubernetes.io/configuration-snippet: |
+          proxy_hide_header "x-webkit-csp";
+          proxy_hide_header "content-security-policy";
+          proxy_hide_header "X-Frame-Options";
           proxy_set_header Accept-Encoding "";
           sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://gilbn.github.io/theme.park/CSS/themes/qbittorrent/organizr-dark.css"></head>';
           sub_filter_once on;
