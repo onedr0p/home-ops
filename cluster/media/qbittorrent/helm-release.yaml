@@ -39,6 +39,14 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "external"
+        # Custom themes provided by https://github.com/gilbN/theme.park
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          proxy_set_header Accept-Encoding "";
+          sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://gilbn.github.io/theme.park/CSS/themes/qbittorrent/organizr-dark.css"></head>';
+          sub_filter_once on;
+        forecastle.stakater.com/expose: "true"
+        forecastle.stakater.com/icon: "https://user-images.githubusercontent.com/33867119/33150262-ba172c24-cfe3-11e7-8bc0-09ac1735844c.png"
+        forecastle.stakater.com/network-restricted: "true"
       hosts:
       - host: qb.devbu.io
         paths:
