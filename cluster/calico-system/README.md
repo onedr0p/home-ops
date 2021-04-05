@@ -43,7 +43,7 @@ ports:
 
 ## calico-kube-controllers
 
-This is not working I am unable to patch the kubecontrollers config with the prometheus port
+This is not working I am unable to patch `kubecontrollersconfiguration` with the prometheus port
 
 ```sh
 calicoctl patch kubecontrollersconfiguration default --patch '{"spec":{"prometheusMetricsPort": 9094}}'
