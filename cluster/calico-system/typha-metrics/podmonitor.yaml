@@ -1,0 +1,16 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: typha-metrics
+  namespace: calico-system
+  labels:
+    k8s-app: calico-typha
+spec:
+  selector:
+    matchLabels:
+      k8s-app: calico-typha
+  podMetricsEndpoints:
+  - port: http-metrics
+    path: /metrics
+    interval: 15s
