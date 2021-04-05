@@ -24,7 +24,7 @@ Feel free to open a [Github issue](https://github.com/onedr0p/home-cluster/issue
 
 ## :computer:&nbsp; Cluster setup
 
-My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.10 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a hyper-converged cluster, workloads and storage are sharing the same available resources on my nodes.
+My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.10 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes.
 
 See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
 
