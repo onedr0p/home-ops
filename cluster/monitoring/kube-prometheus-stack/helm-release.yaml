@@ -114,14 +114,14 @@ spec:
           targetLabel: instance
     kubeApiServer:
       enabled: true
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
     kubeEtcd:
       enabled: false
-    kubeControllerManager:
-      enabled: true
-    kubeScheduler:
-      enabled: true
-    kubeProxy:
-      enabled: true
     prometheus:
       ingress:
         enabled: true
@@ -188,13 +188,3 @@ spec:
   valuesFrom:
   - kind: Secret
     name: "kube-prometheus-stack-helm-values"
-  # postRenderers:
-  # - kustomize:
-  #     patchesJson6902:
-  #     - target:
-  #         kind: Ingress
-  #         name: k10-ingress
-  #       patch:
-  #       - op: replace
-  #         path: /spec/rules/0/http/paths/0/path
-  #         value: /
