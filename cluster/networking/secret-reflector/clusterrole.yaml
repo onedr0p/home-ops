@@ -5,23 +5,37 @@ metadata:
   name: secret-reflector
   namespace: networking
 rules:
-- apiGroups: ["*"]
+- apiGroups: [""]
   resources: ["secrets"]
-  verbs: ["get", "create", "update"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: secret-reflector
+  namespace: kasten-io
+roleRef:
+  kind: Role
+  name: secret-reflector
+  apiGroup: ""
+subjects:
+- kind: ServiceAccount
+  name: sa-secret-reflector
+  namespace: media
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: secret-reflector
   namespace: networking
-subjects:
-- kind: ServiceAccount
-  name: sa-secret-reflector
-  namespace: networking
 roleRef:
   kind: Role
   name: secret-reflector
   apiGroup: ""
+subjects:
+- kind: ServiceAccount
+  name: sa-secret-reflector
+  namespace: networking
 ---
 apiVersion: v1
 kind: ServiceAccount
