@@ -1,44 +1,34 @@
 ---
-kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
 metadata:
   name: secret-reflector
-  namespace: networking
 rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["*"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["watch", "list"]
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["watch", "list"]
+  - apiGroups: ["certmanager.k8s.io"]
+    resources: ["certificates", "certificates/finalizers"]
+    verbs: ["watch", "list"]
+  - apiGroups: ["cert-manager.io"]
+    resources: ["certificates", "certificates/finalizers"]
+    verbs: ["watch", "list"]
 ---
-kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
 metadata:
   name: secret-reflector
-  namespace: kasten-io
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: secret-reflector
-  apiGroup: ""
+  apiGroup: rbac.authorization.k8s.io
 subjects:
-- kind: ServiceAccount
-  name: sa-secret-reflector
-  namespace: networking
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: secret-reflector
-  namespace: media
-roleRef:
-  kind: Role
-  name: secret-reflector
-  apiGroup: ""
-subjects:
-- kind: ServiceAccount
-  name: sa-secret-reflector
-  namespace: networking
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: sa-secret-reflector
-  namespace: networking
+  - kind: ServiceAccount
+    name: sa-secret-reflector
+    namespace: networking
