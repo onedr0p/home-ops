@@ -45,7 +45,7 @@ See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
 - Rancher [System Upgrade Controller](https://github.com/rancher/system-upgrade-controller) to apply updates to k3s
 - [Renovate](https://github.com/renovatebot/renovate) with the help of the [k8s-at-home/renovate-helm-releases](https://github.com/k8s-at-home/renovate-helm-releases) Github action keeps my application charts and container images up-to-date
 - [Actions Runner Controller](https://github.com/summerwind/actions-runner-controller) operates a self-hosted Github runner in my cluster that updates Sealed Secrets when needed
-- ~~[Kured](https://github.com/weaveworks/kured) to apply OS patches to my nodes~~ Kured has given me issues with rebooting nodes. I will handle upgrades myself.
+- ~~[Kured](https://github.com/weaveworks/kured) to apply OS patches to my nodes~~ **Note:** _Kured has given me issues with rebooting nodes. I will handle upgrades myself._
 
 ---
 
