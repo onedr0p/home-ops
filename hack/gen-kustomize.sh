@@ -23,6 +23,6 @@ for folder in ${folders}; do
     if [ ! -f "kustomization.yaml" ]; then
         kustomize create
     fi
-    kustomize edit add resource *.yaml
+    kustomize edit add resource **.yaml
     popd >/dev/null 2>&1
 done
