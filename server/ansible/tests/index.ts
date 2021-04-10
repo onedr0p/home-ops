@@ -13,7 +13,7 @@ const dropletGenericCount = 2;
 const controlDroplets = [];
 for (let i = 0; i < dropletControlCount; i++) {
     const nodeLetter = String.fromCharCode(97 + i);
-    const nodeName = `k8s-control-node-${nodeLetter}`;
+    const nodeName = `k8s-master-${nodeLetter}`;
     const nameTag = new digitalocean.Tag(`${nodeName}`);
     controlDroplets.push(new digitalocean.Droplet(`${nodeName}`, {
         image: "ubuntu-20-10-x64",
@@ -29,7 +29,7 @@ for (let i = 0; i < dropletControlCount; i++) {
 const genericDroplets = [];
 for (let i = 0; i < dropletGenericCount; i++) {
     const nodeLetter = String.fromCharCode(97 + i);
-    const nodeName = `k8s-generic-node-${nodeLetter}`;
+    const nodeName = `k8s-worker-${nodeLetter}`;
     const nameTag = new digitalocean.Tag(`${nodeName}`);
     genericDroplets.push(new digitalocean.Droplet(`${nodeName}`, {
         image: "ubuntu-20-10-x64",
@@ -78,9 +78,9 @@ const httpLoadBalancer = new digitalocean.LoadBalancer("http-public", {
 // e.g. using yq@v4 'pulumi stack output --json | yq eval -P - > hosts.yml'
 export const all = {
     children: {
-        "control-nodes": {
+        "master-nodes": {
             hosts: {
-                "k8s-control-node-a": {
+                "k8s-master-a": {
                     "ansible_host": controlDroplets[0].ipv4Address,
                     "ansible_user": "root",
                     "k3s_registration_address": kubernetesLoadBalancer.ip,
@@ -89,16 +89,16 @@ export const all = {
                 }
             },
         },
-        "generic-nodes": {
+        "worker-nodes": {
             hosts: {
-                "k8s-generic-node-a": {
+                "k8s-worker-a": {
                     "ansible_host": genericDroplets[0].ipv4Address,
                     "ansible_user": "root",
                     "k3s_registration_address": kubernetesLoadBalancer.ip,
                     "digitalocean_private_ip": genericDroplets[0].ipv4AddressPrivate,
                     "digitalocean_http_ip": httpLoadBalancer.ip,
                 },
-                "k8s-generic-node-b": {
+                "k8s-worker-b": {
                     "ansible_host": genericDroplets[1].ipv4Address,
                     "ansible_user": "root",
                     "k3s_registration_address": kubernetesLoadBalancer.ip,

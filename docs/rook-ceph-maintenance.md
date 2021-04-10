@@ -16,7 +16,7 @@ kubectl scale deploy/zigbee2mqtt --replicas 0 -n home
 Get the `rbd` image name for the app:
 
 ```sh
-kubectl get pv/(kubectl get pv | grep zigbee2mqtt-data | awk -F' ' '{print $1}') -n home -o json | jq -r '.spec.csi.volumeAttributes.imageName'
+kubectl get pv/(kubectl get pv | grep plex-config-v1 | awk -F' ' '{print $1}') -n home -o json | jq -r '.spec.csi.volumeAttributes.imageName'
 ```
 
 Exec into the `rook-direct-mount` toolbox:
@@ -43,7 +43,7 @@ mkdir -p /mnt/data
     Mount the `nfs` share:
 
     ```sh
-    mount -t nfs -o "tcp,intr,rw,noatime,nodiratime,rsize=65536,wsize=65536,hard" 192.168.1.40:/volume1/Data /mnt/nfsdata
+    mount -t nfs -o "tcp,intr,rw,noatime,nodiratime,rsize=65536,wsize=65536,hard" 192.168.42.50:/volume1/Data /mnt/nfs
     ```
 
 List all the `rbd` block device names:
@@ -55,7 +55,7 @@ rbd list --pool replicapool
 Map the `rbd` block device to a `/dev/rbdX` device:
 
 ```sh
-rbd map -p replicapool csi-vol-e4a2e40f-2795-11eb-80c7-2298c6796a25
+rbd map -p replicapool csi-vol-9a010830-8b0a-11eb-b291-6aaa17155076
 ```
 
 Mount the `/dev/rbdX` device:
@@ -85,7 +85,7 @@ When done you can unmount `/mnt/data` and unmap the `rbd` device:
 
 ```sh
 umount /mnt/data
-rbd unmap -p replicapool csi-vol-e4a2e40f-2795-11eb-80c7-2298c6796a25
+rbd unmap -p replicapool csi-vol-9a010830-8b0a-11eb-b291-6aaa17155076
 ```
 
 Lastly you need to scale the deployment replicas back up to 1:
@@ -112,3 +112,18 @@ ceph crash archive-all
 ## Helpful links
 
 * [Common issues](https://rook.io/docs/rook/v1.5/ceph-common-issues.html)
+
+```
+kubectl get pv/(kubectl get pv \
+    | grep "drone" \
+    | awk -F' ' '{print $1}') -n media -o json \
+    | jq -r '.spec.csi.volumeAttributes.imageName'
+
+rbd map -p replicapool csi-vol-8d510654-2693-11eb-80c7-2298c6796a25 \
+    | xargs -I{} mount {} /mnt/data
+
+tar czvf /mnt/nfs/backups/drone.tar.gz -C /mnt/data/ .
+
+umount /mnt/data && \
+rbd unmap -p replicapool csi-vol-8d510654-2693-11eb-80c7-2298c6796a25
+```

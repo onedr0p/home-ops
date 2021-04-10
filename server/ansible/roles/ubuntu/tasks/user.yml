@@ -1,11 +1,5 @@
 ---
 
-- name: user | get home directory
-  ansible.builtin.shell: "echo $HOME"
-  changed_when: false
-  check_mode: no
-  register: user_home
-
 - name: user | add to sudoers
   ansible.builtin.copy:
     content: "{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
@@ -24,13 +18,12 @@
 
 - name: user | check if hushlogin exists
   ansible.builtin.stat:
-    path: "/{{ user_home.stdout }}/.hushlogin"
+    path: "/home/{{ ansible_user }}/.hushlogin"
   register: hushlogin_result
 
 - name: user | silence the login prompt
   ansible.builtin.file:
-    dest: "/{{ user_home.stdout }}/.hushlogin"
+    dest: "/home/{{ ansible_user }}/.hushlogin"
     state: touch
     owner: "{{ ansible_user }}"
     mode: "0775"
-  when: not hushlogin_result.stat.exists
