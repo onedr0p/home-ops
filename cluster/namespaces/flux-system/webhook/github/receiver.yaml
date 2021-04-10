@@ -1,0 +1,16 @@
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta1
+kind: Receiver
+metadata:
+  name: home-cluster
+  namespace: flux-system
+spec:
+  type: github
+  events:
+  - "ping"
+  - "push"
+  secretRef:
+    name: github-token
+  resources:
+  - kind: GitRepository
+    name: flux-system

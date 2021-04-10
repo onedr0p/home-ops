@@ -1,0 +1,34 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: descheduler
+  namespace: kube-system
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://kubernetes-sigs.github.io/descheduler
+      chart: descheduler
+      version: 0.20.0
+      sourceRef:
+        kind: HelmRepository
+        name: kubernetes-sigs-descheduler-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    podAnnotations:
+      botkube.io/disable: "true"
+    deschedulerPolicy:
+      strategies:
+        RemoveDuplicates:
+          enabled: false
+        RemovePodsViolatingNodeAffinity:
+          enabled: true
+          params:
+            nodeAffinityType:
+            - requiredDuringSchedulingIgnoredDuringExecution
+        RemovePodsViolatingInterPodAntiAffinity:
+          enabled: false
+        LowNodeUtilization:
+          enabled: false
