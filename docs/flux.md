@@ -14,12 +14,6 @@ brew install fluxcd/tap/flux
 
 _For full installation guide visit the [Flux installation guide](https://toolkit.fluxcd.io/guides/installation/)_
 
-Set the `GITHUB_TOKEN` environment variable to a personal access token you created in Github.
-
-```sh
-export GITHUB_TOKEN=47241b5a1f9cc45cc7388cf787fc6abacf99eb70
-```
-
 Check if you cluster is ready for Flux
 
 ```sh
@@ -29,11 +23,12 @@ flux check --pre
 Install Flux into your cluster
 
 ```sh
+set -x GITHUB_TOKEN xyz;
 flux bootstrap github \
-  --version=v0.9.0 \
+  --version=v0.12.1 \
   --owner=onedr0p \
   --repository=home-cluster \
-  --path=cluster \
+  --path=cluster/base \
   --personal \
   --network-policy=false
 ```
