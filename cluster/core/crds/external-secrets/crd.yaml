@@ -1,0 +1,32 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: external-secrets-source
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: https://github.com/external-secrets/kubernetes-external-secrets.git
+  ref:
+    tag: v7.0.1
+  ignore: |
+    # exclude all
+    /*
+    # include deploy crds dir
+    !/charts/kubernetes-external-secrets/crds
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: external-secrets-crds
+  namespace: flux-system
+spec:
+  interval: 5m
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: external-secrets-source
+  healthChecks:
+  - apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: externalsecrets.kubernetes-client.io
