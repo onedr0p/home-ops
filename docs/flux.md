@@ -25,12 +25,13 @@ Install Flux into your cluster
 ```sh
 set -x GITHUB_TOKEN xyz;
 flux bootstrap github \
-  --version=v0.12.1 \
-  --owner=onedr0p \
-  --repository=home-cluster \
-  --path=cluster/base \
-  --personal \
-  --network-policy=false
+--version=v0.12.1 \
+--owner=onedr0p \
+--repository=home-cluster \
+--path=cluster/base \
+--personal \
+--private=false \
+--network-policy=false
 ```
 
 **Note**: When using k3s I found that the network-policy flag has to be set to false, or Flux will not work
