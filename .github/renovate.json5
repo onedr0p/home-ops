@@ -12,32 +12,29 @@
   "kubernetes": {
     "fileMatch": ["cluster/.+\\.yaml$"],
     "ignorePaths": [
-      "cluster/flux-system/",
-      "cluster/actions-runner-system/"
+      "cluster/base/"
     ]
   },
   "helm-values": {
-    "fileMatch": ["cluster/.+helm-release\\.yaml$"]
+    "fileMatch": ["cluster/namespaces/.+helm-release\\.yaml$"]
   },
   "regexManagers": [
-    // regexManager to read and process HelmRelease files
+    // regexManager to read and process HelmReleases and CRDs
     {
-      "fileMatch": ["cluster/.+helm-release\\.yaml$"],
+      "fileMatch": [
+        "cluster/namespaces/.+helm-release\\.yaml$"
+        "cluster/core/.+crd\\.yaml$"
+      ],
       "matchStrings": [
-        "registryUrl=(?<registryUrl>.*?)\n *chart: (?<depName>.*?)\n *version: (?<currentValue>.*)\n"
+        # helm releases
+        "registryUrl=(?<registryUrl>.*?)\n *chart: (?<depName>.*?)\n *version: (?<currentValue>.*)\n",
+        # kube-prometheus-stack crd
+        "registryUrl=(?<registryUrl>.*?)\n *tag: (?<depName>[a-zA-Z-]+)-(?<currentValue>.*)\n",
+        # cert-manager crd
+        "registryUrl=(?<registryUrl>.*?) chart=(?<depName>.*?)\n.*\\/(?<currentValue>.*?)\\/"
       ],
       "datasourceTemplate": "helm"
     },
-    // regexManager to read and process actions-runner-controller runner images
-    {
-      "fileMatch": [
-        "cluster/actions-runner-system/runners/.+\\.yaml$"
-      ],
-      "matchStrings": [
-        "image: (?<depName>.*?):(?<currentValue>.*?)\n"
-      ],
-      "datasourceTemplate": "docker"
-    }
   ],
   "packageRules": [
     // setup datasources
