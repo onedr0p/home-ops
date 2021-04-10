@@ -1,0 +1,74 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: gitea
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://dl.gitea.io/charts/
+      chart: gitea
+      version: 2.2.3
+      sourceRef:
+        kind: HelmRepository
+        name: gitea-charts
+        namespace: flux-system
+      interval: 5m
+  dependsOn:
+  - name: sealed-secrets
+    namespace: kube-system
+  values:
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: "rook-ceph-block"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+        nginx.ingress.kubernetes.io/proxy-body-size: 128m
+      hosts:
+      - "gitea.devbu.io"
+      tls:
+      - hosts:
+        - "gitea.devbu.io"
+    service:
+      http:
+        port: 3000
+    gitea:
+      admin:
+        username: "devin"
+        email: "devin.kray@gmail.com"
+      config:
+        APP_NAME: "Home Gitea"
+        server:
+          ROOT_URL: https://gitea.devbu.io
+          DISABLE_SSH: true
+          PPROF_ENABLED: true
+        respository:
+          DEFAULT_PRIVATE: true
+        admin:
+          DISABLE_REGULAR_ORG_CREATION: true
+        security:
+          PASSWORD_COMPLEXITY: "lower,upper"
+          MIN_PASSWORD_LENGTH: 12
+        service:
+          DISABLE_REGISTRATION: true
+          REQUIRE_SIGNIN_VIEW: true
+        database:
+          DB_TYPE: postgres
+          HOST: 192.168.42.40:5432
+          NAME: gitea
+          USER: admin
+      database:
+        builtIn:
+          postgresql:
+            enabled: false
+      cache:
+        builtIn:
+          enabled: true
+  valuesFrom:
+  - kind: Secret
+    name: "gitea-helm-values"

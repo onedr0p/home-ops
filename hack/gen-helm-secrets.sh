@@ -2,7 +2,7 @@
 set -eu
 
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
-CLUSTER_ROOT="${PROJECT_ROOT}/cluster"
+CLUSTER_ROOT="${PROJECT_ROOT}/cluster/namespaces"
 PUB_CERT="${PROJECT_ROOT}/sealed-secrets-public-cert.pem"
 SECRETS_ENV="${PROJECT_ROOT}/.cluster-secrets.env"
 

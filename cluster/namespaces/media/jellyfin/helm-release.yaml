@@ -1,0 +1,83 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: jellyfin
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: jellyfin
+      version: 7.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+  values:
+    image:
+      repository: jellyfin/jellyfin
+      tag: 10.7.1
+    env:
+      TZ: "America/New_York"
+      JELLYFIN_CACHE_DIR: "/config/cache"
+    podSecurityContext:
+      supplementalGroups:
+      - 44
+      - 109
+      - 100
+    service:
+      enabled: true
+      type: LoadBalancer
+      externalIPs:
+      - 192.168.69.220
+      externalTrafficPolicy: Local
+      port:
+        port: 8096
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+        forecastle.stakater.com/expose: "true"
+        forecastle.stakater.com/icon: "https://features.jellyfin.org/images/logos/a7Lx9nYDzWuDR94Az8Yum7neWMvNMndkm9qr4QVtmjaMrOHDLisS5K7LJctTRzK9-icon-transparent.png?size=200"
+        forecastle.stakater.com/network-restricted: "true"
+      hosts:
+      - host: jellyfin.devbu.io
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "jellyfin.devbu.io"
+    persistence:
+      config:
+        enabled: true
+        existingClaim: jellyfin-config-v1
+      transcode:
+        enabled: true
+        emptyDir:
+          enabled: true
+          medium: "Memory"
+    additionalVolumeMounts:
+    - name: media-rocinante
+      mountPath: "/media-rocinante"
+      readOnly: true
+    - name: media-serenity
+      mountPath: "/media-serenity"
+      readOnly: true
+    additionalVolumes:
+    - name: media-rocinante
+      persistentVolumeClaim:
+        claimName: nfs-media-rocinante-pvc
+    - name: media-serenity
+      persistentVolumeClaim:
+        claimName: nfs-media-serenity-pvc
+    resources:
+      requests:
+        gpu.intel.com/i915: 1
+        cpu: 500m
+        memory: 1000Mi
+      limits:
+        gpu.intel.com/i915: 1
+        memory: 8000Mi
