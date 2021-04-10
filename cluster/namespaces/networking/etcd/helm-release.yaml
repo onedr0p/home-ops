@@ -1,0 +1,29 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: etcd
+  namespace: networking
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://charts.bitnami.com/bitnami
+      chart: etcd
+      version: 6.1.3
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    replicaCount: 1
+    auth:
+      rbac:
+        enabled: false
+    persistence:
+      enabled: false
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true

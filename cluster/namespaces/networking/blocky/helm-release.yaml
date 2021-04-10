@@ -1,0 +1,99 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: blocky
+  namespace: networking
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: blocky
+      version: 6.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: spx01/blocky
+      tag: v0.13
+    env:
+      TZ: "America/New_York"
+    replicas: 2
+    config: |
+      upstream:
+        externalResolvers:
+        - tcp-tls:4838af.dns1.nextdns.io:853
+        - tcp-tls:4838af.dns2.nextdns.io:853
+      conditional:
+        mapping:
+          # CoreDNS IP
+          devbu.io: udp:192.168.69.180
+      blocking:
+        blackLists:
+          ads:
+          # https://oisd.nl/
+          - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
+        whiteLists:
+          ads:
+          - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+        clientGroupsBlock:
+          default:
+          - ads
+      clientLookup:
+        upstream: udp:192.168.1.1
+      prometheus:
+        enable: true
+        path: /metrics
+      httpPort: 4000
+      logLevel: info
+    service:
+      port:
+        port: 4000
+      additionalServices:
+      - enabled: true
+        nameSuffix: dns-tcp
+        type: LoadBalancer
+        externalIPs:
+        - 192.168.69.115
+        port:
+          port: 53
+          name: dns-tcp
+          protocol: TCP
+          targetPort: 53
+        externalTrafficPolicy: Local
+      - enabled: true
+        nameSuffix: dns-udp
+        type: LoadBalancer
+        externalIPs:
+        - 192.168.69.115
+        port:
+          port: 53
+          name: dns-udp
+          protocol: UDP
+          targetPort: 53
+        externalTrafficPolicy: Local
+    prometheus:
+      serviceMonitor:
+        enabled: true
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "blocky-config"
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - blocky
+          topologyKey: "kubernetes.io/hostname"
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 750Mi
