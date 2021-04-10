@@ -1,0 +1,81 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: snmp-exporter-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: snmp-exporter.rules
+    rules:
+    - alert: SnmpExporterDown
+      annotations:
+        message: SNMP Exporter has disappeared from Prometheus target discovery.
+      expr: absent(up{job="snmp-exporter", namespace="monitoring"} == 1)
+      for: 15m
+      labels:
+        severity: critical
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: ups-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: ups.rules
+    rules:
+    - alert: UPS15MinutesRemaining
+      annotations:
+        description: ZPM almost depleted
+        summary: ZPM {{$labels.instance}} has less than 15 minutes of battery left,
+          systems are starting to power down. Bye
+      expr: upsAdvBatteryRunTimeRemaining/60/100 <= 15
+      for: 10s
+      labels:
+        severity: critical
+    - alert: UPSOnBattery
+      annotations:
+        description: ZPM is running on its battery
+        summary: ZPM {{$labels.instance}} is running on batteries
+      expr: upsBasicBatteryTimeOnBattery > 0
+      for: 1m
+      labels:
+        severity: critical
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: nas-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: rocinante-disk.rules
+    rules:
+    - alert: DiskDegraded
+      annotations:
+        description: Disk Degraded
+        summary: Disk {{$labels.diskIndex}} is in a degraded state
+      expr: diskSmartInfo != 0
+      for: 5m
+      labels:
+        severity: critical
+  - name: serenity-disk.rules
+    rules:
+    - alert: DiskDegraded
+      annotations:
+        description: Disk Degraded
+        summary: Disk {{$labels.diskID}} is in a degraded state
+      expr: diskStatus != 1
+      for: 5m
+      labels:
+        severity: critical
