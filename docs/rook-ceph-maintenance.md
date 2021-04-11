@@ -120,17 +120,17 @@ kubectl -n rook-ceph exec -it (kubectl -n rook-ceph get pod -l "app=rook-direct-
 mount -t nfs -o "tcp,intr,rw,noatime,nodiratime,rsize=65536,wsize=65536,hard" 192.168.42.50:/volume1/Data /mnt/nfs
 
 kubectl get pv/(kubectl get pv \
-    | grep "zigbee2mqtt" \
+    | grep "zwave2mqtt" \
     | awk -F' ' '{print $1}') -n home -o json \
     | jq -r '.spec.csi.volumeAttributes.imageName'
 
-rbd map -p replicapool csi-vol-15ad6845-9a6e-11eb-ae97-9a71104156fa \
+rbd map -p replicapool csi-vol-152399d0-9a6f-11eb-ae97-9a71104156fa \
     | xargs -I{} mount {} /mnt/data
 
 rm -rf /mnt/data/*
-tar xvf /mnt/nfs/backups/zigbee2mqtt.tar.gz -C /mnt/data
+tar xvf /mnt/nfs/backups/zwave2mqtt.tar.gz -C /mnt/data
 # chown -R 568:568 /mnt/data/
 
 umount /mnt/data && \
-rbd unmap -p replicapool csi-vol-15ad6845-9a6e-11eb-ae97-9a71104156fa
+rbd unmap -p replicapool csi-vol-152399d0-9a6f-11eb-ae97-9a71104156fa
 ```
