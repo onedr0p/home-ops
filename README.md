@@ -1,6 +1,3 @@
-🚧 Cluster is undergoing maintenance 🚧 Cluster is undergoing maintenance 🚧
-
-
 <img src="https://camo.githubusercontent.com/5b298bf6b0596795602bd771c5bddbb963e83e0f/68747470733a2f2f692e696d6775722e636f6d2f7031527a586a512e706e67" align="left" width="144px" height="144px"/>
 
 ### My home Kubernetes cluster :sailboat:
@@ -44,11 +41,9 @@ See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
 
 ## :robot:&nbsp; Automate all the things!
 
-- [Github Actions](https://docs.github.com/en/actions) for running automated Ansible tests and checking code formatting.
+- [Github Actions](https://docs.github.com/en/actions) for running automated Ansible tests and checking code formatting
 - Rancher [System Upgrade Controller](https://github.com/rancher/system-upgrade-controller) to apply updates to k3s
 - [Renovate](https://github.com/renovatebot/renovate) with the help of the [k8s-at-home/renovate-helm-releases](https://github.com/k8s-at-home/renovate-helm-releases) Github action keeps my application charts and container images up-to-date
-- [Actions Runner Controller](https://github.com/summerwind/actions-runner-controller) operates a self-hosted Github runner in my cluster that updates Sealed Secrets when needed
-- ~~[Kured](https://github.com/weaveworks/kured) to apply OS patches to my nodes~~ **Note:** _Kured has given me issues with rebooting nodes. I will handle upgrades myself._
 
 ---
 
