@@ -124,7 +124,7 @@ kubectl get pv/(kubectl get pv \
     | awk -F' ' '{print $1}') -n media -o json \
     | jq -r '.spec.csi.volumeAttributes.imageName'
 
-rbd map -p replicapool csi-vol-ebb786c7-9a6f-11eb-ae97-9a71104156fa \
+rbd map -p replicapool csi-vol-924e2e8a-9a71-11eb-ae97-9a71104156fa \
     | xargs -I{} mount {} /mnt/data
 
 rm -rf /mnt/data/*
@@ -132,5 +132,5 @@ tar xvf /mnt/nfs/backups/gonic.tar.gz -C /mnt/data
 # chown -R 568:568 /mnt/data/
 
 umount /mnt/data && \
-rbd unmap -p replicapool csi-vol-ebb786c7-9a6f-11eb-ae97-9a71104156fa
+rbd unmap -p replicapool csi-vol-924e2e8a-9a71-11eb-ae97-9a71104156fa
 ```
