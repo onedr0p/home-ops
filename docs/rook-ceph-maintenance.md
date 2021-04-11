@@ -114,16 +114,23 @@ ceph crash archive-all
 * [Common issues](https://rook.io/docs/rook/v1.5/ceph-common-issues.html)
 
 ```
+
+kubectl -n rook-ceph exec -it (kubectl -n rook-ceph get pod -l "app=rook-direct-mount" -o jsonpath='{.items[0].metadata.name}') bash
+
+mount -t nfs -o "tcp,intr,rw,noatime,nodiratime,rsize=65536,wsize=65536,hard" 192.168.42.50:/volume1/Data /mnt/nfs
+
 kubectl get pv/(kubectl get pv \
-    | grep "drone" \
+    | grep "gitea" \
     | awk -F' ' '{print $1}') -n media -o json \
     | jq -r '.spec.csi.volumeAttributes.imageName'
 
-rbd map -p replicapool csi-vol-8d510654-2693-11eb-80c7-2298c6796a25 \
+rbd map -p replicapool csi-vol-f8be8614-9a69-11eb-ae97-9a71104156fa \
     | xargs -I{} mount {} /mnt/data
 
-tar czvf /mnt/nfs/backups/drone.tar.gz -C /mnt/data/ .
+rm -rf /mnt/data/*
+tar xvf /mnt/nfsdata/backups/gitea.tar.gz -C /mnt/data
+# chown -R 568:568 /mnt/data/
 
 umount /mnt/data && \
-rbd unmap -p replicapool csi-vol-8d510654-2693-11eb-80c7-2298c6796a25
+rbd unmap -p replicapool csi-vol-f8be8614-9a69-11eb-ae97-9a71104156fa
 ```
