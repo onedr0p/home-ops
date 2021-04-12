@@ -2,70 +2,58 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: jellyfin
+  name: bazarr
   namespace: media
 spec:
   interval: 5m
   chart:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
-      chart: jellyfin
+      chart: bazarr
       version: 7.2.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
         namespace: flux-system
+      interval: 5m
   values:
     image:
-      repository: jellyfin/jellyfin
-      tag: 10.7.2
+      repository: ghcr.io/k8s-at-home/bazarr
+      tag: v0.9.3
     env:
       TZ: "America/New_York"
-      JELLYFIN_CACHE_DIR: "/config/cache"
-    podSecurityContext:
-      supplementalGroups:
-      - 44
-      - 109
-      - 100
-    service:
-      enabled: true
-      type: LoadBalancer
-      externalIPs:
-      - "${CLUSTER_LB_JELLYFIN}"
-      externalTrafficPolicy: Local
-      port:
-        port: 8096
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "internal"
+        # Custom themes provided by https://github.com/gilbN/theme.park
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          proxy_set_header Accept-Encoding "";
+          sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://gilbn.github.io/theme.park/CSS/themes/bazarr/organizr-dark.css"></head>';
+          sub_filter_once on;
         forecastle.stakater.com/expose: "true"
-        forecastle.stakater.com/icon: "https://features.jellyfin.org/images/logos/a7Lx9nYDzWuDR94Az8Yum7neWMvNMndkm9qr4QVtmjaMrOHDLisS5K7LJctTRzK9-icon-transparent.png?size=200"
+        forecastle.stakater.com/icon: "https://raw.githubusercontent.com/causefx/Organizr/v2-develop/plugins/images/tabs/bazarr.png"
         forecastle.stakater.com/network-restricted: "true"
       hosts:
-      - host: "jellyfin.${SECRET_CLUSTER_DOMAIN}"
+      - host: "bazarr.${SECRET_CLUSTER_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - "jellyfin.${SECRET_CLUSTER_DOMAIN}"
+        - "bazarr.${SECRET_CLUSTER_DOMAIN}"
     persistence:
       config:
         enabled: true
-        existingClaim: jellyfin-config-v1
-      transcode:
-        enabled: true
-        emptyDir:
-          enabled: true
-          medium: "Memory"
+        existingClaim: bazarr-config-v1
+    podSecurityContext:
+      supplementalGroups:
+      - 100
     additionalVolumeMounts:
     - name: media-rocinante
       mountPath: "/media-rocinante"
-      readOnly: true
     - name: media-serenity
       mountPath: "/media-serenity"
-      readOnly: true
     additionalVolumes:
     - name: media-rocinante
       persistentVolumeClaim:
@@ -75,9 +63,7 @@ spec:
         claimName: nfs-media-serenity-pvc
     resources:
       requests:
-        gpu.intel.com/i915: 1
+        memory: 250Mi
         cpu: 500m
-        memory: 1000Mi
       limits:
-        gpu.intel.com/i915: 1
-        memory: 8000Mi
+        memory: 1500Mi
