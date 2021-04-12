@@ -56,14 +56,24 @@ spec:
       - name: loop
       - name: reload
       - name: loadbalance
+      # - name: etcd
+      #   parameters: devbu.io
+      #   configBlock: |-
+      #     stubzones
+      #     path /skydns
+      #     endpoint http://etcd:2379
       - name: etcd
         parameters: devbu.io
         configBlock: |-
           stubzones
           path /skydns
-          endpoint http://etcd:2379
+          endpoint https://opnsense.devbu.io:2379
+          tls /etc/coredns/coredns-etcd/cert.pem /etc/coredns/coredns-etcd/key.pem /etc/coredns/coredns-etcd/ca.crt
     prometheus:
       service:
         enabled: true
       monitor:
         enabled: true
+    extraSecrets:
+    - name: coredns-etcd
+      mountPath: /etc/coredns/coredns-etcd
