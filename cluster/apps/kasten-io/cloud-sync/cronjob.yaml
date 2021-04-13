@@ -1,7 +1,4 @@
 ---
-#
-# Cronjob to back up my k10 backups to the cloud
-#
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -37,15 +34,12 @@ spec:
             - "24"
             - "--bwlimit"
             - "25M"
-            - "minio:kasten-io"
-            - "b2-velero-crypt:/"
+            - "minio:k10"
+            - "b2-k10:/"
             volumeMounts:
             - name: rclone-config
-              mountPath: "/config"
+              mountPath: "/config/rclone.conf"
           volumes:
           - name: rclone-config
             secret:
-              secretName: rclone-config
-              items:
-              - key: rclone-config
-                path: rclone.conf
+              secretName: rclone-config-secret
