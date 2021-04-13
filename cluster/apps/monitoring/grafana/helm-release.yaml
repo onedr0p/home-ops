@@ -29,7 +29,7 @@ spec:
       VAR_BLOCKY_URL: "http://blocky.networking.svc.cluster.local:4000"
     grafana.ini:
       server:
-        root_url: "https://grafana.devbu.io"
+        root_url: "https://grafana.${SECRET_CLUSTER_DOMAIN}"
       paths:
         data: /var/lib/grafana/data
         logs: /var/log/grafana
@@ -161,10 +161,10 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "internal"
       hosts:
-      - "grafana.devbu.io"
+      - "grafana.${SECRET_CLUSTER_DOMAIN}"
       tls:
       - hosts:
-        - "grafana.devbu.io"
+        - "grafana.${SECRET_CLUSTER_DOMAIN}"
     persistence:
       enabled: true
       storageClassName: "rook-ceph-block"

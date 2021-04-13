@@ -21,7 +21,7 @@ spec:
     eula:
       accept: true
       company: Devbu
-      email: devin.kray@gmail.com
+      email: "${SECRET_EMAIL}"
     global:
       persistence:
         storageClass: rook-ceph-block
@@ -37,16 +37,16 @@ spec:
     ingress:
       create: true
       class: "internal"
-      host: k10.devbu.io
+      host: "k10.${SECRET_CLUSTER_DOMAIN}"
       annotations:
         kubernetes.io/ingress.class: "internal"
         nginx.ingress.kubernetes.io/app-root: /k10
       urlPath: k10
       hosts:
-      - k10.devbu.io
+      - "k10.${SECRET_CLUSTER_DOMAIN}"
       tls:
         enabled: true
-        secretName: devbu-io-tls
+        secretName: ${SECRET_CLUSTER_DOMAIN_CERT}
   postRenderers:
   - kustomize:
       patchesJson6902:

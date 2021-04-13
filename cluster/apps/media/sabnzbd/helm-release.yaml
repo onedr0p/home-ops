@@ -26,8 +26,8 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "external"
-        nginx.ingress.kubernetes.io/auth-url: "https://auth.devbu.io/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: "https://auth.devbu.io/oauth2/start"
+        nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_CLUSTER_DOMAIN}/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_CLUSTER_DOMAIN}/oauth2/start"
         nginx.ingress.kubernetes.io/configuration-snippet: |
           proxy_set_header Accept-Encoding "";
           sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://gilbn.github.io/theme.park/CSS/themes/sabnzbd/organizr-dark.css"></head>';
@@ -36,26 +36,26 @@ spec:
         forecastle.stakater.com/icon: "https://avatars.githubusercontent.com/u/16778130?v=4"
         forecastle.stakater.com/network-restricted: "true"
       hosts:
-      - host: sabnzbd.devbu.io
+      - host: "sabnzbd.${SECRET_CLUSTER_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - "sabnzbd.devbu.io"
+        - "sabnzbd.${SECRET_CLUSTER_DOMAIN}"
       additionalIngresses:
       - enabled: true
         nameSuffix: "api"
         annotations:
           kubernetes.io/ingress.class: "external"
         hosts:
-        - host: sabnzbd.devbu.io
+        - host: "sabnzbd.${SECRET_CLUSTER_DOMAIN}"
           paths:
           - path: /api
             pathType: Prefix
         tls:
         - hosts:
-          - "sabnzbd.devbu.io"
+          - "sabnzbd.${SECRET_CLUSTER_DOMAIN}"
     persistence:
       config:
         enabled: true

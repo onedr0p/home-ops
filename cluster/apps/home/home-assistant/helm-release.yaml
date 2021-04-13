@@ -37,13 +37,13 @@ spec:
       annotations:
         kubernetes.io/ingress.class: "external"
       hosts:
-      - host: hass.devbu.io
+      - host: "hass.${SECRET_CLUSTER_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - "hass.devbu.io"
+        - "hass.${SECRET_CLUSTER_DOMAIN}"
     prometheus:
       serviceMonitor:
         enabled: false
@@ -77,13 +77,13 @@ spec:
           annotations:
             kubernetes.io/ingress.class: "internal"
           hosts:
-          - host: hass-config.devbu.io
+          - host: "hass-config.${SECRET_CLUSTER_DOMAIN}"
             paths:
             - path: /
               pathType: Prefix
           tls:
           - hosts:
-            - hass-config.devbu.io
+            - "hass-config.${SECRET_CLUSTER_DOMAIN}"
         volumeMounts:
         - name: config
           mountPath: /config

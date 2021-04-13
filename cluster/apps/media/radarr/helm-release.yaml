@@ -26,8 +26,8 @@ spec:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: "external"
-        nginx.ingress.kubernetes.io/auth-url: "https://auth.devbu.io/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: "https://auth.devbu.io/oauth2/start"
+        nginx.ingress.kubernetes.io/auth-url: "https://auth.${SECRET_CLUSTER_DOMAIN}/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_CLUSTER_DOMAIN}/oauth2/start"
         # Custom themes provided by https://github.com/gilbN/theme.park
         nginx.ingress.kubernetes.io/configuration-snippet: |
           proxy_set_header Accept-Encoding "";
@@ -37,26 +37,26 @@ spec:
         forecastle.stakater.com/icon: "https://github.com/Radarr/Radarr/blob/develop/Logo/128.png?raw=true"
         forecastle.stakater.com/network-restricted: "true"
       hosts:
-      - host: radarr.devbu.io
+      - host: "radarr.${SECRET_CLUSTER_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - "radarr.devbu.io"
+        - "radarr.${SECRET_CLUSTER_DOMAIN}"
       additionalIngresses:
       - enabled: true
         nameSuffix: "api"
         annotations:
           kubernetes.io/ingress.class: "external"
         hosts:
-        - host: radarr.devbu.io
+        - host: "radarr.${SECRET_CLUSTER_DOMAIN}"
           paths:
           - path: /api
             pathType: Prefix
         tls:
         - hosts:
-          - "radarr.devbu.io"
+          - "radarr.${SECRET_CLUSTER_DOMAIN}"
     persistence:
       config:
         enabled: true
