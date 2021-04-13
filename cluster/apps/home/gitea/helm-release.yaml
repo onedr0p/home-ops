@@ -16,9 +16,6 @@ spec:
         name: gitea-charts
         namespace: flux-system
       interval: 5m
-  dependsOn:
-  - name: sealed-secrets
-    namespace: kube-system
   values:
     persistence:
       enabled: true
@@ -40,7 +37,10 @@ spec:
     gitea:
       admin:
         username: "devin"
-        email: "devin.kray@gmail.com"
+        email: "${SECRET_EMAIL}"
+        password: "${SECRET_GITEA_ADMIN_PASSWORD}"
+      security:
+        SECRET_KEY: "${SECRET_GITEA_SECRET_KEY}"
       config:
         APP_NAME: "Home Gitea"
         server:
@@ -62,6 +62,7 @@ spec:
           HOST: 192.168.42.40:5432
           NAME: gitea
           USER: admin
+          PASSWD: "${SECRET_GITEA_POSTRES_PASSWORD}"
       database:
         builtIn:
           postgresql:
@@ -69,6 +70,3 @@ spec:
       cache:
         builtIn:
           enabled: true
-  valuesFrom:
-  - kind: Secret
-    name: "gitea-helm-values"

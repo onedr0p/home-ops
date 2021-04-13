@@ -16,10 +16,13 @@ spec:
         name: infracloudio-charts
         namespace: flux-system
       interval: 5m
-  dependsOn:
-  - name: sealed-secrets
-    namespace: kube-system
   values:
+    communications:
+      discord:
+        enabled: true
+        token: "${SECRET_BOTKUBE_DISCORD_TOKEN}"
+        botid: "${SECRET_BOTKUBE_DISCORD_BOT_ID}"
+        channel: "${SECRET_BOTKUBE_DISCORD_CHANNEL_ID}"
     serviceMonitor:
       enabled: true
     config:
@@ -243,6 +246,3 @@ spec:
         - create
         - delete
         - error
-  valuesFrom:
-  - kind: Secret
-    name: "botkube-helm-values"

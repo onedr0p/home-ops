@@ -16,9 +16,6 @@ spec:
         name: k8s-at-home-charts
         namespace: flux-system
       interval: 5m
-  dependsOn:
-  - name: sealed-secrets
-    namespace: kube-system
   values:
     image:
       repository: koenkk/zigbee2mqtt
@@ -34,6 +31,8 @@ spec:
       mqtt:
         base_topic: zigbee2mqtt
         server: "mqtt://vernemq"
+        user: "${SECRET_MQTT_USERNAME}"
+        password: "${SECRET_MQTT_PASSWORD}"
       serial:
         port: /dev/ttyUSB0
       advanced:
@@ -119,6 +118,3 @@ spec:
     #     volumeMounts:
     #     - name: config
     #       mountPath: /data
-  valuesFrom:
-  - kind: Secret
-    name: "zigbee2mqtt-helm-values"

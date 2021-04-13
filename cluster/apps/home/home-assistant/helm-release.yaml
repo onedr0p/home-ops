@@ -16,15 +16,29 @@ spec:
         name: k8s-at-home-charts
         namespace: flux-system
       interval: 5m
-  dependsOn:
-  - name: sealed-secrets
-    namespace: kube-system
   values:
     image:
       repository: homeassistant/home-assistant
       tag: 2021.4.3
     env:
       TZ: "America/New_York"
+      HASS_SECRET_LATITUDE: "${SECRET_HASS_SECRET_LATITUDE}"
+      HASS_SECRET_LONGITUDE: "${SECRET_HASS_SECRET_LONGITUDE}"
+      HASS_SECRET_ELEVATION: "${SECRET_HASS_SECRET_ELEVATION}"
+      HASS_SECRET_MQTT_USERNAME: "${SECRET_HASS_SECRET_MQTT_USERNAME}"
+      HASS_SECRET_MQTT_PASSWORD: "${SECRET_HASS_SECRET_MQTT_PASSWORD}"
+      HASS_SECRET_DB_URL: "${SECRET_HASS_SECRET_DB_URL}"
+      HASS_SECRET_OPENGARAGE_HOST: "${SECRET_HASS_SECRET_OPENGARAGE_HOST}"
+      HASS_SECRET_OPENGARAGE_DEVICE_KEY: "${SECRET_HASS_SECRET_OPENGARAGE_DEVICE_KEY}"
+      HASS_SECRET_GOOGLE_PROJECT_ID: "${SECRET_HASS_SECRET_GOOGLE_PROJECT_ID}"
+      HASS_SECRET_GOOGLE_SECURE_DEVICES_PIN: "${SECRET_HASS_SECRET_GOOGLE_SECURE_DEVICES_PIN}"
+      HASS_SECRET_ECOBEE_API_KEY: "${SECRET_HASS_SECRET_ECOBEE_API_KEY}"
+      HASS_SECRET_FLUME_USERNAME: "${SECRET_HASS_SECRET_FLUME_USERNAME}"
+      HASS_SECRET_FLUME_PASSWORD: "${SECRET_HASS_SECRET_FLUME_PASSWORD}"
+      HASS_SECRET_FLUME_CLIENT_ID: "${SECRET_HASS_SECRET_FLUME_CLIENT_ID}"
+      HASS_SECRET_FLUME_CLIENT_SECRET: "${SECRET_HASS_SECRET_FLUME_CLIENT_SECRET}"
+    git:
+      deployKeyBase64: "${SECRET_HASS_DEPLOY_KEY_B64}"
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
     service:
@@ -96,6 +110,3 @@ spec:
         memory: 100Mi
       limits:
         memory: 4000Mi
-  valuesFrom:
-  - kind: Secret
-    name: "home-assistant-helm-values"

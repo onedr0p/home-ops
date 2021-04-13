@@ -16,9 +16,6 @@ spec:
         name: drone-charts
         namespace: flux-system
       interval: 5m
-  dependsOn:
-  - name: sealed-secrets
-    namespace: kube-system
   values:
     image:
       repository: drone/drone
@@ -46,6 +43,9 @@ spec:
       DRONE_LOGS_TEXT: true
       DRONE_LOGS_PRETTY: true
       DRONE_LOGS_COLOR: true
+      DRONE_RPC_SECRET: "${SECRET_DRONE_RPC_SECRET}"
+      DRONE_GITEA_CLIENT_ID: "${SECRET_DRONE_GITEA_CLIENT_ID}"
+      DRONE_GITEA_CLIENT_SECRET: "${SECRET_DRONE_GITEA_CLIENT_SECRET}"
     rbac:
       buildNamespaces:
       - home
@@ -55,6 +55,3 @@ spec:
     persistentVolume:
       enabled: true
       storageClass: "rook-ceph-block"
-  valuesFrom:
-  - kind: Secret
-    name: "drone-helm-values"

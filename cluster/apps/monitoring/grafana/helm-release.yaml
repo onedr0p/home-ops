@@ -16,9 +16,6 @@ spec:
         name: grafana-charts
         namespace: flux-system
       interval: 5m
-  dependsOn:
-  - name: sealed-secrets
-    namespace: kube-system
   values:
     deploymentStrategy:
       type: Recreate
@@ -27,6 +24,7 @@ spec:
       GF_PANELS_DISABLE_SANITIZE_HTML: true
       GF_LOG_FILTERS: rendering:debug
       VAR_BLOCKY_URL: "http://blocky.networking.svc.cluster.local:4000"
+    adminPassword: "${SECRET_GRAFANA_PASSWORD}"
     grafana.ini:
       server:
         root_url: "https://grafana.${SECRET_CLUSTER_DOMAIN}"
@@ -173,6 +171,3 @@ spec:
       - ReadWriteOnce
     podAnnotations:
       configmap.reloader.stakater.com/reload: "grafana"
-  valuesFrom:
-  - kind: Secret
-    name: "grafana-helm-values"
