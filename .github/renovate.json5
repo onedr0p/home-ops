@@ -12,17 +12,17 @@
   "kubernetes": {
     "fileMatch": ["cluster/.+\\.yaml$"],
     "ignorePaths": [
-      "cluster/base/"
+      "cluster/base/",
     ]
   },
   "helm-values": {
-    "fileMatch": ["cluster/.+helm-release\\.yaml$"]
+    "fileMatch": ["cluster/.+helm-release\\.yaml$"],
   },
   "regexManagers": [
     // regexManager to read and process HelmReleases and CRDs
     {
       "fileMatch": [
-        "cluster/.+\\.yaml$"
+        "cluster/.+\\.yaml$",
       ],
       "matchStrings": [
         // helm releases
@@ -32,9 +32,9 @@
         // rook-ceph crd
         "registryUrl=(?<registryUrl>.*?) chart=(?<depName>.*?)\n *tag: (?<currentValue>.*)\n",
         // cert-manager crd
-        "registryUrl=(?<registryUrl>.*?) chart=(?<depName>.*?)\n.*\\/(?<currentValue>.*?)\\/"
+        "registryUrl=(?<registryUrl>.*?) chart=(?<depName>.*?)\n.*\\/(?<currentValue>.*?)\\/",
       ],
-      "datasourceTemplate": "helm"
+      "datasourceTemplate": "helm",
     },
   ],
   "packageRules": [
@@ -42,7 +42,6 @@
     {
       "matchDatasources": ["helm"],
       "separateMinorPatch": true,
-      "excludePackagePatterns": ["^rook.ceph"]
     },
     // global docker datasource settings
     {
@@ -52,62 +51,48 @@
       "commitMessageExtra": "to {{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}",
       "matchUpdateTypes": ["major", "minor", "patch"],
       "separateMinorPatch": true,
-      "excludePackagePatterns": ["^rook.ceph"]
-    },
-    // custom groups
-    {
-      "matchDatasources": ["helm", "docker"],
-      "matchPackagePatterns": ["^rook.ceph"],
-      "groupName": "rook-ceph-suite",
-      "separateMinorPatch": true
     },
     // add labels according to package and update types
     {
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["major"],
       "labels": ["renovate/image", "dep/major"],
-      "excludePackagePatterns": ["^rook.ceph"]
     },
     {
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["minor"],
       "labels": ["renovate/image", "dep/minor"],
-      "excludePackagePatterns": ["^rook.ceph"]
     },
     {
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["patch"],
       "labels": ["renovate/image", "dep/patch"],
-      "excludePackagePatterns": ["^rook.ceph"]
     },
     {
       "matchDatasources": ["helm"],
       "matchUpdateTypes": ["major"],
       "labels": ["renovate/helm", "dep/major"],
-      "excludePackagePatterns": ["^rook.ceph"]
     },
     {
       "matchDatasources": ["helm"],
       "matchUpdateTypes": ["minor"],
       "labels": ["renovate/helm", "dep/minor"],
-      "excludePackagePatterns": ["^rook.ceph"]
     },
     {
       "matchDatasources": ["helm"],
       "matchUpdateTypes": ["patch"],
       "labels": ["renovate/helm", "dep/patch"],
-      "excludePackagePatterns": ["^rook.ceph"]
     },
     // custom version schemes
     {
       "matchDatasources": ["docker"],
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.*)$",
-      "matchPackageNames": ["blakeblackshear/frigate"]
+      "matchPackageNames": ["blakeblackshear/frigate"],
     },
     {
       "matchDatasources": ["docker"],
       "versioning": "regex:^RELEASE\\.(?<major>\\d+)-(?<minor>\\d+)-(?<patch>\\d+)T.*Z(-(?<compatibility>.*))?$",
-      "matchPackageNames": ["minio/minio"]
+      "matchPackageNames": ["minio/minio"],
     },
     // pin package versions
     {
@@ -115,8 +100,8 @@
       "allowedVersions": "<13",
       "matchPackageNames": [
         "postgres",
-        "prodrigestivill/postgres-backup-local"
-      ]
+        "prodrigestivill/postgres-backup-local",
+      ],
     },
     {
       "matchDatasources": ["docker"],
@@ -136,7 +121,7 @@
       "versioning": "loose",
       "matchPackageNames": [
         "ghcr.io/k8s-at-home/plex"
-      ]
+      ],
     },
     // enable auto-merge
     {
@@ -148,8 +133,8 @@
       "matchPackageNames": [
         "flaresolverr/flaresolverr",
         "ghcr.io/k8s-at-home/jackett",
-        "ghcr.io/k8s-at-home/prowlarr"
-     ]
-    }
-  ]
+        "ghcr.io/k8s-at-home/prowlarr",
+     ],
+    },
+  ],
 }
