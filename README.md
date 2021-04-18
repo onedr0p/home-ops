@@ -16,9 +16,11 @@ _... managed by Flux and serviced with RenovateBot_ :robot:
 
 ## :book:&nbsp; Overview
 
-This repository _is_ my homelab Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder and makes the changes to my cluster based on the YAML manifests.
+This repository _is_ my home Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder and makes the changes to my cluster based on the YAML manifests.
 
 Feel free to open a [Github issue](https://github.com/onedr0p/home-cluster/issues/new/choose) or join the [k8s@home Discord](https://discord.gg/sTMX7Vh) if you have any questions.
+
+This repository is built off the [k8s-at-home/template-cluster-k3s](https://github.com/k8s-at-home/template-cluster-k3s) repository.
 
 ---
 
@@ -32,9 +34,8 @@ See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
 
   - [calico](https://docs.projectcalico.org/about/about-calico): For internal cluster networking using BGP configured on Opnsense.
   - [rook-ceph](https://rook.io/): Provides persistent volumes, allowing any application to consume RBD block storage.
-  - [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets): Encrypts Secrets into a SealedSecret, which is safe to store - even to a public repository.
-  - [external-secrets](https://github.com/external-secrets/kubernetes-external-secrets): Allows usage of external secret management systems like [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/) or [HashiCorp Vault](https://www.vaultproject.io/), to securely add secrets in Kubernetes.
-  - [external-dns](https://github.com/kubernetes-sigs/external-dns): Creates DNS entries in a separate [coredns](https://github.com/coredns/coredns) deployment which is backed by a separate [etcd](https://github.com/etcd-io/etcd) deployment.
+  - [SOPS](https://toolkit.fluxcd.io/guides/mozilla-sops/): Encrypts secrets which is safe to store - even to a public repository.
+  - [external-dns](https://github.com/kubernetes-sigs/external-dns): Creates DNS entries in a separate [coredns](https://github.com/coredns/coredns) deployment which is backed by my clusters [etcd](https://github.com/etcd-io/etcd) deployment.
   - [cert-manager](https://cert-manager.io/docs/): Configured to create TLS certs for all ingress services automatically using LetsEncrypt.
 
 ---
@@ -49,7 +50,7 @@ See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
 
 ## :spider_web:&nbsp; Networking
 
-In my network Calico is configured with BGP on my Opnsense router. With BGP enabled, I advertize a load balancer using `externalIPs` on my Kubernetes services. This makes it so I do not need `Metallb`. Another benefit to this is that I can directly hit any pods IP directly from any device on my local network.
+In my network Calico is configured with BGP on my [Opnsense](https://opnsense.org/) router. With BGP enabled, I advertise a load balancer using `externalIPs` on my Kubernetes services. This makes it so I do not need `Metallb`. Another benefit to this is that I can directly hit any pods IP directly from any device on my local network.
 
 | Name                        | CIDR              |
 |-----------------------------|-------------------|
@@ -63,7 +64,7 @@ In my network Calico is configured with BGP on my Opnsense router. With BGP enab
 
 To prefix this, I should mention that I only use one domain name for internal and externally facing applications. Also this is the most complicated thing to explain but I will try to sum it up.
 
-On Opnsense under `Services: Unbound DNS: Overrides` I have a `Domain Override` set to my domain with the address pointing to my _non-cluster service_ CoreDNS load balancer IP. This allows me to use [Split-horizon DNS](https://en.wikipedia.org/wiki/Split-horizon_DNS). [external-dns](https://github.com/kubernetes-sigs/external-dns) reads my clusters `Ingress`'s and inserts DNS records containing the sub-domain and load balancer IP (of ingress-nginx) into the _non-cluster service_ CoreDNS service. The records are stored into a _non-cluster service_ etcd instance without persistence.
+On [Opnsense](https://opnsense.org/) under `Services: Unbound DNS: Overrides` I have a `Domain Override` set to my domain with the address pointing to my _non-cluster service_ CoreDNS load balancer IP. This allows me to use [Split-horizon DNS](https://en.wikipedia.org/wiki/Split-horizon_DNS). [external-dns](https://github.com/kubernetes-sigs/external-dns) reads my clusters `Ingress`'s and inserts DNS records containing the sub-domain and load balancer IP (of ingress-nginx) into the _non-cluster service_ CoreDNS service. The records are stored into my clusters etcd instance.
 
 ---
 
@@ -81,13 +82,12 @@ On Opnsense under `Services: Unbound DNS: Overrides` I have a `Domain Override` 
 
 ## :wrench:&nbsp; Tools
 
-| Tool                                                   | Purpose                                                                                                   |
-|--------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| [direnv](https://github.com/direnv/direnv)             | Set `KUBECONFIG` environment variable based on present working directory                                  |
-| [git-crypt](https://github.com/AGWA/git-crypt)         | Encrypt certain files in my repository that can only be decrypted with a key on my computers              |
-| [go-task](https://github.com/go-task/task)             | Replacement for make and makefiles, who honestly likes that?                                              |
-| [pre-commit](https://github.com/pre-commit/pre-commit) | Ensure the YAML and shell script in my repo are consistent                                                |
-| [kubetail](https://github.com/johanhaleby/kubetail)    | Tail logs in Kubernetes, also check out [stern](https://github.com/wercker/stern) ([which fork? good luck](https://techgaun.github.io/active-forks/index.html#https://github.com/wercker/stern)) |
+| Tool                                                   | Purpose                                                                                                                              |
+|--------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| [direnv](https://github.com/direnv/direnv)             | Set `KUBECONFIG` environment variable based on present working directory                                                             |
+| [go-task](https://github.com/go-task/task)             | Replacement for make and makefiles, who honestly likes that?                                                                         |
+| [pre-commit](https://github.com/pre-commit/pre-commit) | Ensure the YAML and shell script in my repo are consistent                                                                           |
+| [kubetail](https://github.com/johanhaleby/kubetail)    | Tail logs in Kubernetes, also check out [stern](https://techgaun.github.io/active-forks/index.html#https://github.com/wercker/stern) |
 
 ---
 
