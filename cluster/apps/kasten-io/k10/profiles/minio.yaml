@@ -1,0 +1,26 @@
+---
+kind: Profile
+apiVersion: config.kio.kasten.io/v1alpha1
+metadata:
+  name: minio
+  namespace: kasten-io
+spec:
+  locationSpec:
+    type: ObjectStore
+    objectStore:
+      endpoint: "https://minio.${SECRET_CLUSTER_DOMAIN}"
+      name: k10
+      objectStoreType: S3
+      path: k10/ce93d7b1-2946-4cc2-afd5-1fa585eec33c/migration
+      pathType: Directory
+    credential:
+      secretType: AwsAccessKey
+      secret:
+        apiVersion: v1
+        kind: secret
+        name: k10secret-64sws
+        namespace: kasten-io
+  type: Location
+status:
+  validation: Success
+  hash: 4055781777
