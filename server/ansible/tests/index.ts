@@ -3,8 +3,8 @@ import * as pulumi from "@pulumi/pulumi";
 
 const region = digitalocean.Regions.SFO3;
 
-const dropletMasterTypeTag = new digitalocean.Tag(`ansible-control-${pulumi.getStack()}`);
-const dropletWorkerTypeTag = new digitalocean.Tag(`ansible-generic-${pulumi.getStack()}`);
+const dropletMasterTypeTag = new digitalocean.Tag(`ansible-e2e-master-${pulumi.getStack()}`);
+const dropletWorkerTypeTag = new digitalocean.Tag(`ansible-e2e-worker-${pulumi.getStack()}`);
 
 const dropletMasterCount = 1;
 const dropletWorkerCount = 1;
@@ -16,7 +16,7 @@ for (let i = 0; i < dropletMasterCount; i++) {
     const nodeName = `k8s-master-${nodeLetter}`;
     const nameTag = new digitalocean.Tag(`${nodeName}`);
     masterDroplets.push(new digitalocean.Droplet(`${nodeName}`, {
-        image: "ubuntu-20-10-x64",
+        image: "ubuntu-20-04-x64",
         region: region,
         privateNetworking: true,
         size: digitalocean.DropletSlugs.DropletS1VCPU1GB,
@@ -32,7 +32,7 @@ for (let i = 0; i < dropletWorkerCount; i++) {
     const nodeName = `k8s-worker-${nodeLetter}`;
     const nameTag = new digitalocean.Tag(`${nodeName}`);
     workerDroplets.push(new digitalocean.Droplet(`${nodeName}`, {
-        image: "ubuntu-20-10-x64",
+        image: "ubuntu-20-04-x64",
         region: region,
         privateNetworking: true,
         size: digitalocean.DropletSlugs.DropletS1VCPU1GB,
