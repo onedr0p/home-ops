@@ -42,7 +42,7 @@ See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
 
 ## :robot:&nbsp; Automate all the things!
 
-- [Github Actions](https://docs.github.com/en/actions) for running automated Ansible tests and checking code formatting
+- [Github Actions](https://docs.github.com/en/actions) for checking code formatting
 - Rancher [System Upgrade Controller](https://github.com/rancher/system-upgrade-controller) to apply updates to k3s
 - [Renovate](https://github.com/renovatebot/renovate) with the help of the [k8s-at-home/renovate-helm-releases](https://github.com/k8s-at-home/renovate-helm-releases) Github action keeps my application charts and container images up-to-date
 
