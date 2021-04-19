@@ -18,12 +18,12 @@
 
 - name: user | check if hushlogin exists
   ansible.builtin.stat:
-    path: "/home/{{ ansible_user }}/.hushlogin"
+    path: "~/.hushlogin"
   register: hushlogin_result
 
 - name: user | silence the login prompt
   ansible.builtin.file:
-    dest: "/home/{{ ansible_user }}/.hushlogin"
+    dest: "~/.hushlogin"
     state: touch
     owner: "{{ ansible_user }}"
     mode: "0775"
