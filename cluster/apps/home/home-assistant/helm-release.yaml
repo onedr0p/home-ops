@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: home-assistant
-      version: 7.5.1
+      version: 8.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -22,24 +22,9 @@ spec:
       tag: 2021.4.5
     env:
       TZ: "America/New_York"
-      HASS_LATITUDE: "${SECRET_HASS_LATITUDE}"
-      HASS_LONGITUDE: "${SECRET_HASS_LONGITUDE}"
-      HASS_ELEVATION: "${SECRET_HASS_ELEVATION}"
-      HASS_MQTT_USERNAME: "${SECRET_MQTT_USERNAME}"
-      HASS_MQTT_PASSWORD: "${SECRET_MQTT_PASSWORD}"
-      HASS_DB_URL: "${SECRET_HASS_DB_URL}"
-      HASS_OPENGARAGE_HOST: "${SECRET_HASS_OPENGARAGE_HOST}"
-      HASS_OPENGARAGE_DEVICE_KEY: "${SECRET_HASS_OPENGARAGE_DEVICE_KEY}"
-      HASS_GOOGLE_PROJECT_ID: "${SECRET_HASS_GOOGLE_PROJECT_ID}"
-      HASS_GOOGLE_SECURE_DEVICES_PIN: "${SECRET_HASS_GOOGLE_SECURE_DEVICES_PIN}"
-      HASS_ECOBEE_API_KEY: "${SECRET_HASS_ECOBEE_API_KEY}"
-      HASS_DARKSKY_API_KEY: "${SECRET_HASS_DARKSKY_API_KEY}"
-      HASS_FLUME_USERNAME: "${SECRET_HASS_FLUME_USERNAME}"
-      HASS_FLUME_PASSWORD: "${SECRET_HASS_FLUME_PASSWORD}"
-      HASS_FLUME_CLIENT_ID: "${SECRET_HASS_FLUME_CLIENT_ID}"
-      HASS_FLUME_CLIENT_SECRET: "${SECRET_HASS_FLUME_CLIENT_SECRET}"
-    git:
-      deployKeyBase64: "${SECRET_HASS_DEPLOY_KEY_B64}"
+    envFrom:
+    - secretRef:
+        name: home-assistant
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
     service:
@@ -79,6 +64,8 @@ spec:
         image:
           repository: codercom/code-server
           tag: 3.9.3
+        git:
+          deployKeySecret: code-server
         workingDir: "/config"
         args:
         - --auth
@@ -102,9 +89,6 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /config
-        - name: deploykey
-          mountPath: /root/.ssh/id_rsa
-          subPath: id_rsa
     resources:
       requests:
         cpu: 100m
