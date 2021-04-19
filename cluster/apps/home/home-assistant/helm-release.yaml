@@ -1,0 +1,113 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: home-assistant
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: home-assistant
+      version: 7.5.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: homeassistant/home-assistant
+      tag: 2021.4.5
+    env:
+      TZ: "America/New_York"
+      HASS_LATITUDE: "${SECRET_HASS_LATITUDE}"
+      HASS_LONGITUDE: "${SECRET_HASS_LONGITUDE}"
+      HASS_ELEVATION: "${SECRET_HASS_ELEVATION}"
+      HASS_MQTT_USERNAME: "${SECRET_MQTT_USERNAME}"
+      HASS_MQTT_PASSWORD: "${SECRET_MQTT_PASSWORD}"
+      HASS_DB_URL: "${SECRET_HASS_DB_URL}"
+      HASS_OPENGARAGE_HOST: "${SECRET_HASS_OPENGARAGE_HOST}"
+      HASS_OPENGARAGE_DEVICE_KEY: "${SECRET_HASS_OPENGARAGE_DEVICE_KEY}"
+      HASS_GOOGLE_PROJECT_ID: "${SECRET_HASS_GOOGLE_PROJECT_ID}"
+      HASS_GOOGLE_SECURE_DEVICES_PIN: "${SECRET_HASS_GOOGLE_SECURE_DEVICES_PIN}"
+      HASS_ECOBEE_API_KEY: "${SECRET_HASS_ECOBEE_API_KEY}"
+      HASS_DARKSKY_API_KEY: "${SECRET_HASS_DARKSKY_API_KEY}"
+      HASS_FLUME_USERNAME: "${SECRET_HASS_FLUME_USERNAME}"
+      HASS_FLUME_PASSWORD: "${SECRET_HASS_FLUME_PASSWORD}"
+      HASS_FLUME_CLIENT_ID: "${SECRET_HASS_FLUME_CLIENT_ID}"
+      HASS_FLUME_CLIENT_SECRET: "${SECRET_HASS_FLUME_CLIENT_SECRET}"
+    git:
+      deployKeyBase64: "${SECRET_HASS_DEPLOY_KEY_B64}"
+    hostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
+    service:
+      type: LoadBalancer
+      externalIPs:
+      - "${CLUSTER_LB_HOME_ASSISTANT}"
+      externalTrafficPolicy: Local
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "external"
+      hosts:
+      - host: "hass.${SECRET_CLUSTER_DOMAIN}"
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "hass.${SECRET_CLUSTER_DOMAIN}"
+    prometheus:
+      serviceMonitor:
+        enabled: false
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+      startup:
+        enabled: false
+    persistence:
+      config:
+        enabled: true
+        existingClaim: home-assistant-config-v1
+    addons:
+      codeserver:
+        enabled: true
+        image:
+          repository: codercom/code-server
+          tag: 3.9.3
+        workingDir: "/config"
+        args:
+        - --auth
+        - "none"
+        - --user-data-dir
+        - "/config/.vscode"
+        - --extensions-dir
+        - "/config/.vscode"
+        ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/ingress.class: "internal"
+          hosts:
+          - host: "hass-config.${SECRET_CLUSTER_DOMAIN}"
+            paths:
+            - path: /
+              pathType: Prefix
+          tls:
+          - hosts:
+            - "hass-config.${SECRET_CLUSTER_DOMAIN}"
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: deploykey
+          mountPath: /root/.ssh/id_rsa
+          subPath: id_rsa
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        memory: 4000Mi

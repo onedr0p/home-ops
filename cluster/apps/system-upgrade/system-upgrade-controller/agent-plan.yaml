@@ -1,0 +1,29 @@
+---
+apiVersion: upgrade.cattle.io/v1
+kind: Plan
+metadata:
+  name: k3s-agent
+  namespace: system-upgrade
+  labels:
+    k3s-upgrade: agent
+spec:
+  serviceAccountName: system-upgrade
+  concurrency: 1
+  channel: https://update.k3s.io/v1-release/channels/v1.20
+  nodeSelector:
+    matchExpressions:
+    - key: node-role.kubernetes.io/master
+      operator: NotIn
+      values:
+      - "true"
+    - key: k3s-upgrade
+      operator: In
+      values:
+      - "true"
+  prepare:
+    image: rancher/k3s-upgrade
+    args:
+    - "prepare"
+    - "k3s-server"
+  upgrade:
+    image: rancher/k3s-upgrade

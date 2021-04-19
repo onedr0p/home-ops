@@ -27,6 +27,17 @@
   when:
   - grub_result.stat.exists
 
+- name: boot | grub | set pti=off
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
+    replace: '\1 {{ option }}={{ value }}\2'
+  vars:
+    option: pti
+    value: "off"
+  when:
+  - grub_result.stat.exists
+
 - name: boot | grub | run grub-mkconfig
   ansible.builtin.command: grub-mkconfig -o /boot/grub/grub.cfg
   when:

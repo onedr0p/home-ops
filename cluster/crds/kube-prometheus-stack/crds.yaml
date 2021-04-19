@@ -1,0 +1,54 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: kube-prometheus-stack-source
+  namespace: flux-system
+spec:
+  interval: 30m
+  url: https://github.com/prometheus-community/helm-charts.git
+  ref:
+    # renovate: registryUrl=https://prometheus-community.github.io/helm-charts
+    tag: kube-prometheus-stack-14.9.0
+  ignore: |
+    # exclude all
+    /*
+    # include deploy crds dir
+    !/charts/kube-prometheus-stack/crds
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: kube-prometheus-stack-crds
+  namespace: flux-system
+spec:
+  interval: 15m
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: kube-prometheus-stack-source
+  healthChecks:
+  - apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: alertmanagerconfigs.monitoring.coreos.com
+  - apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: alertmanagers.monitoring.coreos.com
+  - apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: podmonitors.monitoring.coreos.com
+  - apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: probes.monitoring.coreos.com
+  - apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: prometheuses.monitoring.coreos.com
+  - apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: prometheusrules.monitoring.coreos.com
+  - apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: servicemonitors.monitoring.coreos.com
+  - apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: thanosrulers.monitoring.coreos.com

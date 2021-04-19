@@ -1,0 +1,25 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: node-problem-detector
+  namespace: kube-system
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://charts.deliveryhero.io/
+      chart: node-problem-detector
+      version: 2.0.1
+      sourceRef:
+        kind: HelmRepository
+        name: deliveryhero-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: k8s.gcr.io/node-problem-detector/node-problem-detector
+      tag: v0.8.7
+    metrics:
+      serviceMonitor:
+        enabled: true

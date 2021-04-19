@@ -4,7 +4,7 @@ Welcome to the docs on my home Kubernetes cluster.
 
 ## Story
 
-Two years ago my homelab setup was very different that what it is today. I was running a [Docker Swarm](https://docs.docker.com/engine/swarm/) cluster and doing deployments with [Portainer](https://www.portainer.io/). While this was working, I was unsure about Docker Swarm's future and I was also looking at a better way to handle application updates. I knew I wanted to keep using open source software and decided it was a good time to start getting familiar with Kubernetes... in came k3s.
+In 2018 my homelab setup was very different that what it is today. I was running a [Docker Swarm](https://docs.docker.com/engine/swarm/) cluster and doing deployments with [Portainer](https://www.portainer.io/). While this was working, I was unsure about Docker Swarm's future and I was also looking at a better way to handle application updates. I knew I wanted to keep using open source software and decided it was a good time to start getting familiar with Kubernetes... in came k3s.
 
 ### k3s
 

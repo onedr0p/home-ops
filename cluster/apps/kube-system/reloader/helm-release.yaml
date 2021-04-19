@@ -1,0 +1,23 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: reloader
+  namespace: kube-system
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://stakater.github.io/stakater-charts
+      chart: reloader
+      version: v0.0.87
+      sourceRef:
+        kind: HelmRepository
+        name: stakater-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    nameOverride: reloader
+    fullnameOverride: reloader
+    # TODO - enable podMonitor
+    # https://github.com/stakater/Reloader/issues/221

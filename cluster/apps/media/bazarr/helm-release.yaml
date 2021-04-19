@@ -1,0 +1,69 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: bazarr
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: bazarr
+      version: 7.3.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: ghcr.io/k8s-at-home/bazarr
+      tag: v0.9.3
+    env:
+      TZ: "America/New_York"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "internal"
+        # Custom themes provided by https://github.com/gilbN/theme.park
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          proxy_set_header Accept-Encoding "";
+          sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://gilbn.github.io/theme.park/CSS/themes/bazarr/organizr-dark.css"></head>';
+          sub_filter_once on;
+        forecastle.stakater.com/expose: "true"
+        forecastle.stakater.com/icon: "https://raw.githubusercontent.com/causefx/Organizr/v2-develop/plugins/images/tabs/bazarr.png"
+        forecastle.stakater.com/network-restricted: "true"
+      hosts:
+      - host: "bazarr.${SECRET_CLUSTER_DOMAIN}"
+        paths:
+        - path: /
+          pathType: Prefix
+      tls:
+      - hosts:
+        - "bazarr.${SECRET_CLUSTER_DOMAIN}"
+    persistence:
+      config:
+        enabled: true
+        existingClaim: bazarr-config-v1
+    podSecurityContext:
+      supplementalGroups:
+      - 100
+    additionalVolumeMounts:
+    - name: media-rocinante
+      mountPath: "/media-rocinante"
+    - name: media-serenity
+      mountPath: "/media-serenity"
+    additionalVolumes:
+    - name: media-rocinante
+      persistentVolumeClaim:
+        claimName: nfs-media-rocinante-pvc
+    - name: media-serenity
+      persistentVolumeClaim:
+        claimName: nfs-media-serenity-pvc
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 1500Mi
