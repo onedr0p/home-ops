@@ -13,3 +13,13 @@ env:
 includes:
   ansible: .taskfiles/ansible.yml
   blocky: .taskfiles/blocky.yml
+
+tasks:
+
+  kubeconfig:
+    desc: Remotely fetch kubeconfig from k3s
+    cmds:
+    - rsync --verbose --progress --partial --rsync-path="sudo rsync" ubuntu@192.168.42.10:/etc/rancher/k3s/k3s.yaml ./kubeconfig
+    - sed -i '' 's/127.0.0.1/192.168.1.1/g' ./kubeconfig
+    - chmod go-r kubeconfig
+    silent: true
