@@ -72,7 +72,7 @@ On [Opnsense](https://opnsense.org/) under `Services: Unbound DNS: Overrides` I 
 
 | Device                  | Count | OS Disk Size | Data Disk Size       | Ram  | Purpose                       |
 |-------------------------|-------|--------------|----------------------|------|-------------------------------|
-| Intel NUC8i3BEK         | 3     | 256GB NVMe   | N/A                  | 16GB | k3s Masters                   |
+| Intel NUC8i3BEK         | 3     | 256GB NVMe   | N/A                  | 16GB | k3s Masters (embedded etcd)   |
 | Intel NUC8i5BEH         | 3     | 120GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                   |
 | Intel NUC8i7BEH         | 2     | 750GB SSD    | 1TB NVMe (rook-ceph) | 64GB | k3s Workers                   |
 | Qnap NAS (rocinante)    | 1     | N/A          | 8x12TB RAID6         | 16GB | Media and shared file storage |
@@ -82,13 +82,12 @@ On [Opnsense](https://opnsense.org/) under `Services: Unbound DNS: Overrides` I 
 
 ## :wrench:&nbsp; Tools
 
-| Tool                                                   | Purpose                                                                                                                              |
-|--------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
-| [direnv](https://github.com/direnv/direnv)             | Set `KUBECONFIG` environment variable based on present working directory                                                             |
-| [go-task](https://github.com/go-task/task)             | Replacement for make and makefiles, who honestly likes that?                                                                         |
-| [pre-commit](https://github.com/pre-commit/pre-commit) | Ensure the YAML and shell script in my repo are consistent                                                                           |
-| [kubetail](https://github.com/johanhaleby/kubetail)    | Tail logs in Kubernetes, also check out [stern](https://techgaun.github.io/active-forks/index.html#https://github.com/wercker/stern) |
-
+| Tool                                                                                            | Purpose                                                                   |
+|-------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| [direnv](https://github.com/direnv/direnv)                                                      | Sets `KUBECONFIG` environment variable based on present working directory |
+| [go-task](https://github.com/go-task/task)                                                      | Alternative to makefiles, who honestly likes that?                        |
+| [pre-commit](https://github.com/pre-commit/pre-commit)                                          | Enforce code consistency and verifies no secrets are pushed               |
+| [kubetail](https://github.com/johanhaleby/kubetail) / [stern](https://github.com/wercker/stern) | Tail logs in Kubernetes                                                   |
 ---
 
 ## :handshake:&nbsp; Thanks
