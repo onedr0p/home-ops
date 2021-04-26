@@ -134,3 +134,10 @@ tar xvf /mnt/nfs/backups/tautulli.tar.gz -C /mnt/data
 umount /mnt/data && \
 rbd unmap -p replicapool csi-vol-2bd198a6-9a7d-11eb-ae97-9a71104156fa
 ```
+
+```
+ceph mgr module enable rook
+ceph orch set backend rook
+ceph dashboard set-alertmanager-api-host http://kube-prometheus-stack-alertmanager.monitoring.svc:9093
+ceph dashboard set-prometheus-api-host http://kube-prometheus-stack-prometheus.monitoring.svc:9090
+```
