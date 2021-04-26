@@ -1,6 +1,6 @@
 ---
+version: "3"
 
-version: '3'
 services:
   postgres:
     image: postgres:12.6
@@ -13,7 +13,7 @@ services:
     ports:
     - "5432:5432"
     volumes:
-    - pg-data:/var/lib/postgresql/data
+    - "pg-data:/var/lib/postgresql/data"
   pgadmin:
     image: dpage/pgadmin4:5.2
     restart: unless-stopped
@@ -24,11 +24,11 @@ services:
     ports:
     - "12080:80"
     volumes:
-    - pgadmin-data:/var/lib/pgadmin
+    - "pgadmin-data:/var/lib/pgadmin"
     links:
-    - postgres:pgsql-server
+    - "postgres:pgsql-server"
     depends_on:
-    - postgres
+    - "postgres"
   pgbackups:
     image: prodrigestivill/postgres-backup-local:12
     restart: unless-stopped
@@ -44,11 +44,11 @@ services:
       BACKUP_KEEP_MONTHS: 3
       HEALTHCHECK_PORT: 8080
     volumes:
-    - pgbackups-data:/backups
+    - "pgbackups-data:/backups"
     links:
-    - postgres:pgsql-server
+    - "postgres:pgsql-server"
     depends_on:
-    - postgres
+    - "postgres"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/"]
       interval: 30s
@@ -58,18 +58,18 @@ volumes:
   pg-data:
     driver: local
     driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/share/Data/ContainerStation/postgresql/data'
+      type: "none"
+      o: "bind"
+      device: "/share/Data/ContainerStation/postgresql/data"
   pgadmin-data:
     driver: local
     driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/share/Data/ContainerStation/pgadmin'
+      type: "none"
+      o: "bind"
+      device: "/share/Data/ContainerStation/pgadmin"
   pgbackups-data:
     driver: local
     driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/share/Data/ContainerStation/pgbackups'
+      type: "none"
+      o: "bind"
+      device: "/share/Data/ContainerStation/pgbackups"

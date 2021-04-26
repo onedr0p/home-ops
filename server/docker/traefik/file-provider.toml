@@ -1,0 +1,53 @@
+[tls.options]
+  [tls.options.default]
+    minVersion = "VersionTLS12"
+    cipherSuites = [
+        "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+        "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+        "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305",
+        "TLS_AES_128_GCM_SHA256",
+        "TLS_AES_256_GCM_SHA384",
+        "TLS_CHACHA20_POLY1305_SHA256"
+    ]
+    sniStrict = true
+
+[http]
+  [http.routers]
+    [http.routers.unifi]
+      rule = "Host(`unifi.devbu.io`)"
+      entryPoints = ["websecure"]
+      service = "unifi"
+    [http.routers.unifi.tls]
+      certResolver = "letsencrypt"
+      [[http.routers.unifi.tls.domains]]
+        main = "unifi.devbu.io"
+    [http.services.unifi]
+      [http.services.unifi.loadBalancer]
+        [[http.services.unifi.loadBalancer.servers]]
+          url = "https://192.168.1.2:443"
+
+    [http.routers.rocinante]
+      rule = "Host(`rocinante.devbu.io`)"
+      entryPoints = ["websecure"]
+      service = "rocinante"
+    [http.routers.rocinante.tls]
+      certResolver = "letsencrypt"
+      [[http.routers.rocinante.tls.domains]]
+        main = "rocinante.devbu.io"
+    [http.services.rocinante]
+      [http.services.rocinante.loadBalancer]
+        [[http.services.rocinante.loadBalancer.servers]]
+          url = "http://192.168.42.40:8080"
+
+    [http.routers.serenity]
+      rule = "Host(`serenity.devbu.io`)"
+      entryPoints = ["websecure"]
+      service = "serenity"
+    [http.routers.serenity.tls]
+      certResolver = "letsencrypt"
+      [[http.routers.serenity.tls.domains]]
+        main = "serenity.devbu.io"
+    [http.services.serenity]
+      [http.services.serenity.loadBalancer]
+        [[http.services.serenity.loadBalancer.servers]]
+          url = "http://192.168.42.50:8080"

@@ -1,16 +1,16 @@
 ---
+version: "3"
 
-version: '3.7'
 services:
   cadvisor:
     image: gcr.io/google-containers/cadvisor:v0.36.0
     ports:
-    - 9123:8080
+    - "9123:8080"
     volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
+    - "/:/rootfs:ro"
+    - "/var/run:/var/run:rw"
+    - "/sys:/sys:ro"
+    - "/var/lib/docker/:/var/lib/docker:ro"
   node-exporter:
     image: prom/node-exporter:v1.1.2
     restart: unless-stopped
@@ -20,16 +20,16 @@ services:
     - SYS_TIME
     - SYS_NICE
     command:
-    - '--path.procfs=/host/proc'
-    - '--path.rootfs=/rootfs'
-    - '--path.sysfs=/host/sys'
-    - '--no-collector.time'
-    - '--no-collector.timex'
-    - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc|mnt/ext)($$|/)'
+    - "--path.procfs=/host/proc"
+    - "--path.rootfs=/rootfs"
+    - "--path.sysfs=/host/sys"
+    - "--no-collector.time"
+    - "--no-collector.timex"
+    - "--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc|mnt/ext)($$|/)"
     volumes:
-    - /proc:/host/proc:ro
-    - /sys:/host/sys:ro
-    - /:/rootfs:ro,rslave
+    - "/proc:/host/proc:ro"
+    - "/sys:/host/sys:ro"
+    - "/:/rootfs:ro,rslave"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9100/metrics"]
       interval: 30s

@@ -1,9 +1,9 @@
 ---
+version: "3"
 
-version: '3.7'
 services:
   minio:
-    image: minio/minio:RELEASE.2021-04-22T15-44-28Z
+    image: minio/minio:RELEASE.2021-03-04T00-53-13Z
     restart: unless-stopped
     environment:
       MINIO_ACCESS_KEY: ""
@@ -12,18 +12,24 @@ services:
       MINIO_UPDATE: "off"
     command: server /data
     ports:
-    - 9000:9000
+    - "9000:9000"
     volumes:
-    - minio-data:/data
+    - "minio-data:/data"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.minio.rule=Host(`minio.devbu.io`)"
+    - "traefik.http.routers.minio.entrypoints=websecure"
+    - "traefik.http.routers.minio.tls.certresolver=letsencrypt"
+    - "traefik.http.services.minio.loadbalancer.server.port=9000"
 volumes:
   minio-data:
     driver: local
     driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/share/Data/ContainerStation/minio'
+      type: "none"
+      o: "bind"
+      device: "/share/Data/ContainerStation/minio"

@@ -1,17 +1,16 @@
 ---
+version: "3"
 
-version: '3.7'
 services:
   scrutiny:
-    container_name: scrutiny
     image: analogj/scrutiny:v0.3.11-collector
-    cap_add:
-    - SYS_RAWIO
     environment:
       SCRUTINY_API_ENDPOINT: "https://scrutiny.devbu.io"
+    cap_add:
+    - SYS_RAWIO
     volumes:
-    - /lib/udev:/run/udev:ro
-    - scrutiny-data:/scrutiny/config
+    - "/lib/udev:/run/udev:ro"
+    - "scrutiny-data:/scrutiny/config"
     devices:
     - "/dev/sda"
     - "/dev/sdb"
@@ -25,6 +24,6 @@ volumes:
   scrutiny-data:
     driver: local
     driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/share/Data/ContainerStation/scrutiny'
+      type: "none"
+      o: "bind"
+      device: "/share/Data/ContainerStation/scrutiny"
