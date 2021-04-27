@@ -33,9 +33,8 @@ spec:
           proxy_set_header Accept-Encoding "";
           sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://gilbn.github.io/theme.park/CSS/themes/lidarr/organizr-dark.css"></head>';
           sub_filter_once on;
-        forecastle.stakater.com/expose: "true"
-        forecastle.stakater.com/icon: "https://github.com/lidarr/Lidarr/blob/develop/Logo/128.png?raw=true"
-        forecastle.stakater.com/network-restricted: "true"
+        external-dns.alpha.kubernetes.io/target: cname--ext.${SECRET_CLUSTER_DOMAIN}
+        external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
       hosts:
       - host: "lidarr.${SECRET_CLUSTER_DOMAIN}"
         paths:
