@@ -28,8 +28,6 @@ spec:
         externalIPs:
         - "${CLUSTER_LB_INGRESS_EXTERNAL}"
         externalTrafficPolicy: Local
-      publishService:
-        enabled: true
       config:
         custom-http-errors: 404,500,501,502,503
         ssl-protocols: "TLSv1.3 TLSv1.2"
@@ -72,14 +70,7 @@ spec:
       enabled: true
       image:
         repository: ghcr.io/181192/custom-error-pages
-        tag: latest
-      # image:
-      #   repository: ghcr.io/tarampampam/error-pages
-      #   tag: 1.6.0
-      # runAsUser: 0
-      # runAsNonRoot: false
-      # readOnlyRootFilesystem: false
-      # extraEnvs:
-      # - name: TEMPLATE_NAME
-      #   value: shuffle
-      # port: 8080
+        tag: v1.2.0
+      extraEnvs:
+      - name: ERROR_FILES_PATH
+        value: ./themes/shuffle
