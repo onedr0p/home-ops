@@ -1,0 +1,39 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflare-ddns
+  namespace: networking
+  labels:
+    app.kubernetes.io/name: cloudflare-ddns
+    app.kubernetes.io/instance: cloudflare-ddns
+data:
+  cloudflare-ddns.sh: |
+    #!/bin/sh
+    ip4=$(curl -s https://ipv4.icanhazip.com/)
+    record4=$(curl -s -X GET \
+      "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONEID}/dns_records?name=${CLOUDFLARE_RECORD_NAME}&type=A" \
+      -H "X-Auth-Email: ${CLOUDFLARE_EMAIL}" \
+      -H "X-Auth-Key: ${CLOUDFLARE_APIKEY}" \
+      -H "Content-Type: application/json" \
+    )
+    old_ip4=$(echo "$record4" | grep -Po '(?<="content":")[^"]*' | head -1)
+    if [[ "${ip4}" == "${old_ip4}" ]]; then
+      echo "IP Address '${ip4}' has not changed... exiting"
+      exit 0
+    fi
+    record4_identifier=$(echo "${record4}" | grep -Po '(?<="id":")[^"]*' | head -1)
+    update4=$(curl -s -X PUT \
+      "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONEID}/dns_records/${record4_identifier}" \
+      -H "X-Auth-Email: ${CLOUDFLARE_EMAIL}" \
+      -H "X-Auth-Key: ${CLOUDFLARE_APIKEY}" \
+      -H "Content-Type: application/json" \
+      --data "{\"id\":\"${CLOUDFLARE_ZONEID}\",\"type\":\"A\",\"proxied\":true,\"name\":\"${CLOUDFLARE_RECORD_NAME}\",\"content\":\"${ip4}\"}" \
+    )
+    if [[ "${update4}" == *"\"success\":false"* ]]; then
+      echo "IP Address '${ip4}' update failed... exiting"
+      exit 1
+    else
+      echo "IP Address '${ip4}' update successful... exiting"
+      exit 0
+    fi
