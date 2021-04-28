@@ -1,0 +1,91 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: networking
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://helm.traefik.io/traefik
+      chart: traefik
+      version: 9.18.3
+      sourceRef:
+        kind: HelmRepository
+        name: traefik-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    deployment:
+      kind: Deployment
+      replicas: 3
+    service:
+      enabled: true
+      type: LoadBalancer
+      spec:
+        externalIPs:
+        - "${CLUSTER_LB_TRAEFIK}"
+        externalTrafficPolicy: Local
+    logs:
+      general:
+        format: json
+        level: DEBUG
+      access:
+        enabled: true
+        format: json
+    ingressClass:
+      enabled: true
+      isDefaultClass: true
+      fallbackApiVersion: v1
+    ingressRoute:
+      dashboard:
+        enabled: false
+    globalArguments:
+    - "--global.checknewversion"
+    - "--serverstransport.insecureskipverify=true"
+    - "--providers.kubernetesingress.ingressclass=traefik"
+    - "--metrics.prometheus=true"
+    - "--metrics.prometheus.entryPoint=metrics"
+    # - "--entrypoints.websecure.http.middlewares=ingress-error-pages@kubernetescrd"
+    # - "--entryPoints.websecure.proxyProtocol.trustedIPs=103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,104.16.0.0/13,104.24.0.0/14,108.162.192.0/18,131.0.72.0/22,141.101.64.0/18,162.158.0.0/15,172.64.0.0/13,173.245.48.0/20,188.114.96.0/20,190.93.240.0/20,197.234.240.0/22,198.41.128.0/17,2400:cb00::/32,2606:4700::/32,2803:f800::/32,2405:b500::/32,2405:8100::/32,2a06:98c0::/29,2c0f:f248::/32"
+    additionalArguments:
+    - "--providers.kubernetesingress.ingressendpoint.hostname=${SECRET_CLUSTER_DOMAIN}"
+    - "--providers.kubernetesingress.ingressendpoint.ip=${CLUSTER_LB_TRAEFIK}"
+    # - "--experimental.plugins.subfilter.modulename=github.com/DirtyCajunRice/subfilter"
+    # - "--experimental.plugins.subfilter.version=v0.5.0"
+    ports:
+      web:
+        redirectTo: websecure
+      websecure:
+        tls:
+          enabled: true
+      metrics:
+        port: 8082
+        expose: true
+        exposedPort: 8082
+    pilot:
+      enabled: false
+      # token: "23f45ed9-8bcb-43a5-b41f-1af0762be61d"
+    experimental:
+      plugins:
+        enabled: true
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - traefik
+            topologyKey: kubernetes.io/hostname
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "50Mi"
+      limits:
+        cpu: "300m"
+        memory: "150Mi"
