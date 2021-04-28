@@ -17,20 +17,18 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    # interval: "3m"
-    logLevel: debug
     sources:
     - ingress
     provider: cloudflare
     cloudflare:
       secretName: external-dns-external
       email: "${SECRET_EMAIL}"
-      proxied: false
+      proxied: true
     policy: sync
     txtPrefix: "k8s."
     domainFilters:
     - "${SECRET_CLUSTER_DOMAIN}"
-    annotationFilter: "external-dns.alpha.kubernetes.io/exclude notin (true)"
+    annotationFilter: "kubernetes.io/ingress.class=external"
     metrics:
       enabled: true
       serviceMonitor:
