@@ -8,8 +8,6 @@ _... managed by Flux and serviced with RenovateBot_ :robot:
 </div>
 
 <br/>
-<br/>
-<br/>
 
 <div align="center">
 
