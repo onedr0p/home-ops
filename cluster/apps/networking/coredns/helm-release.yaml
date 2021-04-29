@@ -30,6 +30,8 @@ spec:
       externalTrafficPolicy: Local
     servers:
     - zones:
+      - zone: .
+        scheme: dns://
       - zone: ${SECRET_CLUSTER_DOMAIN}.
         scheme: dns://
         # use_tcp: true
@@ -51,6 +53,8 @@ spec:
         parameters: 0.0.0.0:9153
       - name: forward
         parameters: . /etc/resolv.conf
+      - name: file
+        parameters: /etc/coredns/${SECRET_CLUSTER_DOMAIN}.db ${SECRET_CLUSTER_DOMAIN}
       - name: cache
         parameters: 30
       - name: loop
