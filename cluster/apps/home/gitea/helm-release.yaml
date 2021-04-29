@@ -22,8 +22,8 @@ spec:
       size: 10Gi
       storageClass: "rook-ceph-block"
     ingress:
-      enabled: false
-      ingressClassName: "traefik"
+      enabled: true
+      # ingressClassName: "traefik"
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
       hosts:
@@ -70,3 +70,13 @@ spec:
       cache:
         builtIn:
           enabled: true
+  postRenderers:
+  - kustomize:
+      patchesJson6902:
+      - target:
+          kind: Ingress
+          name: gitea
+        patch:
+        - op: add
+          path: /spec/ingressClassName
+          value: traefik
