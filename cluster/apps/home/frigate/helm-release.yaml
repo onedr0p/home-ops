@@ -301,8 +301,8 @@ spec:
     podAnnotations:
       configmap.reloader.stakater.com/reload: "frigate"
     ingress:
-      enabled: false
-      ingressClassName: "traefik"
+      enabled: true
+      # ingressClassName: "traefik"
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
       hosts:
@@ -348,3 +348,13 @@ spec:
       limits:
         gpu.intel.com/i915: 1
         memory: 2000Mi
+  postRenderers:
+  - kustomize:
+      patchesJson6902:
+      - target:
+          kind: Ingress
+          name: frigate
+        patch:
+        - op: add
+          path: /spec/ingressClassName
+          value: traefik
