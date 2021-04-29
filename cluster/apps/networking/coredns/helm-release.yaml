@@ -58,8 +58,11 @@ spec:
       - name: loadbalance
       - name: hosts
         configBlock: |-
-          ${CLUSTER_LB_TRAEFIK} ext.${SECRET_CLUSTER_DOMAIN}
+          ${CLUSTER_LB_TRAEFIK} ${SECRET_CLUSTER_DOMAIN}
           fallthrough
+      # - name: records
+      #   configBlock: |-
+      #     ext.${SECRET_CLUSTER_DOMAIN} 60  IN A  ${CLUSTER_LB_TRAEFIK}
       - name: etcd
         parameters: ${SECRET_CLUSTER_DOMAIN}
         configBlock: |-
