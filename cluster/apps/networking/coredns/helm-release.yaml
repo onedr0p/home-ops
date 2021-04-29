@@ -30,7 +30,7 @@ spec:
       externalTrafficPolicy: Local
     servers:
     - zones:
-      - zone: ${SECRET_CLUSTER_DOMAIN}
+      - zone: ${SECRET_CLUSTER_DOMAIN}.
         scheme: dns://
       port: 53
       plugins:
@@ -40,14 +40,6 @@ spec:
         configBlock: |-
           lameduck 5s
       - name: ready
-      - name: kubernetes
-        parameters: cluster.local in-addr.arpa ip6.arpa
-        configBlock: |-
-          pods insecure
-          fallthrough in-addr.arpa ip6.arpa
-          ttl 30
-      - name: prometheus
-        parameters: 0.0.0.0:9153
       - name: forward
         parameters: . /etc/resolv.conf
       - name: cache
