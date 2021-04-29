@@ -24,10 +24,9 @@ spec:
       TZ: "America/New_York"
     ingress:
       enabled: true
+      ingressClassName: "traefik"
       annotations:
-        kubernetes.io/ingress.class: "internal"
-        # external-dns.alpha.kubernetes.io/external: "true"
-        # external-dns.alpha.kubernetes.io/target: "ext.${SECRET_CLUSTER_DOMAIN}"
+        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
       hosts:
       - host: "lidarr.${SECRET_CLUSTER_DOMAIN}"
         paths:
@@ -36,17 +35,6 @@ spec:
       tls:
       - hosts:
         - "lidarr.${SECRET_CLUSTER_DOMAIN}"
-      additionalIngresses:
-      - enabled: true
-        nameSuffix: "api"
-        annotations:
-          kubernetes.io/ingress.class: "internal"
-          # external-dns.alpha.kubernetes.io/target: ""
-        hosts:
-        - host: "lidarr.${SECRET_CLUSTER_DOMAIN}"
-          paths:
-          - path: /api
-            pathType: Prefix
         tls:
         - hosts:
           - "lidarr.${SECRET_CLUSTER_DOMAIN}"

@@ -36,11 +36,9 @@ spec:
     clusterName: k8s
     ingress:
       create: true
-      class: "internal"
       host: "k10.${SECRET_CLUSTER_DOMAIN}"
       annotations:
-        kubernetes.io/ingress.class: "internal"
-        nginx.ingress.kubernetes.io/app-root: /k10
+        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
       urlPath: k10
       hosts:
       - "k10.${SECRET_CLUSTER_DOMAIN}"
@@ -54,6 +52,6 @@ spec:
           kind: Ingress
           name: k10-ingress
         patch:
-        - op: replace
-          path: /spec/rules/0/http/paths/0/path
-          value: /
+        - op: add
+          path: /spec/ingressClassName
+          value: traefik

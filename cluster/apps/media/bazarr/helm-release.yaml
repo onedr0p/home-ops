@@ -24,13 +24,9 @@ spec:
       TZ: "America/New_York"
     ingress:
       enabled: true
+      ingressClassName: "traefik"
       annotations:
-        kubernetes.io/ingress.class: "internal"
-        # Custom themes provided by https://github.com/gilbN/theme.park
-        nginx.ingress.kubernetes.io/configuration-snippet: |
-          proxy_set_header Accept-Encoding "";
-          sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://gilbn.github.io/theme.park/CSS/themes/bazarr/organizr-dark.css"></head>';
-          sub_filter_once on;
+        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
       hosts:
       - host: "bazarr.${SECRET_CLUSTER_DOMAIN}"
         paths:
