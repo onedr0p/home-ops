@@ -1,0 +1,22 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: rfc1918-ips
+  namespace: networking
+spec:
+  ipWhiteList:
+    sourceRange:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: rfc1918
+  namespace: networking
+spec:
+  chain:
+    middlewares:
+    - name: rfc1918-ips
