@@ -30,11 +30,10 @@ spec:
       externalTrafficPolicy: Local
     servers:
     - zones:
-      - zone: .
-        scheme: dns://
+      # - zone: .
+      #   scheme: dns://
       - zone: ${SECRET_CLUSTER_DOMAIN}.
         scheme: dns://
-        # use_tcp: true
       port: 53
       plugins:
       - name: log
@@ -53,20 +52,13 @@ spec:
         parameters: 0.0.0.0:9153
       - name: forward
         parameters: . /etc/resolv.conf
-      - name: file
-        parameters: /etc/coredns/${SECRET_CLUSTER_DOMAIN}.db ${SECRET_CLUSTER_DOMAIN}
+      # - name: file
+      #   parameters: /etc/coredns/${SECRET_CLUSTER_DOMAIN}.db ${SECRET_CLUSTER_DOMAIN}
       - name: cache
         parameters: 30
       - name: loop
       - name: reload
       - name: loadbalance
-      # - name: records
-      #   configBlock: |-
-      #     ${SECRET_CLUSTER_DOMAIN}.            IN      SOA     sns.dns.icann.org. noc.dns.icann.org. 2015082541 7200 3600 1209600 3600
-      #     ${SECRET_CLUSTER_DOMAIN}.            IN      NS      b.iana-servers.net.
-      #     ${SECRET_CLUSTER_DOMAIN}.            IN      NS      a.iana-servers.net.
-      #     ${SECRET_CLUSTER_DOMAIN}.            IN      A       ${CLUSTER_LB_TRAEFIK}
-      #     ext.${SECRET_CLUSTER_DOMAIN}         IN      A       ${CLUSTER_LB_TRAEFIK}
       - name: etcd
         parameters: ${SECRET_CLUSTER_DOMAIN}
         configBlock: |-
@@ -74,14 +66,14 @@ spec:
           path /skydns
           endpoint https://192.168.1.1:2379
           tls /etc/coredns/coredns-etcd/cert.pem /etc/coredns/coredns-etcd/key.pem /etc/coredns/coredns-etcd/ca.crt
-    zoneFiles:
-    - filename: ${SECRET_CLUSTER_DOMAIN}.db
-      domain: ${SECRET_CLUSTER_DOMAIN}
-      contents: |-
-        ${SECRET_CLUSTER_DOMAIN}.            IN SOA     ns.dns.${SECRET_CLUSTER_DOMAIN}. hostmaster.${SECRET_CLUSTER_DOMAIN}. 1610541154 7200 1800 86400 30
-        ${SECRET_CLUSTER_DOMAIN}.            IN NS      ns.dns.${SECRET_CLUSTER_DOMAIN}.
-        ${SECRET_CLUSTER_DOMAIN}.            IN A       ${CLUSTER_LB_TRAEFIK}
-        ext.${SECRET_CLUSTER_DOMAIN}         IN A       ${CLUSTER_LB_TRAEFIK}
+    # zoneFiles:
+    # - filename: ${SECRET_CLUSTER_DOMAIN}.db
+    #   domain: ${SECRET_CLUSTER_DOMAIN}
+    #   contents: |-
+    #     ${SECRET_CLUSTER_DOMAIN}.            IN SOA     ns.dns.${SECRET_CLUSTER_DOMAIN}. hostmaster.${SECRET_CLUSTER_DOMAIN}. 1610541154 7200 1800 86400 30
+    #     ${SECRET_CLUSTER_DOMAIN}.            IN NS      ns.dns.${SECRET_CLUSTER_DOMAIN}.
+    #     ${SECRET_CLUSTER_DOMAIN}.            IN A       ${CLUSTER_LB_TRAEFIK}
+    #     *.${SECRET_CLUSTER_DOMAIN}.          IN CNAME   ${SECRET_CLUSTER_DOMAIN}.
     prometheus:
       service:
         enabled: true
