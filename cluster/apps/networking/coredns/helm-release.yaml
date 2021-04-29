@@ -30,13 +30,11 @@ spec:
       externalTrafficPolicy: Local
     servers:
     - zones:
-      # - zone: .
-      #   scheme: dns://
       - zone: ${SECRET_CLUSTER_DOMAIN}.
         scheme: dns://
       port: 53
       plugins:
-      # - name: log
+      - name: log
       - name: errors
       - name: health
         configBlock: |-
@@ -50,6 +48,8 @@ spec:
           ttl 30
       - name: prometheus
         parameters: 0.0.0.0:9153
+      # - name: forward
+      #   parameters: . /etc/resolv.conf
       - name: cache
         parameters: 30
       - name: loop
@@ -62,8 +62,6 @@ spec:
           path /skydns
           endpoint https://192.168.1.1:2379
           tls /etc/coredns/coredns-etcd/cert.pem /etc/coredns/coredns-etcd/key.pem /etc/coredns/coredns-etcd/ca.crt
-      # - name: forward
-      #   parameters: . /etc/resolv.conf
     prometheus:
       service:
         enabled: true
