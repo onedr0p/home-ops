@@ -64,19 +64,14 @@ spec:
         configBlock: |-
           stubzones
           path /skydns
-          endpoint http://etcd.networking:2379
-      # - name: etcd
-      #   configBlock: |-
-      #     stubzones
-      #     path /skydns
-      #     endpoint https://192.168.42.10:2379 https://192.168.42.11:2379 https://192.168.42.12:2379
-      #     tls /etc/coredns/coredns-etcd/cert.pem /etc/coredns/coredns-etcd/key.pem /etc/coredns/coredns-etcd/ca.crt
+          endpoint https://192.168.42.10:2379 https://192.168.42.11:2379 https://192.168.42.12:2379
+          tls /etc/coredns/coredns-etcd/cert.pem /etc/coredns/coredns-etcd/key.pem /etc/coredns/coredns-etcd/ca.crt
       # Set up cache
       - name: cache
         parameters: 30
-    # extraSecrets:
-    # - name: coredns-etcd
-    #   mountPath: /etc/coredns/coredns-etcd
+    extraSecrets:
+    - name: coredns-etcd
+      mountPath: /etc/coredns/coredns-etcd
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:

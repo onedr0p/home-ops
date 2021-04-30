@@ -26,12 +26,10 @@ spec:
     - ingress
     provider: coredns
     coredns:
-      etcdEndpoints: "http://etcd.networking:2379"
-    # coredns:
-    #   etcdEndpoints: "https://192.168.42.10:2379,https://192.168.42.11:2379,https://192.168.42.12:2379"
-    #   etcdTLS:
-    #     enabled: true
-    #     secretName: coredns-etcd
+      etcdEndpoints: "https://192.168.42.10:2379,https://192.168.42.11:2379,https://192.168.42.12:2379"
+      etcdTLS:
+        enabled: true
+        secretName: coredns-etcd
     policy: sync
     txtPrefix: "k8s."
     domainFilters:
@@ -40,8 +38,6 @@ spec:
       create: false
       apiversion: externaldns.k8s.io/v1alpha1
       kind: DNSEndpoint
-    serviceAccount:
-      name: internal-dns
     resources:
       requests:
         memory: 100Mi
