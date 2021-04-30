@@ -27,6 +27,7 @@ spec:
       ingressClassName: "traefik"
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        traefik.ingress.kubernetes.io/router.middlewares: "networking-basic-auth@kubernetescrd"
       hosts:
       - host: "lidarr.${SECRET_CLUSTER_DOMAIN}"
         paths:
@@ -35,6 +36,17 @@ spec:
       tls:
       - hosts:
         - "lidarr.${SECRET_CLUSTER_DOMAIN}"
+      additionalIngresses:
+      - enabled: true
+        nameSuffix: "api"
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
+        - host: "lidarr.${SECRET_CLUSTER_DOMAIN}"
+          paths:
+          - path: /api
+            pathType: Prefix
         tls:
         - hosts:
           - "lidarr.${SECRET_CLUSTER_DOMAIN}"
