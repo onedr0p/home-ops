@@ -30,25 +30,35 @@ spec:
       externalTrafficPolicy: Local
     servers:
     - zones:
-      - zone: ${SECRET_CLUSTER_DOMAIN}.
-        scheme: dns://
-      - zone: gateway.${SECRET_CLUSTER_DOMAIN}
+      - zone: ${SECRET_CLUSTER_DOMAIN}
         scheme: dns://
       port: 53
       plugins:
+      # Enables console logging
       - name: log
       - name: errors
+      # Serves a /health endpoint on :8080, required for livenessProbe
       - name: health
         configBlock: |-
           lameduck 5s
+      # Serves a /ready endpoint on :8181, required for readinessProbe
       - name: ready
-      - name: cache
-        parameters: 30
+      # Serves a /metrics endpoint on :9153, required for serviceMonitor
+      - name: prometheus
+        parameters: 0.0.0.0:9153
+      # Allow automatic reloading of Corefile
+      - name: reload
+      # Detect forwarding loops
       - name: loop
+      # Static hosts
       - name: hosts
         configBlock: |-
+          10.1.1.11 minio.${DOMAIN_1}
+          10.1.1.11 nexus.${DOMAIN_1}
+          10.1.1.11 docker.${DOMAIN_1}
+          10.1.1.11 docker-cache.${DOMAIN_1}
           fallthrough
-      - name: reload
+      # Set up local resolution
       - name: etcd
         parameters: ${SECRET_CLUSTER_DOMAIN}
         configBlock: |-
@@ -56,6 +66,9 @@ spec:
           path /skydns
           endpoint https://192.168.42.10:2379 https://192.168.42.11:2379 https://192.168.42.12:2379
           tls /etc/coredns/coredns-etcd/cert.pem /etc/coredns/coredns-etcd/key.pem /etc/coredns/coredns-etcd/ca.crt
+      # Set up cache
+      - name: cache
+        parameters: 30
     extraSecrets:
     - name: coredns-etcd
       mountPath: /etc/coredns/coredns-etcd
