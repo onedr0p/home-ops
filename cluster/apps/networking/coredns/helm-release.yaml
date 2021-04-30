@@ -46,6 +46,8 @@ spec:
       - name: loop
       - name: reload
       - name: loadbalance
+      - name: file
+        parameters: /etc/coredns/${SECRET_CLUSTER_DOMAIN/./-}.db ${SECRET_CLUSTER_DOMAIN/./-}
       - name: etcd
         parameters: ${SECRET_CLUSTER_DOMAIN}
         configBlock: |-
@@ -53,6 +55,13 @@ spec:
           path /skydns
           endpoint https://192.168.42.10:2379 https://192.168.42.11:2379 https://192.168.42.12:2379
           tls /etc/coredns/coredns-etcd/cert.pem /etc/coredns/coredns-etcd/key.pem /etc/coredns/coredns-etcd/ca.crt
+    zoneFiles:
+    - filename: ${SECRET_CLUSTER_DOMAIN/./-}.db
+      domain: ${SECRET_CLUSTER_DOMAIN}
+      contents: |
+        ${SECRET_CLUSTER_DOMAIN}.           IN SOA    ns.dns.${SECRET_CLUSTER_DOMAIN}. hostmaster.${SECRET_CLUSTER_DOMAIN}. 1610541154 7200 1800 86400 30
+        ${SECRET_CLUSTER_DOMAIN}.           IN NS     ns.dns.${SECRET_CLUSTER_DOMAIN}.
+        gateway.${SECRET_CLUSTER_DOMAIN}.   IN A      192.168.69.180
     extraSecrets:
     - name: coredns-etcd
       mountPath: /etc/coredns/coredns-etcd
