@@ -45,6 +45,9 @@ spec:
       - name: cache
         parameters: 30
       - name: loop
+      - name: hosts
+        configBlock: |-
+          fallthrough
       - name: reload
       - name: loadbalance
       - name: etcd
@@ -57,3 +60,19 @@ spec:
     extraSecrets:
     - name: coredns-etcd
       mountPath: /etc/coredns/coredns-etcd
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - coredns
+          topologyKey: "kubernetes.io/hostname"
+    resources:
+      requests:
+        memory: 200Mi
+        cpu: 50m
+      limits:
+        memory: 500Mi
