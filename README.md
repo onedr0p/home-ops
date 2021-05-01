@@ -89,10 +89,10 @@ In my network Calico is configured with BGP on my [Opnsense](https://opnsense.or
 
 To prefix this, I should mention that I only use one domain name for internal and externally facing applications. Also this is the most complicated thing to explain but I will try to sum it up.
 
-On [Opnsense](https://opnsense.org/) under `Services: Unbound DNS: Overrides` I have a `Domain Override` set to my domain with the address pointing to my _in-cluster-non-cluster service_ CoreDNS load balancer IP. This allows me to use [Split-horizon DNS](https://en.wikipedia.org/wiki/Split-horizon_DNS). [external-dns](https://github.com/kubernetes-sigs/external-dns) reads my clusters `Ingress`'s and inserts DNS records containing the sub-domain and load balancer IP (of traefik) into the _in-cluster-non-cluster service_ CoreDNS service and into Cloudflare depending on if an annotation is present on the ingress.
+On [Opnsense](https://opnsense.org/) under `Services: Unbound DNS: Overrides` I have a `Domain Override` set to my domain with the address pointing to my _in-cluster-non-cluster service_ CoreDNS load balancer IP. This allows me to use [Split-horizon DNS](https://en.wikipedia.org/wiki/Split-horizon_DNS). [external-dns](https://github.com/kubernetes-sigs/external-dns) reads my clusters `Ingress`'s and inserts DNS records containing the sub-domain and load balancer IP (of traefik) into the _in-cluster-non-cluster service_ CoreDNS service and into Cloudflare depending on if an annotation is present on the ingress. See the diagram below for a visual representation.
 
 <div align="center">
-<img src="https://user-images.githubusercontent.com/213795/116784310-9bf4e680-aa61-11eb-9a7f-18ac9f2750ae.png" align="center" width="560px" height="512px"/>
+<img src="https://user-images.githubusercontent.com/213795/116784905-baa8ac80-aa64-11eb-95aa-c57e4b5a8329.png" align="center" />
 </div>
 
 ---
