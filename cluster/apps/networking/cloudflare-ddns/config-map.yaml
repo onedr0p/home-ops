@@ -14,12 +14,12 @@ data:
       -H "X-Auth-Key: ${CLOUDFLARE_APIKEY}" \
       -H "Content-Type: application/json" \
     )
-    old_ip4=$(echo "$record4" | sed -n 's/.*"content":"\([^"]*\).*/\1/p')
+    old_ip4=$(echo "$record4" | jq -r '.result[0].content')
     if [[ "${ip4}" == "${old_ip4}" ]]; then
       echo "IP Address '${ip4}' has not changed... exiting"
       exit 0
     fi
-    record4_identifier=$(echo "${record4}" | sed -n 's/.*"id":"\([^"]*\).*/\1/p')
+    record4_identifier=$(echo "${record4}" | jq -r '.result[0].id')
     update4=$(curl -s -X PUT \
       "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONEID}/dns_records/${record4_identifier}" \
       -H "X-Auth-Email: ${CLOUDFLARE_EMAIL}" \
