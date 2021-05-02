@@ -38,16 +38,16 @@ spec:
       ingressClassName: "traefik"
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        external-dns/public: "true"
-        external-dns.alpha.kubernetes.io/target: "gateway.${SECRET_CLUSTER_DOMAIN}"
+        external-dns/is-public: "true"
+        external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
       hosts:
-      - host: "music.${SECRET_CLUSTER_DOMAIN}"
+      - host: "music.${SECRET_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - "music.${SECRET_CLUSTER_DOMAIN}"
+        - "music.${SECRET_DOMAIN}"
     persistence:
       config:
         enabled: true

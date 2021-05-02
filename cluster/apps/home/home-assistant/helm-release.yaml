@@ -37,16 +37,16 @@ spec:
       ingressClassName: "traefik"
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        external-dns/public: "true"
-        external-dns.alpha.kubernetes.io/target: "gateway.${SECRET_CLUSTER_DOMAIN}"
+        external-dns/is-public: "true"
+        external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
       hosts:
-      - host: "hass.${SECRET_CLUSTER_DOMAIN}"
+      - host: "hass.${SECRET_DOMAIN}"
         paths:
         - path: /
           pathType: Prefix
       tls:
       - hosts:
-        - "hass.${SECRET_CLUSTER_DOMAIN}"
+        - "hass.${SECRET_DOMAIN}"
     prometheus:
       serviceMonitor:
         enabled: false
@@ -83,13 +83,13 @@ spec:
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           hosts:
-          - host: "hass-config.${SECRET_CLUSTER_DOMAIN}"
+          - host: "hass-config.${SECRET_DOMAIN}"
             paths:
             - path: /
               pathType: Prefix
           tls:
           - hosts:
-            - "hass-config.${SECRET_CLUSTER_DOMAIN}"
+            - "hass-config.${SECRET_DOMAIN}"
         volumeMounts:
         - name: config
           mountPath: /config
