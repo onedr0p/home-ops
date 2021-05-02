@@ -19,12 +19,9 @@ spec:
           - name: uptimerobot-heartbeat
             image: curlimages/curl:7.76.1
             imagePullPolicy: IfNotPresent
-            env:
-            - name: UPTIMEROBOT_HEARTBEAT_URL
-              valueFrom:
-                secretKeyRef:
-                  name: uptimerobot-heartbeat-url-secret
-                  key: uptimerobot-heartbeat-url
+            envFrom:
+            - secretRef:
+                name: uptimerobot-heartbeat-url
             command:
             - "/bin/sh"
             - "-ec"
