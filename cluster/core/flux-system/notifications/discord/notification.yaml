@@ -2,25 +2,31 @@
 apiVersion: notification.toolkit.fluxcd.io/v1beta1
 kind: Provider
 metadata:
-  name: github
+  name: discord
   namespace: flux-system
 spec:
-  type: github
-  address: https://github.com/onedr0p/home-cluster
+  type: discord
+  username: Flux
+  channel: flux
   secretRef:
-    name: github-token
+    name: discord-webhook-url
 ---
 apiVersion: notification.toolkit.fluxcd.io/v1beta1
 kind: Alert
 metadata:
-  name: github
+  name: home-cluster
   namespace: flux-system
 spec:
   providerRef:
-    name: github
-  eventSeverity: info
+    name: discord
+  eventSeverity: error
   eventSources:
+  - kind: GitRepository
+    name: '*'
   - kind: Kustomization
+    name: '*'
+  - kind: HelmRepository
     name: '*'
   - kind: HelmRelease
     name: '*'
+  suspend: false
