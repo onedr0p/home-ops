@@ -25,7 +25,7 @@ spec:
       type: LoadBalancer
       spec:
         externalIPs:
-        - "${CLUSTER_LB_TRAEFIK}"
+        - "${LB_TRAEFIK_IP}"
         externalTrafficPolicy: Local
       annotations:
         external-dns.alpha.kubernetes.io/hostname: "ipv4.${SECRET_DOMAIN}"
@@ -53,7 +53,7 @@ spec:
     # - "--entrypoints.websecure.http.middlewares=ingress-error-pages@kubernetescrd"
     additionalArguments:
     - "--providers.kubernetesingress.ingressendpoint.hostname=${SECRET_DOMAIN}"
-    - "--providers.kubernetesingress.ingressendpoint.ip=${CLUSTER_LB_TRAEFIK}"
+    - "--providers.kubernetesingress.ingressendpoint.ip=${LB_TRAEFIK_IP}"
     # - "--experimental.plugins.subfilter.modulename=github.com/DirtyCajunRice/subfilter"
     # - "--experimental.plugins.subfilter.version=v0.5.0"
     ports:
