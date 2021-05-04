@@ -75,7 +75,7 @@ The Git repository contains the following directories under `cluster` and are or
 
 ## :spider_web:&nbsp; Networking
 
-Currently when using BGP on Opnsense services do not get properly load balanced this is due to Opnsense not supporting multipath in the BSD kernel. I have revert back to using MetalLB and will investigate using BGP again when Opnsense updates to FreeBSD 13.
+Currently when using BGP on Opnsense services do not get properly load balanced this is due to Opnsense not supporting multipath in the BSD kernel. I have reverted back to using MetalLB and will investigate using BGP again when Opnsense updates to FreeBSD 13.
 
 ~~In my network Calico is configured with BGP on my [Opnsense](https://opnsense.org/) router. With BGP enabled, I advertise a load balancer using `externalIPs` on my Kubernetes services. This makes it so I do not need `Metallb`. Another benefit to this is that I can directly hit any pods IP directly from any device on my local network.~~
 
