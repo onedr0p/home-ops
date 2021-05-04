@@ -27,8 +27,6 @@ spec:
     service:
       loadBalancerIP: "${LB_COREDNS_IP}"
       externalTrafficPolicy: Local
-      # annotations:
-      #   metallb.universe.tf/allow-shared-ip: coredns
     servers:
     - zones:
       - zone: ${SECRET_DOMAIN}
@@ -36,7 +34,7 @@ spec:
       port: 53
       plugins:
       # Enables console logging
-      # - name: log
+      - name: log
       - name: errors
       # Serves a /health endpoint on :8080, required for livenessProbe
       - name: health
