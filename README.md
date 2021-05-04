@@ -75,15 +75,18 @@ The Git repository contains the following directories under `cluster` and are or
 
 ## :spider_web:&nbsp; Networking
 
-In my network Calico is configured with BGP on my [Opnsense](https://opnsense.org/) router. With BGP enabled, I advertise a load balancer using `externalIPs` on my Kubernetes services. This makes it so I do not need `Metallb`. Another benefit to this is that I can directly hit any pods IP directly from any device on my local network.
+Currently when using BGP on Opnsense services do not get properly load balanced. Due to Opnsense not supporting multipath in the BSD kernel I have revert back to using MetalLB. I will investigate using BGP again when Opnsense udpates to FreeBSD 13.
 
-| Name                        | CIDR              |
-|-----------------------------|-------------------|
-| Management                  | `192.168.1.0/24`  |
-| Servers                     | `192.168.42.0/24` |
-| k8s external services (BGP) | `192.168.69.0/24` |
-| k8s pods                    | `10.69.0.0/16`    |
-| k8s services                | `10.96.0.0/16`    |
+~~In my network Calico is configured with BGP on my [Opnsense](https://opnsense.org/) router. With BGP enabled, I advertise a load balancer using `externalIPs` on my Kubernetes services. This makes it so I do not need `Metallb`. Another benefit to this is that I can directly hit any pods IP directly from any device on my local network.~~
+
+| Name                            | CIDR                                |
+|---------------------------------|-------------------------------------|
+| Management                      | `192.168.1.0/24`                    |
+| Servers                         | `192.168.42.0/24`                   |
+| MetalLB ARP Range               | `192.168.42.100` - `192.168.42.120` |
+| ~~k8s external services (BGP)~~ | ~~`192.168.69.0/24`~~               |
+| k8s pods                        | `10.69.0.0/16`                      |
+| k8s services                    | `10.96.0.0/16`                      |
 
 ## :man_shrugging:&nbsp; DNS
 
