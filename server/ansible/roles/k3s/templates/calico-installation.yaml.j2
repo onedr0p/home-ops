@@ -10,10 +10,11 @@ spec:
     ipPools:
     - blockSize: 26
       cidr: "{{ k3s_server["cluster-cidr"] }}"
-      {% if calico.bgp.enabled is defined and calico.bgp.enabled %}
+      # {% if calico.bgp.enabled is defined and calico.bgp.enabled %}
+      # encapsulation: None
+      # {% else %}
+      # encapsulation: VXLANCrossSubnet
+      # {% endif %}
       encapsulation: None
-      {% else %}
-      encapsulation: VXLANCrossSubnet
-      {% endif %}
       natOutgoing: Enabled
       nodeSelector: all()
