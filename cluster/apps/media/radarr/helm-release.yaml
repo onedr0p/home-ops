@@ -62,6 +62,8 @@ spec:
       mountPath: "/media-rocinante"
     - name: media-serenity
       mountPath: "/media-serenity"
+    - name: incomplete
+      emptyDir: {}
     additionalVolumes:
     - name: media-rocinante
       persistentVolumeClaim:
@@ -69,6 +71,10 @@ spec:
     - name: media-serenity
       persistentVolumeClaim:
         claimName: nfs-media-serenity-pvc
+    - name: incomplete
+      hostPath:
+        path: /mnt/incomplete
+        type: Directory
     resources:
       requests:
         memory: 250Mi
