@@ -53,9 +53,13 @@ spec:
     - name: usb
       hostPath:
         path: /dev/serial/by-id/usb-0658_0200-if00
+        type: CharDevice
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
           - matchExpressions:
-            - {key: "feature.node.kubernetes.io/custom-zwave", operator: In, values: ["true"]}
+            - key: feature.node.kubernetes.io/custom-zwave
+              operator: In
+              values:
+              - "true"
