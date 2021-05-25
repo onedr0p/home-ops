@@ -20,7 +20,7 @@ spec:
         - name: vip_arp
           value: "true"
         - name: vip_interface
-          value: "${KUBE_VIP_INTERFACE}"
+          value: "eno1"
         - name: port
           value: "6443"
         - name: vip_cidr
@@ -32,11 +32,10 @@ spec:
         - name: svc_enable
           value: "false"
         - name: vip_address
-          value: "${KUBE_VIP_ADDRESS}"
+          value: "192.168.42.5"
         image: plndr/kube-vip:0.3.4
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         name: kube-vip
-        resources: {}
         securityContext:
           capabilities:
             add:
@@ -50,9 +49,3 @@ spec:
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
-  updateStrategy: {}
-status:
-  currentNumberScheduled: 0
-  desiredNumberScheduled: 0
-  numberMisscheduled: 0
-  numberReady: 0
