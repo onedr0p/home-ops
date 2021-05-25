@@ -1,0 +1,18 @@
+---
+
+- name: kube-vip | deploy kube-vip RBAC manifest to k3s manifest directory
+  run_once: true
+  ansible.builtin.template:
+    src: "kube-vip-rbac.yaml.j2"
+    dest: "{{ k3s_server_manifests_dir }}/kube-vip-rbac.yaml"
+    mode: 0644
+  when:
+  - kube_vip.rbac.enabled is defined
+  - kube_vip.rbac.enabled
+
+- name: kube-vip | deploy kube-vip to k3s manifest directory
+  run_once: true
+  ansible.builtin.template:
+    src: "kube-vip.yaml.j2"
+    dest: "{{ k3s_server_manifests_dir }}/kube-vip.yaml"
+    mode: 0644
