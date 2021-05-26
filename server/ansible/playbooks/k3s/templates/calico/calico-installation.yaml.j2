@@ -1,4 +1,3 @@
-#jinja2:lstrip_blocks: True
 ---
 apiVersion: operator.tigera.io/v1
 kind: Installation
@@ -9,11 +8,7 @@ spec:
     # Note: The ipPools section cannot be modified post-install.
     ipPools:
     - blockSize: 26
-      cidr: "{{ k3s_server["cluster-cidr"] }}"
-      {% if calico.bgp.enabled is defined and calico.bgp.enabled %}
-      encapsulation: None
-      {% else %}
-      encapsulation: VXLANCrossSubnet
-      {% endif %}
+      cidr: "{{ k3s_server['cluster-cidr'] }}"
+      encapsulation: "{{ calico_encapsulation }}"
       natOutgoing: Enabled
       nodeSelector: all()
