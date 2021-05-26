@@ -16,17 +16,17 @@
       state: absent
       path: "/var/lib/rook"
     when:
-    - rook_ceph.enabled is defined
-    - rook_ceph.enabled
+    - rook.enabled is defined
+    - rook.enabled
   - name: zap the drives
     become: true
     ansible.builtin.shell: >
       sgdisk --zap-all {{ item }} || true
     loop:
-    - "{{ rook_ceph.devices }}"
+    - "{{ rook.devices }}"
     when:
-    - rook_ceph.enabled is defined
-    - rook_ceph.enabled
+    - rook.enabled is defined
+    - rook.enabled
   - name: remove lvm partitions
     become: true
     ansible.builtin.shell: "{{ item }}"
@@ -36,13 +36,13 @@
     - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup remove -f %
     - ls /dev/mapper/ceph--* | xargs -I% -- rm -rf %
     when:
-    - rook_ceph.enabled is defined
-    - rook_ceph.enabled
+    - rook.enabled is defined
+    - rook.enabled
   - name: wipe the block device
     become: true
     ansible.builtin.command: "wipefs -af {{ item }}"
     with_items:
-    - "{{ rook_ceph.devices }}"
+    - "{{ rook.devices }}"
     when:
-    - rook_ceph.enabled is defined
-    - rook_ceph.enabled
+    - rook.enabled is defined
+    - rook.enabled

@@ -1,11 +1,11 @@
 ---
 
-- name: boot | grub | check for existence of grub
+- name: Check for existence of grub
   ansible.builtin.stat:
     path: /etc/default/grub
   register: grub_result
 
-- name: boot | grub | set apparmor=0
+- name: Disable apparmor
   ansible.builtin.replace:
     path: /etc/default/grub
     regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
@@ -16,7 +16,7 @@
   when:
   - grub_result.stat.exists
 
-- name: boot | grub | set mitigations=off
+- name: Disable mitigations
   ansible.builtin.replace:
     path: /etc/default/grub
     regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
@@ -27,7 +27,7 @@
   when:
   - grub_result.stat.exists
 
-- name: boot | grub | set pti=off
+- name: Disable pti
   ansible.builtin.replace:
     path: /etc/default/grub
     regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
@@ -38,7 +38,7 @@
   when:
   - grub_result.stat.exists
 
-- name: boot | grub | run grub-mkconfig
+- name: Reconfigure grub
   ansible.builtin.command: grub-mkconfig -o /boot/grub/grub.cfg
   when:
   - grub_result.stat.exists

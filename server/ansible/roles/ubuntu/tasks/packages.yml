@@ -1,6 +1,6 @@
 ---
 
-- name: packages | disable recommends
+- name: Disable APT recommends
   ansible.builtin.blockinfile:
     path: /etc/apt/apt.conf.d/02norecommends
     mode: 0644
@@ -11,7 +11,7 @@
       APT::Get::Install-Recommends "false";
       APT::Get::Install-Suggests "false";
 
-- name: packages | upgrade all packages
+- name: Upgrade all system packages
   ansible.builtin.apt:
     upgrade: full
     update_cache: true
@@ -22,7 +22,7 @@
   retries: 5
   until: apt_upgrade is success
 
-- name: packages | install common
+- name: Install common packages
   ansible.builtin.apt:
     name: "{{ packages.apt_install }}"
     install_recommends: false
@@ -38,21 +38,21 @@
   - packages.apt_install is iterable
   - packages.apt_install | length > 0
 
-- name: packages | remove crufty packages
+- name: Remove crufty packages
   block:
-  - name: packages | remove crufty packages | gather install packages
+  - name: Gather install packages
     ansible.builtin.package_facts:
       manager: auto
     when:
     - "'snapd' in packages.apt_remove"
-  - name: packages | remove crufty packages | check if snap is installed
+  - name: Check if snap is installed
     ansible.builtin.debug:
       msg: "snapd is installed"
     register: snapd_check
     when:
     - "'snapd' in packages.apt_remove"
     - "'snapd' in ansible_facts.packages"
-  - name: packages | remove crufty packages | remove snap packages
+  - name: Remove snap packages
     ansible.builtin.command: snap remove {{ item }}
     loop:
     - lxd
@@ -62,12 +62,12 @@
     - "'snapd' in packages.apt_remove"
     - "'snapd' in ansible_facts.packages"
     - snapd_check.failed is defined
-  - name: packages | remove crufty packages | remove packages
+  - name: Remove packages
     ansible.builtin.apt:
       name: "{{ packages.apt_remove }}"
       state: absent
       autoremove: true
-  - name: packages | remove crufty packages | remove crufty files
+  - name: Remove files from uninstalled packages
     ansible.builtin.file:
       state: absent
       path: "{{ item }}"

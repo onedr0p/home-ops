@@ -1,11 +1,11 @@
 ---
 
-- name: network | check for bridge-nf-call-iptables
+- name: Check for bridge-nf-call-iptables
   ansible.builtin.stat:
     path: /proc/sys/net/bridge/bridge-nf-call-iptables
   register: bridge_nf_call_iptables_result
 
-- name: network | sysctl | set config
+- name: Set kubernetes network configuration
   ansible.builtin.blockinfile:
     path: /etc/sysctl.d/99-kubernetes-cri.conf
     mode: 0644
@@ -17,7 +17,7 @@
   - bridge_nf_call_iptables_result.stat.exists
   register: sysctl_network
 
-- name: network | sysctl | reload
+- name: Reload kubernetes network configuration
   ansible.builtin.shell: sysctl -p /etc/sysctl.d/99-kubernetes-cri.conf
   when:
   - sysctl_network.changed

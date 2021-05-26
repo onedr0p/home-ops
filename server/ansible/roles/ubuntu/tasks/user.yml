@@ -1,12 +1,12 @@
 ---
 
-- name: user | add to sudoers
+- name: Add user to sudoers
   ansible.builtin.copy:
     content: "{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
     dest: "/etc/sudoers.d/{{ ansible_user }}_nopasswd"
     mode: "0440"
 
-- name: user | add additional SSH public keys
+- name: Add additional user SSH public keys
   ansible.posix.authorized_key:
     user: "{{ ansible_user }}"
     key: "{{ item }}"
@@ -16,12 +16,12 @@
   - ssh_authorized_keys is iterable
   - ssh_authorized_keys | length > 0
 
-- name: user | check if hushlogin exists
+- name: Check if hushlogin exists
   ansible.builtin.stat:
     path: "/home/{{ ansible_user }}/.hushlogin"
   register: hushlogin_result
 
-- name: user | silence the login prompt
+- name: Silence the login prompt
   ansible.builtin.file:
     dest: "/home/{{ ansible_user }}/.hushlogin"
     state: touch
