@@ -2,16 +2,16 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: kube-vip-ds
+  name: kube-vip
   namespace: kube-system
 spec:
   selector:
     matchLabels:
-      name: kube-vip-ds
+      name: kube-vip
   template:
     metadata:
       labels:
-        name: kube-vip-ds
+        name: kube-vip
     spec:
       containers:
       - args:
@@ -20,7 +20,7 @@ spec:
         - name: vip_arp
           value: "true"
         - name: vip_interface
-          value: {{ kube_vip.listen_interface }}
+          value: {{ kube_vip.interface }}
         - name: port
           value: "6443"
         - name: vip_cidr
@@ -34,9 +34,8 @@ spec:
         - name: vip_address
           value: {{ k3s_registration_address }}
         image: plndr/kube-vip:0.3.4
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         name: kube-vip
-        resources: {}
         securityContext:
           capabilities:
             add:
@@ -50,9 +49,3 @@ spec:
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
-  updateStrategy: {}
-status:
-  currentNumberScheduled: 0
-  desiredNumberScheduled: 0
-  numberMisscheduled: 0
-  numberReady: 0

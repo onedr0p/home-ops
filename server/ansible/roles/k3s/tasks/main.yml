@@ -4,12 +4,14 @@
   tags:
   - kubeconfig
 
-- include: registry.yml
-  when: mirror_registry is defined
-        or (private_registries is defined
-          and private_registries|length > 0)
+- include: kube-vip.yml
+  when:
+  - k3s_control_node is defined
+  - k3s_control_node
+  - kube_vip.enabled is defined
+  - kube_vip.enabled
   tags:
-  - registry
+  - kube-vip
 
 - include: calico.yml
   when:
@@ -20,20 +22,11 @@
   tags:
   - calico
 
-- include: kube-vip.yml
-  when:
-  - k3s_control_node is defined
-  - k3s_control_node
-  - kube_vip.enabled is defined
-  - kube_vip.enabled
-  tags:
-  - kube-vip
-
-- include: secrets.yml
+- include: etcd-secret.yml
   when:
   - k3s_control_node is defined
   - k3s_control_node
   - k3s_etcd_datastore is defined
   - k3s_etcd_datastore
   tags:
-  - secrets
+  - etcd-secret

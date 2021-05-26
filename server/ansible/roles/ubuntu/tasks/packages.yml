@@ -21,8 +21,6 @@
   register: apt_upgrade
   retries: 5
   until: apt_upgrade is success
-  when:
-  - (skip_upgrade_packages is not defined or (skip_upgrade_packages is defined and not skip_upgrade_packages))
 
 - name: packages | install common
   ansible.builtin.apt:
@@ -55,7 +53,6 @@
     - "'snapd' in packages.apt_remove"
     - "'snapd' in ansible_facts.packages"
   - name: packages | remove crufty packages | remove snap packages
-
     ansible.builtin.command: snap remove {{ item }}
     loop:
     - lxd
@@ -66,13 +63,11 @@
     - "'snapd' in ansible_facts.packages"
     - snapd_check.failed is defined
   - name: packages | remove crufty packages | remove packages
-
     ansible.builtin.apt:
       name: "{{ packages.apt_remove }}"
       state: absent
       autoremove: true
   - name: packages | remove crufty packages | remove crufty files
-
     ansible.builtin.file:
       state: absent
       path: "{{ item }}"
@@ -92,4 +87,3 @@
   - packages.apt_remove is defined
   - packages.apt_remove is iterable
   - packages.apt_remove | length > 0
-  - (skip_remove_packages is not defined or (skip_remove_packages is defined and not skip_remove_packages))
