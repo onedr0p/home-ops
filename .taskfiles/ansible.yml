@@ -7,33 +7,39 @@ env:
 vars:
   ANSIBLE_PLAYBOOK_DIR: "{{.ANSIBLE_DIR}}/playbooks"
   ANSIBLE_INVENTORY_DIR: "{{.ANSIBLE_DIR}}/inventory"
-  ANSIBLE_GROUPS: "master-nodes:worker-nodes"
+  ANSIBLE_MASTER_GROUP: "master-nodes"
+  ANSIBLE_WORKER_GROUP: "worker-nodes"
 
 tasks:
 
   list:
     desc: List all the k8s nodes
     cmds:
-    - "ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --list-hosts"
+    - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --list-hosts"
     silent: true
 
   ping:
     desc: Ping all the k8s nodes
     cmds:
-    - "ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -m 'ping'"
+    - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -m 'ping'"
     silent: true
 
   uptime:
     desc: Uptime of all the k8s nodes
     cmds:
-    - "ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -a 'uptime -p'"
+    - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -a 'uptime -p'"
     silent: true
 
   clean-images:
     desc: Clean up stale container images
     cmds:
-    - "ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -a 'k3s crictl rmi --prune' --become"
+    - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -a 'k3s crictl rmi --prune' --become"
     silent: true
+
+  purge-manifests:
+    desc: Delete all manifests under /var/lib/rancher/k3s/server/manifests
+    cmds:
+    - "ansible {{.ANSIBLE_MASTER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -a 'rm /var/lib/rancher/k3s/server/manifests/*' --become"
 
   playbook:ubuntu-prepare:
     desc: Prepare all the k8s nodes for running k3s
@@ -50,7 +56,7 @@ tasks:
   playbook:ubuntu-reboot:
     desc: Reboot all the k8s nodes
     cmds:
-    - "ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml -m reboot"
+    - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml -m reboot"
     silent: true
 
   playbook:k3s-install:
