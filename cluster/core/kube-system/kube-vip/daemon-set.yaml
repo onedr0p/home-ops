@@ -2,19 +2,22 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: kube-vip-ds
+  name: kube-vip
   namespace: kube-system
 spec:
   selector:
     matchLabels:
-      name: kube-vip-ds
+      name: kube-vip
   template:
     metadata:
       labels:
-        name: kube-vip-ds
+        name: kube-vip
     spec:
       containers:
-      - args:
+      - name: kube-vip
+        image: plndr/kube-vip:0.3.4
+        imagePullPolicy: IfNotPresent
+        args:
         - manager
         env:
         - name: vip_arp
@@ -33,9 +36,6 @@ spec:
           value: "false"
         - name: vip_address
           value: "192.168.42.5"
-        image: plndr/kube-vip:0.3.4
-        imagePullPolicy: IfNotPresent
-        name: kube-vip
         securityContext:
           capabilities:
             add:

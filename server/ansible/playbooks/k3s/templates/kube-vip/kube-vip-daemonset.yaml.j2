@@ -14,7 +14,10 @@ spec:
         name: kube-vip
     spec:
       containers:
-      - args:
+      - name: kube-vip
+        image: plndr/kube-vip:0.3.4
+        imagePullPolicy: IfNotPresent
+        args:
         - manager
         env:
         - name: vip_arp
@@ -33,9 +36,6 @@ spec:
           value: "false"
         - name: vip_address
           value: "{{ k3s_registration_address }}"
-        image: plndr/kube-vip:0.3.4
-        imagePullPolicy: IfNotPresent
-        name: kube-vip
         securityContext:
           capabilities:
             add:
