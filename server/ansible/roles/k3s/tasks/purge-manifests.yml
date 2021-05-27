@@ -1,0 +1,13 @@
+---
+
+- name: Gather list of manifests to delete
+  ansible.builtin.find:
+    paths: "{{ k3s_server_manifests_dir }}"
+    patterns: "*.yaml"
+  register: manifests
+
+- name: delete CNI files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ manifests.files }}"
