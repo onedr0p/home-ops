@@ -11,22 +11,22 @@
     pause:
       seconds: 5
   tasks:
-  - name: kill k3s
+  - name: Kill k3s
     ansible.builtin.command: /usr/local/bin/k3s-killall.sh
-  - name: uninstall k3s
+  - name: Uninstall k3s
     ansible.builtin.command:
       cmd: /usr/local/bin/k3s-uninstall.sh
       removes: /usr/local/bin/k3s-uninstall.sh
-  - name: uninstall k3s agent
+  - name: Uninstall k3s agent
     ansible.builtin.command:
       cmd: /usr/local/bin/k3s-agent-uninstall.sh
       removes: /usr/local/bin/k3s-agent-uninstall.sh
-  - name: gather list of CNI files to delete
+  - name: Gather list of CNI files to delete
     find:
       paths: /etc/cni/net.d
       patterns: "*"
     register: files_to_delete
-  - name: delete CNI files
+  - name: Delete CNI files
     ansible.builtin.file:
       path: "{{ item.path }}"
       state: absent
