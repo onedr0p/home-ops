@@ -75,18 +75,17 @@ The Git repository contains the following directories under `cluster` and are or
 
 ## :spider_web:&nbsp; Networking
 
-_Currently when using BGP on Opnsense services do not get properly load balanced, this is due to Opnsense not supporting multipath in the BSD kernel._
+_Currently when using BGP on Opnsense, services do not get properly load balanced. This is due to Opnsense not supporting multipath in the BSD kernel._
 
 In my network Calico is configured with BGP on my [Opnsense](https://opnsense.org/) router. With BGP enabled, I advertise a load balancer using `externalIPs` on my Kubernetes services.
 
-| Name                            | CIDR                                |
-|---------------------------------|-------------------------------------|
-| Management                      | `192.168.1.0/24`                    |
-| Servers                         | `192.168.42.0/24`                   |
-| MetalLB ARP Range               | `192.168.42.100` - `192.168.42.120` |
-| ~~k8s external services (BGP)~~ | ~~`192.168.69.0/24`~~               |
-| k8s pods                        | `10.69.0.0/16`                      |
-| k8s services                    | `10.96.0.0/16`                      |
+| Name                        | CIDR              |
+|-----------------------------|-------------------|
+| Management                  | `192.168.1.0/24`  |
+| Servers                     | `192.168.42.0/24` |
+| k8s external services (BGP) | `192.168.69.0/24` |
+| k8s pods                    | `10.69.0.0/16`    |
+| k8s services                | `10.96.0.0/16`    |
 
 ## :man_shrugging:&nbsp; DNS
 
