@@ -30,7 +30,8 @@ spec:
       - enabled: true
         nameSuffix: dns
         type: LoadBalancer
-        loadBalancerIP: "${LB_BLOCKY_IP}"
+        externalIPs:
+        - "${SVC_BLOCKY_ADDRESS}"
         port:
           port: 53
           name: dns-tcp
@@ -49,7 +50,7 @@ spec:
         - tcp-tls:${SECRET_NEXTDNS_ID}.dns2.nextdns.io:853
       conditional:
         mapping:
-          ${SECRET_DOMAIN}: udp:${LB_COREDNS_IP}
+          ${SECRET_DOMAIN}: udp:${SVC_COREDNS_ADDRESS}
       blocking:
         blackLists:
           ads:
@@ -62,7 +63,7 @@ spec:
           default:
           - ads
       clientLookup:
-        upstream: udp:${GATEWAY_IP}
+        upstream: udp:${GATEWAY_ADDRESS}
       prometheus:
         enable: true
         path: /metrics
