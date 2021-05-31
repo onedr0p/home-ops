@@ -6,9 +6,6 @@ vars:
     sh: "git rev-parse --show-toplevel"
   CLUSTER_DIR: "{{.PROJECT_DIR}}/cluster"
   ANSIBLE_DIR: "{{.PROJECT_DIR}}/server/ansible"
-  K3S_PRIMARY_MASTER_NODE_USERNAME: "ubuntu"
-  K3S_PRIMARY_MASTER_NODE_ADDRESS: "192.168.42.10"
-  K3S_KUBEVIP_ADDRESS: "192.168.42.5"
 
 env:
   KUBECONFIG: "{{.PROJECT_DIR}}/kubeconfig"
@@ -16,14 +13,5 @@ env:
 includes:
   ansible: .taskfiles/ansible.yml
   blocky: .taskfiles/blocky.yml
+  cluster: .taskfiles/cluster.yml
   flux: .taskfiles/flux.yml
-
-tasks:
-
-  kubeconfig:
-    desc: Remotely fetch kubeconfig from k3s
-    cmds:
-    - rsync --verbose --progress --partial --rsync-path="sudo rsync" {{.K3S_PRIMARY_MASTER_NODE_USERNAME}}@{{.K3S_PRIMARY_MASTER_NODE_ADDRESS}}:/etc/rancher/k3s/k3s.yaml ./kubeconfig
-    - sed -i '' 's/127.0.0.1/{{.K3S_KUBEVIP_ADDRESS}}/g' ./kubeconfig
-    - chmod go-r kubeconfig
-    silent: true
