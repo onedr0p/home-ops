@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: kube-vip
-        image: plndr/kube-vip:0.3.4
+        image: ghcr.io/kube-vip/kube-vip:v0.3.5
         imagePullPolicy: IfNotPresent
         args:
         - manager
@@ -34,6 +34,14 @@ spec:
           value: kube-system
         - name: svc_enable
           value: "false"
+        - name: vip_leaderelection
+          value: "true"
+        - name: vip_leaseduration
+          value: "5"
+        - name: vip_renewdeadline
+          value: "3"
+        - name: vip_retryperiod
+          value: "1"
         - name: vip_address
           value: "192.168.42.5"
         securityContext:
