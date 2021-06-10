@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: zigbee2mqtt
-      version: 7.4.0
+      version: 8.0.1
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -23,6 +23,25 @@ spec:
     env:
       TZ: America/New_York
       ZIGBEE2MQTT_DATA: /data
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
+        - host: "zigbee2mqtt.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "zigbee2mqtt.${SECRET_DOMAIN}"
+    persistence:
+      config:
+        enabled: true
+        existingClaim: zigbee2mqtt-config-v1
+        mountPath: "/data"
     config:
       homeassistant: true
       device_options:
@@ -59,21 +78,3 @@ spec:
         port: 8080
       experimental:
         new_api: true
-    ingress:
-      enabled: true
-      ingressClassName: "traefik"
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-      hosts:
-      - host: "zigbee2mqtt.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "zigbee2mqtt.${SECRET_DOMAIN}"
-    persistence:
-      config:
-        enabled: true
-        existingClaim: zigbee2mqtt-config-v1
-        mountPath: "/data"
