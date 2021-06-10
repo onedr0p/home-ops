@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: plex
-      version: 4.4.0
+      version: 5.0.1
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -28,49 +28,51 @@ spec:
       - 109
       - 100
     service:
-      enabled: true
-      type: LoadBalancer
-      externalIPs:
-      - "${SVC_PLEX_ADDRESS}"
-      externalTrafficPolicy: Local
-      annotations:
-        traefik.ingress.kubernetes.io/service.serversscheme: https
+      main:
+        type: LoadBalancer
+        externalIPs:
+        - "${SVC_PLEX_ADDRESS}"
+        externalTrafficPolicy: Local
+        annotations:
+          traefik.ingress.kubernetes.io/service.serversscheme: https
     ingress:
-      enabled: true
-      ingressClassName: "traefik"
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        external-dns/is-public: "true"
-        external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
-      hosts:
-      - host: "plex.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "plex.${SECRET_DOMAIN}"
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          external-dns/is-public: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+        hosts:
+        - host: "plex.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "plex.${SECRET_DOMAIN}"
     persistence:
       config:
         enabled: true
         existingClaim: plex-config-v1
       tmp:
         enabled: true
-        emptyDir:
-          enabled: true
-          medium: "Memory"
-    additionalVolumeMounts:
-    - name: media-rocinante
-      mountPath: "/media-rocinante"
-      readOnly: true
-    additionalVolumes:
-    - name: media-rocinante
-      persistentVolumeClaim:
-        claimName: nfs-media-rocinante-pvc
+        type: emptyDir
+        medium: Memory
+      media-rocinante:
+        enabled: true
+        existingClaim: nfs-media-rocinante-pvc
+        mountPath: /media-rocinante
+        readOnly: true
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
+          - matchExpressions:
+            - key: feature.node.kubernetes.io/custom-intel-gpu
+              operator: In
+              values:
+              - "true"
           - matchExpressions:
             - key: kubernetes.io/hostname
               operator: In
@@ -85,23 +87,23 @@ spec:
       limits:
         gpu.intel.com/i915: 1
         memory: 24000Mi
-    podAnnotations:
-      configmap.reloader.stakater.com/reload: "plex-promtail"
-    addons:
-      promtail:
-        enabled: true
-        image:
-          repository: grafana/promtail
-          tag: 2.2.1
-        loki: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
-        logs:
-        - name: promtail/plex
-          path: "/config/Library/Application Support/Plex Media Server/Logs/*.log"
-        - name: promtail/plex/plugins
-          path: "/config/Library/Application Support/Plex Media Server/Logs/PMS Plugin Logs/*.log"
-        volumeMounts:
-        - name: config
-          mountPath: /config
-          readOnly: true
-        securityContext:
-          runAsUser: 0
+    # podAnnotations:
+    #   configmap.reloader.stakater.com/reload: "plex-promtail"
+    # addons:
+    #   promtail:
+    #     enabled: true
+    #     image:
+    #       repository: grafana/promtail
+    #       tag: 2.2.1
+    #     loki: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+    #     logs:
+    #     - name: promtail/plex
+    #       path: "/config/Library/Application Support/Plex Media Server/Logs/*.log"
+    #     - name: promtail/plex/plugins
+    #       path: "/config/Library/Application Support/Plex Media Server/Logs/PMS Plugin Logs/*.log"
+    #     volumeMounts:
+    #     - name: config
+    #       mountPath: /config
+    #       readOnly: true
+    #     securityContext:
+    #       runAsUser: 0
