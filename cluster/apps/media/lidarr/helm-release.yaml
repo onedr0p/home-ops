@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: lidarr
-      version: 9.1.0
+      version: 10.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -23,22 +23,21 @@ spec:
     env:
       TZ: "America/New_York"
     ingress:
-      enabled: true
-      ingressClassName: "traefik"
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        traefik.ingress.kubernetes.io/router.middlewares: "networking-basic-auth@kubernetescrd"
-      hosts:
-      - host: "lidarr.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "lidarr.${SECRET_DOMAIN}"
-      additionalIngresses:
-      - enabled: true
-        nameSuffix: "api"
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.middlewares: "networking-basic-auth@kubernetescrd"
+        hosts:
+        - host: "lidarr.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "lidarr.${SECRET_DOMAIN}"
+      api:
         ingressClassName: "traefik"
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
@@ -50,20 +49,17 @@ spec:
         tls:
         - hosts:
           - "lidarr.${SECRET_DOMAIN}"
+    podSecurityContext:
+      supplementalGroups:
+      - 100
     persistence:
       config:
         enabled: true
         existingClaim: lidarr-config-v1
-    podSecurityContext:
-      supplementalGroups:
-      - 100
-    additionalVolumeMounts:
-    - name: media-rocinante
-      mountPath: "/media-rocinante"
-    additionalVolumes:
-    - name: media-rocinante
-      persistentVolumeClaim:
-        claimName: nfs-media-rocinante-pvc
+      media-rocinante:
+        enabled: true
+        existingClaim: nfs-media-rocinante-pvc
+        mountPath: /media-rocinante
     resources:
       requests:
         memory: 250Mi
@@ -73,8 +69,8 @@ spec:
     prometheus:
       podMonitor:
         enabled: true
-        interval: 3m
-        scrapeTimeout: 1m30s
+        interval: 10m
+        scrapeTimeout: 2m
     additionalContainers:
     - name: exportarr
       image: ghcr.io/onedr0p/exportarr:v0.6.0
