@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: radarr
-      version: 11.1.0
+      version: 12.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -23,22 +23,22 @@ spec:
     env:
       TZ: "America/New_York"
     ingress:
-      enabled: true
-      ingressClassName: "traefik"
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        traefik.ingress.kubernetes.io/router.middlewares: "networking-basic-auth@kubernetescrd"
-      hosts:
-      - host: "radarr.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "radarr.${SECRET_DOMAIN}"
-      additionalIngresses:
-      - enabled: true
-        nameSuffix: "api"
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.middlewares: "networking-basic-auth@kubernetescrd"
+        hosts:
+        - host: "radarr.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "radarr.${SECRET_DOMAIN}"
+      api:
+        enabled: true
         ingressClassName: "traefik"
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
@@ -50,51 +50,48 @@ spec:
         tls:
         - hosts:
           - "radarr.${SECRET_DOMAIN}"
+    podSecurityContext:
+      supplementalGroups:
+      - 100
     persistence:
       config:
         enabled: true
         existingClaim: radarr-config-v1
-    podSecurityContext:
-      supplementalGroups:
-      - 100
-    additionalVolumeMounts:
-    - name: media-rocinante
-      mountPath: "/media-rocinante"
-    additionalVolumes:
-    - name: media-rocinante
-      persistentVolumeClaim:
-        claimName: nfs-media-rocinante-pvc
+      media-rocinante:
+        enabled: true
+        existingClaim: nfs-media-rocinante-pvc
+        mountPath: /media-rocinante
     resources:
       requests:
         memory: 250Mi
         cpu: 500m
       limits:
         memory: 1500Mi
-    # prometheus:
-    #   podMonitor:
-    #     enabled: true
-    #     interval: 3m
-    #     scrapeTimeout: 1m30s
-    # additionalContainers:
-    # - name: exportarr
-    #   image: ghcr.io/onedr0p/exportarr:v0.6.0
-    #   imagePullPolicy: IfNotPresent
-    #   args: ["exportarr", "radarr"]
-    #   env:
-    #   - name: PORT
-    #     value: "32123"
-    #   - name: URL
-    #     value: "http://localhost"
-    #   - name: CONFIG
-    #     value: "/config/config.xml"
-    #   - name: ENABLE_UNKNOWN_QUEUE_ITEMS
-    #     value: "true"
-    #   - name: ENABLE_ADDITIONAL_METRICS
-    #     value: "true"
-    #   ports:
-    #   - name: exportarr
-    #     containerPort: 32123
-    #   volumeMounts:
-    #   - name: config
-    #     mountPath: /config
-    #     readOnly: true
+    prometheus:
+      podMonitor:
+        enabled: true
+        interval: 10m
+        scrapeTimeout: 2s
+    additionalContainers:
+    - name: exportarr
+      image: ghcr.io/onedr0p/exportarr:v0.6.0
+      imagePullPolicy: IfNotPresent
+      args: ["exportarr", "radarr"]
+      env:
+      - name: PORT
+        value: "32123"
+      - name: URL
+        value: "http://localhost"
+      - name: CONFIG
+        value: "/config/config.xml"
+      - name: ENABLE_UNKNOWN_QUEUE_ITEMS
+        value: "true"
+      - name: ENABLE_ADDITIONAL_METRICS
+        value: "true"
+      ports:
+      - name: exportarr
+        containerPort: 32123
+      volumeMounts:
+      - name: config
+        mountPath: /config
+        readOnly: true
