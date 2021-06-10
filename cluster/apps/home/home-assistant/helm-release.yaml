@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: home-assistant
-      version: 8.3.1
+      version: 9.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -28,28 +28,27 @@ spec:
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
     service:
-      type: LoadBalancer
-      externalIPs:
-      - "${SVC_HOME_ASSISTANT_ADDRESS}"
-      externalTrafficPolicy: Local
+      main:
+        type: LoadBalancer
+        externalIPs:
+        - "${SVC_HOME_ASSISTANT_ADDRESS}"
+        externalTrafficPolicy: Local
     ingress:
-      enabled: true
-      ingressClassName: "traefik"
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        external-dns/is-public: "true"
-        external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
-      hosts:
-      - host: "hass.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "hass.${SECRET_DOMAIN}"
-    prometheus:
-      serviceMonitor:
-        enabled: false
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          external-dns/is-public: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+        hosts:
+        - host: "hass.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "hass.${SECRET_DOMAIN}"
     probes:
       liveness:
         enabled: false
