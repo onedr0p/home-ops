@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: qbittorrent
-      version: 10.1.0
+      version: 11.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -23,47 +23,49 @@ spec:
     env:
       TZ: "America/New_York"
     service:
-      additionalServices:
-      - enabled: true
-        nameSuffix: bittorrent
+      main:
+        ports:
+          http:
+            port: 8080
+      bittorrent:
+        enabled: true
         type: LoadBalancer
         externalIPs:
         - "${SVC_QBITTORRENT_ADDRESS}"
-        port:
-          port: 50413
-          name: bittorrent
-          protocol: TCP
-          targetPort: 50413
+        ports:
+          bittorrent:
+            enabled: true
+            port: 50413
+            protocol: TCP
+            targetPort: 50413
         externalTrafficPolicy: Local
     ingress:
-      enabled: true
-      ingressClassName: "traefik"
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        external-dns/is-public: "true"
-        external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
-      hosts:
-      - host: "qb.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "qb.${SECRET_DOMAIN}"
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          external-dns/is-public: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+        hosts:
+        - host: "qb.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "qb.${SECRET_DOMAIN}"
+    podSecurityContext:
+      supplementalGroups:
+      - 100
     persistence:
       config:
         enabled: true
         existingClaim: qbittorrent-config-v1
-    podSecurityContext:
-      supplementalGroups:
-      - 100
-    additionalVolumeMounts:
-    - name: media-rocinante
-      mountPath: "/media-rocinante"
-    additionalVolumes:
-    - name: media-rocinante
-      persistentVolumeClaim:
-        claimName: nfs-media-rocinante-pvc
+      media-rocinante:
+        enabled: true
+        existingClaim: nfs-media-rocinante-pvc
+        mountPath: /media-rocinante
     resources:
       requests:
         memory: 250Mi
