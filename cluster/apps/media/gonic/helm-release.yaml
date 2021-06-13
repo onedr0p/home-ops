@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: gonic
-      version: 4.4.0
+      version: 5.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -34,36 +34,34 @@ spec:
       GONIC_CACHE_PATH: "/data/cache"
       GONIC_SCAN_INTERVAL: "120"
     ingress:
-      enabled: true
-      ingressClassName: "traefik"
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        external-dns/is-public: "true"
-        external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
-      hosts:
-      - host: "music.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "music.${SECRET_DOMAIN}"
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          external-dns/is-public: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+        hosts:
+        - host: "music.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "music.${SECRET_DOMAIN}"
+    podSecurityContext:
+      supplementalGroups:
+      - 100
     persistence:
       config:
         enabled: true
         existingClaim: gonic-config-v1
         mountPath: "/data"
-    podSecurityContext:
-      supplementalGroups:
-      - 100
-    additionalVolumeMounts:
-    - name: media-rocinante
-      mountPath: "/media-rocinante"
-      readOnly: true
-    additionalVolumes:
-    - name: media-rocinante
-      persistentVolumeClaim:
-        claimName: nfs-media-rocinante-pvc
+      media-rocinante:
+        enabled: true
+        existingClaim: nfs-media-rocinante-pvc
+        mountPath: /media-rocinante
+        readOnly: true
     resources:
       requests:
         memory: 100Mi
