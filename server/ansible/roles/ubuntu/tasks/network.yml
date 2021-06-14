@@ -1,11 +1,17 @@
 ---
 
+- name: Set hostname to inventory hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  when:
+  - ansible_hostname != inventory_hostname
+
 - name: Check for bridge-nf-call-iptables
   ansible.builtin.stat:
     path: /proc/sys/net/bridge/bridge-nf-call-iptables
   register: bridge_nf_call_iptables_result
 
-- name: Set kubernetes network configuration
+- name: Set Kubernetes network configuration
   ansible.builtin.blockinfile:
     path: /etc/sysctl.d/99-kubernetes-cri.conf
     mode: 0644
@@ -17,7 +23,7 @@
   - bridge_nf_call_iptables_result.stat.exists
   register: sysctl_network
 
-- name: Reload kubernetes network configuration
+- name: Reload Kubernetes network configuration
   ansible.builtin.shell: sysctl -p /etc/sysctl.d/99-kubernetes-cri.conf
   when:
   - sysctl_network.changed
