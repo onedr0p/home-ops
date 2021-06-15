@@ -27,6 +27,8 @@ spec:
       - 44
       - 109
       - 100
+    hostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
     service:
       main:
         type: LoadBalancer
@@ -87,23 +89,23 @@ spec:
       limits:
         gpu.intel.com/i915: 1
         memory: 24000Mi
-    # podAnnotations:
-    #   configmap.reloader.stakater.com/reload: "plex-promtail"
-    # addons:
-    #   promtail:
-    #     enabled: true
-    #     image:
-    #       repository: grafana/promtail
-    #       tag: 2.2.1
-    #     loki: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
-    #     logs:
-    #     - name: promtail/plex
-    #       path: "/config/Library/Application Support/Plex Media Server/Logs/*.log"
-    #     - name: promtail/plex/plugins
-    #       path: "/config/Library/Application Support/Plex Media Server/Logs/PMS Plugin Logs/*.log"
-    #     volumeMounts:
-    #     - name: config
-    #       mountPath: /config
-    #       readOnly: true
-    #     securityContext:
-    #       runAsUser: 0
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "plex-promtail"
+    addons:
+      promtail:
+        enabled: true
+        image:
+          repository: grafana/promtail
+          tag: 2.2.1
+        loki: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+        logs:
+        - name: promtail/plex
+          path: "/config/Library/Application Support/Plex Media Server/Logs/*.log"
+        - name: promtail/plex/plugins
+          path: "/config/Library/Application Support/Plex Media Server/Logs/PMS Plugin Logs/*.log"
+        volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+        securityContext:
+          runAsUser: 0
