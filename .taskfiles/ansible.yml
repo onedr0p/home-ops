@@ -41,6 +41,18 @@ tasks:
     cmds:
     - "ansible {{.ANSIBLE_MASTER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -a 'rm /var/lib/rancher/k3s/server/manifests/*' --become"
 
+  reboot:
+    desc: Reboot all the k8s nodes
+    cmds:
+    - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml -m reboot"
+    silent: true
+
+  shutdown:
+    desc: Reboot all the k8s nodes
+    cmds:
+    - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml -m shutdown"
+    silent: true
+
   playbook:ubuntu-prepare:
     desc: Prepare all the k8s nodes for running k3s
     cmds:
@@ -51,12 +63,6 @@ tasks:
     desc: Upgrade all the k8s nodes operating system
     cmds:
     - "ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/ubuntu/upgrade.yml"
-    silent: true
-
-  playbook:ubuntu-reboot:
-    desc: Reboot all the k8s nodes
-    cmds:
-    - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml -m reboot"
     silent: true
 
   playbook:k3s-install:
