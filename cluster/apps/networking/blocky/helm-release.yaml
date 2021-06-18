@@ -28,7 +28,7 @@ spec:
         port: 4000
       additionalServices:
       - enabled: true
-        nameSuffix: dns
+        nameSuffix: dns-tcp
         type: LoadBalancer
         externalIPs:
         - "${SVC_BLOCKY_ADDRESS}"
@@ -37,8 +37,14 @@ spec:
           name: dns-tcp
           protocol: TCP
           targetPort: 53
-        additionalPorts:
-        - port: 53
+        externalTrafficPolicy: Local
+      - enabled: true
+        nameSuffix: dns-udp
+        type: LoadBalancer
+        externalIPs:
+        - "${SVC_BLOCKY_ADDRESS}"
+        port:
+          port: 53
           name: dns-udp
           protocol: UDP
           targetPort: 53
