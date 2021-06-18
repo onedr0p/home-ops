@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: intel/intel-gpu-plugin
-      tag: 0.20.0
+      tag: 0.21.0
       pullPolicy: IfNotPresent
     args:
     - -shared-dev-num
@@ -28,6 +28,11 @@ spec:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
+          - matchExpressions:
+            - key: node-role.kubernetes.io/worker
+              operator: Equals
+              values:
+              - "true"
           - matchExpressions:
             - key: feature.node.kubernetes.io/custom-intel-gpu
               operator: In
