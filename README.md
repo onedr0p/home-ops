@@ -3,7 +3,7 @@
 <img src="https://camo.githubusercontent.com/5b298bf6b0596795602bd771c5bddbb963e83e0f/68747470733a2f2f692e696d6775722e636f6d2f7031527a586a512e706e67" align="center" width="144px" height="144px"/>
 
 ### My home Kubernetes cluster :sailboat:
-_... managed by Flux and serviced with RenovateBot_ :robot:
+_... managed with Flux and Renovate_ :robot:
 
 </div>
 
@@ -105,10 +105,9 @@ On [Opnsense](https://opnsense.org/) under `Services: Unbound DNS: Overrides` I 
 | Device                  | Count | OS Disk Size | Data Disk Size       | Ram  | Purpose                       |
 |-------------------------|-------|--------------|----------------------|------|-------------------------------|
 | Intel NUC8i3BEK         | 3     | 256GB NVMe   | N/A                  | 16GB | k3s Masters (embedded etcd)   |
-| Intel NUC8i5BEH         | 3     | 120GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                   |
-| Intel NUC8i7BEH         | 2     | 750GB SSD    | 1TB NVMe (rook-ceph) | 64GB | k3s Workers                   |
-| Qnap NAS (rocinante)    | 1     | N/A          | 8x12TB RAID6         | 16GB | Media and shared file storage |
-| Synology NAS (serenity) | 1     | N/A          | 8x12TB RAID6         | 4GB  | Media and shared file storage |
+| Intel NUC8i5BEH         | 1     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                   |
+| Intel NUC8i7BEH         | 2     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                   |
+| Qnap NAS (rocinante)    | 1     | N/A          | 8x12TB RAID6         | 16GB | Shared file storage           |
 
 ---
 
