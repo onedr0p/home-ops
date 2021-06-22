@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: sabnzbd
-      version: 7.1.0
+      version: 8.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -23,22 +23,22 @@ spec:
     env:
       TZ: "America/New_York"
     ingress:
-      enabled: true
-      ingressClassName: "traefik"
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        traefik.ingress.kubernetes.io/router.middlewares: "networking-basic-auth@kubernetescrd"
-      hosts:
-      - host: "sabnzbd.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "sabnzbd.${SECRET_DOMAIN}"
-      additionalIngresses:
-      - enabled: true
-        nameSuffix: "api"
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.middlewares: "networking-basic-auth@kubernetescrd"
+        hosts:
+        - host: "sabnzbd.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "sabnzbd.${SECRET_DOMAIN}"
+      api:
+        enabled: true
         ingressClassName: "traefik"
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
@@ -50,20 +50,17 @@ spec:
         tls:
         - hosts:
           - "sabnzbd.${SECRET_DOMAIN}"
+    podSecurityContext:
+      supplementalGroups:
+      - 100
     persistence:
       config:
         enabled: true
         existingClaim: sabnzbd-config-v1
-    podSecurityContext:
-      supplementalGroups:
-      - 100
-    additionalVolumeMounts:
-    - name: media-rocinante
-      mountPath: "/media-rocinante"
-    additionalVolumes:
-    - name: media-rocinante
-      persistentVolumeClaim:
-        claimName: nfs-media-rocinante-pvc
+      media-rocinante:
+        enabled: true
+        existingClaim: nfs-media-rocinante-pvc
+        mountPath: /media-rocinante
     resources:
       requests:
         memory: 250Mi
