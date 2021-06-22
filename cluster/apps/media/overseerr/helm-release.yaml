@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: overseerr
-      version: 3.4.0
+      version: 4.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -24,20 +24,21 @@ spec:
       TZ: "America/New_York"
       LOG_LEVEL: "info"
     ingress:
-      enabled: true
-      ingressClassName: "traefik"
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        external-dns/is-public: "true"
-        external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
-      hosts:
-      - host: "requests.${SECRET_DOMAIN}"
-        paths:
-        - path: /
-          pathType: Prefix
-      tls:
-      - hosts:
-        - "requests.${SECRET_DOMAIN}"
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          external-dns/is-public: "true"
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+        hosts:
+        - host: "requests.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "requests.${SECRET_DOMAIN}"
     persistence:
       config:
         enabled: true
@@ -48,4 +49,4 @@ spec:
         memory: 250Mi
         cpu: 500m
       limits:
-        memory: 1500Mi
+        memory: 750Mi
