@@ -118,7 +118,7 @@ On [Opnsense](https://opnsense.org/) under `Services: Unbound DNS: Overrides` I 
 | [direnv](https://github.com/direnv/direnv)                                                      | Sets `KUBECONFIG` environment variable based on present working directory |
 | [go-task](https://github.com/go-task/task)                                                      | Alternative to makefiles, who honestly likes that?                        |
 | [pre-commit](https://github.com/pre-commit/pre-commit)                                          | Enforce code consistency and verifies no secrets are pushed               |
-| [kubetail](https://github.com/johanhaleby/kubetail) / [stern](https://github.com/stern/stern) | Tail logs in Kubernetes                                                   |
+| [stern](https://github.com/stern/stern) | Tail logs in Kubernetes                                                   |
 ---
 
 ## :handshake:&nbsp; Thanks
