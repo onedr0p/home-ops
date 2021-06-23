@@ -34,7 +34,7 @@ This repository is built off the [k8s-at-home/template-cluster-k3s](https://gith
 
 My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 21.04 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes.
 
-See my [server/ansible](./server/ansible/) directory for my playbooks and roles.
+See my [ansible](./ansible/) directory for my playbooks and roles.
 
 ## :art:&nbsp; Cluster components
 
