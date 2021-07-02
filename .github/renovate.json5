@@ -9,14 +9,18 @@
   "suppressNotifications": ["prIgnoreNotification"],
   // only rebase PRs when there's a conflict
   "rebaseWhen": "conflicted",
+  "helm-values": {
+    "fileMatch": [
+      "cluster/.+/helm-release\\.yaml$",
+    ],
+  },
   "kubernetes": {
-    "fileMatch": ["cluster/.+\\.yaml$"],
+    "fileMatch": [
+      "cluster/.+\\.yaml$",
+    ],
     "ignorePaths": [
       "cluster/base/",
-    ]
-  },
-  "helm-values": {
-    "fileMatch": ["cluster/.+helm-release\\.yaml$"],
+    ],
   },
   "regexManagers": [
     // regexManager to read and process HelmRelease files
@@ -75,6 +79,8 @@
     // setup datasources
     {
       "matchDatasources": ["helm"],
+      "separateMinorPatch": true,
+      "ignoreDeprecated": true
     },
     // global docker datasource settings
     {
