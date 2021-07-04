@@ -2,19 +2,18 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nfs-frigate-rocinante-pv
+  name: nfs-frigate
 spec:
-  storageClassName: frigate-rocinante
+  storageClassName: frigate
   capacity:
     storage: 1Mi
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: 192.168.42.40
-    path: /Media/Videos/frigate
+    server: 192.168.42.50
+    path: /Frigate
   mountOptions:
-  - nfsvers=3
   - tcp
   - intr
   - hard
@@ -24,12 +23,12 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nfs-frigate-rocinante-pvc
+  name: nfs-frigate
   namespace: home
 spec:
   accessModes:
   - ReadWriteMany
-  storageClassName: frigate-rocinante
+  storageClassName: frigate
   resources:
     requests:
       storage: 1Mi

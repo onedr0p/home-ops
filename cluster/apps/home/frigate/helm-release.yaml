@@ -265,39 +265,6 @@ spec:
             timestamp: False
             retain:
               default: 14
-        # --
-        bedroom-river:
-          ffmpeg:
-            inputs:
-            - path: rtsp://192.168.1.2:7447/dvqmpqqyo6wOjR3o
-              roles:
-              - detect
-            - path: rtsp://192.168.1.2:7447/bh0tUsX1QP2iXGmL
-              roles:
-              - clips
-              - record
-              - rtmp
-          height: 576
-          width: 1024
-          fps: 5
-          objects:
-            filters:
-              person:
-                min_area: 1500
-                max_area: 100000
-                threshold: 0.75
-                min_score: 0.60
-          clips:
-            enabled: True
-            objects:
-            - person
-            - dog
-            - cat
-          snapshots:
-            enabled: True
-            timestamp: False
-            retain:
-              default: 14
     podAnnotations:
       configmap.reloader.stakater.com/reload: "frigate"
     ingress:
@@ -316,15 +283,15 @@ spec:
         existingClaim: frigate-config-v1
         mountPath: /data
     extraVolumes:
-    - name: frigate-rocinante
+    - name: frigate
       persistentVolumeClaim:
-        claimName: nfs-frigate-rocinante-pvc
+        claimName: nfs-frigate
     - name: cache
       emptyDir:
         medium: Memory
     extraVolumeMounts:
     - mountPath: /media
-      name: frigate-rocinante
+      name: frigate
     - mountPath: /tmp/cache
       name: cache
     affinity:
