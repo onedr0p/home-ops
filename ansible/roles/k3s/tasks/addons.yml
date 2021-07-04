@@ -1,0 +1,13 @@
+---
+
+- name: addons | check if cluster is installed
+  ansible.builtin.stat:
+    path: "/etc/rancher/k3s/config.yaml"
+  register: k3s_check_installed
+  check_mode: false
+
+- name: addons | set manifest facts
+  ansible.builtin.set_fact:
+    k3s_server_manifests_templates: []
+    k3s_server_manifests_urls: []
+  when: k3s_check_installed.stat.exists
