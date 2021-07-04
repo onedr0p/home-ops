@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-kasten
+spec:
+  storageClassName: kasten
+  capacity:
+    storage: 1Mi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 192.168.42.50
+    path: /Kasten
+  mountOptions:
+  - tcp
+  - intr
+  - hard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-kasten
+  namespace: kasten-io
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: kasten
+  resources:
+    requests:
+      storage: 1Mi
