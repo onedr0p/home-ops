@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: blocky
-      version: 6.4.0
+      version: 7.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -24,30 +24,33 @@ spec:
       TZ: "America/New_York"
     replicas: 3
     service:
-      port:
-        port: 4000
-      additionalServices:
-      - enabled: true
-        nameSuffix: dns-tcp
+      main:
+        ports:
+          http:
+            port: 4000
+      dns-tcp:
+        enabled: true
         type: LoadBalancer
         externalIPs:
         - "${SVC_BLOCKY_ADDRESS}"
-        port:
-          port: 53
-          name: dns-tcp
-          protocol: TCP
-          targetPort: 53
+        ports:
+          dns-tcp:
+            enabled: true
+            port: 53
+            protocol: TCP
+            targetPort: 53
         externalTrafficPolicy: Local
-      - enabled: true
-        nameSuffix: dns-udp
+      dns-udp:
+        enabled: true
         type: LoadBalancer
         externalIPs:
         - "${SVC_BLOCKY_ADDRESS}"
-        port:
-          port: 53
-          name: dns-udp
-          protocol: UDP
-          targetPort: 53
+        ports:
+          dns-udp:
+            enabled: true
+            port: 53
+            protocol: UDP
+            targetPort: 53
         externalTrafficPolicy: Local
     config: |
       upstream:
