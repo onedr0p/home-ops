@@ -4,14 +4,19 @@ kind: DaemonSet
 metadata:
   name: kube-vip
   namespace: kube-system
+  labels:
+    app.kubernetes.io/instance: kube-vip
+    app.kubernetes.io/name: kube-vip
 spec:
   selector:
     matchLabels:
-      name: kube-vip
+      app.kubernetes.io/instance: kube-vip
+      app.kubernetes.io/name: kube-vip
   template:
     metadata:
       labels:
-        name: kube-vip
+        app.kubernetes.io/instance: kube-vip
+        app.kubernetes.io/name: kube-vip
     spec:
       containers:
       - name: kube-vip
@@ -67,4 +72,5 @@ spec:
       serviceAccountName: kube-vip
       tolerations:
       - key: node-role.kubernetes.io/master
+        operator: Exists
         effect: NoSchedule
