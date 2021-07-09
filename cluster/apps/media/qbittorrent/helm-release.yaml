@@ -70,6 +70,18 @@ spec:
             server: 192.168.42.50
             path: /media
         mountPath: /media
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - kube-vip
+            topologyKey: kubernetes.io/hostname
     resources:
       requests:
         memory: 250Mi
