@@ -35,6 +35,10 @@ spec:
           - emqx.${SECRET_DOMAIN}
     emqxConfig:
       EMQX_ALLOW_ANONYMOUS: "false"
+      EMQX_ADMIN_PASSWORD: "${SECRET_EMQX_ADMIN_PASSWORD}"
+      EMQX_AUTH__MNESIA__PASSWORD_HASH: plain
+      EMQX_AUTH__USER__1__USERNAME: "${SECRET_MQTT_USERNAME}"
+      EMQX_AUTH__USER__1__PASSWORD: "${SECRET_MQTT_PASSWORD}"
     emqxAclConfig: >
       {allow, {user, "dashboard"}, subscribe, ["$SYS/#"]}.
       {allow, {ipaddr, "127.0.0.1"}, pubsub, ["$SYS/#", "#"]}.
