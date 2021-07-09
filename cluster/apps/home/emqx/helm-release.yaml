@@ -1,0 +1,98 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: emqx
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://repos.emqx.io/charts
+      chart: emqx
+      version: 4.3.5
+      sourceRef:
+        kind: HelmRepository
+        name: emqx-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    replicaCount: 3
+    recreatePods: true
+    service:
+      type: LoadBalancer
+      loadBalancerIP: 10.0.6.50
+    ingress:
+      dashboard:
+        enabled: true
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        path: /
+        hosts:
+        - emqx.${SECRET_DOMAIN}
+        tls:
+        - hosts:
+          - emqx.${SECRET_DOMAIN}
+    emqxConfig:
+      EMQX_ALLOW_ANONYMOUS: "false"
+    emqxAclConfig: >
+      {allow, {user, "dashboard"}, subscribe, ["$SYS/#"]}.
+      {allow, {ipaddr, "127.0.0.1"}, pubsub, ["$SYS/#", "#"]}.
+      {allow, all, subscribe, ["$SYS/#", {eq, "#"}]}.
+      {allow, all}.
+    emqxLoadedPlugins: >
+      {emqx_management, true}.
+      {emqx_recon, true}.
+      {emqx_retainer, true}.
+      {emqx_dashboard, true}.
+      {emqx_telemetry, false}.
+      {emqx_rule_engine, true}.
+      {emqx_bridge_mqtt, false}.
+      {emqx_auth_mnesia, true}.
+      {emqx_prometheus, true}.
+    emqxLoadedModules: >
+      {emqx_mod_presence, true}.
+      {emqx_mod_delayed, false}.
+      {emqx_mod_rewrite, false}.
+      {emqx_mod_subscription, false}.
+      {emqx_mod_topic_metrics, true}.
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - emqx
+              - kube-vip
+          topologyKey: "kubernetes.io/hostname"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 150Mi
+      limits:
+        memory: 512Mi
+  postRenderers:
+  - kustomize:
+      patchesJson6902:
+      - target:
+          kind: Ingress
+          name: emqx
+        patch:
+        - op: add
+          path: /spec/ingressClassName
+          value: traefik
+      - target:
+          kind: Service
+          name: emqx
+        patch:
+        - op: remove
+          path: /spec/loadBalancerIP
+      - target:
+          kind: Service
+          name: emqx
+        patch:
+        - op: add
+          path: /spec/externalIPs/0
+          value: "${SVC_EMQX_ADDRESS}"
