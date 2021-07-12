@@ -20,6 +20,13 @@ _... managed with Flux and Renovate_ :robot:
 
 <br/>
 
+---
+
+## :house:&nbsp;Services
+
+[![My-Plex](https://img.shields.io/uptimerobot/status/m784591338-cbf3205bc18109108eb0ea8e?color=orange&label=my%20plex&style=for-the-badge)](https://plex.tv)
+[![My-Home-Assistant](https://img.shields.io/uptimerobot/status/m786203807-32ce99612d7b2d01b89c4315?color=lightblue&label=my%20home%20assistant&style=for-the-badger-the-badge)](https://www.home-assistant.io/)
+
 ## :book:&nbsp; Overview
 
 This repository _is_ my home Kubernetes cluster in a declarative state. [Flux](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder and makes the changes to my cluster based on the YAML manifests.
