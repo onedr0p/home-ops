@@ -60,17 +60,20 @@ spec:
       {emqx_mod_rewrite, false}.
       {emqx_mod_subscription, false}.
       {emqx_mod_topic_metrics, true}.
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
     affinity:
       podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpressions:
-            - key: app.kubernetes.io/name
-              operator: In
-              values:
-              - emqx
-              - kube-vip
-          topologyKey: "kubernetes.io/hostname"
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - emqx
+            topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 100m
