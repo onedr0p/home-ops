@@ -74,6 +74,8 @@ spec:
     experimental:
       plugins:
         enabled: true
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
@@ -85,15 +87,6 @@ spec:
                 operator: In
                 values:
                 - traefik
-            topologyKey: kubernetes.io/hostname
-        - weight: 50
-          podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                - kube-vip
             topologyKey: kubernetes.io/hostname
     resources:
       requests:
