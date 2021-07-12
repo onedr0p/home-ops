@@ -77,15 +77,14 @@ spec:
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
-        - podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                - traefik
-                - kube-vip
-            topologyKey: "kubernetes.io/hostname"
+        - labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - traefik
+              - kube-vip
+          topologyKey: "kubernetes.io/hostname"
     resources:
       requests:
         memory: 100Mi
