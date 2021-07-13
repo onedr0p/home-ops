@@ -28,8 +28,6 @@ _... managed with Flux and Renovate_ :robot:
 
 </div>
 
-<br/>
-
 ---
 
 ## :book:&nbsp; Overview
@@ -119,7 +117,7 @@ On [Opnsense](https://opnsense.org/) under `Services: Unbound DNS: Overrides` I 
 | Intel NUC8i3BEK         | 3     | 256GB NVMe   | N/A                  | 16GB | k3s Masters (embedded etcd)   |
 | Intel NUC8i5BEH         | 1     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                   |
 | Intel NUC8i7BEH         | 2     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                   |
-| Qnap NAS (rocinante)    | 1     | N/A          | 8x12TB RAID6         | 16GB | Shared file storage           |
+| TrueNAS SCALE (custom)  | 1     | 120GB SSD    | 8x12TB RAIDz2        | 64GB | Shared file storage           |
 
 ---
 
