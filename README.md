@@ -22,7 +22,7 @@ _... managed with Flux and Renovate_ :robot:
 
 <div align="center">
 
-[![Home-Internet](https://img.shields.io/uptimerobot/status/m784591389-ddbc4c84041a70eb6f6a3fb4?color=blueviolet&label=home%20internet&style=for-the-badge)](https://uptimerobot.com)
+[![Home-Internet](https://img.shields.io/uptimerobot/status/m784591389-ddbc4c84041a70eb6f6a3fb4?color=blueviolet&label=home%20internet&style=for-the-badge&logo=aiohttp&logoColor=white)](https://uptimerobot.com)
 [![My-Plex](https://img.shields.io/uptimerobot/status/m784591338-cbf3205bc18109108eb0ea8e?logo=plex&logoColor=white&color=orange&label=my%20plex&style=for-the-badge)](https://plex.tv)
 [![My-Home-Assistant](https://img.shields.io/uptimerobot/status/m786203807-32ce99612d7b2d01b89c4315?logo=homeassistant&logoColor=white&color=lightblue&label=my%20home%20assistant&style=for-the-badge)](https://www.home-assistant.io/)
 
