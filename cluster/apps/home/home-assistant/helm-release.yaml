@@ -92,16 +92,8 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /config
-    affinity:
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpressions:
-            - key: app.kubernetes.io/name
-              operator: In
-              values:
-              - kube-vip
-          topologyKey: kubernetes.io/hostname
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
     resources:
       requests:
         cpu: 100m
