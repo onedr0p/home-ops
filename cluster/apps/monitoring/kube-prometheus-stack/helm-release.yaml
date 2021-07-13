@@ -151,7 +151,11 @@ spec:
         tls:
         - hosts:
           - "prometheus.${SECRET_DOMAIN}"
+      thanosService:
+        enabled: true
       prometheusSpec:
+        replicas: 1
+        replicaExternalLabelName: "replica"
         ruleSelector: {}
         ruleNamespaceSelector: {}
         ruleSelectorNilUsesHelmValues: false
@@ -161,7 +165,7 @@ spec:
         podMonitorSelector: {}
         podMonitorNamespaceSelector: {}
         podMonitorSelectorNilUsesHelmValues: false
-        retention: 14d
+        retention: 6h
         enableAdminAPI: true
         walCompression: true
         storageSpec:
@@ -171,6 +175,12 @@ spec:
               resources:
                 requests:
                   storage: 50Gi
+        thanos:
+          image: quay.io/thanos/thanos:v0.21.1
+          version: v0.21.1
+          objectStorageConfig:
+            name: thanos-objstore
+            key: objstore.yml
         additionalScrapeConfigs:
         - job_name: 'node-exporter'
           honor_timestamps: true
