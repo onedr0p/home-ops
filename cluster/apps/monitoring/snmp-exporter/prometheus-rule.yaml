@@ -48,24 +48,3 @@ spec:
       for: 1m
       labels:
         severity: critical
----
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
-metadata:
-  labels:
-    prometheus: k8s
-    role: alert-rules
-  name: nas-rules
-  namespace: monitoring
-spec:
-  groups:
-  - name: rocinante-disk.rules
-    rules:
-    - alert: DiskDegraded
-      annotations:
-        description: Disk Degraded
-        summary: Disk {{$labels.diskIndex}} is in a degraded state
-      expr: diskSmartInfo != 0
-      for: 5m
-      labels:
-        severity: critical
