@@ -56,11 +56,15 @@ spec:
     datasources:
       datasources.yaml:
         apiVersion: 1
+        # list of datasources that should be deleted from the database
+        deleteDatasources:
+        - name: Loki
+          orgId: 1
         datasources:
         - name: Prometheus
           type: prometheus
-          url: http://prometheus-operated:9090
           access: proxy
+          url: http://thanos-query:9090/
           isDefault: true
         - name: Loki
           type: loki
@@ -159,10 +163,10 @@ spec:
       - hosts:
         - "grafana.${SECRET_DOMAIN}"
     persistence:
-      enabled: true
-      storageClassName: "rook-ceph-block"
-      size: 10Gi
-      accessModes:
-      - ReadWriteOnce
+      enabled: false
+      # storageClassName: "rook-ceph-block"
+      # size: 10Gi
+      # accessModes:
+      # - ReadWriteOnce
     podAnnotations:
       configmap.reloader.stakater.com/reload: "grafana"
