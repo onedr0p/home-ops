@@ -27,3 +27,15 @@ tasks:
     cmds:
     - kubectl get serviceaccount k10-k10 -o jsonpath="{.secrets[0].name}" --namespace kasten-io
     - kubectl get secret k10-k10-token-bdpdn --namespace kasten-io -ojsonpath="{.data.token}{'\n'}" | base64 --decode
+
+  maintenance:
+    desc: Stop all Pods and Pause all Helm Releases that rely on the NAS
+    cmds:
+    - flux suspend hr -n media plex
+    - flux suspend hr -n media sonarr
+    - flux suspend hr -n media radarr
+    - flux suspend hr -n media lidarr
+    - flux suspend hr -n media readarr
+    - flux suspend hr -n media qbittorrent
+    - flux suspend hr -n media sabnzbd
+    - flux suspend hr -n home frigate
