@@ -42,9 +42,9 @@ spec:
                 {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
                 {{ end }}
               {{ end }}
-        - name: 'webhook'
+        - name: 'nodered'
           webhook_configs:
-          - url: "http://192.168.1.35:9000/hooks/webhook-ups"
+          - url: "http://node-red.home/power-outage"
             send_resolved: false
         route:
           group_by: ['alertname', 'job']
@@ -58,10 +58,9 @@ spec:
               alertname: Watchdog
           - receiver: 'discord'
             match_re:
-              # severity: critical|warning
               severity: critical
             continue: true
-          - receiver: 'webhook'
+          - receiver: 'nodered'
             match:
               alertname: UPS15MinutesRemaining
             continue: true
