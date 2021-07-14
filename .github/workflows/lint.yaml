@@ -3,43 +3,23 @@
 name: Lint
 
 on: # yamllint disable-line rule:truthy
-  workflow_dispatch:
-  push:
-    branches:
-    - main
   pull_request:
 
 jobs:
-  yaml:
+  yamllint:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
+    - name: yamllint
+      uses: reviewdog/action-yamllint@v1
       with:
-        fetch-depth: 1
-    - name: Lint YAML
-      uses: ibiqlik/action-yamllint@v3
-      with:
-        file_or_dir: "./cluster"
-        config_file: "./.github/yamllint.config.yaml"
-
-  bash:
+        yamllint_flags: "-c .github/yamllint.config.yaml ./cluster"
+  shellcheck:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
-    - name: Lint Hack Scripts
+    - name: shellcheck
       uses: reviewdog/action-shellcheck@v1
       with:
         path: "./hack"
         level: "error"
-
-  # ansible:
-  #   runs-on:
-  #   - ubuntu-20.04
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #     with:
-  #       fetch-depth: 1
-  #   - name: Lint Ansible Playbooks
-  #     uses: ansible/ansible-lint-action@master
