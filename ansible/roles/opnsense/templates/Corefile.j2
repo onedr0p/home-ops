@@ -1,0 +1,18 @@
+.:53 {
+  bind 192.168.1.1 127.0.0.1 ::1
+  errors
+  log
+  reload
+  loadbalance
+  prometheus :9153
+  cache
+  k8s_gateway {{ home_domain }} {
+    resources Ingress
+    ttl 30
+    kubeconfig /root/k8s/kubeconfig
+    fallthrough
+  }
+  forward . tls://1.1.1.1 tls://1.0.0.1 {
+    tls_servername cloudflare-dns.com
+  }
+}
