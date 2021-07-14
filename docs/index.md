@@ -8,7 +8,7 @@ In 2018 my homelab setup was very different that what it is today. I was running
 
 ### k3s
 
-[k3s](https://k3s.io/) comes with a very low barrier to entry in getting a Kubernetes cluster running. After deploying it with [k3sup](https://github.com/alexellis/k3sup) I fell in love with the simplicity and love the single binary approach. With k3sup the time it took from getting a Kubernetes cluster up and running was literally minutes. Without much Kubernetes knowledge this allowed me to teardown the cluster and install it again, each time learning new things like how to deploy applications with [Helm](https://helm.sh/), set up a load balancer using [Metallb](https://metallb.universe.tf/), how to handle ingress and storage.
+[k3s](https://k3s.io/) comes with a very low barrier to entry in getting a Kubernetes cluster running. After deploying it with [k3sup](https://github.com/alexellis/k3sup) I fell in love with the simplicity and love the single binary approach. With k3sup the time it took from getting a Kubernetes cluster up and running was literally minutes. Without much Kubernetes knowledge this allowed me to teardown the cluster and install it again, each time learning new things like how to deploy applications with [Helm](https://helm.sh/), set up a load balancer using [Metallb](https://metallb.universe.tf/), or how to handle ingress and storage.
 
 ### Flux
 
