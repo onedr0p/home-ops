@@ -1,0 +1,35 @@
+---
+
+name: Publish docs via GitHub Pages
+
+on: # yamllint disable-line rule:truthy
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+    paths:
+    - '.github/workflows/docs.yaml'
+    - 'mkdocs.yaml'
+    - 'docs/**'
+
+env:
+  MKDOCS_MATERIAL_INSIDER_TOKEN: ${{ secrets.MKDOCS_MATERIAL_INSIDER_TOKEN }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    if: github.event.pull_request.head.repo.fork == false
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: git config --global user.name "${GITHUB_ACTOR}"
+      - run: git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+      - run: pip install git+https://${MKDOCS_MATERIAL_INSIDER_TOKEN}@github.com/squidfunk/mkdocs-material-insiders.git
+      - run: |
+          pip install \
+            mkdocs-minify-plugin>=0.3 \
+            mkdocs-redirects>=1.0
+      - run: mkdocs gh-deploy --config-file ./mkdocs.yaml --force
+      - run: mkdocs --version

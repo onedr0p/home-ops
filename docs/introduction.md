@@ -1,6 +1,6 @@
 # Home Cluster
 
-Welcome to the docs on my home Kubernetes cluster.
+Welcome to the docs on my home Kubernetes cluster. These docs are to meant for my use but you may find them useful as well in your Kubernetes journey.
 
 ## Story
 
