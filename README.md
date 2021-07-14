@@ -18,8 +18,6 @@ _... managed with Flux and Renovate_ :robot:
 
 </div>
 
-<br/>
-
 <div align="center">
 
 [![Home-Internet](https://img.shields.io/uptimerobot/status/m784591389-ddbc4c84041a70eb6f6a3fb4?color=blueviolet&label=home%20internet&style=for-the-badge&logo=aiohttp&logoColor=white)](https://uptimerobot.com)
