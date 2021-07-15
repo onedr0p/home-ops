@@ -30,14 +30,13 @@ spec:
             relabel_configs:
             - source_labels: ['__syslog_message_hostname']
               target_label: host
-    serviceMonitor:
-      enabled: true
     extraPorts:
       syslog:
         name: syslog
         containerPort: 1514
-        protocol: TCP
         service:
           type: LoadBalancer
           externalIPs:
           - ${SVC_SYSLOG_ADDRESS}
+    serviceMonitor:
+      enabled: true
