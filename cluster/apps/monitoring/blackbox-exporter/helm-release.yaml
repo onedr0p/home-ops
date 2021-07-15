@@ -1,0 +1,90 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: blackbox-exporter
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://prometheus-community.github.io/helm-charts
+      chart: prometheus-blackbox-exporter
+      version: 4.10.4
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    fullnameOverride: blackbox-exporter
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+      hosts:
+      - "blackbox.${SECRET_DOMAIN}"
+      tls:
+      - hosts:
+        - "blackbox.${SECRET_DOMAIN}"
+    allowIcmp: true
+    config:
+      modules:
+        icmp:
+          prober: icmp
+          timeout: 30s
+          icmp:
+            preferred_ip_protocol: "ip4"
+    serviceMonitor:
+      enabled: true
+      defaults:
+        labels:
+          release: prometheus
+        interval: 30s
+        scrapeTimeout: 30s
+      targets:
+      - name: k8s-0
+        url: 192.168.42.10
+        module: icmp
+      - name: k8s-1
+        url: 192.168.42.11
+        module: icmp
+      - name: k8s-2
+        url: 192.168.42.12
+        module: icmp
+      - name: k8s-3
+        url: 192.168.42.13
+        module: icmp
+      - name: k8s-4
+        url: 192.168.42.14
+        module: icmp
+      - name: k8s-5
+        url: 192.168.42.15
+        module: icmp
+      - name: expanse
+        url: 192.168.42.50
+        module: icmp
+      - name: router
+        url: 192.168.1.1
+        module: icmp
+    prometheusRule:
+      enabled: true
+      additionalLabels:
+        app: prometheus-operator
+        release: prometheus
+      rules:
+      - alert: HostDown
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          message: The host {{"{{ $labels.target }}"}} is currently unreachable
+      - alert: SlowResponseTime
+        annotations:
+          message: The response time for {{"{{ $labels.target }}"}} has been greater than 30 seconds for 5 minutes.
+        expr: probe_duration_seconds > 30
+        for: 5m
+        labels:
+          severity: warning
