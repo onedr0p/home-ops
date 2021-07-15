@@ -6,9 +6,11 @@
 #
 # Add the following to /etc/rc.conf[.local] to enable this service
 #
-# coredns_enable (bool):    Set to NO by default.
-#                Set it to YES to enable blocky.
-# coredns_config (str):         Set to /usr/local/etc/coredns/Corefile by default.
+# coredns_enable  (bool):        Set to NO by default.
+#                                Set it to YES to enable blocky.
+# coredns_config  (str):         Set to /usr/local/etc/coredns/Corefile by default.
+#
+# coredns_logfile (str):         Set to /var/log/coredns.log by default.
 #
 
 . /etc/rc.subr
@@ -31,7 +33,7 @@ start_cmd="${name}_start"
 coredns_start()
 {
     echo -n "Starting ${name}."
-    /usr/sbin/daemon -p ${pidfile} -f ${command} -conf ${coredns_config} ${coredns_flags}
+    /usr/sbin/daemon -p ${pidfile} -o ${coredns_logfile} -f ${command} -conf ${coredns_config} ${coredns_flags}
 }
 
 run_rc_command "$1"
