@@ -23,24 +23,24 @@ tasks:
     silent: true
 
   list:
-    desc: List all the nodes
+    desc: List all the hosts
     dir: ansible
     cmds:
     - "ansible all -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --list-hosts"
     silent: true
 
   ping:
-    desc: Ping all the k8s nodes
+    desc: Ping all the hosts
     dir: ansible
     cmds:
-    - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -m 'ping'"
+    - "ansible all -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -m 'ping'"
     silent: true
 
   uptime:
-    desc: Uptime of all the k8s nodes
+    desc: Uptime of all the hosts
     dir: ansible
     cmds:
-    - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -a 'uptime -p'"
+    - ansible all -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -a 'uptime'
     silent: true
 
   clean-images:
@@ -84,16 +84,9 @@ tasks:
     - "ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/ubuntu/upgrade.yml"
     silent: true
 
-  playbook:k3s-install:
-    desc: Install k3s on the nodes
+  playbook:cluster-install:
+    desc: Install Kubernetes on the nodes
     dir: ansible
     cmds:
     - "ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/k3s/install.yml"
-    silent: true
-
-  playbook:k3s-upgrade:
-    desc: Install k3s on the nodes
-    dir: ansible
-    cmds:
-    - "ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/k3s/upgrade.yml"
     silent: true
