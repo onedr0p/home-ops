@@ -9,70 +9,91 @@ vars:
   ANSIBLE_INVENTORY_DIR: "{{.ANSIBLE_DIR}}/inventory"
   ANSIBLE_MASTER_GROUP: "master-nodes"
   ANSIBLE_WORKER_GROUP: "worker-nodes"
+  ANSIBLE_ROUTER_GROUP: "router"
+  ANSIBLE_STORAGE_GROUP: "storage"
 
 tasks:
 
-  list:
-    desc: List all the k8s nodes
+  deps:
+    desc: Upgrade Ansible galaxy deps
+    dir: ansible
     cmds:
-    - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --list-hosts"
+    - "ansible-galaxy install -r requirements.yml --force"
+    - "pip3 install -r requirements.txt"
+    silent: true
+
+  list:
+    desc: List all the nodes
+    dir: ansible
+    cmds:
+    - "ansible all -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --list-hosts"
     silent: true
 
   ping:
     desc: Ping all the k8s nodes
+    dir: ansible
     cmds:
     - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -m 'ping'"
     silent: true
 
   uptime:
     desc: Uptime of all the k8s nodes
+    dir: ansible
     cmds:
     - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -a 'uptime -p'"
     silent: true
 
   clean-images:
     desc: Clean up stale container images
+    dir: ansible
     cmds:
     - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -a 'k3s crictl rmi --prune' --become"
     silent: true
 
   purge-manifests:
     desc: Delete all manifests under /var/lib/rancher/k3s/server/manifests
+    dir: ansible
     cmds:
     - "ansible {{.ANSIBLE_MASTER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml --one-line -a 'rm /var/lib/rancher/k3s/server/manifests/*' --become"
 
   reboot:
     desc: Reboot all the k8s nodes
+    dir: ansible
     cmds:
     - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml -m reboot"
     silent: true
 
   shutdown:
     desc: Reboot all the k8s nodes
+    dir: ansible
     cmds:
     - "ansible {{.ANSIBLE_MASTER_GROUP}}:{{.ANSIBLE_WORKER_GROUP}} -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml -m shutdown"
     silent: true
 
   playbook:ubuntu-prepare:
     desc: Prepare all the k8s nodes for running k3s
+    dir: ansible
     cmds:
     - "ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/ubuntu/prepare.yml"
     silent: true
 
   playbook:ubuntu-upgrade:
     desc: Upgrade all the k8s nodes operating system
+    dir: ansible
     cmds:
     - "ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/ubuntu/upgrade.yml"
     silent: true
 
   playbook:k3s-install:
     desc: Install k3s on the nodes
+    dir: ansible
     cmds:
     - "ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/k3s/install.yml"
     silent: true
 
   playbook:k3s-upgrade:
     desc: Install k3s on the nodes
+    dir: ansible
     cmds:
     - "ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/k3s/upgrade.yml"
     silent: true

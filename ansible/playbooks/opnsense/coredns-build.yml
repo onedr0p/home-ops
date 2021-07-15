@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://json.schemastore.org/ansible-playbook.json
+---
+- hosts: 127.0.0.1
+
+  vars:
+    coredns_version: 1.8.4
+
+  connection: local
+  gather_facts: no
+  become: no
+  any_errors_fatal: true
+  tasks:
+  - name: Build CoreDNS in Docker
+    community.docker.docker_image:
+      name: coredns:build
+      source: build
+      state: present
+      build:
+        path: build
+        nocache: false
+        args:
+          VERSION: "v{{ coredns_version }}"
+
+  - name: Create bin directory
+    ansible.builtin.file:
+      path: "{{ playbook_dir }}/build/bin"
+      state: directory
+
+  - name: Copy CoreDNS binary from Docker image
+    community.docker.docker_container:
+      name: coredns_build
+      image: coredns:build
+      container_default_behavior: no_defaults
+      mounts:
+      - source: "{{ playbook_dir }}/build/bin"
+        target: /mnt/dist/bin
+        type: bind
+      command: cp /go/src/coredns/coredns /mnt/dist/bin
+
+  - name: Remove CoreDNS container
+    community.docker.docker_container:
+      name: coredns_build
+      state: absent
+      container_default_behavior: no_defaults
+
+  - name: Remove CoreDNS build image
+    community.docker.docker_image:
+      name: coredns:build
+      state: absent
