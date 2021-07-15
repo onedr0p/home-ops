@@ -1,0 +1,42 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: snmp-exporter-ups-0
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://prometheus-community.github.io/helm-charts
+      chart: prometheus-snmp-exporter
+      version: 0.1.3
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    fullnameOverride: snmp-exporter-ups-0
+    extraConfigmapMounts:
+    - name: snmp-exporter-ups-0
+      mountPath: /run/secrets/snmp-exporter
+      subPath: snmp.yaml
+      configMap: snmp-exporter-ups-0
+      readOnly: true
+      defaultMode: 420
+    serviceMonitor:
+      enabled: true
+      namespace: monitoring
+      params:
+        enabled: true
+        conf:
+          module:
+          - apcups
+          target:
+          - 192.168.1.15
+      path: /snmp
+      scrapeTimeout: 10s
+      relabelings:
+      - sourceLabels: [__param_target]
+        targetLabel: instance

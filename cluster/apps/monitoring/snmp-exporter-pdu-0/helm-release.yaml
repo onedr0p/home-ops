@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: snmp-exporter-pdu
+  name: snmp-exporter-pdu-0
   namespace: monitoring
 spec:
   interval: 5m
@@ -17,12 +17,12 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    fullnameOverride: snmp-exporter-pdu
+    fullnameOverride: snmp-exporter-pdu-0
     extraConfigmapMounts:
-    - name: snmp-exporter-pdu
+    - name: snmp-exporter-pdu-0
       mountPath: /run/secrets/snmp-exporter
       subPath: snmp.yaml
-      configMap: snmp-exporter-pdu
+      configMap: snmp-exporter-pdu-0
       readOnly: true
       defaultMode: 420
     serviceMonitor:
@@ -35,7 +35,6 @@ spec:
           - cyberpower
           target:
           - 192.168.1.16
-          - 192.168.1.17
       path: /snmp
       scrapeTimeout: 10s
       relabelings:
