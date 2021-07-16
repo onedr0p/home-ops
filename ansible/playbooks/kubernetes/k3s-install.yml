@@ -1,0 +1,50 @@
+---
+
+- hosts:
+  - master-nodes
+  - worker-nodes
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+  pre_tasks:
+  - name: Pausing for 5 seconds...
+    pause:
+      seconds: 5
+  tasks:
+  - name: Check if cluster is installed
+    ansible.builtin.stat:
+      path: "/etc/rancher/k3s/config.yaml"
+    register: k3s_check_installed
+    check_mode: false
+
+  - name: Set manifest facts
+    ansible.builtin.set_fact:
+      k3s_server_manifests_templates: []
+      k3s_server_manifests_urls: []
+    when: k3s_check_installed.stat.exists
+
+  - name: Install Kubernetes
+    include_role:
+      name: xanmanning.k3s
+      public: yes
+
+  - name: Update kubeconfig with the right IPv4 address
+    delegate_to: localhost
+    become: false
+    run_once: true
+    ansible.builtin.replace:
+      path: "/tmp/kubeconfig"
+      regexp: 'https://127.0.0.1:6443'
+      replace: 'https://{{ k3s_registration_address }}:6443'
+
+  - name: Remove deployed manifest templates
+    ansible.builtin.file:
+      path: "{{ k3s_server_manifests_dir }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
+      state: absent
+    loop: "{{ k3s_server_manifests_templates }}"
+
+  - name: Remove deployed manifest urls
+    ansible.builtin.file:
+      path: "{{ k3s_server_manifests_dir }}/{{ item.filename }}"
+      state: absent
+    loop: "{{ k3s_server_manifests_urls }}"
