@@ -22,7 +22,7 @@ spec:
       replicaLabels:
       - replica
       dnsDiscovery:
-        sidecarsService: kube-prometheus-stack-thanos-discovery
+        sidecarsService: prometheus-thanos-discovery
         sidecarsNamespace: monitoring
       ingress:
         enabled: true
@@ -39,12 +39,13 @@ spec:
     compactor:
       enabled: true
       persistence:
-        enabled: false
+        enabled: true
+        size: 5Gi
     storegateway:
       enabled: true
       persistence:
         enabled: true
-        size: 20Gi
+        size: 5Gi
     ruler:
       enabled: false
     metrics:
