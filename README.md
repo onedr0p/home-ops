@@ -31,7 +31,7 @@ _... managed with Flux and Renovate_ :robot:
 
 ## :book:&nbsp; Overview
 
-This is home to my personal Kubernetes cluster. The [Flux Operator](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder and makes the changes to my cluster based on the YAML manifests.
+This is home to my personal Kubernetes cluster. The [Flux Operator](https://github.com/fluxcd/flux2) watches this Git repository and makes the changes to my cluster based on the manifests in the [cluster](./cluster/) directory.
 
 For more information, head on over to my [docs](https://onedr0p.github.io/home-cluster/).
 
