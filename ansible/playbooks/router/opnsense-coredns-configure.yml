@@ -51,7 +51,7 @@
             user:
               token: {{ DNSCertificateAuthorityToken }}
           current-context: home
-        mode: 0644
+        mode: 0755
 
     - name: Copy kubeconfig to /tmp
       ansible.builtin.fetch:
@@ -66,50 +66,50 @@
       ansible.builtin.file:
         path: /usr/local/etc/coredns
         state: directory
-        mode: 0644
+        mode: 0755
 
     - name: Copy kubeconfig to Opnsense
       ansible.builtin.copy:
         src: /tmp/kubeconfig-homedns
         dest: /usr/local/etc/coredns/kubeconfig
-        mode: 0644
+        mode: 0755
       delegate_to: gateway
 
     - name: Create Corefile
       ansible.builtin.template:
         src: Corefile.j2
         dest: /usr/local/etc/coredns/Corefile
-        mode: 0644
+        mode: 0755
 
     - name: Create CoreDNS rc.conf script
       ansible.builtin.template:
         src: coredns-rc.conf.j2
         dest: /etc/rc.conf.d/coredns
-        mode: 0644
+        mode: 0755
 
     - name: Create CoreDNS rc.d script
       ansible.builtin.template:
         src: coredns-rc.d.j2
         dest: /usr/local/etc/rc.d/coredns
-        mode: 0644
+        mode: 0755
 
     - name: Create CoreDNS action script
       ansible.builtin.template:
         src: actions_coredns.conf.j2
         dest: /usr/local/opnsense/service/conf/actions.d/actions_coredns.conf
-        mode: 0644
+        mode: 0755
 
     - name: Create CoreDNS start up script
       ansible.builtin.template:
         src: 99-coredns.j2
         dest: /usr/local/etc/rc.syshook.d/start/99-coredns
-        mode: 0644
+        mode: 0755
 
     - name: Create CoreDNS log rotation config
       ansible.builtin.template:
         src: coredns-newsyslog.conf.j2
         dest: /etc/newsyslog.conf.d/coredns
-        mode: 0644
+        mode: 0755
 
     - name: Stop running CoreDNS
       ansible.builtin.shell: |
