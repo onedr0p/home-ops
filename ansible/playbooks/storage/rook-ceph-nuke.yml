@@ -1,7 +1,7 @@
 ---
 
 - hosts:
-  - worker-nodes
+  - worker
   become: true
   gather_facts: true
   any_errors_fatal: true
@@ -20,7 +20,7 @@
       ansible.builtin.shell: >
         sgdisk --zap-all {{ item }} || true
       loop:
-      - "{{ rook.devices }}"
+      - "{{ rook_devices }}"
     - name: Remove lvm partitions
       ansible.builtin.shell: "{{ item }}"
       loop:
@@ -31,7 +31,8 @@
     - name: Wipe the block device
       ansible.builtin.command: "wipefs -af {{ item }}"
       with_items:
-      - "{{ rook.devices }}"
+      - "{{ rook_devices }}"
     when:
-    - rook.enabled is defined
-    - rook.enabled
+    - rook_devices is defined
+    - rook_devices is iterable
+    - rook_devices | length > 0
