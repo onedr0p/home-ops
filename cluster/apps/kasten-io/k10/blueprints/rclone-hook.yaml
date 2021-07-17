@@ -5,11 +5,11 @@ metadata:
   name: rclone-hook
   namespace: kasten-io
 actions:
-  exportHook:
+  postExport:
     kind: Deployment
     phases:
     - func: KubeExec
-      name: export
+      name: rclone
       args:
         namespace: "{{ .Deployment.Namespace }}"
         pod: "{{ index .Deployment.Pods 0 }}"
