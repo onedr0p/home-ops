@@ -5,7 +5,7 @@ metadata:
   namespace: kasten-io
   name: cloud-sync
 spec:
-  schedule: "0 */12 * * *"
+  schedule: "0 */6 * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
@@ -34,12 +34,17 @@ spec:
             - "24"
             - "--bwlimit"
             - "25M"
-            - "minio:k10"
+            - "/mnt/k10-exports"
             - "b2-k10:k10-XU5jS1ot/"
             volumeMounts:
             - name: rclone-config
               mountPath: "/config"
+            - name: k10-exports
+              mountPath: /mnt/k10-exports
           volumes:
           - name: rclone-config
             secret:
               secretName: rclone-config-secret
+          - name: k10-exports
+            persistentVolumeClaim:
+              claimName: nfs-kasten
