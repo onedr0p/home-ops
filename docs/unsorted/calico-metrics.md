@@ -3,60 +3,69 @@
 ## calico-node
 
 ```sh
-calicoctl patch felixConfiguration default  --patch '{"spec":{"prometheusMetricsEnabled": true}}'
-kubectl -n calico-system edit ds calico-node
-```
-
-Under `spec.template.spec.containers`:
-
-```yaml
-# ...
-ports:
-- containerPort: 9091
-  name: http-metrics
-  protocol: TCP
-# ...
+calicoctl patch felixConfiguration default --patch '{"spec":{"prometheusMetricsEnabled": true}}'
 ```
 
 ## calico-typha
 
+Enable Prometheus metrics
+
 ```sh
-kubectl -n calico-system edit deployment calico-typha
+kubectl patch deployment calico-typha -n calico-system --type='json' -p '[
+  {"op": "add", "path": "/spec/template/spec/containers/0/env/-",
+    "value": {
+      "name":"TYPHA_PROMETHEUSMETRICSENABLED","value":"true"
+    }
+  },
+  {"op": "add", "path": "/spec/template/spec/containers/0/env/-",
+    "value": {
+      "name":"TYPHA_PROMETHEUSMETRICSPORT","value":"9092"
+    }
+  }
+]' \
+--dry-run=client -o yaml
 ```
 
-Under `spec.template.spec.containers`:
+Expose the metric port
 
-```yaml
-# ...
-- env:
-  - name: TYPHA_PROMETHEUSMETRICSENABLED
-    value: "true"
-  - name: TYPHA_PROMETHEUSMETRICSPORT
-    value: "9092"
-# ...
-ports:
-- containerPort: 9092
-  name: http-metrics
-  protocol: TCP
-# ...
+```sh
+kubectl patch deployment calico-typha -n calico-system --type='json' -p '[
+  {"op": "add", "path": "/spec/template/spec/containers/0/ports/-",
+    "value": {
+      "containerPort": 9092,
+      "name": "http-metrics",
+      "protocol": "TCP"
+    }
+  }
+]' \
+--dry-run=client -o yaml
 ```
 
 ## calico-kube-controllers
 
-This is not working I am unable to patch `kubecontrollersconfiguration` with the prometheus port
-
 ```sh
-calicoctl patch kubecontrollersconfiguration default --patch '{"spec":{"prometheusMetricsPort": 9094}}'
-kubectl -n calico-system edit deployment calico-kube-controllers
+calicoctl patch kubecontrollersconfiguration default --patch '{"spec":{"prometheusMetricsPort": 9095}}'
 ```
 
-Under `spec.template.spec.containers`:
+Expose the metric port
 
-```yaml
-# ...
-ports:
-- containerPort: 9094
-  name: http-metrics
-  protocol: TCP
-# ...
+```sh
+kubectl patch deployment calico-kube-controllers -n calico-system -p '
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "containers": [{
+          "name": "calico-kube-controllers",
+          "ports": [{
+            "containerPort": 9095,
+            "name": "http-metrics",
+            "protocol": "TCP"
+          }]
+        }]
+      }
+    }
+  }
+}' \
+--dry-run=client -o yaml
 ```
