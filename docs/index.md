@@ -16,10 +16,11 @@ See my [ansible](./ansible/) directory for my playbooks and roles.
 
 - [calico](https://docs.projectcalico.org/about/about-calico): For internal cluster networking using BGP configured on Opnsense.
 - [rook-ceph](https://rook.io/): Provides persistent volumes, allowing any application to consume RBD block storage.
-- [SOPS](https://toolkit.fluxcd.io/guides/mozilla-sops/): Encrypts secrets which is safe to store - even to a public repository.
+- [Mozilla SOPS](https://toolkit.fluxcd.io/guides/mozilla-sops/): Encrypts secrets which is safe to store - even to a public repository.
 - [external-dns](https://github.com/kubernetes-sigs/external-dns): Creates DNS entries in a separate [coredns](https://github.com/coredns/coredns) deployment which is backed by my clusters [etcd](https://github.com/etcd-io/etcd) deployment.
 - [cert-manager](https://cert-manager.io/docs/): Configured to create TLS certs for all ingress services automatically using LetsEncrypt.
 - [kube-vip](https://github.com/kube-vip/kube-vip): HA solution for Kubernetes control plane
+- [Kasten](https://www.kasten.io): Data backup and recovery
 
 ## Repository structure
 

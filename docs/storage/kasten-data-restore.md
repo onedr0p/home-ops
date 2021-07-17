@@ -1,4 +1,4 @@
-# Restoring Data
+# Kasten Data Restore
 
 Recovering from a K10 backup involves the following sequence of actions
 
