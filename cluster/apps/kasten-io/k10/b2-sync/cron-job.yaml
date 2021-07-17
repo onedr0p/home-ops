@@ -1,0 +1,48 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  namespace: kasten-io
+  name: b2-sync
+spec:
+  schedule: "0 */12 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: rclone
+            image: rclone/rclone:1.55
+            env:
+            - name: TZ
+              value: "America/New_York"
+            command:
+            - "rclone"
+            args:
+            - "-v"
+            - "--config"
+            - "/config/rclone.conf"
+            - "sync"
+            - "--ignore-errors"
+            - "--fast-list"
+            - "--b2-hard-delete"
+            - "--transfers"
+            - "24"
+            - "--checkers"
+            - "24"
+            - "/mnt/k10-exports"
+            - "b2-k10:k10-XU5jS1ot/"
+            volumeMounts:
+            - name: rclone-config
+              mountPath: "/config"
+            - name: k10-exports
+              mountPath: /mnt/k10-exports
+          volumes:
+          - name: rclone-config
+            secret:
+              secretName: rclone-config-secret
+          - name: k10-exports
+            persistentVolumeClaim:
+              claimName: nfs-kasten
