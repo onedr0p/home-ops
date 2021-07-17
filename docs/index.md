@@ -71,24 +71,21 @@ On [Opnsense](https://opnsense.org/) under `Services: Unbound DNS: Overrides` I 
 
 ## Hardware
 
-| Device                  | Count | OS Disk Size | Data Disk Size       | Ram  | Purpose                       |
-|-------------------------|-------|--------------|----------------------|------|-------------------------------|
-| Intel NUC8i3BEK         | 3     | 256GB NVMe   | N/A                  | 16GB | k3s Masters (embedded etcd)   |
-| Intel NUC8i5BEH         | 1     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                   |
-| Intel NUC8i7BEH         | 2     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                   |
-| TrueNAS SCALE (custom)  | 1     | 120GB SSD    | 8x12TB RAIDz2        | 64GB | Shared file storage           |
-
----
+| Device                 | Count | OS Disk Size | Data Disk Size       | Ram  | Purpose                     |
+|------------------------|-------|--------------|----------------------|------|-----------------------------|
+| Intel NUC8i3BEK        | 3     | 256GB NVMe   | N/A                  | 16GB | k3s Masters (embedded etcd) |
+| Intel NUC8i5BEH        | 1     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                 |
+| Intel NUC8i7BEH        | 2     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                 |
+| TrueNAS SCALE (custom) | 1     | 120GB SSD    | 8x12TB RAIDz2        | 64GB | Shared file storage         |
 
 ## Tools
 
-| Tool                                                                                            | Purpose                                                                   |
-|-------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| [direnv](https://github.com/direnv/direnv)                                                      | Sets `KUBECONFIG` environment variable based on present working directory |
-| [go-task](https://github.com/go-task/task)                                                      | Alternative to makefiles, who honestly likes that?                        |
-| [pre-commit](https://github.com/pre-commit/pre-commit)                                          | Enforce code consistency and verifies no secrets are pushed               |
-| [stern](https://github.com/stern/stern) | Tail logs in Kubernetes                                                   |
----
+| Tool                                                   | Purpose                                                      |
+|--------------------------------------------------------|--------------------------------------------------------------|
+| [direnv](https://github.com/direnv/direnv)             | Sets environment variable based on present working directory |
+| [go-task](https://github.com/go-task/task)             | Alternative to makefiles, who honestly likes that?           |
+| [pre-commit](https://github.com/pre-commit/pre-commit) | Enforce code consistency and verifies no secrets are pushed  |
+| [stern](https://github.com/stern/stern)                | Tail logs in Kubernetes                                      |
 
 ## Thanks
 
