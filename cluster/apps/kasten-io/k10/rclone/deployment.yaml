@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rclone
+  namespace: kasten-io
+  labels:
+    app.kubernetes.io/instance: rclone
+    app.kubernetes.io/name: rclone
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: rclone
+      app.kubernetes.io/name: rclone
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: rclone
+        app.kubernetes.io/name: rclone
+    spec:
+      containers:
+      - name: rclone
+        image: rclone/rclone:1.55
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TZ
+          value: "America/New_York"
+        command: ["/bin/sh", "-c", "--"]
+        args: ["while true; do sleep 30; done;"]
+        volumeMounts:
+        - name: rclone-config
+          mountPath: "/config"
+        - name: k10-exports
+          mountPath: /mnt/k10-exports
+      volumes:
+      - name: rclone-config
+        secret:
+          secretName: rclone-config
+      - name: k10-exports
+        persistentVolumeClaim:
+          claimName: nfs-kasten
