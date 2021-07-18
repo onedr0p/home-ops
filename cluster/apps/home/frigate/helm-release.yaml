@@ -8,22 +8,57 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://blakeblackshear.github.io/blakeshome-charts/
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: frigate
-      version: 5.0.1
+      version: 5.0.0
       sourceRef:
         kind: HelmRepository
-        name: blakeshome-charts
+        name: k8s-at-home-charts
         namespace: flux-system
       interval: 5m
   values:
     image:
       repository: blakeblackshear/frigate
       tag: 0.8.4-amd64
-    coral:
-      enabled: true
-    shmSize: 2Gi
-    timezone: "America/New_York"
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
+        - host: "frigate.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            pathType: Prefix
+        tls:
+        - hosts:
+          - "frigate.${SECRET_DOMAIN}"
+    securityContext:
+      privileged: true
+    persistence:
+      data:
+        enabled: true
+        existingClaim: frigate-config-v1
+        mountPath: /data
+      media:
+        enabled: true
+        type: custom
+        volumeSpec:
+          nfs:
+            server: 192.168.42.50
+            path: /frigate
+        mountPath: /media
+      usb:
+        enabled: true
+        type: hostPath
+        hostPath: /dev/bus/usb
+      cache:
+        enabled: true
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 2Gi
+        mountPath: /dev/shm
     config: |
       mqtt:
         host: emqx
@@ -269,33 +304,6 @@ spec:
               default: 14
     podAnnotations:
       configmap.reloader.stakater.com/reload: "frigate"
-    ingress:
-      enabled: true
-      # ingressClassName: "traefik"
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-      hosts:
-      - "frigate.${SECRET_DOMAIN}"
-      tls:
-      - hosts:
-        - "frigate.${SECRET_DOMAIN}"
-    persistence:
-      data:
-        enabled: true
-        existingClaim: frigate-config-v1
-        mountPath: /data
-    extraVolumes:
-    - name: frigate
-      persistentVolumeClaim:
-        claimName: nfs-frigate
-    - name: cache
-      emptyDir:
-        medium: Memory
-    extraVolumeMounts:
-    - mountPath: /media
-      name: frigate
-    - mountPath: /tmp/cache
-      name: cache
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -317,13 +325,3 @@ spec:
       limits:
         gpu.intel.com/i915: 1
         memory: 2000Mi
-  postRenderers:
-  - kustomize:
-      patchesJson6902:
-      - target:
-          kind: Ingress
-          name: frigate
-        patch:
-        - op: add
-          path: /spec/ingressClassName
-          value: traefik
