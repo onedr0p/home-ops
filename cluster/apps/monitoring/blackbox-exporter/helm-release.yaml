@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://prometheus-community.github.io/helm-charts
       chart: prometheus-blackbox-exporter
-      version: 5.0.0
+      version: 4.15.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community-charts
@@ -20,13 +20,11 @@ spec:
     fullnameOverride: blackbox-exporter
     ingress:
       enabled: true
-      className: "traefik"
       annotations:
+        kubernetes.io/ingress.class: "traefik"
         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
       hosts:
-      - host: "blackbox.${SECRET_DOMAIN}"
-        paths:
-        - path: /
+      - "blackbox.${SECRET_DOMAIN}"
       tls:
       - hosts:
         - "blackbox.${SECRET_DOMAIN}"
