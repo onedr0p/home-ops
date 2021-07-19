@@ -13,7 +13,6 @@ spec:
     rules:
     - alert: UPSLowOnBattery
       annotations:
-        description: ZPM almost depleted
         summary: ZPM {{$labels.instance}} has less than 30 minutes of battery left
       expr: upsAdvBatteryRunTimeRemaining/60/100 <= 30
       for: 10s
@@ -21,7 +20,6 @@ spec:
         severity: critical
     - alert: UPSOnBattery
       annotations:
-        description: ZPM is running on its battery
         summary: ZPM {{$labels.instance}} is running on batteries
       expr: upsBasicBatteryTimeOnBattery > 0
       for: 1m
