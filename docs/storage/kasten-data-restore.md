@@ -2,7 +2,9 @@
 
 Recovering from a K10 backup involves the following sequence of actions
 
-## Create a Kubernetes Secret, k10-dr-secret, using the passphrase provided while enabling DR
+## Create k10-dr-secret Kubernetes Secret
+
+!!! info "The `<passphrase>` was set during the first installation of k10"
 
 ```sh
 kubectl create secret generic k10-dr-secret \
@@ -14,18 +16,26 @@ kubectl create secret generic k10-dr-secret \
 
 !!! info "Ensure that Flux has correctly deployed K10 to it's namespace `kasten-io`"
 
-## Provide bucket information and credentials for the object storage location
+```sh
+flux get hr -n kasten-io
+```
 
-!!! info "Ensure that Flux has correctly deployed the `minio` storage profile and that it's accessible within K10"
+## Verify the nfs storage profile was created
+
+```sh
+kubectl get profiles -n kasten-io
+```
 
 ## Restoring the K10 backup
 
 Install the helm chart that creates the K10 restore job and wait for completion of the `k10-restore` job
 
+!!! info "The `<source-cluster-id>` was set during the first installation of k10"
+
 ```sh
-helm install k10-restore kasten/k10restore --namespace=kasten-io \
-    --set sourceClusterID=<source-clusterID> \
-    --set profile.name=<location-profile-name>
+helm install k10-restore kasten/k10restore -n kasten-io \
+    --set sourceClusterID=<source-cluster-id> \
+    --set profile.name=nfs
 ```
 
 ## Application recovery

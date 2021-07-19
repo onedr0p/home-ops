@@ -111,7 +111,7 @@ ceph crash archive-all
 
 ## Helpful links
 
-* [Common issues](https://rook.io/docs/rook/v1.5/ceph-common-issues.html)
+* [Common issues](https://rook.io/docs/rook/v1.6/ceph-common-issues.html)
 
 ```
 
