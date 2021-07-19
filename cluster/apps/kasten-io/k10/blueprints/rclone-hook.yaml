@@ -12,9 +12,12 @@ actions:
       name: hookPhase
       args:
         namespace: "kasten-io"
+        image: rclone/rclone:1.55
         podOverride:
           containers:
           - name: rclone
+            image: rclone/rclone:1.55
+            imagePullPolicy: IfNotPresent
             env:
             - name: TZ
               value: "America/New_York"
@@ -30,7 +33,6 @@ actions:
           - name: k10-exports
             persistentVolumeClaim:
               claimName: nfs-kasten
-        image: rclone/rclone:1.55
         command:
         - "rclone"
         - "-v"
