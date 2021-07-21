@@ -76,3 +76,129 @@ spec:
             Outbound SSH connection (user=%user.name server_ip=%fd.sip server_port=%fd.sport client_ip=%fd.cip)
           priority: WARNING
           tags: [network]
+      rules-file-integrity.yaml: |-
+        - rule: Detect New File
+          desc: detect new file created
+          condition: >
+            evt.type = chmod or evt.type = fchmod
+          output: >
+            File below a known directory opened for writing (user=%user.name
+            command=%proc.cmdline file=%fd.name parent=%proc.pname pcmdline=%proc.pcmdline gparent=%proc.aname[2])
+          priority: ERROR
+          tags: [filesystem]
+        - rule: Detect New Directory
+          desc: detect new directory created
+          condition: >
+            mkdir
+          output: >
+            File below a known directory opened for writing (user=%user.name
+            command=%proc.cmdline file=%fd.name parent=%proc.pname pcmdline=%proc.pcmdline gparent=%proc.aname[2])
+          priority: ERROR
+          tags: [filesystem]
+        - rule: Detect File Permission or Ownership Change
+          desc: detect file permission/ownership change
+          condition: >
+            spawned_process and proc.name in (chmod, chown) and proc.args contains "/tmp/"
+          output: >
+            File below a known directory has permission or ownership change (user=%user.name
+            command=%proc.cmdline file=%fd.name parent=%proc.pname pcmdline=%proc.pcmdline gparent=%proc.aname[2])
+          priority: WARNING
+          tags: [filesystem]
+        - rule: Detect Directory Change
+          desc: detect directories change
+          condition: >
+            spawned_process and proc.name in (mkdir, rmdir, mvdir, mv)
+          output: >
+            Directory Change in Filesystem (user=%user.name
+            command=%proc.cmdline file=%fd.name parent=%proc.pname pcmdline=%proc.pcmdline gparent=%proc.aname[2])
+          priority: WARNING
+          tags: [filesystem]
+        - rule: Kernel Module Modification
+          desc: detect kernel module change
+          condition: >
+            spawned_process and proc.name in (insmod, modprobe)
+          output: >
+            Kernel Module Change (user=%user.name
+            command=%proc.cmdline file=%fd.name parent=%proc.pname pcmdline=%proc.pcmdline gparent=%proc.aname[2] result=%evt.res)
+          priority: WARNING
+          tags: [process]
+        - rule: Node Created in Filesystem
+          desc: detect node created in filesystem
+          condition: >
+            spawned_process and proc.name = mknod
+          output: >
+            Node Creation in Filesystem (user=%user.name
+            command=%proc.cmdline file=%fd.name parent=%proc.pname pcmdline=%proc.pcmdline gparent=%proc.aname[2] result=%evt.res)
+          priority: WARNING
+          tags: [filesystem]
+        - rule: Listen on New Port
+          desc: Detection a new port is listening
+          condition:
+            evt.type = listen
+          output: >
+            A new port is open to listen (port=%fd.sport ip=%fd.sip)
+          priority: WARNING
+          tags: [network]
+      rules-traefik.yaml: |-
+        - macro: traefik_consider_syscalls
+          condition: (evt.num < 0)
+        - macro: app_traefik
+          condition: container and container.image startswith "traefik"
+        # Restricting listening ports to selected set
+        - list: traefik_allowed_inbound_ports_tcp
+          items: [443, 80, 8080]
+        - rule: Unexpected inbound tcp connection traefik
+          desc: Detect inbound traffic to traefik using tcp on a port outside of expected set
+          condition: inbound and evt.rawres >= 0 and not fd.sport in (traefik_allowed_inbound_ports_tcp) and app_traefik
+          output: Inbound network connection to traefik on unexpected port (command=%proc.cmdline pid=%proc.pid connection=%fd.name sport=%fd.sport user=%user.name %container.info image=%container.image)
+          priority: NOTICE
+        # Restricting spawned processes to selected set
+        - list: traefik_allowed_processes
+          items: ["traefik"]
+        - rule: Unexpected spawned process traefik
+          desc: Detect a process started in a traefik container outside of an expected set
+          condition: spawned_process and not proc.name in (traefik_allowed_processes) and app_traefik
+          output: Unexpected process spawned in traefik container (command=%proc.cmdline pid=%proc.pid user=%user.name %container.info image=%container.image)
+          priority: NOTICE
+      rules-rook.yaml: |-
+        - macro: rook_consider_syscalls
+          condition: (evt.num < 0)
+        # These policies are limited to containers, specifically those where
+        # the container image name starts with "rook"
+        - macro: app_rook
+          condition: container and container.image contains "rook"
+        # Not considering all inbound networking suspect
+        # Not considering all outbound networking suspect
+        # Restricting listening ports to selected set
+        # Restricting spawned processes to selected set
+        - list: rook_allowed_processes
+          items: ["/bin/sh", "/sbin/ldconfig.real", "/tini", "/usr/bin/python2.7", "/usr/local/bin/rook", "ceph", "ldconfig", "ldconfig.real", "rook"]
+        - rule: Unexpected spawned process rook
+          desc: Detect a process started in a rook container outside of an expected set
+          condition: spawned_process and not proc.name in (rook_allowed_processes) and app_rook
+          output: Unexpected process spawned in rook container (command=%proc.cmdline pid=%proc.pid user=%user.name %container.info image=%container.image)
+          priority: NOTICE
+        # Restricting files read or written to specific set
+        - list: rook_allowed_file_prefixes_readonly
+          items: ["/"]
+        - rule: Unexpected file access readonly for rook
+          desc: Detect an attempt to access a file readonly other than below an expected list of directories
+          condition: (open_read and evt.is_open_write=false) and not fd.name pmatch (rook_allowed_file_prefixes_readonly) and app_rook
+          output: Unexpected file accessed readonly for rook (command=%proc.cmdline pid=%proc.pid file=%fd.name %container.info image=%container.image)
+          priority: NOTICE
+        - list: rook_allowed_file_prefixes_readwrite
+          items: ["/dev", "/tmp"]
+        - rule: Unexpected file access readwrite for rook
+          desc: Detect an attempt to access a file readwrite other than below an expected list of directories
+          condition: (open_write) and not fd.name pmatch (rook_allowed_file_prefixes_readwrite) and app_rook
+          output: Unexpected file accessed readwrite for rook (command=%proc.cmdline pid=%proc.pid file=%fd.name %container.info image=%container.image)
+          priority: NOTICE
+        # Restricting syscalls to selected set
+        - list: rook_allowed_syscalls
+          items: [clone, connect, dup, execve, getegid, geteuid, getgid, getrlimit, getuid, open, openat, pipe, procexit, sendmsg, socket, unlinkat]
+        - rule: Unexpected syscall rook
+          desc: Detect a syscall in a rook container outside of an expected set
+          condition: rook_consider_syscalls and not evt.type in ("<unknown>", rook_allowed_syscalls) and app_rook
+          output: Unexpected syscall in rook container (command=%proc.cmdline pid=%proc.pid user=%user.name syscall=%evt.type args=%evt.args %container.info image=%container.image)
+          priority: NOTICE
+          warn_evttypes: False
