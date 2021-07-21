@@ -19,9 +19,22 @@ spec:
   values:
     image:
       registry: public.ecr.aws
+    config:
+      existingSecret: falcosidekick
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: traefik
+        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+      hosts:
+      - host: "falcosidekick.${SECRET_DOMAIN}"
+        paths:
+        - /
+      tls:
+      - hosts:
+        - "falcosidekick.${SECRET_DOMAIN}"
     webui:
       enabled: true
-      darkmode: true
       image:
         registry: public.ecr.aws
       ingress:
@@ -30,8 +43,8 @@ spec:
           kubernetes.io/ingress.class: traefik
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-        - host: "falco-dashboard.${SECRET_DOMAIN}"
+        - host: "falcosidekick-ui.${SECRET_DOMAIN}"
           paths: ["/ui", "/events", "/healthz", "/ws"]
         tls:
         - hosts:
-          - "falco-dashboard.${SECRET_DOMAIN}"
+          - "falcosidekick-ui.${SECRET_DOMAIN}"
