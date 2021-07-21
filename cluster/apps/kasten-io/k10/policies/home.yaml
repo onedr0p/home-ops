@@ -1,0 +1,61 @@
+# yamllint disable
+kind: Policy
+apiVersion: config.kio.kasten.io/v1alpha1
+metadata:
+  name: home
+  namespace: kasten-io
+spec:
+  frequency: "@daily"
+  subFrequency:
+    minutes:
+      - 0
+    hours:
+      - 11
+      - 23
+    weekdays:
+      - 0
+    days:
+      - 1
+    months:
+      - 1
+  retention:
+    daily: 7
+    weekly: 2
+    monthly: 2
+  selector:
+    matchExpressions:
+      - key: k10.kasten.io/appNamespace
+        operator: In
+        values:
+          - home
+  actions:
+    - action: backup
+      backupParameters:
+        filters:
+          includeResources:
+            - matchExpressions:
+                - key: kasten.io/backup-volume
+                  operator: In
+                  values:
+                    - enabled
+        ignoreExceptions: true
+        profile:
+          name: home
+          namespace: kasten-io
+    - action: export
+      exportParameters:
+        frequency: "@daily"
+        receiveString: bIzAPpoanmEJ4QpcrTZGj8Z0SUsNDlim5yOJ01sHeq8XMd4eiUaHZrmgdfaYlfQMIFDkzKuNGU+u7zELhTr9hRoHngA1B+Gac4eL796G9664qIxx321pDBaVu5T0NL9Iep43oG5P4eUau7OQ7NzJ6nOGD/Diy0JJ51XZHEOs8OiL4pMpE3e7lV3UrUXoNTVe6IFnQ42Vpj1I00o3MTiL9929XXSzHSjrpihO/IrbWJdep4bOOnTYbsUDs6SuidqyZJbfJa+PK9pzW2/4vBon4DLZ9f/TMqvE0gmHTmwmGyp+X3fVunE7+3r0uNDP8ItwiAw0McpNwyxIsMMmnw2KF/JLtKkNKQsG+IQth53r5PW7wx3JhdTSsWxyzw3L1GwqpJKueMMC0HMhHqF1+X4PfZybCNuL660
+        profile:
+          name: home
+          namespace: kasten-io
+        hooks:
+          onSuccess:
+            blueprint: home
+            actionName: post-export
+        migrationToken:
+          name: home-migration-token-f2rcn
+          namespace: kasten-io
+        exportData:
+          enabled: true
+      retention: {}
