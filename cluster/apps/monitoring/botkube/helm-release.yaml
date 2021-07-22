@@ -30,10 +30,25 @@ spec:
       settings:
         clustername: home-cluster
       resources:
+      - name: v1/pods
+        namespaces:
+          include:
+          - default
+          - gaming
+          - home
+          - kube-system
+          - media
+          - monitoring
+          - networking
+        events:
+        - create
+        - delete
+        - error
       - name: v1/services
         namespaces:
           include:
           - default
+          - gaming
           - home
           - kube-system
           - media
@@ -47,6 +62,7 @@ spec:
         namespaces:
           include:
           - default
+          - gaming
           - home
           - kube-system
           - media
@@ -61,6 +77,7 @@ spec:
         namespaces:
           include:
           - default
+          - gaming
           - home
           - kube-system
           - media
@@ -75,6 +92,7 @@ spec:
         namespaces:
           include:
           - default
+          - gaming
           - home
           - kube-system
           - media
@@ -87,12 +105,7 @@ spec:
       - name: v1/nodes
         namespaces:
           include:
-          - default
-          - home
-          - kube-system
-          - media
-          - monitoring
-          - networking
+          - all
         events:
         - create
         - delete
@@ -114,6 +127,7 @@ spec:
         namespaces:
           include:
           - default
+          - gaming
           - home
           - kube-system
           - media
@@ -127,6 +141,7 @@ spec:
         namespaces:
           include:
           - default
+          - gaming
           - home
           - kube-system
           - media
@@ -140,6 +155,7 @@ spec:
         namespaces:
           include:
           - default
+          - gaming
           - home
           - kube-system
           - media
@@ -152,12 +168,7 @@ spec:
       - name: apps/v1/daemonsets
         namespaces:
           include:
-          - default
-          - home
-          - kube-system
-          - media
-          - monitoring
-          - networking
+          - all
         events:
         - create
         - delete
@@ -166,23 +177,29 @@ spec:
         namespaces:
           include:
           - default
+          - gaming
           - home
           - kube-system
           - media
           - monitoring
           - networking
         events:
+        - create
         - update
+        - delete
+        - error
+      - name: rbac.authorization.k8s.io/v1/roles
+        namespaces:
+          include:
+          - all
+        events:
+        - create
+        - delete
         - error
       - name: rbac.authorization.k8s.io/v1/rolebindings
         namespaces:
           include:
-          - default
-          - home
-          - kube-system
-          - media
-          - monitoring
-          - networking
+          - all
         events:
         - create
         - delete
@@ -190,12 +207,7 @@ spec:
       - name: rbac.authorization.k8s.io/v1/clusterrolebindings
         namespaces:
           include:
-          - default
-          - home
-          - kube-system
-          - media
-          - monitoring
-          - networking
+          - all
         events:
         - create
         - delete
@@ -203,12 +215,7 @@ spec:
       - name: rbac.authorization.k8s.io/v1/clusterroles
         namespaces:
           include:
-          - default
-          - home
-          - kube-system
-          - media
-          - monitoring
-          - networking
+          - all
         events:
         - create
         - delete
