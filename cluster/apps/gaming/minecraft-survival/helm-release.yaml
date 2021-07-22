@@ -53,7 +53,8 @@ spec:
       gameMode: survival
       motd: "minecraft-survival\n\u00A76\u00A7lsurvival\u00A7r\u00A7l - \u00A7r\u00A7c\u00A7lSMP\u00A7r\n"
       icon: https://www.freeiconspng.com/uploads/minecraft-server-icon-23.png
-      loadBalancerIP: 192.168.69.150
+      externalIPs:
+      - 192.168.69.150
       rcon:
         enabled: false
         port: 25575
@@ -76,16 +77,6 @@ spec:
           tls:
           - hosts:
             - minecraft-survival-map.${SECRET_DOMAIN}
-      - name: geyser
-        containerPort: 19132
-        protocol: UDP
-        service:
-          enabled: true
-          type: LoadBalancer
-          port: 19132
-          loadBalancerIP: 192.168.69.151
-        ingress:
-          enabled: false
     persistence:
       dataDir:
         enabled: true
