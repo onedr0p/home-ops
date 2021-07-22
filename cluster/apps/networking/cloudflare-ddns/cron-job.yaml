@@ -4,6 +4,8 @@ kind: CronJob
 metadata:
   name: cloudflare-ddns
   namespace: networking
+  annotations:
+    botkube.io/disable: "true"
 spec:
   schedule: "*/5 * * * *"
   failedJobsHistoryLimit: 1
@@ -12,6 +14,9 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          annotations:
+            botkube.io/disable: "true"
         spec:
           restartPolicy: Never
           containers:
