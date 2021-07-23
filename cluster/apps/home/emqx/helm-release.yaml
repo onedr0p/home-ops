@@ -17,7 +17,7 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    replicaCount: 3
+    replicaCount: 1
     recreatePods: true
     service:
       type: LoadBalancer
@@ -65,18 +65,6 @@ spec:
       {emqx_mod_topic_metrics, true}.
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
-    affinity:
-      podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                - emqx
-            topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 100m
