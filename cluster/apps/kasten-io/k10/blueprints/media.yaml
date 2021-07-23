@@ -8,42 +8,42 @@ actions:
   post-export:
     # kind: PersistentVolumeClaim
     phases:
-    - func: KubeTask
-      name: hookPhase
-      args:
-        namespace: "kasten-io"
-        image: rclone/rclone:1.56
-        podOverride:
-          containers:
-          - name: container
-            imagePullPolicy: IfNotPresent
-            env:
-            - name: TZ
-              value: "America/New_York"
-            volumeMounts:
-            - name: rclone-config
-              mountPath: "/config"
-            - name: k10-exports
-              mountPath: /mnt/k10-exports
-          volumes:
-          - name: rclone-config
-            secret:
-              secretName: rclone-config
-          - name: k10-exports
-            persistentVolumeClaim:
-              claimName: nfs-kasten
-        command:
-        - "rclone"
-        - "-v"
-        - "--config"
-        - "/config/rclone.conf"
-        - "sync"
-        - "--ignore-errors"
-        - "--fast-list"
-        - "--b2-hard-delete"
-        - "--transfers"
-        - "24"
-        - "--checkers"
-        - "24"
-        - "/mnt/k10-exports/media"
-        - "b2:k10-media-mxlcc/"
+      - func: KubeTask
+        name: hookPhase
+        args:
+          namespace: "kasten-io"
+          image: rclone/rclone:1.56
+          podOverride:
+            containers:
+              - name: container
+                imagePullPolicy: IfNotPresent
+                env:
+                  - name: TZ
+                    value: "America/New_York"
+                volumeMounts:
+                  - name: rclone-config
+                    mountPath: "/config"
+                  - name: k10-exports
+                    mountPath: /mnt/k10-exports
+            volumes:
+              - name: rclone-config
+                secret:
+                  secretName: rclone-config
+              - name: k10-exports
+                persistentVolumeClaim:
+                  claimName: nfs-kasten
+          command:
+            - "rclone"
+            - "-v"
+            - "--config"
+            - "/config/rclone.conf"
+            - "sync"
+            - "--ignore-errors"
+            - "--fast-list"
+            - "--b2-hard-delete"
+            - "--transfers"
+            - "24"
+            - "--checkers"
+            - "24"
+            - "/mnt/k10-exports/media"
+            - "b2:k10-media-mxlcc/"

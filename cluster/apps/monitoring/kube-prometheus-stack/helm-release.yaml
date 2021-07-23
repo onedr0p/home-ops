@@ -24,53 +24,53 @@ spec:
           slack_api_url: "${SECRET_ALERT_MANAGER_DISCORD_WEBHOOK}"
           resolve_timeout: 5m
         receivers:
-        - name: 'null'
-        - name: 'discord'
-          slack_configs:
-          - channel: '#prometheus'
-            icon_url: https://avatars3.githubusercontent.com/u/3380462
-            username: 'Prometheus'
-            send_resolved: true
-            title: |-
-              [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }} {{ else if ne .CommonAnnotations.message ""}}{{ .CommonAnnotations.message }} {{ else if ne .CommonAnnotations.description ""}}{{ .CommonAnnotations.description }} {{ else }}{{ .CommonLabels.alertname }}{{ end }}
-            text: >-
-              {{ range .Alerts -}}
-                *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+          - name: "null"
+          - name: "discord"
+            slack_configs:
+              - channel: "#prometheus"
+                icon_url: https://avatars3.githubusercontent.com/u/3380462
+                username: "Prometheus"
+                send_resolved: true
+                title: |-
+                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }} {{ else if ne .CommonAnnotations.message ""}}{{ .CommonAnnotations.message }} {{ else if ne .CommonAnnotations.description ""}}{{ .CommonAnnotations.description }} {{ else }}{{ .CommonLabels.alertname }}{{ end }}
+                text: >-
+                  {{ range .Alerts -}}
+                    *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
 
-              {{ if ne .Annotations.summary ""}}*Summary:* {{ .Annotations.summary }} {{ else if ne .Annotations.message ""}}*Message:* {{ .Annotations.message }} {{ else if ne .Annotations.description ""}}*Description:* {{ .Annotations.description }}{{ end }}
+                  {{ if ne .Annotations.summary ""}}*Summary:* {{ .Annotations.summary }} {{ else if ne .Annotations.message ""}}*Message:* {{ .Annotations.message }} {{ else if ne .Annotations.description ""}}*Description:* {{ .Annotations.description }}{{ end }}
 
-              *Details:*
-                {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
-                {{ end }}
-              {{ end }}
-        - name: 'nodered'
-          webhook_configs:
-          - url: "http://node-red.home:1880/power-outage"
-            send_resolved: true
+                  *Details:*
+                    {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+                    {{ end }}
+                  {{ end }}
+          - name: "nodered"
+            webhook_configs:
+              - url: "http://node-red.home:1880/power-outage"
+                send_resolved: true
         route:
-          group_by: ['alertname', 'job']
+          group_by: ["alertname", "job"]
           group_wait: 30s
           group_interval: 5m
           repeat_interval: 6h
-          receiver: 'discord'
+          receiver: "discord"
           routes:
-          - receiver: 'null'
-            match:
-              alertname: Watchdog
-          - receiver: 'discord'
-            match_re:
-              severity: critical
-            continue: true
-          - receiver: 'nodered'
-            match:
-              alertname: UPSLowOnBattery
-            continue: true
+            - receiver: "null"
+              match:
+                alertname: Watchdog
+            - receiver: "discord"
+              match_re:
+                severity: critical
+              continue: true
+            - receiver: "nodered"
+              match:
+                alertname: UPSLowOnBattery
+              continue: true
         inhibit_rules:
-        - source_match:
-            severity: 'critical'
-          target_match:
-            severity: 'warning'
-          equal: ['alertname', 'namespace']
+          - source_match:
+              severity: "critical"
+            target_match:
+              severity: "warning"
+            equal: ["alertname", "namespace"]
       ingress:
         enabled: true
         pathType: Prefix
@@ -78,10 +78,10 @@ spec:
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-        - "alert-manager.${SECRET_DOMAIN}"
-        tls:
-        - hosts:
           - "alert-manager.${SECRET_DOMAIN}"
+        tls:
+          - hosts:
+              - "alert-manager.${SECRET_DOMAIN}"
       alertmanagerSpec:
         storage:
           volumeClaimTemplate:
@@ -93,12 +93,12 @@ spec:
     nodeExporter:
       serviceMonitor:
         relabelings:
-        - action: replace
-          regex: (.*)
-          replacement: $1
-          sourceLabels:
-          - __meta_kubernetes_pod_node_name
-          targetLabel: kubernetes_node
+          - action: replace
+            regex: (.*)
+            replacement: $1
+            sourceLabels:
+              - __meta_kubernetes_pod_node_name
+            targetLabel: kubernetes_node
     kube-state-metrics:
       fullnameOverride: kube-state-metrics
     prometheus-node-exporter:
@@ -110,36 +110,36 @@ spec:
       enabled: true
       serviceMonitor:
         metricRelabelings:
-        - action: replace
-          sourceLabels:
-          - node
-          targetLabel: instance
+          - action: replace
+            sourceLabels:
+              - node
+            targetLabel: instance
     kubeApiServer:
       enabled: true
     kubeControllerManager:
       enabled: true
       endpoints:
-      - 192.168.42.10
-      - 192.168.42.11
-      - 192.168.42.12
+        - 192.168.42.10
+        - 192.168.42.11
+        - 192.168.42.12
     kubeScheduler:
       enabled: true
       endpoints:
-      - 192.168.42.10
-      - 192.168.42.11
-      - 192.168.42.12
+        - 192.168.42.10
+        - 192.168.42.11
+        - 192.168.42.12
     kubeProxy:
       enabled: true
       endpoints:
-      - 192.168.42.10
-      - 192.168.42.11
-      - 192.168.42.12
+        - 192.168.42.10
+        - 192.168.42.11
+        - 192.168.42.12
     kubeEtcd:
       enabled: true
       endpoints:
-      - 192.168.42.10
-      - 192.168.42.11
-      - 192.168.42.12
+        - 192.168.42.10
+        - 192.168.42.11
+        - 192.168.42.12
       service:
         enabled: true
         port: 2381
@@ -155,10 +155,10 @@ spec:
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-        - "prometheus.${SECRET_DOMAIN}"
-        tls:
-        - hosts:
           - "prometheus.${SECRET_DOMAIN}"
+        tls:
+          - hosts:
+              - "prometheus.${SECRET_DOMAIN}"
       thanosService:
         enabled: true
       prometheusSpec:
@@ -193,13 +193,13 @@ spec:
             name: thanos-objstore
             key: objstore.yml
         additionalScrapeConfigs:
-        - job_name: 'node-exporter'
-          honor_timestamps: true
-          static_configs:
-          - targets:
-            - 192.168.1.1:9100
-        - job_name: 'coredns'
-          honor_timestamps: true
-          static_configs:
-          - targets:
-            - 192.168.1.1:9153
+          - job_name: "node-exporter"
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - 192.168.1.1:9100
+          - job_name: "coredns"
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - 192.168.1.1:9153

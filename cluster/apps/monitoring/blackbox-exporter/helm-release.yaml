@@ -34,44 +34,44 @@ spec:
         interval: 30s
         scrapeTimeout: 30s
       targets:
-      - name: router
-        url: 192.168.1.1
-        module: icmp
-      - name: garage
-        url: 192.168.1.19
-        module: icmp
-      - name: vacuum
-        url: 192.168.1.28
-        module: icmp
-      - name: zigbee
-        url: 192.168.1.90
-        module: icmp
-      - name: nas
-        url: 192.168.42.50
-        module: icmp
-      - name: piaware
-        url: 192.168.150.25
-        module: icmp
-      - name: hdhomerun
-        url: 192.168.150.30
-        module: icmp
+        - name: router
+          url: 192.168.1.1
+          module: icmp
+        - name: garage
+          url: 192.168.1.19
+          module: icmp
+        - name: vacuum
+          url: 192.168.1.28
+          module: icmp
+        - name: zigbee
+          url: 192.168.1.90
+          module: icmp
+        - name: nas
+          url: 192.168.42.50
+          module: icmp
+        - name: piaware
+          url: 192.168.150.25
+          module: icmp
+        - name: hdhomerun
+          url: 192.168.150.30
+          module: icmp
     prometheusRule:
       enabled: true
       additionalLabels:
         app: prometheus-operator
         release: prometheus
       rules:
-      - alert: HostDown
-        expr: probe_success == 0
-        for: 1m
-        labels:
-          severity: critical
-        annotations:
-          message: The host {{"{{ $labels.target }}"}} is currently unreachable
-      - alert: SlowResponseTime
-        annotations:
-          message: The response time for {{"{{ $labels.target }}"}} has been greater than 30 seconds for 5 minutes.
-        expr: probe_duration_seconds > 30
-        for: 5m
-        labels:
-          severity: warning
+        - alert: HostDown
+          expr: probe_success == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            message: The host {{"{{ $labels.target }}"}} is currently unreachable
+        - alert: SlowResponseTime
+          annotations:
+            message: The response time for {{"{{ $labels.target }}"}} has been greater than 30 seconds for 5 minutes.
+          expr: probe_duration_seconds > 30
+          for: 5m
+          labels:
+            severity: warning

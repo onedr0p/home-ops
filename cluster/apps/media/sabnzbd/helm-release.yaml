@@ -30,29 +30,29 @@ spec:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           traefik.ingress.kubernetes.io/router.middlewares: "networking-basic-auth@kubernetescrd"
         hosts:
-        - host: "sabnzbd.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "sabnzbd.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "sabnzbd.${SECRET_DOMAIN}"
+          - hosts:
+              - "sabnzbd.${SECRET_DOMAIN}"
       api:
         enabled: true
         ingressClassName: "traefik"
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-        - host: "sabnzbd.${SECRET_DOMAIN}"
-          paths:
-          - path: /api
-            pathType: Prefix
+          - host: "sabnzbd.${SECRET_DOMAIN}"
+            paths:
+              - path: /api
+                pathType: Prefix
         tls:
-        - hosts:
-          - "sabnzbd.${SECRET_DOMAIN}"
+          - hosts:
+              - "sabnzbd.${SECRET_DOMAIN}"
     podSecurityContext:
       supplementalGroups:
-      - 100
+        - 100
     persistence:
       config:
         enabled: true

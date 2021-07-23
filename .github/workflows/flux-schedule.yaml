@@ -1,45 +1,44 @@
 ---
-
 name: Schedule - Update Flux
 
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
   schedule:
-  - cron: '0 */12 * * *'
+    - cron: "0 */12 * * *"
 
 jobs:
   flux-upgrade:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
 
-    - name: Setup Flux CLI
-      uses: fluxcd/flux2/action@main
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@main
 
-    - name: Upgrade Flux
-      id: upgrade
-      run: |
-        UGLY_VERSION="$(flux -v)"
-        VERSION="v${UGLY_VERSION#*flux version }"
-        flux install --version="${VERSION}" \
-          --network-policy=false \
-          --export > ./cluster/base/flux-system/gotk-components.yaml
-        echo "::set-output name=flux_version::$VERSION"
+      - name: Upgrade Flux
+        id: upgrade
+        run: |
+          UGLY_VERSION="$(flux -v)"
+          VERSION="v${UGLY_VERSION#*flux version }"
+          flux install --version="${VERSION}" \
+            --network-policy=false \
+            --export > ./cluster/base/flux-system/gotk-components.yaml
+          echo "::set-output name=flux_version::$VERSION"
 
-    - name: Create pull request for Flux upgrade
-      uses: peter-evans/create-pull-request@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        branch: "flux/upgrade-${{ steps.upgrade.outputs.flux_version }}"
-        delete-branch: true
-        title: "chore(deps): upgrade flux components to ${{ steps.upgrade.outputs.flux_version }}"
-        signoff: true
-        committer: "Devin Buhl <onedr0p@users.noreply.github.com>"
-        author: "Devin Buhl <onedr0p@users.noreply.github.com>"
-        assignees: "onedr0p"
-        commit-message: "chore(deps): upgrade flux components to ${{ steps.upgrade.outputs.flux_version }}"
-        body: |
-          Release notes: https://github.com/fluxcd/flux2/releases/tag/${{ steps.upgrade.outputs.flux_version }}
-        labels: flux/upgrade
+      - name: Create pull request for Flux upgrade
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: "flux/upgrade-${{ steps.upgrade.outputs.flux_version }}"
+          delete-branch: true
+          title: "chore(deps): upgrade flux components to ${{ steps.upgrade.outputs.flux_version }}"
+          signoff: true
+          committer: "Devin Buhl <onedr0p@users.noreply.github.com>"
+          author: "Devin Buhl <onedr0p@users.noreply.github.com>"
+          assignees: "onedr0p"
+          commit-message: "chore(deps): upgrade flux components to ${{ steps.upgrade.outputs.flux_version }}"
+          body: |
+            Release notes: https://github.com/fluxcd/flux2/releases/tag/${{ steps.upgrade.outputs.flux_version }}
+          labels: flux/upgrade

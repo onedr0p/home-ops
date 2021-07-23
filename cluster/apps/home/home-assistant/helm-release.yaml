@@ -23,15 +23,15 @@ spec:
     env:
       TZ: "America/New_York"
     envFrom:
-    - secretRef:
-        name: home-assistant
+      - secretRef:
+          name: home-assistant
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
     service:
       main:
         type: LoadBalancer
         externalIPs:
-        - "${SVC_HOME_ASSISTANT_ADDRESS}"
+          - "${SVC_HOME_ASSISTANT_ADDRESS}"
         externalTrafficPolicy: Local
     ingress:
       main:
@@ -42,13 +42,13 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-        - host: "hass.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "hass.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "hass.${SECRET_DOMAIN}"
+          - hosts:
+              - "hass.${SECRET_DOMAIN}"
     probes:
       liveness:
         enabled: false
@@ -70,28 +70,28 @@ spec:
           deployKeySecret: code-server
         workingDir: "/config"
         args:
-        - --auth
-        - "none"
-        - --user-data-dir
-        - "/config/.vscode"
-        - --extensions-dir
-        - "/config/.vscode"
+          - --auth
+          - "none"
+          - --user-data-dir
+          - "/config/.vscode"
+          - --extensions-dir
+          - "/config/.vscode"
         ingress:
           enabled: true
           ingressClassName: "traefik"
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
           hosts:
-          - host: "hass-config.${SECRET_DOMAIN}"
-            paths:
-            - path: /
-              pathType: Prefix
+            - host: "hass-config.${SECRET_DOMAIN}"
+              paths:
+                - path: /
+                  pathType: Prefix
           tls:
-          - hosts:
-            - "hass-config.${SECRET_DOMAIN}"
+            - hosts:
+                - "hass-config.${SECRET_DOMAIN}"
         volumeMounts:
-        - name: config
-          mountPath: /config
+          - name: config
+            mountPath: /config
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
     resources:

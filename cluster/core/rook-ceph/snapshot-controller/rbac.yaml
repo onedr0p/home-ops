@@ -10,39 +10,39 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: snapshot-controller-runner
 rules:
-- apiGroups: [""]
-  resources: ["persistentvolumes"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["persistentvolumeclaims"]
-  verbs: ["get", "list", "watch", "update"]
-- apiGroups: ["storage.k8s.io"]
-  resources: ["storageclasses"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["events"]
-  verbs: ["list", "watch", "create", "update", "patch"]
-- apiGroups: ["snapshot.storage.k8s.io"]
-  resources: ["volumesnapshotclasses"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["snapshot.storage.k8s.io"]
-  resources: ["volumesnapshotcontents"]
-  verbs: ["create", "get", "list", "watch", "update", "delete"]
-- apiGroups: ["snapshot.storage.k8s.io"]
-  resources: ["volumesnapshots"]
-  verbs: ["get", "list", "watch", "update"]
-- apiGroups: ["snapshot.storage.k8s.io"]
-  resources: ["volumesnapshots/status"]
-  verbs: ["update"]
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "update"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch", "create", "update", "patch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotcontents"]
+    verbs: ["create", "get", "list", "watch", "update", "delete"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshots"]
+    verbs: ["get", "list", "watch", "update"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshots/status"]
+    verbs: ["update"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: snapshot-controller-role
 subjects:
-- kind: ServiceAccount
-  name: snapshot-controller
-  namespace: rook-ceph
+  - kind: ServiceAccount
+    name: snapshot-controller
+    namespace: rook-ceph
 roleRef:
   kind: ClusterRole
   name: snapshot-controller-runner
@@ -54,9 +54,9 @@ metadata:
   namespace: rook-ceph
   name: snapshot-controller-leaderelection
 rules:
-- apiGroups: ["coordination.k8s.io"]
-  resources: ["leases"]
-  verbs: ["get", "watch", "list", "delete", "update", "create"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "watch", "list", "delete", "update", "create"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -64,9 +64,9 @@ metadata:
   name: snapshot-controller-leaderelection
   namespace: rook-ceph
 subjects:
-- kind: ServiceAccount
-  name: snapshot-controller
-  namespace: rook-ceph
+  - kind: ServiceAccount
+    name: snapshot-controller
+    namespace: rook-ceph
 roleRef:
   kind: Role
   name: snapshot-controller-leaderelection

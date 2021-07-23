@@ -1,5 +1,5 @@
 ---
-version: '3'
+version: "3"
 
 vars:
   K3S_PRIMARY_MASTER_NODE_USERNAME: "ubuntu"
@@ -7,35 +7,34 @@ vars:
   K3S_KUBEVIP_ADDRESS: "192.168.42.5"
 
 tasks:
-
   kubeconfig:
     desc: Remotely fetch kubeconfig from k3s
     cmds:
-    - rsync --verbose --progress --partial --rsync-path="sudo rsync" {{.K3S_PRIMARY_MASTER_NODE_USERNAME}}@{{.K3S_PRIMARY_MASTER_NODE_ADDRESS}}:/etc/rancher/k3s/k3s.yaml ./kubeconfig
-    - sed -i '' 's/127.0.0.1/{{.K3S_KUBEVIP_ADDRESS}}/g' ./kubeconfig
-    - chmod go-r kubeconfig
+      - rsync --verbose --progress --partial --rsync-path="sudo rsync" {{.K3S_PRIMARY_MASTER_NODE_USERNAME}}@{{.K3S_PRIMARY_MASTER_NODE_ADDRESS}}:/etc/rancher/k3s/k3s.yaml ./kubeconfig
+      - sed -i '' 's/127.0.0.1/{{.K3S_KUBEVIP_ADDRESS}}/g' ./kubeconfig
+      - chmod go-r kubeconfig
     silent: true
 
   rook-ceph-toolbox:
     desc: Exec into the Rook Ceph toolbox
     cmds:
-    - kubectl -n rook-ceph exec -it (kubectl -n rook-ceph get pod -l "app=rook-direct-mount" -o jsonpath='{.items[0].metadata.name}') bash
+      - kubectl -n rook-ceph exec -it (kubectl -n rook-ceph get pod -l "app=rook-direct-mount" -o jsonpath='{.items[0].metadata.name}') bash
     slient: true
 
   k10-password:
     desc: Retrieve the k10 passphrase
     cmds:
-    - kubectl get serviceaccount k10-k10 -o jsonpath="{.secrets[0].name}" --namespace kasten-io
-    - kubectl get secret k10-k10-token-bdpdn --namespace kasten-io -ojsonpath="{.data.token}{'\n'}" | base64 --decode
+      - kubectl get serviceaccount k10-k10 -o jsonpath="{.secrets[0].name}" --namespace kasten-io
+      - kubectl get secret k10-k10-token-bdpdn --namespace kasten-io -ojsonpath="{.data.token}{'\n'}" | base64 --decode
 
   maintenance:
     desc: Stop all Pods and Pause all Helm Releases that rely on the NAS
     cmds:
-    - flux suspend hr -n media plex
-    - flux suspend hr -n media sonarr
-    - flux suspend hr -n media radarr
-    - flux suspend hr -n media lidarr
-    - flux suspend hr -n media readarr
-    - flux suspend hr -n media qbittorrent
-    - flux suspend hr -n media sabnzbd
-    - flux suspend hr -n home frigate
+      - flux suspend hr -n media plex
+      - flux suspend hr -n media sonarr
+      - flux suspend hr -n media radarr
+      - flux suspend hr -n media lidarr
+      - flux suspend hr -n media readarr
+      - flux suspend hr -n media qbittorrent
+      - flux suspend hr -n media sabnzbd
+      - flux suspend hr -n home frigate

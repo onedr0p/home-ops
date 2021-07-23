@@ -36,7 +36,7 @@ spec:
         enabled: true
         type: LoadBalancer
         externalIPs:
-        - "${SVC_BLOCKY_ADDRESS}"
+          - "${SVC_BLOCKY_ADDRESS}"
         ports:
           tcp:
             enabled: true
@@ -85,15 +85,15 @@ spec:
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                - blocky
-            topologyKey: kubernetes.io/hostname
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - blocky
+              topologyKey: kubernetes.io/hostname
     resources:
       requests:
         memory: 100Mi

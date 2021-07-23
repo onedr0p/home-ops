@@ -52,31 +52,31 @@ spec:
       dashboardproviders.yaml:
         apiVersion: 1
         providers:
-        - name: 'default'
-          orgId: 1
-          folder: ''
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards/default
+          - name: "default"
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
     datasources:
       datasources.yaml:
         apiVersion: 1
         # list of datasources that should be deleted from the database
         deleteDatasources:
-        - name: Loki
-          orgId: 1
+          - name: Loki
+            orgId: 1
         datasources:
-        - name: Prometheus
-          type: prometheus
-          access: proxy
-          url: http://thanos-query:9090/
-          isDefault: true
-        - name: Loki
-          type: loki
-          access: proxy
-          url: http://loki:3100
+          - name: Prometheus
+            type: prometheus
+            access: proxy
+            url: http://thanos-query:9090/
+            isDefault: true
+          - name: Loki
+            type: loki
+            access: proxy
+            url: http://loki:3100
     dashboards:
       default:
         # # Ref: https://grafana.com/grafana/dashboards/12175
@@ -156,12 +156,12 @@ spec:
         enabled: true
         searchNamespace: ALL
     plugins:
-    - natel-discrete-panel
-    - pr0ps-trackmap-panel
-    - grafana-piechart-panel
-    - vonage-status-panel
-    - grafana-worldmap-panel
-    - grafana-clock-panel
+      - natel-discrete-panel
+      - pr0ps-trackmap-panel
+      - grafana-piechart-panel
+      - vonage-status-panel
+      - grafana-worldmap-panel
+      - grafana-clock-panel
     serviceMonitor:
       enabled: true
     ingress:
@@ -170,10 +170,10 @@ spec:
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
       hosts:
-      - "grafana.${SECRET_DOMAIN}"
-      tls:
-      - hosts:
         - "grafana.${SECRET_DOMAIN}"
+      tls:
+        - hosts:
+            - "grafana.${SECRET_DOMAIN}"
     serviceAccount:
       create: true
       autoMount: true

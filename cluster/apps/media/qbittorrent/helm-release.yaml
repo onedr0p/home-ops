@@ -31,7 +31,7 @@ spec:
         enabled: true
         type: LoadBalancer
         externalIPs:
-        - "${SVC_QBITTORRENT_ADDRESS}"
+          - "${SVC_QBITTORRENT_ADDRESS}"
         ports:
           bittorrent:
             enabled: true
@@ -48,16 +48,16 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-        - host: "qb.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "qb.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "qb.${SECRET_DOMAIN}"
+          - hosts:
+              - "qb.${SECRET_DOMAIN}"
     podSecurityContext:
       supplementalGroups:
-      - 100
+        - 100
     persistence:
       config:
         enabled: true
@@ -73,15 +73,15 @@ spec:
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                - kube-vip
-            topologyKey: kubernetes.io/hostname
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - kube-vip
+              topologyKey: kubernetes.io/hostname
     resources:
       requests:
         memory: 250Mi

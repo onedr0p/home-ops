@@ -41,15 +41,15 @@ spec:
       enabled: true
   # TODO https://github.com/grafana/helm-charts/pull/568
   postRenderers:
-  - kustomize:
-      patchesJson6902:
-      - target:
-          kind: Service
-          name: promtail-syslog
-        patch:
-        - op: remove
-          path: /spec/loadBalancerIP
-        - op: add
-          path: /spec/externalIPs
-          value:
-          - "${SVC_SYSLOG_ADDRESS}"
+    - kustomize:
+        patchesJson6902:
+          - target:
+              kind: Service
+              name: promtail-syslog
+            patch:
+              - op: remove
+                path: /spec/loadBalancerIP
+              - op: add
+                path: /spec/externalIPs
+                value:
+                  - "${SVC_SYSLOG_ADDRESS}"

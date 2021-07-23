@@ -36,17 +36,17 @@ spec:
         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
       urlPath: k10
       hosts:
-      - "k10.${SECRET_DOMAIN}"
+        - "k10.${SECRET_DOMAIN}"
       tls:
         enabled: true
         secretName: "${SECRET_DOMAIN/./-}-tls"
   postRenderers:
-  - kustomize:
-      patchesJson6902:
-      - target:
-          kind: Ingress
-          name: k10-ingress
-        patch:
-        - op: add
-          path: /spec/ingressClassName
-          value: traefik
+    - kustomize:
+        patchesJson6902:
+          - target:
+              kind: Ingress
+              name: k10-ingress
+            patch:
+              - op: add
+                path: /spec/ingressClassName
+                value: traefik

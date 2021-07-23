@@ -23,22 +23,22 @@ spec:
     config:
       existingSecret: falcosidekick
       extraEnv:
-      - name: WEBUI_URL
-        value: http://falco-sidekick-falcosidekick-ui:2802
-      - name: DISCORD_MINIMUMPRIORITY
-        value: critical
+        - name: WEBUI_URL
+          value: http://falco-sidekick-falcosidekick-ui:2802
+        - name: DISCORD_MINIMUMPRIORITY
+          value: critical
     ingress:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: traefik
         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
       hosts:
-      - host: "falcosidekick.${SECRET_DOMAIN}"
-        paths:
-        - /
+        - host: "falcosidekick.${SECRET_DOMAIN}"
+          paths:
+            - /
       tls:
-      - hosts:
-        - "falcosidekick.${SECRET_DOMAIN}"
+        - hosts:
+            - "falcosidekick.${SECRET_DOMAIN}"
     webui:
       enabled: true
       # image:
@@ -49,8 +49,8 @@ spec:
           kubernetes.io/ingress.class: traefik
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-        - host: "falcosidekick-ui.${SECRET_DOMAIN}"
-          paths: ["/ui", "/events", "/healthz", "/ws"]
+          - host: "falcosidekick-ui.${SECRET_DOMAIN}"
+            paths: ["/ui", "/events", "/healthz", "/ws"]
         tls:
-        - hosts:
-          - "falcosidekick-ui.${SECRET_DOMAIN}"
+          - hosts:
+              - "falcosidekick-ui.${SECRET_DOMAIN}"

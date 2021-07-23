@@ -24,14 +24,14 @@ spec:
       TZ: "America/New_York"
     podSecurityContext:
       supplementalGroups:
-      - 44
-      - 109
-      - 100
+        - 44
+        - 109
+        - 100
     service:
       main:
         type: LoadBalancer
         externalIPs:
-        - "${SVC_PLEX_ADDRESS}"
+          - "${SVC_PLEX_ADDRESS}"
         externalTrafficPolicy: Local
         annotations:
           traefik.ingress.kubernetes.io/service.serversscheme: https
@@ -44,13 +44,13 @@ spec:
           external-dns/is-public: "true"
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
         hosts:
-        - host: "plex.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "plex.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "plex.${SECRET_DOMAIN}"
+          - hosts:
+              - "plex.${SECRET_DOMAIN}"
     persistence:
       config:
         enabled: true
@@ -72,17 +72,17 @@ spec:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
-          - matchExpressions:
-            - key: feature.node.kubernetes.io/custom-intel-gpu
-              operator: In
-              values:
-              - "true"
-          - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-              - k8s-4
-              - k8s-5
+            - matchExpressions:
+                - key: feature.node.kubernetes.io/custom-intel-gpu
+                  operator: In
+                  values:
+                    - "true"
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - k8s-4
+                    - k8s-5
     resources:
       requests:
         gpu.intel.com/i915: 1
@@ -101,13 +101,13 @@ spec:
           tag: 2.2.1
         loki: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
         logs:
-        - name: promtail/plex
-          path: "/config/Library/Application Support/Plex Media Server/Logs/*.log"
-        - name: promtail/plex/plugins
-          path: "/config/Library/Application Support/Plex Media Server/Logs/PMS Plugin Logs/*.log"
+          - name: promtail/plex
+            path: "/config/Library/Application Support/Plex Media Server/Logs/*.log"
+          - name: promtail/plex/plugins
+            path: "/config/Library/Application Support/Plex Media Server/Logs/PMS Plugin Logs/*.log"
         volumeMounts:
-        - name: config
-          mountPath: /config
-          readOnly: true
+          - name: config
+            mountPath: /config
+            readOnly: true
         securityContext:
           runAsUser: 0

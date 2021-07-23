@@ -27,13 +27,13 @@ spec:
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-        - host: "frigate.${SECRET_DOMAIN}"
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: "frigate.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - "frigate.${SECRET_DOMAIN}"
+          - hosts:
+              - "frigate.${SECRET_DOMAIN}"
     securityContext:
       privileged: true
     persistence:
@@ -308,15 +308,15 @@ spec:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
-          - matchExpressions:
-            - key: feature.node.kubernetes.io/custom-coral-tpu
-              operator: In
-              values:
-              - "true"
-            - key: feature.node.kubernetes.io/custom-intel-gpu
-              operator: In
-              values:
-              - "true"
+            - matchExpressions:
+                - key: feature.node.kubernetes.io/custom-coral-tpu
+                  operator: In
+                  values:
+                    - "true"
+                - key: feature.node.kubernetes.io/custom-intel-gpu
+                  operator: In
+                  values:
+                    - "true"
     resources:
       requests:
         gpu.intel.com/i915: 1
