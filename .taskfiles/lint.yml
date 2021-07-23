@@ -1,0 +1,27 @@
+---
+version: '3'
+
+tasks:
+
+  all:
+    - task: markdown
+    - task: yaml
+    - task: format
+
+  markdown:
+    desc: Lint Markdown
+    cmds:
+      - markdownlint -c '.github/lint/.markdownlint.yaml' *.md **/*.md
+    ignore_errors: true
+
+  yaml:
+    desc: Lint YAML
+    cmds:
+      - yamllint -c '.github/lint/.yamllint.yaml' .
+    ignore_errors: true
+
+  format:
+    desc: Lint general formatting
+    cmds:
+      - prettier --ignore-path '.github/lint/.prettierignore' --config '.github/lint/.prettierrc.yaml' --check .
+    ignore_errors: true
