@@ -1,0 +1,78 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: minecraft-creative
+  namespace: gaming
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://itzg.github.io/minecraft-server-charts/
+      chart: minecraft
+      version: 3.4.2
+      sourceRef:
+        kind: HelmRepository
+        name: minecraft-server-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image: itzg/minecraft-server
+    imageTag: 2021.17.0
+    extraEnv:
+      ENABLE_AUTOPAUSE: FALSE
+      SPIGET_RESOURCES: "274,74354,8631,28140"
+    minecraftServer:
+      eula: "TRUE"
+      version: "LATEST"
+      type: PAPER
+      paperDownloadUrl: https://papermc.io/api/v1/paper/1.17.1/latest/download
+      forceReDownload: true
+      jvmOpts: >-
+        -Xms4G -Xmx4G
+        -XX:+UseG1GC -XX:+ParallelRefProcEnabled
+        -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions
+        -XX:+DisableExplicitGC -XX:+AlwaysPreTouch
+        -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40
+        -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20
+        -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4
+        -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90
+        -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32
+        -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1
+        -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true"
+      memory: 4096M
+      difficulty: normal
+      maxTickTime: -1
+      gameMode: creative
+      motd: "minecraft-creative\n\u00A76\u00A7lcreative\u00A7r\u00A7l - \u00A7r\u00A7c\u00A7lSMP\u00A7r\n"
+      icon: https://www.freeiconspng.com/uploads/minecraft-server-icon-23.png
+      serviceType: LoadBalancer
+      externalIPs:
+        - 192.168.69.151
+      extraPorts:
+        - name: map
+          containerPort: 8123
+          service:
+            enabled: true
+            type: ClusterIP
+            port: 8123
+          ingress:
+            enabled: true
+            annotations:
+              kubernetes.io/ingress.class: traefik
+            hosts:
+              - name: minecraft-creative-map.${SECRET_DOMAIN}
+                path: /
+            tls:
+              - hosts:
+                  - minecraft-creative-map.${SECRET_DOMAIN}
+    persistence:
+      dataDir:
+        enabled: true
+        existingClaim: minecraft-creative-config-v1
+    resources:
+      requests:
+        memory: 4096Mi
+        cpu: 250m
+      limits:
+        memory: 5120Mi
