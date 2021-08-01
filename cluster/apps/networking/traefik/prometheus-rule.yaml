@@ -26,7 +26,7 @@ spec:
               logs for exact parsing error."
           expr: |
             traefik_config_last_reload_failure{job="traefik"} == 1
-          for: 0m
+          for: 5m
           labels:
             severity: critical
         - alert: TraefikHighHttp4xxErrorRateService
@@ -38,8 +38,8 @@ spec:
             sum(rate(traefik_service_requests_total{code=~"4.*"}[1m])) by (exported_service)
               /
             sum(rate(traefik_service_requests_total[1m])) by (exported_service)
-              > .05
-          for: 2m
+              > .10
+          for: 5m
           labels:
             severity: critical
         - alert: TraefikHighHttp5xxErrorRateService
@@ -51,8 +51,8 @@ spec:
             sum(rate(traefik_service_requests_total{code=~"5.*"}[1m])) by (exported_service)
               /
             sum(rate(traefik_service_requests_total[1m])) by (exported_service)
-              > .05
-          for: 2m
+              > .10
+          for: 5m
           labels:
             severity: critical
         - alert: TraefikTooManyRequest
@@ -63,6 +63,6 @@ spec:
           expr: |
             avg(traefik_entrypoint_open_connections{job="traefik"})
               > 5
-          for: 1m
+          for: 5m
           labels:
             severity: critical
