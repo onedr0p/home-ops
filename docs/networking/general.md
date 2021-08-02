@@ -15,7 +15,7 @@ My current cluster-internal networking is implemented by {{ links.external('cali
 ## Running high-available control-plane
 
 !!! warning
-    Due to the way that BGP works, a node can only set up a single BGP connection to the router. This mean {{ links.external('kube-vip') }} and {{ links.external('calico') }} services must not be running on the same node.
+    Due to the way that BGP works, a node can only set up a single BGP connection to the router. This mean kube-vip and Calico services must not be running on the same node.
 
 In order to expose my control-plane on a loadbalanced IP address, I have deployed {{ links.external('kube-vip') }}.
 It is configured to expose a load balanced address to the host IP addresses of my control-plane nodes over BGP.
