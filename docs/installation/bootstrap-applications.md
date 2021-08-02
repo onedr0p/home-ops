@@ -32,6 +32,7 @@ kubectl --kubeconfig=./kubeconfig create secret generic sops-gpg \
     --namespace=flux-system \
     --from-file=sops.asc=/dev/stdin
 ```
+
 ### Install Flux
 
 !!! warning "Due to race conditions with the Flux CRDs you will have to run the below command twice. There should be no errors on this second run."

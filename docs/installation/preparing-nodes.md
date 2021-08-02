@@ -20,11 +20,11 @@ network:
   ethernets:
     eno1:
       addresses:
-      - 192.168.42.10/24
+        - 192.168.42.10/24
       gateway4: 192.168.42.1
       nameservers:
         addresses:
-        - 192.168.1.1
+          - 192.168.1.1
         search: []
   version: 2
 ```

@@ -1,9 +1,11 @@
 ---
+# Project information
 site_name: onedr0p | Home Cluster
 site_description: My home Kubernetes (k3s) cluster managed by GitOps (Flux2)
 site_author: Devin Buhl
 site_url: https://onedr0p.github.io/home-cluster/
 
+# Repository
 repo_name: onedr0p/home-cluster
 repo_url: https://github.com/onedr0p/home-cluster
 edit_uri: "edit/main/docs/"
@@ -24,13 +26,13 @@ theme:
       primary: blue
       accent: indigo
       toggle:
-        icon: material/toggle-switch-off-outline
+        icon: material/weather-night
         name: Switch to dark mode
     - scheme: slate
       primary: blue
       accent: indigo
       toggle:
-        icon: material/toggle-switch
+        icon: material/weather-sunny
         name: Switch to light mode
   font:
     text: Roboto
@@ -38,16 +40,10 @@ theme:
 
 docs_dir: ./docs
 
+# Customization
 extra_css:
   - _static/custom.css
 
-# Plugins
-plugins:
-  - search
-  - minify:
-      minify_html: true
-
-# Customization
 extra:
   social:
     - icon: fontawesome/brands/github
@@ -57,47 +53,23 @@ extra:
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/devinbuhl
 
+# Plugins
+plugins:
+  - search:
+      lang: en
+  - minify:
+      minify_html: true
+  - macros:
+      include_dir: docs/_snippets
+
 # Extensions
 markdown_extensions:
   - admonition
-  - abbr
   - attr_list
-  - def_list
-  - footnotes
-  - meta
-  - md_in_html
   - toc:
       permalink: true
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.betterem:
-      smart_enable: all
-  - pymdownx.caret
-  - pymdownx.critic
-  - pymdownx.details
-  - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-  - pymdownx.highlight
-  - pymdownx.inlinehilite
-  - pymdownx.keys
-  - pymdownx.magiclink:
-      repo_url_shorthand: true
-      user: k8s-at-home
-      repo: docs
-  - pymdownx.mark
-  - pymdownx.smartsymbols
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid-experimental
-          format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.tabbed
-  - pymdownx.tasklist:
-      custom_checkbox: true
-  - pymdownx.tilde
 
-# Page tree
+# Navigation structure
 nav:
   - Introduction: index.md
   - Installation:
@@ -105,6 +77,7 @@ nav:
       - Installing Kubernetes: installation/installing-kubernetes.md
       - Bootstrap Applications: installation/bootstrap-applications.md
   - Networking:
+      - General: networking/general.md
       - DNS: networking/dns.md
   - Storage:
       - Backing up data manually: storage/manual-data-backup.md
