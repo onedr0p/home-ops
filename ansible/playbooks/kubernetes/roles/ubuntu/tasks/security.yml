@@ -1,0 +1,44 @@
+---
+
+- name: Check for existence of grub
+  ansible.builtin.stat:
+    path: /etc/default/grub
+  register: grub_result
+
+- name: Disable apparmor
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
+    replace: '\1 {{ option }}={{ value }}\2'
+  vars:
+    option: apparmor
+    value: 0
+  when:
+  - grub_result.stat.exists
+
+- name: Disable mitigations
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
+    replace: '\1 {{ option }}={{ value }}\2'
+  vars:
+    option: mitigations
+    value: "off"
+  when:
+  - grub_result.stat.exists
+
+- name: Disable PTI
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
+    replace: '\1 {{ option }}={{ value }}\2'
+  vars:
+    option: pti
+    value: "off"
+  when:
+  - grub_result.stat.exists
+
+- name: Run grub-mkconfig
+  ansible.builtin.command: grub-mkconfig -o /boot/grub/grub.cfg
+  when:
+  - grub_result.stat.exists
