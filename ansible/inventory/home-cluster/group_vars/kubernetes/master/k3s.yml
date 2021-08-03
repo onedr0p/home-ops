@@ -1,5 +1,4 @@
 ---
-
 # https://rancher.com/docs/k3s/latest/en/installation/install-options/server-config/
 # https://github.com/PyratLabs/ansible-role-k3s#server-control-plane-configuration
 
@@ -10,15 +9,15 @@ k3s_control_node: true
 k3s_server:
   node-ip: "{{ ansible_host }}"
   tls-san:
-  - "{{ k3s_registration_address }}"
+    - "{{ k3s_registration_address }}"
   docker: false
-  flannel-backend: 'none' # This needs to be in quotes
+  flannel-backend: "none" # This needs to be in quotes
   disable:
-  - flannel
-  - traefik
-  - servicelb
-  - metrics-server
-  - local-storage
+    - flannel
+    - traefik
+    - servicelb
+    - metrics-server
+    - local-storage
   disable-network-policy: true
   disable-cloud-controller: true
   write-kubeconfig-mode: "644"
@@ -27,15 +26,15 @@ k3s_server:
   # Network CIDR to use for service IPs
   service-cidr: "10.96.0.0/16"
   kubelet-arg:
-  - "feature-gates=GracefulNodeShutdown=true"
-  - "feature-gates=MixedProtocolLBService=true"
+    - "feature-gates=GracefulNodeShutdown=true"
+    - "feature-gates=MixedProtocolLBService=true"
   # Required to use kube-prometheus-stack
   kube-controller-manager-arg:
-  - "address=0.0.0.0"
-  - "bind-address=0.0.0.0"
+    - "address=0.0.0.0"
+    - "bind-address=0.0.0.0"
   kube-proxy-arg:
-  - "metrics-bind-address=0.0.0.0"
+    - "metrics-bind-address=0.0.0.0"
   kube-scheduler-arg:
-  - "address=0.0.0.0"
-  - "bind-address=0.0.0.0"
+    - "address=0.0.0.0"
+    - "bind-address=0.0.0.0"
   etcd-expose-metrics: true

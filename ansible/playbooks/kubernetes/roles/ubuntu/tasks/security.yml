@@ -1,5 +1,4 @@
 ---
-
 - name: Check for existence of grub
   ansible.builtin.stat:
     path: /etc/default/grub
@@ -24,8 +23,8 @@
     option: apparmor
     value: 0
   when:
-  - grub_result.stat.exists
-  - apparmor_status.stdout == "0"
+    - grub_result.stat.exists
+    - apparmor_status.stdout == "0"
 
 - name: Disable mitigations
   ansible.builtin.replace:
@@ -36,12 +35,12 @@
     option: mitigations
     value: "off"
   when:
-  - grub_result.stat.exists
-  - mitigations_status.stdout == "0"
+    - grub_result.stat.exists
+    - mitigations_status.stdout == "0"
 
 - name: Run grub-mkconfig
   ansible.builtin.command: update-grub
   when:
-  - grub_result.stat.exists
-  - apparmor_status.stdout == "0"
-  - mitigations_status.stdout == "0"
+    - grub_result.stat.exists
+    - apparmor_status.stdout == "0"
+    - mitigations_status.stdout == "0"
