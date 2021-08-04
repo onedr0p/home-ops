@@ -8,10 +8,32 @@ on: # yamllint disable-line rule:truthy
       - "**.yml"
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-20.04
+    outputs:
+      files: "${{ steps.filter.outputs.changed_files }}"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Get changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          list-files: shell
+          filters: |
+            changed:
+              - "**.yaml"
+              - "*.yml"
   yamllint:
+    name: Lint YAML
+    runs-on: ubuntu-20.04
+    if: ${{ needs.changes.outputs.files != '' }}
+    needs:
+      - changes
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: reviewdog/action-yamllint@v1
         with:
-          yamllint_flags: "-c .github/lint/.yamllint.yaml ."
+          yamllint_flags: "-c .github/lint/.yamllint.yaml ${{ needs.changes.outputs.files }}"
