@@ -1,0 +1,17 @@
+---
+name: yamllint
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    paths:
+      - "**.yaml"
+      - "**.yml"
+
+jobs:
+  yamllint:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: reviewdog/action-yamllint@v1
+        with:
+          yamllint_flags: "-c .github/lint/.yamllint.yaml ."
