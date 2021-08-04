@@ -12,12 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-
       - name: Install Flux
         uses: fluxcd/flux2/action@main
-
       - name: Upgrade Flux
         id: upgrade
         run: |
@@ -27,7 +23,6 @@ jobs:
             --network-policy=false \
             --export > ./cluster/base/flux-system/gotk-components.yaml
           echo "::set-output name=flux_version::$VERSION"
-
       - name: Create pull request for Flux upgrade
         uses: peter-evans/create-pull-request@v3
         with:

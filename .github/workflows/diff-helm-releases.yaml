@@ -21,8 +21,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - name: Get changes
         uses: dorny/paths-filter@v2
         id: filter
@@ -119,7 +117,7 @@ jobs:
           fi
           echo "::set-output name=message::$(echo "$message" | jq --raw-input --slurp)"
 
-      - name: Create PR comment
+      - name: Add Pull Request comment
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ github.event.pull_request.number }}
