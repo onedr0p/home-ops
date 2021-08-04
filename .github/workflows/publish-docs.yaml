@@ -19,8 +19,12 @@ jobs:
     runs-on: ubuntu-20.04
     if: github.event.pull_request.head.repo.fork == false
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Install Python
+        uses: actions/setup-python@v2
         with:
           python-version: 3.x
       - run: git config --global user.name "${GITHUB_ACTOR}"

@@ -1,0 +1,30 @@
+---
+name: Lint Markdown files on Pull Requests
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    paths:
+      - "**.md"
+
+jobs:
+  markdownlint:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Get changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          list-files: shell
+          filters: |
+            markdown:
+              - added|modified: "**.md"
+      - name: Lint files
+        if: ${{ steps.filter.outputs.markdown == 'true' }}
+        uses: reviewdog/action-shellcheck@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          markdownlint_flags: "-c '.github/lint/.markdownlint.yaml' ${{ steps.filter.outputs.markdown_files }}"

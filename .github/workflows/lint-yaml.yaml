@@ -1,5 +1,5 @@
 ---
-name: yamllint
+name: Lint YAML files on Pull Requests
 
 on: # yamllint disable-line rule:truthy
   pull_request:
@@ -11,8 +11,12 @@ jobs:
   yamllint:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: dorny/paths-filter@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Get changes
+        uses: dorny/paths-filter@v2
         id: filter
         with:
           list-files: shell
@@ -20,7 +24,8 @@ jobs:
             yaml:
               - added|modified: "**.yaml"
               - added|modified: "**.yml"
-      - if: ${{ steps.filter.outputs.yaml == 'true' }}
+      - name: Lint files
+        if: ${{ steps.filter.outputs.yaml == 'true' }}
         uses: reviewdog/action-yamllint@v1
         with:
           yamllint_flags: "-c .github/lint/.yamllint.yaml ${{ steps.filter.outputs.yaml_files }}"

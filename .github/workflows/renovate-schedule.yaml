@@ -1,5 +1,5 @@
 ---
-name: Schedule - Renovate Helm Releases
+name: Schedule - Add Helm Release Renovate annotations
 
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -10,9 +10,9 @@ jobs:
   renovate-helm-releases:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 1
 
       - name: Renovate Helm Releases
@@ -33,5 +33,5 @@ jobs:
           assignees: "onedr0p"
           commit-message: "chore(deps): update renovate annotations"
           body: |
-            Update HelmReleases inorder for Renovate to pick up new versions of Helm charts
+            Update Helm Releases in order for Renovate to pick up new versions of Helm charts
           labels: renovate/annotations
