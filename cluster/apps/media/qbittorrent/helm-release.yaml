@@ -72,6 +72,12 @@ spec:
         mountPath: /media
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 6000Mi
     additionalContainers:
       - name: exporter
         image: esanchezm/prometheus-qbittorrent-exporter:latest
@@ -93,9 +99,3 @@ spec:
         ports:
           - name: metrics
             containerPort: 9022
-    resources:
-      requests:
-        memory: 250Mi
-        cpu: 500m
-      limits:
-        memory: 6000Mi
