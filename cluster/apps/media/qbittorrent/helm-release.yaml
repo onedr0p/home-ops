@@ -70,18 +70,29 @@ spec:
             server: 192.168.42.50
             path: /media
         mountPath: /media
-    affinity:
-      podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                  - key: app.kubernetes.io/name
-                    operator: In
-                    values:
-                      - kube-vip
-              topologyKey: kubernetes.io/hostname
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
+    additionalContainers:
+      - name: exporter
+        image: esanchezm/prometheus-qbittorrent-exporter:latest
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: QBITTORRENT_HOST
+            value: "http://localhost"
+          - name: QBITTORRENT_PORT
+            value: "8080"
+          - name: EXPORTER_PORT
+            value: "9022"
+          - name: EXPORTER_LOG_LEVEL
+            value: "INFO"
+          - name: METRICS_PREFIX
+            value: "qbittorrent"
+        envFrom:
+          - secretRef:
+              name: qbittorrent-creds
+        ports:
+          - name: metrics
+            containerPort: 9022
     resources:
       requests:
         memory: 250Mi
