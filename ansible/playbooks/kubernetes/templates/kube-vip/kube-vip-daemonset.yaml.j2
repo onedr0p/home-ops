@@ -19,54 +19,51 @@ spec:
         app.kubernetes.io/name: kube-vip
     spec:
       containers:
-      - name: kube-vip
-        image: ghcr.io/kube-vip/kube-vip:v0.3.5
-        imagePullPolicy: IfNotPresent
-        args:
-        - manager
-        env:
-        - name: vip_arp
-          value: "false"
-        - name: vip_interface
-          value: lo
-        - name: port
-          value: "6443"
-        - name: vip_cidr
-          value: "32"
-        - name: cp_enable
-          value: "true"
-        - name: cp_namespace
-          value: kube-system
-        - name: vip_startleader
-          value: "false"
-        - name: vip_loglevel
-          value: "5"
-        - name: bgp_enable
-          value: "true"
-        - name: bgp_routerinterface
-          value: "{{ kubevip_interface }}"
-        - name: bgp_as
-          value: "{{ kubevip_bgp_as_number }}"
-        - name: bgp_peeraddress
-          value: "{{ kubevip_bgp_peer_ip }}"
-        - name: bgp_peeras
-          value: "{{ kubevip_bgp_peer_as_number }}"
-        - name: vip_address
-          value: "{{ kubevip_address }}"
-        securityContext:
-          capabilities:
-            add:
-            - NET_ADMIN
-            - NET_RAW
-            - SYS_TIME
-        volumeMounts:
-        - mountPath: /etc/kubernetes/admin.conf
-          name: kubeconfig
+        - name: kube-vip
+          image: ghcr.io/kube-vip/kube-vip:v0.3.7
+          imagePullPolicy: IfNotPresent
+          args:
+            - manager
+          env:
+            - name: vip_arp
+              value: "false"
+            - name: vip_interface
+              value: lo
+            - name: port
+              value: "6443"
+            - name: vip_cidr
+              value: "32"
+            - name: cp_enable
+              value: "true"
+            - name: cp_namespace
+              value: kube-system
+            - name: vip_startleader
+              value: "false"
+            - name: vip_loglevel
+              value: "5"
+            - name: bgp_enable
+              value: "true"
+            - name: bgp_routerinterface
+              value: "{{ kubevip_interface }}"
+            - name: bgp_as
+              value: "{{ kubevip_bgp_as_number }}"
+            - name: bgp_peeraddress
+              value: "{{ kubevip_bgp_peer_ip }}"
+            - name: bgp_peeras
+              value: "{{ kubevip_bgp_peer_as_number }}"
+            - name: vip_address
+              value: "{{ kubevip_address }}"
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+                - SYS_TIME
       hostNetwork: true
       nodeSelector:
         node-role.kubernetes.io/master: "true"
       serviceAccountName: kube-vip
       tolerations:
-      - key: node-role.kubernetes.io/master
-        operator: Exists
-        effect: NoSchedule
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
