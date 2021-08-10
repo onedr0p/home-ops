@@ -14,3 +14,17 @@
     - ssh_authorized_keys is defined
     - ssh_authorized_keys is iterable
     - ssh_authorized_keys | length > 0
+
+- name: Check if hushlogin exists
+  ansible.builtin.stat:
+    path: "/home/{{ ansible_user }}/.hushlogin"
+  register: hushlogin_status
+
+- name: Silence the login prompt
+  ansible.builtin.file:
+    dest: "/home/{{ ansible_user }}/.hushlogin"
+    state: touch
+    owner: "{{ ansible_user }}"
+    mode: "0775"
+  when:
+    - not hushlogin_status.stat.exists
