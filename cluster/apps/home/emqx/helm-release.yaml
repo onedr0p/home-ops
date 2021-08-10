@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://repos.emqx.io/charts
       chart: emqx
-      version: 4.3.6
+      version: 4.3.7
       sourceRef:
         kind: HelmRepository
         name: emqx-charts
@@ -21,7 +21,8 @@ spec:
     recreatePods: true
     service:
       type: LoadBalancer
-      loadBalancerIP: 1.1.1.1
+      externalIPs:
+        - "${SVC_EMQX_ADDR}"
       annotations:
         external-dns.alpha.kubernetes.io/hostname: "mqtt.${SECRET_DOMAIN}"
         coredns.io/hostname: "mqtt.${SECRET_DOMAIN}"
@@ -54,17 +55,3 @@ spec:
                     values:
                       - emqx
               topologyKey: kubernetes.io/hostname
-  # TODO https://github.com/emqx/emqx/pull/5201
-  postRenderers:
-    - kustomize:
-        patchesJson6902:
-          - target:
-              kind: Service
-              name: emqx
-            patch:
-              - op: remove
-                path: /spec/loadBalancerIP
-              - op: add
-                path: /spec/externalIPs
-                value:
-                  - "${SVC_EMQX_ADDR}"
