@@ -6,8 +6,13 @@ metadata:
   namespace: networking
 spec:
   schedule: "0 */12 * * *"
+  concurrencyPolicy: "Forbid"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
   jobTemplate:
     spec:
+      backoffLimit: 3
+      ttlSecondsAfterFinished: 300
       template:
         spec:
           serviceAccountName: sa-secret-reflector
