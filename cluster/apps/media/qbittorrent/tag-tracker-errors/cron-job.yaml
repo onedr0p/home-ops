@@ -6,9 +6,15 @@ metadata:
   name: tag-tracker-errors
 spec:
   schedule: "0 * * * *"
-  concurrencyPolicy: Forbid
+  concurrencyPolicy: "Forbid"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
   jobTemplate:
     spec:
+      backoffLimit: 5
+      ttlSecondsAfterFinished: 120
+      parallelism: 1
+      completions: 1
       template:
         spec:
           restartPolicy: Never
