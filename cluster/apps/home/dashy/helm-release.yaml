@@ -1,0 +1,31 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: dashy
+  namespace: networking
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: /charts/kah-common/
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: lissy93/dashy
+      tag: release-1.5.0
+    nameOverride: dashy
+    service:
+      main:
+        ports:
+          http:
+            port: 4000
+    persistence:
+      config:
+        enabled: true
+        existingClaim: dashy-config-v1
+        monthPath: /app/public
