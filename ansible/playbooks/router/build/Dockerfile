@@ -1,4 +1,4 @@
-FROM docker.io/golang:1.16.7-alpine
+FROM docker.io/golang:1.17.0-alpine
 
 ARG VERSION
 
