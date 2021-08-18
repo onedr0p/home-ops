@@ -6,7 +6,7 @@ Here are several suggestions I have prior to installing Kubernetes. Some of thes
 
 ## Networking
 
-- Configure DNS on your nodes to use an upstream provider (e.g. 1.1.1.1, 9.9.9.9), or your router's IP if you have DNS configured there. Do not use a Ad-blockers (PiHole, Adguard-Home, Blocky, etc.) DNS server. Ad-blockers should be used on devices with a web browser.
+- Configure DNS on your nodes to use an upstream provider (e.g. `1.1.1.1`, `9.9.9.9`), or your router's IP if you have DNS configured there. Do not use a Ad-blockers (PiHole, Adguard-Home, Blocky, etc.) DNS server. Ad-blockers should be used on devices with a web browser.
 
 - Ensure you are using `iptables` in `nf_tables` mode.
 
