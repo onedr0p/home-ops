@@ -1,5 +1,7 @@
 # Guidelines
 
+{% import 'links.jinja2' as links %}
+
 Here are several suggestions I have prior to installing Kubernetes. Some of these suggestions may only apply to Ubuntu.
 
 ## Networking
