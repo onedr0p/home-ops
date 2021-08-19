@@ -3,3 +3,12 @@ kind: Kustomization
 resources:
   - cron-job.yaml
   - secret.sops.yaml
+namespace: monitoring
+configMapGenerator:
+  - name: uptimerobot-heartbeat
+    files:
+      - uptimerobot-heartbeat.sh
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
