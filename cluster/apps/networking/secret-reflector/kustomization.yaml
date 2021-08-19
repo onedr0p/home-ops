@@ -3,3 +3,12 @@ kind: Kustomization
 resources:
   - cron-job.yaml
   - rbac.yaml
+namespace: networking
+configMapGenerator:
+  - name: secret-reflector
+    files:
+      - secret-reflector.sh
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
