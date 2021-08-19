@@ -8,37 +8,38 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://charts.bitnami.com/bitnami
+      # renovate: registryUrl=https://kubernetes-sigs.github.io/external-dns
       chart: external-dns
-      version: 5.4.1
+      version: 1.2.0
       sourceRef:
         kind: HelmRepository
-        name: bitnami-charts
+        name: external-dns-charts
         namespace: flux-system
       interval: 5m
   values:
-    image:
-      registry: public.ecr.aws
-      repository: bitnami/external-dns
-    nameOverride: external-dns
-    interval: "5m"
-    # logLevel: debug
+    interval: 5m
+    logLevel: info
+    provider: cloudflare
+    env:
+      - name: CF_API_EMAIL
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-creds
+            key: email
+      - name: CF_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-creds
+            key: api-key
+    extraArgs:
+      - --cloudflare-proxied
+      - --annotation-filter="external-dns/is-public in (true)"
+    policy: sync
     sources:
       - ingress
-    provider: cloudflare
-    cloudflare:
-      secretName: cloudflare-api-key
-      email: "${SECRET_EMAIL}"
-      proxied: true
-    policy: sync
     txtPrefix: "k8s."
     domainFilters:
       - "${SECRET_DOMAIN}"
-    crd:
-      create: false
-      apiversion: externaldns.k8s.io/v1alpha1
-      kind: DNSEndpoint
-    annotationFilter: "external-dns/is-public in (true)"
     resources:
       requests:
         memory: 100Mi
