@@ -8,6 +8,8 @@ Here are several suggestions I have prior to installing Kubernetes. Some of thes
 
 - Configure DNS on your nodes to use an upstream provider (e.g. `1.1.1.1`, `9.9.9.9`), or your router's IP if you have DNS configured there. Do not use a Ad-blockers (PiHole, Adguard-Home, Blocky, etc.) DNS server. Ad-blockers should be used on devices with a web browser.
 
+- Remove any search domains from your hosts `/etc/resolv.conf`. Search domains have an issue with alpine based containers and DNS might not resolve in them.
+
 - Ensure you are using `iptables` in `nf_tables` mode.
 
 - Enable packet forwarding on the hosts, and apply other sysctl tweaks:
