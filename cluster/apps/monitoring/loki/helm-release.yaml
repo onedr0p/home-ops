@@ -44,5 +44,11 @@ spec:
           kvstore:
             store: inmemory
         enable_api: true
+    alerting_groups:
+      - name: zigbee2mqtt
+        rules:
+          - alert: UnableToConnectToMQTT
+            expr: sum by(container) (rate({job=~"loki-dev/.*"}[1m])) > 1000
+            for: 2m
     serviceMonitor:
       enabled: true
