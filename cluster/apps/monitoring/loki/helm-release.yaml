@@ -45,7 +45,9 @@ spec:
         rules:
           - alert: ZigbeeUnableToReachMQTT
             expr: |
-              sum(increase({app="zigbee2mqtt"} |= "Not connected to MQTT server" [1m])) > 5
-            for: 2m
+              sum(increase({app="zigbee2mqtt"} |= "Not connected to MQTT server" [5m])) > 1
+            for: 1m
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "loki-alerting-rules"
     serviceMonitor:
       enabled: true
