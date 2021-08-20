@@ -41,10 +41,11 @@ spec:
             store: inmemory
         enable_api: true
     alerting_groups:
-      - name: zigbee2mqtt
+      - name: zigbee
         rules:
-          - alert: UnableToConnectToMQTT
-            expr: sum by(container) (rate({job=~"loki-dev/.*"}[1m])) > 1000
+          - alert: ZigbeeUnableToReachMQTT
+            expr: |
+              sum(increase({app="zigbee2mqtt"} |= "Not connected to MQTT server" [1m])) > 5
             for: 2m
     serviceMonitor:
       enabled: true
