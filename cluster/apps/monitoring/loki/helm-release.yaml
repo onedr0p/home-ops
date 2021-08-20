@@ -45,8 +45,13 @@ spec:
         rules:
           - alert: ZigbeeUnableToReachMQTT
             expr: |
-              sum(increase({app="zigbee2mqtt"} |= "Not connected to MQTT server" [5m])) > 1
-            for: 1m
+              sum(count_over_time({app="zigbee2mqtt"} |= "Not connected to MQTT server"[1m])) > 0
+            for: 10s
+            labels:
+              severity: critical
+              category: logs
+            annotations:
+              title: "{{$value}} errors occurred in application logs"
     podAnnotations:
       configmap.reloader.stakater.com/reload: "loki-alerting-rules"
     serviceMonitor:
