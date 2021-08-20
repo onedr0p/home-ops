@@ -55,14 +55,14 @@ tasks:
     desc: Reboot all the k8s nodes
     dir: ansible
     cmds:
-      - "ansible kubernetes -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml -m reboot"
+      - "ansible kubernetes -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml -a '/usr/bin/systemctl reboot' --become"
     silent: true
 
   shutdown:
     desc: Shutdown all the k8s nodes
     dir: ansible
     cmds:
-      - "ansible kubernetes -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml -m shutdown"
+      - "ansible kubernetes -i {{.ANSIBLE_INVENTORY_DIR}}/home-cluster/hosts.yml -a '/usr/bin/systemctl poweroff' --become"
     silent: true
 
   playbook:ubuntu-prepare:

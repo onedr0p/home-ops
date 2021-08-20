@@ -4,7 +4,7 @@ version: "3"
 vars:
   K3S_PRIMARY_MASTER_NODE_USERNAME: "ubuntu"
   K3S_PRIMARY_MASTER_NODE_ADDRESS: "192.168.42.10"
-  K3S_KUBEVIP_ADDRESS: "192.168.42.5"
+  K3S_KUBEVIP_ADDRESS: "192.168.69.5"
 
 tasks:
   kubeconfig:
@@ -27,14 +27,50 @@ tasks:
       - kubectl get serviceaccount k10-k10 -o jsonpath="{.secrets[0].name}" --namespace kasten-io
       - kubectl get secret k10-k10-token-bdpdn --namespace kasten-io -ojsonpath="{.data.token}{'\n'}" | base64 --decode
 
-  maintenance:
-    desc: Stop all Pods and Pause all Helm Releases that rely on the NAS
+  pause:
+    desc: Pause all Helm Releases that rely on NFS storage
     cmds:
-      - flux suspend hr -n media plex
-      - flux suspend hr -n media sonarr
-      - flux suspend hr -n media radarr
-      - flux suspend hr -n media lidarr
-      - flux suspend hr -n media readarr
-      - flux suspend hr -n media qbittorrent
-      - flux suspend hr -n media sabnzbd
       - flux suspend hr -n home frigate
+      - kubectl scale -n home deploy/frigate --replicas 0
+      - flux suspend hr -n home mosquitto
+      - kubectl scale -n home deploy/mosquitto --replicas 0
+      - flux suspend hr -n media jellyfin
+      - kubectl scale -n media deploy/jellyfin --replicas 0
+      - flux suspend hr -n media lidarr
+      - kubectl scale -n media deploy/lidarr --replicas 0
+      - flux suspend hr -n media plex
+      - kubectl scale -n media deploy/plex --replicas 0
+      - flux suspend hr -n media qbittorrent
+      - kubectl scale -n media deploy/qbittorrent --replicas 0
+      - flux suspend hr -n media radarr
+      - kubectl scale -n media deploy/radarr --replicas 0
+      - flux suspend hr -n media readarr
+      - kubectl scale -n media deploy/readarr --replicas 0
+      - flux suspend hr -n media sabnzbd
+      - kubectl scale -n media deploy/sabnzbd --replicas 0
+      - flux suspend hr -n media sonarr
+      - kubectl scale -n media deploy/sonarr --replicas 0
+
+  resume:
+    desc: Resume all Helm Releases that rely on NFS storage
+    cmds:
+      - flux resume hr -n home frigate
+      - kubectl scale -n home deploy/frigate --replicas 1
+      - flux resume hr -n home mosquitto
+      - kubectl scale -n home deploy/mosquitto --replicas 1
+      - flux resume hr -n media jellyfin
+      - kubectl scale -n media deploy/jellyfin --replicas 1
+      - flux resume hr -n media lidarr
+      - kubectl scale -n media deploy/lidarr --replicas 1
+      - flux resume hr -n media plex
+      - kubectl scale -n media deploy/plex --replicas 1
+      - flux resume hr -n media qbittorrent
+      - kubectl scale -n media deploy/qbittorrent --replicas 1
+      - flux resume hr -n media radarr
+      - kubectl scale -n media deploy/radarr --replicas 1
+      - flux resume hr -n media readarr
+      - kubectl scale -n media deploy/readarr --replicas 1
+      - flux resume hr -n media sabnzbd
+      - kubectl scale -n media deploy/sabnzbd --replicas 1
+      - flux resume hr -n media sonarr
+      - kubectl scale -n media deploy/sonarr --replicas 1
