@@ -85,3 +85,17 @@ spec:
               category: logs
             annotations:
               summary: "Frigate is unable to reach MQTT"
+      #
+      # *arr applications
+      #
+      - name: arr
+        rules:
+          - alert: ArrDatabaseIsLocked
+            expr: |
+              sum by (app) (count_over_time({app=~".*arr"} |= "database is locked"[2m])) > 0
+            for: 10s
+            labels:
+              severity: critical
+              category: logs
+            annotations:
+              summary: "{{$value}} is experiencing locked database issues"
