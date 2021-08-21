@@ -45,12 +45,12 @@ spec:
         rules:
           - alert: ZigbeeUnableToReachMQTT
             expr: |
-              sum(count_over_time({app="zigbee2mqtt"} |= "Not connected to MQTT server"[1m])) > 0
+              sum(increase({app="zigbee2mqtt"} |= "Not connected to MQTT server"[2m])) > 0
             for: 10s
             labels:
               severity: critical
               category: logs
             annotations:
-              title: "{{$value}} errors occurred in application logs"
+              summary: "Zigbee2mqtt is unable to access MQTT"
     serviceMonitor:
       enabled: true
