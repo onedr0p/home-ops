@@ -78,37 +78,10 @@ spec:
         rules:
           - alert: FrigateUnableToReachMQTT
             expr: |
-              sum(count_over_time({app="frigate"} |= "MQTT Server unavailable"[2m])) > 0
+              sum(count_over_time({app="frigate"} |= "Unable to connect to MQTT server"[2m])) > 0
             for: 10s
             labels:
               severity: critical
               category: logs
             annotations:
               summary: "Frigate is unable to reach MQTT"
-          - alert: FrigateBadUsernameOrPasswordMQTT
-            expr: |
-              sum(count_over_time({app="frigate"} |= "MQTT Bad username or password"[2m])) > 0
-            for: 10s
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "Frigate is unable to reach MQTT - Bad Username or Password"
-          - alert: FrigateUnauthorizedMQTT
-            expr: |
-              sum(count_over_time({app="frigate"} |= "MQTT Not authorized"[2m])) > 0
-            for: 10s
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "Frigate is unable to reach MQTT - Unauthorized"
-          - alert: FrigateConnectionRefusedMQTT
-            expr: |
-              sum(count_over_time({app="frigate"} |= "Unable to connect to MQTT"[2m])) > 0
-            for: 10s
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "Frigate is unable to reach MQTT - Connection Refused"
