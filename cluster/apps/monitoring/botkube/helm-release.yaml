@@ -10,21 +10,15 @@ spec:
     spec:
       # renovate: registryUrl=https://infracloudio.github.io/charts
       chart: botkube
-      version: v0.12.1
+      version: v0.12.2
       sourceRef:
         kind: HelmRepository
         name: infracloudio-charts
         namespace: flux-system
       interval: 5m
   values:
-    image:
-      repository: ghcr.io/infracloudio/botkube
     communications:
-      discord:
-        enabled: true
-        token: "${SECRET_BOTKUBE_DISCORD_TOKEN}"
-        botid: "${SECRET_BOTKUBE_DISCORD_BOT_ID}"
-        channel: "${SECRET_BOTKUBE_DISCORD_CHANNEL_ID}"
+      existingSecretName: "botkube-communications"
     serviceMonitor:
       enabled: true
     config:
