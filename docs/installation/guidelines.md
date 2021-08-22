@@ -47,6 +47,6 @@ sudo update-grub
 sudo reboot
 ```
 
-- Setup `unattended-upgrade` for use with {{ links.external('kured') }} to automatically patch your nodes.
+- Setup `unattended-upgrade` for use with {{ links.external('kured') }} to automatically patch and reboot your nodes.
 
 - Disable swap
