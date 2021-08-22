@@ -24,6 +24,8 @@ RUN \
   && go generate \
   && go mod tidy
 
+ENV GOOS=freebsd \
+    GOARCH=amd64
+
 RUN \
-  GOOS=freebsd GOARCH=amd64 \
-  && go build -ldflags "-s -w -X github.com/coredns/coredns/coremain.GitCommit=$(git describe --always)" -o coredns
+  go build -ldflags "-s -w -X github.com/coredns/coredns/coremain.GitCommit=$(git describe --always)" -o coredns
