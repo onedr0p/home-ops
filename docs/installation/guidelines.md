@@ -4,6 +4,10 @@
 
 Here are several suggestions I have prior to installing Kubernetes. Some of these suggestions may only apply to Ubuntu.
 
+## Storage
+
+- Do not use NFS for application configuration data if that application uses SQLite with write ahead logging (WAL), or uses file locks. Applications like Sonarr, Radarr, Lidarr are clear examples to avoid using NFS for the configuration volume.
+
 ## Networking
 
 - Configure DNS on your nodes to use an upstream provider (e.g. `1.1.1.1`, `9.9.9.9`), or your router's IP if you have DNS configured there and it's not pointing to a local adblocker DNS.
