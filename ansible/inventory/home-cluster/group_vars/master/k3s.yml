@@ -28,7 +28,7 @@ k3s_server:
   kubelet-arg:
     - "feature-gates=GracefulNodeShutdown=true"
     - "feature-gates=MixedProtocolLBService=true"
-  # Required to use kube-prometheus-stack
+  # Required to use monitor these components with kube-prometheus-stack
   kube-controller-manager-arg:
     - "address=0.0.0.0"
     - "bind-address=0.0.0.0"
@@ -38,3 +38,6 @@ k3s_server:
     - "address=0.0.0.0"
     - "bind-address=0.0.0.0"
   etcd-expose-metrics: true
+  # Required for haproxy healthchecks
+  kube-apiserver-arg:
+    - "anonymous-auth=true"
