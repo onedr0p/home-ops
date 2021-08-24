@@ -17,13 +17,13 @@ My current cluster-internal networking is implemented by {{ links.external('cali
 !!! warning
     Due to the way that BGP works, a node can only set up a single BGP connection to the router. This mean kube-vip and Calico services must not be running on the same node.
 
-In order to expose my control-plane on a loadbalanced IP address, I have deployed {{ links.external('kube-vip') }}.
-It is configured to expose a load balanced address to the host IP addresses of my control-plane nodes over BGP.
+In order to expose my control-plane on a loadbalanced IP address, I have deployed {{ links.external('kube-vip') }} via static pods on my k8s masters.
+It is configured to expose a load balanced IP address over BGP.
 
 ## Exposing services on their own IP address
 
 !!! warning
-    Currently when using BGP on Opnsense, services do not get properly load balanced. This is due to Opnsense not supporting multipath in the BSD kernel.
+    Currently when using BGP on Opnsense, services do not get properly load balanced. This is due to Opnsense not supporting multipath (ECMP) in the BSD kernel.
 
 Most (http/https) traffic enters my cluster through an Ingress controller. For situations where this is not desirable (e.g. MQTT traffic) or when I need a fixed IP reachable from outside the cluster (e.g. to use in combination with port forwarding) I use {{ links.external('calico') }} configured with BGP.
 
