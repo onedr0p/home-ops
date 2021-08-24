@@ -18,7 +18,7 @@ My current cluster-internal networking is implemented by {{ links.external('cali
     Due to the way that BGP works, a node can only set up a single BGP connection to the router. This mean kube-vip and Calico services must not be running on the same node.
 
 In order to expose my control-plane on a loadbalanced IP address, I have deployed {{ links.external('kube-vip') }} via static pods on my k8s masters.
-It is configured to expose a load balanced IP address over BGP.
+It is configured to expose a load balanced IP address over BGP. I am also using HA Proxy which is deployed on my router as a backup.
 
 ## Exposing services on their own IP address
 
