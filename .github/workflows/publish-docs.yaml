@@ -25,13 +25,18 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
-      - run: git config --global user.name "${GITHUB_ACTOR}"
-      - run: git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-      - run: pip install git+https://${MKDOCS_MATERIAL_INSIDER_TOKEN}@github.com/squidfunk/mkdocs-material-insiders.git
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Configure Git
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
       - run: |
           pip install \
+            mkdocs>=1.1 \
             mkdocs-macros-plugin >=0.5 \
+            mkdocs-material >=1.0 \
             mkdocs-minify-plugin>=0.3 \
             mkdocs-redirects>=1.0
       - run: mkdocs gh-deploy --config-file ./mkdocs.yaml --force
-      - run: mkdocs --version
