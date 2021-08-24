@@ -19,18 +19,15 @@ jobs:
     outputs:
       files: "${{ steps.extract.outputs.files }}"
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Get changes
-        uses: dorny/paths-filter@v2
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
         id: filter
         with:
           list-files: shell
           filters: |
             changed:
               - '**'
-      - name: Filter Helm Releases
-        id: extract
+      - id: extract
         run: |
           filtered=$(grep -zl "kind: HelmRelease.*registryUrl=" ${{ steps.filter.outputs.changed_files }} \
             | jq -nR '[inputs | select(length>0)]')
@@ -47,23 +44,19 @@ jobs:
         file: ${{ fromJson(needs.changes.outputs.files) }}
       fail-fast: false
     steps:
-      - name: Setup Kubernetes Tools
-        uses: yokawasa/action-setup-kube-tools@v0.8.0
+      - uses: yokawasa/action-setup-kube-tools@v0.8.0
         with:
           setup-tools: |
             helmv3
             yq
-      - name: Checkout live branch
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
           ref: ${{ env.conf_live_branch }}
           path: live
-      - name: Checkout PR branch
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
           path: pr
-      - name: Create diff
-        id: diff
+      - id: diff
         run: |
           hr_live_url=$(sed -nr 's|.*registryUrl=(.+)$|\1|p' live/${{ matrix.file }})
           hr_live_chart=$(yq e .spec.chart.spec.chart live/${{ matrix.file }})
@@ -117,8 +110,7 @@ jobs:
           fi
           echo "::set-output name=message::$(echo "$message" | jq --raw-input --slurp)"
 
-      - name: Add Pull Request comment
-        uses: peter-evans/create-or-update-comment@v1
+      - uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: "${{ fromJSON(steps.diff.outputs.message) }}"

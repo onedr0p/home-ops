@@ -1,21 +1,18 @@
 ---
-name: Schedule - Update Flux
+name: Schedule - Upgrade Flux
 
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
   schedule:
-    - cron: "0 */12 * * *"
+    - cron: "0 */4 * * *"
 
 jobs:
   flux-upgrade:
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Install Flux
-        uses: fluxcd/flux2/action@main
-      - name: Upgrade Flux
-        id: upgrade
+      - uses: actions/checkout@v2
+      - uses: fluxcd/flux2/action@main
+      - id: upgrade
         run: |
           UGLY_VERSION="$(flux -v)"
           VERSION="v${UGLY_VERSION#*flux version }"
@@ -24,8 +21,7 @@ jobs:
             --network-policy=false \
             --export > ./cluster/base/flux-system/gotk-components.yaml
           echo "::set-output name=flux_version::$VERSION"
-      - name: Create pull request for Flux upgrade
-        uses: peter-evans/create-pull-request@v3
+      - uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: "flux/upgrade-${{ steps.upgrade.outputs.flux_version }}"

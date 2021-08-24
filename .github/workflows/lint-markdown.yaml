@@ -10,18 +10,15 @@ jobs:
   markdownlint:
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Get changes
-        uses: dorny/paths-filter@v2
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
         id: filter
         with:
           list-files: shell
           filters: |
             markdown:
               - added|modified: "**.md"
-      - name: Lint files
-        if: ${{ steps.filter.outputs.markdown == 'true' }}
+      - if: ${{ steps.filter.outputs.markdown == 'true' }}
         uses: reviewdog/action-shellcheck@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
