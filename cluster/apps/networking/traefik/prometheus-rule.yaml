@@ -22,51 +22,47 @@ spec:
         - alert: TraefikConfigError
           annotations:
             summary: "Traefik config error."
-            description:
-              "Traefik has failed to load the config file. Check Traefik
+            description: "Traefik has failed to load the config file. Check Traefik
               logs for exact parsing error."
           expr: |
             traefik_config_last_reload_failure{job="traefik"} == 1
-          for: 5m
+          for: 0m
           labels:
             severity: critical
         - alert: TraefikHighHttp4xxErrorRateService
           annotations:
             summary: "Traefik has a high HTTP 4xx error rate."
-            description:
-              "Traefik is reporting {{ $value | humanizePercentage }} of 4xx
-              errors on {{ $labels.exported_service }}"
+            description: "Traefik is reporting {{ $value | humanizePercentage }} of 4xx
+              errors on {{ $labels.service }}"
           expr: |
-            sum(rate(traefik_service_requests_total{code=~"4.*"}[1m])) by (exported_service)
+            sum(rate(traefik_service_requests_total{code=~"4.*"}[1m])) by (service)
               /
-            sum(rate(traefik_service_requests_total[1m])) by (exported_service)
-              > .10
-          for: 5m
+            sum(rate(traefik_service_requests_total[1m])) by (service)
+              > .05
+          for: 3m
           labels:
             severity: critical
         - alert: TraefikHighHttp5xxErrorRateService
           annotations:
             summary: "Traefik has a high HTTP 5xx error rate."
-            description:
-              "Traefik is reporting {{ $value | humanizePercentage }} of 5xx
-              errors on {{ $labels.exported_service }}"
+            description: "Traefik is reporting {{ $value | humanizePercentage }} of 5xx
+              errors on {{ $labels.service }}"
           expr: |
-            sum(rate(traefik_service_requests_total{code=~"5.*"}[1m])) by (exported_service)
+            sum(rate(traefik_service_requests_total{code=~"5.*"}[1m])) by (service)
               /
-            sum(rate(traefik_service_requests_total[1m])) by (exported_service)
-              > .10
-          for: 5m
+            sum(rate(traefik_service_requests_total[1m])) by (service)
+              > .05
+          for: 3m
           labels:
             severity: critical
         - alert: TraefikTooManyRequest
           annotations:
             summary: "Traefik has too many open connections"
-            description:
-              "Traefik is reporting {{ $value }} of open connections on entrypoint
+            description: "Traefik is reporting {{ $value }} of open connections on entrypoint
               {{ $labels.entrypoint }}"
           expr: |
             avg(traefik_entrypoint_open_connections{job="traefik"})
               > 5
-          for: 5m
+          for: 1m
           labels:
             severity: critical
