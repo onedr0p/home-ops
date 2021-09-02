@@ -16,7 +16,7 @@ mkdir -p /mnt/data
 mount -t nfs -o "nfsvers=4.1,hard" 192.168.42.50:/Data /mnt/nfsdata
 ```
 
-## Restore data from a NFS share
+## Backup data to a NFS share
 
 !!! info "Ran from your workstation"
 
