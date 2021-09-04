@@ -190,14 +190,20 @@ spec:
             name: thanos-objstore
             key: objstore.yml
         additionalScrapeConfigs:
-          - job_name: "node-exporter"
-            honor_timestamps: true
-            static_configs:
-              - targets:
-                  - 192.168.1.1:9100
-                  - 192.168.42.60:9100
           - job_name: "coredns"
             honor_timestamps: true
             static_configs:
               - targets:
-                  - 192.168.1.1:9153
+                  - "${GATEWAY_ADDR}:9153"
+          - job_name: 'minio-job'
+            honor_timestamps: true
+            metrics_path: /minio/v2/metrics/cluster
+            static_configs:
+              - targets:
+                  - "${NAS_ADDR}:9000"
+          - job_name: "node-exporter"
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - "${GATEWAY_ADDR}:9100"
+                  - "${NAS_ADDR}:9100"
