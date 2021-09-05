@@ -1,0 +1,19 @@
+[Unit]
+Description=Run node_exporter
+After=zfs-volumes.target network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStartPre=-/bin/podman kill node_exporter
+ExecStartPre=-/bin/podman rm node_exporter
+ExecStartPre=-/bin/podman pull prom/node-exporter:v1.2.2
+ExecStart=/bin/podman run --name node_exporter --net=host \
+    -v /proc:/host/proc:ro \
+    -v /sys:/host/sys:ro \
+    -v /:/rootfs:ro \
+    --user root \
+    prom/node-exporter:v1.2.2 --path.procfs=/host/proc --path.rootfs=/rootfs --path.sysfs=/host/sys
+ExecStop=/bin/podman stop node_exporter
+
+[Install]
+WantedBy=multi-user.target

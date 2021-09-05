@@ -1,0 +1,23 @@
+[Unit]
+Description=Run minio
+After=zfs-volumes.target network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStartPre=-/bin/podman kill minio
+ExecStartPre=-/bin/podman rm minio
+ExecStartPre=-/bin/podman pull minio/minio:RELEASE.2021-08-25T00-41-18Z
+ExecStart=/bin/podman run --name minio \
+    -e MINIO_ROOT_USER="" \
+    -e MINIO_ROOT_PASSWORD="" \
+    -e MINIO_PROMETHEUS_AUTH_TYPE="public" \
+    -e MINIO_UPDATE="off" \
+    -p 9000:9000 \
+    -p 9001:9001 \
+    -v /tycho/System/minio:/data \
+    --user 568:100 \
+    minio/minio:RELEASE.2021-08-25T00-41-18Z server /data --console-address ":9001"
+ExecStop=/bin/podman stop minio
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+[Unit]
+Description=Run postgres
+After=zfs-volumes.target network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStartPre=-/bin/podman kill postgres
+ExecStartPre=-/bin/podman rm postgres
+ExecStartPre=-/bin/podman pull postgres:12.8
+ExecStart=/bin/podman run --name postgres \
+    -e POSTGRES_DB="postgres" \
+    -e POSTGRES_USER="admin" \
+    -e POSTGRES_PASSWORD="" \
+    -e PGDATA="/var/lib/postgresql/data" \
+    -p 5432:5432 \
+    -v /tycho/System/postgres:/var/lib/postgresql/data \
+    --user 568:100 \
+    postgres:12.7
+ExecStop=/bin/podman stop postgres
+
+[Install]
+WantedBy=multi-user.target
