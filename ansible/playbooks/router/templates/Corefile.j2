@@ -3,9 +3,15 @@
   errors
   log
   prometheus :9153
-  k8s_gateway {{ home_domain }} {
+  k8s_gateway {{ domain }} {
     ttl 30
     kubeconfig /usr/local/etc/coredns/kubeconfig
+    fallthrough
+  }
+  hosts {
+    192.168.42.60 gateway.{{ domain }}
+    192.168.42.60 s3.{{ domain }}
+    192.168.42.60 unifi.{{ domain }}
     fallthrough
   }
   forward . tls://1.1.1.1 tls://1.0.0.1 {
