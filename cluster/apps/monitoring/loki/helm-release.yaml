@@ -19,6 +19,19 @@ spec:
   values:
     image:
       repository: ghcr.io/k8s-at-home/loki
+    ingress:
+      enabled: true
+      ingressClassName: "traefik"
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+      hosts:
+        - host: "loki.${SECRET_DOMAIN}"
+          paths:
+            - /
+      tls:
+        - hosts:
+            - "loki.${SECRET_DOMAIN}"
     serviceMonitor:
       enabled: true
     config:
