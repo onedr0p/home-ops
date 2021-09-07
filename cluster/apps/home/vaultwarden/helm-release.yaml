@@ -21,9 +21,12 @@ spec:
       repository: vaultwarden/server
       tag: 1.22.2
     env:
-      TZ: "America/New_York"
       DOMAIN: https://vaultwarden.${SECRET_DOMAIN}
-      SIGNUPS_ALLOWED: "false"
+      SIGNUPS_ALLOWED: false
+      TZ: "America/New_York"
+      WEBSOCKET_ADDRESS: 0.0.0.0
+      WEBSOCKET_ENABLED: true
+      WEBSOCKET_PORT: 3012
     envFrom:
       - secretRef:
           name: vaultwarden
@@ -41,9 +44,29 @@ spec:
           - host: vaultwarden.${SECRET_DOMAIN}
             paths:
               - path: /
+                pathType: Prefix
+              - path: /notifications/hub/negotiate
+                pathType: Prefix
+              - path: /notifications/hub
+                pathType: Prefix
+                servicePort: 3012
         tls:
           - hosts:
               - vaultwarden.${SECRET_DOMAIN}
+      admin:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.middlewares: "networking-rfc1918@kubernetescrd"
+        hosts:
+          - host: "vaultwarden.${SECRET_DOMAIN}"
+            paths:
+              - path: /admin
+                pathType: Prefix
+        tls:
+          - hosts:
+              - "vaultwarden.${SECRET_DOMAIN}"
     persistence:
       config:
         enabled: true
