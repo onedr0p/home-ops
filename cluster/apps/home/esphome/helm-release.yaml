@@ -2,15 +2,15 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: bazarr
-  namespace: media
+  name: esphome
+  namespace: home
 spec:
   interval: 5m
   chart:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
-      chart: bazarr
-      version: 10.0.0
+      chart: esphome
+      version: 8.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -18,10 +18,11 @@ spec:
       interval: 5m
   values:
     image:
-      repository: ghcr.io/k8s-at-home/bazarr
-      tag: v0.9.8
+      repository: ghcr.io/esphome/esphome
+      tag: 2021.8.2
     env:
       TZ: "America/New_York"
+      ESPHOME_DASHBOARD_USE_PING: true
     ingress:
       main:
         enabled: true
@@ -29,29 +30,17 @@ spec:
         annotations:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-          - host: "bazarr.${SECRET_DOMAIN}"
+          - host: "esphome.${SECRET_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "bazarr.${SECRET_DOMAIN}"
-    podSecurityContext:
-      supplementalGroups:
-        - 100
+              - "esphome.${SECRET_DOMAIN}"
     persistence:
       config:
         enabled: true
-        existingClaim: bazarr-config-v1
-      media:
-        enabled: true
-        type: custom
-        volumeSpec:
-          nfs:
-            server: "${NAS_ADDR}"
-            path: /tycho/Media
-        mountPath: /media
-        readOnly: true
+        existingClaim: esphome-config-v1
     podAnnotations:
       backup.velero.io/backup-volumes: config
     resources:
@@ -59,4 +48,4 @@ spec:
         memory: 250Mi
         cpu: 500m
       limits:
-        memory: 1500Mi
+        memory: 1000Mi
