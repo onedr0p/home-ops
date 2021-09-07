@@ -1,0 +1,59 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: vaultwarden
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: vaultwarden
+      version: 3.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: vaultwarden/server
+      tag: 1.22.2
+    env:
+      TZ: "America/New_York"
+      DOMAIN: https://vaultwarden.${SECRET_DOMAIN}
+      SIGNUPS_ALLOWED: "false"
+    envFrom:
+      - secretRef:
+          name: vaultwarden
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+          external-dns/is-public: "true"
+          hajimari.io/enable: "true"
+          hajimari.io/icon: "shield-key"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
+          - host: vaultwarden.${SECRET_DOMAIN}
+            paths:
+              - path: /
+        tls:
+          - hosts:
+              - vaultwarden.${SECRET_DOMAIN}
+    persistence:
+      config:
+        enabled: true
+        existingClaim: vaultwarden-config-v1
+    podAnnotations:
+      backup.velero.io/backup-volumes: config
+      secret.reloader.stakater.com/reload: "vaultwarden"
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 2000Mi
