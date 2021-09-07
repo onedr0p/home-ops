@@ -112,3 +112,31 @@ spec:
               category: logs
             annotations:
               summary: "{{$value}} is experiencing locked database issues"
+      #
+      # home-assistant
+      #
+      - name: home-assistant
+        rules:
+          - alert: HomeAssistantUnableToReachPostgresql
+            expr: |
+              sum by (app) (count_over_time({app=~"home-assistant"} |= "Error in database connectivity during commit"[2m])) > 0
+            for: 10s
+            labels:
+              severity: critical
+              category: logs
+            annotations:
+              summary: "Home Assistant is unable to connect to postgresql"
+      #
+      # vaultwarden
+      #
+      - name: vaultwarden
+        rules:
+          - alert: VaultwardenUnableToReachPostgresql
+            expr: |
+              sum by (app) (count_over_time({app=~"vaultwarden"} |= "could not connect to server"[2m])) > 0
+            for: 10s
+            labels:
+              severity: critical
+              category: logs
+            annotations:
+              summary: "Vaultwarden is unable to connect to postgresql"
