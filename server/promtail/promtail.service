@@ -1,0 +1,14 @@
+[Unit]
+Description=Run promtail
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/home/devin/Code/repos/onedr0p/home-cluster/server
+ExecStartPre=-/bin/podman pod ps --filter label=app=promtail -q | xargs sudo podman pod stop
+ExecStartPre=-/bin/podman pod ps --filter label=app=promtail -q | xargs sudo podman pod rm -rf
+ExecStart=/bin/podman play kube promtail/deployment.yaml
+ExecStop=/bin/podman pod ps --filter label=app=promtail -q | xargs sudo podman pod stop
+
+[Install]
+WantedBy=multi-user.target

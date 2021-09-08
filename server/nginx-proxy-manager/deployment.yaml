@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-proxy-manager
+spec:
+  selector:
+    matchLabels:
+      app: nginx-proxy-manager
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nginx-proxy-manager
+    spec:
+      containers:
+        - name: nginx-proxy-manager
+          image: jc21/nginx-proxy-manager:2.9.8
+          env:
+            - name: DB_SQLITE_FILE
+              value: /data/npm.sqlite
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              drop:
+                - CAP_MKNOD
+                - CAP_NET_RAW
+                - CAP_AUDIT_WRITE
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsUser: 0
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: letsencrypt
+              mountPath: /etc/letsencrypt
+      hostNetwork: true
+      volumes:
+        - name: data
+          hostPath:
+            path: /containers/nginx-proxy-manager/data
+            type: Directory
+        - name: letsencrypt
+          hostPath:
+            path: /containers/nginx-proxy-manager/letsencrypt
+            type: Directory

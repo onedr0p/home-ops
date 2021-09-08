@@ -1,0 +1,14 @@
+[Unit]
+Description=Run nginx-proxy-manager
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/home/devin/Code/repos/onedr0p/home-cluster/server
+ExecStartPre=-/bin/podman pod ps --filter label=app=nginx-proxy-manager -q | xargs sudo podman pod stop
+ExecStartPre=-/bin/podman pod ps --filter label=app=nginx-proxy-manager -q | xargs sudo podman pod rm -rf
+ExecStart=/bin/podman play kube nginx-proxy-manager/deployment.yaml
+ExecStop=/bin/podman pod ps --filter label=app=nginx-proxy-manager -q | xargs sudo podman pod stop
+
+[Install]
+WantedBy=multi-user.target

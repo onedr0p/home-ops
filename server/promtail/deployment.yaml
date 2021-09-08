@@ -1,0 +1,54 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: promtail
+spec:
+  selector:
+    matchLabels:
+      app: promtail
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: promtail
+    spec:
+      containers:
+        - name: promtail
+          image: docker.io/grafana/promtail:2.3.0
+          args:
+            - -config.file=/etc/promtail/promtail.yaml
+          env:
+            - name: HOSTNAME
+              value: expanse
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              drop:
+                - CAP_MKNOD
+                - CAP_NET_RAW
+                - CAP_AUDIT_WRITE
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsUser: 0
+          volumeMounts:
+            - name: config
+              mountPath: /etc
+              readOnly: true
+            - name: journal
+              mountPath: /var/log/journal
+              readOnly: true
+      hostNetwork: true
+      volumes:
+        - name: config
+          secret:
+            secretName: application-secrets
+            items:
+              - key: PROMTAIL_CONFIG
+                path: promtail/config.yaml
+        - name: journal
+          hostPath:
+            path: /var/log/journal
+            type: Directory
