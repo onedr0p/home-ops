@@ -35,7 +35,7 @@ spec:
             runAsUser: 0
           volumeMounts:
             - name: config
-              mountPath: /etc
+              mountPath: /etc/promtail/promtail.yaml
               readOnly: true
             - name: journal
               mountPath: /var/log/journal
@@ -43,11 +43,9 @@ spec:
       hostNetwork: true
       volumes:
         - name: config
-          secret:
-            secretName: application-secrets
-            items:
-              - key: PROMTAIL_CONFIG
-                path: promtail/config.yaml
+          hostPath:
+            path: /tycho/System/promtail/config.yaml
+            type: File
         - name: journal
           hostPath:
             path: /var/log/journal
