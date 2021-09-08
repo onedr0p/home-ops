@@ -7,8 +7,9 @@ Wants=network-online.target
 WorkingDirectory=/home/devin/Code/repos/onedr0p/home-cluster/server
 ExecStartPre=-/bin/bash -c '/bin/podman pod ps --filter label=app=node-exporter -q | xargs sudo podman pod stop'
 ExecStartPre=-/bin/bash -c '/bin/podman pod ps --filter label=app=node-exporter -q | xargs sudo podman pod rm -f'
-ExecStart=/bin/podman play kube node-exporter/deployment.yaml
-ExecStop=/bin/bash -c '/bin/podman pod ps --filter label=app=node-exporter -q | xargs sudo podman pod stop'
+ExecStart=-/bin/podman play kube node-exporter/deployment.yaml
+ExecStop=-/bin/bash -c '/bin/podman pod ps --filter label=app=node-exporter -q | xargs sudo podman pod stop'
+ExecStop=-/bin/bash -c '/bin/podman pod ps --filter label=app=node-exporter -q | xargs sudo podman pod rm -f'
 
 [Install]
 WantedBy=multi-user.target
