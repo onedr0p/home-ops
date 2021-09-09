@@ -4,6 +4,8 @@ kind: HelmRelease
 metadata:
   name: nfs-subdir-external-provisioner
   namespace: kube-system
+  labels:
+    kustomize.toolkit.fluxcd.io/substitute: "disabled"
 spec:
   interval: 5m
   chart:
@@ -19,7 +21,7 @@ spec:
   values:
     replicaCount: 3
     nfs:
-      server: "${NAS_ADDR}"
+      server: "192.168.42.60"
       path: "/tycho/PersistentVolumeClaims"
       mountOptions:
         - noatime
