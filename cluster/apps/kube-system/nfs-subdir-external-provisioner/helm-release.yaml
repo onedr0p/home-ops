@@ -1,0 +1,28 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nfs-subdir-external-provisioner
+  namespace: kube-system
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+      chart: nfs-subdir-external-provisioner
+      version: 4.0.13
+      sourceRef:
+        kind: HelmRepository
+        name: nfs-subdir-external-provisioner-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    replicaCount: 3
+    nfs:
+      server: "${NAS_ADDR}"
+      path: "/tycho/PersistentVolumeClaims"
+      mountOptions:
+        - noatime
+    storageClass:
+      defaultClass: false
+      pathPattern: "${.PVC.namespace}-${.PVC.name}"
