@@ -12,11 +12,13 @@ Here are several suggestions I have prior to installing Kubernetes or just gener
 
 ## Networking
 
-- Configure DNS on your nodes to use an upstream provider (e.g. `1.1.1.1`, `9.9.9.9`), or your router's IP if you have DNS configured there and it's not pointing to a local adblocker DNS.
+- Configure DNS on your nodes to use an upstream provider (e.g. `1.1.1.1`, `9.9.9.9`), or your router's IP if you have DNS configured there and it's **not pointing to a local adblocker DNS**.
 
 - Do not use a Ad-blockers (PiHole, Adguard-Home, Blocky, etc.) DNS server for your k8s nodes. Ad-blockers should be used on devices with a web browser.
 
 - Remove any search domains from your hosts `/etc/resolv.conf`. Search domains have an issue with alpine based containers and DNS might not resolve in them.
+
+- Do not disable ipv6, keep it enabled even if you aren't using it. Some applications will complain about ipv6 being disabled and logs will be spammed.
 
 - Ensure you are using `iptables` in `nf_tables` mode.
 
@@ -27,6 +29,7 @@ cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 net.ipv4.ip_forward=1
+net.ipv6.conf.all.forwarding = 1
 fs.inotify.max_user_watches=65536
 EOF
 sudo sysctl --system
