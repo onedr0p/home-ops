@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: sonarr
-      version: 14.0.0
+      version: 15.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -57,18 +57,21 @@ spec:
     podSecurityContext:
       supplementalGroups:
         - 100
-    exporter:
+    metrics:
       enabled: true
-      image:
-        repository: ghcr.io/onedr0p/exportarr
-        tag: v0.6.1
-      env:
-        port: 32123
-        additionalMetrics: true
-        unknownQueueItems: false
-      podMonitor:
+      serviceMonitor:
         interval: 3m
         scrapeTimeout: 1m
+      prometheusRule:
+        enabled: true
+      exporter:
+        image:
+          repository: ghcr.io/onedr0p/exportarr
+          tag: v0.6.1
+        env:
+          port: 9794
+          additionalMetrics: true
+          unknownQueueItems: false
     persistence:
       config:
         enabled: true
