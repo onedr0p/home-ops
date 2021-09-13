@@ -1,0 +1,32 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: doplarr
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: /charts/kah-common/
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: ghcr.io/kiranshila/doplarr
+      tag: overseerr
+    nameOverride: doplarr
+    env:
+      OVERSEERR_URL: "https://requests.${SECRET_DOMAIN}"
+    envFrom:
+      - secretRef:
+          name: doplarr
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 500Mi
