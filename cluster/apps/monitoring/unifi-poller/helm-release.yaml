@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: unifi-poller
-      version: 9.0.0
+      version: 10.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -32,6 +32,10 @@ spec:
       UP_INFLUXDB_DISABLE: true
       UP_PROMETHEUS_DISABLE: false
       UP_PROMETHEUS_NAMESPACE: "unifipoller"
-    prometheus:
+    metrics:
+      enabled: true
       serviceMonitor:
+        interval: 1m
+        scrapeTimeout: 30s
+      prometheusRule:
         enabled: true
