@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://falcosecurity.github.io/charts
       chart: falcosidekick
-      version: 0.3.17
+      version: 0.4.0
       sourceRef:
         kind: HelmRepository
         name: falco-security-charts
@@ -35,7 +35,7 @@ spec:
       hosts:
         - host: "falcosidekick.${SECRET_DOMAIN}"
           paths:
-            - /
+            - path: /
       tls:
         - hosts:
             - "falcosidekick.${SECRET_DOMAIN}"
@@ -50,7 +50,11 @@ spec:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
           - host: "falcosidekick-ui.${SECRET_DOMAIN}"
-            paths: ["/ui", "/events", "/healthz", "/ws"]
+            paths:
+              - path: /ui
+              - path: /events
+              - path: /healthz
+              - path: /ws
         tls:
           - hosts:
               - "falcosidekick-ui.${SECRET_DOMAIN}"
