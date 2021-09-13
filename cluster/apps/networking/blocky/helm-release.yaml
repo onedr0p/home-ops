@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: blocky
-      version: 8.0.0
+      version: 9.0.1
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -49,6 +49,13 @@ spec:
             protocol: UDP
             targetPort: 53
         externalTrafficPolicy: Local
+    metrics:
+      enabled: true
+      serviceMonitor:
+        interval: 30s
+        scrapeTimeout: 10s
+      prometheusRule:
+        enabled: true
     config: |
       upstream:
         externalResolvers:
@@ -75,9 +82,6 @@ spec:
         path: /metrics
       httpPort: 4000
       logLevel: info
-    prometheus:
-      serviceMonitor:
-        enabled: true
     podAnnotations:
       configmap.reloader.stakater.com/reload: "blocky-config"
     affinity:
