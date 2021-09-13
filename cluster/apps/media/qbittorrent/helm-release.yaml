@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: qbittorrent
-      version: 12.2.1
+      version: 13.0.0
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -57,17 +57,20 @@ spec:
         tls:
           - hosts:
               - "qb.${SECRET_DOMAIN}"
-    exporter:
+    metrics:
       enabled: true
-      image:
-        repository: ghcr.io/k8s-at-home/prometheus-qbittorrent-exporter
-        tag: v1.2.0
-      env:
-        user: "${SECRET_QB_USERNAME}"
-        password: "${SECRET_QB_PASSWORD}"
+      exporter:
+        image:
+          repository: ghcr.io/k8s-at-home/prometheus-qbittorrent-exporter
+          tag: v1.2.0
+        env:
+          user: "${SECRET_QB_USERNAME}"
+          password: "${SECRET_QB_PASSWORD}"
       serviceMonitor:
         interval: 1m
         scrapeTimeout: 10s
+      prometheusRule:
+        enabled: true
     podSecurityContext:
       supplementalGroups:
         - 100
