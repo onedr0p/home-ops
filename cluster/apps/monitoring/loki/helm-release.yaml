@@ -57,6 +57,20 @@ spec:
         enable_api: true
     alerting_groups:
       #
+      # SMART Failures
+      #
+      - name: smart-failure
+        rules:
+          - alert: SmartFailures
+            expr: |
+              sum by (hostname) (count_over_time({hostname=~".+"} |= "Failed SMART"[2m])) > 0
+            for: 10s
+            labels:
+              severity: critical
+              category: logs
+            annotations:
+              summary: "SMART has reported failures a drive on {{$hostname}}"
+      #
       # zigbee2mqtt
       #
       - name: zigbee2mqtt
@@ -111,7 +125,7 @@ spec:
               severity: critical
               category: logs
             annotations:
-              summary: "{{$value}} is experiencing locked database issues"
+              summary: "{{$app}} is experiencing locked database issues"
       #
       # home-assistant
       #
