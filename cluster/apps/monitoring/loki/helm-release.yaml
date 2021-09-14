@@ -63,7 +63,7 @@ spec:
         rules:
           - alert: SmartFailures
             expr: |
-              sum by (hostname) (count_over_time({hostname=~".+"} |= "Failed SMART"[2m])) > 0
+              sum by (hostname) (count_over_time({hostname=~".+"} |~ "(?i).*smartd.*(error|fail).*"[2m])) > 0
             for: 10s
             labels:
               severity: critical
