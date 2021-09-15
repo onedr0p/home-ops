@@ -2,6 +2,17 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
+  name: rook-ceph-bucket
+provisioner: rook-ceph.ceph.rook.io/bucket
+reclaimPolicy: Delete
+parameters:
+  objectStoreName: object-store
+  objectStoreNamespace: rook-ceph
+  region: east-us-1
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
   name: rook-ceph-block
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
