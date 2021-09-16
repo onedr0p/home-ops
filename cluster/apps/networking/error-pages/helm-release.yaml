@@ -22,7 +22,7 @@ spec:
       repository: ghcr.io/tarampampam/error-pages
       tag: 1.8.0
     controller:
-      replicas: 3
+      replicas: 2
     nameOverride: error-pages
     env:
       TEMPLATE_NAME: hacker-terminal
@@ -31,6 +31,18 @@ spec:
         ports:
           http:
             port: 8080
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - error-pages
+              topologyKey: kubernetes.io/hostname
     resources:
       requests:
         memory: 100Mi
