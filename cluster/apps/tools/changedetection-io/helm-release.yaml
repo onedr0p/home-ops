@@ -21,6 +21,7 @@ spec:
     nameOverride: changedetection-io
     env:
       BASE_URL: "https://change-detection.${SECRET_DOMAIN}"
+      WEBDRIVER_URL: http://localhost:4444/wd/hub
       TZ: "America/New_York"
     service:
       main:
@@ -48,9 +49,26 @@ spec:
         enabled: true
         existingClaim: changedetection-io-config-v1
         mountPath: /datastore
+      cache:
+        enabled: true
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 2Gi
+        mountPath: /dev/shm
     resources:
       requests:
         memory: 100Mi
         cpu: 100m
       limits:
         memory: 750Mi
+    additionalContainers:
+      chrome-webdriver:
+        name: chrome-webdriver
+        image: selenium/standalone-chrome-debug:3.141.59
+        imagePullPolicy: IfNotPresent
+        ports:
+          - name: chrome-webdriver
+            containerPort: 4444
+        volumeMounts:
+          - name: cache
+            mountPath: /dev/shm
