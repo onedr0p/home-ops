@@ -55,11 +55,27 @@ spec:
         mountPath: /media
     podAnnotations:
       backup.velero.io/backup-volumes: config
-      # pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/config"]'
-      # post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/config"]'
+      pre.hook.backup.velero.io/container: fsfreeze-pause
+      pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/config"]'
+      post.hook.backup.velero.io/container: fsfreeze-pause
+      post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/config"]'
     resources:
       requests:
         memory: 250Mi
         cpu: 500m
       limits:
         memory: 1500Mi
+    additionalContainers:
+      fsfreeze-pause:
+        name: fsfreeze-pause
+        image: ubuntu:focal-20210827
+        imagePullPolicy: IfNotPresent
+        command:
+          - "/bin/bash"
+          - "-c"
+          - "sleep infinity"
+        volumeMounts:
+          - name: config
+            mountPath: /config
+      securityContext:
+        runAsUser: 0
