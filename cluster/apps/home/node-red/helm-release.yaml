@@ -47,6 +47,8 @@ spec:
         mountPath: "/data"
     podAnnotations:
       backup.velero.io/backup-volumes: config
+      pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/data"]'
+      post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/data"]'
     resources:
       requests:
         memory: 100Mi

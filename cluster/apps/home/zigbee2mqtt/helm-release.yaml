@@ -44,6 +44,8 @@ spec:
         mountPath: "/data"
     podAnnotations:
       backup.velero.io/backup-volumes: config
+      pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/data"]'
+      post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/data"]'
     config:
       homeassistant: true
       device_options:

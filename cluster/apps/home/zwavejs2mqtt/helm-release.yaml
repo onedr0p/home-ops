@@ -50,6 +50,8 @@ spec:
         hostPathType: CharDevice
     podAnnotations:
       backup.velero.io/backup-volumes: config
+      pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/usr/src/app/store"]'
+      post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/usr/src/app/store"]'
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:

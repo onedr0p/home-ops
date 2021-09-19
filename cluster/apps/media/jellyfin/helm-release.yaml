@@ -66,6 +66,8 @@ spec:
         medium: Memory
     podAnnotations:
       backup.velero.io/backup-volumes: config
+      pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/config"]'
+      post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/config"]'
     resources:
       requests:
         gpu.intel.com/i915: 1

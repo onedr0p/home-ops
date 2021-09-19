@@ -64,6 +64,8 @@ spec:
         existingClaim: home-assistant-config-v1
     podAnnotations:
       backup.velero.io/backup-volumes: config
+      pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/config"]'
+      post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/config"]'
       secret.reloader.stakater.com/reload: "home-assistant"
     addons:
       codeserver:
