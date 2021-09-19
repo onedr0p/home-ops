@@ -44,6 +44,10 @@ spec:
         mountPath: "/data"
     podAnnotations:
       backup.velero.io/backup-volumes: config
+      pre.hook.backup.velero.io/container: fsfreeze
+      pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/data"]'
+      post.hook.backup.velero.io/container: fsfreeze
+      post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/data"]'
     config:
       homeassistant: true
       device_options:
@@ -80,3 +84,17 @@ spec:
         port: 8080
       experimental:
         new_api: true
+    additionalContainers:
+      fsfreeze:
+        name: fsfreeze
+        image: ubuntu:focal-20210827
+        imagePullPolicy: IfNotPresent
+        command:
+          - "/bin/bash"
+          - "-c"
+          - "sleep infinity"
+        volumeMounts:
+          - name: config
+            mountPath: /data
+        securityContext:
+          privileged: true
