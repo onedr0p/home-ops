@@ -66,6 +66,10 @@ spec:
         medium: Memory
     podAnnotations:
       backup.velero.io/backup-volumes: config
+      pre.hook.backup.velero.io/container: fsfreeze
+      pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/config"]'
+      post.hook.backup.velero.io/container: fsfreeze
+      post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/config"]'
     resources:
       requests:
         gpu.intel.com/i915: 1
@@ -74,3 +78,17 @@ spec:
       limits:
         gpu.intel.com/i915: 1
         memory: 4000Mi
+    additionalContainers:
+      fsfreeze:
+        name: fsfreeze
+        image: ubuntu:focal-20210827
+        imagePullPolicy: IfNotPresent
+        command:
+          - "/bin/bash"
+          - "-c"
+          - "sleep infinity"
+        volumeMounts:
+          - name: config
+            mountPath: /config
+        securityContext:
+          privileged: true
