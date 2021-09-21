@@ -27,15 +27,12 @@ spec:
       backupStorageLocation:
         name: default
         bucket: velero
+        default: true
         config:
           region: us-east-1
           s3ForcePathStyle: true
           s3Url: http://${NAS_ADDR}:9000
           publicUrl: https://s3.${SECRET_DOMAIN}
-      volumeSnapshotLocation:
-        name: aws
-        config:
-          region: us-east-1
       resticTimeout: 4h
     initContainers:
       - name: velero-plugin-for-aws
@@ -56,7 +53,7 @@ spec:
       serviceMonitor:
         enabled: true
     backupsEnabled: true
-    snapshotsEnabled: true
+    snapshotsEnabled: false
     upgradeCRDs: false
     cleanUpCRDs: false
     kubectl:
