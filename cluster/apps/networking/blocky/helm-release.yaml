@@ -58,37 +58,37 @@ spec:
         enabled: true
     config: |
       upstream:
-        externalResolvers:
-        - tcp-tls:${SECRET_NEXTDNS_ID}.dns1.nextdns.io:853
-        - tcp-tls:${SECRET_NEXTDNS_ID}.dns2.nextdns.io:853
+        default:
+          - tcp-tls:${SECRET_NEXTDNS_ID}.dns1.nextdns.io:853
+          - tcp-tls:${SECRET_NEXTDNS_ID}.dns2.nextdns.io:853
       conditional:
         mapping:
           ${SECRET_DOMAIN}: udp:${GATEWAY_ADDR}
       blocking:
         blackLists:
           ads:
-          - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
-          - |
-            /^ad([sxv]?[0-9]*|system)[_.-]([^.[:space:]]+\.){1,}|[_.-]ad([sxv]?[0-9]*|system)[_.-]/
-            /^(.+[_.-])?adse?rv(er?|ice)?s?[0-9]*[_.-]/
-            /^(.+[_.-])?telemetry[_.-]/
-            /^adim(age|g)s?[0-9]*[_.-]/
-            /^adtrack(er|ing)?[0-9]*[_.-]/
-            /^advert(s|is(ing|ements?))?[0-9]*[_.-]/
-            /^aff(iliat(es?|ion))?[_.-]/
-            /^analytics?[_.-]/
-            /^banners?[_.-]/
-            /^beacons?[0-9]*[_.-]/
-            /^count(ers?)?[0-9]*[_.-]/
-            /^mads\./
-            /^pixels?[-.]/
-            /^stat(s|istics)?[0-9]*[_.-]/
+            - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
+            - |
+              /^ad([sxv]?[0-9]*|system)[_.-]([^.[:space:]]+\.){1,}|[_.-]ad([sxv]?[0-9]*|system)[_.-]/
+              /^(.+[_.-])?adse?rv(er?|ice)?s?[0-9]*[_.-]/
+              /^(.+[_.-])?telemetry[_.-]/
+              /^adim(age|g)s?[0-9]*[_.-]/
+              /^adtrack(er|ing)?[0-9]*[_.-]/
+              /^advert(s|is(ing|ements?))?[0-9]*[_.-]/
+              /^aff(iliat(es?|ion))?[_.-]/
+              /^analytics?[_.-]/
+              /^banners?[_.-]/
+              /^beacons?[0-9]*[_.-]/
+              /^count(ers?)?[0-9]*[_.-]/
+              /^mads\./
+              /^pixels?[-.]/
+              /^stat(s|istics)?[0-9]*[_.-]/
         whiteLists:
           ads:
-          - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+            - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
         clientGroupsBlock:
           default:
-          - ads
+            - ads
       clientLookup:
         upstream: udp:${GATEWAY_ADDR}
       prometheus:
