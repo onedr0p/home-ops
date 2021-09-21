@@ -59,11 +59,10 @@ spec:
     config: |
       upstream:
         default:
-          - tcp-tls:${SECRET_NEXTDNS_ID}.dns1.nextdns.io:853
-          - tcp-tls:${SECRET_NEXTDNS_ID}.dns2.nextdns.io:853
+          - tcp+udp:${GATEWAY_ADDR}
       conditional:
         mapping:
-          ${SECRET_DOMAIN}: udp:${GATEWAY_ADDR}
+          ${SECRET_DOMAIN}: tcp+udp:${GATEWAY_ADDR}
       blocking:
         blackLists:
           ads:
@@ -90,7 +89,7 @@ spec:
           default:
             - ads
       clientLookup:
-        upstream: udp:${GATEWAY_ADDR}
+        upstream: tcp+udp:${GATEWAY_ADDR}
       prometheus:
         enable: true
         path: /metrics
