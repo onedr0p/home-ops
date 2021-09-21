@@ -20,8 +20,10 @@ spec:
       tag: v2.17.2
     nameOverride: filebrowser
     env:
-      FB_DATABASE: /config/database.db
-      FB_CONFIG: /etc/filebrowser/filebrowser.yaml
+      FB_DATABASE: "/config/filebrowser.db"
+      FB_ROOT: "/media"
+      FB_LOG: "stdout"
+      FB_NOAUTH: "true"
       TZ: "America/New_York"
     service:
       main:
@@ -48,13 +50,13 @@ spec:
       config:
         enabled: true
         existingClaim: filebrowser-config-v1
-      filebrowser:
-        enabled: true
-        mountPath: /etc/filebrowser/filebrowser.yaml
-        type: custom
-        volumeSpec:
-          configMap:
-            name: filebrowser
+      # filebrowser:
+      #   enabled: true
+      #   mountPath: /etc/filebrowser/filebrowser.yaml
+      #   type: custom
+      #   volumeSpec:
+      #     configMap:
+      #       name: filebrowser
       media:
         enabled: true
         type: custom
@@ -69,4 +71,4 @@ spec:
         memory: 100Mi
         cpu: 100m
       limits:
-        memory: 750Mi
+        memory: 500Mi
