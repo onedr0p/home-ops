@@ -20,10 +20,9 @@ spec:
       tag: v2.17.2
     nameOverride: filebrowser
     env:
-      APPLICATION_URL: "https://filestash.${SECRET_DOMAIN}"
+      FB_DATABASE: /config/database.db
+      FB_CONFIG: /etc/filebrowser/filebrowser.yaml
       TZ: "America/New_York"
-    args:
-      - --database /config/database.db
     service:
       main:
         ports:
@@ -51,7 +50,7 @@ spec:
         existingClaim: filebrowser-config-v1
       filebrowser:
         enabled: true
-        mountPath: /.filebrowser.json
+        mountPath: /etc/filebrowser/filebrowser.yaml
         type: custom
         volumeSpec:
           configMap:
