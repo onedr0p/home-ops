@@ -33,14 +33,10 @@ spec:
       - :9001
     service:
       main:
-        enabled: true
         ports:
           http:
             port: 9001
-      api:
-        enabled: true
-        ports:
-          http:
+          api:
             enabled: true
             port: 9000
     ingress:
@@ -55,6 +51,8 @@ spec:
             paths:
               - path: /
                 pathType: Prefix
+                service:
+                  port: 9001
         tls:
           - hosts:
               - "minio.${SECRET_DOMAIN}"
@@ -68,9 +66,8 @@ spec:
             paths:
               - path: /
                 pathType: Prefix
-                # service:
-                #   name: minio-api
-                #   port: 9000
+                service:
+                  port: 9000
         tls:
           - hosts:
               - "s3.${SECRET_DOMAIN}"
