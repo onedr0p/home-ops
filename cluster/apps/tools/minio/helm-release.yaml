@@ -33,13 +33,18 @@ spec:
       - :9001
     service:
       main:
+        enabled: false
+      console:
+        enabled: true
         ports:
-          http:
+          console:
+            enabled: true
+            primary: true
             port: 9001
       api:
         enabled: true
         ports:
-          http:
+          api:
             enabled: true
             primary: false
             port: 9000
@@ -56,6 +61,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
+                  name: minio-console
                   port: 9001
         tls:
           - hosts:
@@ -71,6 +77,7 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
+                  name: minio-api
                   port: 9000
         tls:
           - hosts:
