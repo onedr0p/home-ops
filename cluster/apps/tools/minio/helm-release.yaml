@@ -36,8 +36,10 @@ spec:
         ports:
           http:
             port: 9001
-          api:
-            enabled: true
+      api:
+        enabled: true
+        ports:
+          http:
             port: 9000
     ingress:
       main:
@@ -53,6 +55,15 @@ spec:
                 pathType: Prefix
                 service:
                   port: 9001
+        tls:
+          - hosts:
+              - "minio.${SECRET_DOMAIN}"
+      api:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
           - host: "s3.${SECRET_DOMAIN}"
             paths:
               - path: /
@@ -61,7 +72,6 @@ spec:
                   port: 9000
         tls:
           - hosts:
-              - "minio.${SECRET_DOMAIN}"
               - "s3.${SECRET_DOMAIN}"
     persistence:
       config:
