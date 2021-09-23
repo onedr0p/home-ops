@@ -1,0 +1,30 @@
+server:
+  log_level: info
+  disable: true
+
+client:
+  url: https://loki.${SECRET_DOMAIN}/loki/api/v1/push
+
+positions:
+  filename: /tmp/positions.yaml
+
+scrape_configs:
+  - job_name: valetudo
+    # Parse the valetudo logs e.g.
+    # [2021-09-23T14:30:20.403Z] [INFO] MQTT configured
+    pipeline_stages:
+      - regex:
+          expression: "^\\[(?P<timestamp>.+)\\] \\[(?P<level>(TRACE|DEBUG|INFO|WARNING|ERROR))\\] (?P<message>.*)$"
+      - labels:
+          level:
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+      - output:
+          source: message
+    static_configs:
+      - targets:
+         - localhost
+        labels:
+          __path__: /tmp/valetudo.log
+          hostname: valetudo
