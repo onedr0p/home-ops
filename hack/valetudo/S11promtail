@@ -1,0 +1,27 @@
+#!/bin/sh
+
+load() {
+    echo "starting promtail"
+    start-stop-daemon -S -b -q -m -p /var/run/promtail.pid -x /mnt/data/promtail/promtail -- -config.file /mnt/data/promtail/config.yml
+}
+
+unload() {
+    echo "stopping promtail"
+    start-stop-daemon -K -q -p /var/run/promtail.pid
+}
+
+case "$1" in
+    start)
+        load
+        ;;
+    stop)
+        unload
+        ;;
+    restart)
+        unload
+        load
+        ;;
+    *)
+        echo "$0 <start/stop/restart>"
+        ;;
+esac

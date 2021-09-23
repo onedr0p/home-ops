@@ -1,0 +1,27 @@
+#!/bin/sh
+
+load() {
+    echo "starting node_exporter"
+    start-stop-daemon -S -b -q -m -p /var/run/node_exporter.pid -x /mnt/data/node_exporter/node_exporter
+}
+
+unload() {
+    echo "stopping node_exporter"
+    start-stop-daemon -K -q -p /var/run/node_exporter.pid
+}
+
+case "$1" in
+    start)
+        load
+        ;;
+    stop)
+        unload
+        ;;
+    restart)
+        unload
+        load
+        ;;
+    *)
+        echo "$0 <start/stop/restart>"
+        ;;
+esac
