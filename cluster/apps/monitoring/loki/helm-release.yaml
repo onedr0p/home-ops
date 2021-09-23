@@ -77,7 +77,7 @@ spec:
         rules:
           - alert: ZigbeeUnableToReachMQTT
             expr: |
-              sum(count_over_time({app="zigbee2mqtt"} |= "Not connected to MQTT server"[2m])) > 0
+              sum(count_over_time({app="zigbee2mqtt"} |~ "(?i)not connected to mqtt server"[2m])) > 0
             for: 10s
             labels:
               severity: critical
@@ -91,7 +91,7 @@ spec:
         rules:
           - alert: ZwaveUnableToReachMQTT
             expr: |
-              sum(count_over_time({app="zwavejs2mqtt"} |= "Error while connecting MQTT"[2m])) > 0
+              sum(count_over_time({app="zwavejs2mqtt"} |~ "(?i)error while connecting mqtt"[2m])) > 0
             for: 10s
             labels:
               severity: critical
@@ -105,7 +105,7 @@ spec:
         rules:
           - alert: FrigateUnableToReachMQTT
             expr: |
-              sum(count_over_time({app="frigate"} |= "Unable to connect to MQTT server"[2m])) > 0
+              sum(count_over_time({app="frigate"} |~ "(?i)unable to connect to mqtt server"[2m])) > 0
             for: 10s
             labels:
               severity: critical
@@ -119,7 +119,7 @@ spec:
         rules:
           - alert: ArrDatabaseIsLocked
             expr: |
-              sum by (app) (count_over_time({app=~".*arr"} |= "database is locked"[2m])) > 0
+              sum by (app) (count_over_time({app=~".*arr"} |~ "(?i)database is locked"[2m])) > 0
             for: 10s
             labels:
               severity: critical
@@ -133,7 +133,7 @@ spec:
         rules:
           - alert: HomeAssistantUnableToReachPostgresql
             expr: |
-              sum by (app) (count_over_time({app=~"home-assistant"} |= "Error in database connectivity during commit"[2m])) > 0
+              sum by (app) (count_over_time({app=~"home-assistant"} |~ "(?i)error in database connectivity during commit"[2m])) > 0
             for: 10s
             labels:
               severity: critical
@@ -147,10 +147,24 @@ spec:
         rules:
           - alert: VaultwardenUnableToReachPostgresql
             expr: |
-              sum by (app) (count_over_time({app=~"vaultwarden"} |= "could not connect to server"[2m])) > 0
+              sum by (app) (count_over_time({app=~"vaultwarden"} |~ "(?i)could not connect to server"[2m])) > 0
             for: 10s
             labels:
               severity: critical
               category: logs
             annotations:
               summary: "Vaultwarden is unable to connect to postgresql"
+      #
+      # valetudo
+      #
+      - name: valetudo
+        rules:
+          - alert: ValetudoUnableToReachMQTT
+            expr: |
+              sum by (hostname) (count_over_time({hostname=~"valetudo"} |~ "(?i).*error.*mqtt.*"[2m])) > 0
+            for: 10s
+            labels:
+              severity: critical
+              category: logs
+            annotations:
+              summary: "Valetudo is unable to connect to mqtt"
