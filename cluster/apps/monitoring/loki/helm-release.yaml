@@ -154,3 +154,17 @@ spec:
               category: logs
             annotations:
               summary: "Vaultwarden is unable to connect to postgresql"
+      #
+      # valetudo
+      #
+      - name: valetudo
+        rules:
+          - alert: ValetudoUnableToReachMQTT
+            expr: |
+              sum by (hostname) (count_over_time({hostname=~"valetudo"} |~ "(?i)error.*mqtt"[2m])) > 0
+            for: 10s
+            labels:
+              severity: critical
+              category: logs
+            annotations:
+              summary: "Valetudo is unable to connect to mqtt"
