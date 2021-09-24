@@ -33,26 +33,17 @@ spec:
       - :9001
     service:
       main:
-        enabled: false
-      console:
         enabled: true
-        primary: true
         ports:
-          console:
+          http:
             enabled: true
             port: 9001
-      api:
-        enabled: true
-        ports:
           api:
             enabled: true
             port: 9000
     ingress:
       main:
-        enabled: false
-      console:
         enabled: true
-        primary: true
         ingressClassName: "traefik"
         annotations:
           # TODO: Add hajimari annotations to minio ingress
@@ -63,26 +54,16 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: minio
                   port: 9001
-        tls:
-          - hosts:
-              - "minio.${SECRET_DOMAIN}"
-      api:
-        enabled: true
-        ingressClassName: "traefik"
-        annotations:
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        hosts:
           - host: "s3.${SECRET_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
                 service:
-                  name: minio-api
                   port: 9000
         tls:
           - hosts:
+              - "minio.${SECRET_DOMAIN}"
               - "s3.${SECRET_DOMAIN}"
     persistence:
       config:
