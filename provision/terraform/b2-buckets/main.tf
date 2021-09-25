@@ -3,7 +3,7 @@ terraform {
   backend "remote" {
     organization = "onedr0p"
     workspaces {
-      name = "home-cluster-b2"
+      name = "home-b2"
     }
   }
 
