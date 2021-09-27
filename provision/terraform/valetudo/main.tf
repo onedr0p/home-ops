@@ -14,3 +14,7 @@ terraform {
     }
   }
 }
+
+provider "ssh" {
+  debug_log = "/tmp/ssh.log"
+}

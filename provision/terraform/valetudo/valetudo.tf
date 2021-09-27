@@ -24,4 +24,8 @@ resource "ssh_resource" "valetudo" {
   commands = [
     "/etc/init/S11valetudo restart"
   ]
+
+  depends_on = [
+    null_resource.valetudo
+  ]
 }
