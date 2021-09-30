@@ -42,20 +42,19 @@ provider "registry.terraform.io/integrations/github" {
 }
 
 provider "registry.terraform.io/loafoe/ssh" {
-  version     = "0.3.0"
-  constraints = "0.3.0"
+  version     = "0.4.0"
+  constraints = "0.4.0"
   hashes = [
-    "h1:ggamJqDvR5DMUlhkG6QxNNfHKKllb+wMnG1Ga1c+zYQ=",
-    "zh:22414c12fec6a66e9037a6647e27960cd109ce5a3f3ef77fb1ebf34a66a76412",
-    "zh:2bb8e99ead943814d54feb8296451e29444bb86623c4a70f40d31c59b8455925",
-    "zh:2d2ee27fe343dbd3c4cbf69e0387451159fcc2cdcf866305912991140d86361c",
-    "zh:6cbbfa184975861b7630063a0eeb494285408188e49b012c77397965eae12e60",
-    "zh:7333c93615f535eeffbb2468d9b0a7f61376031eadc26a73c065897bfe365cd4",
-    "zh:78126ce017e841d4f7154d3c367a2737914b5e813b527013c22c743f9e4fb8af",
-    "zh:94dfa6fa1335205d7661255f65b15ad1f202d3a38279f8587815dfc43dcfc835",
-    "zh:ad36cf3e1a82b39264b3762e08dddf8a486957fcf498c330a9386be4a166b7af",
-    "zh:b2bb1631a2b2f3c3ab41adfaa98a05934aa426bf500e171308c584d279e9ca49",
-    "zh:b372739bc04202a917f68e9b49368fff84c6a7ae2e08e9612ace218fc2e76c3e",
-    "zh:db989e5e66310590686267db87368a38d40444492ab94f4c5e8b8a1a9a429def",
+    "h1:8hIM0oIxiL+i+cVwPjjo7pz8G/xKUFLVkkNrgjlUcHk=",
+    "h1:NH1Pkk6qs1WrXiwRL4ZoqTUmVg/uJChmybhUl4Q4pys=",
+    "h1:SdM/yq+f+34UAgiQmH1sStN6C4RnN8YVq7EGD113za8=",
+    "h1:eAkV7qwwVoCOEDliO1bGZ8gLy+TUQtIqIkAK+ldnGxw=",
+    "h1:o+aTmthbLXGmk90p1g9Ti1ZW0MHigGS7K0khsV5NFbY=",
+    "h1:sBxKHrrA4hiDX9oNhUDZYSrxKKNeo01UjX4KL0VlRp8=",
+    "h1:t0e+fAV4wfoBy0UXUPqd8jN0t2Faees6VZUqm7wg3u4=",
+    "h1:t2P4nZWigsU/EeHXiZgFBltm6/ygG9dViWovdGdiNlo=",
+    "h1:uB+WQlfQ5p+OrFRZ5/4xNBIYgRigQ2gTiH3UDPLcPO8=",
+    "h1:yZZ3UTIzpyfv5FJ3LZZmu+/BpCcccVBUb3XDvBOMvEI=",
+    "h1:zxUPuspKjfN+VvEEjVFQNUDN+o0IUDXhbPwd/kOtt7Q=",
   ]
 }
