@@ -70,15 +70,17 @@ spec:
         enabled: true
         type: emptyDir
         medium: Memory
+    nodeSelector:
+      node-role.kubernetes.io/worker: true
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
-            - matchExpressions:
-                - key: feature.node.kubernetes.io/custom-intel-gpu
-                  operator: In
-                  values:
-                    - "true"
+            # - matchExpressions:
+            #     - key: feature.node.kubernetes.io/custom-intel-gpu
+            #       operator: In
+            #       values:
+            #         - "true"
             - matchExpressions:
                 - key: kubernetes.io/hostname
                   operator: In
