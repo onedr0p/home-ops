@@ -3,7 +3,7 @@ terraform {
   backend "remote" {
     organization = "onedr0p"
     workspaces {
-      name = "home-cloudflare"
+      name = "home-cloudflare-casa-tld"
     }
   }
 
