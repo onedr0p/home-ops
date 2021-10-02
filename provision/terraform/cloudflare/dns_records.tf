@@ -82,7 +82,7 @@ resource "cloudflare_record" "mx_mailgun_b" {
   priority = 10
 }
 
-resource "cloudflare_record" "txt_mailgun" {
+resource "cloudflare_record" "txt_mailgun_spf" {
   name    = "mg"
   zone_id = lookup(data.cloudflare_zones.domain.zones[0], "id")
   value   = "v=spf1 include:mailgun.org ~all"
@@ -151,7 +151,7 @@ resource "cloudflare_record" "mx_fastmail_2" {
   priority = 20
 }
 
-resource "cloudflare_record" "txt_fastmail" {
+resource "cloudflare_record" "txt_fastmail_spf" {
   name    = "${data.sops_file.cloudflare_secrets.data["cloudflare_domain"]}"
   zone_id = lookup(data.cloudflare_zones.domain.zones[0], "id")
   value   = "v=spf1 include:spf.messagingengine.com ?all"
@@ -161,7 +161,7 @@ resource "cloudflare_record" "txt_fastmail" {
 }
 
 #
-# DMARC record
+# Additional email records
 #
 
 resource "cloudflare_record" "txt_dmarc" {
