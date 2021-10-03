@@ -172,3 +172,17 @@ spec:
               category: logs
             annotations:
               summary: "Valetudo is unable to connect to mqtt"
+      #
+      # node-red
+      #
+      - name: node-red
+        rules:
+          - alert: NodeRedUnableToReachHomeAssistant
+            expr: |
+              sum by (app) (count_over_time({app=~"node-red"} |~ "(?i)home assistant.*connecting to undefined"[2m])) > 0
+            for: 10s
+            labels:
+              severity: critical
+              category: logs
+            annotations:
+              summary: "Node-Red is unable to connect to Home Assistant"
