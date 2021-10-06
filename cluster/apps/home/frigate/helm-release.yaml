@@ -19,7 +19,7 @@ spec:
   values:
     image:
       repository: ghcr.io/k8s-at-home/frigate
-      tag: 0.8.4-amd64
+      tag: v0.9.1-amd64
     ingress:
       main:
         enabled: true
@@ -76,234 +76,238 @@ spec:
           type: edgetpu
           device: usb
 
+      # Global objects configuration
       objects:
         track:
-        - person
-        - dog
-        - cat
+          - person
         filters:
           person:
             min_area: 2500
             max_area: 100000
             threshold: 0.7
-          dog:
-            min_area: 1000
-            max_area: 10000
-            threshold: 0.7
-          cat:
-            min_area: 1000
-            max_area: 10000
-            threshold: 0.7
 
+      # Global ffmpeg configuration
       ffmpeg:
         hwaccel_args:
-        - -hwaccel
-        - vaapi
-        - -hwaccel_device
-        - /dev/dri/renderD128
-        - -hwaccel_output_format
-        - yuv420p
+          - -hwaccel
+          - vaapi
+          - -hwaccel_device
+          - /dev/dri/renderD128
+          - -hwaccel_output_format
+          - yuv420p
 
+       # Specify camera's
       cameras:
+        # --
+        driveway:
+          ffmpeg:
+            inputs:
+              - path: rtsp://192.168.1.2:7447/G3Uq8HXgG4lSdw7g
+                roles:
+                  - detect
+              - path: rtsp://192.168.1.2:7447/HxyLIfvoNRWdDnrF
+                roles:
+                  - rtmp
+          rtmp:
+            enabled: True
+          detect:
+            width: 1280
+            height: 720
+            fps: 10
+          record:
+            enabled: True
+            retain_days: 0
+            events:
+              retain:
+                default: 14
+          snapshots:
+            enabled: True
+            timestamp: False
+            retain:
+              default: 14
+          objects:
+            track:
+              - person
         # --
         porch:
           ffmpeg:
             inputs:
-            - path: rtsp://192.168.1.2:7447/818ALvS1HQ744KND
-              roles:
-              - detect
-            - path: rtsp://192.168.1.2:7447/OLL9WgMx3FNx7Yfy
-              roles:
-              - clips
-              - record
-              - rtmp
-          height: 720
-          width: 960
-          fps: 5
-          objects:
-            filters:
-              person:
-                min_area: 1500
-                max_area: 100000
-                threshold: 0.75
-                min_score: 0.60
-          clips:
+              - path: rtsp://192.168.1.2:7447/818ALvS1HQ744KND
+                roles:
+                  - detect
+              - path: rtsp://192.168.1.2:7447/OLL9WgMx3FNx7Yfy
+                roles:
+                  - rtmp
+          rtmp:
             enabled: True
-            objects:
-            - person
-            - dog
-            - cat
+          detect:
+            width: 960
+            height: 720
+            fps: 10
+          record:
+            enabled: True
+            retain_days: 0
+            events:
+              retain:
+                default: 14
           snapshots:
             enabled: True
             timestamp: False
             retain:
               default: 14
+          objects:
+            track:
+              - person
         # --
         garage:
           ffmpeg:
             inputs:
-            - path: rtsp://192.168.1.2:7447/3mzDU0htPbIcPPFH
-              roles:
-              - detect
-            - path: rtsp://192.168.1.2:7447/Cpb9YqiSgX16LjsX
-              roles:
-              - clips
-              - record
-              - rtmp
-          height: 576
-          width: 1024
-          fps: 5
-          objects:
-            filters:
-              person:
-                min_area: 1500
-                max_area: 100000
-                threshold: 0.75
-                min_score: 0.60
-          clips:
+              - path: rtsp://192.168.1.2:7447/3mzDU0htPbIcPPFH
+                roles:
+                  - detect
+              - path: rtsp://192.168.1.2:7447/Cpb9YqiSgX16LjsX
+                roles:
+                  - rtmp
+          rtmp:
             enabled: True
-            objects:
-            - car
-            - person
-            - dog
-            - cat
+          detect:
+            width: 1024
+            height: 576
+            fps: 10
+          record:
+            enabled: True
+            retain_days: 0
+            events:
+              retain:
+                default: 14
           snapshots:
             enabled: True
             timestamp: False
             retain:
               default: 14
+          objects:
+            track:
+              - person
         # --
         study:
           ffmpeg:
             inputs:
-            - path: rtsp://192.168.1.2:7447/25BixzVyRA74DHfP
-              roles:
-              - detect
-            - path: rtsp://192.168.1.2:7447/BwmH0xgM3fZotFIa
-              roles:
-              - clips
-              - record
-              - rtmp
-          height: 576
-          width: 1024
-          fps: 5
-          objects:
-            filters:
-              person:
-                min_area: 1500
-                max_area: 100000
-                threshold: 0.75
-                min_score: 0.60
-          clips:
+              - path: rtsp://192.168.1.2:7447/25BixzVyRA74DHfP
+                roles:
+                  - detect
+              - path: rtsp://192.168.1.2:7447/BwmH0xgM3fZotFIa
+                roles:
+                  - rtmp
+          rtmp:
             enabled: True
-            objects:
-            - person
-            - dog
-            - cat
+          detect:
+            width: 1024
+            height: 576
+            fps: 10
+          record:
+            enabled: True
+            retain_days: 0
+            events:
+              retain:
+                default: 14
           snapshots:
             enabled: True
             timestamp: False
             retain:
               default: 14
+          objects:
+            track:
+              - person
         # --
         living-room:
           ffmpeg:
             inputs:
-            - path: rtsp://192.168.1.2:7447/PgTHLlRmqRH6Z6wV
-              roles:
-              - detect
-            - path: rtsp://192.168.1.2:7447/dGFODTTigTod247N
-              roles:
-              - clips
-              - record
-              - rtmp
-          height: 576
-          width: 1024
-          fps: 5
-          objects:
-            filters:
-              person:
-                min_area: 1500
-                max_area: 100000
-                threshold: 0.75
-                min_score: 0.60
-          clips:
+              - path: rtsp://192.168.1.2:7447/PgTHLlRmqRH6Z6wV
+                roles:
+                  - detect
+              - path: rtsp://192.168.1.2:7447/dGFODTTigTod247N
+                roles:
+                  - rtmp
+          rtmp:
             enabled: True
-            objects:
-            - person
-            - dog
-            - cat
+          detect:
+            width: 1024
+            height: 576
+            fps: 10
+          record:
+            enabled: True
+            retain_days: 0
+            events:
+              retain:
+                default: 14
           snapshots:
             enabled: True
             timestamp: False
             retain:
               default: 14
+          objects:
+            track:
+              - person
         # --
         basement-1:
           ffmpeg:
             inputs:
-            - path: rtsp://192.168.1.2:7447/5pXj1v9ZyXf8ssmc
-              roles:
-              - detect
-            - path: rtsp://192.168.1.2:7447/Zwnrr51JKWjioKc4
-              roles:
-              - clips
-              - record
-              - rtmp
-          height: 576
-          width: 1024
-          fps: 5
-          objects:
-            filters:
-              person:
-                min_area: 1500
-                max_area: 100000
-                threshold: 0.75
-                min_score: 0.60
-          clips:
+              - path: rtsp://192.168.1.2:7447/5pXj1v9ZyXf8ssmc
+                roles:
+                  - detect
+              - path: rtsp://192.168.1.2:7447/Zwnrr51JKWjioKc4
+                roles:
+                  - rtmp
+          rtmp:
             enabled: True
-            objects:
-            - person
-            - dog
-            - cat
+          detect:
+            width: 1024
+            height: 576
+            fps: 10
+          record:
+            enabled: True
+            retain_days: 0
+            events:
+              retain:
+                default: 14
           snapshots:
             enabled: True
             timestamp: False
             retain:
               default: 14
+          objects:
+            track:
+              - person
         # --
         basement-2:
           ffmpeg:
             inputs:
-            - path: rtsp://192.168.1.2:7447/pp1jGiFpb1AuVHRl
-              roles:
-              - detect
-            - path: rtsp://192.168.1.2:7447/z6XEPgL62FAvtpPR
-              roles:
-              - clips
-              - record
-              - rtmp
-          height: 576
-          width: 1024
-          fps: 5
-          objects:
-            filters:
-              person:
-                min_area: 1500
-                max_area: 100000
-                threshold: 0.75
-                min_score: 0.60
-          clips:
+              - path: rtsp://192.168.1.2:7447/pp1jGiFpb1AuVHRl
+                roles:
+                  - detect
+              - path: rtsp://192.168.1.2:7447/z6XEPgL62FAvtpPR
+                roles:
+                  - rtmp
+          rtmp:
             enabled: True
-            objects:
-            - person
-            - dog
-            - cat
+          detect:
+            width: 1024
+            height: 576
+            fps: 15
+          record:
+            enabled: True
+            retain_days: 0
+            events:
+              retain:
+                default: 14
           snapshots:
             enabled: True
             timestamp: False
             retain:
               default: 14
+          objects:
+            track:
+              - person
     podAnnotations:
       configmap.reloader.stakater.com/reload: "frigate-config"
     nodeSelector:
@@ -329,4 +333,4 @@ spec:
         cpu: 500m
       limits:
         gpu.intel.com/i915: 1
-        memory: 2000Mi
+        memory: 3000Mi
