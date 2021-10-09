@@ -2,17 +2,6 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: rook-ceph-bucket
-provisioner: rook-ceph.ceph.rook.io/bucket
-reclaimPolicy: Delete
-parameters:
-  objectStoreName: object-store
-  objectStoreNamespace: rook-ceph
-  region: east-us-1
----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
   name: rook-ceph-block
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
@@ -29,23 +18,5 @@ parameters:
   csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
   csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
   csi.storage.k8s.io/fstype: ext4
-reclaimPolicy: Delete
-allowVolumeExpansion: true
----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: rook-cephfs
-provisioner: rook-ceph.cephfs.csi.ceph.com
-parameters:
-  clusterID: rook-ceph
-  fsName: cephfs
-  pool: cephfs-data0
-  csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
-  csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
-  csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
-  csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
-  csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
-  csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
 reclaimPolicy: Delete
 allowVolumeExpansion: true
