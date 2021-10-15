@@ -9,12 +9,19 @@
       * soft nofile 97816
       session required pam_limits.so
 
-- name: Update max_user_watches
+- name: Increase max_user_watches
   ansible.posix.sysctl:
     name: fs.inotify.max_user_watches
     value: "524288"
     state: present
-    sysctl_file: /etc/sysctl.d/98-kubernetes-fs.conf
+    sysctl_file: /etc/sysctl.d/99-max_user_watches.conf
+
+- name: Increase max_user_instances
+  ansible.posix.sysctl:
+    name: fs.inotify.max_user_instances
+    value: "512"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-max_user_instances.conf
 
 - name: Disable swap at runtime
   ansible.builtin.command: swapoff -a
