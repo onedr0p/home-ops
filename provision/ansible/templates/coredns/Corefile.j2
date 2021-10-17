@@ -1,14 +1,39 @@
-.:53 {
-  bind 192.168.1.1 127.0.0.1 ::1
+(common) {
   errors
   log
-  prometheus :9153
+  reload
+  loadbalance
+  cache 300
+  loop
+  local
+  hosts {
+    ttl 600
+    reload 5s
+    fallthrough
+  }
+  prometheus 192.168.1.1:9153
+}
+
+. {
+  bind 192.168.1.1 127.0.0.1 ::1
+  import common
   k8s_gateway {{ SECRET_DOMAIN }} {
-    ttl 30
+    resources Ingress
+    ttl 1
     kubeconfig /usr/local/etc/coredns/kubeconfig
     fallthrough
   }
   forward . tls://1.1.1.1 tls://1.0.0.1 {
     tls_servername cloudflare-dns.com
+  }
+}
+
+turbo.ac {
+  bind 192.168.1.1 127.0.0.1 ::1
+  import common
+  k8s_gateway . {
+    resources Ingress
+    ttl 30
+    kubeconfig /usr/local/etc/coredns/kubeconfig
   }
 }
