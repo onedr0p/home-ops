@@ -1,0 +1,43 @@
+---
+apiVersion: metal.sidero.dev/v1alpha1
+kind: ServerClass
+metadata:
+  name: nuc-master
+spec:
+  configPatches:
+    - op: replace
+      path: /machine/install/disk
+      value: /dev/nvme0n1
+    - op: add
+      path: /machine/network/interfaces
+      value:
+        - interface: eth0
+          dhcp: true
+          vip:
+            ip: 192.168.42.178
+    - op: replace
+      path: /persist
+      value: false
+    - op: add
+      path: /machine/kubelet/extraArgs
+      value:
+        rotate-server-certificates: true
+        feature-gates: GracefulNodeShutdown=true,MixedProtocolLBService=true
+    - op: replace
+      path: /cluster/proxy/disabled
+      value: true
+    - op: add
+      path: /machine/time
+      value:
+        disabled: false
+        servers:
+          - time.cloudflare.com
+    - op: replace
+      path: /cluster/network/cni
+      value:
+        name: "custom"
+        urls:
+          - "https://gist.githubusercontent.com/onedr0p/f5dac47f2c0814c134d6acacdf293cc4/raw/2b9763d4eac65ad3944a3d5e7f614b4b4c472abe/taleros-cilium.yaml"
+  selector:
+    matchLabels:
+      nuc-master: "true"
