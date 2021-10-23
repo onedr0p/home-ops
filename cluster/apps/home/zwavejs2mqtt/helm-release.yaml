@@ -48,12 +48,12 @@ spec:
         type: hostPath
         hostPath: /dev/serial/by-id/usb-0658_0200-if00
         hostPathType: CharDevice
-    podAnnotations:
-      backup.velero.io/backup-volumes: config
-      pre.hook.backup.velero.io/container: fsfreeze
-      pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/usr/src/app/store"]'
-      post.hook.backup.velero.io/container: fsfreeze
-      post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/usr/src/app/store"]'
+    # podAnnotations:
+    #   backup.velero.io/backup-volumes: config
+    #   pre.hook.backup.velero.io/container: fsfreeze
+    #   pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/usr/src/app/store"]'
+    #   post.hook.backup.velero.io/container: fsfreeze
+    #   post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/usr/src/app/store"]'
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -63,12 +63,12 @@ spec:
                   operator: In
                   values:
                     - "true"
-    additionalContainers:
-      fsfreeze:
-        name: fsfreeze
-        image: ghcr.io/k8s-at-home/fsfreeze:v2.37-r0
-        volumeMounts:
-          - name: config
-            mountPath: /usr/src/app/store
-        securityContext:
-          privileged: true
+    # additionalContainers:
+    #   fsfreeze:
+    #     name: fsfreeze
+    #     image: ghcr.io/k8s-at-home/fsfreeze:v2.37-r0
+    #     volumeMounts:
+    #       - name: config
+    #         mountPath: /usr/src/app/store
+    #     securityContext:
+    #       privileged: true
