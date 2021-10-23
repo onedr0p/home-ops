@@ -55,12 +55,12 @@ spec:
         medium: Memory
         sizeLimit: 2Gi
         mountPath: /dev/shm
-    podAnnotations:
-      backup.velero.io/backup-volumes: config
-      pre.hook.backup.velero.io/container: fsfreeze
-      pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/datastore"]'
-      post.hook.backup.velero.io/container: fsfreeze
-      post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/datastore"]'
+    # podAnnotations:
+    #   backup.velero.io/backup-volumes: config
+    #   pre.hook.backup.velero.io/container: fsfreeze
+    #   pre.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--freeze", "/datastore"]'
+    #   post.hook.backup.velero.io/container: fsfreeze
+    #   post.hook.backup.velero.io/command: '["/sbin/fsfreeze", "--unfreeze", "/datastore"]'
     resources:
       requests:
         memory: 100Mi
@@ -78,11 +78,11 @@ spec:
         volumeMounts:
           - name: cache
             mountPath: /dev/shm
-      fsfreeze:
-        name: fsfreeze
-        image: ghcr.io/k8s-at-home/fsfreeze:v2.37-r0
-        volumeMounts:
-          - name: config
-            mountPath: /datastore
-        securityContext:
-          privileged: true
+      # fsfreeze:
+      #   name: fsfreeze
+      #   image: ghcr.io/k8s-at-home/fsfreeze:v2.37-r0
+      #   volumeMounts:
+      #     - name: config
+      #       mountPath: /datastore
+      #   securityContext:
+      #     privileged: true
