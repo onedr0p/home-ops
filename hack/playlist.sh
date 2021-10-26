@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-#
 while true; do
     figlet -f slant "media" | lolcat
     kubecolor get po -n media; sleep 5; clear;
