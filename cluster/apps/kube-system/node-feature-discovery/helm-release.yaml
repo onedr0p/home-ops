@@ -17,6 +17,10 @@ spec:
         namespace: flux-system
   values:
     worker:
+      annotations:
+        configmap.reloader.stakater.com/reload: "nfd-worker-conf"
+      nodeSelector:
+        node-role.kubernetes.io/worker: "true"
       config: |-
         core:
           sources:
@@ -52,5 +56,3 @@ spec:
             matchOn:
             - usbId:
                 vendor: ["1a6e", "18d1"]
-      annotations:
-        configmap.reloader.stakater.com/reload: "nfd-worker-conf"
