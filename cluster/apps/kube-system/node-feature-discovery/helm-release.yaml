@@ -16,21 +16,6 @@ spec:
         name: node-feature-discovery-charts
         namespace: flux-system
   values:
-    master:
-      tolerations:
-        - key: "node-role.kubernetes.io/master"
-          operator: "Equal"
-          value: "true"
-          effect: "NoSchedule"
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 1
-              preference:
-                matchExpressions:
-                  - key: "node-role.kubernetes.io/master"
-                    operator: In
-                    values: [""]
     worker:
       config: |-
         core:
@@ -67,22 +52,5 @@ spec:
             matchOn:
             - usbId:
                 vendor: ["1a6e", "18d1"]
-          - name: "flight-aware"
-            matchOn:
-            - usbId:
-                class: ["ff"]
-                vendor: ["0bda"]
-                device: ["2832"]
-          - name: "zigbee"
-            matchOn:
-            - usbId:
-                class: ["ff"]
-                vendor: ["1a86"]
-                device: ["7523"]
       annotations:
         configmap.reloader.stakater.com/reload: "nfd-worker-conf"
-      tolerations:
-        - effect: "NoExecute"
-          operator: "Exists"
-        - effect: "NoSchedule"
-          operator: "Exists"
