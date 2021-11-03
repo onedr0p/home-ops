@@ -45,6 +45,8 @@ spec:
               name: libmodules
             - name: mon-endpoint-volume
               mountPath: /etc/rook
+            - name: nas-data
+              mountPath: /mnt/nas-data
       # if hostNetwork: false, the "rbd map" command hangs, see https://github.com/rook/rook/issues/2021
       hostNetwork: true
       volumes:
@@ -63,3 +65,7 @@ spec:
             items:
               - key: data
                 path: mon-endpoints
+        - name: nas-data
+          nfs:
+            server: "${NAS_ADDRESS}"
+            path: /tycho/Data
