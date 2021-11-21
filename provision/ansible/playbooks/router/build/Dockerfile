@@ -1,7 +1,7 @@
 FROM docker.io/golang:1.17.3-alpine
 
 ARG VERSION
-ENV VERSION=${VERSION:-v1.8.5}
+ENV VERSION=${VERSION:-v1.8.6}
 
 ENV CGO_ENABLED=0 \
     GOPATH=/go \
