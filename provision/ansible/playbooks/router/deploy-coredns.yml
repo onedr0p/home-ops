@@ -7,7 +7,7 @@
   any_errors_fatal: true
   tasks:
     - name: Generate kubeconfig for home-dns on k8s-0
-      ansible.builtin.block:
+      block:
         - name: Fetch service account for home-dns
           ansible.builtin.set_fact:
             DNSServiceAccountRaw: "{{ lookup('community.kubernetes.k8s', namespace='kube-system', kind='ServiceAccount', resource_name='home-dns') }}"
@@ -60,7 +60,7 @@
       when: "'k8s-0' in inventory_hostname"
 
     - name: Configure and start CoreDNS on Opnsense
-      ansible.builtin.block:
+      block:
         - name: Create coredns directories
           ansible.builtin.file:
             path: /usr/local/etc/coredns
