@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# PROVIDE: promtail
+# REQUIRE: DAEMON NETWORKING
+# KEYWORD: shutdown
+#
+# Add the following to /etc/rc.conf[.local] to enable this service
+#
+# promtail_enable  (bool):        Set to NO by default.
+#                                Set it to YES to enable blocky.
+# promtail_config  (str):         Set to /usr/local/etc/promtail/Corefile by default.
+#
+# promtail_logfile (str):         Set to /var/log/promtail.log by default.
+#
+
+. /etc/rc.subr
+
+name=promtail
+rcvar=promtail_enable
+
+load_rc_config ${name}
+
+: ${promtail_enable:=NO}
+: ${promtail_config:="/usr/local/etc/promtail/promtail.yaml"}
+: ${promtail_flags:=}
+: ${promtail_logfile:="/var/log/promtail.log"}
+
+pidfile=/var/run/promtail.pid
+command="/usr/local/sbin/promtail"
+
+start_cmd="${name}_start"
+
+promtail_start()
+{
+    echo -n "Starting ${name}."
+    /usr/sbin/daemon -p ${pidfile} -o ${promtail_logfile} -f ${command} -config.file ${promtail_config} ${promtail_flags}
+}
+
+run_rc_command "$1"

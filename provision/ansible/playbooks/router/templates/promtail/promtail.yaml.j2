@@ -1,0 +1,75 @@
+server:
+  log_level: debug
+  disable: true
+
+client:
+  url: https://loki.{{ SECRET_DOMAIN }}/loki/api/v1/push
+
+positions:
+  filename: /tmp/positions.yaml
+
+scrape_configs:
+  - job_name: system
+    # Parse the system logs e.g.
+    # Nov 22 02:43:23 gateway dhclient[13848]: DHCPREQUEST on igb0 to x.x.x.x port 67
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>[A-Z]{1}[a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}) (?P<hostname>.*?) (?P<program>.*?)\[\d+\]: (?P<message>.*)$'
+      - labels:
+          hostname:
+          program:
+      - timestamp:
+          source: timestamp
+          format: Nov 12 23:00:00
+      - output:
+          source: message
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          __path__: /var/log/system/*.log
+          job: opnsense/system
+  - job_name: filter
+    # Parse the filter logs
+    # https://docs.netgate.com/pfsense/en/latest/monitoring/logs/raw-filter-format.html#bnf-grammar
+    # {job="opnsense/filter"} != "igmp" != "icmp" != "udp" != "tcp"
+    pipeline_stages:
+      - regex:
+          # UDP
+          # Nov 12 23:00:00 gateway.turbo.ac filterlog[2657]: 90,,,91e2443ae2e8caf012f9a6e5a8a455c8,lo0,match,pass,in,4,0x4,,255,4660,0,none,17,udp,914,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,5353,5353,894
+          expression: '^(?P<timestamp>[A-Z]{1}[a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}) (?P<hostname>.*?) (?P<program>.*?)\[\d+\]: (?P<message>(?P<rule>[^,]*),(?P<sub_rule>[^,]*),(?P<anchor>[^,]*),(?P<tracker>[^,]*),(?P<interface>[^,]*),(?P<reason>[^,]*),(?P<action>[^,]*),(?P<direction>[^,]*),(?P<ip_version>[^,]*),(?P<tos>[^,]*),(?P<ecn>[^,]*),(?P<ttl>[^,]*),(?P<id>[^,]*),(?P<offset>[^,]*),(?P<flags>[^,]*),(?P<protocol_id>[^,]*),(?P<protocol>udp),(?P<length>[^,]*),(?P<source_ip>[^,]*),(?P<destination_ip>[^,]*),(?P<source_port>[^,]*),(?P<destination_port>[^,]*),(?P<data_length>[^,]*))$'
+      - regex:
+          # TCP
+          # Nov 12 23:00:00 gateway.turbo.ac filterlog[2657]: 94,,,ef794793b2e3764b938bd04cba88e8a3,igb0,match,pass,out,4,0x0,,62,16800,0,DF,6,tcp,60,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,11715,443,0,S,3876953207,,64240,,mss;sackOK;TS;nop;wscale
+          expression: '^(?P<timestamp>[A-Z]{1}[a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}) (?P<hostname>.*?) (?P<program>.*?)\[\d+\]: (?P<message>(?P<rule>[^,]*),(?P<sub_rule>[^,]*),(?P<anchor>[^,]*),(?P<tracker>[^,]*),(?P<interface>[^,]*),(?P<reason>[^,]*),(?P<action>[^,]*),(?P<direction>[^,]*),(?P<ip_version>[^,]*),(?P<tos>[^,]*),(?P<ecn>[^,]*),(?P<ttl>[^,]*),(?P<id>[^,]*),(?P<offset>[^,]*),(?P<flags>[^,]*),(?P<protocol_id>[^,]*),(?P<protocol>tcp),(?P<length>[^,]*),(?P<source_ip>[^,]*),(?P<destination_ip>[^,]*),(?P<source_port>[^,]*),(?P<destination_port>[^,]*),(?P<data_length>[^,]*),(?P<tcp_flags>[^,]*),(?P<sequence_number>[^,]*),(?P<ack_number>[^,]*),(?P<tcp_window>[^,]*),(?P<urg>[^,]*),(?P<tcp_options>[^,]*))$'
+      - regex:
+          # ICMP
+          # Nov 12 23:00:00 gateway.turbo.ac filterlog[2657]: 94,,,ef794793b2e3764b938bd04cba88e8a3,igb0,match,pass,out,4,0x0,,63,44871,0,DF,1,icmp,84,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,datalength=64
+          expression: '^(?P<timestamp>[A-Z]{1}[a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}) (?P<hostname>.*?) (?P<program>.*?)\[\d+\]: (?P<message>(?P<rule>[^,]*),(?P<sub_rule>[^,]*),(?P<anchor>[^,]*),(?P<tracker>[^,]*),(?P<interface>[^,]*),(?P<reason>[^,]*),(?P<action>[^,]*),(?P<direction>[^,]*),(?P<ip_version>[^,]*),(?P<tos>[^,]*),(?P<ecn>[^,]*),(?P<ttl>[^,]*),(?P<id>[^,]*),(?P<offset>[^,]*),(?P<flags>[^,]*),(?P<protocol_id>[^,]*),(?P<protocol>icmp),(?P<length>[^,]*),(?P<source_ip>[^,]*),(?P<destination_ip>[^,]*),(?P<icmp_data>[^,]*))$'
+      - regex:
+          # IGMP
+          # Nov 12 23:00:00 gateway.turbo.ac filterlog[2657]: 16,,,02f4bab031b57d1e30553ce08e0ec131,igb1_vlan150,match,block,in,4,0xc0,,1,15472,0,none,2,igmp,32,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,datalength=8
+          expression: '^(?P<timestamp>[A-Z]{1}[a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}) (?P<hostname>.*?) (?P<program>.*?)\[\d+\]: (?P<message>(?P<rule>[^,]*),(?P<sub_rule>[^,]*),(?P<anchor>[^,]*),(?P<tracker>[^,]*),(?P<interface>[^,]*),(?P<reason>[^,]*),(?P<action>[^,]*),(?P<direction>[^,]*),(?P<ip_version>[^,]*),(?P<tos>[^,]*),(?P<ecn>[^,]*),(?P<ttl>[^,]*),(?P<id>[^,]*),(?P<offset>[^,]*),(?P<flags>[^,]*),(?P<protocol_id>[^,]*),(?P<protocol>igmp),(?P<length>[^,]*),(?P<source_ip>[^,]*),(?P<destination_ip>[^,]*),(?P<igmp_data>[^,]*))$'
+      - labels:
+          hostname:
+          program:
+          interface:
+          reason:
+          action:
+          direction:
+          protocol:
+          source_ip:
+          destination_ip:
+          source_port:
+          destination_port:
+      - timestamp:
+          source: timestamp
+          format: Nov 12 23:00:00
+      - output:
+          source: message
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          __path__: /var/log/filter/*.log
+          job: opnsense/filter
