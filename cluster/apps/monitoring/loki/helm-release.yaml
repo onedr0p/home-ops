@@ -131,7 +131,7 @@ spec:
               category: logs
             annotations:
               # TODO: Figure out how to use hostname in summary
-              summary: "An *arr app is experiencing locked database issues"
+              summary: "An arr app is experiencing locked database issues"
       #
       # home-assistant
       #
@@ -139,7 +139,7 @@ spec:
         rules:
           - alert: HomeAssistantUnableToReachPostgresql
             expr: |
-              sum by (app) (count_over_time({app=~"home-assistant"} |~ "(?i)error in database connectivity during commit"[2m])) > 0
+              sum by (app) (count_over_time({app="home-assistant"} |~ "(?i)error in database connectivity"[2m])) > 0
             for: 10s
             labels:
               severity: critical
@@ -153,7 +153,7 @@ spec:
         rules:
           - alert: VaultwardenUnableToReachPostgresql
             expr: |
-              sum by (app) (count_over_time({app=~"vaultwarden"} |~ "(?i)could not connect to server"[2m])) > 0
+              sum by (app) (count_over_time({app="vaultwarden"} |~ "(?i)could not connect to server"[2m])) > 0
             for: 10s
             labels:
               severity: critical
@@ -167,7 +167,7 @@ spec:
         rules:
           - alert: ValetudoUnableToReachMQTT
             expr: |
-              sum by (hostname) (count_over_time({hostname=~"valetudo"} |~ "(?i).*error.*mqtt.*"[2m])) > 0
+              sum by (hostname) (count_over_time({hostname="valetudo"} |~ "(?i).*error.*mqtt.*"[2m])) > 0
             for: 10s
             labels:
               severity: critical
@@ -181,7 +181,7 @@ spec:
         rules:
           - alert: NodeRedUnableToReachHomeAssistant
             expr: |
-              sum by (app) (count_over_time({app=~"node-red"} |~ "(?i)home assistant.*connecting to undefined"[2m])) > 0
+              sum by (app) (count_over_time({app="node-red"} |~ "(?i)home assistant.*connecting to undefined"[2m])) > 0
             for: 10s
             labels:
               severity: critical
