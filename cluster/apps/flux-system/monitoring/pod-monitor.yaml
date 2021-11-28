@@ -5,6 +5,7 @@ metadata:
   name: flux-system
   namespace: flux-system
   labels:
+    component: logging
     app.kubernetes.io/part-of: flux
 spec:
   namespaceSelector:
@@ -16,8 +17,3 @@ spec:
         operator: Exists
   podMetricsEndpoints:
     - port: http-prom
-      relabelings:
-        - sourceLabels: ['namespace', 'job']
-          regex: ".+/(.*)"
-          targetLabel: "job"
-          replacement: "$1"
