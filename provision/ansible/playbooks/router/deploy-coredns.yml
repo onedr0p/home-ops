@@ -63,9 +63,12 @@
       block:
         - name: Create coredns directories
           ansible.builtin.file:
-            path: /usr/local/etc/coredns
+            path: "{{ item }}"
             state: directory
             mode: 0755
+          loop:
+            - /usr/local/etc/coredns
+            - /var/log/coredns
 
         - name: Copy kubeconfig to Opnsense
           ansible.builtin.copy:

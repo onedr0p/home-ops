@@ -7,9 +7,12 @@
   tasks:
     - name: Create promtail directories
       ansible.builtin.file:
-        path: /usr/local/etc/promtail
+        path: "{{ item }}"
         state: directory
         mode: 0755
+      loop:
+        - /usr/local/etc/promtail
+        - /var/log/promtail
 
     - name: Create Promtail config
       ansible.builtin.template:
