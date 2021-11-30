@@ -1,0 +1,47 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: snmp-exporter-dell-0
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://prometheus-community.github.io/helm-charts
+      chart: prometheus-snmp-exporter
+      version: 0.1.5
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    fullnameOverride: snmp-exporter-dell-0
+    image:
+      repository: quay.io/prometheus/snmp-exporter
+    extraArgs:
+      - "--config.file=/config/snmp.yaml"
+    extraConfigmapMounts:
+      - name: snmp-exporter-dell-0
+        mountPath: /config/snmp.yaml
+        subPath: snmp.yaml
+        configMap: snmp-exporter-dell-0
+        readOnly: true
+        defaultMode: 420
+    serviceMonitor:
+      enabled: true
+      namespace: monitoring
+      params:
+        enabled: true
+        conf:
+          module:
+            - dell
+          target:
+            - 192.168.42.61
+      path: /snmp
+      # interval: 60s
+      scrapeTimeout: 10s
+      relabelings:
+        - sourceLabels: [__param_target]
+          targetLabel: instance
