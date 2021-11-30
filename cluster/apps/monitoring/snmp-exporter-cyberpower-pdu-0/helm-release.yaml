@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: snmp-exporter-pdu-1
+  name: snmp-exporter-cyberpower-pdu-0
   namespace: monitoring
 spec:
   interval: 5m
@@ -17,16 +17,16 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    fullnameOverride: snmp-exporter-pdu-1
+    fullnameOverride: snmp-exporter-cyberpower-pdu-0
     image:
       repository: quay.io/prometheus/snmp-exporter
     extraArgs:
       - "--config.file=/config/snmp.yaml"
     extraConfigmapMounts:
-      - name: snmp-exporter-pdu-1
+      - name: snmp-exporter-cyberpower-pdu-0
         mountPath: /config/snmp.yaml
         subPath: snmp.yaml
-        configMap: snmp-exporter-pdu-1
+        configMap: snmp-exporter-cyberpower-pdu-0
         readOnly: true
         defaultMode: 420
     serviceMonitor:
@@ -38,7 +38,7 @@ spec:
           module:
             - cyberpower
           target:
-            - 192.168.1.17
+            - 192.168.1.16
       path: /snmp
       # interval: 60s
       scrapeTimeout: 10s

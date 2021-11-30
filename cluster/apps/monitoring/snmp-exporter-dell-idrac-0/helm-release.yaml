@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: snmp-exporter-dell-0
+  name: snmp-exporter-dell-idrac-0
   namespace: monitoring
 spec:
   interval: 5m
@@ -17,16 +17,16 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    fullnameOverride: snmp-exporter-dell-0
+    fullnameOverride: snmp-exporter-dell-idrac-0
     image:
       repository: quay.io/prometheus/snmp-exporter
     extraArgs:
       - "--config.file=/config/snmp.yaml"
     extraConfigmapMounts:
-      - name: snmp-exporter-dell-0
+      - name: snmp-exporter-dell-idrac-0
         mountPath: /config/snmp.yaml
         subPath: snmp.yaml
-        configMap: snmp-exporter-dell-0
+        configMap: snmp-exporter-dell-idrac-0
         readOnly: true
         defaultMode: 420
     serviceMonitor:
