@@ -16,17 +16,20 @@ spec:
         name: k8s-at-home-charts
         namespace: flux-system
       interval: 5m
-  dependsOn:
-    - name: emqx
-      namespace: home
   values:
     image:
       repository: ghcr.io/zwave-js/zwavejs2mqtt
       tag: 6.0.2
     env:
       TZ: "America/New_York"
-    securityContext:
-      privileged: true
+    service:
+      main:
+        ports:
+          http:
+            port: 8091
+          websocket:
+            enabled: true
+            port: 3000
     ingress:
       main:
         enabled: true
@@ -41,6 +44,8 @@ spec:
         tls:
           - hosts:
               - "zwavejs2mqtt.${SECRET_DOMAIN}"
+    securityContext:
+      privileged: true
     persistence:
       config:
         enabled: true
