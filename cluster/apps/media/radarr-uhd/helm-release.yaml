@@ -29,6 +29,10 @@ spec:
         annotations:
           hajimari.io/enable: "true"
           hajimari.io/icon: "filmstrip"
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            proxy_set_header Accept-Encoding "";
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.dev/css/base/radarr/hotline.css"></head>';
+            sub_filter_once on;
           # traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
           - host: "radarr-uhd.${SECRET_DOMAIN}"
