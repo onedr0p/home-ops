@@ -31,7 +31,7 @@ spec:
       ingressClassResource:
         default: true
       config:
-        # custom-http-errors: 401,403,404,500,501,502,503
+        custom-http-errors: 401,403,404,500,501,502,503
         forwarded-for-header: "CF-Connecting-IP"
         hsts-max-age: "31449600"
         proxy-body-size: "100m"
@@ -51,18 +51,6 @@ spec:
           enabled: false
       extraArgs:
         default-ssl-certificate: "networking/${SECRET_DOMAIN/./-}-tls"
-      # defaultBackend:
-      #   enabled: true
-      #   image:
-      #     repository: ghcr.io/tarampampam/error-pages
-      #     tag: 2.2.0
-      #     # repository: ghcr.io/181192/custom-error-pages
-      #     # tag: 1.2.1
-      #   extraEnvs:
-      #     - name: TEMPLATE_NAME
-      #       value: ghost
-      #     # - name: ERROR_FILES_PATH
-      #     #   value: ./themes/ghost
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -87,3 +75,15 @@ spec:
           cpu: 100m
         limits:
           memory: 1000Mi
+    defaultBackend:
+      enabled: true
+      image:
+        repository: ghcr.io/tarampampam/error-pages
+        tag: 2.2.0
+        # repository: ghcr.io/181192/custom-error-pages
+        # tag: 1.2.1
+      extraEnvs:
+        - name: TEMPLATE_NAME
+          value: ghost
+        # - name: ERROR_FILES_PATH
+        #   value: ./themes/ghost
