@@ -38,13 +38,14 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
+        ingressClassName: "nginx"
         annotations:
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
           external-dns/is-public: "true"
           hajimari.io/enable: "true"
           hajimari.io/icon: "plex"
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          # traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
         hosts:
           - host: "plex.${SECRET_DOMAIN}"
             paths:

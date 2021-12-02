@@ -42,11 +42,19 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
+        ingressClassName: "nginx"
         annotations:
           hajimari.io/enable: "true"
           hajimari.io/icon: "cloud-download"
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          # Custom themes provided by https://github.com/gilbN/theme.park
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            proxy_hide_header "x-webkit-csp";
+            proxy_hide_header "content-security-policy";
+            proxy_hide_header "X-Frame-Options";
+            proxy_set_header Accept-Encoding "";
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.dev/css/base/qbittorrent/nord.css"></head>';
+            sub_filter_once on;
+          # traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
           - host: "qb.${SECRET_DOMAIN}"
             paths:
