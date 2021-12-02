@@ -10,9 +10,9 @@ tasks:
   kubeconfig:
     desc: Remotely fetch kubeconfig from k3s
     cmds:
-      - rsync --verbose --progress --partial --rsync-path="sudo rsync" {{.K3S_PRIMARY_MASTER_NODE_USERNAME}}@{{.K3S_PRIMARY_MASTER_NODE_ADDR}}:/etc/rancher/k3s/k3s.yaml ./kubeconfig
-      - sed -i '' 's/127.0.0.1/{{.K3S_LB_ADDR}}/g' ./kubeconfig
-      - chmod go-r kubeconfig
+      - rsync --verbose --progress --partial --rsync-path="sudo rsync" {{.K3S_PRIMARY_MASTER_NODE_USERNAME}}@{{.K3S_PRIMARY_MASTER_NODE_ADDR}}:/etc/rancher/k3s/k3s.yaml ./cluster/kubeconfig
+      - sed -i '' 's/127.0.0.1/{{.K3S_LB_ADDR}}/g' ./cluster/kubeconfig
+      - chmod go-r ./cluster/kubeconfig
     silent: true
 
   rook-ceph-toolbox:
@@ -21,52 +21,54 @@ tasks:
       - kubectl -n rook-ceph exec -it (kubectl -n rook-ceph get pod -l "app=rook-direct-mount" -o jsonpath='{.items[0].metadata.name}') bash
     slient: true
 
-  k10-password:
-    desc: Retrieve the k10 passphrase
-    cmds:
-      - kubectl get serviceaccount k10-k10 -o jsonpath="{.secrets[0].name}" --namespace kasten-io
-      - kubectl get secret k10-k10-token-bdpdn --namespace kasten-io -ojsonpath="{.data.token}{'\n'}" | base64 --decode
-
   pause:
     desc: Pause all Helm Releases that rely on NFS storage
     cmds:
       - flux suspend hr -n home frigate
       - kubectl scale -n home deploy/frigate --replicas 0
-      - flux suspend hr -n media jellyfin
-      - kubectl scale -n media deploy/jellyfin --replicas 0
       - flux suspend hr -n media lidarr
       - kubectl scale -n media deploy/lidarr --replicas 0
       - flux suspend hr -n media plex
       - kubectl scale -n media deploy/plex --replicas 0
       - flux suspend hr -n media qbittorrent
       - kubectl scale -n media deploy/qbittorrent --replicas 0
+      - flux suspend hr -n media qbittorrent-vpn
+      - kubectl scale -n media deploy/qbittorrent-vpn --replicas 0
       - flux suspend hr -n media radarr
       - kubectl scale -n media deploy/radarr --replicas 0
+      - flux suspend hr -n media radarr-uhd
+      - kubectl scale -n media deploy/radarr-uhd --replicas 0
       - flux suspend hr -n media readarr
       - kubectl scale -n media deploy/readarr --replicas 0
       - flux suspend hr -n media sabnzbd
       - kubectl scale -n media deploy/sabnzbd --replicas 0
       - flux suspend hr -n media sonarr
       - kubectl scale -n media deploy/sonarr --replicas 0
+      - flux suspend hr -n media sonarr-uhd
+      - kubectl scale -n media deploy/sonarr-uhd --replicas 0
 
   resume:
     desc: Resume all Helm Releases that rely on NFS storage
     cmds:
       - flux resume hr -n home frigate
       - kubectl scale -n home deploy/frigate --replicas 1
-      - flux resume hr -n media jellyfin
-      - kubectl scale -n media deploy/jellyfin --replicas 1
       - flux resume hr -n media lidarr
       - kubectl scale -n media deploy/lidarr --replicas 1
       - flux resume hr -n media plex
       - kubectl scale -n media deploy/plex --replicas 1
       - flux resume hr -n media qbittorrent
       - kubectl scale -n media deploy/qbittorrent --replicas 1
+      - flux resume hr -n media qbittorrent-vpn
+      - kubectl scale -n media deploy/qbittorrent-vpn --replicas 1
       - flux resume hr -n media radarr
       - kubectl scale -n media deploy/radarr --replicas 1
+      - flux resume hr -n media radarr-uhd
+      - kubectl scale -n media deploy/radarr-uhd --replicas 1
       - flux resume hr -n media readarr
       - kubectl scale -n media deploy/readarr --replicas 1
       - flux resume hr -n media sabnzbd
       - kubectl scale -n media deploy/sabnzbd --replicas 1
       - flux resume hr -n media sonarr
       - kubectl scale -n media deploy/sonarr --replicas 1
+      - flux resume hr -n media sonarr-uhd
+      - kubectl scale -n media deploy/sonarr-uhd --replicas 1
