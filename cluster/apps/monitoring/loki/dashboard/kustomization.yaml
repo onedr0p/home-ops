@@ -1,0 +1,41 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+configMapGenerator:
+  - name: loki-chunks-dashboard
+    files:
+      - loki-chunks-dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-chunks.json
+  - name: loki-deletion-dashboard
+    files:
+      - loki-deletion-dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-deletion.json
+  - name: loki-logs-dashboard
+    files:
+      - loki-logs-dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-logs.json
+  - name: loki-mixin-recording-rules-dashboard
+    files:
+      - loki-mixin-recording-rules-dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-mixin-recording-rules.json
+  - name: loki-operational-dashboard
+    files:
+      - loki-operational-dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-operational.json
+  - name: loki-reads-resources-dashboard
+    files:
+      - loki-reads-resources-dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-reads-resources.json
+  - name: loki-reads-dashboard
+    files:
+      - loki-reads-dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-reads.json
+  - name: loki-retention-dashboard
+    files:
+      - loki-retention-dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-retention.json
+  - name: loki-writes-resources-dashboard
+    files:
+      - loki-writes-resources-dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-writes-resources.json
+  - name: loki-writes-dashboard
+    files:
+      - loki-writes-dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-writes.json
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+  labels:
+    grafana_dashboard: "true"
