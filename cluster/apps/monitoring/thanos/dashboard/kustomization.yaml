@@ -1,0 +1,38 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+configMapGenerator:
+  - name: thanos-bucket-replicate-dashboard
+    files:
+      - dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/bucket_replicate.json
+  - name: thanos-compact-dashboard
+    files:
+      - dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/compact.json
+  - name: thanos-overview-dashboard
+    files:
+      - dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/overview.json
+  - name: thanos-query-dashboard
+    files:
+      - dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/query.json
+  - name: thanos-query-frontend-dashboard
+    files:
+      - dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/query_frontend.json
+  - name: thanos-receive-dashboard
+    files:
+      - dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/receive.json
+  - name: thanos-rule-dashboard
+    files:
+      - dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/rule.json
+  - name: thanos-sidecar-dashboard
+    files:
+      - dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/sidecar.json
+  - name: thanos-store-dashboard
+    files:
+      - dashboard.json=https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/store.json
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+  labels:
+    grafana_dashboard: "true"
