@@ -10,8 +10,10 @@ services:
       MINIO_ROOT_PASSWORD: "{{ MINIO_ROOT_PASSWORD }}"
       MINIO_PROMETHEUS_AUTH_TYPE: public
       MINIO_UPDATE: "off"
+      MINIO_BROWSER_REDIRECT_URL: https://minio.turbo.ac
+      MINIO_SERVER_URL: https://s3.turbo.ac
       TZ: America/New_York
-    command: server /data --console-address :9001
+    command: server /data --console-address ":9001"
     ports:
       - 9000:9000
       - 9001:9001
@@ -25,16 +27,16 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
       - traefik.enable=true
-      - traefik.http.routers.console.service=console
-      - traefik.http.routers.console.rule=Host(`minio.turbo.ac`)
-      - traefik.http.routers.console.entrypoints=websecure
-      - traefik.http.routers.console.tls.certresolver=letsencrypt
-      - traefik.http.services.console.loadbalancer.server.port=9001
       - traefik.http.routers.s3.service=s3
       - traefik.http.routers.s3.rule=Host(`s3.turbo.ac`)
       - traefik.http.routers.s3.entrypoints=websecure
       - traefik.http.routers.s3.tls.certresolver=letsencrypt
       - traefik.http.services.s3.loadbalancer.server.port=9000
+      - traefik.http.routers.console.service=console
+      - traefik.http.routers.console.rule=Host(`minio.turbo.ac`)
+      - traefik.http.routers.console.entrypoints=websecure
+      - traefik.http.routers.console.tls.certresolver=letsencrypt
+      - traefik.http.services.console.loadbalancer.server.port=9001
 volumes:
   minio-data:
     driver: local

@@ -204,21 +204,39 @@ spec:
             name: thanos-objstore
             key: objstore.yml
         additionalScrapeConfigs:
-          - job_name: "coredns"
+          - job_name: cadvisor
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - "${NAS_ADDR}:8080"
+          - job_name: coredns
             honor_timestamps: true
             static_configs:
               - targets:
                   - "${GATEWAY_ADDR}:9153"
-          - job_name: 'minio-job'
+          - job_name: minio
             honor_timestamps: true
             metrics_path: /minio/v2/metrics/cluster
             static_configs:
               - targets:
-                  - "minio.tools:9000"
-          - job_name: "node-exporter"
+                  - "${NAS_ADDR}:9000"
+          - job_name: node-exporter
             honor_timestamps: true
             static_configs:
               - targets:
                   - "${GATEWAY_ADDR}:9100"
                   - "${NAS_ADDR}:9100"
                   - "192.168.1.28:9100"
+          - job_name: postgresql-exporter
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - "${NAS_ADDR}:9187"
+          - job_name: "vault"
+            metrics_path: /v1/sys/metrics
+            params:
+              format:
+                - prometheus
+            static_configs:
+              - targets:
+                  - "${NAS_ADDR}:8200"

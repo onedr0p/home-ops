@@ -17,6 +17,18 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
 
+  postgresql-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.10.0
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://{{ POSTGRESQL_USERNAME }}:{{ POSTGRESQL_PASSWORD }}@pgsql-server:5432/postgres?sslmode=disable"
+    ports:
+      - 9187:9187
+    links:
+      - postgresql:pgsql-server
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
   pgadmin:
     image: docker.io/dpage/pgadmin4:6.2
     restart: unless-stopped
