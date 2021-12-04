@@ -6,7 +6,7 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/home/devin/Code/repos/onedr0p/home-cluster/server
+WorkingDirectory=/home/devin/Code/repos/onedr0p/home-ops/server
 ExecStartPre=-/bin/bash -c '/bin/podman pod ps --filter label=app=postgresql -q | xargs sudo podman pod stop'
 ExecStartPre=-/bin/bash -c '/bin/podman pod ps --filter label=app=postgresql -q | xargs sudo podman pod rm -f'
 ExecStart=/bin/podman play kube postgresql/deployment.yaml
