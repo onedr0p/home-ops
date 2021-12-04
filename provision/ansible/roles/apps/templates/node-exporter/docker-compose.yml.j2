@@ -1,0 +1,22 @@
+---
+version: "3"
+
+services:
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:v1.3.0
+    restart: unless-stopped
+    pid: host
+    network_mode: host
+    cap_add:
+      - SYS_TIME
+      - SYS_NICE
+    command:
+      - --path.procfs=/host/proc
+      - --path.rootfs=/rootfs
+      - --path.sysfs=/host/sys
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro,rslave
+    labels:
+      - com.centurylinklabs.watchtower.enable=true

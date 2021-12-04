@@ -1,0 +1,22 @@
+server:
+  log_level: info
+  disable: true
+
+client:
+  url: "https://loki.{{ SECRET_DOMAIN }}/loki/api/v1/push"
+
+positions:
+  filename: /tmp/positions.yaml
+
+scrape_configs:
+  - job_name: journal
+    journal:
+      path: /var/log/journal
+      max_age: 12h
+      labels:
+        job: systemd-journal
+    relabel_configs:
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'unit'
+      - source_labels: ['__journal__hostname']
+        target_label: 'hostname'

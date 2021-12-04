@@ -1,0 +1,91 @@
+---
+version: "3"
+
+services:
+  postgresql:
+    image: docker.io/library/postgres:13.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: "{{ POSTGRESQL_USERNAME }}"
+      POSTGRES_PASSWORD: "{{ POSTGRESQL_PASSWORD }}"
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  pgadmin:
+    image: docker.io/dpage/pgadmin4:6.2
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "{{ PGADMIN_USERNAME }}"
+      PGADMIN_DEFAULT_PASSWORD: "{{ PGADMIN_PASSWORD }}"
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - 12080:80
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    links:
+      - postgresql:pgsql-server
+    depends_on:
+      - postgresql
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - traefik.enable=true
+      - traefik.http.routers.pgadmin.rule=Host(`pgadmin.turbo.ac`)
+      - traefik.http.routers.pgadmin.entrypoints=websecure
+      - traefik.http.routers.pgadmin.tls.certresolver=letsencrypt
+      - traefik.http.services.pgadmin.loadbalancer.server.port=80
+
+  pgbackups:
+    image: docker.io/prodrigestivill/postgres-backup-local:13
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: pgsql-server
+      POSTGRES_DB: postgres
+      POSTGRES_USER: "{{ POSTGRESQL_USERNAME }}"
+      POSTGRES_PASSWORD: "{{ POSTGRESQL_PASSWORD }}"
+      POSTGRES_EXTRA_OPTS: "-Z9 --schema=public --blobs"
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 0
+      BACKUP_KEEP_MONTHS: 0
+      HEALTHCHECK_PORT: 8080
+    volumes:
+      - pgbackups-data:/backups
+    links:
+      - postgresql:pgsql-server
+    depends_on:
+      - postgresql
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+volumes:
+  pg-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tycho/System/Containers/data/postgresql/data
+
+  pgadmin-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tycho/System/Containers/data/postgresql/pgadmin
+
+  pgbackups-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tycho/System/Containers/data/postgresql/pgbackups

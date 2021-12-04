@@ -1,0 +1,27 @@
+---
+- name: Create minio directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /tycho/System/Containers/apps/minio
+    - /tycho/System/Containers/data/minio
+
+- name: Copy minio docker compose file
+  ansible.builtin.template:
+    src: minio/docker-compose.yml.j2
+    dest: /tycho/System/Containers/apps/minio/docker-compose.yml
+    mode: 0755
+
+- name: Tear down minio
+  community.docker.docker_compose:
+    project_src: /tycho/System/Containers/apps/minio
+    files:
+      - docker-compose.yml
+    state: absent
+
+- name: Create and start minio
+  community.docker.docker_compose:
+    project_src: /tycho/System/Containers/apps/minio
+    files:
+      - docker-compose.yml

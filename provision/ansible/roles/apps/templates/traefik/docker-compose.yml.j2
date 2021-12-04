@@ -1,0 +1,38 @@
+---
+version: "3"
+
+services:
+  traefik:
+    image: docker.io/library/traefik:v2.5.4
+    restart: unless-stopped
+    environment:
+      CF_API_EMAIL: "{{ CLOUDFLARE_EMAIL }}"
+      CF_API_KEY: "{{ CLOUDFLARE_APIKEY }}"
+    command:
+      - --api=true
+      - --api.dashboard=false
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.email={{ CLOUDFLARE_EMAIL }}
+      - --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json
+      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesResolvers.letsencrypt.acme.dnschallenge=true
+      - --certificatesResolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
+      - --certificatesResolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
+      - --serverstransport.insecureskipverify=true
+      - --log.level=INFO
+    network_mode: host
+    volumes:
+      - traefik-certs:/certs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+volumes:
+  traefik-certs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tycho/System/Containers/data/traefik/certs

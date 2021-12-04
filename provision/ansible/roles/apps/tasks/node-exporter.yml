@@ -1,0 +1,26 @@
+---
+- name: Create node-exporter directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /tycho/System/Containers/apps/node-exporter
+
+- name: Copy node-exporter docker compose file
+  ansible.builtin.template:
+    src: node-exporter/docker-compose.yml.j2
+    dest: /tycho/System/Containers/apps/node-exporter/docker-compose.yml
+    mode: 0755
+
+- name: Tear down node-exporter
+  community.docker.docker_compose:
+    project_src: /tycho/System/Containers/apps/node-exporter
+    files:
+      - docker-compose.yml
+    state: absent
+
+- name: Create and start node-exporter
+  community.docker.docker_compose:
+    project_src: /tycho/System/Containers/apps/node-exporter
+    files:
+      - docker-compose.yml

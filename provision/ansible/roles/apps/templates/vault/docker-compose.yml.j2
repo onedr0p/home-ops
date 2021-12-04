@@ -1,0 +1,42 @@
+---
+version: "3"
+
+services:
+  vault:
+    image: docker.io/library/vault:1.9.0
+    restart: unless-stopped
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_ADDR: http://0.0.0.0:8200
+      VAULT_API_ADDR: http://0.0.0.0:8200
+      VAULT_ADDRESS: http://0.0.0.0:8200
+    command: vault server -config=/vault/config/vault.json
+    ports:
+      - 8200:8200
+    volumes:
+      - /tycho/System/Containers/apps/vault/vault.json:/vault/config/vault.json
+      - vault-policies:/vault/policies
+      - vault-data:/vault/data
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - traefik.enable=true
+      - traefik.http.routers.vault.rule=Host(`vault.turbo.ac`)
+      - traefik.http.routers.vault.entrypoints=websecure
+      - traefik.http.routers.vault.tls.certresolver=letsencrypt
+      - traefik.http.services.vault.loadbalancer.server.port=8200
+
+volumes:
+  vault-policies:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tycho/System/Containers/data/vault/policies
+
+  vault-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tycho/System/Containers/data/vault/data

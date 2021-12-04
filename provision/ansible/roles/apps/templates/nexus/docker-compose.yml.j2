@@ -1,0 +1,41 @@
+---
+version: "3"
+
+services:
+  nexus:
+    image: docker.io/sonatype/nexus3:3.37.0
+    restart: unless-stopped
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: "-Xms2703m -Xmx2703m -XX:ActiveProcessorCount=4 -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-data/javaprefs"
+    ports:
+      - 8081:8081
+      - 8082:8082
+      # - 8083:8083
+    volumes:
+      - nexus-data:/nexus-data
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - traefik.enable=true
+      - traefik.http.routers.artifacts.rule=Host(`artifacts.turbo.ac`)
+      - traefik.http.routers.artifacts.service=artifacts
+      - traefik.http.routers.artifacts.entrypoints=websecure
+      - traefik.http.routers.artifacts.tls.certresolver=letsencrypt
+      - traefik.http.services.artifacts.loadbalancer.server.port=8081
+      - traefik.http.routers.registry.service=registry
+      - traefik.http.routers.registry.rule=Host(`registry.turbo.ac`)
+      - traefik.http.routers.registry.entrypoints=websecure
+      - traefik.http.routers.registry.tls.certresolver=letsencrypt
+      - traefik.http.services.registry.loadbalancer.server.port=8082
+      # - traefik.http.routers.registry-cache.service=registry-cache
+      # - traefik.http.routers.registry-cache.rule=Host(`registry-cache.turbo.ac`)
+      # - traefik.http.routers.registry-cache.entrypoints=websecure
+      # - traefik.http.routers.registry-cache.tls.certresolver=letsencrypt
+      # - traefik.http.services.registry-cache.loadbalancer.server.port=8083
+
+volumes:
+  nexus-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tycho/System/Containers/data/nexus

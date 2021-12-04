@@ -1,0 +1,44 @@
+---
+version: "3"
+
+services:
+  minio:
+    image: quay.io/minio/minio:RELEASE.2021-11-24T23-19-33Z
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: "{{ MINIO_ROOT_USER }}"
+      MINIO_ROOT_PASSWORD: "{{ MINIO_ROOT_PASSWORD }}"
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+      MINIO_UPDATE: "off"
+      TZ: America/New_York
+    command: server /data --console-address :9001
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - traefik.enable=true
+      - traefik.http.routers.console.service=console
+      - traefik.http.routers.console.rule=Host(`minio.turbo.ac`)
+      - traefik.http.routers.console.entrypoints=websecure
+      - traefik.http.routers.console.tls.certresolver=letsencrypt
+      - traefik.http.services.console.loadbalancer.server.port=9001
+      - traefik.http.routers.s3.service=s3
+      - traefik.http.routers.s3.rule=Host(`s3.turbo.ac`)
+      - traefik.http.routers.s3.entrypoints=websecure
+      - traefik.http.routers.s3.tls.certresolver=letsencrypt
+      - traefik.http.services.s3.loadbalancer.server.port=9000
+volumes:
+  minio-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tycho/System/Containers/data/minio

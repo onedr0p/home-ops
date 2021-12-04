@@ -1,0 +1,30 @@
+---
+- name: Create postgresql directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /tycho/System/Containers/apps/postgresql
+    - /tycho/System/Containers/data/postgresql
+    - /tycho/System/Containers/data/postgresql/data
+    - /tycho/System/Containers/data/postgresql/pgadmin
+    - /tycho/System/Containers/data/postgresql/pgbackups
+
+- name: Copy postgresql docker compose file
+  ansible.builtin.template:
+    src: postgresql/docker-compose.yml.j2
+    dest: /tycho/System/Containers/apps/postgresql/docker-compose.yml
+    mode: 0755
+
+- name: Tear down postgresql
+  community.docker.docker_compose:
+    project_src: /tycho/System/Containers/apps/postgresql
+    files:
+      - docker-compose.yml
+    state: absent
+
+- name: Create and start postgresql
+  community.docker.docker_compose:
+    project_src: /tycho/System/Containers/apps/postgresql
+    files:
+      - docker-compose.yml

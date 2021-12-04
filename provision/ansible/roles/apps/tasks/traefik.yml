@@ -1,0 +1,26 @@
+---
+- name: Create traefik directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /tycho/System/Containers/apps/traefik
+
+- name: Copy traefik docker compose file
+  ansible.builtin.template:
+    src: traefik/docker-compose.yml.j2
+    dest: /tycho/System/Containers/apps/traefik/docker-compose.yml
+    mode: 0755
+
+- name: Tear down traefik
+  community.docker.docker_compose:
+    project_src: /tycho/System/Containers/apps/traefik
+    files:
+      - docker-compose.yml
+    state: absent
+
+- name: Create and start traefik
+  community.docker.docker_compose:
+    project_src: /tycho/System/Containers/apps/traefik
+    files:
+      - docker-compose.yml

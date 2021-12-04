@@ -1,0 +1,27 @@
+---
+- name: Create nexus directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /tycho/System/Containers/apps/nexus
+    - /tycho/System/Containers/data/nexus
+
+- name: Copy nexus docker compose file
+  ansible.builtin.template:
+    src: nexus/docker-compose.yml.j2
+    dest: /tycho/System/Containers/apps/nexus/docker-compose.yml
+    mode: 0755
+
+- name: Tear down nexus
+  community.docker.docker_compose:
+    project_src: /tycho/System/Containers/apps/nexus
+    files:
+      - docker-compose.yml
+    state: absent
+
+- name: Create and start nexus
+  community.docker.docker_compose:
+    project_src: /tycho/System/Containers/apps/nexus
+    files:
+      - docker-compose.yml
