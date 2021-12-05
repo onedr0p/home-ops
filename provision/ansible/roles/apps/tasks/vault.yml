@@ -4,20 +4,20 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - /tycho/System/Containers/apps/vault
-    - /tycho/System/Containers/data/vault
+    - "{{ apps_dir }}/vault"
+    - "{{ data_dir }}/vault"
 
 - name: Copy vault docker compose file
   ansible.builtin.template:
     src: vault/docker-compose.yml.j2
-    dest: /tycho/System/Containers/apps/vault/docker-compose.yml
+    dest: "{{ apps_dir }}/vault/docker-compose.yml"
     mode: 0755
   register: compose
 
 - name: Copy vault config
   ansible.builtin.template:
     src: vault/vault.json.j2
-    dest: /tycho/System/Containers/apps/vault/vault.json
+    dest: "{{ apps_dir }}/vault/vault.json"
     mode: 0755
   register: config
 

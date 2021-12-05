@@ -4,20 +4,20 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - /tycho/System/Containers/apps/promtail
-    - /tycho/System/Containers/data/promtail
+    - "{{ apps_dir }}/promtail"
+    - "{{ data_dir }}/promtail"
 
 - name: Copy promtail docker compose file
   ansible.builtin.template:
     src: promtail/docker-compose.yml.j2
-    dest: /tycho/System/Containers/apps/promtail/docker-compose.yml
+    dest: "{{ apps_dir }}/promtail/docker-compose.yml"
     mode: 0755
   register: compose
 
 - name: Copy promtail config
   ansible.builtin.template:
     src: promtail/promtail.yaml.j2
-    dest: /tycho/System/Containers/apps/promtail/promtail.yaml
+    dest: "{{ apps_dir }}/promtail/promtail.yaml"
     mode: 0755
   register: config
 

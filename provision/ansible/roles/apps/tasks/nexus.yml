@@ -4,13 +4,13 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - /tycho/System/Containers/apps/nexus
-    - /tycho/System/Containers/data/nexus
+    - "{{ apps_dir }}/nexus"
+    - "{{ data_dir }}/nexus"
 
 - name: Copy nexus docker compose file
   ansible.builtin.template:
     src: nexus/docker-compose.yml.j2
-    dest: /tycho/System/Containers/apps/nexus/docker-compose.yml
+    dest: "{{ apps_dir }}/nexus/docker-compose.yml"
     mode: 0755
   register: compose
 

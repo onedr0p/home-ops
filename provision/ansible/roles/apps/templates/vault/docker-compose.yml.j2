@@ -15,7 +15,7 @@ services:
     ports:
       - 8200:8200
     volumes:
-      - /tycho/System/Containers/apps/vault/vault.json:/vault/config/vault.json
+      - "{{ apps_dir }}/vault/vault.json:/vault/config/vault.json"
       - vault-policies:/vault/policies
       - vault-data:/vault/data
     labels:
@@ -32,11 +32,11 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /tycho/System/Containers/data/vault/policies
+      device: "{{ data_dir }}/vault/policies"
 
   vault-data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /tycho/System/Containers/data/vault/data
+      device: "{{ data_dir }}/vault/data"

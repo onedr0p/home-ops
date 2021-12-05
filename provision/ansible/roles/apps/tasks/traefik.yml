@@ -4,12 +4,14 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - /tycho/System/Containers/apps/traefik
+    - "{{ apps_dir }}/traefik"
+    - "{{ data_dir }}/traefik"
+    - "{{ data_dir }}/traefik/certs"
 
 - name: Copy traefik docker compose file
   ansible.builtin.template:
     src: traefik/docker-compose.yml.j2
-    dest: /tycho/System/Containers/apps/traefik/docker-compose.yml
+    dest: "{{ apps_dir }}/traefik/docker-compose.yml"
     mode: 0755
   register: compose
 
