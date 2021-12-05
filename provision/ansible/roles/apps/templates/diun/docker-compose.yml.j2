@@ -1,0 +1,30 @@
+---
+version: "3.8"
+
+services:
+  diun:
+    image: ghcr.io/crazy-max/diun:4.20.1
+    restart: unless-stopped
+    container_name: diun
+    environment:
+      TZ: America/New_York
+      LOG_LEVEL: info
+      LOG_JSON: "true"
+      DIUN_WATCH_WORKERS: "20"
+      DIUN_WATCH_SCHEDULE: "0 */6 * * *"
+      DIUN_PROVIDERS_DOCKER: "true"
+    command: serve
+    volumes:
+      - diun-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - diun.enable=true
+
+volumes:
+  diun-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "{{ data_dir }}/diun"

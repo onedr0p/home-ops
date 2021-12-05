@@ -1,10 +1,11 @@
 ---
-version: "3"
+version: "3.8"
 
 services:
   nexus:
     image: docker.io/sonatype/nexus3:3.37.0
     restart: unless-stopped
+    container_name: nexus
     environment:
       INSTALL4J_ADD_VM_PARAMS: "-Xms2703m -Xmx2703m -XX:ActiveProcessorCount=4 -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-data/javaprefs"
     ports:
@@ -15,6 +16,7 @@ services:
       - nexus-data:/nexus-data
     labels:
       - com.centurylinklabs.watchtower.enable=true
+      - diun.enable=true
       - traefik.enable=true
       - traefik.http.routers.artifacts.rule=Host(`artifacts.turbo.ac`)
       - traefik.http.routers.artifacts.service=artifacts

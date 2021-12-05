@@ -1,10 +1,11 @@
 ---
-version: "3"
+version: "3.8"
 
 services:
   node-exporter:
     image: quay.io/prometheus/node-exporter:v1.3.1
     restart: unless-stopped
+    container_name: node-exporter
     pid: host
     network_mode: host
     cap_add:
@@ -20,3 +21,4 @@ services:
       - /:/rootfs:ro,rslave
     labels:
       - com.centurylinklabs.watchtower.enable=true
+      - diun.enable=true

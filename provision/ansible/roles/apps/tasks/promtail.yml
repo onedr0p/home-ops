@@ -22,11 +22,10 @@
   register: config
 
 - name: Create promtail systemd file
-  ansible.builtin.copy:
-    src: "files/docker-compose@.service"
+  ansible.builtin.template:
+    src: "docker-compose@.service.j2"
     dest: "/etc/systemd/system/docker-compose@promtail.service"
     mode: 0644
-    remote_src: false
   register: systemd
 
 - name: Start and enable promtail
@@ -34,4 +33,5 @@
     name: "docker-compose@promtail.service"
     state: restarted
     enabled: true
+    daemon_reload: true
   when: compose.changed or config.changed or systemd.changed

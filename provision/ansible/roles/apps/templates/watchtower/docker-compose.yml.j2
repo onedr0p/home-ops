@@ -1,18 +1,21 @@
 ---
-version: "3"
+version: "3.8"
 
 services:
   watchtower:
     image: docker.io/containrrr/watchtower:1.3.0
     restart: unless-stopped
+    container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/timezone:/etc/timezone:ro
     environment:
       WATCHTOWER_CLEANUP: "true"
       WATCHTOWER_LABEL_ENABLE: "true"
-      WATCHTOWER_INCLUDE_RESTARTING: "true"
+      WATCHTOWER_INCLUDE_RESTARTING: "false"
       WATCHTOWER_MONITOR_ONLY: "true"
       WATCHTOWER_POLL_INTERVAL: "3600"
+      WATCHTOWER_DEBUG: "true"
     labels:
       - com.centurylinklabs.watchtower.enable=true
+      - diun.enable=true

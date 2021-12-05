@@ -1,10 +1,11 @@
 ---
-version: "3"
+version: "3.8"
 
 services:
   vault:
     image: docker.io/library/vault:1.9.0
     restart: unless-stopped
+    container_name: vault
     cap_add:
       - IPC_LOCK
     environment:
@@ -20,6 +21,7 @@ services:
       - vault-data:/vault/data
     labels:
       - com.centurylinklabs.watchtower.enable=true
+      - diun.enable=true
       - traefik.enable=true
       - traefik.http.routers.vault.rule=Host(`vault.turbo.ac`)
       - traefik.http.routers.vault.entrypoints=websecure

@@ -1,10 +1,11 @@
 ---
-version: "3"
+version: "3.8"
 
 services:
   traefik:
     image: docker.io/library/traefik:v2.5.4
     restart: unless-stopped
+    container_name: traefik
     environment:
       CF_API_EMAIL: "{{ CLOUDFLARE_EMAIL }}"
       CF_API_KEY: "{{ CLOUDFLARE_APIKEY }}"
@@ -28,6 +29,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
       - com.centurylinklabs.watchtower.enable=true
+      - diun.enable=true
 
 volumes:
   traefik-certs:

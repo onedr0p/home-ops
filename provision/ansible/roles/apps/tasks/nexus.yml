@@ -15,11 +15,10 @@
   register: compose
 
 - name: Create nexus systemd file
-  ansible.builtin.copy:
-    src: "files/docker-compose@.service"
+  ansible.builtin.template:
+    src: "docker-compose@.service.j2"
     dest: "/etc/systemd/system/docker-compose@nexus.service"
     mode: 0644
-    remote_src: false
   register: systemd
 
 - name: Start and enable nexus
@@ -27,4 +26,5 @@
     name: "docker-compose@nexus.service"
     state: restarted
     enabled: true
+    daemon_reload: true
   when: compose.changed or systemd.changed

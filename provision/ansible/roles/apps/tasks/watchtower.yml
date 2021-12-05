@@ -14,11 +14,10 @@
   register: compose
 
 - name: Create watchtower systemd file
-  ansible.builtin.copy:
-    src: "files/docker-compose@.service"
+  ansible.builtin.template:
+    src: "docker-compose@.service.j2"
     dest: "/etc/systemd/system/docker-compose@watchtower.service"
     mode: 0644
-    remote_src: false
   register: systemd
 
 - name: Start and enable watchtower
@@ -26,4 +25,5 @@
     name: "docker-compose@watchtower.service"
     state: restarted
     enabled: true
+    daemon_reload: true
   when: compose.changed or systemd.changed

@@ -1,10 +1,11 @@
 ---
-version: "3"
+version: "3.8"
 
 services:
   postgresql:
     image: docker.io/library/postgres:14.1
     restart: unless-stopped
+    container_name: postgresql
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: "{{ POSTGRESQL_USERNAME }}"
@@ -16,10 +17,12 @@ services:
       - pg-data:/var/lib/postgresql/data
     labels:
       - com.centurylinklabs.watchtower.enable=true
+      - diun.enable=true
 
   postgresql-exporter:
     image: quay.io/prometheuscommunity/postgres-exporter:v0.10.0
     restart: unless-stopped
+    container_name: postgresql-exporter
     environment:
       DATA_SOURCE_NAME: "postgresql://{{ POSTGRESQL_USERNAME }}:{{ POSTGRESQL_PASSWORD }}@pgsql-server:5432/postgres?sslmode=disable"
     ports:
@@ -28,10 +31,12 @@ services:
       - postgresql:pgsql-server
     labels:
       - com.centurylinklabs.watchtower.enable=true
+      - diun.enable=true
 
   pgadmin:
     image: docker.io/dpage/pgadmin4:6.2
     restart: unless-stopped
+    container_name: postgresql-pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: "{{ PGADMIN_USERNAME }}"
       PGADMIN_DEFAULT_PASSWORD: "{{ PGADMIN_PASSWORD }}"
@@ -51,10 +56,12 @@ services:
       - traefik.http.routers.pgadmin.entrypoints=websecure
       - traefik.http.routers.pgadmin.tls.certresolver=letsencrypt
       - traefik.http.services.pgadmin.loadbalancer.server.port=80
+      - diun.enable=true
 
   pgbackups:
     image: docker.io/prodrigestivill/postgres-backup-local:14
     restart: unless-stopped
+    container_name: postgresql-pgbackups
     environment:
       POSTGRES_HOST: pgsql-server
       POSTGRES_DB: postgres
@@ -79,6 +86,7 @@ services:
       retries: 3
     labels:
       - com.centurylinklabs.watchtower.enable=true
+      - diun.enable=true
 
 volumes:
   pg-data:

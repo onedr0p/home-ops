@@ -15,11 +15,10 @@
   register: compose
 
 - name: Create minio systemd file
-  ansible.builtin.copy:
-    src: "files/docker-compose@.service"
+  ansible.builtin.template:
+    src: "docker-compose@.service.j2"
     dest: "/etc/systemd/system/docker-compose@minio.service"
     mode: 0644
-    remote_src: false
   register: systemd
 
 - name: Start and enable minio
@@ -27,4 +26,5 @@
     name: "docker-compose@minio.service"
     state: restarted
     enabled: true
+    daemon_reload: true
   when: compose.changed or systemd.changed
