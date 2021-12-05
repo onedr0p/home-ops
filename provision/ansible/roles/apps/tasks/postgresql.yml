@@ -15,16 +15,19 @@
     src: postgresql/docker-compose.yml.j2
     dest: /tycho/System/Containers/apps/postgresql/docker-compose.yml
     mode: 0755
+  register: compose
 
-- name: Tear down postgresql
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/postgresql
-    files:
-      - docker-compose.yml
-    state: absent
+- name: Create postgresql systemd file
+  ansible.builtin.copy:
+    src: "files/docker-compose@.service"
+    dest: "/etc/systemd/system/docker-compose@postgresql.service"
+    mode: 0644
+    remote_src: false
+  register: systemd
 
-- name: Create and start postgresql
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/postgresql
-    files:
-      - docker-compose.yml
+- name: Start and enable postgresql
+  ansible.builtin.systemd:
+    name: "docker-compose@postgresql.service"
+    state: restarted
+    enabled: true
+  when: compose.changed or systemd.changed

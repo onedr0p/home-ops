@@ -12,22 +12,26 @@
     src: promtail/docker-compose.yml.j2
     dest: /tycho/System/Containers/apps/promtail/docker-compose.yml
     mode: 0755
+  register: compose
 
 - name: Copy promtail config
   ansible.builtin.template:
     src: promtail/promtail.yaml.j2
     dest: /tycho/System/Containers/apps/promtail/promtail.yaml
     mode: 0755
+  register: config
 
-- name: Tear down promtail
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/promtail
-    files:
-      - docker-compose.yml
-    state: absent
+- name: Create promtail systemd file
+  ansible.builtin.copy:
+    src: "files/docker-compose@.service"
+    dest: "/etc/systemd/system/docker-compose@promtail.service"
+    mode: 0644
+    remote_src: false
+  register: systemd
 
-- name: Create and start promtail
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/promtail
-    files:
-      - docker-compose.yml
+- name: Start and enable promtail
+  ansible.builtin.systemd:
+    name: "docker-compose@promtail.service"
+    state: restarted
+    enabled: true
+  when: compose.changed or config.changed or systemd.changed

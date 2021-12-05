@@ -12,16 +12,19 @@
     src: minio/docker-compose.yml.j2
     dest: /tycho/System/Containers/apps/minio/docker-compose.yml
     mode: 0755
+  register: compose
 
-- name: Tear down minio
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/minio
-    files:
-      - docker-compose.yml
-    state: absent
+- name: Create minio systemd file
+  ansible.builtin.copy:
+    src: "files/docker-compose@.service"
+    dest: "/etc/systemd/system/docker-compose@minio.service"
+    mode: 0644
+    remote_src: false
+  register: systemd
 
-- name: Create and start minio
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/minio
-    files:
-      - docker-compose.yml
+- name: Start and enable minio
+  ansible.builtin.systemd:
+    name: "docker-compose@minio.service"
+    state: restarted
+    enabled: true
+  when: compose.changed or systemd.changed

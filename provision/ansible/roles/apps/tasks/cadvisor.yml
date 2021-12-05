@@ -11,16 +11,19 @@
     src: cadvisor/docker-compose.yml.j2
     dest: /tycho/System/Containers/apps/cadvisor/docker-compose.yml
     mode: 0755
+  register: compose
 
-- name: Tear down cadvisor
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/cadvisor
-    files:
-      - docker-compose.yml
-    state: absent
+- name: Create cadvisor systemd file
+  ansible.builtin.copy:
+    src: "files/docker-compose@.service"
+    dest: "/etc/systemd/system/docker-compose@cadvisor.service"
+    mode: 0644
+    remote_src: false
+  register: systemd
 
-- name: Create and start cadvisor
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/cadvisor
-    files:
-      - docker-compose.yml
+- name: Start and enable cadvisor
+  ansible.builtin.systemd:
+    name: "docker-compose@cadvisor.service"
+    state: restarted
+    enabled: true
+  when: compose.changed or systemd.changed

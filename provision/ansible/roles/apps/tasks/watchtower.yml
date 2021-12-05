@@ -11,16 +11,19 @@
     src: watchtower/docker-compose.yml.j2
     dest: /tycho/System/Containers/apps/watchtower/docker-compose.yml
     mode: 0755
+  register: compose
 
-- name: Tear down watchtower
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/watchtower
-    files:
-      - docker-compose.yml
-    state: absent
+- name: Create watchtower systemd file
+  ansible.builtin.copy:
+    src: "files/docker-compose@.service"
+    dest: "/etc/systemd/system/docker-compose@watchtower.service"
+    mode: 0644
+    remote_src: false
+  register: systemd
 
-- name: Create and start watchtower
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/watchtower
-    files:
-      - docker-compose.yml
+- name: Start and enable watchtower
+  ansible.builtin.systemd:
+    name: "docker-compose@watchtower.service"
+    state: restarted
+    enabled: true
+  when: compose.changed or systemd.changed

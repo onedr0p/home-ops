@@ -12,22 +12,26 @@
     src: vault/docker-compose.yml.j2
     dest: /tycho/System/Containers/apps/vault/docker-compose.yml
     mode: 0755
+  register: compose
 
 - name: Copy vault config
   ansible.builtin.template:
     src: vault/vault.json.j2
     dest: /tycho/System/Containers/apps/vault/vault.json
     mode: 0755
+  register: config
 
-- name: Tear down vault
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/vault
-    files:
-      - docker-compose.yml
-    state: absent
+- name: Create vault systemd file
+  ansible.builtin.copy:
+    src: "files/docker-compose@.service"
+    dest: "/etc/systemd/system/docker-compose@vault.service"
+    mode: 0644
+    remote_src: false
+  register: systemd
 
-- name: Create and start vault
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/vault
-    files:
-      - docker-compose.yml
+- name: Start and enable vault
+  ansible.builtin.systemd:
+    name: "docker-compose@vault.service"
+    state: restarted
+    enabled: true
+  when: compose.changed or config.changed or systemd.changed

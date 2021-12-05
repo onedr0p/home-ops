@@ -12,16 +12,19 @@
     src: nexus/docker-compose.yml.j2
     dest: /tycho/System/Containers/apps/nexus/docker-compose.yml
     mode: 0755
+  register: compose
 
-- name: Tear down nexus
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/nexus
-    files:
-      - docker-compose.yml
-    state: absent
+- name: Create nexus systemd file
+  ansible.builtin.copy:
+    src: "files/docker-compose@.service"
+    dest: "/etc/systemd/system/docker-compose@nexus.service"
+    mode: 0644
+    remote_src: false
+  register: systemd
 
-- name: Create and start nexus
-  community.docker.docker_compose:
-    project_src: /tycho/System/Containers/apps/nexus
-    files:
-      - docker-compose.yml
+- name: Start and enable nexus
+  ansible.builtin.systemd:
+    name: "docker-compose@nexus.service"
+    state: restarted
+    enabled: true
+  when: compose.changed or systemd.changed
