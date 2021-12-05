@@ -7,11 +7,11 @@ services:
     restart: unless-stopped
     container_name: nexus
     environment:
-      INSTALL4J_ADD_VM_PARAMS: "-Xms2703m -Xmx2703m -XX:ActiveProcessorCount=4 -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-data/javaprefs"
+      INSTALL4J_ADD_VM_PARAMS: "-Xms4096m -Xmx4096m -XX:ActiveProcessorCount=4 -XX:MaxDirectMemorySize=4096m -Djava.util.prefs.userRoot=/nexus-data/javaprefs"
     ports:
       - 8081:8081
       - 8082:8082
-      # - 8083:8083
+      - 8083:8083
     volumes:
       - nexus-data:/nexus-data
     labels:
@@ -28,11 +28,11 @@ services:
       - traefik.http.routers.registry.entrypoints=websecure
       - traefik.http.routers.registry.tls.certresolver=letsencrypt
       - traefik.http.services.registry.loadbalancer.server.port=8082
-      # - traefik.http.routers.registry-cache.service=registry-cache
-      # - traefik.http.routers.registry-cache.rule=Host(`registry-cache.turbo.ac`)
-      # - traefik.http.routers.registry-cache.entrypoints=websecure
-      # - traefik.http.routers.registry-cache.tls.certresolver=letsencrypt
-      # - traefik.http.services.registry-cache.loadbalancer.server.port=8083
+      - traefik.http.routers.mirror.service=mirror
+      - traefik.http.routers.mirror.rule=Host(`mirror.turbo.ac`)
+      - traefik.http.routers.mirror.entrypoints=websecure
+      - traefik.http.routers.mirror.tls.certresolver=letsencrypt
+      - traefik.http.services.mirror.loadbalancer.server.port=8083
 
 volumes:
   nexus-data:
