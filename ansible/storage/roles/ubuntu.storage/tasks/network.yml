@@ -1,0 +1,47 @@
+---
+- name: Set hostname to inventory hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  when:
+    - ansible_hostname != inventory_hostname
+
+- name: Update /etc/hosts to include hostname
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    create: true
+    block: |
+      127.0.0.1 localhost
+      127.0.1.1 {{ inventory_hostname }}
+
+      # The following lines are desirable for IPv6 capable hosts
+      ::1 ip6-localhost ip6-loopback
+      fe00::0 ip6-localnet
+      ff00::0 ip6-mcastprefix
+      ff02::1 ip6-allnodes
+      ff02::2 ip6-allrouters
+      ff02::3 ip6-allhosts
+
+- name: Check for bridge-nf-call-iptables
+  ansible.builtin.stat:
+    path: /proc/sys/net/bridge/bridge-nf-call-iptables
+  register: bridge_nf_call_iptables_result
+
+- name: Set Kubernetes network configuration
+  ansible.builtin.blockinfile:
+    path: /etc/sysctl.d/99-kubernetes-cri.conf
+    mode: 0644
+    create: true
+    block: |
+      net.ipv4.ip_forward = 1
+      net.bridge.bridge-nf-call-iptables = 1
+      net.ipv6.conf.all.forwarding = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+  when:
+    - bridge_nf_call_iptables_result.stat.exists
+  register: sysctl_network
+
+- name: Reload Kubernetes network configuration
+  ansible.builtin.shell: sysctl -p /etc/sysctl.d/99-kubernetes-cri.conf
+  when:
+    - sysctl_network.changed
+    - bridge_nf_call_iptables_result.stat.exists

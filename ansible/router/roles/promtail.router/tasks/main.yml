@@ -1,0 +1,83 @@
+---
+- name: Create promtail directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - /usr/local/etc/promtail
+    - /var/log/promtail
+
+- name: Create Promtail config
+  ansible.builtin.template:
+    src: promtail/promtail.yaml.j2
+    dest: /usr/local/etc/promtail/promtail.yaml
+    mode: 0755
+
+- name: Create Promtail rc.conf script
+  ansible.builtin.template:
+    src: promtail/promtail-rc.conf.j2
+    dest: /etc/rc.conf.d/promtail
+    mode: 0755
+
+- name: Create Promtail rc.d script
+  ansible.builtin.template:
+    src: promtail/promtail-rc.d.j2
+    dest: /usr/local/etc/rc.d/promtail
+    mode: 0755
+
+- name: Create Promtail action script
+  ansible.builtin.template:
+    src: promtail/actions_promtail.conf.j2
+    dest: /usr/local/opnsense/service/conf/actions.d/actions_promtail.conf
+    mode: 0755
+
+- name: Create Promtail start up script
+  ansible.builtin.template:
+    src: promtail/99-promtail.j2
+    dest: /usr/local/etc/rc.syshook.d/start/99-promtail
+    mode: 0755
+
+- name: Create Promtail log rotation config
+  ansible.builtin.template:
+    src: promtail/promtail-newsyslog.conf.j2
+    dest: /etc/newsyslog.conf.d/promtail
+    mode: 0755
+
+- name: Stop running Promtail
+  ansible.builtin.shell: |
+    /usr/local/etc/rc.d/promtail stop
+  ignore_errors: true
+
+- name: Remove Promtail install files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/promtail-freebsd-amd64
+    - /tmp/promtail-freebsd-amd64.zip
+
+- name: Get the latest Promtail tag
+  ansible.builtin.shell:
+    cmd: curl --silent 'https://api.github.com/repos/grafana/loki/releases/latest' |  grep '"tag_name":' | cut -d'"' -f4
+  register: loki_latest
+
+- name: Download Promtail
+  ansible.builtin.get_url:
+    url: "https://github.com/grafana/loki/releases/download/{{ loki_latest.stdout }}/promtail-freebsd-amd64.zip"
+    dest: /tmp/promtail-freebsd-amd64.zip
+
+- name: Unzip Promtail
+  ansible.builtin.shell:
+    cmd: unzip /tmp/promtail-freebsd-amd64.zip -d /tmp
+
+- name: Install Promtail
+  ansible.builtin.copy:
+    src: /tmp/promtail-freebsd-amd64
+    dest: /usr/local/sbin/promtail
+    mode: 0755
+    remote_src: true
+
+- name: Run Promtail
+  ansible.builtin.shell: |
+    /usr/local/etc/rc.d/promtail start

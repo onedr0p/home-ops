@@ -1,0 +1,19 @@
+---
+- name: Enable kernel modules runtime
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - br_netfilter
+    - overlay
+    - rbd
+
+- name: Enable kernel modules on boot
+  ansible.builtin.copy:
+    mode: 0644
+    content: "{{ item }}"
+    dest: "/etc/modules-load.d/{{ item }}.conf"
+  loop:
+    - br_netfilter
+    - overlay
+    - rbd
