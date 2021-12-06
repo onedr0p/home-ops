@@ -2,87 +2,19 @@
 version: "3"
 
 env:
-  ANSIBLE_CONFIG: "{{.PROJECT_DIR}}/provision/ansible/ansible.cfg"
-
-vars:
-  ANSIBLE_PLAYBOOK_DIR: "{{.ANSIBLE_DIR}}/playbooks"
-  ANSIBLE_INVENTORY_DIR: "{{.ANSIBLE_DIR}}/inventory"
+  ANSIBLE_CONFIG: "{{.PROJECT_DIR}}/ansible/ansible.cfg"
 
 tasks:
   deps:
     desc: Upgrade Ansible galaxy deps
-    dir: provision/ansible
+    dir: ansible
     cmds:
       - "ansible-galaxy install -r requirements.yml --force"
       - "ansible-galaxy collection install -r requirements.yml --force"
       - "pip3 install -r requirements.txt"
-    silent: true
 
   list:
     desc: List all the hosts
-    dir: provision/ansible
+    dir: ansible
     cmds:
-      - "ansible all -i {{.ANSIBLE_INVENTORY_DIR}}/home/hosts.yml --list-hosts"
-    silent: true
-
-  ping:
-    desc: Ping all the hosts
-    dir: provision/ansible
-    cmds:
-      - "ansible all -i {{.ANSIBLE_INVENTORY_DIR}}/home/hosts.yml --one-line -m 'ping'"
-    silent: true
-
-  uptime:
-    desc: Uptime of all the hosts
-    dir: provision/ansible
-    cmds:
-      - ansible all -i {{.ANSIBLE_INVENTORY_DIR}}/home/hosts.yml --one-line -a 'uptime'
-    silent: true
-
-  clean-images:
-    desc: Clean up stale container images
-    dir: provision/ansible
-    cmds:
-      - "ansible kubernetes -i {{.ANSIBLE_INVENTORY_DIR}}/home/hosts.yml --one-line -a 'k3s crictl rmi --prune' --become"
-    silent: true
-
-  purge-manifests:
-    desc: Delete all manifests under /var/lib/rancher/k3s/server/manifests
-    dir: provision/ansible
-    cmds:
-      - "ansible master -i {{.ANSIBLE_INVENTORY_DIR}}/home/hosts.yml --one-line -a 'rm /var/lib/rancher/k3s/server/manifests/*' --become"
-
-  reboot:
-    desc: Reboot all the k8s nodes
-    dir: provision/ansible
-    cmds:
-      - "ansible kubernetes -i {{.ANSIBLE_INVENTORY_DIR}}/home/hosts.yml -a '/usr/bin/systemctl reboot' --become"
-    silent: true
-
-  poweroff:
-    desc: Shutdown all the k8s nodes
-    dir: provision/ansible
-    cmds:
-      - "ansible kubernetes -i {{.ANSIBLE_INVENTORY_DIR}}/home/hosts.yml -a '/usr/bin/systemctl poweroff' --become"
-    silent: true
-
-  playbook:ubuntu-prepare:
-    desc: Prepare all the k8s nodes for running k3s
-    dir: provision/ansible
-    cmds:
-      - "ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/home/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/kubernetes/ubuntu-prepare.yml"
-    silent: true
-
-  playbook:ubuntu-upgrade:
-    desc: Upgrade all the k8s nodes operating system
-    dir: provision/ansible
-    cmds:
-      - "ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/home/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/kubernetes/ubuntu-upgrade.yml"
-    silent: true
-
-  playbook:cluster-install:
-    desc: Install Kubernetes on the nodes
-    dir: provision/ansible
-    cmds:
-      - "ansible-playbook -i {{.ANSIBLE_INVENTORY_DIR}}/home/hosts.yml {{.ANSIBLE_PLAYBOOK_DIR}}/kubernetes/k3s-install.yml"
-    silent: true
+      - "ansible all -i hosts.yml --list-hosts"
