@@ -19,8 +19,9 @@ spec:
             severity: critical
         - alert: FluxReconciliationFailure
           annotations:
-            description: '{{ $labels.kind }} {{ $labels.namespace }}/{{ $labels.name }} reconciliation has been failing
-              for more than ten minutes.'
+            description:
+              "{{ $labels.kind }} {{ $labels.namespace }}/{{ $labels.name }} reconciliation has been failing
+              for more than ten minutes."
             summary: Flux reconciliation failure.
           expr: |
             max(gotk_reconcile_condition{status="False",type="Ready"}) by (namespace, name, kind)

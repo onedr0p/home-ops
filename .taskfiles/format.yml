@@ -3,9 +3,11 @@ version: "3"
 
 tasks:
   all:
-    - task: markdown
+    - task: json
+    - task: md
     - task: yaml
-  markdown:
+
+  md:
     desc: Format Markdown
     cmds:
       - >-
@@ -16,7 +18,7 @@ tasks:
         --ignore-unknown
         --parser=markdown
         --write '*.md' '**/*.md'
-    ignore_error: true
+
   yaml:
     desc: Format YAML
     cmds:
@@ -28,6 +30,19 @@ tasks:
         --list-different
         --ignore-unknown
         --parser=yaml
-        --write '*.y*ml'
-        '**/*.y*ml'
+        --write '*.y*ml' '**/*.y*ml' '**/*.y*ml.j2'
+    ignore_error: true
+
+  json:
+    desc: Format JSON
+    cmds:
+      - >-
+        prettier
+        --ignore-path '.github/lint/.prettierignore'
+        --config
+        '.github/lint/.prettierrc.yaml'
+        --list-different
+        --ignore-unknown
+        --parser=json
+        --write '*.json' '**/*.json'
     ignore_error: true

@@ -3,24 +3,30 @@ version: "3"
 
 tasks:
   all:
-    - task: markdown
+    - task: md
     - task: yaml
-    - task: format
 
-  markdown:
+  md:
     desc: Lint Markdown
     cmds:
       - markdownlint -c '.github/lint/.markdownlint.yaml' *.md **/*.md
-    ignore_errors: true
+    ignore_error: true
 
   yaml:
     desc: Lint YAML
     cmds:
       - yamllint -c '.github/lint/.yamllint.yaml' .
-    ignore_errors: true
+    ignore_error: true
 
-  format:
-    desc: Lint general formatting
+  json:
+    desc: Lint JSON
     cmds:
-      - prettier --ignore-path '.github/lint/.prettierignore' --config '.github/lint/.prettierrc.yaml' --check .
-    ignore_errors: true
+      - >-
+        prettier
+        --ignore-path '.github/lint/.prettierignore'
+        --config
+        '.github/lint/.prettierrc.yaml'
+        --ignore-unknown
+        --parser=json
+        --check '*.json' '**/*.json'
+    ignore_error: true
