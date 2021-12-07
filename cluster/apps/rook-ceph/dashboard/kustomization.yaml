@@ -1,0 +1,22 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: rook-ceph
+# TODO: Make sure ceph dashboards are using the latest grafana components
+# Some have problems displaying certian panels
+configMapGenerator:
+  - name: ceph-cluster-dashboard
+    files:
+      - ceph-cluster-dashboard.json
+  - name: ceph-osd-dashboard
+    files:
+      - ceph-osd-dashboard.json
+  - name: ceph-pools-dashboard
+    files:
+      - ceph-pools-dashboard.json
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+  labels:
+    grafana_dashboard: "true"
