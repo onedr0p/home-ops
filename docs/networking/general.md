@@ -18,7 +18,7 @@ Description of how my network is set up.
 
 * If you decide to use kube-vip and calico both in BGP mode, workloads exposing a load balancer `externalIPs` cannot be deployed to the control plane nodes. Simply put the BIRD daemon can only run on one node at a time.
 
-* Currently when using BGP on Opnsense, services with multiple replicas do not get properly load balanced. This is due to Opnsense not supporting ECMP (equal-cost multipath) in the BSD kernel.
+* Currently when using BGP on Opnsense, services with multiple replicas do not get properly load balanced. This is due to Opnsense not supporting ECMP (equal-cost multipath) in the BSD kernel. This will be fixed in Opnsense 22.1.
 
 ## Running high-available control-plane
 

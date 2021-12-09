@@ -8,7 +8,7 @@ This repository is built off the [k8s-at-home/template-cluster-k3s](https://gith
 
 ## Cluster setup
 
-My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 21.04 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.
+My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.04 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.
 
 See my [ansible](./ansible/) directory for my playbooks and roles.
 
@@ -17,10 +17,9 @@ See my [ansible](./ansible/) directory for my playbooks and roles.
 - [calico](https://docs.projectcalico.org/about/about-calico): For internal cluster networking using BGP configured on Opnsense.
 - [rook-ceph](https://rook.io/): Provides persistent volumes, allowing any application to consume RBD block storage.
 - [Mozilla SOPS](https://toolkit.fluxcd.io/guides/mozilla-sops/): Encrypts secrets which is safe to store - even to a public repository.
-- [external-dns](https://github.com/kubernetes-sigs/external-dns): Creates DNS entries in a separate [coredns](https://github.com/coredns/coredns) deployment which is backed by my clusters [etcd](https://github.com/etcd-io/etcd) deployment.
+- [external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically creates DNS records on Cloudflare when I want a ingress to be accessed publicly.
 - [cert-manager](https://cert-manager.io/docs/): Configured to create TLS certs for all ingress services automatically using LetsEncrypt.
-- [kube-vip](https://github.com/kube-vip/kube-vip): HA solution for Kubernetes control plane
-- [Kasten](https://www.kasten.io): Data backup and recovery
+- [ingress-nginx](https://kubernetes.github.io/ingress-nginx/): My preferred ingress controller to expose traffic to pods over DNS.
 
 ## Repository structure
 
@@ -53,13 +52,14 @@ The Git repository contains the following directories under `cluster` and are or
 | Intel NUC8i5BEH | 1     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                 |
 | Intel NUC8i7BEH | 2     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | k3s Workers                 |
 | PowerEdge T340  | 1     | 120GB SSD    | 8x12TB RAIDz2        | 32GB | Shared file storage         |
+| Lenovo SA120    | 1     |              | 8x12TB               |      | DAS                         |
 
 ## Tools
 
 | Tool                                                   | Purpose                                                      |
 | ------------------------------------------------------ | ------------------------------------------------------------ |
 | [direnv](https://github.com/direnv/direnv)             | Sets environment variable based on present working directory |
-| [go-task](https://github.com/go-task/task)             | Alternative to makefiles, who honestly likes that?           |
+| [go-task](https://github.com/go-task/task)             | Makefiles except in YAML                                     |
 | [pre-commit](https://github.com/pre-commit/pre-commit) | Enforce code consistency and verifies no secrets are pushed  |
 | [stern](https://github.com/stern/stern)                | Tail logs in Kubernetes                                      |
 

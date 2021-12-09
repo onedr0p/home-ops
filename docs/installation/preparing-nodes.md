@@ -34,5 +34,5 @@ network:
 !!! info "Update Ansible inventory configuration and run the `ubuntu-prepare` playbook"
 
 ```sh
-task ansible:playbook:ubuntu-prepare
+ansible-playbook -i ansible/hosts.yml ansible/kubernetes/ubuntu.yml
 ```
