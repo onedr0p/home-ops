@@ -1,0 +1,50 @@
+---
+- name: Fetch service account for home-dns
+  ansible.builtin.set_fact:
+    DNSServiceAccountRaw: "{{ lookup('community.kubernetes.k8s', namespace='kube-system', kind='ServiceAccount', resource_name='home-dns') }}"
+
+- name: Extract service account token from service account
+  ansible.builtin.set_fact:
+    DNSServiceAccountToken: "{{ DNSServiceAccountRaw | json_query('secrets[*].name | [0]') }}"
+
+- name: Fetch CA
+  ansible.builtin.set_fact:
+    DNSCertificateAuthorityRaw: "{{ lookup('community.kubernetes.k8s', namespace='kube-system', kind='Secret', resource_name=DNSServiceAccountToken) }}"
+
+- name: Extract CA Cert from CA
+  ansible.builtin.set_fact:
+    DNSCertificateAuthority: '{{ DNSCertificateAuthorityRaw | json_query(''data."ca.crt"'') }}'
+
+- name: Extract CA Token from CA
+  ansible.builtin.set_fact:
+    DNSCertificateAuthorityToken: "{{ DNSCertificateAuthorityRaw | json_query('data.token') | b64decode }}"
+
+- name: Create kubeconfig
+  ansible.builtin.copy:
+    dest: "/tmp/kubeconfig-homedns"
+    content: |
+      ---
+      apiVersion: v1
+      kind: Config
+      clusters:
+      - name: home
+        cluster:
+          certificate-authority-data: "{{ DNSCertificateAuthority }}"
+          server: "https://{{ k3s_registration_address }}:6443"
+      contexts:
+      - name: home
+        context:
+          cluster: home
+          user: home-dns
+      users:
+      - name: home-dns
+        user:
+          token: {{ DNSCertificateAuthorityToken }}
+      current-context: home
+    mode: 0755
+
+- name: Copy kubeconfig to /tmp
+  ansible.builtin.fetch:
+    src: "/tmp/kubeconfig-homedns"
+    dest: "/tmp/kubeconfig-homedns"
+    flat: true
