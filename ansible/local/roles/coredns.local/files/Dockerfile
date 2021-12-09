@@ -1,4 +1,4 @@
-FROM docker.io/golang:1.17.4-alpine
+FROM docker.io/golang:1.17.5-alpine
 
 ARG VERSION
 ENV VERSION=${VERSION:-v1.8.6}
