@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rook-direct-mount
-  namespace: rook-ceph # namespace:cluster
+  namespace: rook-ceph
   labels:
     app: rook-direct-mount
 spec:
@@ -20,8 +20,7 @@ spec:
       containers:
         - name: rook-direct-mount
           image: rook/ceph:v1.8.0
-          command: ["/tini"]
-          args: ["-g", "--", "/usr/local/bin/toolbox.sh"]
+          command: ["/usr/local/bin/toolbox.sh"]
           imagePullPolicy: IfNotPresent
           env:
             - name: ROOK_CEPH_USERNAME
