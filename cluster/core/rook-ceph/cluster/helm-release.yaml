@@ -20,19 +20,21 @@ spec:
   values:
     monitoring:
       enabled: true
-    # ingress:
-    #   dashboard:
-    #     annotations:
-    #       kubernetes.io/ingress.class: "nginx"
-    #     host:
-    #       name: "rook.${SECRET_DOMAIN}"
-    #       path: "/"
-    #     tls:
-    #       - hosts:
-    #           - "rook.${SECRET_DOMAIN}"
-    cephClusterSpec:
+    ingress:
       dashboard:
-        enabled: false
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+        host:
+          name: "rook.${SECRET_DOMAIN}"
+          path: "/"
+        tls:
+          - hosts:
+              - "rook.${SECRET_DOMAIN}"
+    cephClusterSpec:
+      mgr:
+        count: 2
+      dashboard:
+        enabled: true
         ssl: false
       storage:
         useAllNodes: false
