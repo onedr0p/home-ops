@@ -2,7 +2,7 @@
 
 {% import 'links.jinja2' as links %}
 
-My DNS setup may seem a bit complicated at first, but it allows for completely automatic management of DNS entries for service and ingress objects.
+My DNS setup may seem a bit complicated at first, but it allows for completely automatic management of DNS entries for service and ingress objects. It also allows for me to determine what ingresses I want public or private.
 
 ## Components
 
