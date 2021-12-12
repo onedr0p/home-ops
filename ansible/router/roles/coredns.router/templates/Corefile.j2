@@ -6,18 +6,13 @@
   cache 300
   loop
   local
-  # dnsmasq is enabled only for setting hostnames in the Opnsense UI
+  # dnsmasq is only enabled for setting hostnames in the Opnsense UI.
+  # In the dnsmasq settings:
+  # 1) Set 'Listen Port' to 553
+  # 2) (optional) Network Interfaces is set to one local interface
+  # 3) Make sure 'Register DHCP static mappings' is enabled
+  # 4) Adding an 'Host Overrides' also appends to this host file
   hosts /var/etc/dnsmasq-hosts {
-    # Set DNS names for static IPs
-    192.168.1.1       opnsense.turbo.ac
-    192.168.42.60     artifacts.turbo.ac
-    192.168.42.60     registry.turbo.ac
-    192.168.42.60     mirror.turbo.ac
-    192.168.42.60     minio.turbo.ac
-    192.168.42.60     s3.turbo.ac
-    192.168.42.60     vault.turbo.ac
-    192.168.42.60     pgadmin.turbo.ac
-
     ttl 600
     reload 5s
     fallthrough
