@@ -6,6 +6,7 @@ provider "registry.terraform.io/carlpett/sops" {
   constraints = "0.6.3"
   hashes = [
     "h1:5V8tOWQ6AR+QB6mz+OZx5qab5z9muOId1VCwVzpq6B8=",
+    "h1:Fz5ZW01W8lR1arSqP+dNqwXZdqusU6EBd/7NOKdS4dU=",
     "zh:0c9f0cad271cbd4c3fa97961b6276ff86f7db2d5dc39ea7de687b5e5091b5f4b",
     "zh:4180cf700dc8ccc71db5d4a0496c22a54301a617ae53d93bba91cb142694552e",
     "zh:656f35d78120bd50d82767a814f53a0a4f96ff1f5f79e40089f259bb1f09ce9e",
@@ -56,6 +57,7 @@ provider "registry.terraform.io/hashicorp/http" {
   constraints = "2.1.0"
   hashes = [
     "h1:GYoVrTtiSAE3AlP1fad3fFmHoPaXAPhm/DJyMcVCwZA=",
+    "h1:Xzqtg6D818s2JCkn7AmaxYgGRevLcymYHHArMHGESSE=",
     "zh:03d82dc0887d755b8406697b1d27506bc9f86f93b3e9b4d26e0679d96b802826",
     "zh:0704d02926393ddc0cfad0b87c3d51eafeeae5f9e27cc71e193c141079244a22",
     "zh:095ea350ea94973e043dad2394f10bca4a4bf41be775ba59d19961d39141d150",
