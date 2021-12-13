@@ -32,12 +32,14 @@ provider "minio" {
 
 locals {
   bucket_settings = {
-    "k3s"    = { versioning_enabled = false },
-    "loki"   = { versioning_enabled = false },
-    "phone"  = { versioning_enabled = false },
-    "thanos" = { versioning_enabled = false }
+    "k3s"      = { versioning_enabled = false },
+    "loki"     = { versioning_enabled = false },
+    "phone"    = { versioning_enabled = false },
+    "thanos"   = { versioning_enabled = false },
+    "opnsense" = { versioning_enabled = false }
   }
 }
+
 resource "minio_bucket" "map" {
   for_each = local.bucket_settings
 
