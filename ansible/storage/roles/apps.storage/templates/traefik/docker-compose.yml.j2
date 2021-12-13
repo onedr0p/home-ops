@@ -11,9 +11,11 @@ services:
       CF_API_KEY: "{{ CLOUDFLARE_APIKEY }}"
     command:
       - --api=true
-      - --api.dashboard=false
+      - --api.dashboard=true
+      - --api.insecure=true
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --certificatesresolvers.letsencrypt.acme.email={{ CLOUDFLARE_EMAIL }}
       - --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json
@@ -30,6 +32,11 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
       - diun.enable=true
+      - traefik.enable=true
+      - traefik.http.routers.dashboard.rule=Host(`traefik.turbo.ac`)
+      - traefik.http.routers.dashboard.entrypoints=websecure
+      - traefik.http.routers.dashboard.tls.certresolver=letsencrypt
+      - traefik.http.routers.dashboard.service=api@internal
 
 volumes:
   traefik-certs:
