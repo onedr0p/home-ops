@@ -1,4 +1,19 @@
 ---
+- name: Modify ansible_user group
+  ansible.builtin.group:
+    name: "{{ ansible_user }}"
+    state: present
+    gid: 568
+
+- name: Modify ansible_user user
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    shell: /usr/bin/fish
+    uid: 568
+    group: "{{ ansible_user }}"
+    groups: users
+    append: true
+
 - name: Add user to sudoers
   ansible.builtin.copy:
     content: "{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
