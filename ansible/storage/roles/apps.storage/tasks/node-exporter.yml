@@ -6,24 +6,15 @@
   loop:
     - "{{ apps_dir }}/node-exporter"
 
-- name: Copy node-exporter docker compose file
-  ansible.builtin.template:
-    src: node-exporter/docker-compose.yml.j2
-    dest: "{{ apps_dir }}/node-exporter/docker-compose.yml"
-    mode: 0755
-  register: compose
-
-- name: Create node-exporter systemd file
-  ansible.builtin.template:
-    src: "docker-compose@.service.j2"
-    dest: "/etc/systemd/system/docker-compose@node-exporter.service"
-    mode: 0644
-  register: systemd
-
-- name: Start and enable node-exporter
-  ansible.builtin.systemd:
-    name: "docker-compose@node-exporter.service"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-  when: compose.changed or systemd.changed
+- block:
+    - name: Copy node-exporter docker compose file
+      ansible.builtin.template:
+        src: node-exporter/docker-compose.yml.j2
+        dest: "{{ apps_dir }}/node-exporter/docker-compose.yml"
+        mode: 0755
+    - name: Create node-exporter systemd file
+      ansible.builtin.template:
+        src: "docker-compose@.service.j2"
+        dest: "/etc/systemd/system/docker-compose@node-exporter.service"
+        mode: 0644
+  notify: Restart node-exporter

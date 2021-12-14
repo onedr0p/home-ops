@@ -6,24 +6,15 @@
   loop:
     - "{{ apps_dir }}/cadvisor"
 
-- name: Copy cadvisor docker compose file
-  ansible.builtin.template:
-    src: cadvisor/docker-compose.yml.j2
-    dest: "{{ apps_dir }}/cadvisor/docker-compose.yml"
-    mode: 0755
-  register: compose
-
-- name: Create cadvisor systemd file
-  ansible.builtin.template:
-    src: "docker-compose@.service.j2"
-    dest: "/etc/systemd/system/docker-compose@cadvisor.service"
-    mode: 0644
-  register: systemd
-
-- name: Start and enable cadvisor
-  ansible.builtin.systemd:
-    name: "docker-compose@cadvisor.service"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-  when: compose.changed or systemd.changed
+- block:
+    - name: Copy cadvisor docker compose file
+      ansible.builtin.template:
+        src: cadvisor/docker-compose.yml.j2
+        dest: "{{ apps_dir }}/cadvisor/docker-compose.yml"
+        mode: 0755
+    - name: Create cadvisor systemd file
+      ansible.builtin.template:
+        src: "docker-compose@.service.j2"
+        dest: "/etc/systemd/system/docker-compose@cadvisor.service"
+        mode: 0644
+  notify: Restart cadvisor

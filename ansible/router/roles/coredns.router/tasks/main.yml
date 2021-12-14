@@ -20,7 +20,7 @@
     src: Corefile.j2
     dest: /usr/local/etc/coredns/Corefile
     mode: 0755
-  register: coredns_corefile
+  register: coredns_config
 
 - name: Create CoreDNS rc.conf script
   ansible.builtin.template:
@@ -70,8 +70,7 @@
     checksum_algorithm: sha1
   register: coredns_router_file
 
-- name: Reconfigure coredns
-  block:
+- block:
     - name: Stop running CoreDNS
       ansible.builtin.shell: |
         /usr/local/etc/rc.d/coredns stop
@@ -87,7 +86,7 @@
         /usr/local/etc/rc.d/coredns start
   when: |-
     kubernetes_kubeconfig.changed
-    or coredns_corefile.changed
+    or coredns_config.changed
     or coredns_rc.changed
     or coredns_rc_d.changed
     or coredns_actions.changed

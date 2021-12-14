@@ -8,24 +8,15 @@
     - "{{ data_dir }}/traefik"
     - "{{ data_dir }}/traefik/certs"
 
-- name: Copy traefik docker compose file
-  ansible.builtin.template:
-    src: traefik/docker-compose.yml.j2
-    dest: "{{ apps_dir }}/traefik/docker-compose.yml"
-    mode: 0755
-  register: compose
-
-- name: Create traefik systemd file
-  ansible.builtin.template:
-    src: "docker-compose@.service.j2"
-    dest: "/etc/systemd/system/docker-compose@traefik.service"
-    mode: 0644
-  register: systemd
-
-- name: Start and enable traefik
-  ansible.builtin.systemd:
-    name: "docker-compose@traefik.service"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-  when: compose.changed or systemd.changed
+- block:
+    - name: Copy traefik docker compose file
+      ansible.builtin.template:
+        src: traefik/docker-compose.yml.j2
+        dest: "{{ apps_dir }}/traefik/docker-compose.yml"
+        mode: 0755
+    - name: Create traefik systemd file
+      ansible.builtin.template:
+        src: "docker-compose@.service.j2"
+        dest: "/etc/systemd/system/docker-compose@traefik.service"
+        mode: 0644
+  notify: Restart traefik

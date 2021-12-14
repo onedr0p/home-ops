@@ -7,24 +7,15 @@
     - "{{ apps_dir }}/diun"
     - "{{ data_dir }}/diun"
 
-- name: Copy diun docker compose file
-  ansible.builtin.template:
-    src: diun/docker-compose.yml.j2
-    dest: "{{ apps_dir }}/diun/docker-compose.yml"
-    mode: 0755
-  register: compose
-
-- name: Create diun systemd file
-  ansible.builtin.template:
-    src: "docker-compose@.service.j2"
-    dest: "/etc/systemd/system/docker-compose@diun.service"
-    mode: 0644
-  register: systemd
-
-- name: Start and enable diun
-  ansible.builtin.systemd:
-    name: "docker-compose@diun.service"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-  when: compose.changed or systemd.changed
+- block:
+    - name: Copy diun docker compose file
+      ansible.builtin.template:
+        src: diun/docker-compose.yml.j2
+        dest: "{{ apps_dir }}/diun/docker-compose.yml"
+        mode: 0755
+    - name: Create diun systemd file
+      ansible.builtin.template:
+        src: "docker-compose@.service.j2"
+        dest: "/etc/systemd/system/docker-compose@diun.service"
+        mode: 0644
+  notify: Restart diun

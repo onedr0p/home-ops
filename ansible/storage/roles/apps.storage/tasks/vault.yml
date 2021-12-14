@@ -7,31 +7,20 @@
     - "{{ apps_dir }}/vault"
     - "{{ data_dir }}/vault"
 
-- name: Copy vault docker compose file
-  ansible.builtin.template:
-    src: vault/docker-compose.yml.j2
-    dest: "{{ apps_dir }}/vault/docker-compose.yml"
-    mode: 0755
-  register: compose
-
-- name: Copy vault config
-  ansible.builtin.template:
-    src: vault/vault.json.j2
-    dest: "{{ apps_dir }}/vault/vault.json"
-    mode: 0755
-  register: config
-
-- name: Create vault systemd file
-  ansible.builtin.template:
-    src: "docker-compose@.service.j2"
-    dest: "/etc/systemd/system/docker-compose@vault.service"
-    mode: 0644
-  register: systemd
-
-- name: Start and enable vault
-  ansible.builtin.systemd:
-    name: "docker-compose@vault.service"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-  when: compose.changed or config.changed or systemd.changed
+- block:
+    - name: Copy vault docker compose file
+      ansible.builtin.template:
+        src: vault/docker-compose.yml.j2
+        dest: "{{ apps_dir }}/vault/docker-compose.yml"
+        mode: 0755
+    - name: Copy vault config
+      ansible.builtin.template:
+        src: vault/vault.json.j2
+        dest: "{{ apps_dir }}/vault/vault.json"
+        mode: 0755
+    - name: Create vault systemd file
+      ansible.builtin.template:
+        src: "docker-compose@.service.j2"
+        dest: "/etc/systemd/system/docker-compose@vault.service"
+        mode: 0644
+  notify: Restart vault

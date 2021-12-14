@@ -10,24 +10,15 @@
     - "{{ data_dir }}/postgresql/pgadmin"
     - "{{ data_dir }}/postgresql/pgbackups"
 
-- name: Copy postgresql docker compose file
-  ansible.builtin.template:
-    src: postgresql/docker-compose.yml.j2
-    dest: "{{ apps_dir }}/postgresql/docker-compose.yml"
-    mode: 0755
-  register: compose
-
-- name: Create postgresql systemd file
-  ansible.builtin.template:
-    src: "docker-compose@.service.j2"
-    dest: "/etc/systemd/system/docker-compose@postgresql.service"
-    mode: 0644
-  register: systemd
-
-- name: Start and enable postgresql
-  ansible.builtin.systemd:
-    name: "docker-compose@postgresql.service"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-  when: compose.changed or systemd.changed
+- block:
+    - name: Copy postgresql docker compose file
+      ansible.builtin.template:
+        src: postgresql/docker-compose.yml.j2
+        dest: "{{ apps_dir }}/postgresql/docker-compose.yml"
+        mode: 0755
+    - name: Create postgresql systemd file
+      ansible.builtin.template:
+        src: "docker-compose@.service.j2"
+        dest: "/etc/systemd/system/docker-compose@postgresql.service"
+        mode: 0644
+  notify: Restart postgresql

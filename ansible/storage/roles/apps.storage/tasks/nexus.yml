@@ -7,24 +7,16 @@
     - "{{ apps_dir }}/nexus"
     - "{{ data_dir }}/nexus"
 
-- name: Copy nexus docker compose file
-  ansible.builtin.template:
-    src: nexus/docker-compose.yml.j2
-    dest: "{{ apps_dir }}/nexus/docker-compose.yml"
-    mode: 0755
-  register: compose
+- block:
+    - name: Copy nexus docker compose file
+      ansible.builtin.template:
+        src: nexus/docker-compose.yml.j2
+        dest: "{{ apps_dir }}/nexus/docker-compose.yml"
+        mode: 0755
 
-- name: Create nexus systemd file
-  ansible.builtin.template:
-    src: "docker-compose@.service.j2"
-    dest: "/etc/systemd/system/docker-compose@nexus.service"
-    mode: 0644
-  register: systemd
-
-- name: Start and enable nexus
-  ansible.builtin.systemd:
-    name: "docker-compose@nexus.service"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-  when: compose.changed or systemd.changed
+    - name: Create nexus systemd file
+      ansible.builtin.template:
+        src: "docker-compose@.service.j2"
+        dest: "/etc/systemd/system/docker-compose@nexus.service"
+        mode: 0644
+  notify: Restart nexus

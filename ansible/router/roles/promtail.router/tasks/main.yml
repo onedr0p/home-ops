@@ -13,36 +13,42 @@
     src: promtail.yaml.j2
     dest: /usr/local/etc/promtail/promtail.yaml
     mode: 0755
+  register: promtail_config
 
 - name: Create Promtail rc.conf script
   ansible.builtin.template:
     src: promtail-rc.conf.j2
     dest: /etc/rc.conf.d/promtail
     mode: 0755
+  register: promtail_rc
 
 - name: Create Promtail rc.d script
   ansible.builtin.template:
     src: promtail-rc.d.j2
     dest: /usr/local/etc/rc.d/promtail
     mode: 0755
+  register: promtail_rc_d
 
 - name: Create Promtail action script
   ansible.builtin.template:
     src: actions_promtail.conf.j2
     dest: /usr/local/opnsense/service/conf/actions.d/actions_promtail.conf
     mode: 0755
+  register: promtail_actions
 
 - name: Create Promtail start up script
   ansible.builtin.template:
     src: 99-promtail.j2
     dest: /usr/local/etc/rc.syshook.d/start/99-promtail
     mode: 0755
+    register: promtail_syshook
 
 - name: Create Promtail log rotation config
   ansible.builtin.template:
     src: promtail-newsyslog.conf.j2
     dest: /etc/newsyslog.conf.d/promtail
     mode: 0755
+  register: promtail_newsyslog
 
 - name: Stop running Promtail
   ansible.builtin.shell: |
