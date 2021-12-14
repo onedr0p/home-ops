@@ -57,23 +57,23 @@
   block:
     - name: Fetch service account for home-dns
       ansible.builtin.set_fact:
-        DNSServiceAccountRaw: "{{ lookup('community.kubernetes.k8s', namespace='kube-system', kind='ServiceAccount', resource_name='home-dns') }}"
+        dns_service_account_raw: "{{ lookup('community.kubernetes.k8s', namespace='kube-system', kind='ServiceAccount', resource_name='home-dns') }}"
 
     - name: Extract service account token from service account
       ansible.builtin.set_fact:
-        DNSServiceAccountToken: "{{ DNSServiceAccountRaw | json_query('secrets[*].name | [0]') }}"
+        dns_service_account_token: "{{ dns_service_account_raw | json_query('secrets[*].name | [0]') }}"
 
     - name: Fetch CA
       ansible.builtin.set_fact:
-        DNSCertificateAuthorityRaw: "{{ lookup('community.kubernetes.k8s', namespace='kube-system', kind='Secret', resource_name=DNSServiceAccountToken) }}"
+        dns_certificate_authority_raw: "{{ lookup('community.kubernetes.k8s', namespace='kube-system', kind='Secret', resource_name=dns_service_account_token) }}"
 
     - name: Extract CA Cert from CA
       ansible.builtin.set_fact:
-        DNSCertificateAuthority: '{{ DNSCertificateAuthorityRaw | json_query(''data."ca.crt"'') }}'
+        dns_certificate_authority: '{{ dns_certificate_authority_raw | json_query(''data."ca.crt"'') }}'
 
     - name: Extract CA Token from CA
       ansible.builtin.set_fact:
-        DNSCertificateAuthorityToken: "{{ DNSCertificateAuthorityRaw | json_query('data.token') | b64decode }}"
+        dns_certificate_authority_token: "{{ dns_certificate_authority_raw | json_query('data.token') | b64decode }}"
 
     - name: Create kubeconfig
       ansible.builtin.copy:
@@ -85,7 +85,7 @@
           clusters:
           - name: home
             cluster:
-              certificate-authority-data: "{{ DNSCertificateAuthority }}"
+              certificate-authority-data: "{{ dns_certificate_authority }}"
               server: "https://{{ k3s_registration_address }}:6443"
           contexts:
           - name: home
@@ -95,7 +95,7 @@
           users:
           - name: home-dns
             user:
-              token: {{ DNSCertificateAuthorityToken }}
+              token: {{ dns_certificate_authority_token }}
           current-context: home
         mode: 0755
 

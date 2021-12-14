@@ -1,38 +1,28 @@
 ---
-- name: Copy 20auto-upgrades unattended-upgrades config
-  ansible.builtin.blockinfile:
-    path: /etc/apt/apt.conf.d/20auto-upgrades
-    mode: 0644
-    create: true
-    block: |
-      APT::Periodic::Update-Package-Lists "1";
-      APT::Periodic::Download-Upgradeable-Packages "1";
-      APT::Periodic::AutocleanInterval "7";
-      APT::Periodic::Unattended-Upgrade "1";
 
-- name: Copy 50unattended-upgrades unattended-upgrades config
-  ansible.builtin.blockinfile:
-    path: /etc/apt/apt.conf.d/50unattended-upgrades
-    mode: 0644
-    create: true
-    block: |
-      Unattended-Upgrade::Automatic-Reboot "false";
-      Unattended-Upgrade::Remove-Unused-Dependencies "true";
-      Unattended-Upgrade::Allowed-Origins {
-          "${distro_id} stable";
-          "${distro_id} ${distro_codename}-security";
-          "${distro_id} ${distro_codename}-updates";
-      };
+- block:
+    - name: Copy 20auto-upgrades unattended-upgrades config
+      ansible.builtin.blockinfile:
+        path: /etc/apt/apt.conf.d/20auto-upgrades
+        mode: 0644
+        create: true
+        block: |
+          APT::Periodic::Update-Package-Lists "1";
+          APT::Periodic::Download-Upgradeable-Packages "1";
+          APT::Periodic::AutocleanInterval "7";
+          APT::Periodic::Unattended-Upgrade "1";
 
-- name: Start unattended-upgrades service
-  ansible.builtin.systemd:
-    name: unattended-upgrades
-    enabled: true
-    state: started
-
-- name: Restart unattended-upgrades service
-  ansible.builtin.service:
-    name: unattended-upgrades.service
-    daemon_reload: true
-    enabled: true
-    state: restarted
+    - name: Copy 50unattended-upgrades unattended-upgrades config
+      ansible.builtin.blockinfile:
+        path: /etc/apt/apt.conf.d/50unattended-upgrades
+        mode: 0644
+        create: true
+        block: |
+          Unattended-Upgrade::Automatic-Reboot "false";
+          Unattended-Upgrade::Remove-Unused-Dependencies "true";
+          Unattended-Upgrade::Allowed-Origins {
+              "${distro_id} stable";
+              "${distro_id} ${distro_codename}-security";
+              "${distro_id} ${distro_codename}-updates";
+          };
+  notify: Restart unattended-upgrades

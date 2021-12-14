@@ -26,7 +26,7 @@
     value: 0
   when:
     - grub_result.stat.exists
-    - apparmor_status.stdout == "0"
+    - not apparmor_status.changed
 
 - name: Disable mitigations
   ansible.builtin.replace:
@@ -38,7 +38,7 @@
     value: "off"
   when:
     - grub_result.stat.exists
-    - mitigations_status.stdout == "0"
+    - not mitigations_status.changed
 
 - name: Run grub-mkconfig
   ansible.builtin.command: update-grub

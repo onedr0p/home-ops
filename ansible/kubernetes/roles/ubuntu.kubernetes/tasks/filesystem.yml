@@ -9,6 +9,14 @@
 #       * soft nofile 97816
 #       session required pam_limits.so
 
+- name: Configure smartd
+  ansible.builtin.copy:
+    dest: /etc/smartd.conf
+    mode: 0644
+    content: |
+      DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40
+  notify: Restart smartd
+
 - name: Increase max_user_watches
   ansible.posix.sysctl:
     name: fs.inotify.max_user_watches
