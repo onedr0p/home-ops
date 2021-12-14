@@ -10,13 +10,19 @@
       APT::Get::Install-Recommends "false";
       APT::Get::Install-Suggests "false";
 
+- name: Add apt repositories
+  ansible.builtin.apt_repository:
+    repo: "{{ item }}"
+    update_cache: true
+  loop: "{{ apt_repositories }}"
+  when:
+    - apt_repositories is defined
+    - apt_repositories is iterable
+    - apt_repositories | length > 0
+
 - name: Upgrade all system packages
   ansible.builtin.apt:
     upgrade: full
-    update_cache: true
-    cache_valid_time: 3600
-    autoclean: true
-    autoremove: true
   register: apt_upgrade
   retries: 5
   until: apt_upgrade is success
@@ -25,10 +31,6 @@
   ansible.builtin.apt:
     name: "{{ apt_install_packages }}"
     install_recommends: false
-    update_cache: true
-    cache_valid_time: 3600
-    autoclean: true
-    autoremove: true
   register: apt_install_common
   retries: 5
   until: apt_install_common is success
@@ -77,11 +79,8 @@
         - "/var/lib/snapd"
         - "/var/cache/snapd"
         - "/usr/lib/snapd"
-        - "/etc/cloud"
-        - "/var/lib/cloud"
       when:
         - "'snapd' in apt_remove_packages"
-        - "'cloud-init' in apt_remove_packages"
   when:
     - apt_remove_packages is defined
     - apt_remove_packages is iterable
