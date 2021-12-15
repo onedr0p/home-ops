@@ -1,0 +1,47 @@
+---
+version: "3.8"
+
+services:
+  time-machine:
+    image: docker.io/mbentley/timemachine:smb-20211214
+    restart: unless-stopped
+    container_name: time-machine
+    environment:
+      PASSWORD: "{{ TIMEMACHINE_PASSWORD }}"
+      TM_UID: 568
+      TM_GID: 568
+    network_mode: host
+    volumes:
+      - time-machine-data:/opt/timemachine
+      - time-machine-var-lib-smb:/var/lib/samba
+      - time-machine-var-cache-smb:/var/cache/samba
+      - time-machine-run-smb:/run/samba
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - diun.enable=true
+
+volumes:
+  time-machine-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "{{ data_dir }}/time-machine/data"
+  time-machine-var-lib-smb:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "{{ data_dir }}/time-machine/var-lib-smb"
+  time-machine-var-cache-smb:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "{{ data_dir }}/time-machine/var-cache-smb"
+  time-machine-run-smb:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "{{ data_dir }}/time-machine/run-smb"
