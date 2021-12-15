@@ -21,8 +21,6 @@ spec:
       repository: ghcr.io/k8s-at-home/loki
     ingress:
       enabled: true
-      annotations:
-        kubernetes.io/ingress.class: "nginx"
       hosts:
         - host: "loki.${SECRET_DOMAIN}"
           paths:
@@ -195,6 +193,9 @@ spec:
               kind: Ingress
               name: loki
             patch:
+              - op: add
+                path: /spec/ingressClassName
+                value: nginx
               - op: replace
                 path: /apiVersion
                 value: networking.k8s.io/v1
