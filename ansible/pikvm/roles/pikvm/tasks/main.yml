@@ -5,6 +5,13 @@
       community.general.pacman:
         update_cache: true
         upgrade: true
+    - name: Install packages
+      community.general.pacman:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - "cronie"
+        - "ffmpeg"
     - name: Set timezone
       community.general.timezone:
         name: "{{ timezone | default('America/New_York') }}"
@@ -27,7 +34,7 @@
       ansible.builtin.command: /usr/local/bin/ro
 
 - block:
-    - name: Copy kvm override
+    - name: Create kvmd override configuration
       ansible.builtin.template:
         src: override.yaml.j2
         dest: "/etc/kvmd/override.yaml"
@@ -36,3 +43,64 @@
     - name: Mount read-only
       ansible.builtin.command: /usr/local/bin/ro
   notify: Restart kvmd
+
+- block:
+    - name: Determine if acme.sh is installed
+      ansible.builtin.stat:
+        path: "~/.acme.sh/acme.sh"
+      register: acme_installed
+    - name: Git clone acme.sh
+      ansible.builtin.git:
+        repo: https://github.com/acmesh-official/acme.sh
+        version: 3.0.1
+        dest: /tmp/acme.sh
+      when: not acme_installed.stat.exists
+    - name: Install acme.sh
+      ansible.builtin.command: >-
+        /tmp/acme.sh --install -m {{ CLOUDFLARE_EMAIL }}
+      args:
+        creates: "~/.acme.sh/acme.sh"
+    - name: Upgrade acme.sh
+      ansible.builtin.command: /root/.acme.sh/acme.sh --upgrade
+      register: upgrade_result
+      changed_when: upgrade_result.rc == 0 and "Upgrade success" not in upgrade_result.stdout
+    - name: Issue certificate
+      ansible.builtin.command: >-
+        /root/.acme.sh/acme.sh --issue --dns dns_cf
+        -d {{ pikvm_domain }}
+        --pre-hook "tar -zcvf /root/.acme.sh/DefaultSSL_`date +%Y-%m-%d_%H.%M.%S`.tgz /etc/kvmd/nginx/ssl/server.*"
+        --fullchainpath /etc/kvmd/nginx/ssl/server.crt
+        --keypath /etc/kvmd/nginx/ssl/server.key
+        --reloadcmd "systemctl restart kvmd-nginx.service"
+      environment:
+        CF_Email: "{{ CLOUDFLARE_EMAIL }}"
+        CF_Key: "{{ CLOUDFLARE_APIKEY }}"
+      register: issue_result
+      changed_when: issue_result.rc == 0 and "Cert success" in issue_result.stdout
+      failed_when: issue_result.rc != 0 and "Domains not changed" not in issue_result.stdout
+    - name: Create cloudflare email environment variable in crontab
+      ansible.builtin.cron:
+        name: CF_Email
+        env: true
+        job: "{{ CLOUDFLARE_EMAIL }}"
+    - name: Create cloudflare apikey environment variable in crontab
+      ansible.builtin.cron:
+        name: CF_Key
+        env: true
+        job: "{{ CLOUDFLARE_APIKEY }}"
+    - name: Create certificate renewal job in crontab
+      ansible.builtin.cron:
+        name: "renew cronjob"
+        minute: 0
+        hour: 0
+        job: >-
+          /root/.acme.sh/acme.sh --renew
+          -d {{ pikvm_domain }}
+          --pre-hook "rw"
+          --fullchainpath /etc/kvmd/nginx/ssl/server.crt
+          --keypath /etc/kvmd/nginx/ssl/server.key
+          --reloadcmd "systemctl restart kvmd-nginx.service"
+          --post-hook "ro"
+  rescue:
+    - name: Mount read-only
+      ansible.builtin.command: /usr/local/bin/ro
