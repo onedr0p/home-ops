@@ -6,11 +6,11 @@ metadata:
   namespace: flux-system
   annotations:
     external-dns/is-public: "true"
-    external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_DOMAIN}"
+    external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_PUBLIC_DOMAIN}"
 spec:
   ingressClassName: "nginx"
   rules:
-    - host: "flux-webhook.${SECRET_DOMAIN}"
+    - host: "flux-webhook.${SECRET_PUBLIC_DOMAIN}"
       http:
         paths:
           - path: /
@@ -22,4 +22,4 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - "flux-webhook.${SECRET_DOMAIN}"
+        - "flux-webhook.${SECRET_PUBLIC_DOMAIN}"

@@ -22,19 +22,19 @@ spec:
     ingress:
       enabled: true
       hosts:
-        - host: "loki.${SECRET_DOMAIN}"
+        - host: "loki.${SECRET_PUBLIC_DOMAIN}"
           paths:
             - /
       tls:
         - hosts:
-            - "loki.${SECRET_DOMAIN}"
+            - "loki.${SECRET_PUBLIC_DOMAIN}"
     serviceMonitor:
       enabled: true
     config:
       storage_config:
         aws:
           bucketnames: loki
-          endpoint: s3.turbo.ac
+          endpoint: "s3.${SECRET_PRIVATE_DOMAIN}"
           access_key_id: "${SECRET_MINIO_ACCESS_KEY}"
           secret_access_key: "${SECRET_MINIO_SECRET_KEY}"
           s3forcepathstyle: true
