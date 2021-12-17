@@ -13,23 +13,17 @@
     dest: /usr/local/etc/rclone/rclone.conf
     mode: 0755
 
-- name: Get the latest Rclone tag
-  ansible.builtin.shell:
-    cmd: curl --silent 'https://api.github.com/repos/rclone/rclone/releases/latest' |  grep '"tag_name":' | cut -d'"' -f4
-  register: rclone_latest
-
 - name: Remove Rclone install files
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
-    - "/tmp/rclone-{{ rclone_latest.stdout }}-freebsd-amd64"
+    - "/tmp/rclone-{{ rclone_version }}-freebsd-amd64"
     - /tmp/rclone-freebsd-amd64.zip
-
 
 - name: Download Rclone
   ansible.builtin.get_url:
-    url: "https://github.com/rclone/rclone/releases/download/{{ rclone_latest.stdout }}/rclone-{{ rclone_latest.stdout }}-freebsd-amd64.zip"
+    url: "https://github.com/rclone/rclone/releases/download/{{ rclone_version }}/rclone-{{ rclone_version }}-freebsd-amd64.zip"
     dest: /tmp/rclone-freebsd-amd64.zip
 
 - name: Unzip Rclone
@@ -38,7 +32,7 @@
 
 - name: Install Rclone
   ansible.builtin.copy:
-    src: "/tmp/rclone-{{ rclone_latest.stdout }}-freebsd-amd64/rclone"
+    src: "/tmp/rclone-{{ rclone_version }}-freebsd-amd64/rclone"
     dest: /usr/local/sbin/rclone
     mode: 0755
     remote_src: true
