@@ -1,14 +1,21 @@
 ---
-# SECRET_DOMAIN: [string]
-# SECRET_POSTGRESQL_USERNAME: [string]
-# SECRET_POSTGRESQL_PASSWORD: [string]
-# SECRET_PGADMIN_USERNAME: [string]
-# SECRET_PGADMIN_PASSWORD: [string]
-# SECRET_CLOUDFLARE_EMAIL: [string]
-# SECRET_CLOUDFLARE_APIKEY: [string]
-# SECRET_MINIO_ROOT_PASSWORD: [string]
-# SECRET_MINIO_ROOT_USER: [string]
-# SECRET_TIMEMACHINE_PASSWORD: [string]
+#
+# SECRET* vars are encrypted with sops
+#
 
-# apps_dir: [string]
-# data_dir: [string]
+containers_base_dir: /tycho/System/Containers
+
+docker_edition: ce
+docker_package: "docker-{{ docker_edition }}"
+docker_users: "{{ ansible_user }}"
+docker_install_compose: true
+# TODO: Renovate docker-compose version in storage ansible
+docker_compose_version: "v2.2.2"
+docker_daemon_options:
+  log-driver: journald
+
+pip_package: python3-pip
+# TODO: Renovate pip packages in storage ansible
+pip_install_packages:
+  - docker==5.0.3
+  - docker-compose==1.29.2

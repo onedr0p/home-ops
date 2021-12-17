@@ -1,0 +1,43 @@
+---
+- block:
+    - name: Upgrade system
+      community.general.pacman:
+        update_cache: true
+        upgrade: true
+    - name: Install packages
+      community.general.pacman:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - ffmpeg
+    - name: Set timezone
+      community.general.timezone:
+        name: "{{ os_timezone | default('America/New_York') }}"
+    - name: Set hostname to inventory hostname
+      ansible.builtin.hostname:
+        name: "{{ inventory_hostname }}"
+      when:
+        - ansible_hostname != inventory_hostname
+    - name: Add additional user SSH public keys
+      ansible.posix.authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ item }}"
+      loop: "{{ os_ssh_authorized_keys }}"
+      when:
+        - os_ssh_authorized_keys is defined
+        - os_ssh_authorized_keys is iterable
+        - os_ssh_authorized_keys | length > 0
+  rescue:
+    - name: Mount read-only
+      ansible.builtin.command: /usr/local/bin/ro
+
+- block:
+    - name: Create kvmd override configuration
+      ansible.builtin.template:
+        src: override.yaml.j2
+        dest: "/etc/kvmd/override.yaml"
+        mode: 0644
+  rescue:
+    - name: Mount read-only
+      ansible.builtin.command: /usr/local/bin/ro
+  notify: Restart kvmd

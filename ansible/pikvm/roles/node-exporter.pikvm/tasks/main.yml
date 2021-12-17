@@ -1,0 +1,34 @@
+---
+- name: Check current node-exporter version
+  ansible.builtin.command: "/usr/local/bin/node-exporter --version"
+  failed_when: false
+  changed_when: false
+  register: node_exporter_version_check
+
+- name: Download and unarchive node-exporter into temporary location
+  ansible.builtin.unarchive:
+    src: "{{ node_exporter_download_url }}"
+    dest: /tmp
+    remote_src: true
+    mode: 0755
+  when: >
+    node_exporter_version_check.stdout is not defined
+    or node_exporter_version not in node_exporter_version_check.stdout
+  register: node_exporter_download_check
+
+- name: Move node-exporter binary into place
+  ansible.builtin.copy:
+    src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-{{ node_exporter_arch }}/node_exporter"
+    dest: /usr/local/bin/node-exporter
+    mode: 0755
+    remote_src: true
+  notify: Restart node-exporter
+  when: node_exporter_download_check is defined
+
+- block:
+    - name: Create node-exporter systemd file
+      ansible.builtin.template:
+        src: node-exporter.service.j2
+        dest: /etc/systemd/system/node-exporter.service
+        mode: 0644
+  notify: Restart node-exporter

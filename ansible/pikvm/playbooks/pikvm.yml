@@ -10,12 +10,17 @@
         seconds: 5
     - name: Mount read-write
       ansible.builtin.command: /usr/local/bin/rw
+      tags: always
   roles:
-    - role: pikvm
-      tags: pikvm
-    - role: geerlingguy.node_exporter
-      tags:
-        - node-exporter
+    - role: os.pikvm
+      tags: os
+    - role: acme.pikvm
+      tags: acme
+    - role: node-exporter.pikvm
+      tags: node-exporter
+    - role: promtail.pikvm
+      tags: promtail
   post_tasks:
     - name: Mount read-only
       ansible.builtin.command: /usr/local/bin/ro
+      tags: always

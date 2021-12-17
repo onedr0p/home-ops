@@ -1,50 +1,12 @@
 ---
 
 - block:
-    - name: Upgrade system
-      community.general.pacman:
-        update_cache: true
-        upgrade: true
-    - name: Install packages
+    - name: Install cronie
       community.general.pacman:
         name: "{{ item }}"
         state: present
       loop:
-        - "cronie"
-        - "ffmpeg"
-    - name: Set timezone
-      community.general.timezone:
-        name: "{{ timezone | default('America/New_York') }}"
-    - name: Set hostname to inventory hostname
-      ansible.builtin.hostname:
-        name: "{{ inventory_hostname }}"
-      when:
-        - ansible_hostname != inventory_hostname
-    - name: Add additional user SSH public keys
-      ansible.posix.authorized_key:
-        user: "{{ ansible_user }}"
-        key: "{{ item }}"
-      loop: "{{ ssh_authorized_keys }}"
-      when:
-        - ssh_authorized_keys is defined
-        - ssh_authorized_keys is iterable
-        - ssh_authorized_keys | length > 0
-  rescue:
-    - name: Mount read-only
-      ansible.builtin.command: /usr/local/bin/ro
-
-- block:
-    - name: Create kvmd override configuration
-      ansible.builtin.template:
-        src: override.yaml.j2
-        dest: "/etc/kvmd/override.yaml"
-        mode: 0644
-  rescue:
-    - name: Mount read-only
-      ansible.builtin.command: /usr/local/bin/ro
-  notify: Restart kvmd
-
-- block:
+        - cronie
     - name: Determine if acme.sh is installed
       ansible.builtin.stat:
         path: "~/.acme.sh/acme.sh"
@@ -57,7 +19,7 @@
       when: not acme_installed.stat.exists
     - name: Install acme.sh
       ansible.builtin.command: >-
-        /tmp/acme.sh --install -m {{ CLOUDFLARE_EMAIL }}
+        /tmp/acme.sh --install -m {{ SECRET_CLOUDFLARE_EMAIL }}
       args:
         creates: "~/.acme.sh/acme.sh"
     - name: Upgrade acme.sh
@@ -67,14 +29,14 @@
     - name: Issue certificate
       ansible.builtin.command: >-
         /root/.acme.sh/acme.sh --issue --dns dns_cf
-        -d {{ pikvm_domain }}
+        -d {{ inventory_hostname }}.{{ SECRET_PRIVATE_DOMAIN }}
         --pre-hook "tar -zcvf /root/.acme.sh/DefaultSSL_`date +%Y-%m-%d_%H.%M.%S`.tgz /etc/kvmd/nginx/ssl/server.*"
         --fullchainpath /etc/kvmd/nginx/ssl/server.crt
         --keypath /etc/kvmd/nginx/ssl/server.key
         --reloadcmd "systemctl restart kvmd-nginx.service"
       environment:
-        CF_Email: "{{ CLOUDFLARE_EMAIL }}"
-        CF_Key: "{{ CLOUDFLARE_APIKEY }}"
+        CF_Email: "{{ SECRET_CLOUDFLARE_EMAIL }}"
+        CF_Key: "{{ SECRET_CLOUDFLARE_APIKEY }}"
       register: issue_result
       changed_when: issue_result.rc == 0 and "Cert success" in issue_result.stdout
       failed_when: issue_result.rc != 0 and "Domains not changed" not in issue_result.stdout
@@ -82,12 +44,12 @@
       ansible.builtin.cron:
         name: CF_Email
         env: true
-        job: "{{ CLOUDFLARE_EMAIL }}"
+        job: "{{ SECRET_CLOUDFLARE_EMAIL }}"
     - name: Create cloudflare apikey environment variable in crontab
       ansible.builtin.cron:
         name: CF_Key
         env: true
-        job: "{{ CLOUDFLARE_APIKEY }}"
+        job: "{{ SECRET_CLOUDFLARE_APIKEY }}"
     - name: Create certificate renewal job in crontab
       ansible.builtin.cron:
         name: "renew cronjob"
@@ -95,7 +57,7 @@
         hour: 0
         job: >-
           /root/.acme.sh/acme.sh --renew
-          -d {{ pikvm_domain }}
+          -d {{ inventory_hostname }}.{{ SECRET_PRIVATE_DOMAIN }}
           --pre-hook "rw"
           --fullchainpath /etc/kvmd/nginx/ssl/server.crt
           --keypath /etc/kvmd/nginx/ssl/server.key
