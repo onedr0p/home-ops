@@ -1,7 +1,7 @@
 ---
 - name: Check if cluster is installed
   ansible.builtin.stat:
-    path: "/etc/rancher/k3s/config.yaml"
+    path: /etc/rancher/k3s/config.yaml
   register: k3s_check_installed
   check_mode: false
 
@@ -19,8 +19,8 @@
 - name: Copy kubeconfig locally to /tmp
   run_once: true
   ansible.builtin.fetch:
-    src: "/etc/rancher/k3s/k3s.yaml"
-    dest: "/tmp/kubeconfig"
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: /tmp/kubeconfig
     flat: true
   when:
     - k3s_control_node is defined
@@ -31,8 +31,8 @@
   become: false
   run_once: true
   ansible.builtin.replace:
-    path: "/tmp/kubeconfig"
-    regexp: "https://127.0.0.1:6443"
+    path: /tmp/kubeconfig
+    regexp: https://127.0.0.1:6443
     replace: "https://{{ k3s_registration_address }}:6443"
 
 - name: Remove deployed manifest templates
@@ -54,54 +54,6 @@
     - k3s_server_manifests_urls | length > 0
 
 - name: Generate kubeconfig for home-dns on k8s-0
-  block:
-    - name: Fetch service account for home-dns
-      ansible.builtin.set_fact:
-        dns_service_account_raw: "{{ lookup('community.kubernetes.k8s', namespace='kube-system', kind='ServiceAccount', resource_name='home-dns') }}"
-
-    - name: Extract service account token from service account
-      ansible.builtin.set_fact:
-        dns_service_account_token: "{{ dns_service_account_raw | json_query('secrets[*].name | [0]') }}"
-
-    - name: Fetch CA
-      ansible.builtin.set_fact:
-        dns_certificate_authority_raw: "{{ lookup('community.kubernetes.k8s', namespace='kube-system', kind='Secret', resource_name=dns_service_account_token) }}"
-
-    - name: Extract CA Cert from CA
-      ansible.builtin.set_fact:
-        dns_certificate_authority: '{{ dns_certificate_authority_raw | json_query(''data."ca.crt"'') }}'
-
-    - name: Extract CA Token from CA
-      ansible.builtin.set_fact:
-        dns_certificate_authority_token: "{{ dns_certificate_authority_raw | json_query('data.token') | b64decode }}"
-
-    - name: Create kubeconfig
-      ansible.builtin.copy:
-        dest: "/tmp/kubeconfig-homedns"
-        content: |
-          ---
-          apiVersion: v1
-          kind: Config
-          clusters:
-          - name: home
-            cluster:
-              certificate-authority-data: "{{ dns_certificate_authority }}"
-              server: "https://{{ k3s_registration_address }}:6443"
-          contexts:
-          - name: home
-            context:
-              cluster: home
-              user: home-dns
-          users:
-          - name: home-dns
-            user:
-              token: {{ dns_certificate_authority_token }}
-          current-context: home
-        mode: 0755
-
-    - name: Copy kubeconfig to /tmp
-      ansible.builtin.fetch:
-        src: "/tmp/kubeconfig-homedns"
-        dest: "/tmp/kubeconfig-homedns"
-        flat: true
+  include_role:
+    name: dns.kubernetes
   when: "'k8s-0' in inventory_hostname"
