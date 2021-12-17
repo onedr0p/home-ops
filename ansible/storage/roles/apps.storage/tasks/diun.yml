@@ -4,14 +4,14 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - "{{ apps_dir }}/diun"
-    - "{{ data_dir }}/diun"
+    - "{{ containers_base_dir }}/apps/diun"
+    - "{{ containers_base_dir }}/data/diun"
 
 - block:
     - name: Copy diun docker compose file
       ansible.builtin.template:
         src: diun/docker-compose.yml.j2
-        dest: "{{ apps_dir }}/diun/docker-compose.yml"
+        dest: "{{ containers_base_dir }}/apps/diun/docker-compose.yml"
         mode: 0755
     - name: Create diun systemd file
       ansible.builtin.template:

@@ -4,19 +4,19 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - "{{ apps_dir }}/vault"
-    - "{{ data_dir }}/vault"
+    - "{{ containers_base_dir }}/apps/vault"
+    - "{{ containers_base_dir }}/data/vault"
 
 - block:
     - name: Copy vault docker compose file
       ansible.builtin.template:
         src: vault/docker-compose.yml.j2
-        dest: "{{ apps_dir }}/vault/docker-compose.yml"
+        dest: "{{ containers_base_dir }}/apps/vault/docker-compose.yml"
         mode: 0755
     - name: Copy vault config
       ansible.builtin.template:
         src: vault/vault.json.j2
-        dest: "{{ apps_dir }}/vault/vault.json"
+        dest: "{{ containers_base_dir }}/apps/vault/vault.json"
         mode: 0755
     - name: Create vault systemd file
       ansible.builtin.template:

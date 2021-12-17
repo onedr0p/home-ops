@@ -4,18 +4,18 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - "{{ apps_dir }}/time-machine"
-    - "{{ data_dir }}/time-machine"
-    - "{{ data_dir }}/time-machine/data"
-    - "{{ data_dir }}/time-machine/var-lib-smb"
-    - "{{ data_dir }}/time-machine/var-cache-smb"
-    - "{{ data_dir }}/time-machine/run-smb"
+    - "{{ containers_base_dir }}/apps/time-machine"
+    - "{{ containers_base_dir }}/data/time-machine"
+    - "{{ containers_base_dir }}/data/time-machine/data"
+    - "{{ containers_base_dir }}/data/time-machine/var-lib-smb"
+    - "{{ containers_base_dir }}/data/time-machine/var-cache-smb"
+    - "{{ containers_base_dir }}/data/time-machine/run-smb"
 
 - block:
     - name: Copy time-machine docker compose file
       ansible.builtin.template:
         src: time-machine/docker-compose.yml.j2
-        dest: "{{ apps_dir }}/time-machine/docker-compose.yml"
+        dest: "{{ containers_base_dir }}/apps/time-machine/docker-compose.yml"
         mode: 0755
     - name: Create time-machine systemd file
       ansible.builtin.template:

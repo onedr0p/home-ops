@@ -4,19 +4,19 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - "{{ apps_dir }}/promtail"
-    - "{{ data_dir }}/promtail"
+    - "{{ containers_base_dir }}/apps/promtail"
+    - "{{ containers_base_dir }}/data/promtail"
 
 - block:
     - name: Copy promtail docker compose file
       ansible.builtin.template:
         src: promtail/docker-compose.yml.j2
-        dest: "{{ apps_dir }}/promtail/docker-compose.yml"
+        dest: "{{ containers_base_dir }}/apps/promtail/docker-compose.yml"
         mode: 0755
     - name: Copy promtail config
       ansible.builtin.template:
         src: promtail/promtail.yaml.j2
-        dest: "{{ apps_dir }}/promtail/promtail.yaml"
+        dest: "{{ containers_base_dir }}/apps/promtail/promtail.yaml"
         mode: 0755
     - name: Create promtail systemd file
       ansible.builtin.template:

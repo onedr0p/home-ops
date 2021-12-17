@@ -7,8 +7,8 @@ services:
     restart: unless-stopped
     container_name: minio
     environment:
-      MINIO_ROOT_USER: "{{ MINIO_ROOT_USER }}"
-      MINIO_ROOT_PASSWORD: "{{ MINIO_ROOT_PASSWORD }}"
+      MINIO_ROOT_USER: "{{ SECRET_MINIO_ROOT_USER }}"
+      MINIO_ROOT_PASSWORD: "{{ SECRET_MINIO_ROOT_PASSWORD }}"
       MINIO_PROMETHEUS_URL: "https://prometheus.{{ SECRET_DOMAIN }}"
       MINIO_PROMETHEUS_AUTH_TYPE: public
       MINIO_UPDATE: "off"
@@ -47,4 +47,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: "{{ data_dir }}/minio"
+      device: "{{ containers_base_dir }}/data/minio"

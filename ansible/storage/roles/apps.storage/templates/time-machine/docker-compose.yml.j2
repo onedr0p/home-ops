@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     container_name: time-machine
     environment:
-      PASSWORD: "{{ TIMEMACHINE_PASSWORD }}"
+      PASSWORD: "{{ SECRET_TIMEMACHINE_PASSWORD }}"
       TM_UID: 568
       TM_GID: 568
     network_mode: host
@@ -26,22 +26,22 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: "{{ data_dir }}/time-machine/data"
+      device: "{{ containers_base_dir }}/data/time-machine/data"
   time-machine-var-lib-smb:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: "{{ data_dir }}/time-machine/var-lib-smb"
+      device: "{{ containers_base_dir }}/data/time-machine/var-lib-smb"
   time-machine-var-cache-smb:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: "{{ data_dir }}/time-machine/var-cache-smb"
+      device: "{{ containers_base_dir }}/data/time-machine/var-cache-smb"
   time-machine-run-smb:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: "{{ data_dir }}/time-machine/run-smb"
+      device: "{{ containers_base_dir }}/data/time-machine/run-smb"

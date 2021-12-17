@@ -16,7 +16,7 @@ services:
     ports:
       - 8200:8200
     volumes:
-      - "{{ apps_dir }}/vault/vault.json:/vault/config/vault.json"
+      - "{{ containers_base_dir }}/apps/vault/vault.json:/vault/config/vault.json"
       - vault-policies:/vault/policies
       - vault-data:/vault/data
     labels:
@@ -34,11 +34,11 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: "{{ data_dir }}/vault/policies"
+      device: "{{ containers_base_dir }}/data/vault/policies"
 
   vault-data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: "{{ data_dir }}/vault/data"
+      device: "{{ containers_base_dir }}/data/vault/data"

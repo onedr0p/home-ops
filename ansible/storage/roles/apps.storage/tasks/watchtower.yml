@@ -4,13 +4,13 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - "{{ apps_dir }}/watchtower"
+    - "{{ containers_base_dir }}/apps/watchtower"
 
 - block:
     - name: Copy watchtower docker compose file
       ansible.builtin.template:
         src: watchtower/docker-compose.yml.j2
-        dest: "{{ apps_dir }}/watchtower/docker-compose.yml"
+        dest: "{{ containers_base_dir }}/apps/watchtower/docker-compose.yml"
         mode: 0755
     - name: Create watchtower systemd file
       ansible.builtin.template:

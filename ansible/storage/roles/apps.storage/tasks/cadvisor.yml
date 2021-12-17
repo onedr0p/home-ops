@@ -4,13 +4,13 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - "{{ apps_dir }}/cadvisor"
+    - "{{ containers_base_dir }}/apps/cadvisor"
 
 - block:
     - name: Copy cadvisor docker compose file
       ansible.builtin.template:
         src: cadvisor/docker-compose.yml.j2
-        dest: "{{ apps_dir }}/cadvisor/docker-compose.yml"
+        dest: "{{ containers_base_dir }}/apps/cadvisor/docker-compose.yml"
         mode: 0755
     - name: Create cadvisor systemd file
       ansible.builtin.template:

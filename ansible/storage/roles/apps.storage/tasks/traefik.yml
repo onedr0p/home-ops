@@ -4,15 +4,15 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - "{{ apps_dir }}/traefik"
-    - "{{ data_dir }}/traefik"
-    - "{{ data_dir }}/traefik/certs"
+    - "{{ containers_base_dir }}/apps/traefik"
+    - "{{ containers_base_dir }}/data/traefik"
+    - "{{ containers_base_dir }}/data/traefik/certs"
 
 - block:
     - name: Copy traefik docker compose file
       ansible.builtin.template:
         src: traefik/docker-compose.yml.j2
-        dest: "{{ apps_dir }}/traefik/docker-compose.yml"
+        dest: "{{ containers_base_dir }}/apps/traefik/docker-compose.yml"
         mode: 0755
     - name: Create traefik systemd file
       ansible.builtin.template:

@@ -7,8 +7,8 @@ services:
     restart: unless-stopped
     container_name: traefik
     environment:
-      CF_API_EMAIL: "{{ CLOUDFLARE_EMAIL }}"
-      CF_API_KEY: "{{ CLOUDFLARE_APIKEY }}"
+      CF_API_EMAIL: "{{ SECRET_CLOUDFLARE_EMAIL }}"
+      CF_API_KEY: "{{ SECRET_CLOUDFLARE_APIKEY }}"
     command:
       - --api=true
       - --api.dashboard=true
@@ -17,7 +17,7 @@ services:
       - --providers.docker.exposedbydefault=false
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.letsencrypt.acme.email={{ CLOUDFLARE_EMAIL }}
+      - --certificatesresolvers.letsencrypt.acme.email={{ SECRET_CLOUDFLARE_EMAIL }}
       - --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json
       - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
       - --certificatesResolvers.letsencrypt.acme.dnschallenge=true
@@ -45,4 +45,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: "{{ data_dir }}/traefik/certs"
+      device: "{{ containers_base_dir }}/data/traefik/certs"

@@ -24,11 +24,11 @@
   ansible.posix.authorized_key:
     user: "{{ ansible_user }}"
     key: "{{ item }}"
-  loop: "{{ ssh_authorized_keys }}"
+  loop: "{{ os_ssh_authorized_keys }}"
   when:
-    - ssh_authorized_keys is defined
-    - ssh_authorized_keys is iterable
-    - ssh_authorized_keys | length > 0
+    - os_ssh_authorized_keys is defined
+    - os_ssh_authorized_keys is iterable
+    - os_ssh_authorized_keys | length > 0
 
 - name: Check if hushlogin exists
   ansible.builtin.stat:

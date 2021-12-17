@@ -4,17 +4,17 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - "{{ apps_dir }}/postgresql"
-    - "{{ data_dir }}/postgresql"
-    - "{{ data_dir }}/postgresql/data"
-    - "{{ data_dir }}/postgresql/pgadmin"
-    - "{{ data_dir }}/postgresql/pgbackups"
+    - "{{ containers_base_dir }}/apps/postgresql"
+    - "{{ containers_base_dir }}/data/postgresql"
+    - "{{ containers_base_dir }}/data/postgresql/data"
+    - "{{ containers_base_dir }}/data/postgresql/pgadmin"
+    - "{{ containers_base_dir }}/data/postgresql/pgbackups"
 
 - block:
     - name: Copy postgresql docker compose file
       ansible.builtin.template:
         src: postgresql/docker-compose.yml.j2
-        dest: "{{ apps_dir }}/postgresql/docker-compose.yml"
+        dest: "{{ containers_base_dir }}/apps/postgresql/docker-compose.yml"
         mode: 0755
     - name: Create postgresql systemd file
       ansible.builtin.template:
