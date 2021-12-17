@@ -1,4 +1,13 @@
 ---
+
+- name: Install network tools
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    update_cache: true
+  loop:
+    - iputils-ping
+    - net-tools
+
 - name: Set hostname to inventory hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"

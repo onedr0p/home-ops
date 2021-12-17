@@ -1,4 +1,16 @@
 ---
+
+- name: Install network tools
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    update_cache: true
+  loop:
+    - arptables
+    - ebtables
+    - iputils-ping
+    - ipvsadm
+    - net-tools
+
 - name: Set hostname to inventory hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"

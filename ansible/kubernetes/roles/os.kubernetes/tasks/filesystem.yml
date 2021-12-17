@@ -1,13 +1,17 @@
 ---
-# - name: Update user open file limit
-#   ansible.builtin.blockinfile:
-#     path: /etc/security/limits.conf
-#     mode: 0644
-#     create: true
-#     block: |
-#       * hard nofile 97816
-#       * soft nofile 97816
-#       session required pam_limits.so
+- name: Install filesystem tools
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    update_cache: true
+  loop:
+    - gdisk
+    - hdparm
+    - lvm2
+    - nfs-common
+    - nvme-cli
+    - open-iscsi
+    - smartmontools
+    - socat
 
 - name: Configure smartd
   ansible.builtin.copy:
@@ -43,3 +47,13 @@
   loop:
     - swap
     - none
+
+# - name: Update user open file limit
+#   ansible.builtin.blockinfile:
+#     path: /etc/security/limits.conf
+#     mode: 0644
+#     create: true
+#     block: |
+#       * hard nofile 97816
+#       * soft nofile 97816
+#       session required pam_limits.so
