@@ -208,31 +208,31 @@ spec:
             honor_timestamps: true
             static_configs:
               - targets:
-                  - "${NAS_ADDR}:8005"
+                  - "expanse:8005"
           - job_name: coredns
             honor_timestamps: true
             static_configs:
               - targets:
-                  - "${OPNSENSE_ADDR}:9153"
+                  - "opnsense:9153"
           - job_name: minio
             honor_timestamps: true
             metrics_path: /minio/v2/metrics/cluster
             static_configs:
               - targets:
-                  - "${NAS_ADDR}:9000"
+                  - "expanse:9000"
           - job_name: node-exporter
             honor_timestamps: true
             static_configs:
               - targets:
-                  - "${OPNSENSE_ADDR}:9100"
-                  - "${NAS_ADDR}:9100"
-                  - "${VALETUDO_ADDR}:9100"
-                  - "${PIKVM_ADDR}:9100"
-          - job_name: postgresql-exporter
+                  - "opnsense:9100"
+                  - "expanse:9100"
+                  - "valetudu:9100"
+                  - "pikvm:9100"
+          - job_name: postgresql
             honor_timestamps: true
             static_configs:
               - targets:
-                  - "${NAS_ADDR}:9187"
+                  - "expanse:9187"
           - job_name: vault
             metrics_path: /v1/sys/metrics
             params:
@@ -240,4 +240,13 @@ spec:
                 - prometheus
             static_configs:
               - targets:
-                  - "${NAS_ADDR}:8200"
+                  - "expanse:8200"
+          - job_name: pikvm
+            metrics_path: /api/export/prometheus/metrics
+            basic_auth:
+              # ( ͡° ͜ʖ ͡°)
+              username: admin
+              password: admin
+            static_configs:
+              - targets:
+                  - "https://pikvm.${SECRET_PRIVATE_DOMAIN}"
