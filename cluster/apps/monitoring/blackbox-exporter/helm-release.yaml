@@ -20,6 +20,17 @@ spec:
     fullnameOverride: blackbox-exporter
     image:
       repository: quay.io/prometheus/blackbox-exporter
+    ingress:
+      enabled: true
+      className: nginx
+      hosts:
+        - host: "blockbox.${SECRET_PUBLIC_DOMAIN}"
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - "blockbox.${SECRET_PUBLIC_DOMAIN}"
     allowIcmp: true
     config:
       modules:
