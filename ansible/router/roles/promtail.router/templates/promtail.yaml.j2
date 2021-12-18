@@ -11,7 +11,7 @@ positions:
 scrape_configs:
   - job_name: system
     # Parse the system logs e.g.
-    # Jan 2 15:04:05 gateway.turbo.ac dhclient[13848]: DHCPREQUEST on igb0 to x.x.x.x port 67
+    # Jan 2 15:04:05 opnsense dhclient[13848]: DHCPREQUEST on igb0 to x.x.x.x port 67
     pipeline_stages:
       - regex:
           expression: '^(?P<timestamp>[A-Z]{1}[a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}) (?P<hostname>.*?) (?P<program>.*?)\[\d+\]: (?P<message>.*)$'
@@ -36,17 +36,17 @@ scrape_configs:
     pipeline_stages:
       - regex:
           # UDP
-          # Jan 2 15:04:05 gateway.turbo.ac filterlog[2657]: 90,,,91e2443ae2e8caf012f9a6e5a8a455c8,lo0,match,pass,in,4,0x4,,255,4660,0,none,17,udp,914,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,5353,5353,894
+          # Jan 2 15:04:05 opnsense filterlog[2657]: 90,,,91e2443ae2e8caf012f9a6e5a8a455c8,lo0,match,pass,in,4,0x4,,255,4660,0,none,17,udp,914,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,5353,5353,894
           expression: '^(?P<timestamp>[A-Z]{1}[a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}) (?P<hostname>.*?) (?P<program>.*?)\[\d+\]: (?P<message>(?P<rule>[^,]*),(?P<sub_rule>[^,]*),(?P<anchor>[^,]*),(?P<tracker>[^,]*),(?P<interface>[^,]*),(?P<reason>[^,]*),(?P<action>[^,]*),(?P<direction>[^,]*),(?P<ip_version>[^,]*),(?P<tos>[^,]*),(?P<ecn>[^,]*),(?P<ttl>[^,]*),(?P<id>[^,]*),(?P<offset>[^,]*),(?P<flags>[^,]*),(?P<protocol_id>[^,]*),(?P<protocol>udp),(?P<length>[^,]*),(?P<source_ip>[^,]*),(?P<destination_ip>[^,]*),(?P<source_port>[^,]*),(?P<destination_port>[^,]*),(?P<data_length>[^,]*))$'
       - regex:
           # TCP
-          # Jan 2 15:04:05 gateway.turbo.ac filterlog[2657]: 94,,,ef794793b2e3764b938bd04cba88e8a3,igb0,match,pass,out,4,0x0,,62,16800,0,DF,6,tcp,60,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,11715,443,0,S,3876953207,,64240,,mss;sackOK;TS;nop;wscale
+          # Jan 2 15:04:05 opnsense filterlog[2657]: 94,,,ef794793b2e3764b938bd04cba88e8a3,igb0,match,pass,out,4,0x0,,62,16800,0,DF,6,tcp,60,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,11715,443,0,S,3876953207,,64240,,mss;sackOK;TS;nop;wscale
           expression: '^(?P<timestamp>[A-Z]{1}[a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}) (?P<hostname>.*?) (?P<program>.*?)\[\d+\]: (?P<message>(?P<rule>[^,]*),(?P<sub_rule>[^,]*),(?P<anchor>[^,]*),(?P<tracker>[^,]*),(?P<interface>[^,]*),(?P<reason>[^,]*),(?P<action>[^,]*),(?P<direction>[^,]*),(?P<ip_version>[^,]*),(?P<tos>[^,]*),(?P<ecn>[^,]*),(?P<ttl>[^,]*),(?P<id>[^,]*),(?P<offset>[^,]*),(?P<flags>[^,]*),(?P<protocol_id>[^,]*),(?P<protocol>tcp),(?P<length>[^,]*),(?P<source_ip>[^,]*),(?P<destination_ip>[^,]*),(?P<source_port>[^,]*),(?P<destination_port>[^,]*),(?P<data_length>[^,]*),(?P<tcp_flags>[^,]*),(?P<sequence_number>[^,]*),(?P<ack_number>[^,]*),(?P<tcp_window>[^,]*),(?P<urg>[^,]*),(?P<tcp_options>[^,]*))$'
       - regex:
           # ICMP / IGMP / GRE
-          # Jan 2 15:04:05 gateway.turbo.ac filterlog[2657]: 94,,,ef794793b2e3764b938bd04cba88e8a3,igb0,match,pass,out,4,0x0,,63,44871,0,DF,1,icmp,84,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,datalength=64
-          # Jan 2 15:04:05 gateway.turbo.ac filterlog[2657]: 16,,,02f4bab031b57d1e30553ce08e0ec131,igb1_vlan150,match,block,in,4,0xc0,,1,15472,0,none,2,igmp,32,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,datalength=8
-          # Jan 2 15:04:05 gateway.turbo.ac filterlog[2657]: 16,,,02f4bab031b57d1e30553ce08e0ec131,igb0,match,block,in,4,0x0,,57,20354,0,DF,47,gre,564,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,datalength=544
+          # Jan 2 15:04:05 opnsense filterlog[2657]: 94,,,ef794793b2e3764b938bd04cba88e8a3,igb0,match,pass,out,4,0x0,,63,44871,0,DF,1,icmp,84,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,datalength=64
+          # Jan 2 15:04:05 opnsense filterlog[2657]: 16,,,02f4bab031b57d1e30553ce08e0ec131,igb1_vlan150,match,block,in,4,0xc0,,1,15472,0,none,2,igmp,32,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,datalength=8
+          # Jan 2 15:04:05 opnsense filterlog[2657]: 16,,,02f4bab031b57d1e30553ce08e0ec131,igb0,match,block,in,4,0x0,,57,20354,0,DF,47,gre,564,xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx,datalength=544
           expression: '^(?P<timestamp>[A-Z]{1}[a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}) (?P<hostname>.*?) (?P<program>.*?)\[\d+\]: (?P<message>(?P<rule>[^,]*),(?P<sub_rule>[^,]*),(?P<anchor>[^,]*),(?P<tracker>[^,]*),(?P<interface>[^,]*),(?P<reason>[^,]*),(?P<action>[^,]*),(?P<direction>[^,]*),(?P<ip_version>[^,]*),(?P<tos>[^,]*),(?P<ecn>[^,]*),(?P<ttl>[^,]*),(?P<id>[^,]*),(?P<offset>[^,]*),(?P<flags>[^,]*),(?P<protocol_id>[^,]*),(?P<protocol>icmp|igmp|gre),(?P<length>[^,]*),(?P<source_ip>[^,]*),(?P<destination_ip>[^,]*),(?P<data>[^,]*))$'
       # TODO: Parse this regex pattern
       # 15,,,91515c100a3692cb94121964974ce513,igb1_vlan50,match,block,in,6,0x00,0x00000,1,ip,0,32,fe80::1ae8:29ff:fe2d:7e21,ff02::1,INVALIDOPT
