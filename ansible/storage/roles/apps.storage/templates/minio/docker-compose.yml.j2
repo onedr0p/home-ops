@@ -4,8 +4,9 @@ version: "3.8"
 services:
   minio:
     image: quay.io/minio/minio:RELEASE.2021-12-10T23-03-39Z
-    restart: unless-stopped
     container_name: minio
+    restart: unless-stopped
+    network_mode: host
     environment:
       MINIO_ROOT_USER: "{{ SECRET_MINIO_ROOT_USER }}"
       MINIO_ROOT_PASSWORD: "{{ SECRET_MINIO_ROOT_PASSWORD }}"
@@ -17,9 +18,9 @@ services:
       MINIO_SERVER_URL: https://s3.turbo.ac
       TZ: America/New_York
     command: server /data --console-address ":9001"
-    ports:
-      - 9000:9000
-      - 9001:9001
+    # ports:
+    #   - 9000:9000
+    #   - 9001:9001
     volumes:
       - minio-data:/data
     healthcheck:

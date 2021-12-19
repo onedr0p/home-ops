@@ -4,8 +4,9 @@ version: "3.8"
 services:
   vault:
     image: docker.io/library/vault:1.9.1
-    restart: unless-stopped
     container_name: vault
+    restart: unless-stopped
+    network_mode: host
     cap_add:
       - IPC_LOCK
     environment:
@@ -13,8 +14,8 @@ services:
       VAULT_API_ADDR: http://0.0.0.0:8200
       VAULT_ADDRESS: http://0.0.0.0:8200
     command: vault server -config=/vault/config/vault.json
-    ports:
-      - 8200:8200
+    # ports:
+    #   - 8200:8200
     volumes:
       - "{{ containers_base_dir }}/apps/vault/vault.json:/vault/config/vault.json"
       - vault-policies:/vault/policies

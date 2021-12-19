@@ -4,8 +4,9 @@ version: "3.8"
 services:
   traefik:
     image: docker.io/library/traefik:v2.5.5
-    restart: unless-stopped
     container_name: traefik
+    restart: unless-stopped
+    network_mode: host
     environment:
       CF_API_EMAIL: "{{ SECRET_CLOUDFLARE_EMAIL }}"
       CF_API_KEY: "{{ SECRET_CLOUDFLARE_APIKEY }}"
@@ -25,7 +26,10 @@ services:
       - --certificatesResolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
       - --serverstransport.insecureskipverify=true
       - --log.level=INFO
-    network_mode: host
+    # ports:
+    #   - 80:80
+    #   - 443:443
+    #   - 8080:8080
     volumes:
       - traefik-certs:/certs
       - /var/run/docker.sock:/var/run/docker.sock:ro

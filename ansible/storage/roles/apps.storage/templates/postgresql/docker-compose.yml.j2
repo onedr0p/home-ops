@@ -4,39 +4,42 @@ version: "3.8"
 services:
   postgresql:
     image: docker.io/library/postgres:14.1
-    restart: unless-stopped
     container_name: postgresql
+    restart: unless-stopped
+    network_mode: host
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: "{{ SECRET_POSTGRESQL_USERNAME }}"
       POSTGRES_PASSWORD: "{{ SECRET_POSTGRESQL_PASSWORD }}"
       PGDATA: /var/lib/postgresql/data
-    ports:
-      - 5432:5432
+    # ports:
+    #   - 5432:5432
     volumes:
       - pg-data:/var/lib/postgresql/data
 
   postgresql-exporter:
     image: quay.io/prometheuscommunity/postgres-exporter:v0.10.0
-    restart: unless-stopped
     container_name: postgresql-exporter
+    restart: unless-stopped
+    network_mode: host
     environment:
       DATA_SOURCE_NAME: "postgresql://{{ SECRET_POSTGRESQL_USERNAME }}:{{ SECRET_POSTGRESQL_PASSWORD }}@pgsql-server:5432/postgres?sslmode=disable"
-    ports:
-      - 9187:9187
+    # ports:
+    #   - 9187:9187
     links:
       - postgresql:pgsql-server
 
   pgadmin:
     image: docker.io/dpage/pgadmin4:6.3
-    restart: unless-stopped
     container_name: postgresql-pgadmin
+    restart: unless-stopped
+    network_mode: host
     environment:
       PGADMIN_DEFAULT_EMAIL: "{{ SECRET_PGADMIN_USERNAME }}"
       PGADMIN_DEFAULT_PASSWORD: "{{ SECRET_PGADMIN_PASSWORD }}"
-      PGADMIN_LISTEN_PORT: 80
-    ports:
-      - 12080:80
+      PGADMIN_LISTEN_PORT: 12080
+    # ports:
+    #   - 12080:80
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     links:
@@ -48,12 +51,13 @@ services:
       - traefik.http.routers.pgadmin.rule=Host(`pgadmin.{{ SECRET_PRIVATE_DOMAIN }}`)
       - traefik.http.routers.pgadmin.entrypoints=websecure
       - traefik.http.routers.pgadmin.tls.certresolver=letsencrypt
-      - traefik.http.services.pgadmin.loadbalancer.server.port=80
+      - traefik.http.services.pgadmin.loadbalancer.server.port=12080
 
   pgbackups:
     image: docker.io/prodrigestivill/postgres-backup-local:14
-    restart: unless-stopped
     container_name: postgresql-pgbackups
+    restart: unless-stopped
+    network_mode: host
     environment:
       POSTGRES_HOST: pgsql-server
       POSTGRES_DB: postgres
@@ -64,7 +68,7 @@ services:
       BACKUP_KEEP_DAYS: 7
       BACKUP_KEEP_WEEKS: 0
       BACKUP_KEEP_MONTHS: 0
-      HEALTHCHECK_PORT: 8080
+      HEALTHCHECK_PORT: 9166
     volumes:
       - pgbackups-data:/backups
     links:
@@ -72,7 +76,7 @@ services:
     depends_on:
       - postgresql
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      test: ["CMD", "curl", "-f", "http://localhost:9166/"]
       interval: 30s
       timeout: 20s
       retries: 3

@@ -6,8 +6,11 @@ services:
     image: gcr.io/google-containers/cadvisor:v0.36.0
     container_name: cadvisor
     restart: unless-stopped
-    ports:
-      - 8005:8080
+    network_mode: host
+    command:
+      - -port=8005
+    # ports:
+    #   - 8005:8080
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
