@@ -10,6 +10,7 @@ services:
       MINIO_ROOT_USER: "{{ SECRET_MINIO_ROOT_USER }}"
       MINIO_ROOT_PASSWORD: "{{ SECRET_MINIO_ROOT_PASSWORD }}"
       MINIO_PROMETHEUS_URL: "https://prometheus.{{ SECRET_PUBLIC_DOMAIN }}"
+      MINIO_PROMETHEUS_JOB_ID: minio
       MINIO_PROMETHEUS_AUTH_TYPE: public
       MINIO_UPDATE: "off"
       MINIO_BROWSER_REDIRECT_URL: https://minio.{{ SECRET_PUBLIC_DOMAIN }}
@@ -27,8 +28,6 @@ services:
       timeout: 20s
       retries: 3
     labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - diun.enable=true
       - traefik.enable=true
       - traefik.http.routers.s3.service=s3
       - traefik.http.routers.s3.rule=Host(`s3.{{ SECRET_PRIVATE_DOMAIN }}`)

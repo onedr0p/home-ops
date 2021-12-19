@@ -15,9 +15,6 @@ services:
       - 5432:5432
     volumes:
       - pg-data:/var/lib/postgresql/data
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - diun.enable=true
 
   postgresql-exporter:
     image: quay.io/prometheuscommunity/postgres-exporter:v0.10.0
@@ -29,9 +26,6 @@ services:
       - 9187:9187
     links:
       - postgresql:pgsql-server
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - diun.enable=true
 
   pgadmin:
     image: docker.io/dpage/pgadmin4:6.3
@@ -50,13 +44,11 @@ services:
     depends_on:
       - postgresql
     labels:
-      - com.centurylinklabs.watchtower.enable=true
       - traefik.enable=true
       - traefik.http.routers.pgadmin.rule=Host(`pgadmin.{{ SECRET_PRIVATE_DOMAIN }}`)
       - traefik.http.routers.pgadmin.entrypoints=websecure
       - traefik.http.routers.pgadmin.tls.certresolver=letsencrypt
       - traefik.http.services.pgadmin.loadbalancer.server.port=80
-      - diun.enable=true
 
   pgbackups:
     image: docker.io/prodrigestivill/postgres-backup-local:14
@@ -84,9 +76,6 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - diun.enable=true
 
 volumes:
   pg-data:
