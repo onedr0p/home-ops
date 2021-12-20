@@ -31,6 +31,15 @@ spec:
           - hosts:
               - "rook.${SECRET_PUBLIC_DOMAIN}"
     cephClusterSpec:
+      placement:
+        mon:
+          tolerations:
+            - effect: NoSchedule
+              operator: Exists
+        mgr:
+          tolerations:
+            - effect: NoSchedule
+              operator: Exists
       crashCollector:
         disable: false
       mgr:
