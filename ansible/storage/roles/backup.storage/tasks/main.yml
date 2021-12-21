@@ -1,0 +1,61 @@
+---
+
+- name: Create default directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ containers_base_dir }}/apps"
+    - "{{ containers_base_dir }}/apps/rclone"
+  tags:
+    - always
+
+- name: Create rclone config
+  ansible.builtin.template:
+    src: rclone.conf.j2
+    dest: "{{ containers_base_dir }}/apps/rclone/rclone.conf"
+    mode: 0755
+  tags:
+    - always
+
+- import_tasks: music.yml
+  tags:
+    - music
+
+# - name: Install rclone
+#   ansible.builtin.apt:
+#     name: "{{ item }}"
+#     update_cache: true
+#   loop:
+#     - rclone
+
+# - name: Create rclone user directory
+#   ansible.builtin.file:
+#     path: "{{ item }}"
+#     state: directory
+#   loop:
+#     - "{{ ansible_user }}/.config/rclone"
+
+# - name: Copy rclone config to users home directory
+#   ansible.builtin.template:
+#     src: rclone.conf.j2
+#     dest: "{{ ansible_user }}/.config/rclone/rclone.conf"
+#     mode: 0755
+
+# - name: Create music-backup cronjob
+#   ansible.builtin.cron:
+#     name: "music-backup"
+#     special_time: "daily"
+#     job: >-
+#       rclone -v
+#       --config {{ ansible_user }}/.config/rclone/rclone.conf
+#       sync
+#       --ignore-errors
+#       --fast-list
+#       --b2-hard-delete
+#       --transfers 20
+#       --checkers 20
+#       --bwlimit 25M
+#       /tycho/Media/Library/Music
+#       b2:music-rcUFz3wc/
+#       && curl -fsS -m 10 --retry 5 -o /dev/null {{ SECRET_UPTIMEROBOT_HEARTBEAT_MUSIC_B2 }}

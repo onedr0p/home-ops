@@ -8,13 +8,13 @@
     - "{{ containers_base_dir }}/data/nexus"
 
 - block:
-    - name: Copy nexus docker compose file
+    - name: Create nexus docker compose file
       ansible.builtin.template:
         src: nexus/docker-compose.yml.j2
         dest: "{{ containers_base_dir }}/apps/nexus/docker-compose.yml"
         mode: 0755
 
-    - name: Create nexus systemd file
+    - name: Create nexus systemd service file
       ansible.builtin.template:
         src: "docker-compose@.service.j2"
         dest: "/etc/systemd/system/docker-compose@nexus.service"

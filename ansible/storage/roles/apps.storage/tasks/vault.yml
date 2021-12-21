@@ -8,17 +8,17 @@
     - "{{ containers_base_dir }}/data/vault"
 
 - block:
-    - name: Copy vault docker compose file
+    - name: Create vault docker compose file
       ansible.builtin.template:
         src: vault/docker-compose.yml.j2
         dest: "{{ containers_base_dir }}/apps/vault/docker-compose.yml"
         mode: 0755
-    - name: Copy vault config
+    - name: Create vault config
       ansible.builtin.template:
         src: vault/vault.json.j2
         dest: "{{ containers_base_dir }}/apps/vault/vault.json"
         mode: 0755
-    - name: Create vault systemd file
+    - name: Create vault systemd service file
       ansible.builtin.template:
         src: "docker-compose@.service.j2"
         dest: "/etc/systemd/system/docker-compose@vault.service"

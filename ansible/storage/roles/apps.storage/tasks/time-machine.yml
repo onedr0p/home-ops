@@ -12,12 +12,12 @@
     - "{{ containers_base_dir }}/data/time-machine/run-smb"
 
 - block:
-    - name: Copy time-machine docker compose file
+    - name: Create time-machine docker compose file
       ansible.builtin.template:
         src: time-machine/docker-compose.yml.j2
         dest: "{{ containers_base_dir }}/apps/time-machine/docker-compose.yml"
         mode: 0755
-    - name: Create time-machine systemd file
+    - name: Create time-machine systemd service file
       ansible.builtin.template:
         src: "docker-compose@.service.j2"
         dest: "/etc/systemd/system/docker-compose@time-machine.service"

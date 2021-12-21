@@ -9,12 +9,12 @@
     - "{{ containers_base_dir }}/data/traefik/certs"
 
 - block:
-    - name: Copy traefik docker compose file
+    - name: Create traefik docker compose file
       ansible.builtin.template:
         src: traefik/docker-compose.yml.j2
         dest: "{{ containers_base_dir }}/apps/traefik/docker-compose.yml"
         mode: 0755
-    - name: Create traefik systemd file
+    - name: Create traefik systemd service file
       ansible.builtin.template:
         src: "docker-compose@.service.j2"
         dest: "/etc/systemd/system/docker-compose@traefik.service"

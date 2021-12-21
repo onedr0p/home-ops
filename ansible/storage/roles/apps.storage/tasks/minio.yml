@@ -8,13 +8,13 @@
     - "{{ containers_base_dir }}/data/minio"
 
 - block:
-    - name: Copy minio docker compose file
+    - name: Create minio docker compose file
       ansible.builtin.template:
         src: minio/docker-compose.yml.j2
         dest: "{{ containers_base_dir }}/apps/minio/docker-compose.yml"
         mode: 0755
 
-    - name: Create minio systemd file
+    - name: Create minio systemd service file
       ansible.builtin.template:
         src: "docker-compose@.service.j2"
         dest: "/etc/systemd/system/docker-compose@minio.service"
