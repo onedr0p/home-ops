@@ -30,6 +30,9 @@ spec:
       tls:
         - hosts:
             - "loki.${SECRET_PUBLIC_DOMAIN}"
+    service:
+      type: LoadBalancer
+      loadBalancerIP: 1.1.1.1
     serviceMonitor:
       enabled: true
     config:
@@ -202,3 +205,16 @@ spec:
               category: logs
             annotations:
               summary: "Node-Red is unable to connect to Home Assistant"
+  postRenderers:
+    - kustomize:
+        patchesJson6902:
+          - target:
+              kind: Service
+              name: loki
+            patch:
+              - op: remove
+                path: /spec/loadBalancerIP
+              - op: add
+                path: /spec/externalIPs
+                value:
+                  - "${SVC_LOKI_ADDR}"
