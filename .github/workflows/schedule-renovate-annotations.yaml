@@ -1,5 +1,5 @@
 ---
-name: Schedule - Update Kah Library Helm chart
+name: Schedule - Renovate Annotations Update
 
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -7,28 +7,24 @@ on: # yamllint disable-line rule:truthy
     - cron: "0 */4 * * *"
 
 jobs:
-  update-helm-deps:
+  renovate-annotations-update:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: azure/setup-helm@v1
+      - uses: k8s-at-home/renovate-helm-releases@v1
         with:
-          version: v3.6.3
-      - run: helm repo add k8s-at-home-library https://library-charts.k8s-at-home.com
-      - run: helm repo update
-      - run: helm dep update
-        working-directory: charts/kah-common
+          cluster-path: "./cluster"
       - uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: renovate-kah-library-chart
+          branch: renovate-annotations
           delete-branch: true
-          title: "chore(deps): update kah library chart"
+          title: "chore(ci): update renovate annotations"
           signoff: true
           committer: "Devin Buhl <onedr0p@users.noreply.github.com>"
           author: "Devin Buhl <onedr0p@users.noreply.github.com>"
           assignees: "onedr0p"
-          commit-message: "chore(deps): update kah library chart"
+          commit-message: "chore(ci): update renovate annotations"
           body: |
-            Update the kah library chart
+            Update Helm Releases in order for Renovate to pick up new versions of Helm charts
           labels: component/ci

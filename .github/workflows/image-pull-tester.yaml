@@ -1,0 +1,47 @@
+---
+name: Image Pull Tester
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "cluster/**.yaml"
+      - "ansible/**.yml.j2"
+    types:
+      - labeled
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  changes:
+    if: contains(github.event.pull_request.labels.*.name, 'component/container')
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          list-files: json
+          filters: |
+            yaml:
+              - added|modified: "**.yaml"
+              - added|modified: "**.yml"
+              - added|modified: "**.yaml.j2"
+              - added|modified: "**.yml.j2"
+      - run: echo ::set-output name=file::${{ toJson(steps.filter.outputs) }}
+  test:
+    if: contains(github.event.pull_request.labels.*.name, 'component/container')
+    runs-on: ubuntu-20.04
+    needs: changes
+    strategy:
+      matrix: ${{ fromJson(needs.changes.outputs.matrix) }}
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Matrix test
+        run: |
+          echo ${{ matrix.file }}
+          cat ${{ matrix.file }}
