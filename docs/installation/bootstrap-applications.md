@@ -7,9 +7,7 @@ The Kubernetes @Home community has created a wonderful Github template for boots
 ### Create or locate cluster GPG key
 
 ```sh
-export GPG_TTY=$(tty)
-gpg --list-secret-keys "Home cluster (Flux) <email>"
-export FLUX_KEY_FP=ABCDEFGHIJKLMNOPQRSTUVWXYZ
+export SOPS_AGE_KEY_FILE=/Users/devin/.config/sops/age/keys.txt
 ```
 
 ### Verify cluster is ready for Flux
@@ -40,4 +38,4 @@ cat ~/.config/sops/age/keys.txt |
 kubectl --kubeconfig=./kubeconfig apply --kustomize=./cluster/base/flux-system
 ```
 
-:tada: at this point after reconciliation Flux state should be restored.
+🎉 At this point after reconciliation Flux state should be restored. 🎉
