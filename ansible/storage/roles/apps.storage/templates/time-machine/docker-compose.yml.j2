@@ -6,11 +6,11 @@ services:
     image: docker.io/mbentley/timemachine:smb-20211214
     container_name: time-machine
     restart: unless-stopped
+    network_mode: host
     environment:
       PASSWORD: "{{ SECRET_TIMEMACHINE_PASSWORD }}"
       TM_UID: 568
       TM_GID: 568
-    network_mode: host
     volumes:
       - time-machine-data:/opt/timemachine
       - time-machine-var-lib-smb:/var/lib/samba

@@ -6,14 +6,15 @@ services:
     image: docker.io/library/postgres:14.1
     container_name: postgresql
     restart: unless-stopped
-    network_mode: host
+    networks:
+      - apps
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: "{{ SECRET_POSTGRESQL_USERNAME }}"
       POSTGRES_PASSWORD: "{{ SECRET_POSTGRESQL_PASSWORD }}"
       PGDATA: /var/lib/postgresql/data
-    # ports:
-    #   - 5432:5432
+    ports:
+      - 5432:5432
     volumes:
       - pg-data:/var/lib/postgresql/data
 
@@ -21,11 +22,12 @@ services:
     image: quay.io/prometheuscommunity/postgres-exporter:v0.10.0
     container_name: postgresql-exporter
     restart: unless-stopped
-    network_mode: host
+    networks:
+      - apps
     environment:
       DATA_SOURCE_NAME: "postgresql://{{ SECRET_POSTGRESQL_USERNAME }}:{{ SECRET_POSTGRESQL_PASSWORD }}@pgsql-server:5432/postgres?sslmode=disable"
-    # ports:
-    #   - 9187:9187
+    ports:
+      - 9187:9187
     links:
       - postgresql:pgsql-server
 
@@ -33,13 +35,14 @@ services:
     image: docker.io/dpage/pgadmin4:6.3
     container_name: postgresql-pgadmin
     restart: unless-stopped
-    network_mode: host
+    networks:
+      - apps
     environment:
       PGADMIN_DEFAULT_EMAIL: "{{ SECRET_PGADMIN_USERNAME }}"
       PGADMIN_DEFAULT_PASSWORD: "{{ SECRET_PGADMIN_PASSWORD }}"
       PGADMIN_LISTEN_PORT: 12080
-    # ports:
-    #   - 12080:80
+    ports:
+      - 12080:12080
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     links:
@@ -57,7 +60,8 @@ services:
     image: docker.io/prodrigestivill/postgres-backup-local:14
     container_name: postgresql-pgbackups
     restart: unless-stopped
-    network_mode: host
+    networks:
+      - apps
     environment:
       POSTGRES_HOST: pgsql-server
       POSTGRES_DB: postgres
@@ -88,17 +92,19 @@ volumes:
       type: none
       o: bind
       device: "{{ containers_base_dir }}/data/postgresql/data"
-
   pgadmin-data:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: "{{ containers_base_dir }}/data/postgresql/pgadmin"
-
   pgbackups-data:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: "{{ containers_base_dir }}/data/postgresql/pgbackups"
+
+networks:
+  apps:
+    external: true
