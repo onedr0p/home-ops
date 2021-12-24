@@ -41,7 +41,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: zigbee2mqtt-config-v1
+        existingClaim: zigbee2mqtt-config-v2
         mountPath: "/data"
     # These config values are not what is my current state of zigbee2mqtt
     # It's merely a guide for the initial start up on a fresh install
@@ -53,7 +53,7 @@ spec:
       permit_join: false
       mqtt:
         base_topic: zigbee2mqtt
-        server: "mqtt://emqx"
+        server: "mqtt://mosquitto"
         user: "${SECRET_MQTT_USERNAME}"
         password: "${SECRET_MQTT_PASSWORD}"
       serial:
@@ -61,24 +61,7 @@ spec:
       advanced:
         log_output:
           - console
-        network_key:
-          - 204
-          - 61
-          - 75
-          - 23
-          - 44
-          - 230
-          - 24
-          - 203
-          - 53
-          - 5
-          - 248
-          - 32
-          - 50
-          - 84
-          - 44
-          - 159
+        network_key: GENERATE
+        pan_id: GENERATE
       frontend:
         port: 8080
-      experimental:
-        new_api: true
