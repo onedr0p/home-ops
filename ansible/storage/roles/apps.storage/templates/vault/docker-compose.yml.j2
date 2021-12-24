@@ -6,8 +6,7 @@ services:
     image: docker.io/library/vault:1.9.2
     container_name: vault
     restart: unless-stopped
-    networks:
-      - apps
+    network_mode: bridge
     cap_add:
       - IPC_LOCK
     environment:
@@ -41,7 +40,3 @@ volumes:
       type: none
       o: bind
       device: "{{ containers_base_dir }}/data/vault/data"
-
-networks:
-  apps:
-    external: true

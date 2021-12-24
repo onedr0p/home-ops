@@ -6,8 +6,7 @@ services:
     image: docker.io/sonatype/nexus3:3.37.1
     container_name: nexus
     restart: unless-stopped
-    networks:
-      - apps
+    network_mode: bridge
     environment:
       INSTALL4J_ADD_VM_PARAMS: "-Xms4096m -Xmx4096m -XX:ActiveProcessorCount=4 -XX:MaxDirectMemorySize=4096m -Djava.util.prefs.userRoot=/nexus-data/javaprefs"
     ports:
@@ -41,7 +40,3 @@ volumes:
       type: none
       o: bind
       device: "{{ containers_base_dir }}/data/nexus"
-
-networks:
-  apps:
-    external: true

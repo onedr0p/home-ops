@@ -6,8 +6,7 @@ services:
     image: docker.io/library/traefik:v2.5.5
     container_name: traefik
     restart: unless-stopped
-    networks:
-      - apps
+    network_mode: bridge
     environment:
       CF_API_EMAIL: "{{ SECRET_CLOUDFLARE_EMAIL }}"
       CF_API_KEY: "{{ SECRET_CLOUDFLARE_APIKEY }}"
@@ -48,7 +47,3 @@ volumes:
       type: none
       o: bind
       device: "{{ containers_base_dir }}/data/traefik/certs"
-
-networks:
-  apps:
-    external: true

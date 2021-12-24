@@ -6,8 +6,7 @@ services:
     image: docker.io/library/postgres:14.1
     container_name: postgresql
     restart: unless-stopped
-    networks:
-      - apps
+    network_mode: bridge
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: "{{ SECRET_POSTGRESQL_USERNAME }}"
@@ -21,9 +20,7 @@ services:
   postgresql-exporter:
     image: quay.io/prometheuscommunity/postgres-exporter:v0.10.0
     container_name: postgresql-exporter
-    restart: unless-stopped
-    networks:
-      - apps
+    network_mode: bridge
     environment:
       DATA_SOURCE_NAME: "postgresql://{{ SECRET_POSTGRESQL_USERNAME }}:{{ SECRET_POSTGRESQL_PASSWORD }}@pgsql-server:5432/postgres?sslmode=disable"
     ports:
@@ -35,8 +32,7 @@ services:
     image: docker.io/dpage/pgadmin4:6.3
     container_name: postgresql-pgadmin
     restart: unless-stopped
-    networks:
-      - apps
+    network_mode: bridge
     environment:
       PGADMIN_DEFAULT_EMAIL: "{{ SECRET_PGADMIN_USERNAME }}"
       PGADMIN_DEFAULT_PASSWORD: "{{ SECRET_PGADMIN_PASSWORD }}"
@@ -60,8 +56,7 @@ services:
     image: docker.io/prodrigestivill/postgres-backup-local:14
     container_name: postgresql-pgbackups
     restart: unless-stopped
-    networks:
-      - apps
+    network_mode: bridge
     environment:
       POSTGRES_HOST: pgsql-server
       POSTGRES_DB: postgres
@@ -104,7 +99,3 @@ volumes:
       type: none
       o: bind
       device: "{{ containers_base_dir }}/data/postgresql/pgbackups"
-
-networks:
-  apps:
-    external: true

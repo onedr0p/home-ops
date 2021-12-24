@@ -6,8 +6,7 @@ services:
     image: quay.io/minio/minio:RELEASE.2021-12-20T22-07-16Z
     container_name: minio
     restart: unless-stopped
-    networks:
-      - apps
+    network_mode: bridge
     environment:
       MINIO_ROOT_USER: "{{ SECRET_MINIO_ROOT_USER }}"
       MINIO_ROOT_PASSWORD: "{{ SECRET_MINIO_ROOT_PASSWORD }}"
@@ -49,7 +48,3 @@ volumes:
       type: none
       o: bind
       device: "{{ containers_base_dir }}/data/minio"
-
-networks:
-  apps:
-    external: true
