@@ -44,4 +44,10 @@ jobs:
         uses: actions/checkout@v2
       - name: Matrix test
         run: |
-          echo ${{ matrix.file }}"
+          image=$(yq e '.services.*.image' ${{ matrix.file }})
+          if [[ "${image}" == "null" ]]; then
+              repository=$(yq e '.spec.values.image.repository' ${{ matrix.file }})
+              tag=$(yq e '.spec.values.image.tag' ${{ matrix.file }})
+              image="${repository}:${tag}"
+          fi
+          docker pull "${image}"
