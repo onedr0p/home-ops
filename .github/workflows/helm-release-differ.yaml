@@ -13,8 +13,8 @@ env:
   conf_ignore_known_labels_containing_versions: true
 
 jobs:
-  changes:
-    name: Detect changes
+  detect-file-changes:
+    name: Detect File Changes
     runs-on: ubuntu-20.04
     outputs:
       files: "${{ steps.extract.outputs.files }}"
@@ -33,15 +33,15 @@ jobs:
             | jq -nR '[inputs | select(length>0)]')
           echo ::set-output name=files::${filtered}
 
-  helm-release-diff:
-    name: Template Helm Releases
+  helm-release-differ:
+    name: Helm Release Differ
     runs-on: ubuntu-20.04
-    if: ${{ needs.changes.outputs.files != '' }}
+    if: ${{ needs.detect-file-changes.outputs.files != '' }}
     needs:
-      - changes
+      - detect-file-changes
     strategy:
       matrix:
-        file: ${{ fromJson(needs.changes.outputs.files) }}
+        file: ${{ fromJson(needs.detect-file-changes.outputs.files) }}
       fail-fast: false
     steps:
       - uses: yokawasa/action-setup-kube-tools@v0.8.0
