@@ -15,8 +15,9 @@ on: # yamllint disable-line rule:truthy
       - reopened
 
 jobs:
-  changes:
+  detect-file-changes:
     if: contains(github.event.pull_request.labels.*.name, 'component/container')
+    name: Detect File Changes
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -32,13 +33,14 @@ jobs:
               - added|modified: "**.yml.j2"
     outputs:
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
-  test:
+  image-pull-tester:
     if: contains(github.event.pull_request.labels.*.name, 'component/container')
+    name: Image Pull Tester
     runs-on: ubuntu-20.04
-    needs: changes
+    needs: detect-file-changes
     strategy:
       matrix:
-        file: ${{ fromJSON(needs.changes.outputs.yaml_files) }}
+        file: ${{ fromJSON(needs.detect-file-changes.outputs.yaml_files) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
