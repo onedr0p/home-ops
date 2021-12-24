@@ -12,12 +12,14 @@
 # done
 
 
-image=$(yq e '.services.*.image' cluster/apps/media/plex/helm-release.yaml)
-if [[ "${image}" == "null" ]]; then
+images=$(yq e '.services.*.image' ansible/storage/roles/apps.storage/templates/postgresql/docker-compose.yml.j2)
+if [[ "${image}" != "null" ]]; then
     repository=$(yq e '.spec.values.image.repository' cluster/apps/media/plex/helm-release.yaml)
     tag=$(yq e '.spec.values.image.tag' cluster/apps/media/plex/helm-release.yaml)
-    image="${repository}:${tag}"
+    images="${repository}:${tag}"
 fi
 
-docker pull $image
-echo $?
+for image in ${images//\\n/ }
+do
+    docker pull $image
+done
