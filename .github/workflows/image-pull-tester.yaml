@@ -30,18 +30,18 @@ jobs:
               - added|modified: "**.yml"
               - added|modified: "**.yaml.j2"
               - added|modified: "**.yml.j2"
-      - run: echo ::set-output name=file::${{ toJson(steps.filter.outputs) }}
+    outputs:
+      yaml_files: ${{ steps.filter.outputs.yaml_files }}
   test:
     if: contains(github.event.pull_request.labels.*.name, 'component/container')
     runs-on: ubuntu-20.04
     needs: changes
     strategy:
-      matrix: ${{ fromJson(needs.changes.outputs.matrix) }}
-      fail-fast: false
+      matrix:
+        file: ${{ fromJSON(needs.changes.outputs.yaml_files) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Matrix test
         run: |
-          echo ${{ matrix.file }}
-          cat ${{ matrix.file }}
+          echo ${{ matrix.file }}"
