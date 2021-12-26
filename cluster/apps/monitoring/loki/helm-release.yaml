@@ -218,3 +218,14 @@ spec:
                 path: /spec/externalIPs
                 value:
                   - "${SVC_LOKI_ADDR}"
+        patchesStrategicMerge:
+          - kind: StatefulSet
+            apiVersion: apps/v1
+            metadata:
+              name: loki
+            spec:
+              template:
+                spec:
+                  containers:
+                    - name: loki
+                      hostNetwork: true
