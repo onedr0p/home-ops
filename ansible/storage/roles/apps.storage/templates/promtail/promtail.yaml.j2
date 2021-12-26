@@ -2,8 +2,15 @@ server:
   log_level: debug
   disable: true
 
-client:
-  url: https://loki.{{ SECRET_PUBLIC_DOMAIN }}/loki/api/v1/push
+clients:
+  - url: https://loki.{{ SECRET_PUBLIC_DOMAIN }}/loki/api/v1/push
+  # - url: http://192.168.69.123:3100/loki/api/v1/push
+  #   batchsize: 524288
+  #   timeout: 20s
+  #   backoff_config:
+  #     min_period: 100ms
+  #     max_period: 10s
+  #     max_retries: 10
 
 positions:
   filename: /tmp/positions.yaml
@@ -20,3 +27,10 @@ scrape_configs:
         target_label: unit
       - source_labels: ["__journal__hostname"]
         target_label: hostname
+  # - job_name: system
+  #   static_configs:
+  #     - targets:
+  #         - localhost
+  #       labels:
+  #         job: varlogs
+  #         __path__: /var/log/auth.log

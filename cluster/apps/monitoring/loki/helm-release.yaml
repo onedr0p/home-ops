@@ -17,8 +17,6 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    image:
-      repository: ghcr.io/k8s-at-home/loki
     ingress:
       enabled: true
       annotations:
@@ -30,9 +28,9 @@ spec:
       tls:
         - hosts:
             - "loki.${SECRET_PUBLIC_DOMAIN}"
-    service:
-      type: LoadBalancer
-      loadBalancerIP: 1.1.1.1
+    # service:
+    #   type: LoadBalancer
+    #   loadBalancerIP: 1.1.1.1
     serviceMonitor:
       enabled: true
     config:
@@ -205,29 +203,29 @@ spec:
               category: logs
             annotations:
               summary: "Node-Red is unable to connect to Home Assistant"
-  postRenderers:
-    - kustomize:
-        patchesJson6902:
-          - target:
-              kind: Service
-              name: loki
-            patch:
-              - op: remove
-                path: /spec/loadBalancerIP
-              - op: add
-                path: /spec/externalIPs
-                value:
-                  - "${SVC_LOKI_ADDR}"
-        patchesStrategicMerge:
-          - kind: StatefulSet
-            apiVersion: apps/v1
-            metadata:
-              name: loki
-              namespace: monitoring
-              labels:
-                app: loki
-            spec:
-              template:
-                spec:
-                  hostNetwork: true
-                  dnsPolicy: ClusterFirstWithHostNet
+  # postRenderers:
+  #   - kustomize:
+  #       patchesJson6902:
+  #         - target:
+  #             kind: Service
+  #             name: loki
+  #           patch:
+  #             - op: remove
+  #               path: /spec/loadBalancerIP
+  #             - op: add
+  #               path: /spec/externalIPs
+  #               value:
+  #                 - "${SVC_LOKI_ADDR}"
+  #       patchesStrategicMerge:
+  #         - kind: StatefulSet
+  #           apiVersion: apps/v1
+  #           metadata:
+  #             name: loki
+  #             namespace: monitoring
+  #             labels:
+  #               app: loki
+  #           spec:
+  #             template:
+  #               spec:
+  #                 hostNetwork: true
+  #                 dnsPolicy: ClusterFirstWithHostNet
