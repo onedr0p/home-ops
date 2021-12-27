@@ -18,27 +18,47 @@ spec:
       interval: 5m
   values:
     customConfig:
+      data_dir: /vector-data-dir
       sources:
-        journald:
-          type: journald
-          journal_directory: /var/log/journal
-        # syslog:
-        #   type: syslog
-        #   address: 0.0.0.0:1514
-        #   mode: udp
-        sinks:
-          loki:
-            type: loki
-            inputs:
-              - journald
-              # - syslog
-            endpoint: http://loki:3100
-            encoding:
-              codec: json
-            labels:
-              job: "vector"
-              hostname: "{{ kubernetes.node.name }}"
-            healthcheck: false
+        host_metrics:
+          type: host_metrics
+          filesystem:
+            devices:
+              excludes: ["binfmt_misc"]
+            filesystems:
+              excludes: ["binfmt_misc"]
+            mountpoints:
+              excludes: ["*/proc/sys/fs/binfmt_misc"]
+        internal_metrics:
+          type: internal_metrics
+        kubernetes_logs:
+          type: kubernetes_logs
+      sinks:
+        prometheus_sink:
+          type: prometheus_exporter
+          inputs: ["host_metrics", "internal_metrics"]
+          address: 0.0.0.0:9090
+      # sources:
+      #   journald:
+      #     type: journald
+      #     journal_directory: /var/log/journal
+      #   # syslog:
+      #   #   type: syslog
+      #   #   address: 0.0.0.0:1514
+      #   #   mode: udp
+      #   sinks:
+      #     loki:
+      #       type: loki
+      #       inputs:
+      #         - journald
+      #         # - syslog
+      #       endpoint: http://loki:3100
+      #       encoding:
+      #         codec: json
+      #       labels:
+      #         job: "vector"
+      #         hostname: "{{ kubernetes.node.name }}"
+      #       healthcheck: false
     podMonitor:
       enabled: true
     extraVolumes:
