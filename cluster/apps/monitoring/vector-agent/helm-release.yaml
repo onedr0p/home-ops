@@ -33,6 +33,9 @@ spec:
           type: internal_metrics
         kubernetes_logs:
           type: kubernetes_logs
+        journal_logs:
+          type: journald
+          journal_directory: /var/log/journal
       sinks:
         prometheus_sink:
           type: prometheus_exporter
@@ -41,6 +44,7 @@ spec:
         loki_sink:
           type: loki
           inputs:
+            - journal_logs
             - kubernetes_logs
           endpoint: http://loki:3100
       # sources:
