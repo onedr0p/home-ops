@@ -20,31 +20,32 @@ spec:
     customConfig:
       data_dir: /vector-data-dir
       sources:
-        # host_metrics:
-        #   type: host_metrics
-        #   filesystem:
-        #     devices:
-        #       excludes: ["binfmt_misc"]
-        #     filesystems:
-        #       excludes: ["binfmt_misc"]
-        #     mountpoints:
-        #       excludes: ["*/proc/sys/fs/binfmt_misc"]
-        # internal_metrics:
-        #   type: internal_metrics
+        journal_logs:
+          type: journald
+          journal_directory: /var/log/journal
         kubernetes_logs:
           type: kubernetes_logs
-        # journal_logs:
-        #   type: journald
-        #   journal_directory: /var/log/journal
+        # syslog_logs:
+        #   type: syslog
+        #   address: 0.0.0.0:1514
+        #   mode: udp
       sinks:
-        # prometheus_sink:
-        #   type: prometheus_exporter
-        #   inputs: ["host_metrics", "internal_metrics"]
-        #   address: 0.0.0.0:9090
-        loki_sink:
+        loki_journal_sink:
           type: loki
           inputs:
-            # - journal_logs
+            - journal_logs
+          endpoint: http://loki:3100
+          encoding:
+            codec: json
+          batch:
+            max_bytes: 400000
+          out_of_order_action: rewrite_timestamp
+          labels:
+            hostname: >-
+              {{ print "{{ print \"{{ host }}\" }}" }}
+        loki_kubernetes_sink:
+          type: loki
+          inputs:
             - kubernetes_logs
           endpoint: http://loki:3100
           encoding:
@@ -63,27 +64,19 @@ spec:
               {{ print "{{ print \"{{ kubernetes.pod_node_name }}\" }}" }}
             filename: >-
               {{ print "{{ print \"{{ kubernetes.file }}\" }}" }}
-      # sources:
-      #   journald:
-      #     type: journald
-      #     journal_directory: /var/log/journal
-      #   # syslog:
-      #   #   type: syslog
-      #   #   address: 0.0.0.0:1514
-      #   #   mode: udp
-      #   sinks:
-      #     loki:
-      #       type: loki
-      #       inputs:
-      #         - journald
-      #         # - syslog
-      #       endpoint: http://loki:3100
-      #       encoding:
-      #         codec: json
-      #       labels:
-      #         job: "vector"
-      #         hostname: "{{ kubernetes.node.name }}"
-      #       healthcheck: false
+        # loki_syslog_sink:
+        #   type: loki
+        #   inputs:
+        #     - syslog_logs
+        #   endpoint: http://loki:3100
+        #   encoding:
+        #     codec: json
+        #   batch:
+        #     max_bytes: 400000
+        #   out_of_order_action: rewrite_timestamp
+        #   labels:
+        #     hostname: >-
+        #       {{ print "{{ print \"{{ host }}\" }}" }}
     podMonitor:
       enabled: true
     securityContext:
