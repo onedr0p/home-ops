@@ -42,7 +42,7 @@ spec:
           out_of_order_action: rewrite_timestamp
           labels:
             hostname: >-
-              {{ print \"{{ host }}\" }}
+              {{`{{ host }}`}}
         loki_kubernetes_sink:
           type: loki
           inputs:
@@ -55,15 +55,15 @@ spec:
           out_of_order_action: rewrite_timestamp
           labels:
             namespace: >-
-              {{ print \"{{ kubernetes.pod_namespace }}\" }}
+              {{`{{ kubernetes.pod_namespace }}`}}
             pod: >-
-              {{ print \"{{ kubernetes.pod_name }}\" }}
+              {{`{{ kubernetes.pod_name }}`}}
             container: >-
-              {{ print \"{{ kubernetes.container_name }}\" }}
+              {{`{{ kubernetes.container_name }}`}}
             hostname: >-
-              {{ print \"{{ kubernetes.pod_node_name }}\" }}
+              {{`{{ kubernetes.pod_node_name }}`}}
             filename: >-
-              {{ print \"{{ kubernetes.file }}\" }}
+              {{`{{ kubernetes.file }}`}}
         # loki_syslog_sink:
         #   type: loki
         #   inputs:
@@ -76,7 +76,7 @@ spec:
         #   out_of_order_action: rewrite_timestamp
         #   labels:
         #     hostname: >-
-        #       {{ print \"{{ host }}\" }}" }}
+        #       {{ print "{{ print \"{{ host }}\" }}" }}
     podMonitor:
       enabled: true
     securityContext:
