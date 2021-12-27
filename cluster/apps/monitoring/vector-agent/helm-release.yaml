@@ -1,0 +1,38 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: vector-aggregator
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://helm.vector.dev
+      chart: vector-agent
+      version: 0.19.1
+      sourceRef:
+        kind: HelmRepository
+        name: vector-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    customConfig:
+      sources:
+        journald:
+          type: journald
+          journal_directory: /var/log/journal
+        syslog:
+          type: syslog
+          address: 0.0.0.0:1514
+          mode: udp
+    podMonitor:
+      enabled: true
+    extraVolumes:
+      - name: journal
+        hostPath:
+          path: /var/log/journal
+    extraVolumeMounts:
+      - name: journal
+        mountPath: /var/log/journal
+        readOnly: true
