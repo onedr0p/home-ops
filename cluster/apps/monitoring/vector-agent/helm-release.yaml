@@ -49,8 +49,15 @@ spec:
           endpoint: http://loki:3100
           encoding:
             codec: json
+          batch:
+            max_bytes: 400000
+          out_of_order_action: rewrite_timestamp
           labels:
             job: vector
+            # pod_namespace: >-
+            #   {{ print "{{ print \"{{ kubernetes.pod_namespace }}\" }}" }}
+            # pod_name: >-
+            #   {{ print "{{ print \"{{ kubernetes.pod_name }}\" }}" }}
       # sources:
       #   journald:
       #     type: journald
