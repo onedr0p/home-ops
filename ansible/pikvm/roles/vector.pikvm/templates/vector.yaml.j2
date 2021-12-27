@@ -1,0 +1,19 @@
+---
+data_dir: /tmp
+sources:
+  journal_logs:
+    type: journald
+    journal_directory: /run/log/journal
+sinks:
+  loki_journal_sink:
+    type: loki
+    inputs:
+      - journal_logs
+    endpoint: https://loki.{{ SECRET_PUBLIC_DOMAIN }}
+    encoding:
+      codec: json
+    batch:
+      max_bytes: 400000
+    out_of_order_action: rewrite_timestamp
+    labels:
+      hostname: "{{ '{{ name }}' }}"

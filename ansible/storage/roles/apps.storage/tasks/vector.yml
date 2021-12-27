@@ -1,0 +1,26 @@
+---
+- name: Create vector directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ containers_base_dir }}/apps/vector"
+    - "{{ containers_base_dir }}/data/vector"
+
+- block:
+    - name: Create vector docker compose file
+      ansible.builtin.template:
+        src: vector/docker-compose.yml.j2
+        dest: "{{ containers_base_dir }}/apps/vector/docker-compose.yml"
+        mode: 0755
+    - name: Create vector config
+      ansible.builtin.template:
+        src: vector/vector.yaml.j2
+        dest: "{{ containers_base_dir }}/apps/vector/vector.yaml"
+        mode: 0755
+    - name: Create vector systemd service file
+      ansible.builtin.template:
+        src: "docker-compose@.service.j2"
+        dest: "/etc/systemd/system/docker-compose@vector.service"
+        mode: 0644
+  notify: Restart vector
