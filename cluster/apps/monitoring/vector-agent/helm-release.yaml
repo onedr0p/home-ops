@@ -53,11 +53,16 @@ spec:
             max_bytes: 400000
           out_of_order_action: rewrite_timestamp
           labels:
-            job: vector
-            # pod_namespace: >-
-            #   {{ print "{{ print \"{{ kubernetes.pod_namespace }}\" }}" }}
-            # pod_name: >-
-            #   {{ print "{{ print \"{{ kubernetes.pod_name }}\" }}" }}
+            namespace: >-
+              {{ print "{{ print \"{{ kubernetes.pod_namespace }}\" }}" }}
+            pod: >-
+              {{ print "{{ print \"{{ kubernetes.pod_name }}\" }}" }}
+            container: >-
+              {{ print "{{ print \"{{ kubernetes.container_name }}\" }}" }}
+            hostname: >-
+              {{ print "{{ print \"{{ kubernetes.pod_node_name }}\" }}" }}
+            filename: >-
+              {{ print "{{ print \"{{ kubernetes.file }}\" }}" }}
       # sources:
       #   journald:
       #     type: journald
