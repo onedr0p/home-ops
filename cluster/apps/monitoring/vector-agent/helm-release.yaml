@@ -22,10 +22,23 @@ spec:
         journald:
           type: journald
           journal_directory: /var/log/journal
-        syslog:
-          type: syslog
-          address: 0.0.0.0:1514
-          mode: udp
+        # syslog:
+        #   type: syslog
+        #   address: 0.0.0.0:1514
+        #   mode: udp
+        sinks:
+          loki:
+            type: loki
+            inputs:
+              - journald
+              # - syslog
+            endpoint: http://loki:3100
+            encoding:
+              codec: json
+            labels:
+              job: "vector"
+              host: "{{ host }}"
+            healthcheck: false
     podMonitor:
       enabled: true
     extraVolumes:
