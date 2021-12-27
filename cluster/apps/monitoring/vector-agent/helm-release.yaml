@@ -41,7 +41,8 @@ spec:
             max_bytes: 400000
           out_of_order_action: rewrite_timestamp
           labels:
-            hostname: "{{`{{ host }}`}}"
+            hostname: >-
+              {{`{{ host }}`}}
         loki_kubernetes_sink:
           type: loki
           inputs:
@@ -53,11 +54,18 @@ spec:
             max_bytes: 400000
           out_of_order_action: rewrite_timestamp
           labels:
-            namespace: "{{`{{ kubernetes.pod_namespace }}`}}"
-            pod: "{{`{{ kubernetes.pod_name }}`}}"
-            container: "{{`{{ kubernetes.container_name }}`}}"
-            hostname: "{{`{{ kubernetes.pod_node_name }}`}}"
-            filename: "{{`{{ kubernetes.file }}`}}"
+            namespace: >-
+              {{`{{ kubernetes.pod_namespace }}`}}
+            pod: >-
+              {{`{{ kubernetes.pod_name }}`}}
+            container: >-
+              {{`{{ kubernetes.container_name }}`}}
+            hostname: >-
+              {{`{{ kubernetes.pod_node_name }}`}}
+            filename: >-
+              {{`{{ kubernetes.file }}`}}
+            app: >-
+              {{`{{ kubernetes.pod_labels."app.kubernetes.io/name" }}`}}
         # loki_syslog_sink:
         #   type: loki
         #   inputs:
