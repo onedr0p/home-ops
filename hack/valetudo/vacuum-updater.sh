@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# One-shot script to install/upgrade valetudo, node-exporter and promtail
+# One-shot script to install/upgrade valetudo, node-exporter and vector
 #
 
 PROJECT_DIR="$(git rev-parse --show-toplevel)"
@@ -76,36 +76,36 @@ ssh "${SSH_OPTS}" -T "${VACUUM_USER}@${VACUUM_ADDR}" <<'EOL'
 EOL
 
 #
-# promtail
+# vector
 #
 
-version="$(curl -sX GET "https://api.github.com/repos/grafana/loki/releases/latest" | jq --raw-output '.tag_name')"
-echo "*** Downloading Promtail... ***"
-curl -fsSL -o "/tmp/promtail.zip" \
-    "https://github.com/grafana/loki/releases/download/${version}/promtail-linux-arm.zip"
+version="$(curl -sX GET "https://api.github.com/repos/vectordotdev/vector/releases/latest" | jq --raw-output '.tag_name' | sed '1s/^.//')"
+echo "*** Downloading Vector... ***"
+curl -fsSL -o "/tmp/vector.tar.gz" \
+    "https://github.com/vectordotdev/vector/releases/download/v${version}/vector-${version}-armv7-unknown-linux-musleabihf.tar.gz"
 
-echo "*** Extracting Promtail ... ***"
-unzip -q -o /tmp/promtail.zip -d /tmp
+echo "*** Extracting Vector ... ***"
+tar zxf /tmp/vector.tar.gz --strip-components=1 -C /tmp
 
-echo "*** Stopping Promtail... ***"
+echo "*** Stopping Vector... ***"
 ssh "${SSH_OPTS}" -T "${VACUUM_USER}@${VACUUM_ADDR}" <<'EOL'
-    /etc/init/S11promtail stop > /dev/null 2>&1
-    sleep 60
+    /etc/init/S11vector stop > /dev/null 2>&1
+    sleep 10
 EOL
 
-echo "*** Copying Promtail to the Vacuum... ***"
+echo "*** Copying Vector to the Vacuum... ***"
 scp "${SSH_OPTS}" -q \
-    /tmp/promtail-linux-arm \
-    "${VACUUM_USER}@${VACUUM_ADDR}:/mnt/data/promtail/promtail"
+    /tmp/vector-armv7-unknown-linux-musleabihf/bin/vector \
+    "${VACUUM_USER}@${VACUUM_ADDR}:/mnt/data/vector/vector"
 
-echo "*** Copying Promtail init script to the Vacuum... ***"
+echo "*** Copying Vector init script to the Vacuum... ***"
 scp "${SSH_OPTS}" -q \
-    "${PROJECT_DIR}/hack/valetudo/S11promtail" \
-    "${VACUUM_USER}@${VACUUM_ADDR}:/etc/init/S11promtail"
+    "${PROJECT_DIR}/hack/valetudo/S11vector" \
+    "${VACUUM_USER}@${VACUUM_ADDR}:/etc/init/S11vector"
 
 ssh "${SSH_OPTS}" -T "${VACUUM_USER}@${VACUUM_ADDR}" <<'EOL'
-    echo "*** Make Promtail Executable... ***"
-    chmod +x /mnt/data/promtail/promtail
-    echo "*** Starting Promtail... ***"
-    /etc/init/S11promtail start > /dev/null 2>&1
+    echo "*** Make Vector Executable... ***"
+    chmod +x /mnt/data/vector/vector
+    echo "*** Starting Vector... ***"
+    /etc/init/S11vector start > /dev/null 2>&1
 EOL

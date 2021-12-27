@@ -1,0 +1,32 @@
+---
+data_dir: /tmp
+sources:
+  valetudo_logs:
+    type: file
+    include:
+      - /tmp/valetudo.log
+transforms:
+  valetudo_remap:
+    type: remap
+    inputs:
+      - valetudo_logs
+    # Parse the valetudo logs e.g.
+    # [2021-09-23T14:30:20.403Z] [INFO] MQTT configured
+    source: |
+      . |= parse_regex!(.message, r'^\[(?P<timestamp>.+)\] \[(?P<level>(TRACE|DEBUG|INFO|WARNING|ERROR))\] (?P<message>.*)$')
+      .timestamp = to_timestamp!(.timestamp)
+sinks:
+  loki_valetudo_sink:
+    type: loki
+    inputs:
+      - valetudo_remap
+    endpoint: https://loki.${SECRET_DOMAIN}
+    encoding:
+      codec: json
+    batch:
+      max_bytes: 400000
+    out_of_order_action: rewrite_timestamp
+    tls:
+      verify_certificate: false
+    labels:
+      hostname: valetudo

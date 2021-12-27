@@ -1,0 +1,27 @@
+#!/bin/sh
+
+load() {
+    echo "starting vector"
+    /sbin/start-stop-daemon -S -b -q -m -p /var/run/vector.pid -x /mnt/data/vector/vector -- --config /mnt/data/vector/config.yml
+}
+
+unload() {
+    echo "stopping vector"
+    /sbin/start-stop-daemon -K -q -p /var/run/vector.pid
+}
+
+case "$1" in
+    start)
+        load
+        ;;
+    stop)
+        unload
+        ;;
+    restart)
+        unload
+        load
+        ;;
+    *)
+        echo "$0 <start/stop/restart>"
+        ;;
+esac
