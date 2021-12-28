@@ -61,18 +61,18 @@ spec:
           remove_label_fields: true
           remove_timestamp: true
           labels:
+            app: >-
+              {{`{{ kubernetes.pod_labels.\"app.kubernetes.io/name\" }}`}}
+            container: >-
+              {{`{{ kubernetes.container_name }}`}}
+            filename: >-
+              {{`{{ kubernetes.file }}`}}
+            hostname: >-
+              {{`{{ kubernetes.pod_node_name }}`}}
             namespace: >-
               {{`{{ kubernetes.pod_namespace }}`}}
             pod: >-
               {{`{{ kubernetes.pod_name }}`}}
-            container: >-
-              {{`{{ kubernetes.container_name }}`}}
-            hostname: >-
-              {{`{{ kubernetes.pod_node_name }}`}}
-            filename: >-
-              {{`{{ kubernetes.file }}`}}
-            app: >-
-              {{`{{ kubernetes.pod_labels."app.kubernetes.io/name" }}`}}
         # loki_syslog_sink:
         #   type: loki
         #   inputs:
