@@ -4,6 +4,8 @@ kind: HelmRelease
 metadata:
   name: nfs-subdir-external-provisioner
   namespace: kube-system
+  labels:
+    kustomize.toolkit.fluxcd.io/substitute: "disabled"
 spec:
   interval: 5m
   chart:
@@ -19,14 +21,13 @@ spec:
   values:
     replicaCount: 2
     nfs:
-      server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+      server: "192.168.1.81"
       path: "/tycho/PersistentVolumeClaims"
       mountOptions:
         - noatime
     storageClass:
       defaultClass: false
-      pathPattern: >-
-        {{`${.PVC.namespace}-${.PVC.name}`}}
+      pathPattern: "${.PVC.namespace}-${.PVC.name}"
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
