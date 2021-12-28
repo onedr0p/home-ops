@@ -22,16 +22,18 @@ spec:
         value: "true"
     customConfig:
       data_dir: /vector-data-dir
+      # Sources
       sources:
         journal_logs:
           type: journald
           journal_directory: /var/log/journal
         kubernetes_logs:
           type: kubernetes_logs
-        # syslog_logs:
-        #   type: syslog
-        #   address: 0.0.0.0:1514
-        #   mode: udp
+        opnsense_firewall_logs:
+          type: syslog
+          address: 0.0.0.0:5140
+          mode: udp
+      # Sinks
       sinks:
         loki_journal_sink:
           type: loki
@@ -75,19 +77,25 @@ spec:
               {{`{{ kubernetes.pod_node_name }}`}}
             pod: >-
               {{`{{ kubernetes.pod_name }}`}}
-        # loki_syslog_sink:
-        #   type: loki
-        #   inputs:
-        #     - syslog_logs
-        #   endpoint: http://loki:3100
-        #   encoding:
-        #     codec: json
-        #   batch:
-        #     max_bytes: 400000
-        #   out_of_order_action: rewrite_timestamp
-        #   labels:
-        #     hostname: >-
-        #       {{ print "{{ print \"{{ host }}\" }}" }}
+        loki_opnsense_firewall_sink:
+          type: loki
+          inputs:
+            - opnsense_firewall_logs
+          endpoint: http://loki:3100
+          encoding:
+            codec: json
+          batch:
+            max_bytes: 2049000
+          labels:
+            hostname: opnsense
+    service:
+      enabled: true
+      type: LoadBalancer
+      ports:
+        - name: opnsense-firewall
+          port: 5140
+          protocol: TCP
+          targetPort: 5140
     podMonitor:
       enabled: true
     securityContext:
@@ -100,3 +108,14 @@ spec:
       - name: journald
         mountPath: /var/log/journal
         readOnly: true
+  postRenderers:
+    - kustomize:
+        patchesJson6902:
+          - target:
+              kind: Service
+              name: vector-agent
+            patch:
+              - op: add
+                path: /spec/externalIPs
+                value:
+                  - "192.168.69.129"
