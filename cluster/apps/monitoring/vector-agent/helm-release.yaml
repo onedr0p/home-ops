@@ -9,14 +9,15 @@ spec:
   chart:
     spec:
       # renovate: registryUrl=https://helm.vector.dev
-      chart: vector-agent
-      version: 0.19.1
+      chart: vector
+      version: 0.3.0
       sourceRef:
         kind: HelmRepository
         name: vector-charts
         namespace: flux-system
       interval: 5m
   values:
+    role: Agent
     env:
       - name: VECTOR_WATCH_CONFIG
         value: "true"
@@ -29,60 +30,6 @@ spec:
           journal_directory: /var/log/journal
         kubernetes_logs:
           type: kubernetes_logs
-        firewall_logs:
-          type: syslog
-          address: 0.0.0.0:5140
-          mode: udp
-      # Transformations
-      transforms:
-        firewall_filterlog:
-          type: remap
-          inputs:
-            - opnsense_firewall_logs
-          source: |
-            if .appname == "filterlog" {
-              message_array = parse_csv!(string!(.message))
-              # ipv4 and ipv6
-              if message_array[8] == "4" || message_array[8] == "6" {
-                .filteriface   = message_array[4]
-                .filterflow    = message_array[7]
-                .filteraction  = message_array[6]
-                .filteripver   = message_array[8]
-                # ipv4
-                if message_array[8] == "4" {
-                  .filterproto   = message_array[16]
-                  .filterflags   = message_array[23]
-                  .filtersrcip   = message_array[18]
-                  .filtersrcport = message_array[20]
-                  .filterdstip   = message_array[19]
-                  .filterdstport = message_array[21]
-                # ipv6
-                } else if message_array[8] == "6" {
-                  .filterproto   = message_array[12]
-                  #.filterflags   = "IPv6 not fully supported"
-                  .filtersrcip   = message_array[15]
-                  .filtersrcport = message_array[17]
-                  .filterdstip   = message_array[16]
-                  .filterdstport = message_array[18]
-                }
-              }
-            }
-        firewall_split:
-          type: route
-          inputs:
-            - firewall_filterlog
-          route:
-            pass: >-
-              '.filteraction == "pass"'
-            rest: >-
-              '.filteraction != "pass"'
-        firewall_geotag:
-          type: geoip
-          inputs:
-            - firewall_split.pass
-          database: /etc/vector/GeoLite2-City.mmdb
-          source: filtersrcip
-          target: geotag
       # Sinks
       sinks:
         loki_journal_sink:
@@ -127,30 +74,8 @@ spec:
               {{`{{ kubernetes.pod_node_name }}`}}
             pod: >-
               {{`{{ kubernetes.pod_name }}`}}
-        loki_firewall_sink:
-          type: loki
-          inputs:
-            - firewall_split.rest
-            - firewall_geotag
-          endpoint: http://loki:3100
-          encoding:
-            codec: json
-          batch:
-            max_bytes: 2049000
-          labels:
-            hostname: opnsense
-    service:
-      enabled: true
-      type: LoadBalancer
-      ports:
-        - name: firewall
-          port: 5140
-          protocol: TCP
-          targetPort: 5140
     podMonitor:
       enabled: true
-    securityContext:
-      privileged: true
     extraVolumes:
       - name: journald
         hostPath:
@@ -159,14 +84,3 @@ spec:
       - name: journald
         mountPath: /var/log/journal
         readOnly: true
-  postRenderers:
-    - kustomize:
-        patchesJson6902:
-          - target:
-              kind: Service
-              name: vector-agent
-            patch:
-              - op: add
-                path: /spec/externalIPs
-                value:
-                  - "192.168.69.129"
