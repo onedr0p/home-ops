@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# PROVIDE: vector
+# REQUIRE: DAEMON NETWORKING
+# KEYWORD: shutdown
+#
+# Add the following to /etc/rc.conf[.local] to enable this service
+#
+# vector_enable  (bool):        Set to NO by default.
+#                                 Set it to YES to enable vector.
+# vector_config  (str):         Set to /usr/local/etc/vector/vector.yaml by default.
+#
+# vector_logfile (str):         Set to /var/log/vector/vector.log by default.
+#
+
+. /etc/rc.subr
+
+name=vector
+rcvar=vector_enable
+
+load_rc_config ${name}
+
+: ${vector_enable:=NO}
+: ${vector_config:="/usr/local/etc/vector/vector.yaml"}
+: ${vector_flags:=}
+: ${vector_logfile:="/var/log/vector/vector.log"}
+
+pidfile=/var/run/vector.pid
+command="/usr/local/sbin/vector"
+
+start_cmd="${name}_start"
+
+vector_start()
+{
+    echo -n "Starting ${name}."
+    # TODO: For log rotation to work, use '-H' option when Opnsense is on FreeBSD 13
+    /usr/sbin/daemon -p ${pidfile} -m 3 -f -o ${vector_logfile} ${command} --config ${vector_config} ${vector_flags}
+}
+
+run_rc_command "$1"
