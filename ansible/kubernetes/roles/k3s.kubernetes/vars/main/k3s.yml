@@ -6,25 +6,25 @@
 
 # Use a specific version of k3s
 # TODO: Renovate k3s version
-k3s_release_version: "v1.22.4+k3s1"
+k3s_release_version: "v1.22.5+k3s1"
 
-# Install using hard links rather than symbolic links.
+# -- Install using hard links rather than symbolic links.
 # ...if you are using the system-upgrade-controller you will need to use hard links rather than symbolic links as the controller will not be able to follow symbolic links.
 k3s_install_hard_links: true
 
-# Escalate user privileges for all tasks.
+# -- Escalate user privileges for all tasks.
 k3s_become_for_all: true
 
-# Enable debugging
+# -- Enable debugging
 k3s_debug: false
 
-# Enabled embedded etcd
+# -- Enabled embedded etcd
 k3s_etcd_datastore: true
 
-# Enable for single or even number of masters
+# -- Enable for single or even number of masters
 k3s_use_unsupported_config: false
 
-# Control Plane registration address
+# -- Control Plane registration address
 # this is set to my haproxy address running on my router.
 # If you want to use kube-vip only
 # set this to "{{ kubevip_address }}"
@@ -34,35 +34,29 @@ k3s_registration_address: 192.168.1.1
 k3s_server_config_yaml_d_files:
   - "k3s/10-etcd-snapshots.yaml.j2"
 
-# /var/lib/rancher/k3s/server/manifests
+# -- /var/lib/rancher/k3s/server/manifests
 k3s_server_manifests_templates:
   - "home-dns/home-dns-rbac.yaml.j2"
   - "calico/calico-installation.yaml.j2"
   - "calico/calico-bgpconfiguration.yaml.j2"
   - "calico/calico-bgppeer.yaml.j2"
 
-# /var/lib/rancher/k3s/server/manifests
+# -- /var/lib/rancher/k3s/server/manifests
 k3s_server_manifests_urls:
   - url: https://docs.projectcalico.org/archive/v3.20/manifests/tigera-operator.yaml
     filename: tigera-operator.yaml
 
-# etcd backups to s3
-k3s_etcd_s3: true
-k3s_etcd_s3_bucket: k3s
-k3s_etcd_s3_insecure: false
-k3s_etcd_snapshot_schedule_cron: "0 */6 * * *"
-k3s_etcd_snapshot_retention: 28
-
-# -- Encapsulation type
-calico_encapsulation: "None"
-# -- BGP Peer IP
-# -- (usually your router IP address)
-calico_bgp_peer_ip: 192.168.42.1
-# -- BGP Autonomous System Number
-# -- (must be the same across all BGP peers)
-calico_bgp_as_number: 64512
-# -- BGP Network you want services to consume
-# -- (this network should not exist or be defined anywhere in your network)
-calico_bgp_external_ips: 192.168.69.0/24
-# -- CIDR of the host node interface Calico should use
-calico_node_cidr: 192.168.42.0/24
+# -- /etc/rancher/k3s/registries.yaml
+k3s_registries:
+  mirrors:
+    "docker.io":
+      endpoint:
+        - "https://mirror.{{ SECRET_PRIVATE_DOMAIN }}"
+    "*":
+      endpoint:
+        - "https://mirror.{{ SECRET_PRIVATE_DOMAIN }}"
+  config:
+    "https://registry.{{ SECRET_PRIVATE_DOMAIN }}":
+      auth:
+        username: "{{ SECRET_NEXUS_USERNAME }}"
+        password: "{{ SECRET_NEXUS_PASSWORD }}"

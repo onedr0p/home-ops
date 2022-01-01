@@ -1,7 +1,7 @@
 ---
 - name: Fetch service account for home-dns
   ansible.builtin.set_fact:
-    dns_service_account_raw: "{{ lookup('community.kubernetes.k8s', namespace='kube-system', kind='ServiceAccount', resource_name='home-dns') }}"
+    dns_service_account_raw: "{{ lookup('kubernetes.core.k8s', kubeconfig=playbook_dir + '/../../../cluster/kubeconfig', namespace='kube-system', kind='ServiceAccount', resource_name='home-dns') }}"
 
 - name: Extract service account token from service account
   ansible.builtin.set_fact:
@@ -9,7 +9,7 @@
 
 - name: Fetch CA
   ansible.builtin.set_fact:
-    dns_certificate_authority_raw: "{{ lookup('community.kubernetes.k8s', namespace='kube-system', kind='Secret', resource_name=dns_service_account_token) }}"
+    dns_certificate_authority_raw: "{{ lookup('kubernetes.core.k8s', kubeconfig=playbook_dir + '/../../../cluster/kubeconfig', namespace='kube-system', kind='Secret', resource_name=dns_service_account_token) }}"
 
 - name: Extract CA Cert from CA
   ansible.builtin.set_fact:
@@ -46,5 +46,5 @@
 - name: Copy kubeconfig to local directory
   ansible.builtin.fetch:
     src: /tmp/kubeconfig-homedns
-    dest: /tmp/kubeconfig-homedns
+    dest: "{{ playbook_dir }}/../../../cluster/kubeconfig-homedns"
     flat: true
