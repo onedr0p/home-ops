@@ -36,7 +36,8 @@ locals {
     "loki"     = { versioning_enabled = false },
     "phone"    = { versioning_enabled = false },
     "thanos"   = { versioning_enabled = false },
-    "opnsense" = { versioning_enabled = false }
+    "opnsense" = { versioning_enabled = false },
+    "k10"      = { versioning_enabled = false }
   }
 }
 
