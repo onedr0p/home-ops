@@ -7,7 +7,7 @@ secrets="${SECRETS}"
 # source namespace to reflect secret from
 namespace_source="networking"
 # space delimited namespace where to reflect the secrets to
-namespace_destination="kasten-io media"
+namespace_destination="kasten-io"
 for secret in ${secrets}; do
     secret_source_content="$(kubectl get secret "${secret}" -n "${namespace_source}" -o json | jq 'del(.metadata.managedFields, .metadata.creationTimestamp, .metadata.resourceVersion, .metadata.uid)')"
     secret_source_checksum="$(echo "${secret_source_content}" | jq 'del(.metadata.namespace)' | md5sum | awk '{ print $1 }')"
