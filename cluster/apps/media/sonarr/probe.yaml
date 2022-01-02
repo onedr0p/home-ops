@@ -1,0 +1,18 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: sonarr-http
+  namespace: media
+spec:
+  jobName: sonarr-http
+  interval: 1m
+  scrapeTimeout: 5s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter.monitoring:9115
+  targets:
+    staticConfig:
+      static:
+        - "http://sonarr.media:8989"
+        - "https://sonarr.${SECRET_PUBLIC_DOMAIN}"

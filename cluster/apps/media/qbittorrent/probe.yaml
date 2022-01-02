@@ -1,0 +1,18 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: qbittorrent-http
+  namespace: media
+spec:
+  jobName: qbittorrent-http
+  interval: 1m
+  scrapeTimeout: 5s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter.monitoring:9115
+  targets:
+    staticConfig:
+      static:
+        - "http://qbittorrent.media:8080"
+        - "https://qb.${SECRET_PUBLIC_DOMAIN}"

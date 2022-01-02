@@ -1,0 +1,18 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: readarr-http
+  namespace: media
+spec:
+  jobName: readarr-http
+  interval: 1m
+  scrapeTimeout: 5s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter.monitoring:9115
+  targets:
+    staticConfig:
+      static:
+        - "http://readarr.media:8787"
+        - "https://readarr.${SECRET_PUBLIC_DOMAIN}"
