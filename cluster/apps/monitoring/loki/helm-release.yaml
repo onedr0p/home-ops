@@ -78,7 +78,7 @@ spec:
               category: logs
             annotations:
               # TODO: Figure out how to use hostname in summary
-              summary: "SMART has reported failures"
+              summary: "SMART has reported failures on host {{ $labels.hostname }}"
       #
       # zigbee2mqtt
       #
@@ -122,7 +122,7 @@ spec:
             annotations:
               summary: "Frigate is unable to reach MQTT"
       #
-      # *arr applications
+      # *arr
       #
       - name: arr
         rules:
@@ -134,8 +134,7 @@ spec:
               severity: critical
               category: logs
             annotations:
-              # TODO: Figure out how to use hostname in summary
-              summary: "An arr app is experiencing locked database issues"
+              summary: "{{ $labels.app }} is experiencing locked database issues"
           - alert: ArrDatabaseIsMalformed
             expr: |
               sum by (app) (count_over_time({app=~".*arr"} |~ "(?i)database disk image is malformed"[2m])) > 0
@@ -144,8 +143,7 @@ spec:
               severity: critical
               category: logs
             annotations:
-              # TODO: Figure out how to use hostname in summary
-              summary: "An arr app is experiencing malformed database disk image issues"
+              summary: "{{ $labels.app }} is experiencing malformed database disk image issues"
       #
       # home-assistant
       #
