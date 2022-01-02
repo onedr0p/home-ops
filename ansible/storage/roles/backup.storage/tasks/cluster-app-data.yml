@@ -1,0 +1,36 @@
+---
+- name: Create cluster-app-data-backup directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ containers_base_dir }}/apps/rclone/cluster-app-data-backup"
+
+- name: Create cluster-app-data-backup docker compose file
+  ansible.builtin.template:
+    src: cluster-app-data/docker-compose.yml.j2
+    dest: "{{ containers_base_dir }}/apps/rclone/cluster-app-data-backup/docker-compose.yml"
+    mode: 0755
+
+- name: Create cluster-app-data-backup systemd service file
+  ansible.builtin.template:
+    src: cluster-app-data/docker-compose@cluster-app-data-backup.service.j2
+    dest: /etc/systemd/system/docker-compose@cluster-app-data-backup.service
+    mode: 0644
+
+- name: Create cluster-app-data-backup systemd timer file
+  ansible.builtin.template:
+    src: cluster-app-data/docker-compose@cluster-app-data-backup.timer.j2
+    dest: /etc/systemd/system/docker-compose@cluster-app-data-backup.timer
+    mode: 0644
+  register: systemd
+
+- name: Enable cluster-app-data-backup systemd timer unit
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  loop:
+    - docker-compose@cluster-app-data-backup.timer
+  when: systemd.changed

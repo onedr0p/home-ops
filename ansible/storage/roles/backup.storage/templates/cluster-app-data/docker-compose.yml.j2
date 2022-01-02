@@ -2,9 +2,9 @@
 version: "3.8"
 
 services:
-  music-backup:
+  cluster-app-data-backup:
     image: docker.io/rclone/rclone:1.57.0
-    container_name: music-backup
+    container_name: cluster-app-data-backup
     network_mode: host
     command:
       - "-v"
@@ -20,8 +20,8 @@ services:
       - "20"
       - "--bwlimit"
       - "20M"
-      - "/media/Library/Music"
-      - "b2:music-rcUFz3wc/"
+      - "/data/Backups"
+      - "b2:cluster-app-data-xQdC743a/"
     volumes:
       - "{{ containers_base_dir }}/apps/rclone/rclone.conf:/config/rclone.conf:ro"
-      - /tycho/Media:/media:ro
+      - /tycho/Data:/data:ro
