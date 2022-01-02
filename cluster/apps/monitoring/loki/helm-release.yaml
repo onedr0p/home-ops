@@ -71,7 +71,7 @@ spec:
         rules:
           - alert: SmartFailures
             expr: |
-              sum by (hostname) (count_over_time({hostname=~".+"} | json | _SYSTEMD_UNIT = "smartmontools.service" !~ "(?i)previous self-test completed without error" |~ "(?i)(error|fail)"[2m])) > 0
+              sum by (hostname) (count_over_time({hostname=~".+"} | json | _SYSTEMD_UNIT = "smartmontools.service" !~ "(?i)previous self-test completed without error" !~ "(?i)Prefailure" |~ "(?i)(error|fail)"[2m])) > 0
             for: 10s
             labels:
               severity: critical
