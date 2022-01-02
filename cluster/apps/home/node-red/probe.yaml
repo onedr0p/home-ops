@@ -1,0 +1,18 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: node-red-http
+  namespace: media
+spec:
+  jobName: node-red-http
+  interval: 1m
+  scrapeTimeout: 5s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter.monitoring:9115
+  targets:
+    staticConfig:
+      static:
+        - "http://node-red.home:1880"
+        - "https://node-red.${SECRET_PUBLIC_DOMAIN}"

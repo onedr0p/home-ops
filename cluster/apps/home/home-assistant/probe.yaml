@@ -1,0 +1,18 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: home-assistant-http
+  namespace: media
+spec:
+  jobName: home-assistant-http
+  interval: 1m
+  scrapeTimeout: 5s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter.monitoring:9115
+  targets:
+    staticConfig:
+      static:
+        - "http://home-assistant.home:8123"
+        - "https://hass.${SECRET_PUBLIC_DOMAIN}"
