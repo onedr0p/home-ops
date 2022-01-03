@@ -1,0 +1,27 @@
+---
+version: "3.8"
+
+services:
+  backup-music:
+    image: docker.io/rclone/rclone:1.57.0
+    container_name: backup-music
+    network_mode: host
+    command:
+      - "-v"
+      - "--config"
+      - "/config/rclone.conf"
+      - "sync"
+      - "--ignore-errors"
+      - "--fast-list"
+      - "--b2-hard-delete"
+      - "--transfers"
+      - "20"
+      - "--checkers"
+      - "20"
+      - "--bwlimit"
+      - "20M"
+      - "/media/Library/Music"
+      - "b2:music-rcUFz3wc/"
+    volumes:
+      - "{{ containers_base_dir }}/apps/rclone/rclone.conf:/config/rclone.conf:ro"
+      - /tycho/Media:/media:ro

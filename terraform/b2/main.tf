@@ -33,6 +33,7 @@ locals {
     "opnsense-d5b252ad" = { bucket_type = "allPrivate", file_name_prefix = "", days_from_hiding_to_deleting = 1, days_from_uploading_to_hiding = null },
     "music-rcUFz3wc" = { bucket_type = "allPrivate", file_name_prefix = "", days_from_hiding_to_deleting = 1, days_from_uploading_to_hiding = null },
     "cluster-app-data-xQdC743a" = { bucket_type = "allPrivate", file_name_prefix = "", days_from_hiding_to_deleting = 1, days_from_uploading_to_hiding = null },
+    "k3s-etcd-snapshots-s0DL5a1k" = { bucket_type = "allPrivate", file_name_prefix = "", days_from_hiding_to_deleting = 1, days_from_uploading_to_hiding = null },
   }
 }
 

@@ -2,9 +2,9 @@
 version: "3.8"
 
 services:
-  music-backup:
+  backup-etcd:
     image: docker.io/rclone/rclone:1.57.0
-    container_name: music-backup
+    container_name: backup-etcd
     network_mode: host
     command:
       - "-v"
@@ -20,8 +20,7 @@ services:
       - "20"
       - "--bwlimit"
       - "20M"
-      - "/media/Library/Music"
-      - "b2:music-rcUFz3wc/"
+      - "minio:k3s/"
+      - "b2:k3s-etcd-snapshots-s0DL5a1k/"
     volumes:
       - "{{ containers_base_dir }}/apps/rclone/rclone.conf:/config/rclone.conf:ro"
-      - /tycho/Media:/media:ro

@@ -1,0 +1,27 @@
+---
+version: "3.8"
+
+services:
+  backup-data:
+    image: docker.io/rclone/rclone:1.57.0
+    container_name: backup-data
+    network_mode: host
+    command:
+      - "-v"
+      - "--config"
+      - "/config/rclone.conf"
+      - "sync"
+      - "--ignore-errors"
+      - "--fast-list"
+      - "--b2-hard-delete"
+      - "--transfers"
+      - "20"
+      - "--checkers"
+      - "20"
+      - "--bwlimit"
+      - "20M"
+      - "/data/Backups"
+      - "b2:cluster-app-data-xQdC743a/"
+    volumes:
+      - "{{ containers_base_dir }}/apps/rclone/rclone.conf:/config/rclone.conf:ro"
+      - /tycho/Data:/data:ro

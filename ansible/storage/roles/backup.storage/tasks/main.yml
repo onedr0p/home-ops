@@ -18,48 +18,18 @@
   tags:
     - always
 
-- import_tasks: music.yml
+- import_tasks: backup-data.yml
+  tags:
+    - data
+
+- import_tasks: backup-etcd.yml
+  tags:
+    - etcd
+
+- import_tasks: backup-music.yml
   tags:
     - music
 
-- import_tasks: cluster-app-data.yml
+- import_tasks: backup-opnsense.yml
   tags:
-    - cluster-app-data
-
-# - name: Install rclone
-#   ansible.builtin.apt:
-#     name: "{{ item }}"
-#     update_cache: true
-#   loop:
-#     - rclone
-
-# - name: Create rclone user directory
-#   ansible.builtin.file:
-#     path: "{{ item }}"
-#     state: directory
-#   loop:
-#     - "{{ ansible_user }}/.config/rclone"
-
-# - name: Copy rclone config to users home directory
-#   ansible.builtin.template:
-#     src: rclone.conf.j2
-#     dest: "{{ ansible_user }}/.config/rclone/rclone.conf"
-#     mode: 0755
-
-# - name: Create music-backup cronjob
-#   ansible.builtin.cron:
-#     name: "music-backup"
-#     special_time: "daily"
-#     job: >-
-#       rclone -v
-#       --config {{ ansible_user }}/.config/rclone/rclone.conf
-#       sync
-#       --ignore-errors
-#       --fast-list
-#       --b2-hard-delete
-#       --transfers 20
-#       --checkers 20
-#       --bwlimit 25M
-#       /tycho/Media/Library/Music
-#       b2:music-rcUFz3wc/
-#       && curl -fsS -m 10 --retry 5 -o /dev/null {{ SECRET_UPTIMEROBOT_HEARTBEAT_MUSIC_B2 }}
+    - opnsense

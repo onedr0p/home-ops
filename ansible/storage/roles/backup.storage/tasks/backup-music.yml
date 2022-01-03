@@ -1,0 +1,38 @@
+---
+- name: Create backup-music directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ containers_base_dir }}/apps/rclone/backup-music"
+
+- name: Create backup-music docker compose file
+  ansible.builtin.template:
+    src: backup-music/docker-compose.yml.j2
+    dest: "{{ containers_base_dir }}/apps/rclone/backup-music/docker-compose.yml"
+    mode: 0755
+
+- name: Create backup-music systemd service file
+  ansible.builtin.template:
+    src: docker-compose@backup.service.j2
+    dest: /etc/systemd/system/docker-compose@backup-music.service
+    mode: 0644
+  vars:
+    heartbeat_url: "{{ SECRET_UPTIMEROBOT_HEARTBEAT_MUSIC_B2 }}"
+
+- name: Create backup-music systemd timer file
+  ansible.builtin.copy:
+    src: files/docker-compose@backup.timer
+    dest: /etc/systemd/system/docker-compose@backup-music.timer
+    mode: 0644
+  register: systemd
+
+- name: Enable backup-music systemd timer unit
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  loop:
+    - docker-compose@backup-music.timer
+  when: systemd.changed

@@ -2,9 +2,9 @@
 version: "3.8"
 
 services:
-  cluster-app-data-backup:
+  backup-opnsense:
     image: docker.io/rclone/rclone:1.57.0
-    container_name: cluster-app-data-backup
+    container_name: backup-opnsense
     network_mode: host
     command:
       - "-v"
@@ -20,8 +20,7 @@ services:
       - "20"
       - "--bwlimit"
       - "20M"
-      - "/data/Backups"
-      - "b2:cluster-app-data-xQdC743a/"
+      - "minio:opnsense/"
+      - "b2:opnsense-d5b252ad/"
     volumes:
       - "{{ containers_base_dir }}/apps/rclone/rclone.conf:/config/rclone.conf:ro"
-      - /tycho/Data:/data:ro
