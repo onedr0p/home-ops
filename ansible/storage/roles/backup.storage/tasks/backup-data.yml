@@ -8,9 +8,13 @@
 
 - name: Create backup-data docker compose file
   ansible.builtin.template:
-    src: backup-data/docker-compose.yml.j2
+    src: docker-compose.yml.j2
     dest: "{{ containers_base_dir }}/apps/rclone/backup-data/docker-compose.yml"
     mode: 0755
+  vars:
+    container_name: backup-data
+    source: /data/Backups
+    destination: b2:cluster-app-data-xQdC743a/
 
 - name: Create backup-data systemd service file
   ansible.builtin.template:

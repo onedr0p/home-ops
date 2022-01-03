@@ -8,9 +8,13 @@
 
 - name: Create backup-music docker compose file
   ansible.builtin.template:
-    src: backup-music/docker-compose.yml.j2
+    src: docker-compose.yml.j2
     dest: "{{ containers_base_dir }}/apps/rclone/backup-music/docker-compose.yml"
     mode: 0755
+  vars:
+    container_name: backup-music
+    source: /media/Library/Music
+    destination: b2:music-rcUFz3wc/
 
 - name: Create backup-music systemd service file
   ansible.builtin.template:

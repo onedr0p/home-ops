@@ -8,9 +8,13 @@
 
 - name: Create backup-etcd docker compose file
   ansible.builtin.template:
-    src: backup-etcd/docker-compose.yml.j2
+    src: docker-compose.yml.j2
     dest: "{{ containers_base_dir }}/apps/rclone/backup-etcd/docker-compose.yml"
     mode: 0755
+  vars:
+    container_name: backup-etcd
+    source: minio:k3s/
+    destination: b2:k3s-etcd-snapshots-s0DL5a1k/
 
 - name: Create backup-etcd systemd service file
   ansible.builtin.template:

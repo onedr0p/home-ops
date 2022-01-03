@@ -2,9 +2,9 @@
 version: "3.8"
 
 services:
-  backup-etcd:
+  {{ container_name }}:
     image: docker.io/rclone/rclone:1.57.0
-    container_name: backup-etcd
+    container_name: {{ container_name }}
     network_mode: host
     command:
       - "-v"
@@ -20,7 +20,9 @@ services:
       - "20"
       - "--bwlimit"
       - "20M"
-      - "minio:k3s/"
-      - "b2:k3s-etcd-snapshots-s0DL5a1k/"
+      - "{{ source }}"
+      - "{{ destination }}"
     volumes:
       - "{{ containers_base_dir }}/apps/rclone/rclone.conf:/config/rclone.conf:ro"
+      - /tycho/Data:/data:ro
+      - /tycho/Media:/media:ro
