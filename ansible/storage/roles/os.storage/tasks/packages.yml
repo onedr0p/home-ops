@@ -14,11 +14,7 @@
   ansible.builtin.apt_repository:
     repo: "{{ item }}"
     update_cache: true
-  loop: "{{ os_packages_repositories }}"
-  when:
-    - os_packages_repositories is defined
-    - os_packages_repositories is iterable
-    - os_packages_repositories | length > 0
+  loop: "{{ os_packages_repositories | default([]) }}"
 
 - name: Upgrade all system packages
   ansible.builtin.apt:
@@ -29,29 +25,22 @@
 
 - name: Install common packages
   ansible.builtin.apt:
-    name: "{{ os_packages_install }}"
+    name: "{{ os_packages_install | default([]) }}"
     install_recommends: false
   register: apt_install_common
   retries: 5
   until: apt_install_common is success
-  when:
-    - os_packages_install is defined
-    - os_packages_install is iterable
-    - os_packages_install | length > 0
 
 - name: Gather installed packages
   ansible.builtin.package_facts:
     manager: auto
 
-- name: Remove packages
+- name: Remove snapd
   block:
     - name: Check if snap is installed
       ansible.builtin.debug:
         msg: "snapd is installed"
       register: snapd_check
-      when:
-        - "'snapd' in os_packages_remove"
-        - "'snapd' in ansible_facts.packages"
     - name: Remove snap packages
       ansible.builtin.command: snap remove {{ item }}
       loop:
@@ -60,14 +49,7 @@
         - core20
         - snapd
       when:
-        - "'snapd' in os_packages_remove"
-        - "'snapd' in ansible_facts.packages"
         - snapd_check.failed is defined
-    - name: Remove packages
-      ansible.builtin.apt:
-        name: "{{ os_packages_remove }}"
-        state: absent
-        autoremove: true
     - name: Remove files
       ansible.builtin.file:
         state: absent
@@ -79,9 +61,12 @@
         - "/var/lib/snapd"
         - "/var/cache/snapd"
         - "/usr/lib/snapd"
-      when:
-        - "'snapd' in os_packages_remove"
   when:
-    - os_packages_remove is defined
-    - os_packages_remove is iterable
-    - os_packages_remove | length > 0
+    - "'snapd' in os_packages_remove"
+    - "'snapd' in ansible_facts.packages"
+
+- name: Remove packages
+  ansible.builtin.apt:
+    name: "{{ os_packages_remove | default([]) }}"
+    state: absent
+    autoremove: true

@@ -9,15 +9,16 @@ VACUUM_USER="root"
 VACUUM_ADDR="192.168.1.28"
 SSH_OPTS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR"
 
+VALETUDO_VERSION="2022.01.0"
+NODE_EXPORTER_VERSION="1.3.1"
+VECTOR_VERSION="0.19.0"
+
 #
 # valetudo
 #
-
-# TODO: Renovate valetudo version in hack
-valetudo_version="2021.12.1"
 echo "*** Downloading Valetudo... ***"
 curl -fsSL -o "/tmp/valetudo" \
-    "https://github.com/Hypfer/Valetudo/releases/download/${valetudo_version}/valetudo-armv7"
+    "https://github.com/Hypfer/Valetudo/releases/download/${VALETUDO_VERSION}/valetudo-armv7"
 ssh "${SSH_OPTS}" -T "${VACUUM_USER}@${VACUUM_ADDR}" <<'EOL'
     echo "*** Stopping Valetudo... ***"
     /etc/init/S11valetudo stop > /dev/null 2>&1
@@ -41,12 +42,9 @@ EOL
 #
 # node_exporter
 #
-
-# TODO: Renovate node_exporter version in hack
-node_exporter_version="1.3.1"
 echo "*** Downloading node_exporter... ***"
 curl -fsSL -o "/tmp/node_exporter.tar.gz" \
-    "https://github.com/prometheus/node_exporter/releases/download/v${node_exporter_version}/node_exporter-${node_exporter_version}.linux-armv7.tar.gz"
+    "https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-armv7.tar.gz"
 echo "*** Extracting node_exporter ... ***"
 tar zxf /tmp/node_exporter.tar.gz --strip-components=1 -C /tmp
 echo "*** Stopping node_exporter... ***"
@@ -72,12 +70,9 @@ EOL
 #
 # vector
 #
-
-# TODO: Renovate vector version in hack
-vector_version="0.19.0"
 echo "*** Downloading Vector... ***"
 curl -fsSL -o "/tmp/vector.tar.gz" \
-    "https://github.com/vectordotdev/vector/releases/download/v${vector_version}/vector-${vector_version}-armv7-unknown-linux-musleabihf.tar.gz"
+    "https://github.com/vectordotdev/vector/releases/download/v${VECTOR_VERSION}/vector-${VECTOR_VERSION}-armv7-unknown-linux-musleabihf.tar.gz"
 echo "*** Extracting Vector ... ***"
 tar zxf /tmp/vector.tar.gz --strip-components=1 -C /tmp
 echo "*** Stopping Vector... ***"

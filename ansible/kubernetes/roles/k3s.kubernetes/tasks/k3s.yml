@@ -39,16 +39,10 @@
   ansible.builtin.file:
     path: "{{ k3s_server_manifests_dir }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
     state: absent
-  loop: "{{ k3s_server_manifests_templates }}"
-  when:
-    - k3s_server_manifests_templates
-    - k3s_server_manifests_templates | length > 0
+  loop: "{{ k3s_server_manifests_templates | default([]) }}"
 
 - name: Remove deployed manifest urls
   ansible.builtin.file:
     path: "{{ k3s_server_manifests_dir }}/{{ item.filename }}"
     state: absent
-  loop: "{{ k3s_server_manifests_urls }}"
-  when:
-    - k3s_server_manifests_urls
-    - k3s_server_manifests_urls | length > 0
+  loop: "{{ k3s_server_manifests_urls | default([]) }}"
