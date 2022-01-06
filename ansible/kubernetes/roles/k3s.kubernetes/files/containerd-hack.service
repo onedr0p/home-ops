@@ -1,0 +1,12 @@
+[Unit]
+Description=Gracefully shutdown k3s workloads
+DefaultDependencies=no
+Before=shutdown.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/k3s-killall.sh
+TimeoutStartSec=0
+
+[Install]
+WantedBy=shutdown.target

@@ -9,24 +9,29 @@
     - name: Pausing for 5 seconds...
       pause:
         seconds: 5
+  roles:
+    - xanmanning.k3s
+  vars:
+    k3s_state: uninstalled
   tasks:
-    - name: Kill k3s
-      ansible.builtin.command: /usr/local/bin/k3s-killall.sh
-    - name: Uninstall k3s
-      ansible.builtin.command:
-        cmd: /usr/local/bin/k3s-uninstall.sh
-        removes: /usr/local/bin/k3s-uninstall.sh
-    - name: Uninstall k3s agent
-      ansible.builtin.command:
-        cmd: /usr/local/bin/k3s-agent-uninstall.sh
-        removes: /usr/local/bin/k3s-agent-uninstall.sh
-    - name: Gather list of CNI files to delete
-      find:
+    - name: Remove containerd-hack
+      ansible.builtin.file:
+        path: /etc/systemd/system/containerd-hack.service
+        state: absent
+      notify:
+        - Reload systemd daemon
+    - name: Gather list of CNI files
+      ansible.builtin.find:
         paths: /etc/cni/net.d
         patterns: "*"
-      register: files_to_delete
+        hidden: true
+      register: directory_contents
     - name: Delete CNI files
       ansible.builtin.file:
         path: "{{ item.path }}"
         state: absent
-      loop: "{{ files_to_delete.files }}"
+      loop: "{{ directory_contents.files }}"
+  handlers:
+    - name: Reload systemd daemon
+      systemd:
+        daemon-reload: true
