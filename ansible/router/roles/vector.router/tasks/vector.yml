@@ -1,0 +1,41 @@
+---
+
+- name: Copy Vector binary into place
+  ansible.builtin.copy:
+    src: /root/vector-bin
+    dest: /usr/local/sbin/vector
+    mode: 0755
+    remote_src: true
+
+- block:
+    - name: Create Vector config
+      ansible.builtin.template:
+        src: vector/vector.yaml.j2
+        dest: /usr/local/etc/vector/vector.yaml
+        mode: 0755
+    - name: Create Vector rc.conf script
+      ansible.builtin.template:
+        src: vector/vector-rc.conf.j2
+        dest: /etc/rc.conf.d/vector
+        mode: 0755
+    - name: Create Vector rc.d script
+      ansible.builtin.template:
+        src: vector/vector-rc.d.j2
+        dest: /usr/local/etc/rc.d/vector
+        mode: 0755
+    - name: Create Vector action script
+      ansible.builtin.template:
+        src: vector/actions_vector.conf.j2
+        dest: /usr/local/opnsense/service/conf/actions.d/actions_vector.conf
+        mode: 0755
+    - name: Create Vector start up script
+      ansible.builtin.template:
+        src: vector/99-vector.j2
+        dest: /usr/local/etc/rc.syshook.d/start/99-vector
+        mode: 0755
+    - name: Create Vector log rotation config
+      ansible.builtin.template:
+        src: vector/vector-newsyslog.conf.j2
+        dest: /etc/newsyslog.conf.d/vector
+        mode: 0755
+  notify: Restart vector
