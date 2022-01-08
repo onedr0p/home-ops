@@ -58,7 +58,7 @@ jobs:
               fi
           done
           containers=$(jo -a "${parsed_images[@]}")
-          echo "${containers}"
+          echo "${containers}" | jq .
           echo ::set-output name=containers::${containers}
   scan-container:
     if: contains(github.event.pull_request.labels.*.name, 'component/container')
@@ -66,10 +66,12 @@ jobs:
     runs-on: ubuntu-20.04
     needs: detect-containers
     strategy:
-      matrix: ${{ fromJSON(needs.detect-containers.outputs.containers) }}
+      matrix:
+        container: ${{ fromJSON(needs.detect-containers.outputs.containers) }}
+      fail-fast: false
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Scan Container
         run: |
-          echo ${{ matrix }}
+          echo ${{ matrix.container }}

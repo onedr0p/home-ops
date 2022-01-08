@@ -50,6 +50,6 @@ for i in "${images[@]}"; do
     fi
 done
 
-jo -a "${parsed_images[@]}"
+jo -a -p "${parsed_images[@]}"
 
 # jq -n --compact-output --argjson v "[$(printf '"%s",' "${parsed_images[@]}")0]" '$v'
