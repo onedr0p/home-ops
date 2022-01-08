@@ -57,13 +57,13 @@ jobs:
                   done
               fi
           done
-          containers=$(jo -a "${parsed_images[@]}")
+          containers1=$(jo -a "${parsed_images[@]}")
+          echo ::set-output name=containers1::${containers1}
+      - name: Output Containers
+        run: |
+          containers=${{ toJson(steps.containers1.outputs) }}
           echo "${containers}"
           echo ::set-output name=containers::${containers}
-      # - name: Output Containers
-      #   run: |
-      #     CONTAINERS=${{ toJson(steps.containers.outputs) }}
-      #     echo ::set-output name=containers::${CONTAINERS}
   scan-container:
     if: contains(github.event.pull_request.labels.*.name, 'component/container')
     name: Scan Container
