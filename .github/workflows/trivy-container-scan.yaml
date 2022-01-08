@@ -1,0 +1,78 @@
+---
+name: Trivy Container Scan
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "cluster/**.yaml"
+      - "ansible/**.yml.j2"
+
+jobs:
+  detect-file-changes:
+    if: contains(github.event.pull_request.labels.*.name, 'component/container')
+    name: Detect File Changes
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          list-files: json
+          filters: |
+            yaml:
+              - added|modified: "**.yaml"
+              - added|modified: "**.yml"
+              - added|modified: "**.yaml.j2"
+              - added|modified: "**.yml.j2"
+    outputs:
+      yaml_files: ${{ steps.filter.outputs.yaml_files }}
+  detect-containers:
+    if: contains(github.event.pull_request.labels.*.name, 'component/container')
+    name: Detect Containers
+    runs-on: ubuntu-20.04
+    needs: detect-file-changes
+    strategy:
+      matrix:
+        file: ${{ fromJSON(needs.detect-file-changes.outputs.yaml_files) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Jo
+        run: |
+          sudo apt-get install jo
+      - name: Detect Containers
+        id: containers
+        run: |
+          images=()
+          images+=("$(yq eval '[.. | select(has("repository")) | select(has("tag"))] | .[] | .repository + ":" + .tag' ${{ matrix.file }})")
+          images+=("$(yq eval '.spec.jobTemplate.spec.template.spec.containers.[].image' ${{ matrix.file }})")
+          images+=("$(yq eval '.services.*.image' ${{ matrix.file }})")
+          parsed_images=()
+          for i in "${images[@]}"; do
+              if [[ -n "${i}" && "${i}" != "null" ]]; then
+                  for b in ${i//\\n/ }; do
+                      parsed_images+=("${b}")
+                  done
+              fi
+          done
+          echo ::set-output name=containers::$(jo -a "${parsed_images[@]}")
+      - name: Output Containers
+        run: |
+          CONTAINERS=${{ toJson(steps.containers.outputs) }}
+          echo ::set-output name=containers::${CONTAINERS}
+  scan-container:
+    if: contains(github.event.pull_request.labels.*.name, 'component/container')
+    name: Scan Container
+    runs-on: ubuntu-20.04
+    needs: detect-containers
+    strategy:
+      matrix:
+        container: ${{ fromJSON(needs.detect-containers.outputs.containers) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Scan Container
+        run: |
+          echo ${{ matrix.container }}
