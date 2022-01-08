@@ -1,4 +1,4 @@
-name: Trivy Git Scan
+name: Trivy IaC Scan
 on:
   push:
     branches:
@@ -6,20 +6,20 @@ on:
   pull_request:
 jobs:
   trivy-git-scan:
-    name: Trivy Git Scan
+    name: Trivy IaC Scan
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Run Trivy vulnerability scanner in repo mode
+      - name: Run Trivy vulnerability scanner in IaC mode
         uses: aquasecurity/trivy-action@0.2.1
         with:
-          scan-type: 'fs'
+          scan-type: 'config'
+          hide-progress: false
+          format: 'table'
+          exit-code: '1'
           ignore-unfixed: true
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL'
+          severity: 'CRITICAL,HIGH'
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v1
         with:
