@@ -66,11 +66,10 @@ jobs:
     runs-on: ubuntu-20.04
     needs: detect-containers
     strategy:
-      matrix:
-        container: ${{ fromJSON(needs.detect-containers.outputs.containers) }}
+      matrix: ${{ fromJSON(needs.detect-containers.outputs.containers) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Scan Container
         run: |
-          echo ${{ matrix.container }}
+          echo ${{ matrix }}
