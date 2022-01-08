@@ -42,13 +42,19 @@ jobs:
       - name: Install Jo
         run: |
           sudo apt-get install jo
-      - name: Detect Containers
+      - name: Detect containers in files
         id: containers
         run: |
           images=()
+          # flux helm releases
           images+=("$(yq eval '[.. | select(has("repository")) | select(has("tag"))] | .[] | .repository + ":" + .tag' ${{ matrix.file }})")
+          # kubernetes deployments, statefulsets and daemonsets
           images+=("$(yq eval '.spec.template.spec.containers.[].image' ${{ matrix.file }})")
+          # kubernetes pods
+          images+=("$(yq eval '.spec.containers.[].image' ${{ matrix.file }})")
+          # kubernetes cronjobs
           images+=("$(yq eval '.spec.jobTemplate.spec.template.spec.containers.[].image' ${{ matrix.file }})")
+          # docker compose
           images+=("$(yq eval '.services.*.image' ${{ matrix.file }})")
           parsed_images=()
           for i in "${images[@]}"; do
