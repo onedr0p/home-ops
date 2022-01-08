@@ -1,0 +1,26 @@
+---
+name: size-label
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  size-label:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: size-label
+        uses: pascalgn/size-label-action@v0.4.2
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          sizes: >
+            {
+              "0": "size/XS",
+              "20": "size/S",
+              "50": "size/M",
+              "200": "size/L",
+              "800": "size/XL",
+              "2000": "size/XXL"
+            }
