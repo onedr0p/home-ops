@@ -47,6 +47,7 @@ jobs:
         run: |
           images=()
           images+=("$(yq eval '[.. | select(has("repository")) | select(has("tag"))] | .[] | .repository + ":" + .tag' ${{ matrix.file }})")
+          images+=("$(yq eval '.spec.template.spec.containers.[].image' ${{ matrix.file }})")
           images+=("$(yq eval '.spec.jobTemplate.spec.template.spec.containers.[].image' ${{ matrix.file }})")
           images+=("$(yq eval '.services.*.image' ${{ matrix.file }})")
           parsed_images=()
@@ -74,18 +75,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Scan Container
-        run: |
-          echo ${{ matrix.container }}
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.2.1
         with:
-          image-ref: "${{ matrix.container }}"
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-results.sarif'
+          image-ref: ${{ matrix.container }}
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+          format: template
+          template: "@/contrib/sarif.tpl"
+          output: trivy-results.sarif
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: trivy-results.sarif
