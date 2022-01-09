@@ -11,7 +11,6 @@ on: # yamllint disable-line rule:truthy
 
 jobs:
   detect-file-changes:
-    if: contains(github.event.pull_request.labels.*.name, 'component/container')
     name: Detect File Changes
     runs-on: ubuntu-20.04
     steps:
@@ -29,7 +28,6 @@ jobs:
     outputs:
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
   detect-containers:
-    if: contains(github.event.pull_request.labels.*.name, 'component/container')
     name: Detect Containers
     runs-on: ubuntu-20.04
     needs: detect-file-changes
@@ -45,12 +43,11 @@ jobs:
       - name: Detect Containers in Files
         id: containers
         run: |
-          containers=$(.github/scripts/container-parser.sh "${{ matrix.file }}")
+          containers=$(.github/scripts/container-parser.sh --file "${{ matrix.file }}")
           echo ::set-output name=containers::${containers}
     outputs:
       containers: ${{ steps.containers.outputs.containers }}
   scan-container:
-    if: contains(github.event.pull_request.labels.*.name, 'component/container')
     name: Scan Container
     runs-on: ubuntu-20.04
     needs: detect-containers
