@@ -90,6 +90,7 @@ parse_files() {
         resources=$(echo "${chart_values}" | helm template "${chart_name}" "${chart_name}" --version "${chart_version}" -f -)
         popd > /dev/null 2>&1
         images+=("$(echo "${resources}" | yq eval-all '.spec.template.spec.containers.[].image' -)")
+        helm repo remove ci > /dev/null 2>&1
     fi
 
     # look in helm values
