@@ -1,5 +1,5 @@
 ---
-name: Trivy Container Scan
+name: Scan Containers
 
 on: # yamllint disable-line rule:truthy
   pull_request:
@@ -47,12 +47,13 @@ jobs:
           echo ::set-output name=containers::${containers}
     outputs:
       containers: ${{ steps.containers.outputs.containers }}
-  scan-container:
-    name: Scan Container
+  scan-containers:
+    name: Scan Containers
     runs-on: ubuntu-20.04
     needs: detect-containers
     strategy:
-      matrix: ${{ fromJSON(needs.detect-containers.outputs.containers) }}
+      matrix:
+        container: ${{ fromJSON(needs.detect-containers.outputs.containers) }}
       fail-fast: false
     steps:
       - name: Checkout
