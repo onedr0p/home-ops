@@ -45,30 +45,10 @@ jobs:
       - name: Detect Containers in Files
         id: containers
         run: |
-          images=()
-          # flux helm releases
-          images+=("$(yq eval '[.. | select(has("repository")) | select(has("tag"))] | .[] | .repository + ":" + .tag' ${{ matrix.file }})")
-          # kubernetes deployments, statefulsets and daemonsets
-          images+=("$(yq eval '.spec.template.spec.containers.[].image' ${{ matrix.file }})")
-          # kubernetes pods
-          images+=("$(yq eval '.spec.containers.[].image' ${{ matrix.file }})")
-          # kubernetes cronjobs
-          images+=("$(yq eval '.spec.jobTemplate.spec.template.spec.containers.[].image' ${{ matrix.file }})")
-          # docker compose
-          images+=("$(yq eval '.services.*.image' ${{ matrix.file }})")
-          parsed_images=()
-          for i in "${images[@]}"; do
-              if [[ -n "${i}" && "${i}" != "null" ]]; then
-                  for b in ${i//\\n/ }; do
-                      parsed_images+=("${b}")
-                  done
-              fi
-          done
-          containers=$(jo -a "${parsed_images[@]}")
-          echo "${containers}" | jq .
+          containers=$(.github/scripts/container-parser.sh "${{ matrix.file }}")
           echo ::set-output name=containers::${containers}
     outputs:
-      containers: "{\"container\": ${{ steps.containers.outputs.containers }} }"
+      containers: ${{ steps.containers.outputs.containers }}
   scan-container:
     if: contains(github.event.pull_request.labels.*.name, 'component/container')
     name: Scan Container
