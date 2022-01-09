@@ -1,0 +1,51 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: flame
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: /charts/kah-common/
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      interval: 5m
+  values:
+    fullnameOverride: flame
+    image:
+      repository: docker.io/pawelmalak/flame
+      tag: 2.2.1
+    env:
+      TZ: "America/New_York"
+    service:
+      main:
+        ports:
+          http:
+            port: 5005
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        hosts:
+          - host: "flame.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - "flame.${SECRET_PUBLIC_DOMAIN}"
+    persistence:
+      config:
+        enabled: true
+        existingClaim: flame-config-v1
+        mountPath: /app/data
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 500Mi
