@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: media-browser
+  name: gaps
   namespace: media
 spec:
   interval: 5m
@@ -15,46 +15,34 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
-    fullnameOverride: media-browser
+    fullnameOverride: gaps
     image:
-      repository: docker.io/filebrowser/filebrowser
-      tag: v2.20.1
+      repository: docker.io/housewrecker/gaps
+      tag: latest@sha256:5179911164bbe8e5b30307c71409eba03712bba1359c5d924ba66cc3fe7d435d
     env:
-      FB_DATABASE: "/config/filebrowser.db"
-      FB_ROOT: "/media"
-      FB_LOG: "stdout"
-      FB_NOAUTH: "true"
       TZ: "America/New_York"
     service:
       main:
         ports:
           http:
-            port: 80
+            port: 8484
     ingress:
       main:
         enabled: true
         ingressClassName: "nginx"
         hosts:
-          - host: "media-browser.${SECRET_PUBLIC_DOMAIN}"
+          - host: "gaps.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "media-browser.${SECRET_PUBLIC_DOMAIN}"
+              - "gaps.${SECRET_PUBLIC_DOMAIN}"
     persistence:
       config:
         enabled: true
-        existingClaim: media-browser-config-v1
-      media:
-        enabled: true
-        type: custom
-        volumeSpec:
-          nfs:
-            server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-            path: /tycho/Media
-        mountPath: /media
-        readOnly: true
+        existingClaim: gaps-config-v1
+        mountPath: /usr/data
     resources:
       requests:
         memory: 100Mi
