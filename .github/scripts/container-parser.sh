@@ -80,8 +80,8 @@ parse_files() {
 
     # look in hydrated flux helm releases
     chart_registry_url=$(sed -nr 's|.*registryUrl=(.+)$|\1|p' "${file}")
-    chart_name=$(yq eval .spec.chart.spec.chart "${file}" 2>/dev/null)
-    if [[ -n ${chart_registry_url} && -n "${chart_name}" ]]; then
+    chart_name=$(yq eval-all .spec.chart.spec.chart "${file}" 2>/dev/null)
+    if [[ -n ${chart_registry_url} && -n "${chart_name}" && ! "${chart_name}" =~ "null" ]]; then
         chart_version=$(yq eval .spec.chart.spec.version "${file}" 2>/dev/null)
         chart_values=$(yq eval .spec.values "${file}" 2>/dev/null)
         pushd "$(mktemp -d)" > /dev/null 2>&1
