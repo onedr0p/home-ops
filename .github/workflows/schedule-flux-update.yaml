@@ -11,9 +11,12 @@ jobs:
     name: Flux Update
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: fluxcd/flux2/action@main
-      - id: update
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Flux
+        uses: fluxcd/flux2/action@main
+      - name: Flux Update
+        id: update
         run: |
           UGLY_VERSION="$(flux -v)"
           VERSION="v${UGLY_VERSION#*flux version }"
@@ -22,7 +25,8 @@ jobs:
             --network-policy=false \
             --export > ./cluster/base/flux-system/gotk-components.yaml
           echo "::set-output name=flux_version::$VERSION"
-      - uses: peter-evans/create-pull-request@v3
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: "flux/update-${{ steps.update.outputs.flux_version }}"

@@ -11,11 +11,14 @@ jobs:
     name: Renovate Annotations Update
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: k8s-at-home/renovate-helm-releases@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Renovate Annotations Update
+        uses: k8s-at-home/renovate-helm-releases@v1
         with:
           cluster-path: "./cluster"
-      - uses: peter-evans/create-pull-request@v3
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: renovate-annotations

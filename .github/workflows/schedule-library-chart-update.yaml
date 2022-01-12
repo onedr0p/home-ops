@@ -11,15 +11,21 @@ jobs:
     name: Library Chart Update
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: azure/setup-helm@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Helm
+        uses: azure/setup-helm@v1
         with:
           version: v3.6.3
-      - run: helm repo add k8s-at-home-library https://library-charts.k8s-at-home.com
-      - run: helm repo update
-      - run: helm dep update
+      - name: Add library chart
+        run: helm repo add k8s-at-home-library https://library-charts.k8s-at-home.com
+      - name: Update helm repositories
+        run: helm repo update
+      - name: Update helm dependencies
+        run: helm dep update
         working-directory: charts/kah-common
-      - uses: peter-evans/create-pull-request@v3
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: renovate-kah-library-chart

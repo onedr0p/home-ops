@@ -17,21 +17,23 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.head.repo.fork == false
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v2
         with:
           python-version: 3.x
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
-      - run: |
+      - name: Configure Git
+        run: |
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-      - run: |
+      - name: Install Pip dependencies
+        run: |
           pip install \
             mkdocs>=1.1 \
             mkdocs-macros-plugin >=0.5 \
             mkdocs-material >=1.0 \
             mkdocs-minify-plugin>=0.3 \
             mkdocs-redirects>=1.0
-      - run: mkdocs gh-deploy --config-file ./mkdocs.yaml --force
+      - name: Publish Docs
+        run: mkdocs gh-deploy --config-file ./mkdocs.yaml --force

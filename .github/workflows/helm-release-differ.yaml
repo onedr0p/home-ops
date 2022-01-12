@@ -19,7 +19,9 @@ jobs:
     outputs:
       files: "${{ steps.extract.outputs.files }}"
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Filter
       - uses: dorny/paths-filter@v2
         id: filter
         with:
@@ -27,7 +29,8 @@ jobs:
           filters: |
             changed:
               - '**'
-      - id: extract
+      - name: Extract
+        id: extract
         run: |
           filtered=$(grep -zl "kind: HelmRelease.*registryUrl=" ${{ steps.filter.outputs.changed_files }} \
             | jq -nR '[inputs | select(length>0)]')
@@ -44,19 +47,23 @@ jobs:
         file: ${{ fromJson(needs.detect-file-changes.outputs.files) }}
       fail-fast: false
     steps:
-      - uses: yokawasa/action-setup-kube-tools@v0.8.0
+      - name: Install tools
+        uses: yokawasa/action-setup-kube-tools@v0.8.0
         with:
           setup-tools: |
             helmv3
             yq
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
           ref: ${{ env.conf_live_branch }}
           path: live
-      - uses: actions/checkout@v2
+      - name: Checkout PR
+        uses: actions/checkout@v2
         with:
           path: pr
-      - id: diff
+      - name: Helm Release Differ
+        id: diff
         run: |
           hr_live_url=$(sed -nr 's|.*registryUrl=(.+)$|\1|p' live/${{ matrix.file }})
           hr_live_chart=$(yq e .spec.chart.spec.chart live/${{ matrix.file }})
@@ -110,7 +117,8 @@ jobs:
           fi
           echo "::set-output name=message::$(echo "$message" | jq --raw-input --slurp)"
 
-      - uses: peter-evans/create-or-update-comment@v1
+      - name: Create pull request comment
+        uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: "${{ fromJSON(steps.diff.outputs.message) }}"
