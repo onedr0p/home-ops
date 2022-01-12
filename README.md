@@ -16,6 +16,7 @@ _... managed with Flux and Renovate_ :robot:
 [![k3s](https://img.shields.io/badge/k3s-v1.23.1-brightgreen?style=for-the-badge&logo=kubernetes&logoColor=white)](https://k3s.io/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=for-the-badge)](https://github.com/pre-commit/pre-commit)
 [![renovate](https://img.shields.io/badge/renovate-enabled-brightgreen?style=for-the-badge&logo=renovatebot&logoColor=white)](https://github.com/renovatebot/renovate)
+[![read-my-docs](https://img.shields.io/badge/read%20my-docs-brightgreen?logo=read-the-docs&logoColor=white&style=for-the-badge)](https://onedr0p.github.io/home-ops/)
 [![Lines of code](https://img.shields.io/tokei/lines/github/onedr0p/home-ops?style=for-the-badge&color=brightgreen&label=lines&logo=codefactor&logoColor=white)](https://github.com/onedr0p/home-ops/graphs/contributors)
 
 </div>
@@ -32,10 +33,55 @@ _... managed with Flux and Renovate_ :robot:
 
 ## :book:&nbsp; Overview
 
-This is home to my personal Kubernetes cluster. [Flux](https://github.com/fluxcd/flux2) watches this Git repository and makes the changes to my cluster based on the manifests in the [cluster](./cluster/) directory. [Renovate](https://github.com/renovatebot/renovate) also watches this Git repository and creates pull requests when it finds updates to Docker images, Helm charts, and other dependencies.
+This is a mono repository for my home infrastructure and Kubernetes cluster. I try to adhere to Infrastructure as Code (IaC) and GitOps practices using the tools like [Ansible](https://www.ansible.com/), [Terraform](https://www.terraform.io/), [Kubernetes](https://kubernetes.io/), [Flux](https://github.com/fluxcd/flux2), [Renovate](https://github.com/renovatebot/renovate) and [GitHub Actions](https://github.com/features/actions)
 
-For more information, head on over to my [docs](https://onedr0p.github.io/home-ops/).
+---
 
-## :handshake:&nbsp; Community
+## Kubernetes
 
-Thanks to all the people who donate their time to the [Kubernetes @Home](https://github.com/k8s-at-home/) community.
+### Installation
+
+My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.04 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.
+
+See my [ansible](./ansible/) directory for my playbooks and roles.
+
+### Core Components
+
+- [projectcalico/calico](https://github.com/projectcalico/calico): Internal Kubernetes networking plugin
+- [rook/rook](https://github.com/projectcalico/calico): Distributed block storage for RWO volumes
+- [mozilla/sops](https://toolkit.fluxcd.io/guides/mozilla-sops/): Manages secrets for Kubernetes, Ansible and Terraform.
+- [kubernetes-sigs/external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically manages DNS records from my cluster in a cloud DNS provider.
+- [jetstack/cert-manager](https://cert-manager.io/docs/): Creates SSL certificates for services in my Kubernetes cluster.
+- [kubernetes/ingress-nginx](https://github.com/kubernetes/ingress-nginx/): Ingress controller to expose HTTP traffic to pods over DNS.
+
+### GitOps
+
+[Flux](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder (see Directories below) and makes the changes to my cluster based on the YAML manifests. [Renovate](https://github.com/renovatebot/renovate) also watches my **entire** repository looking for dependency updates, when they are found a PR is automatically created.
+
+### Directories
+
+The Git repository contains the following directories under [cluster](./cluster/) and are ordered below by how Flux will apply them.
+
+- **base**: directory is the entrypoint to Flux
+- **crds**: directory contains custom resource definitions (CRDs) that need to exist globally in your cluster before anything else exists
+- **core**: directory (depends on **crds**) are important infrastructure applications (grouped by namespace) that should never be pruned by Flux
+- **apps**: directory (depends on **core**) is where your common applications (grouped by namespace) could be placed, Flux will prune resources here if they are not tracked by Git anymore
+
+---
+
+## Hardware
+
+| Device                    | Count | OS Disk Size | Data Disk Size       | Ram  | Purpose                      |
+|---------------------------|-------|--------------|----------------------|------|------------------------------|
+| Intel NUC8i3BEK           | 3     | 256GB NVMe   | N/A                  | 16GB | Kubernetes Masters           |
+| Intel NUC8i5BEH           | 3     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | Kubernetes Workers           |
+| PowerEdge T340            | 1     | 120GB SSD    | 8x12TB RAIDz2        | 32GB | Shared file storage          |
+| Lenovo SA120              | 1     |              | 8x12TB               |      | DAS                          |
+| Raspberry Pi              | 1     | 32GB SD Card | N/A                  | 4GB  | PiKVM                        |
+| TESmart 8 Port KVM Switch | 1     | N/A          | N/A                  | N/A  | Network KVM switch for PiKVM |
+
+---
+
+## :handshake:&nbsp; Thanks
+
+Thanks to all the people who donate their time to the [Kubernetes @Home](https://github.com/k8s-at-home/) community. A lot of inspiration for my cluster came from the people that have shared their clusters over at [awesome-home-kubernetes](https://github.com/k8s-at-home/awesome-home-kubernetes).
