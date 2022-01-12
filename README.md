@@ -37,7 +37,7 @@ This is a mono repository for my home infrastructure and Kubernetes cluster. I t
 
 ---
 
-## Kubernetes
+## :sailboat:&nbsp; Kubernetes
 
 ### Installation
 
