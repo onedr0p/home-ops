@@ -1,0 +1,42 @@
+---
+version: "3"
+
+tasks:
+  all:
+    - task: json
+    - task: md
+    - task: tf
+    - task: yaml
+
+  json:
+    desc: Lint JSON
+    cmds:
+      - >-
+        prettier
+        --ignore-path '.github/linters/.prettierignore'
+        --config
+        '.github/linters/.prettierrc.yaml'
+        --ignore-unknown
+        --parser=json
+        --check '*.json' '**/*.json'
+    ignore_error: true
+
+  md:
+    desc: Lint Markdown
+    cmds:
+      - markdownlint -c '.github/linters/.markdownlint.yaml' *.md **/*.md
+    ignore_error: true
+
+  tf:
+    desc: Lint Terraform
+    cmds:
+      - tflint --config .github/linters/.tflint.hcl --loglevel info terraform/b2
+      - tflint --config .github/linters/.tflint.hcl --loglevel info terraform/cloudflare
+      - tflint --config .github/linters/.tflint.hcl --loglevel info terraform/minio
+    ignore_error: true
+
+  yaml:
+    desc: Lint YAML
+    cmds:
+      - yamllint -c '.github/linters/.yamllint.yaml' .
+    ignore_error: true
