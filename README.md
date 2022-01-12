@@ -62,12 +62,12 @@ See my [ansible](./ansible/) directory for my playbooks and roles.
 
 ### Directories
 
-The Git repository contains the following directories under [cluster](./cluster/) and are ordered below by how Flux will apply them.
+The Git repository contains the following directories under [cluster](./cluster/) and are ordered below by how [Flux](https://github.com/fluxcd/flux2) will apply them.
 
-- **base**: directory is the entrypoint to Flux
+- **base**: directory is the entrypoint to [Flux](https://github.com/fluxcd/flux2)
 - **crds**: directory contains custom resource definitions (CRDs) that need to exist globally in your cluster before anything else exists
-- **core**: directory (depends on **crds**) are important infrastructure applications (grouped by namespace) that should never be pruned by Flux
-- **apps**: directory (depends on **core**) is where your common applications (grouped by namespace) could be placed, Flux will prune resources here if they are not tracked by Git anymore
+- **core**: directory (depends on **crds**) are important infrastructure applications (grouped by namespace) that should never be pruned by [Flux](https://github.com/fluxcd/flux2)
+- **apps**: directory (depends on **core**) is where your common applications (grouped by namespace) could be placed, [Flux](https://github.com/fluxcd/flux2) will prune resources here if they are not tracked by Git anymore
 
 ---
 
