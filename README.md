@@ -56,7 +56,9 @@ See my [ansible](./ansible/) directory for my playbooks and roles.
 
 ### GitOps
 
-[Flux](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder (see Directories below) and makes the changes to my cluster based on the YAML manifests. [Renovate](https://github.com/renovatebot/renovate) also watches my **entire** repository looking for dependency updates, when they are found a PR is automatically created.
+[Flux](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder (see Directories below) and makes the changes to my cluster based on the YAML manifests.
+
+[Renovate](https://github.com/renovatebot/renovate) watches my **entire** repository looking for dependency updates, when they are found a PR is automatically created. When some PRs are merged [Flux](https://github.com/fluxcd/flux2) applies the changes to my cluster.
 
 ### Directories
 
