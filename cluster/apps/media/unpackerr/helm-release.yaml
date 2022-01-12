@@ -1,0 +1,56 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: unpackerr
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: unpackerr
+      version: 11.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: docker.io/golift/unpackerr
+      tag: 0.9.9
+    env:
+      TZ: "America/New_York"
+      UN_SONARR_0_URL: http://sonarr:8989
+      UN_SONARR_0_PATHS_0: /media/Library/Downloads/qbittorrent/completed/sonarr
+      UN_SONARR_1_URL: http://sonarr-uhd:8989
+      UN_SONARR_1_PATHS_0: /media/Library/Downloads/qbittorrent/completed/sonarr-uhd
+      UN_RADARR_0_URL: http://radarr:7878
+      UN_RADARR_0_PATHS_0: /media/Library/Downloads/qbittorrent/completed/radarr
+      UN_RADARR_1_URL: http://radarr-uhd:7878
+      UN_RADARR_1_PATHS_0: /media/Library/Downloads/qbittorrent/completed/radarr-uhd
+      UN_LIDARR_0_URL: http://lidarr:8686
+      UN_LIDARR_0_PATHS_0: /media/Library/Downloads/qbittorrent/completed/lidarr
+      UN_READARR_0_URL: http://readarr:8787
+      UN_READARR_0_PATHS_0: /media/Library/Downloads/qbittorrent/completed/readarr
+    envFrom:
+      - secretRef:
+          name: unpackerr
+    persistence:
+      config:
+        enabled: false
+      media:
+        enabled: true
+        type: custom
+        volumeSpec:
+          nfs:
+            server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+            path: /tycho/Media
+        mountPath: /media
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 500m
+      limits:
+        memory: 750Mi
