@@ -71,7 +71,7 @@ The Git repository contains the following directories under [cluster](./cluster/
 
 ---
 
-## Hardware
+## :wrench:&nbsp; Hardware
 
 | Device                    | Count | OS Disk Size | Data Disk Size       | Ram  | Purpose                      |
 |---------------------------|-------|--------------|----------------------|------|------------------------------|
