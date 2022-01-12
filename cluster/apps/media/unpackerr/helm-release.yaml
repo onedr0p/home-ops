@@ -23,31 +23,31 @@ spec:
     env:
       TZ: "America/New_York"
       UN_SONARR_0_URL: http://sonarr:8989
-      UN_SONARR_0_PATHS_0: /media/Library/Downloads/qbittorrent/completed/sonarr
+      UN_SONARR_0_PATHS_0: /completed/sonarr
       UN_SONARR_1_URL: http://sonarr-uhd:8989
-      UN_SONARR_1_PATHS_0: /media/Library/Downloads/qbittorrent/completed/sonarr-uhd
+      UN_SONARR_1_PATHS_0: /completed/sonarr-uhd
       UN_RADARR_0_URL: http://radarr:7878
-      UN_RADARR_0_PATHS_0: /media/Library/Downloads/qbittorrent/completed/radarr
+      UN_RADARR_0_PATHS_0: /completed/radarr
       UN_RADARR_1_URL: http://radarr-uhd:7878
-      UN_RADARR_1_PATHS_0: /media/Library/Downloads/qbittorrent/completed/radarr-uhd
+      UN_RADARR_1_PATHS_0: /completed/radarr-uhd
       UN_LIDARR_0_URL: http://lidarr:8686
-      UN_LIDARR_0_PATHS_0: /media/Library/Downloads/qbittorrent/completed/lidarr
+      UN_LIDARR_0_PATHS_0: /completed/lidarr
       UN_READARR_0_URL: http://readarr:8787
-      UN_READARR_0_PATHS_0: /media/Library/Downloads/qbittorrent/completed/readarr
+      UN_READARR_0_PATHS_0: /completed/readarr
     envFrom:
       - secretRef:
           name: unpackerr
     persistence:
       config:
         enabled: false
-      media:
+      completed:
         enabled: true
         type: custom
         volumeSpec:
           nfs:
             server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-            path: /tycho/Media
-        mountPath: /media
+            path: /tycho/MediaLibrary/Downloads/qbittorrent/completed
+        mountPath: /completed
     resources:
       requests:
         memory: 250Mi
