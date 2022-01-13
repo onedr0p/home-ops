@@ -18,13 +18,13 @@
     - name: Download CoreDNS
       ansible.builtin.get_url:
         url: "{{ coredns_download_url }}"
-        dest: /tmp/coredns-freebsd-amd64.tar.gz
+        dest: "/tmp/coredns-{{ coredns_version }}-freebsd-amd64.tar.gz"
     - name: Extract CoreDNS
       ansible.builtin.shell:
-        cmd: tar xvf /tmp/coredns-freebsd-amd64.tar.gz -C /tmp
+        cmd: "tar xvf /tmp/coredns-{{ coredns_version }}-freebsd-amd64.tar.gz -C /tmp/coredns-{{ coredns_version }}-freebsd-amd64"
     - name: Move CoreDNS binary into place
       ansible.builtin.copy:
-        src: /tmp/coredns
+        src: /tmp/coredns-{{ coredns_version }}-freebsd-amd64/coredns
         dest: /usr/local/sbin/coredns
         mode: 0755
         remote_src: true
