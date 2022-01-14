@@ -1,0 +1,50 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: discord-support-threads-bot
+  namespace: default
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: /charts/kah-common/
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      interval: 5m
+  values:
+    fullnameOverride: discord-support-threads-bot
+    image:
+      repository: ghcr.io/sct/discord-support-threads
+      tag: latest@sha256:b20953843728c5d2c97e2a7cbf96c98ce44a1cae21d0a8b8e2bf59845ddeed16
+    env:
+      TZ: "America/New_York"
+    envFrom:
+      - secretRef:
+          name: discord-support-threads-bot
+    service:
+      main:
+        enabled: false
+    ingress:
+      main:
+        enabled: false
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+      startup:
+        enabled: false
+    persistence:
+      config:
+        enabled: true
+        existingClaim: discord-support-threads-bot-config-v1
+        mountPath: /app/config
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 500Mi
