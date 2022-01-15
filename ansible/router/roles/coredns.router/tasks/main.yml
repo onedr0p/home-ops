@@ -21,7 +21,9 @@
         dest: "/tmp/coredns-{{ coredns_version }}-freebsd-amd64.tar.gz"
     - name: Extract CoreDNS
       ansible.builtin.shell:
-        cmd: "tar xvf /tmp/coredns-{{ coredns_version }}-freebsd-amd64.tar.gz -C /tmp/coredns-{{ coredns_version }}-freebsd-amd64"
+        cmd: >-
+          mkdir -p /tmp/coredns-{{ coredns_version }}-freebsd-amd64;
+          tar xvf /tmp/coredns-{{ coredns_version }}-freebsd-amd64.tar.gz -C /tmp/coredns-{{ coredns_version }}-freebsd-amd64
     - name: Move CoreDNS binary into place
       ansible.builtin.copy:
         src: /tmp/coredns-{{ coredns_version }}-freebsd-amd64/coredns
