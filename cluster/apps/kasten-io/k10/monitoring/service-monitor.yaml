@@ -1,0 +1,23 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: k10
+  namespace: kasten-io
+spec:
+  namespaceSelector:
+    matchNames:
+      - kasten-io
+  selector:
+    matchLabels:
+      app: prometheus
+  endpoints:
+    - port: http
+      scheme: http
+      path: /k10/prometheus/federate
+      honorLabels: true
+      interval: 15s
+      params:
+        "match[]":
+          - '{__name__=~"jobs.*"}'
+          - '{__name__=~"catalog.*"}'
