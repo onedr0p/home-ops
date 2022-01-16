@@ -11,7 +11,7 @@ spec:
     spec:
       # renovate: registryUrl=https://charts.kasten.io/
       chart: k10
-      version: 4.5.6
+      version: 4.5.7
       sourceRef:
         kind: HelmRepository
         name: kasten-charts
@@ -41,27 +41,3 @@ spec:
         secretName: "${SECRET_PUBLIC_DOMAIN/./-}-tls"
     grafana:
       enabled: false
-  postRenderers:
-    - kustomize:
-        patchesJson6902:
-          - target:
-              version: v1beta1
-              kind: Ingress
-              name: k10-ingress
-            patch:
-              - op: replace
-                path: /apiVersion
-                value: networking.k8s.io/v1
-              - op: remove
-                path: /spec/rules/0/http/paths/0/backend/servicePort
-              - op: remove
-                path: /spec/rules/0/http/paths/0/backend/serviceName
-              - op: add
-                path: /spec/rules/0/http/paths/0/backend/service
-                value:
-                  name: gateway
-                  port:
-                    name: http
-              - op: add
-                path: /spec/rules/0/http/paths/0/pathType
-                value: Prefix
