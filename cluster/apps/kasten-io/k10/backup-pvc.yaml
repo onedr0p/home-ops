@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: k10-backup-v1
+spec:
+  storageClassName: k10-backup-nfs
+  capacity:
+    storage: 1Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+    path: /tycho/Data/Backups/k10
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: k10-backup-v1
+  namespace: kasten-io
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: k10-backup-nfs
+  resources:
+    requests:
+      storage: 1Mi
