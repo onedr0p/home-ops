@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-volumesnapshotcontents=$(kubectl get volumesnapshotcontents | awk '{print $1}')
+volumesnapshotcontents=$(kubectl get --no-headers volumesnapshotcontents | awk '{print $1}')
 for volumesnapshotcontent in $volumesnapshotcontents
 do
     kubectl patch volumesnapshotcontents "${volumesnapshotcontent}" -p '{"metadata":{"finalizers":null}}' --type=merge
