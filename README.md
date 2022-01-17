@@ -2,9 +2,9 @@
 
 <img src="https://camo.githubusercontent.com/5b298bf6b0596795602bd771c5bddbb963e83e0f/68747470733a2f2f692e696d6775722e636f6d2f7031527a586a512e706e67" align="center" width="144px" height="144px"/>
 
-### My home Kubernetes cluster :sailboat:
+### My home operations repository :octocat:
 
-_... managed with Flux and Renovate_ :robot:
+_... managed with Flux, Renovate and GitHub Actions_ :robot:
 
 </div>
 
@@ -16,7 +16,6 @@ _... managed with Flux and Renovate_ :robot:
 [![k3s](https://img.shields.io/badge/k3s-v1.23.1-brightgreen?style=for-the-badge&logo=kubernetes&logoColor=white)](https://k3s.io/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=for-the-badge)](https://github.com/pre-commit/pre-commit)
 [![renovate](https://img.shields.io/badge/renovate-enabled-brightgreen?style=for-the-badge&logo=renovatebot&logoColor=white)](https://github.com/renovatebot/renovate)
-[![read-my-docs](https://img.shields.io/badge/read%20my-docs-brightgreen?logo=read-the-docs&logoColor=white&style=for-the-badge)](https://onedr0p.github.io/home-ops/)
 [![Lines of code](https://img.shields.io/tokei/lines/github/onedr0p/home-ops?style=for-the-badge&color=brightgreen&label=lines&logo=codefactor&logoColor=white)](https://github.com/onedr0p/home-ops/graphs/contributors)
 
 </div>
@@ -113,6 +112,12 @@ I have port forwarded ports `80` and `443` to the load balancer IP of my ingress
 ### Dynamic DNS
 
 My home IP can change at any given time and in order to keep my WAN IP address up to date on Cloudflare I have deployed a [CronJob](./cluster/apps/networking/cloudflare-ddns) in my cluster. This periodically checks and updates the `A` record `ipv4.domain.tld`.
+
+---
+
+## :zap:&nbsp; Network Attached Storage
+
+:construction: Work in Progress :construction:
 
 ---
 
