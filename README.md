@@ -64,12 +64,53 @@ See my [ansible](./ansible/) directory for my playbooks and roles.
 
 The Git repository contains the following directories under [cluster](./cluster/) and are ordered below by how [Flux](https://github.com/fluxcd/flux2) will apply them.
 
-- **base**: directory is the entrypoint to [Flux](https://github.com/fluxcd/flux2)
-- **crds**: directory contains custom resource definitions (CRDs) that need to exist globally in your cluster before anything else exists
-- **core**: directory (depends on **crds**) are important infrastructure applications (grouped by namespace) that should never be pruned by [Flux](https://github.com/fluxcd/flux2)
-- **apps**: directory (depends on **core**) is where your common applications (grouped by namespace) could be placed, [Flux](https://github.com/fluxcd/flux2) will prune resources here if they are not tracked by Git anymore
+- **base**: directory is the entrypoint to [Flux](https://github.com/fluxcd/flux2).
+- **crds**: directory contains custom resource definitions (CRDs) that need to exist globally in your cluster before anything else exists.
+- **core**: directory (depends on **crds**) are important infrastructure applications (grouped by namespace) that should never be pruned by [Flux](https://github.com/fluxcd/flux2).
+- **apps**: directory (depends on **core**) is where your common applications (grouped by namespace) could be placed, [Flux](https://github.com/fluxcd/flux2) will prune resources here if they are not tracked by Git anymore.
+
+### Networking
+
+| Name                                         | CIDR              |
+|----------------------------------------------|-------------------|
+| Kubernetes Nodes                             | `192.168.42.0/24` |
+| Kubernetes external services (Calico w/ BGP) | `192.168.69.0/24` |
+| Kubernetes pods                              | `10.69.0.0/16`    |
+| Kubernetes services                          | `10.96.0.0/16`    |
+
+- HAProxy configured on Opnsense for the Kubernetes Control Plane Load Balancer.
+- Calico configured with `externalIPs` to expose Kubernetes services with their own IP over BGP.
+
+### Persistent Volume Data Backup and Recovery
+
+This is a hard topic to explain because there isn't a single great tool to work with rook-ceph. There's [Velero](https://github.com/vmware-tanzu/velero), [Benji](https://github.com/elemental-lf/benji), [Gemini](https://github.com/FairwindsOps/gemini), and others but they all have different amount of issues or nuances which makes them unsable for me. Right now I am using [Kasten K10 by Veeam](https://www.kasten.io/product/) which does a good job of snapshotting Ceph block volumes and exports the data to durable storage (S3 / NFS).
+
+There is also the manual method of scaling down the application and using the rook-ceph toolbox to mount the PV which allows you to tar up the volume data and send it to a NFS server. This method works great if all other options do not work.
 
 ---
+
+## :globe_with_meridians:&nbsp; DNS
+
+### Ingress Controller
+
+I have port forwarded ports `80` and `443` to the load balancer IP of my ingress controller that's running in my Kubernetes cluster.
+
+[Cloudflare](https://www.cloudflare.com/) works as a proxy to hide my homes WAN IP and also as a firewall. All the traffic coming into my ingress controller on port `80` and `443` comes from Cloudflare, which means in `Opnsense` I block all IPs not originating from [Cloudflares list of IP ranges](https://www.cloudflare.com/ips/).
+
+_Cloudflare is also configured to GeoIP block all countries except a few I have whitelisted_
+
+### Internal DNS
+[CoreDNS](https://github.com/coredns/coredns) is deployed on `Opnsense` with the [k8s_gateway](https://github.com/ori-edge/k8s_gateway) external plugin. With this setup, `CoreDNS` has direct access to my clusters ingress records and serves DNS for them for my internal network.
+
+_I maintain a build of `CoreDNS` for FreeBSD over at [onedr0p/opnsense-coredns](https://github.com/onedr0p/opnsense-coredns) that includes the `k8s_gateway` plugin._
+
+### External DNS
+
+[external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses `external-dns` looks at to gather DNS records are ones that I explicitly set the annotation of `external-dns/is-public: "true"`
+
+### Dynamic DNS
+
+My home IP can change at any given time and in order to keep my WAN IP address up to date on Cloudflare I have deployed a [CronJob](./cluster/apps/networking/cloudflare-ddns) in my cluster. This periodically checks and updates the `A` record `ipv4.domain.tld`.
 
 ## :wrench:&nbsp; Hardware
 
