@@ -43,12 +43,12 @@ This is a mono repository for my home infrastructure and Kubernetes cluster. I t
 
 My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.04 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.
 
-See my [ansible](./ansible/) directory for my playbooks and roles.
+🔸 _See my [ansible](./ansible/) directory for my playbooks and roles._
 
 ### Core Components
 
-- [projectcalico/calico](https://github.com/projectcalico/calico): Internal Kubernetes networking plugin
-- [rook/rook](https://github.com/projectcalico/calico): Distributed block storage for RWO volumes
+- [projectcalico/calico](https://github.com/projectcalico/calico): Internal Kubernetes networking plugin.
+- [rook/rook](https://github.com/projectcalico/calico): Distributed block storage for peristent storage.
 - [mozilla/sops](https://toolkit.fluxcd.io/guides/mozilla-sops/): Manages secrets for Kubernetes, Ansible and Terraform.
 - [kubernetes-sigs/external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically manages DNS records from my cluster in a cloud DNS provider.
 - [jetstack/cert-manager](https://cert-manager.io/docs/): Creates SSL certificates for services in my Kubernetes cluster.
@@ -71,15 +71,15 @@ The Git repository contains the following directories under [cluster](./cluster/
 
 ### Networking
 
+- HAProxy configured on Opnsense for the Kubernetes Control Plane Load Balancer.
+- Calico configured with `externalIPs` to expose Kubernetes services with their own IP over BGP.
+
 | Name                                         | CIDR              |
 |----------------------------------------------|-------------------|
 | Kubernetes Nodes                             | `192.168.42.0/24` |
 | Kubernetes external services (Calico w/ BGP) | `192.168.69.0/24` |
 | Kubernetes pods                              | `10.69.0.0/16`    |
 | Kubernetes services                          | `10.96.0.0/16`    |
-
-- HAProxy configured on Opnsense for the Kubernetes Control Plane Load Balancer.
-- Calico configured with `externalIPs` to expose Kubernetes services with their own IP over BGP.
 
 ### Persistent Volume Data Backup and Recovery
 
@@ -97,20 +97,24 @@ I have port forwarded ports `80` and `443` to the load balancer IP of my ingress
 
 [Cloudflare](https://www.cloudflare.com/) works as a proxy to hide my homes WAN IP and also as a firewall. All the traffic coming into my ingress controller on port `80` and `443` comes from Cloudflare, which means in `Opnsense` I block all IPs not originating from [Cloudflares list of IP ranges](https://www.cloudflare.com/ips/).
 
-_Cloudflare is also configured to GeoIP block all countries except a few I have whitelisted_
+🔸 _Cloudflare is also configured to GeoIP block all countries except a few I have whitelisted_
 
 ### Internal DNS
 [CoreDNS](https://github.com/coredns/coredns) is deployed on `Opnsense` with the [k8s_gateway](https://github.com/ori-edge/k8s_gateway) external plugin. With this setup, `CoreDNS` has direct access to my clusters ingress records and serves DNS for them for my internal network.
 
-_I maintain a build of `CoreDNS` for FreeBSD over at [onedr0p/opnsense-coredns](https://github.com/onedr0p/opnsense-coredns) that includes the `k8s_gateway` plugin._
+🔸 _I maintain a build of `CoreDNS` for FreeBSD over at [onedr0p/opnsense-coredns](https://github.com/onedr0p/opnsense-coredns) that includes the `k8s_gateway` plugin._
 
 ### External DNS
 
 [external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses `external-dns` looks at to gather DNS records are ones that I explicitly set the annotation of `external-dns/is-public: "true"`
 
+🔸 _See my [terraform](./terraform/) directory for how else I manage Cloudflare._
+
 ### Dynamic DNS
 
 My home IP can change at any given time and in order to keep my WAN IP address up to date on Cloudflare I have deployed a [CronJob](./cluster/apps/networking/cloudflare-ddns) in my cluster. This periodically checks and updates the `A` record `ipv4.domain.tld`.
+
+---
 
 ## :wrench:&nbsp; Hardware
 
@@ -126,6 +130,18 @@ My home IP can change at any given time and in order to keep my WAN IP address u
 
 ---
 
-## :handshake:&nbsp; Thanks
+## :handshake:&nbsp; Graditude and Thanks
 
 Thanks to all the people who donate their time to the [Kubernetes @Home](https://github.com/k8s-at-home/) community. A lot of inspiration for my cluster came from the people that have shared their clusters over at [awesome-home-kubernetes](https://github.com/k8s-at-home/awesome-home-kubernetes).
+
+---
+
+## :scroll:&nbsp; Changelog
+
+See [commit history](https://github.com/onedr0p/home-ops/commits/main)
+
+---
+
+## :lock_with_ink_pen:&nbsp; License
+
+See [LICENSE](./LICENSE)
