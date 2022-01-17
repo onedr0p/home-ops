@@ -42,7 +42,7 @@ This is a mono repository for my home infrastructure and Kubernetes cluster. I t
 
 My cluster is [k3s](https://k3s.io/) provisioned overtop Ubuntu 20.04 using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.
 
-🔸 _See my [ansible](./ansible/) directory for my playbooks and roles._
+🔸 _[Click here](./ansible/) to see my Ansible playbooks and roles._
 
 ### Core Components
 
@@ -107,7 +107,7 @@ I have port forwarded ports `80` and `443` to the load balancer IP of my ingress
 
 [external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses `external-dns` looks at to gather DNS records are ones that I explicitly set the annotation of `external-dns/is-public: "true"`
 
-🔸 _See my [terraform](./terraform/) directory for how else I manage Cloudflare._
+🔸 _[Click here](./terraform/cloudflare) to see how else I manage Cloudflare._
 
 ### Dynamic DNS
 
