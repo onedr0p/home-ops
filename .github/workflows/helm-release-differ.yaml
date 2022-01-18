@@ -31,13 +31,13 @@ jobs:
       matrix:
         file: ${{ fromJSON(needs.detect-file-changes.outputs.yaml_files) }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Checkout main branch
         uses: actions/checkout@v2
         with:
           ref: main
           path: main
-      - name: Checkout
-        uses: actions/checkout@v2
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
