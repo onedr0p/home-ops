@@ -36,20 +36,16 @@ jobs:
         with:
           ref: main
           path: main
-      - name: Checkout pull request
+      - name: Checkout
         uses: actions/checkout@v2
+      - name: Install Helm
+        uses: azure/setup-helm@v1
         with:
-          path: pull
-      - name: Install tools
-        uses: yokawasa/action-setup-kube-tools@v0.8.0
-        with:
-          setup-tools: |
-            helmv3
-            yq
+          version: v3.6.3
       - name: Helm Release Differ
         id: diff
         run: |
-          diff=$(.github/scripts/helm-release-differ.sh --source-file "main/${{ matrix.file }}" --target-file "pull/${{ matrix.file }}" --remove-common-labels)
+          diff=$(.github/scripts/helm-release-differ.sh --source-file "main/${{ matrix.file }}" --target-file "${{ matrix.file }}" --remove-common-labels)
           echo "${diff}"
           echo "::set-output name=diff::$(echo ${diff} | jq --raw-input --slurp)"
       - name: Find Comment
