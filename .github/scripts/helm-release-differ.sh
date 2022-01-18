@@ -185,6 +185,8 @@ compare() {
 
     # Diff the files and always return true
     diff -u /tmp/source_resources /tmp/target_resources > /tmp/diff || true
+    # Remove the filenames
+    sed -i -e '1,2d' /tmp/diff
 
     # Store the comment in an array
     comments=()
