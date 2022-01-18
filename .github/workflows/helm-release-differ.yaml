@@ -20,7 +20,7 @@ jobs:
           list-files: json
           filters: |
             yaml:
-              - added|modified: "helm-release.yaml"
+              - added|modified: "**/helm-release.yaml"
     outputs:
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
   helm-release-differ:
@@ -52,8 +52,17 @@ jobs:
           diff=$(.github/scripts/helm-release-differ.sh --source-file "main/${{ matrix.file }}" --target-file "pull/${{ matrix.file }}" --remove-common-labels)
           echo "${diff}"
           echo "::set-output name=diff::$(echo ${diff} | jq --raw-input --slurp)"
-      - name: Create pull request comment
-        uses: peter-evans/create-or-update-comment@v1
+      - name: Find Comment
+        uses: peter-evans/find-comment@v1
+        id: find-comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: helm-release.yaml
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
           body: "${{ fromJSON(steps.diff.outputs.diff) }}"
+          edit-mode: replace
