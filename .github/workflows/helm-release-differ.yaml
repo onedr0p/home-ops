@@ -47,7 +47,7 @@ jobs:
         run: |
           diff=$(.github/scripts/helm-release-differ.sh --source-file "main/${{ matrix.file }}" --target-file "${{ matrix.file }}" --remove-common-labels)
           echo "${diff}"
-          echo "::set-output name=diff::$(echo ${diff} | jq --raw-input --slurp)"
+          echo "::set-output name=diff::$(echo ${diff} | jq --raw-input --slurp 'split("\n")')"
       - name: Find Comment
         uses: peter-evans/find-comment@v1
         id: find-comment
