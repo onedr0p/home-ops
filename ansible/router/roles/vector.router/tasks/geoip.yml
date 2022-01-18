@@ -1,20 +1,20 @@
 ---
 
-- name: Copy GeoIP Update binary into place
-  ansible.builtin.copy:
-    src: /root/geoipupdate-bin
-    dest: /usr/local/sbin/geoipupdate
-    mode: 0755
-    remote_src: true
-
-- name: Create GeoIP Update config
-  ansible.builtin.template:
-    src: geoip/GeoIP.conf.j2
-    dest: /usr/local/etc/geoip/GeoIP.conf
-    mode: 0755
-
-- name: Create GeoIP Update cron job
-  ansible.builtin.template:
-    src: geoip/geoip.cron.j2
-    dest: /usr/local/etc/cron.d/geoip.cron
-    mode: 0644
+- block:
+    - name: Copy GeoIP Update binary into place
+      ansible.builtin.copy:
+        src: /root/geoipupdate-bin
+        dest: /usr/local/sbin/geoipupdate
+        mode: 0755
+        remote_src: true
+    - name: Create GeoIP Update config
+      ansible.builtin.template:
+        src: geoip/GeoIP.conf.j2
+        dest: /usr/local/etc/geoip/GeoIP.conf
+        mode: 0755
+    - name: Create GeoIP Update cron job
+      ansible.builtin.template:
+        src: geoip/geoip.cron.j2
+        dest: /usr/local/etc/cron.d/geoip.cron
+        mode: 0644
+  notify: Download geoip

@@ -33,8 +33,7 @@ start_cmd="${name}_start"
 coredns_start()
 {
     echo -n "Starting ${name}."
-    # TODO: For log rotation to work, use '-H' option when Opnsense is on FreeBSD 13
-    /usr/sbin/daemon -p ${pidfile} -m 3 -f -o ${coredns_logfile} ${command} -conf ${coredns_config} ${coredns_flags}
+    /usr/sbin/daemon -p ${pidfile} -m 3 -H -f -o ${coredns_logfile} ${command} -conf ${coredns_config} ${coredns_flags}
 }
 
 run_rc_command "$1"
