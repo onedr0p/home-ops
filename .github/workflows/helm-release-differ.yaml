@@ -1,0 +1,59 @@
+---
+name: Helm Release Differ
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "cluster/**.yaml"
+
+jobs:
+  detect-file-changes:
+    name: Detect File Changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          list-files: json
+          filters: |
+            yaml:
+              - added|modified: "helm-release.yaml"
+    outputs:
+      yaml_files: ${{ steps.filter.outputs.yaml_files }}
+  helm-release-differ:
+    name: Helm Release Differ
+    runs-on: ubuntu-latest
+    needs: detect-file-changes
+    strategy:
+      matrix:
+        file: ${{ fromJSON(needs.detect-file-changes.outputs.yaml_files) }}
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v2
+        with:
+          ref: main
+          path: main
+      - name: Checkout pull request
+        uses: actions/checkout@v2
+        with:
+          path: pull
+      - name: Install tools
+        uses: yokawasa/action-setup-kube-tools@v0.8.0
+        with:
+          setup-tools: |
+            helmv3
+            yq
+      - name: Helm Release Differ
+        id: diff
+        run: |
+          diff=$(.github/scripts/helm-release-differ.sh --source-file "main/${{ matrix.file }}" --target-file "pull/${{ matrix.file }}" --remove-common-labels)
+          echo "${diff}"
+          echo "::set-output name=diff::$(echo ${diff} | jq --raw-input --slurp)"
+      - name: Create pull request comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: "${{ fromJSON(steps.diff.outputs.diff) }}"
