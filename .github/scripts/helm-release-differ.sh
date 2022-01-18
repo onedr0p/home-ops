@@ -190,7 +190,7 @@ compare() {
     comments=()
 
     # shellcheck disable=SC2016
-    comments+=( "$(printf 'Path: `%s`' "${source_file}")" )
+    comments+=( "$(printf 'Path: `%s`' "${target_file}")" )
     if [[ "${source_chart_name}" != "${target_chart_name}" ]]; then
         # shellcheck disable=SC2016
         comments+=( "$(printf 'Chart: `%s` -> `%s`' "${source_chart_name}" "${target_chart_name}")" )
