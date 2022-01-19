@@ -43,8 +43,6 @@ spec:
         proxy-body-size: "100M"
         ssl-protocols: "TLSv1.3 TLSv1.2"
         use-forwarded-headers: "true"
-      podAnnotations:
-        configmap.reloader.stakater.com/reload: "cloudflare-ip-ranges"
       metrics:
         enabled: true
         serviceMonitor:
@@ -73,7 +71,14 @@ spec:
                     operator: In
                     values:
                       - controller
-              topologyKey: "kubernetes.io/hostname"
+              topologyKey: kubernetes.io/hostname
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+      podAnnotations:
+        configmap.reloader.stakater.com/reload: "cloudflare-ip-ranges"
       resources:
         requests:
           memory: 250Mi
