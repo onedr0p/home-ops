@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
-#
-# script to parse out any images from Kubernetes manifests,
-# helm values, flux helm releases, or docker compose files.
-# returns a object with an array of containers from the parsed file
-#
+# shellcheck source=/dev/null
+source "$(dirname "${0}")/lib/functions.sh"
 
 set -o errexit
 set -o nounset
 set -o pipefail
+shopt -s lastpipe
 
 show_help() {
 cat << EOF
@@ -26,7 +24,7 @@ main() {
     check "jo"
     check "jq"
     check "yq"
-    parse_files
+    entry
 }
 
 parse_command_line() {
@@ -67,30 +65,23 @@ parse_command_line() {
     fi
 }
 
-check() {
-    command -v "${1}" >/dev/null 2>&1 || {
-        echo >&2 "ERROR: ${1} is not installed or not found in \$PATH" >&2
-        exit 1
-    }
-}
-
-parse_files() {
+entry() {
     # create new array to hold the images
     images=()
 
     # look in hydrated flux helm releases
-    chart_registry_url=$(sed -nr 's|.*registryUrl=(.+)$|\1|p' "${file}")
+    chart_registry_url=$(chart_registry_url "${file}")
     chart_name=$(yq eval-all .spec.chart.spec.chart "${file}" 2>/dev/null)
     if [[ -n ${chart_registry_url} && -n "${chart_name}" && ! "${chart_name}" =~ "null" ]]; then
         chart_version=$(yq eval .spec.chart.spec.version "${file}" 2>/dev/null)
         chart_values=$(yq eval .spec.values "${file}" 2>/dev/null)
         pushd "$(mktemp -d)" > /dev/null 2>&1
-        helm repo add ci "${chart_registry_url}" > /dev/null 2>&1
-        helm pull "ci/${chart_name}" --untar --version "${chart_version}"
+        helm repo add main "${chart_registry_url}" > /dev/null 2>&1
+        helm pull "main/${chart_name}" --untar --version "${chart_version}"
         resources=$(echo "${chart_values}" | helm template "${chart_name}" "${chart_name}" --version "${chart_version}" -f -)
         popd > /dev/null 2>&1
         images+=("$(echo "${resources}" | yq eval-all '.spec.template.spec.containers.[].image' -)")
-        helm repo remove ci > /dev/null 2>&1
+        helm repo remove main > /dev/null 2>&1
     fi
 
     # look in helm values

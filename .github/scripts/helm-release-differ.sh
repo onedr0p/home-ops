@@ -1,17 +1,12 @@
 #!/usr/bin/env bash
 
-#
-# script to parse out any images from Kubernetes manifests,
-# helm values, flux helm releases, or docker compose files.
-# returns a object with an array of containers from the parsed file
-#
+# shellcheck source=/dev/null
+source "$(dirname "${0}")/lib/functions.sh"
 
 set -o errexit
 set -o nounset
 set -o pipefail
 shopt -s lastpipe
-
-# REPO_ROOT=$(git rev-parse --show-toplevel)
 
 show_help() {
 cat << EOF
@@ -19,7 +14,7 @@ Usage: $(basename "$0") <options>
     -h, --help                      Display help
     --source-file                   Original helm release
     --target-file                   New helm release
-    --remove-common-labels          Omit common annotations with versions
+    --remove-common-labels          Remove common labels from manifests
 EOF
 }
 
@@ -30,7 +25,7 @@ main() {
     parse_command_line "$@"
     check "helm"
     check "yq"
-    compare
+    entry
 }
 
 parse_command_line() {
@@ -70,7 +65,7 @@ parse_command_line() {
         shift
     done
 
-    if [[ -z "$source_file" ]]; then
+    if [[ -z "${source_file}" ]]; then
         echo "ERROR: '--source-file' is required." >&2
         show_help
         exit 1
@@ -82,7 +77,7 @@ parse_command_line() {
         exit 1
     fi
 
-    if [[ -z "$target_file" ]]; then
+    if [[ -z "${target_file}" ]]; then
         echo "ERROR: '--target-file' is required." >&2
         show_help
         exit 1
@@ -97,47 +92,6 @@ parse_command_line() {
     if [[ -z "$remove_common_labels" ]]; then
         remove_common_labels=false
     fi
-}
-
-check() {
-    command -v "${1}" >/dev/null 2>&1 || {
-        echo >&2 "ERROR: ${1} is not installed or not found in \$PATH" >&2
-        exit 1
-    }
-}
-
-_chart_registry_url() {
-    local helm_release=
-    local chart_id=
-    helm_release="${1}"
-    chart_id=$(yq eval .spec.chart.spec.sourceRef.name "${helm_release}" 2>/dev/null)
-    # Discover all HelmRepository
-    find . -iname '*-charts.yaml' -type f -print0 | while IFS= read -r -d '' file; do
-        # Skip non HelmRepository
-        [[ $(yq eval .kind "${file}" 2>/dev/null) != "HelmRepository" ]] && continue
-        # Skip unrelated HelmRepository
-        [[ "${chart_id}" != $(yq eval .metadata.name "${file}" 2>/dev/null) ]] && continue
-        yq eval .spec.url "${file}"
-        break
-    done
-}
-
-_chart_name() {
-    local helm_release=
-    helm_release="${1}"
-    yq eval .spec.chart.spec.chart "${helm_release}" 2>/dev/null
-}
-
-_chart_version() {
-    local helm_release=
-    helm_release="${1}"
-    yq eval .spec.chart.spec.version "${helm_release}" 2>/dev/null
-}
-
-_chart_values() {
-    local helm_release=
-    helm_release="${1}"
-    yq eval .spec.values "${helm_release}" 2>/dev/null
 }
 
 _resources() {
@@ -166,20 +120,20 @@ _resources() {
     helm repo remove main > /dev/null 2>&1
 }
 
-compare() {
+entry() {
     local comments=
 
-    source_chart_name=$(_chart_name "$source_file")
-    source_chart_version=$(_chart_version "$source_file")
-    source_chart_registry_url=$(_chart_registry_url "$source_file")
-    source_chart_values=$(_chart_values "$source_file")
+    source_chart_name=$(chart_name "${source_file}")
+    source_chart_version=$(chart_version "${source_file}")
+    source_chart_registry_url=$(chart_registry_url "${source_file}")
+    source_chart_values=$(chart_values "${source_file}")
     source_resources=$(_resources "${source_chart_name}" "${source_chart_version}" "${source_chart_registry_url}" "${source_chart_values}")
     echo "${source_resources}" > /tmp/source_resources
 
-    target_chart_version=$(_chart_version "$target_file")
-    target_chart_name=$(_chart_name "$target_file")
-    target_chart_registry_url=$(_chart_registry_url "$target_file")
-    target_chart_values=$(_chart_values "$target_file")
+    target_chart_version=$(chart_version "${target_file}")
+    target_chart_name=$(chart_name "${target_file}")
+    target_chart_registry_url=$(chart_registry_url "${target_file}")
+    target_chart_values=$(chart_values "${target_file}")
     target_resources=$(_resources "${target_chart_name}" "${target_chart_version}" "${target_chart_registry_url}" "${target_chart_values}")
     echo "${target_resources}" > /tmp/target_resources
 
