@@ -9,7 +9,7 @@ on:
         required: false
       logLevel:
         description: "Log-Level"
-        default: "info"
+        default: "debug"
         required: false
   # schedule:
   #   - cron: "0/15 * * * *"
@@ -40,13 +40,15 @@ jobs:
         with:
           app_id: "${{ secrets.ROSEY_BOT_APP_ID }}"
           private_key: "${{ secrets.ROSEY_BOT_APP_PRIVATE_KEY }}"
-      - name: Check Dispatch Variables
+      - name: Override default config from dispatch variables
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" == "true" ]]; then
-            echo "DRY_RUN=true" >> $GITHUB_ENV
-          fi
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -z "${{ github.event.inputs.logLevel }}" ]]; then
-            echo "LOG_LEVEL="${{ github.event.inputs.logLevel }}" >> $GITHUB_ENV
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ github.event.inputs.dryRun }}" == "true" ]]; then
+              echo "DRY_RUN=true" >> $GITHUB_ENV
+            fi
+            if [[ -z "${{ github.event.inputs.logLevel }}" ]]; then
+              echo "LOG_LEVEL="${{ github.event.inputs.logLevel }}" >> $GITHUB_ENV
+            fi
           fi
       - name: Renovate
         uses: renovatebot/github-action@v31.31.0
