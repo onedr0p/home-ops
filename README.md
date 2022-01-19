@@ -94,18 +94,18 @@ There is also the manual method of scaling down the application and using the ro
 
 I have port forwarded ports `80` and `443` to the load balancer IP of my ingress controller that's running in my Kubernetes cluster.
 
-[Cloudflare](https://www.cloudflare.com/) works as a proxy to hide my homes WAN IP and also as a firewall. All the traffic coming into my ingress controller on port `80` and `443` comes from Cloudflare, which means in `Opnsense` I block all IPs not originating from [Cloudflares list of IP ranges](https://www.cloudflare.com/ips/).
+[Cloudflare](https://www.cloudflare.com/) works as a proxy to hide my homes WAN IP and also as a firewall. All the traffic coming into my ingress controller on port `80` and `443` comes from Cloudflare, which means in `Opnsense` I block all IPs not originating from the [Cloudflares list of IP ranges](https://www.cloudflare.com/ips/).
 
 🔸 _Cloudflare is also configured to GeoIP block all countries except a few I have whitelisted_
 
 ### Internal DNS
-[CoreDNS](https://github.com/coredns/coredns) is deployed on `Opnsense` with the [k8s_gateway](https://github.com/ori-edge/k8s_gateway) external plugin. With this setup, `CoreDNS` has direct access to my clusters ingress records and serves DNS for them for my internal network.
+[CoreDNS](https://github.com/coredns/coredns) is deployed on `Opnsense` with the [k8s_gateway](https://github.com/ori-edge/k8s_gateway) external plugin. With this setup, `CoreDNS` has direct access to my clusters ingress records and serves DNS for them in my internal network.
 
 🔸 _I maintain a build of `CoreDNS` for FreeBSD over at [onedr0p/opnsense-coredns](https://github.com/onedr0p/opnsense-coredns) that includes the `k8s_gateway` plugin._
 
 ### External DNS
 
-[external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses `external-dns` looks at to gather DNS records are ones that I explicitly set the annotation of `external-dns/is-public: "true"`
+[external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses `external-dns` looks at to gather DNS records are ones that I explicitly set an annotation of `external-dns/is-public: "true"`
 
 🔸 _[Click here](./terraform/cloudflare) to see how else I manage Cloudflare._
 
