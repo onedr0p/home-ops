@@ -1,0 +1,35 @@
+---
+name: Schedule - Cloudflare IP Ranges Update
+
+on: # yamllint disable-line rule:truthy
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+env:
+  CLOUDFLARE_IP_RANGES_FILE: cluster/apps/networking/ingress-nginx/cloudflare-ip-ranges.txt
+
+jobs:
+  cloudflare-ip-ranges-update:
+    name: Cloudflare IP Ranges
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Cloudflare IP Ranges
+        run: |
+          bash ./.github/scripts/cloudflare-ip-ranges.sh > ${{ env.CLOUDFLARE_IP_RANGES_FILE }}
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: "ci/update-cloudflare-ip-ranges"
+          delete-branch: true
+          title: "chore(ci): update cloudflare IP ranges"
+          signoff: true
+          committer: "Devin Buhl <onedr0p@users.noreply.github.com>"
+          author: "Devin Buhl <onedr0p@users.noreply.github.com>"
+          assignees: "onedr0p"
+          commit-message: "chore(ci): update cloudflare IP ranges"
+          body: |
+            Update Cloudflare IP ranges from https://www.cloudflare.com/ips/
