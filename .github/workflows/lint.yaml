@@ -15,12 +15,18 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: Generate Token
+        uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: "${{ secrets.ROSEY_BOT_APP_ID }}"
+          private_key: "${{ secrets.ROSEY_BOT_APP_PRIVATE_KEY }}"
       - name: Lint
         uses: github/super-linter/slim@v4
         env:
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
           ANSIBLE_CONFIG_FILE: .ansible-lint
           MARKDOWN_CONFIG_FILE: .markdownlint.yaml
           TERRAFORM_TFLINT_CONFIG_FILE: .tflint.hcl
