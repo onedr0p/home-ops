@@ -1,0 +1,21 @@
+name: Sync labels
+
+on: # yamllint disable-line rule:truthy
+  workflow_dispatch:
+
+jobs:
+  labels:
+    name: Sync Labels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Token
+        uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: "${{ secrets.ROSEY_BOT_APP_ID }}"
+          private_key: "${{ secrets.ROSEY_BOT_APP_PRIVATE_KEY }}"
+      - name: Sync Labels
+        uses: EndBug/label-sync@v2
+        with:
+          config-file: .github/labels.yaml
+          token: "${{ steps.generate-token.outputs.token }}"
