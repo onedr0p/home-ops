@@ -7,38 +7,6 @@
   loop:
     - /usr/local/etc/rclone
 
-- name: Check current Rclone version
-  ansible.builtin.command: "/usr/local/sbin/rclone --version"
-  failed_when: false
-  changed_when: false
-  register: rclone_version_check
-
-- block:
-    - name: Remove Rclone install files
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: absent
-      loop:
-        - "/tmp/rclone-{{ rclone_version }}-freebsd-amd64"
-        - "/tmp/rclone-{{ rclone_version }}-freebsd-amd64.zip"
-      changed_when: false
-    - name: Download Rclone
-      ansible.builtin.get_url:
-        url: "https://github.com/rclone/rclone/releases/download/{{ rclone_version }}/rclone-{{ rclone_version }}-freebsd-amd64.zip"
-        dest: "/tmp/rclone-{{ rclone_version }}-freebsd-amd64.zip"
-    - name: Extract Rclone
-      ansible.builtin.shell:
-        cmd: unzip /tmp/rclone-{{ rclone_version }}-freebsd-amd64.zip -d /tmp
-    - name: Move Rclone binary into place
-      ansible.builtin.copy:
-        src: "/tmp/rclone-{{ rclone_version }}-freebsd-amd64/rclone"
-        dest: /usr/local/sbin/rclone
-        mode: 0755
-        remote_src: true
-  when: >
-    rclone_version_check.stdout is not defined
-    or rclone_version not in rclone_version_check.stdout
-
 - name: Create Rclone config
   ansible.builtin.template:
     src: rclone.conf.j2
