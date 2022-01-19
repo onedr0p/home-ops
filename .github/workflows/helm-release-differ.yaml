@@ -8,6 +8,10 @@ on: # yamllint disable-line rule:truthy
     paths:
       - "cluster/**.yaml"
 
+env:
+  # Currently no way to detect automatically
+  DEFAULT_BRANCH: main
+
 jobs:
   detect-file-changes:
     name: Detect File Changes
@@ -39,11 +43,11 @@ jobs:
         with:
           app_id: ${{ secrets.ROSEY_BOT_APP_ID }}
           private_key: ${{ secrets.ROSEY_BOT_APP_PRIVATE_KEY }}
-      - name: Checkout main branch
+      - name: Checkout default branch
         uses: actions/checkout@v2
         with:
-          ref: main
-          path: main
+          ref: "${{ env.DEFAULT_BRANCH }}"
+          path: default
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
@@ -51,7 +55,7 @@ jobs:
       - name: Helm Release Differ
         id: diff
         run: |
-          diff=$(.github/scripts/helm-release-differ.sh --source-file "main/${{ matrix.file }}" --target-file "${{ matrix.file }}" --remove-common-labels)
+          diff=$(.github/scripts/helm-release-differ.sh --source-file "default/${{ matrix.file }}" --target-file "${{ matrix.file }}" --remove-common-labels)
           echo "${diff}"
           diff="${diff//'%'/'%25'}"
           diff="${diff//$'\n'/'%0A'}"
