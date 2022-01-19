@@ -13,6 +13,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Generate Token
+        uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: ${{ secrets.ROSEY_BOT_APP_ID }}
+          private_key: ${{ secrets.ROSEY_BOT_APP_PRIVATE_KEY }}
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
@@ -27,7 +33,7 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.generate-token.outputs.token }}
           branch: ci/renovate-kah-library-chart
           delete-branch: true
           title: "chore(ci): update kah library chart"

@@ -16,13 +16,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Generate Token
+        uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: ${{ secrets.ROSEY_BOT_APP_ID }}
+          private_key: ${{ secrets.ROSEY_BOT_APP_PRIVATE_KEY }}
       - name: Cloudflare IP Ranges
         run: |
           bash ./.github/scripts/cloudflare-ip-ranges.sh > ${{ env.CLOUDFLARE_IP_RANGES_FILE }}
       - name: Create pull request
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.generate-token.outputs.token }}
           branch: ci/update-cloudflare-ip-ranges
           delete-branch: true
           title: "chore(ci): update cloudflare IP ranges"
