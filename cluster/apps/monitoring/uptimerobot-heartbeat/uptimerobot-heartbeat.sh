@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ -z "${UPTIMEROBOT_HEARTBEAT_URL}" ]; then
+if [[ -z "${UPTIMEROBOT_HEARTBEAT_URL}" ]]; then
     printf "%s - Yikes - Missing UPTIMEROBOT_HEARTBEAT_URL environment variable" "$(date -u)"
     exit 0
 fi
