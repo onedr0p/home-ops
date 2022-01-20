@@ -26,11 +26,17 @@ jobs:
         id: lychee
         with:
           output: ./lychee.md
-      - name: Create Issue From File
-        if: ${{ steps.lychee.outputs.exit_code != 0 }}
+      - name: Create Issue
+        uses: peter-evans/create-issue-from-file@v3
+        id: create-issue
+        with:
+          title: Link Checker Dashboard 🤖
+          content-filepath: ./lychee.md
+          token: "${{ steps.generate-token.outputs.token }}"
+      - name: Update Issue
         uses: peter-evans/create-issue-from-file@v3
         with:
           title: Link Checker Dashboard 🤖
-          # issue-number:
+          issue-number: "${{ steps.create-issue.outputs.issue-number }}"
           content-filepath: ./lychee.md
           token: "${{ steps.generate-token.outputs.token }}"
