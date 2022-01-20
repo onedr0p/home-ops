@@ -7,24 +7,14 @@
   loop:
     - /usr/local/etc/rclone
 
-- name: Update Ports
-  ansible.builtin.command: >-
-    opnsense-code ports tools
+- name: Create Rclone config
+  ansible.builtin.template:
+    src: rclone.conf.j2
+    dest: /usr/local/etc/rclone/rclone.conf
+    mode: 0755
 
-- name: Build rclone
-  community.general.make:
-    make: /usr/bin/make
-    chdir: /usr/ports/net/rclone
-    target: install
-
-# - name: Create Rclone config
-#   ansible.builtin.template:
-#     src: rclone.conf.j2
-#     dest: /usr/local/etc/rclone/rclone.conf
-#     mode: 0755
-
-# - name: Create Rclone cron job
-#   ansible.builtin.template:
-#     src: rclone-conf-backup.cron.j2
-#     dest: /usr/local/etc/cron.d/rclone-conf-backup.cron
-#     mode: 0644
+- name: Create Rclone cron job
+  ansible.builtin.template:
+    src: rclone-conf-backup.cron.j2
+    dest: /usr/local/etc/cron.d/rclone-conf-backup.cron
+    mode: 0644
