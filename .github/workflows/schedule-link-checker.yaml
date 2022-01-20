@@ -8,6 +8,9 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
 
+env:
+  LINK_CHECKER_ISSUE_NUMBER: "2717"
+
 jobs:
   link-checker:
     name: Link Checker
@@ -33,10 +36,19 @@ jobs:
           title: Link Checker Dashboard 🤖
           content-filepath: ./lychee.md
           token: "${{ steps.generate-token.outputs.token }}"
+      - name: Find Link Checker Issue
+        id: last_issue
+        uses: micalevisk/find-last-issue@v1
+        with:
+          state: open
+          labels: |
+            link-checker
       - name: Update Issue
         uses: peter-evans/create-issue-from-file@v3
         with:
           title: Link Checker Dashboard 🤖
-          issue-number: "${{ steps.create-issue.outputs.issue-number }}"
+          issue-number: "${{ steps.last_issue.outputs.issue_number }}"
           content-filepath: ./lychee.md
           token: "${{ steps.generate-token.outputs.token }}"
+          labels: |
+            link-checker
