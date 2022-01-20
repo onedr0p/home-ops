@@ -11,6 +11,7 @@ on: # yamllint disable-line rule:truthy
 env:
   # Currently no way to detect automatically
   DEFAULT_BRANCH: main
+  BOT_USERNAME: "rosey-bot[bot]"
 
 jobs:
   detect-file-changes:
@@ -41,8 +42,8 @@ jobs:
         uses: tibdex/github-app-token@v1
         id: generate-token
         with:
-          app_id: ${{ secrets.ROSEY_BOT_APP_ID }}
-          private_key: ${{ secrets.ROSEY_BOT_APP_PRIVATE_KEY }}
+          app_id: ${{ secrets.BOT_APP_ID }}
+          private_key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
       - name: Checkout default branch
         uses: actions/checkout@v2
         with:
@@ -66,7 +67,7 @@ jobs:
         id: find-comment
         with:
           issue-number: "${{ github.event.pull_request.number }}"
-          comment-author: "rosey-bot[bot]"
+          comment-author: "${{ env.BOT_USERNAME }}"
           body-includes: helm-release.yaml
       - name: Create or update comment
         uses: peter-evans/create-or-update-comment@v1

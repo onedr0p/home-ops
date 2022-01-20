@@ -12,7 +12,7 @@ assignees: ""
 
 <!--
 Besides asking here, you can also ask in the following Discussion board or Discord
-Discussion board: https://github.com/k8s-at-home/charts/discussions
+Discussion board: https://github.com/k8s-at-home/organization/discussions
 Discord: https://discord.gg/k8s-at-home
 -->
 

@@ -8,9 +8,6 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
 
-env:
-  LINK_CHECKER_ISSUE_NUMBER: "2717"
-
 jobs:
   link-checker:
     name: Link Checker
@@ -22,8 +19,8 @@ jobs:
         uses: tibdex/github-app-token@v1
         id: generate-token
         with:
-          app_id: "${{ secrets.ROSEY_BOT_APP_ID }}"
-          private_key: "${{ secrets.ROSEY_BOT_APP_PRIVATE_KEY }}"
+          app_id: "${{ secrets.BOT_APP_ID }}"
+          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
       - name: Link Checker
         uses: lycheeverse/lychee-action@v1.2.0
         id: lychee
@@ -39,7 +36,7 @@ jobs:
       - name: Update Issue
         uses: peter-evans/create-issue-from-file@v3
         with:
-          title: Link Checker Dashboard 🤖
+          title: Link Checker Dashboard 🔗
           issue-number: "${{ steps.link-checker-issue.outputs.issue_number }}"
           content-filepath: ./lychee.md
           token: "${{ steps.generate-token.outputs.token }}"

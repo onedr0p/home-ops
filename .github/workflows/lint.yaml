@@ -6,6 +6,10 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
 
+env:
+  # Currently no way to detect automatically
+  DEFAULT_BRANCH: main
+
 jobs:
   build:
     name: Lint
@@ -19,13 +23,13 @@ jobs:
         uses: tibdex/github-app-token@v1
         id: generate-token
         with:
-          app_id: "${{ secrets.ROSEY_BOT_APP_ID }}"
-          private_key: "${{ secrets.ROSEY_BOT_APP_PRIVATE_KEY }}"
+          app_id: "${{ secrets.BOT_APP_ID }}"
+          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
       - name: Lint
         uses: github/super-linter/slim@v4
         env:
           VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: main
+          DEFAULT_BRANCH: "${{ env.DEFAULT_BRANCH }}"
           GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
           ANSIBLE_CONFIG_FILE: .ansible-lint
           MARKDOWN_CONFIG_FILE: .markdownlint.yaml
