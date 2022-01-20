@@ -1,0 +1,24 @@
+---
+name: Meta - Draft On Labels
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    types: [labeled, unlabeled, opened, edited, synchronize]
+
+jobs:
+  enforce-label:
+    name: Draft On Labels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Token
+        uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: "${{ secrets.BOT_APP_ID }}"
+          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+      - name: Draft On Labels
+        uses: onedr0p/draft-on-labels-action@v0.0.1
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
+          labels: |
+            do-not-merge
