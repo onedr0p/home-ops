@@ -1,16 +1,16 @@
 ---
 
-- name: Update Ports
-  ansible.builtin.command: >-
-    opnsense-code ports
-  changed_when: false
+- name: Install the community repository
+  ansible.builtin.get_url:
+    url: https://www.routerperformance.net/mimugmail.conf
+    dest: /usr/local/etc/pkg/repos/mimugmail.conf
+    mode: 0644
 
 - name: Install geoipupdate
-  community.general.make:
-    make: /usr/bin/make
-    chdir: /usr/ports/net/geoipupdate
-    target: install
-  changed_when: false
+  community.general.pkgng:
+    name:
+      - net/geoipupdate
+    state: present
 
 - block:
     - name: Create GeoIP Update config

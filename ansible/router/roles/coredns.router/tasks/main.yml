@@ -36,6 +36,12 @@
     or coredns_version not in coredns_version_check.stdout
   notify: Restart coredns
 
+- name: Create CoreDNS log rotation config
+  ansible.builtin.template:
+    src: coredns-newsyslog.conf.j2
+    dest: /etc/newsyslog.conf.d/coredns
+    mode: 0755
+
 - block:
     - name: Copy kubeconfig
       ansible.builtin.copy:
@@ -65,10 +71,5 @@
       ansible.builtin.template:
         src: 99-coredns.j2
         dest: /usr/local/etc/rc.syshook.d/start/99-coredns
-        mode: 0755
-    - name: Create CoreDNS log rotation config
-      ansible.builtin.template:
-        src: coredns-newsyslog.conf.j2
-        dest: /etc/newsyslog.conf.d/coredns
         mode: 0755
   notify: Restart coredns
