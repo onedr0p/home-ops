@@ -1,5 +1,17 @@
 ---
 
+- name: Update Ports
+  ansible.builtin.command: >-
+    opnsense-code ports
+  changed_when: false
+
+- name: Install geoipupdate
+  community.general.make:
+    make: /usr/bin/make
+    chdir: /usr/ports/net/geoipupdate
+    target: install
+  changed_when: false
+
 - block:
     - name: Create GeoIP Update config
       ansible.builtin.template:

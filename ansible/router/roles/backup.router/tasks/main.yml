@@ -7,6 +7,18 @@
   loop:
     - /usr/local/etc/rclone
 
+- name: Update Ports
+  ansible.builtin.command: >-
+    opnsense-code ports
+  changed_when: false
+
+- name: Install rclone
+  community.general.make:
+    make: /usr/bin/make
+    chdir: /usr/ports/net/rclone
+    target: install
+  changed_when: false
+
 - name: Create Rclone config
   ansible.builtin.template:
     src: rclone.conf.j2

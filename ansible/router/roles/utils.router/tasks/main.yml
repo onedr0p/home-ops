@@ -30,7 +30,7 @@
       - textproc/jq
     state: present
 
-- name: Update Ports
+- name: Update Ports and Tools
   ansible.builtin.command: >-
     opnsense-code ports tools
 
@@ -41,14 +41,12 @@
     target: install
   loop:
     - /usr/ports/net/croc
-    - /usr/ports/net/geoipupdate
-    - /usr/ports/net/rclone
     - /usr/ports/sysutils/neofetch
     - /usr/ports/sysutils/viddy
     - /usr/ports/textproc/fzf
     - /usr/ports/textproc/go-yq
-    ## These ports below take way too long to compile
-    ## (or fail) and should be done manually if needed
+    ## If needed these ports below take way too long to
+    ## compile (or fail) and should be done manually
     # - /usr/ports/sysutils/lsd
     # - /usr/ports/shells/fish
     # - /usr/ports/devel/llvm
