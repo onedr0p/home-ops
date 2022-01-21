@@ -1,0 +1,43 @@
+---
+apiVersion: cr.kanister.io/v1alpha1
+kind: Blueprint
+metadata:
+  name: b2
+  namespace: kasten-io
+actions:
+  post-export:
+    phases:
+      - func: KubeTask
+        name: hookPhase
+        args:
+          namespace: kasten-io
+          image: ghcr.io/k8s-at-home/rclone:v1.57.0
+          podOverride:
+            containers:
+              - name: container
+                imagePullPolicy: IfNotPresent
+                env:
+                  - name: TZ
+                    value: America/New_York
+                volumeMounts:
+                  - name: rclone-config
+                    mountPath: /config
+            volumes:
+              - name: rclone-conf
+                secret:
+                  secretName: rclone-conf
+          command:
+            - "rclone"
+            - "-v"
+            - "--config"
+            - "/config/rclone.conf"
+            - "sync"
+            - "--ignore-errors"
+            - "--fast-list"
+            - "--b2-hard-delete"
+            - "--transfers"
+            - "24"
+            - "--checkers"
+            - "24"
+            - "minio:k10/"
+            - "b2:k10-A2oZFzyJ/"
