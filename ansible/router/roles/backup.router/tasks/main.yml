@@ -7,17 +7,17 @@
   loop:
     - /usr/local/etc/rclone
 
-- name: Update Ports
-  ansible.builtin.command: >-
-    opnsense-code ports
-  changed_when: false
+- name: Install the community repository
+  ansible.builtin.get_url:
+    url: https://www.routerperformance.net/mimugmail.conf
+    dest: /usr/local/etc/pkg/repos/mimugmail.conf
+    mode: 0644
 
 - name: Install rclone
-  community.general.make:
-    make: /usr/bin/make
-    chdir: /usr/ports/net/rclone
-    target: install
-  changed_when: false
+  community.general.pkgng:
+    name:
+      - net/rclone
+    state: present
 
 - name: Create Rclone config
   ansible.builtin.template:
