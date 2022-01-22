@@ -20,7 +20,7 @@ spec:
       repository: ghcr.io/sct/overseerr
       tag: 1.28.0
     env:
-      TZ: "America/New_York"
+      TZ: "${TIMEZONE}"
       LOG_LEVEL: "info"
     ingress:
       main:
@@ -36,13 +36,13 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.dev/css/base/overseerr/nord.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: "requests.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "requests.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "requests.${SECRET_PUBLIC_DOMAIN}"
+              - *host
     persistence:
       config:
         enabled: true

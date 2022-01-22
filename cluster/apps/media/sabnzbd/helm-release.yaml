@@ -20,7 +20,7 @@ spec:
       repository: ghcr.io/k8s-at-home/sabnzbd
       tag: v3.4.2
     env:
-      TZ: "America/New_York"
+      TZ: "${TIMEZONE}"
       HOST_WHITELIST_ENTRIES: >-
         sabnzbd,
         sabnzbd.media,
@@ -40,13 +40,13 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.dev/css/base/sabnzbd/nord.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: "sabnzbd.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "sabnzbd.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "sabnzbd.${SECRET_PUBLIC_DOMAIN}"
+              - *host
     podSecurityContext:
       supplementalGroups:
         - 100

@@ -20,11 +20,11 @@ spec:
       repository: docker.io/filebrowser/filebrowser
       tag: v2.20.1
     env:
+      TZ: "${TIMEZONE}"
       FB_DATABASE: "/config/filebrowser.db"
       FB_ROOT: "/media"
       FB_LOG: "stdout"
       FB_NOAUTH: "true"
-      TZ: "America/New_York"
     service:
       main:
         ports:
@@ -35,13 +35,13 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         hosts:
-          - host: "media-browser.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "media-browser.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "media-browser.${SECRET_PUBLIC_DOMAIN}"
+              - *host
     persistence:
       config:
         enabled: true

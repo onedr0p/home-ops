@@ -20,7 +20,7 @@ spec:
       repository: ghcr.io/gotify/server
       tag: 2.1.4
     env:
-      TZ: "America/New_York"
+      TZ: "${TIMEZONE}"
     envFrom:
       - secretRef:
           name: gotify
@@ -37,13 +37,13 @@ spec:
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_PUBLIC_DOMAIN}"
           external-dns/is-public: "true"
         hosts:
-          - host: "gotify.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "gotify.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "gotify.${SECRET_PUBLIC_DOMAIN}"
+              - *host
     persistence:
       config:
         enabled: true

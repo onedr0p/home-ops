@@ -20,7 +20,7 @@ spec:
       repository: ghcr.io/k8s-at-home/qbittorrent
       tag: v4.3.9
     env:
-      TZ: "America/New_York"
+      TZ: "${TIMEZONE}"
     settings:
       automaticPortSetup: false
     service:
@@ -57,13 +57,13 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.dev/css/base/qbittorrent/nord.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: "qb.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "qb.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "qb.${SECRET_PUBLIC_DOMAIN}"
+              - *host
     metrics:
       enabled: true
       exporter:

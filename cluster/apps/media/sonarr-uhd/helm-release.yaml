@@ -20,7 +20,7 @@ spec:
       repository: ghcr.io/k8s-at-home/sonarr-develop
       tag: v3.0.6.1432
     env:
-      TZ: "America/New_York"
+      TZ: "${TIMEZONE}"
     ingress:
       main:
         enabled: true
@@ -33,13 +33,13 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.dev/css/base/sonarr/hotline.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: "sonarr-uhd.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "sonarr-uhd.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "sonarr-uhd.${SECRET_PUBLIC_DOMAIN}"
+              - *host
     podSecurityContext:
       supplementalGroups:
         - 100

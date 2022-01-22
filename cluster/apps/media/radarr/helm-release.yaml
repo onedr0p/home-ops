@@ -20,7 +20,7 @@ spec:
       repository: ghcr.io/k8s-at-home/radarr-develop
       tag: v4.0.2.5836
     env:
-      TZ: "America/New_York"
+      TZ: "${TIMEZONE}"
     ingress:
       main:
         enabled: true
@@ -33,13 +33,13 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.dev/css/base/radarr/nord.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: "radarr.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "radarr.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "radarr.${SECRET_PUBLIC_DOMAIN}"
+              - *host
     podSecurityContext:
       supplementalGroups:
         - 100
