@@ -23,20 +23,20 @@ spec:
       repository: ghcr.io/koenkk/zigbee2mqtt
       tag: 1.22.2
     env:
-      TZ: America/New_York
+      TZ: "${TIMEZONE}"
       ZIGBEE2MQTT_DATA: /data
     ingress:
       main:
         enabled: true
         ingressClassName: "nginx"
         hosts:
-          - host: "zigbee2mqtt.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "zigbee2mqtt.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "zigbee2mqtt.${SECRET_PUBLIC_DOMAIN}"
+              - *host
     persistence:
       config:
         enabled: true

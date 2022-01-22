@@ -31,7 +31,7 @@ spec:
       repository: ghcr.io/k8s-at-home/node-red
       tag: v2.1.6
     env:
-      TZ: "America/New_York"
+      TZ: "${TIMEZONE}"
       NODE_RED_ENABLE_PROJECTS: "true"
       NODE_RED_ENABLE_SAFE_MODE: "false"
     ingress:
@@ -42,13 +42,13 @@ spec:
           hajimari.io/enable: "true"
           hajimari.io/icon: "resistor-nodes"
         hosts:
-          - host: "node-red.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "node-red.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "node-red.${SECRET_PUBLIC_DOMAIN}"
+              - *host
     persistence:
       config:
         enabled: true

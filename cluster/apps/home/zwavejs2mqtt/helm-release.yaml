@@ -20,7 +20,7 @@ spec:
       repository: ghcr.io/zwave-js/zwavejs2mqtt
       tag: 6.4.1
     env:
-      TZ: "America/New_York"
+      TZ: "${TIMEZONE}"
     service:
       main:
         ports:
@@ -34,13 +34,13 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         hosts:
-          - host: "zwavejs2mqtt.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "zwavejs2mqtt.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "zwavejs2mqtt.${SECRET_PUBLIC_DOMAIN}"
+              - *host
     securityContext:
       privileged: true
     persistence:
