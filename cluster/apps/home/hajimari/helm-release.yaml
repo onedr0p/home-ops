@@ -72,21 +72,21 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         hosts:
-          - host: "hajimari.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host hajimari.${SECRET_PUBLIC_DOMAIN}
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "hajimari.${SECRET_PUBLIC_DOMAIN}"
+              - *host
     persistence:
       data:
         enabled: true
         existingClaim: hajimari-config-v1
     podAnnotations:
-      configmap.reloader.stakater.com/reload: "hajimari-settings"
+      configmap.reloader.stakater.com/reload: hajimari-settings
     resources:
       requests:
         cpu: 100m
