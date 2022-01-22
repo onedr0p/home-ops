@@ -32,11 +32,13 @@ _... managed with Flux, Renovate and GitHub Actions_ :robot:
 
 ## :book:&nbsp; Overview
 
-This is a mono repository for my home infrastructure and Kubernetes cluster. I try to adhere to Infrastructure as Code (IaC) and GitOps practices using the tools like [Ansible](https://www.ansible.com/), [Terraform](https://www.terraform.io/), [Kubernetes](https://kubernetes.io/), [Flux](https://github.com/fluxcd/flux2), [Renovate](https://github.com/renovatebot/renovate) and [GitHub Actions](https://github.com/features/actions)
+This is a mono repository for my home infrastructure and Kubernetes cluster. I try to adhere to Infrastructure as Code (IaC) and GitOps practices using the tools like [Ansible](https://www.ansible.com/), [Terraform](https://www.terraform.io/), [Kubernetes](https://kubernetes.io/), [Flux](https://github.com/fluxcd/flux2), [Renovate](https://github.com/renovatebot/renovate) and [GitHub Actions](https://github.com/features/actions).
 
 ---
 
 ## :sailboat:&nbsp; Kubernetes
+
+There's an excellent template over at [k8s-at-home/template-cluster-k3](https://github.com/k8s-at-home/template-cluster-k3s) if you wanted to try and follow along with some of the practices I use here.
 
 ### Installation
 
@@ -70,9 +72,6 @@ The Git repository contains the following directories under [cluster](./cluster/
 
 ### Networking
 
-- HAProxy configured on Opnsense for the Kubernetes Control Plane Load Balancer.
-- Calico configured with `externalIPs` to expose Kubernetes services with their own IP over BGP.
-
 | Name                                         | CIDR              |
 |----------------------------------------------|-------------------|
 | Kubernetes Nodes                             | `192.168.42.0/24` |
@@ -80,9 +79,14 @@ The Git repository contains the following directories under [cluster](./cluster/
 | Kubernetes pods                              | `10.69.0.0/16`    |
 | Kubernetes services                          | `10.96.0.0/16`    |
 
+- HAProxy configured on Opnsense for the Kubernetes Control Plane Load Balancer.
+- Calico configured with `externalIPs` to expose Kubernetes services with their own IP over BGP which is configured on my router.
+
 ### Persistent Volume Data Backup and Recovery
 
-This is a hard topic to explain because there isn't a single great tool to work with rook-ceph. There's [Velero](https://github.com/vmware-tanzu/velero), [Benji](https://github.com/elemental-lf/benji), [Gemini](https://github.com/FairwindsOps/gemini), and others but they all have different amount of issues or nuances which makes them unsable for me. Right now I am using [Kasten K10 by Veeam](https://www.kasten.io/product/) which does a good job of snapshotting Ceph block volumes and exports the data to durable storage (S3 / NFS).
+This is a hard topic to explain because there isn't a single great tool to work with rook-ceph. There's [Velero](https://github.com/vmware-tanzu/velero), [Benji](https://github.com/elemental-lf/benji), [Gemini](https://github.com/FairwindsOps/gemini), and others but they all have different amount of issues or nuances which makes them unsable for me.
+
+Currently I am leveraging [Kasten K10 by Veeam](https://www.kasten.io/product/) which does a good job of snapshotting Ceph block volumes and the exports the data in the snapshot to durable storage (S3 / NFS).
 
 There is also the manual method of scaling down the application and using the rook-ceph toolbox to mount the PV which allows you to tar up the volume data and send it to a NFS server. This method works great if all other options do not work.
 
