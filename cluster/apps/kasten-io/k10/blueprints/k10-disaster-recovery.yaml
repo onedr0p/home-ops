@@ -2,7 +2,7 @@
 apiVersion: cr.kanister.io/v1alpha1
 kind: Blueprint
 metadata:
-  name: b2
+  name: k10-disaster-recovery
   namespace: kasten-io
 actions:
   post-export:
@@ -20,12 +20,17 @@ actions:
                   - name: TZ
                     value: America/New_York
                 volumeMounts:
-                  - name: rclone-config
+                  - name: rclone-conf
                     mountPath: /config
+                  - name: k10-backups
+                    mountPath: /mnt/k10-backups
             volumes:
               - name: rclone-conf
                 secret:
                   secretName: rclone-conf
+              - name: k10-backups
+                persistentVolumeClaim:
+                  claimName: k10-backups
           command:
             - "rclone"
             - "-v"
@@ -39,5 +44,5 @@ actions:
             - "24"
             - "--checkers"
             - "24"
-            - "minio:k10/"
-            - "b2:k10-A2oZFzyJ/"
+            - "/mnt/k10-backups/k10-disaster-recovery"
+            - "b2:k10-disaster-recovery-eKv4wYXE/"

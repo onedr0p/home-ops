@@ -34,7 +34,9 @@ locals {
     "music-rcUFz3wc" = { bucket_type = "allPrivate", file_name_prefix = "", days_from_hiding_to_deleting = 1, days_from_uploading_to_hiding = null },
     "cluster-app-data-xQdC743a" = { bucket_type = "allPrivate", file_name_prefix = "", days_from_hiding_to_deleting = 1, days_from_uploading_to_hiding = null },
     "k3s-etcd-snapshots-s0DL5a1k" = { bucket_type = "allPrivate", file_name_prefix = "", days_from_hiding_to_deleting = 1, days_from_uploading_to_hiding = null },
-    "k10-A2oZFzyJ" = { bucket_type = "allPrivate", file_name_prefix = "", days_from_hiding_to_deleting = 1, days_from_uploading_to_hiding = null },
+    "k10-home-p9FDifEu" = { bucket_type = "allPrivate", file_name_prefix = "", days_from_hiding_to_deleting = 1, days_from_uploading_to_hiding = null },
+    "k10-media-6bp9UzZu" = { bucket_type = "allPrivate", file_name_prefix = "", days_from_hiding_to_deleting = 1, days_from_uploading_to_hiding = null },
+    "k10-disaster-recovery-eKv4wYXE" = { bucket_type = "allPrivate", file_name_prefix = "", days_from_hiding_to_deleting = 1, days_from_uploading_to_hiding = null },
   }
 }
 
