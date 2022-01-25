@@ -16,21 +16,44 @@ spec:
         namespace: flux-system
       interval: 5m
   values:
+    lapi:
+      env:
+        - name: DISABLE_ONLINE_API
+          value: "true"
+      persistentVolume:
+        data:
+          enabled: true
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: ceph-block
+          size: 1Gi
+        config:
+          enabled: true
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: ceph-block
+          size: 100Mi
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+      resources:
+        limits:
+          memory: 100Mi
+        requests:
+          cpu: 150m
+          memory: 100Mi
     agent:
-      acquisition:
-        - namespace: networking
-          podName: ingress-nginx-controller-*
-          program: nginx
       env:
         - name: DISABLE_ONLINE_API
           value: "true"
         - name: COLLECTIONS
           value: "crowdsecurity/nginx"
-    lapi:
-      env:
-        - name: DISABLE_ONLINE_API
-          value: "true"
-    metrics:
-      enabled: true
-      serviceMonitor:
+      acquisition:
+        - namespace: networking
+          podName: ingress-nginx-controller-*
+          program: nginx
+      metrics:
         enabled: true
+        serviceMonitor:
+          enabled: true
