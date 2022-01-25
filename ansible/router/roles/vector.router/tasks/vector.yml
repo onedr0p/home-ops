@@ -1,12 +1,5 @@
 ---
 
-- name: Copy Vector binary into place
-  ansible.builtin.copy:
-    src: /root/vector-bin
-    dest: /usr/local/sbin/vector
-    mode: 0755
-    remote_src: true
-
 - name: Create Vector log rotation config
   ansible.builtin.template:
     src: vector/vector-newsyslog.conf.j2
@@ -14,6 +7,12 @@
     mode: 0755
 
 - block:
+    - name: Copy Vector binary into place
+      ansible.builtin.copy:
+        src: /root/Documents/vector/target/release/vector
+        dest: /usr/local/sbin/vector
+        mode: 0755
+        remote_src: true
     - name: Create Vector config
       ansible.builtin.template:
         src: vector/vector.yaml.j2
