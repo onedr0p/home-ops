@@ -53,24 +53,13 @@ spec:
           enabled: false
       extraArgs:
         default-ssl-certificate: "networking/${SECRET_PUBLIC_DOMAIN/./-}-tls"
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: app.kubernetes.io/name
-                    operator: In
-                    values:
-                      - ingress-nginx
-                  - key: app.kubernetes.io/instance
-                    operator: In
-                    values:
-                      - ingress-nginx
-                  - key: app.kubernetes.io/component
-                    operator: In
-                    values:
-                      - controller
-              topologyKey: kubernetes.io/hostname
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: ingress-nginx
       tolerations:
         - effect: NoSchedule
           operator: Exists
