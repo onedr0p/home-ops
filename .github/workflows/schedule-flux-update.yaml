@@ -35,10 +35,12 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           token: "${{ steps.generate-token.outputs.token }}"
-          branch: "ci/flux-update-${{ steps.update.outputs.flux_version }}"
+          branch: "github-action/flux-update-${{ steps.update.outputs.flux_version }}"
           delete-branch: true
-          title: "chore(ci): update flux components to ${{ steps.update.outputs.flux_version }}"
+          title: "chore(github-action): update flux components to ${{ steps.update.outputs.flux_version }}"
           signoff: true
-          commit-message: "chore(ci): update flux components to ${{ steps.update.outputs.flux_version }}"
+          commit-message: "chore(github-action): update flux components to ${{ steps.update.outputs.flux_version }}"
           body: |
             Release notes: https://github.com/fluxcd/flux2/releases/tag/${{ steps.update.outputs.flux_version }}
+          labels: |
+            renovate/github-action
