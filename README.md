@@ -4,7 +4,7 @@
 
 ### My home operations repository :octocat:
 
-_... managed with Flux, Renovate and GitHub Actions_ :robot:
+_... managed with Flux, Renovate and GitHub Actions_ 🤖
 
 </div>
 
@@ -36,7 +36,7 @@ This is a mono repository for my home infrastructure and Kubernetes cluster. I t
 
 ---
 
-## :sailboat:&nbsp; Kubernetes
+## ⛵ Kubernetes
 
 There's an excellent template over at [k8s-at-home/template-cluster-k3](https://github.com/k8s-at-home/template-cluster-k3s) if you wanted to try and follow along with some of the practices I use here.
 
@@ -92,7 +92,7 @@ There is also the manual method of scaling down the application and using the ro
 
 ---
 
-## :globe_with_meridians:&nbsp; DNS
+## 🌐 DNS
 
 ### Ingress Controller
 
@@ -124,13 +124,13 @@ My home IP can change at any given time and in order to keep my WAN IP address u
 
 ---
 
-## :zap:&nbsp; Network Attached Storage
+## ⚡ Network Attached Storage
 
 :construction: Work in Progress :construction:
 
 ---
 
-## :wrench:&nbsp; Hardware
+## 🔧 Hardware
 
 | Device                    | Count | OS Disk Size | Data Disk Size       | Ram  | Operating System | Purpose                      |
 |---------------------------|-------|--------------|----------------------|------|------------------|------------------------------|
@@ -144,18 +144,18 @@ My home IP can change at any given time and in order to keep my WAN IP address u
 
 ---
 
-## :handshake:&nbsp; Graditude and Thanks
+## 🤝 Graditude and Thanks
 
 Thanks to all the people who donate their time to the [Kubernetes @Home](https://github.com/k8s-at-home/) community. A lot of inspiration for my cluster came from the people that have shared their clusters over at [awesome-home-kubernetes](https://github.com/k8s-at-home/awesome-home-kubernetes).
 
 ---
 
-## :scroll:&nbsp; Changelog
+## 📜 Changelog
 
 See [commit history](https://github.com/onedr0p/home-ops/commits/main)
 
 ---
 
-## :lock_with_ink_pen:&nbsp; License
+## 🔏 License
 
 See [LICENSE](./LICENSE)
