@@ -2,6 +2,7 @@
 name: Lint
 
 on: # yamllint disable-line rule:truthy
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -28,7 +29,7 @@ jobs:
       - name: Lint
         uses: github/super-linter/slim@v4
         env:
-          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'workflow_dispatch' }}
           DEFAULT_BRANCH: "${{ env.DEFAULT_BRANCH }}"
           GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
           ANSIBLE_CONFIG_FILE: .ansible-lint
