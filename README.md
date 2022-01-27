@@ -96,7 +96,7 @@ There is also the manual method of scaling down the application and using the ro
 
 ### Ingress Controller
 
-I have port forwarded ports `80` and `443` to the load balancer IP of my ingress controller that's running in my Kubernetes cluster.
+Over WAN, I have port forwarded ports `80` and `443` to the load balancer IP of my ingress controller that's running in my Kubernetes cluster.
 
 [Cloudflare](https://www.cloudflare.com/) works as a proxy to hide my homes WAN IP and also as a firewall. All the traffic coming into my ingress controller on port `80` and `443` comes from Cloudflare, which means in `Opnsense` I block all IPs not originating from the [Cloudflares list of IP ranges](https://www.cloudflare.com/ips/).
 
@@ -104,9 +104,9 @@ I have port forwarded ports `80` and `443` to the load balancer IP of my ingress
 
 ### Internal DNS
 
-[CoreDNS](https://github.com/coredns/coredns) is deployed on `Opnsense` with the [k8s_gateway](https://github.com/ori-edge/k8s_gateway) external plugin. With this setup, `CoreDNS` has direct access to my clusters ingress records and serves DNS for them in my internal network. `CoreDNS` is only listening on my `MANAGEMENT` and `SERVER` networks on port `53`.
+[CoreDNS](https://github.com/coredns/coredns) is deployed on `Opnsense` with the [k8s_gateway](https://github.com/ori-edge/k8s_gateway) external plugin. With this setup, `CoreDNS` has direct access to my clusters ingress records and serves DNS for them in my internal network. `CoreDNS` is only listening on `127.0.0.1` on port `53`.
 
-For adblocking, I have [AdGuard Home](https://github.com/AdguardTeam/AdGuardHome) also deployed on `Opnsense` which has a upstream server pointing to `CoreDNS`. `Adguard Home` only listens on my `IOT` and `GUEST` networks on port `53`. This means the clients on my `MANAGEMENT` and `SERVER` networks do not consume `AdGuard Home` for adblocking. In my firewall rules I have NAT port redirection forcing the  `IOT` and `GUEST` networks to use the `Adguard Home` DNS server.
+For adblocking, I have [AdGuard Home](https://github.com/AdguardTeam/AdGuardHome) also deployed on `Opnsense` which has a upstream server pointing to `CoreDNS`. `Adguard Home` listens on my `MANAGEMENT`, `SERVER`, `IOT` and `GUEST` networks on port `53`. In my firewall rules I have NAT port redirection forcing the `IOT` and `GUEST` networks to use the `Adguard Home` DNS server.
 
 Without much engineering of DNS @home, these options have made my `Opnsense` router a single point of failure for DNS. I believe this is ok though because my router _should_ have the most uptime of all my systems.
 
