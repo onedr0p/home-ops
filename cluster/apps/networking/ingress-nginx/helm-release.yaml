@@ -69,7 +69,7 @@ spec:
         - effect: NoExecute
           operator: Exists
       podAnnotations:
-        configmap.reloader.stakater.com/reload: "allowed-networks"
+        configmap.reloader.stakater.com/reload: "cloudflare-proxied-networks"
       resources:
         requests:
           memory: 250Mi
@@ -96,13 +96,9 @@ spec:
     #     - name: ERROR_FILES_PATH
     #       value: ./themes/ghost
   valuesFrom:
-    # Cloudflare IP Addresses
+    # Cloudflare Networks
     # https://www.cloudflare.com/ips/
     - kind: ConfigMap
-      name: allowed-networks
-      valuesKey: allowed-networks.txt
+      name: cloudflare-proxied-networks
+      valuesKey: cloudflare-proxied-networks.txt
       targetPath: controller.config.proxy-real-ip-cidr
-    - kind: ConfigMap
-      name: allowed-networks
-      valuesKey: allowed-networks.txt
-      targetPath: controller.config.whitelist-source-range

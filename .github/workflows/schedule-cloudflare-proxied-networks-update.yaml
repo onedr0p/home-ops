@@ -1,5 +1,5 @@
 ---
-name: Schedule - Allowed Networks Update
+name: Schedule - Cloudflare Proxied Networks Update
 
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -7,12 +7,12 @@ on: # yamllint disable-line rule:truthy
     - cron: "0 0 * * *"
 
 env:
-  ALLOWED_NETWORKS_FILE: >-
-    cluster/apps/networking/ingress-nginx/allowed-networks.txt
+  CLOUDFLARE_PROXIED_NETWORKS_FILE: >-
+    cluster/apps/networking/ingress-nginx/cloudflare-proxied-networks.txt
 
 jobs:
-  allowed-networks-update:
-    name: Allowed Networks
+  cloudflare-proxied-networks-update:
+    name: Cloudflare Proxied Networks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,19 +23,19 @@ jobs:
         with:
           app_id: "${{ secrets.BOT_APP_ID }}"
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
-      - name: Allowed Networks
+      - name: Cloudflare Proxied Networks
         run: |
-          bash ./.github/scripts/allowed-networks.sh > ${{ env.ALLOWED_NETWORKS_FILE }}
+          bash ./.github/scripts/cloudflare-proxied-networks.sh > ${{ env.CLOUDFLARE_PROXIED_NETWORKS_FILE }}
       - name: Create pull request
         uses: peter-evans/create-pull-request@v3
         with:
           token: "${{ steps.generate-token.outputs.token }}"
-          branch: github-action/update-allowed-networks
+          branch: github-action/update-cloudflare-proxied-networks
           delete-branch: true
-          title: "chore(github-action): update allowed networks"
+          title: "chore(github-action): update cloudflare proxied networks"
           signoff: true
-          commit-message: "chore(github-action): update allowed networks"
+          commit-message: "chore(github-action): update cloudflare proxied networks"
           body: |
-            Update allowed networks configmap data from https://www.cloudflare.com/ips/
+            Update cloudflare proxy networks configmap from https://www.cloudflare.com/ips/
           labels: |
             renovate/github-action
