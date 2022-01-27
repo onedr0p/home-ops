@@ -75,22 +75,23 @@ spec:
           cpu: 100m
         limits:
           memory: 1000Mi
-    # defaultBackend:
-    #   enabled: true
-    #   image:
-    #     repository: docker.io/tarampampam/error-pages
-    #     tag: ingress-test
-    #   extraEnvs:
-    #     - name: SHOW_DETAILS
-    #       value: "true"
     defaultBackend:
       enabled: true
       image:
-        repository: ghcr.io/181192/custom-error-pages
-        tag: 1.2.1
+        repository: docker.io/tarampampam/error-pages
+        tag: ingress-test
+        pullPolicy: Always
       extraEnvs:
-        - name: ERROR_FILES_PATH
-          value: ./themes/ghost
+        - name: SHOW_DETAILS
+          value: "true"
+    # defaultBackend:
+    #   enabled: true
+    #   image:
+    #     repository: ghcr.io/181192/custom-error-pages
+    #     tag: 1.2.1
+    #   extraEnvs:
+    #     - name: ERROR_FILES_PATH
+    #       value: ./themes/ghost
   valuesFrom:
     # Cloudflare IP Addresses
     # https://www.cloudflare.com/ips/
