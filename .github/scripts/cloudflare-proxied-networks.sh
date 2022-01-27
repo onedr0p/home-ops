@@ -19,7 +19,7 @@ fi
 combined=$(jq \
     --argjson ipv4_cloudflare "${ipv4_cloudflare}" \
     --argjson ipv6_cloudflare "${ipv6_cloudflare}" \
-    -n '$ipv4_rfc1918 + $ipv4_cloudflare + $ipv6_cloudflare' \
+    -n '$ipv4_cloudflare + $ipv6_cloudflare' \
 )
 
 # Output array as a string with \, as delimiter
