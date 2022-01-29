@@ -11,8 +11,10 @@ SSH_OPTS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLeve
 
 # renovate: datasource=github-releases depName=Hypfer/Valetudo
 valetudo_version="2022.01.0"
+
 # renovate: datasource=github-releases depName=prometheus/node_exporter
 node_exporter_version="v1.3.1"
+
 # renovate: datasource=github-releases depName=vectordotdev/vector
 vector_version="v0.19.0"
 
