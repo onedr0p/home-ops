@@ -9,16 +9,19 @@ VACUUM_USER="root"
 VACUUM_ADDR="192.168.1.28"
 SSH_OPTS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR"
 
-VALETUDO_VERSION="2022.01.0"
-NODE_EXPORTER_VERSION="1.3.1"
-VECTOR_VERSION="0.19.0"
+# renovate: datasource=github-releases depName=Hypfer/Valetudo
+valetudo_version="2022.01.0"
+# renovate: datasource=github-releases depName=prometheus/node_exporter
+node_exporter_version="v1.3.1"
+# renovate: datasource=github-releases depName=vectordotdev/vector
+vector_version="v0.19.0"
 
 #
 # valetudo
 #
 echo "*** Downloading Valetudo... ***"
 curl -fsSL -o "/tmp/valetudo" \
-    "https://github.com/Hypfer/Valetudo/releases/download/${VALETUDO_VERSION}/valetudo-armv7"
+    "https://github.com/Hypfer/Valetudo/releases/download/${valetudo_version}/valetudo-armv7"
 ssh "${SSH_OPTS}" -T "${VACUUM_USER}@${VACUUM_ADDR}" <<'EOL'
     echo "*** Stopping Valetudo... ***"
     /etc/init/S11valetudo stop > /dev/null 2>&1
@@ -44,7 +47,7 @@ EOL
 #
 echo "*** Downloading node_exporter... ***"
 curl -fsSL -o "/tmp/node_exporter.tar.gz" \
-    "https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-armv7.tar.gz"
+    "https://github.com/prometheus/node_exporter/releases/download/${node_exporter_version}/node_exporter-${node_exporter_version#?}.linux-armv7.tar.gz"
 echo "*** Extracting node_exporter ... ***"
 tar zxf /tmp/node_exporter.tar.gz --strip-components=1 -C /tmp
 echo "*** Stopping node_exporter... ***"
@@ -72,7 +75,7 @@ EOL
 #
 echo "*** Downloading Vector... ***"
 curl -fsSL -o "/tmp/vector.tar.gz" \
-    "https://github.com/vectordotdev/vector/releases/download/v${VECTOR_VERSION}/vector-${VECTOR_VERSION}-armv7-unknown-linux-musleabihf.tar.gz"
+    "https://github.com/vectordotdev/vector/releases/download/${vector_version}/vector-${vector_version#?}-armv7-unknown-linux-musleabihf.tar.gz"
 echo "*** Extracting Vector ... ***"
 tar zxf /tmp/vector.tar.gz --strip-components=1 -C /tmp
 echo "*** Stopping Vector... ***"

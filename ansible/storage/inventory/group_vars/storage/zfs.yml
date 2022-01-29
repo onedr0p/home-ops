@@ -8,10 +8,10 @@ zfs_enable_performance_tuning: true
 zfs_create_pools: true
 zfs_create_filesystems: true
 zfs_pools:
-  - name: "tycho"
-    action: "create"
+  - name: tycho
+    action: create
     atime: "on"
-    compression: "lz4"
+    compression: lz4
     devices:
       - "/dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH03QF6"
       - "/dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH098M3"
@@ -21,11 +21,11 @@ zfs_pools:
       - "/dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0FEVW"
       - "/dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0FFE1"
       - "/dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZJV01MC5"
-    type: "raidz2"
-    state: "present"
-  - name: "tycho"
-    action: "add"
-    compression: "lz4"
+    type: raidz2
+    state: present
+  - name: tycho
+    action: add
+    compression: lz4
     devices:
       - "/dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_9KGE7XSL"
       - "/dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_9RKU8MSC"
@@ -35,8 +35,8 @@ zfs_pools:
       - "/dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_X1G75H3L"
       - "/dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_X1G9K99L"
       - "/dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_Z2J5SAAT"
-    type: "raidz2"
-    state: "present"
+    type: raidz2
+    state: present
 zfs_filesystems:
   - name: Media
     pool: tycho
@@ -44,34 +44,34 @@ zfs_filesystems:
     state: present
     owner: 568
     group: 568
-    mountpoint: "/tycho/Media"
+    mountpoint: /tycho/Media
   - name: Frigate
     pool: tycho
     sharenfs: "no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24"
     state: present
     owner: 568
     group: 568
-    mountpoint: "/tycho/Frigate"
+    mountpoint: /tycho/Frigate
   - name: Data
     pool: tycho
     sharenfs: "no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24"
     state: present
     owner: 568
     group: 568
-    mountpoint: "/tycho/Data"
-  - name: PersistentVolumeClaims
+    mountpoint: /tycho/Data
+  - name: PVCs
     pool: tycho
     sharenfs: "no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24"
     state: present
     owner: 568
     group: 568
-    mountpoint: "/tycho/PersistentVolumeClaims"
+    mountpoint: /tycho/PVCs
   - name: System
     pool: tycho
     state: present
     owner: 568
     group: 568
-    mountpoint: "/tycho/System"
+    mountpoint: /tycho/System
 zfs_enable_monitoring: true
 zfs_monitoring_capacity_threshold: 80
 zfs_monitoring_scrub_max_age: 8
