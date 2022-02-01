@@ -16,8 +16,16 @@ spec:
         namespace: flux-system
   install:
     createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
   dependsOn:
+    - name: cert-manager
+      namespace: cert-manager
     - name: rook-ceph
+      namespace: rook-ceph
   values:
     monitoring:
       enabled: true
