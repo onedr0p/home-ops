@@ -5,6 +5,11 @@ on: # yamllint disable-line rule:truthy
   workflow_dispatch:
   schedule:
     - cron: "0 */4 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/sechedule-flux-update.yaml"
 
 jobs:
   flux-update:
@@ -27,7 +32,6 @@ jobs:
           UGLY_VERSION="$(flux -v)"
           VERSION="v${UGLY_VERSION#*flux version }"
           flux install --version="${VERSION}" \
-            --components-extra=image-reflector-controller,image-automation-controller \
             --network-policy=false \
             --export > ./cluster/base/flux-system/gotk-components.yaml
           echo "::set-output name=flux_version::$VERSION"
