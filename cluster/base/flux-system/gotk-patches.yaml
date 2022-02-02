@@ -1,4 +1,5 @@
 ---
+# Increase memory limits on source-controller
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -12,3 +13,27 @@ spec:
           resources:
             limits:
               memory: 2Gi
+# ---
+# # Delete the allow-egress NetworkPolicy
+# $patch: delete
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-egress
+#   namespace: flux-system
+# ---
+# # Delete the allow-scraping NetworkPolicy
+# $patch: delete
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-scraping
+#   namespace: flux-system
+# ---
+# # Delete the allow-webhooks NetworkPolicy
+# $patch: delete
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-webhooks
+#   namespace: flux-system
