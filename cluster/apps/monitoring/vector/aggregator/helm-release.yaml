@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: vector-agent
+  name: vector-aggregator
   namespace: monitoring
 spec:
   interval: 5m
@@ -17,14 +17,11 @@ spec:
       interval: 5m
   install:
     createNamespace: true
+  dependsOn:
+    - name: loki
+      namespace: monitoring
   values:
-    image:
-      repository: timberio/vector
-      tag: 0.19.1-debian
-    role: Agent
-    env:
-      - name: VECTOR_WATCH_CONFIG
-        value: "true"
+    role: Stateless-Aggregator
     customConfig:
       data_dir: /vector-data-dir
       api:
@@ -32,28 +29,19 @@ spec:
       # Sources
       sources:
         journal_logs:
-          type: journald
-          journal_directory: /var/log/journal
+          address: 0.0.0.0:6000
+          type: vector
+          version: "2"
         kubernetes_logs:
-          type: kubernetes_logs
-      # Sinks
+          address: 0.0.0.0:6010
+          type: vector
+          version: "2"
+        opnsense_logs:
+          address: 0.0.0.0:6020
+          type: vector
+          version: "2"
       sinks:
-        loki_journal_sink:
-          type: loki
-          inputs:
-            - journal_logs
-          endpoint: http://loki:3100
-          encoding:
-            codec: json
-          batch:
-            max_bytes: 2049000
-          out_of_order_action: rewrite_timestamp
-          remove_label_fields: true
-          remove_timestamp: true
-          labels:
-            hostname: >-
-              {{`{{ host }}`}}
-        loki_kubernetes_sink:
+        loki_kubernetes:
           type: loki
           inputs:
             - kubernetes_logs
@@ -80,14 +68,34 @@ spec:
               {{`{{ kubernetes.pod_node_name }}`}}
             pod: >-
               {{`{{ kubernetes.pod_name }}`}}
-    service:
-      enabled: false
+        loki_opnsense:
+          type: loki
+          inputs:
+            - opnsense_logs
+          endpoint: http://loki:3100
+          encoding:
+            codec: json
+          batch:
+            max_bytes: 2049000
+          out_of_order_action: rewrite_timestamp
+          labels:
+            hostname: >-
+              {{`{{ host }}`}}
+            syslog_identifier: >-
+              {{`{{ SYSLOG_IDENTIFIER }}`}}
     podMonitor:
       enabled: true
-    securityContext:
-      privileged: true
-    tolerations:
-      - effect: NoSchedule
-        operator: Exists
-      - effect: NoExecute
-        operator: Exists
+    service:
+      enabled: true
+      type: LoadBalancer
+  postRenderers:
+    - kustomize:
+        patchesJson6902:
+          - target:
+              kind: Service
+              name: vector-aggregator
+            patch:
+              - op: add
+                path: /spec/externalIPs
+                value:
+                  - "${SVC_SYSLOG_ADDR}"

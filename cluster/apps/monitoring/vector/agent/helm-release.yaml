@@ -1,0 +1,63 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: vector-agent
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: vector
+      version: 0.5.0
+      sourceRef:
+        kind: HelmRepository
+        name: vector-charts
+        namespace: flux-system
+      interval: 5m
+  install:
+    createNamespace: true
+  dependsOn:
+    - name: vector-aggregator
+      namespace: monitoring
+  values:
+    image:
+      repository: timberio/vector
+      tag: 0.19.1-debian
+    role: Agent
+    customConfig:
+      data_dir: /vector-data-dir
+      api:
+        enabled: false
+      # Sources
+      sources:
+        journal_logs:
+          type: journald
+          journal_directory: /var/log/journal
+        kubernetes_logs:
+          type: kubernetes_logs
+      # Sinks
+      sinks:
+        loki_journal_sink:
+          type: vector
+          inputs:
+            - journal_logs
+          address: vector-aggregator:6000
+          version: "2"
+        loki_kubernetes_sink:
+          type: vector
+          inputs:
+            - kubernetes_logs
+          address: vector-aggregator:6010
+          version: "2"
+    service:
+      enabled: false
+    podMonitor:
+      enabled: true
+    securityContext:
+      privileged: true
+    tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
