@@ -74,16 +74,23 @@ transforms:
     source: filter_source_ip
     target: geoip
 sinks:
-  loki_sink:
-    type: loki
+  loki_opnsense_sink:
+    type: vector
     inputs:
       - filterlog_direction_route.other_action
       - filterlog_geoip
-    endpoint: "https://loki.{{ SECRET_PUBLIC_DOMAIN }}"
-    encoding:
-      codec: json
-    batch:
-      max_bytes: 2049000
-    out_of_order_action: rewrite_timestamp
-    labels:
-      hostname: opnsense
+    address: 192.168.69.111:6020
+    version: "2"
+  # loki_sink:
+  #   type: loki
+  #   inputs:
+  #     - filterlog_direction_route.other_action
+  #     - filterlog_geoip
+  #   endpoint: "https://loki.{{ SECRET_PUBLIC_DOMAIN }}"
+  #   encoding:
+  #     codec: json
+  #   batch:
+  #     max_bytes: 2049000
+  #   out_of_order_action: rewrite_timestamp
+  #   labels:
+  #     hostname: opnsense
