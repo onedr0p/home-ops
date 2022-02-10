@@ -21,25 +21,15 @@
 #
 data_dir: /tmp
 sources:
-  opnsense_system_logs:
-    type: file
-    include:
-      - /var/log/system/latest.log
-  opnsense_firewall_logs:
+  filterlog_logs:
     type: file
     include:
       - /var/log/filter/latest.log
 transforms:
-  opnsense_system_remap:
+  filterlog_remap:
     type: remap
     inputs:
-      - opnsense_system_logs
-    source: |
-      . |= parse_syslog!(.message)
-  opnsense_firewall_remap:
-    type: remap
-    inputs:
-      - opnsense_firewall_logs
+      - filterlog_logs
     source: |
       . |= parse_syslog!(.message)
       if .appname == "filterlog" {
@@ -67,29 +57,28 @@ transforms:
           }
         }
       }
-  opnsense_firewall_direction_route:
+  filterlog_direction_route:
     type: route
     inputs:
-      - opnsense_firewall_remap
+      - filterlog_remap
     route:
       pass_action: >-
         .filter_action == "pass"
       other_action: >-
         .filter_action != "pass"
-  opnsense_firewall_geoip:
+  filterlog_geoip:
     type: geoip
     inputs:
-      - opnsense_firewall_direction_route.pass_action
+      - filterlog_direction_route.pass_action
     database: /usr/local/etc/geoip/GeoLite2-City.mmdb
     source: filter_source_ip
     target: geoip
 sinks:
-  loki_opnsense_sink:
+  loki_sink:
     type: loki
     inputs:
-      - opnsense_system_remap
-      - opnsense_firewall_direction_route.other_action
-      - opnsense_firewall_geoip
+      - filterlog_direction_route.other_action
+      - filterlog_geoip
     endpoint: "https://loki.{{ SECRET_PUBLIC_DOMAIN }}"
     encoding:
       codec: json
