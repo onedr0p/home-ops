@@ -5,17 +5,9 @@ sources:
     type: journald
     journal_directory: /run/log/journal
 sinks:
-  loki_journal_sink:
-    type: loki
+  vector_sink:
+    type: vector
     inputs:
       - journal_logs
-    endpoint: https://loki.{{ SECRET_PUBLIC_DOMAIN }}
-    encoding:
-      codec: json
-    batch:
-      max_bytes: 2049000
-    out_of_order_action: rewrite_timestamp
-    remove_label_fields: true
-    remove_timestamp: true
-    labels:
-      hostname: "{{ inventory_hostname }}"
+    address: "{{ vector_aggregator_addr }}:{{ vector_aggregator_port }}"
+    version: "2"
