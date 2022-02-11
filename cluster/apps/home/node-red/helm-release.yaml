@@ -23,8 +23,13 @@ spec:
   values:
     initContainers:
       npm-update:
-        image: node:16-alpine
-        command: ["npm", "update", "--verbose"]
+        image: node:14-alpine
+        command:
+          - npm
+          - install
+          - node-red-contrib-bigssh@latest
+          - node-red-contrib-home-assistant-websocket@latest
+          - node-red-contrib-zigbee2mqtt@latest
         workingDir: /data
         volumeMounts:
           - name: config
