@@ -23,13 +23,16 @@ spec:
   values:
     initContainers:
       npm-update:
-        image: node:14-alpine
+        image: node:17-alpine
         command:
-          - npm
-          - install
-          - node-red-contrib-bigssh@latest
-          - node-red-contrib-home-assistant-websocket@latest
-          - node-red-contrib-zigbee2mqtt@latest
+          - /bin/bash
+          - -c
+          - |
+            if [[ -f /data/package.json ]]; then
+                npm install --save $(npm outdated | cut -d' ' -f 1 | sed '1d' | xargs -I '$' echo '$@latest' | xargs echo);
+            else
+                echo "Skipping npm updates, no package.json found.";
+            fi
         workingDir: /data
         volumeMounts:
           - name: config
