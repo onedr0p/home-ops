@@ -73,7 +73,7 @@ spec:
           - alert: SmartFailures
             expr: |
               sum by (hostname) (count_over_time({hostname=~".+"} | json | _SYSTEMD_UNIT = "smartmontools.service" !~ "(?i)previous self-test completed without error" !~ "(?i)Prefailure" |~ "(?i)(error|fail)"[2m])) > 0
-            for: 10s
+            for: 2m
             labels:
               severity: critical
               category: logs
@@ -87,7 +87,7 @@ spec:
           - alert: ZigbeeUnableToReachMQTT
             expr: |
               sum(count_over_time({app="zigbee2mqtt"} |~ "(?i)not connected to mqtt server"[2m])) > 0
-            for: 10s
+            for: 2m
             labels:
               severity: critical
               category: logs
@@ -101,7 +101,7 @@ spec:
           - alert: ZwaveUnableToReachMQTT
             expr: |
               sum(count_over_time({app="zwavejs2mqtt"} |~ "(?i)error while connecting mqtt"[2m])) > 0
-            for: 10s
+            for: 2m
             labels:
               severity: critical
               category: logs
@@ -115,7 +115,7 @@ spec:
           - alert: FrigateUnableToReachMQTT
             expr: |
               sum(count_over_time({app="frigate"} |~ "(?i)unable to connect to mqtt server"[2m])) > 0
-            for: 10s
+            for: 2m
             labels:
               severity: critical
               category: logs
@@ -129,7 +129,7 @@ spec:
           - alert: ArrDatabaseIsLocked
             expr: |
               sum by (app) (count_over_time({app=~".*arr"} |~ "(?i)database is locked"[2m])) > 0
-            for: 10s
+            for: 2m
             labels:
               severity: critical
               category: logs
@@ -152,7 +152,7 @@ spec:
           - alert: HomeAssistantUnableToReachPostgresql
             expr: |
               sum by (app) (count_over_time({app="home-assistant"} |~ "(?i)error in database connectivity"[2m])) > 0
-            for: 10s
+            for: 2m
             labels:
               severity: critical
               category: logs
@@ -166,7 +166,7 @@ spec:
           - alert: ValetudoUnableToReachMQTT
             expr: |
               sum by (hostname) (count_over_time({hostname="valetudo"} |~ "(?i).*error.*mqtt.*"[2m])) > 0
-            for: 10s
+            for: 2m
             labels:
               severity: critical
               category: logs
@@ -180,7 +180,7 @@ spec:
           - alert: NodeRedUnableToReachHomeAssistant
             expr: |
               sum by (app) (count_over_time({app="node-red"} |~ "(?i)home assistant.*connecting to undefined"[2m])) > 0
-            for: 10s
+            for: 2m
             labels:
               severity: critical
               category: logs
