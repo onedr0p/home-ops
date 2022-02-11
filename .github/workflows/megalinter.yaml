@@ -27,15 +27,17 @@ jobs:
           app_id: "${{ secrets.BOT_APP_ID }}"
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
       - name: MegaLinter
-        uses: megalinter/megalinter@v5
+        uses: megalinter/megalinter/flavors/terraform@v5
         env:
           VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'workflow_dispatch' }}
           GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
           ENABLE_LINTERS: >-
             ACTION_ACTIONLINT,
             ANSIBLE_ANSIBLE_LINT,
+            BASH_SHELLCHECK,
             DOCKERFILE_HADOLINT,
             ENV_DOTENV_LINTER,
+            GIT_GIT_DIFF,
             JSON_JSONLINT,
             KUBERNETES_KUBEVAL,
             MARKDOWN_MARKDOWNLINT,
