@@ -35,6 +35,20 @@ provider "registry.terraform.io/cloudflare/cloudflare" {
     "h1:uCwvNuE6iiyUpUnGi1Qx2J96/0POjDKIK+ZmAAVDbGs=",
     "h1:xi62jZVmiMQcAB1rx3jgvOsHrA7onNbbkE7/qAzZ4/A=",
     "h1:z9Kk+MvRlsAi5QNIwBC4iFNSEce/38GE+WnN/JISSqE=",
+    "zh:0a76baec727a5c5e297c2b8b6c550c27f2a1271c39c2edaf0fb734338a723100",
+    "zh:0d97c2ff616e5c7c6a0febd5fa29f5c1d09b0fe4df370ddc0590a1404238a3ed",
+    "zh:37d2f5f416fbfccf8b49349b7c95e00c1a6feb70dd17ba321f0332dcf95073bc",
+    "zh:7029b2e414bd7ac7b754ac2d4049553c71e975b24c3646570cd328fbdda5d3d0",
+    "zh:7c11309ee50df58fe11c7636a3dcf6ee73f2f571844de723357eefb9248fb56e",
+    "zh:7ccf589dd6c919d67a6b9c0b0bc19e185dc10e5b723cc47900a481f35f8e49b6",
+    "zh:7ed94078d320e4d5504fc96327c15cc3bb9f7db2a91bb447c2239c1720bf1e90",
+    "zh:c6463c2806c27465a02e179751f00d98e4e8ba8f932d6c7cc94f45760fe60c7a",
+    "zh:c811a022141464d2d60133efc7c9cbda43362303ec2802b51f476f381336864d",
+    "zh:d03c7966ad208e3cf27a7abab85e5c7df4d688edcd144575c1f4b8348e901d26",
+    "zh:dc50c63206c6788e8eb89cdd74afbdb27d02a574daab7e3ba151aeb3463039ac",
+    "zh:df341c2cf8c1d85e294c0759665b22369f334dc153d7799c50bc45749c7fcd8f",
+    "zh:f42d054816a2077d82d94e63aa8d4233ec463778ef5027da28c1228d312cd29f",
+    "zh:fa0834289028d55cb1fe3f45bb29978374140ef735b0294abad4bb122fdadc27",
   ]
 }
 
