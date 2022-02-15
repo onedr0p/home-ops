@@ -22,8 +22,8 @@ spec:
       namespace: home
   values:
     image:
-      repository: ghcr.io/k8s-at-home/frigate
-      tag: v0.9.4-amd64
+      repository: docker.io/blakeblackshear/frigate
+      tag: 0.10.0-rc1-amd64
     env:
       TZ: "${TIMEZONE}"
     ingress:
@@ -132,13 +132,13 @@ spec:
 
       record:
         enabled: true
-        retain_days: 2
+        retain:
+          days: 2
+          mode: motion
         events:
-          max_seconds: 300
-          pre_capture: 10
-          post_capture: 10
           retain:
             default: 7
+            mode: active_objects
 
       cameras:
         # --
