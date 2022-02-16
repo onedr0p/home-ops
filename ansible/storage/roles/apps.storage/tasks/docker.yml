@@ -1,4 +1,11 @@
 ---
+- name: Create docker override systemd file
+  ansible.builtin.copy:
+    src: "files/docker-override.conf"
+    dest: "/etc/systemd/system/docker.service.d/override.conf"
+    mode: 0644
+    remote_src: false
+
 - name: Create docker clean up systemd files
   ansible.builtin.copy:
     src: "files/{{ item }}"
