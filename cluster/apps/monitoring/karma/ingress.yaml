@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: &app karma
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/instance: *app
+    app.kubernetes.io/name: *app
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: &host "karma.${SECRET_PUBLIC_DOMAIN}"
+      http:
+        paths:
+          - backend:
+              service:
+                name: karma
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - *host
