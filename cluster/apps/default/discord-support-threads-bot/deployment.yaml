@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: &app discord-support-threads-bot
+  namespace: default
+  labels:
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: *app
+      app.kubernetes.io/instance: *app
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        configmap.reloader.stakater.com/reload: *app
+      labels:
+        app.kubernetes.io/name: *app
+        app.kubernetes.io/instance: *app
+    spec:
+      containers:
+        - name: *app
+          image: ghcr.io/sct/discord-support-threads:latest@sha256:b20953843728c5d2c97e2a7cbf96c98ce44a1cae21d0a8b8e2bf59845ddeed16
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: *app
+          volumeMounts:
+            - name: &volume config
+              mountPath: /app/config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              memory: 500Mi
+      volumes:
+        - name: *volume
+          persistentVolumeClaim:
+            claimName: discord-support-threads-bot-config-v1
