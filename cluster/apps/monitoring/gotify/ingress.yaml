@@ -2,22 +2,25 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: &app karma
+  name: &app gotify
   namespace: monitoring
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_PUBLIC_DOMAIN}"
+    external-dns/is-public: "true"
   labels:
     app.kubernetes.io/name: *app
     app.kubernetes.io/instance: *app
 spec:
   ingressClassName: nginx
   rules:
-    - host: &host "karma.${SECRET_PUBLIC_DOMAIN}"
+    - host: &host "gotify.${SECRET_PUBLIC_DOMAIN}"
       http:
         paths:
           - backend:
               service:
                 name: *app
                 port:
-                  number: 8080
+                  number: 80
             path: /
             pathType: Prefix
   tls:
