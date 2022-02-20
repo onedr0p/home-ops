@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: &app intel-gpu-plugin
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: *app
+      app.kubernetes.io/instance: *app
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: *app
+        app.kubernetes.io/name: *app
+    spec:
+      containers:
+        - name: *app
+          image: docker.io/intel/intel-gpu-plugin:0.23.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - -shared-dev-num
+            - "2"
+          volumeMounts:
+            - name: devfs
+              mountPath: /dev/dri
+              readOnly: true
+            - name: kubelet-sockets
+              mountPath: /var/lib/kubelet/device-plugins
+            - name: sysfs
+              mountPath: /sys/class/drm
+              readOnly: true
+      volumes:
+        - name: devfs
+          hostPath:
+            path: /dev/dri
+            type: Directory
+        - name: kubelet-sockets
+          hostPath:
+            path: /var/lib/kubelet/device-plugins
+            type: Directory
+        - name: sysfs
+          hostPath:
+            path: /sys/class/drm
+            type: Directory
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: feature.node.kubernetes.io/custom-intel-gpu
+                    operator: In
+                    values:
+                      - "true"
