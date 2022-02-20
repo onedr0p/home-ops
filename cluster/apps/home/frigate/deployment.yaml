@@ -1,0 +1,109 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: &app frigate
+  namespace: home
+  labels:
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: *app
+      app.kubernetes.io/instance: *app
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        configmap.reloader.stakater.com/reload: *app
+      labels:
+        app.kubernetes.io/name: *app
+        app.kubernetes.io/instance: *app
+    spec:
+      containers:
+        - name: *app
+          image: docker.io/blakeblackshear/frigate:0.10.0-amd64
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: "${TIMEZONE}"
+          securityContext:
+            privileged: true
+          ports:
+            - name: &port http
+              containerPort: 5000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/version
+              port: *port
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/version
+              port: *port
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /api/version
+              port: *port
+            failureThreshold: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: media
+              mountPath: /media
+            - name: cache
+              mountPath: /dev/shm
+            - name: *app
+              mountPath: /config/config.yml
+              subPath: config.yml
+            - name: usb
+              mountPath: /dev/bus/usb
+          resources:
+            requests:
+              cpu: 500m
+              memory: 100Mi
+              gpu.intel.com/i915: "1"
+            limits:
+              cpu: 10000m
+              memory: 2000Mi
+              gpu.intel.com/i915: "1"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: frigate-config-v1
+        - name: media
+          nfs:
+            path: /tycho/Frigate
+            server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+        - name: cache
+          emptyDir:
+            medium: Memory
+            sizeLimit: 2Gi
+        - name: *app
+          configMap:
+            name: *app
+            defaultMode: 420
+        - name: usb
+          hostPath:
+            path: /dev/bus/usb
+            type: CharDevice
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: feature.node.kubernetes.io/custom-coral-tpu
+                    operator: In
+                    values:
+                      - "true"

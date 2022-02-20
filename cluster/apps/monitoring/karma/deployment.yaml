@@ -28,13 +28,13 @@ spec:
             - name: ALERTMANAGER_URI
               value: http://prometheus-alertmanager:9093
           ports:
-            - name: http
+            - name: &port http
               containerPort: 8080
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /health
-              port: http
+              port: *port
             initialDelaySeconds: 0
             periodSeconds: 10
             timeoutSeconds: 1
@@ -42,7 +42,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: http
+              port: *port
             initialDelaySeconds: 0
             periodSeconds: 10
             timeoutSeconds: 1
@@ -50,7 +50,7 @@ spec:
           startupProbe:
             httpGet:
               path: /health
-              port: http
+              port: *port
             failureThreshold: 30
             periodSeconds: 10
           resources:

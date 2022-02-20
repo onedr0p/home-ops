@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: &app frigate
+  namespace: home
+  labels:
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: &host "frigate.${SECRET_PUBLIC_DOMAIN}"
+      http:
+        paths:
+          - backend:
+              service:
+                name: *app
+                port:
+                  number: 5000
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - *host
