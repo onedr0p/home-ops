@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       annotations:
-        configmap.reloader.stakater.com/reload: *app
+        configmap.reloader.stakater.com/reload: frigate-config
       labels:
         app.kubernetes.io/name: *app
         app.kubernetes.io/instance: *app
@@ -60,13 +60,13 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            - name: config
+              mountPath: /config/config.yml
+              subPath: frigate.yaml
             - name: media
               mountPath: /media
             - name: cache
               mountPath: /dev/shm
-            - name: *app
-              mountPath: /config/config.yml
-              subPath: config.yml
             - name: usb
               mountPath: /dev/bus/usb
           resources:
@@ -82,6 +82,9 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: frigate-config-v1
+        - name: config
+          configMap:
+            name: frigate-config
         - name: media
           nfs:
             path: /tycho/Frigate
@@ -90,10 +93,6 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 2Gi
-        - name: *app
-          configMap:
-            name: *app
-            defaultMode: 420
         - name: usb
           hostPath:
             path: /dev/bus/usb
