@@ -4,13 +4,13 @@
 # ipv4_rfc1918='[ "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16" ]'
 
 # Get all cloudflare ipv4 ranges in an array
-ipv4_cloudflare="$(curl -s https://www.cloudflare.com/ips-v4 | jq --raw-input --slurp 'split("\n")')"
+ipv4_cloudflare="$(curl -s -L https://www.cloudflare.com/ips-v4 | jq --raw-input --slurp 'split("\n")')"
 if [[ -z "${ipv4_cloudflare}" ]]; then
     exit 1
 fi
 
 # Get all cloudflare ipv6 ranges in an array
-ipv6_cloudflare="$(curl -s https://www.cloudflare.com/ips-v6 | jq --raw-input --slurp 'split("\n")')"
+ipv6_cloudflare="$(curl -s -L https://www.cloudflare.com/ips-v6 | jq --raw-input --slurp 'split("\n")')"
 if [[ -z "${ipv6_cloudflare}" ]]; then
     exit 1
 fi
