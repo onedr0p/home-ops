@@ -28,9 +28,13 @@ services:
       - --certificatesResolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
       - --serverstransport.insecureskipverify=true
       - --log.level=INFO
+      - --metrics.prometheus=true
+      - --metrics.prometheus.entryPoint=metrics
+      - --entryPoints.metrics.address=:7071
     ports:
       - 80:80
       - 443:443
+      - 7071:7071
     volumes:
       - traefik-certs:/certs
       - /var/run/docker.sock:/var/run/docker.sock:ro
