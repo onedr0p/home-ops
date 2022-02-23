@@ -244,8 +244,8 @@ spec:
           - job_name: pikvm
             metrics_path: /api/export/prometheus/metrics
             basic_auth:
-              username: admin
-              password: admin
+              username: "${SECRET_PIKVM_USERNAME}"
+              password: "${SECRET_PIKVM_PASSWORD}"
             static_configs:
               - targets:
                   - "pikvm.${SECRET_PRIVATE_DOMAIN}"
@@ -254,3 +254,11 @@ spec:
             static_configs:
               - targets:
                   - "expanse.${SECRET_PRIVATE_DOMAIN}:7071"
+          - job_name: nexus
+            metrics_path: /service/metrics/prometheus
+            basic_auth:
+              username: "${SECRET_NEXUS_USERNAME}"
+              password: "${SECRET_NEXUS_PASSWORD}"
+            static_configs:
+              - targets:
+                  - "expanse.${SECRET_PRIVATE_DOMAIN}:8081"
