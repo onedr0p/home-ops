@@ -60,46 +60,40 @@
     ]
   },
   "regexManagers": [
-    // regexManager to read and process kube-prometheus-stack CRDs
+    // Read and process GitHub Releases
     {
       "fileMatch": [
-        "cluster/crds/kube-prometheus-stack/.+\\.ya?ml$"
-      ],
-      "matchStrings": [
-        "registryUrl=(?<registryUrl>.*?)\n *tag: (?<depName>[a-zA-Z-]+)-(?<currentValue>.*)\n"
-      ],
-      "datasourceTemplate": "helm"
-    },
-    // regexManager to read and process External Snapshotter and External DNS CRDs
-    {
-      "fileMatch": [
-        "cluster/crds/external-snapshotter/.+\\.ya?ml$",
-        "cluster/crds/external-dns/.+\\.ya?ml$"
-      ],
-      "matchStrings": [
-        "datasource=(?<datasource>.*?)\n *url: https:\/\/github\\.com\/(?<depName>.*?)\\.git\n *ref:\n *tag: (?<currentValue>.*)\n"
-      ],
-      "datasourceTemplate": "github-releases"
-    },
-    // regexManager to read and process github-releases in the ansible directory
-    {
-      "fileMatch": [
-        "ansible/.+\\.ya?ml$"
-      ],
-      "matchStrings": [
-        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)\n.*?_version: \"(?<currentValue>.*)\"\n"
-      ],
-      "datasourceTemplate": "github-releases"
-    },
-    // regexManager to read and process github-releases in the hack directory
-    {
-      "fileMatch": [
+        "cluster/.+\\.ya?ml$",
+        "ansible/.+\\.ya?ml$",
         "hack/.+\\.sh$"
       ],
       "matchStrings": [
+        "datasource=(?<datasource>.*?)\n *url: https:\/\/github\\.com\/(?<depName>.*?)\\.git\n *ref:\n *tag: (?<currentValue>.*)\n",
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)\n.*?_version: \"(?<currentValue>.*)\"\n",
         "datasource=(?<datasource>.*?) depName=(?<depName>.*?)\n.*?_VERSION=\"(?<currentValue>.*)\"\n"
       ],
       "datasourceTemplate": "github-releases"
+    },
+    // Read and process Custom Resource Definitions
+    {
+      "fileMatch": [
+        "cluster/.+\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "registryUrl=(?<registryUrl>.*?)\n *tag: (?<depName>[a-zA-Z-]+)-(?<currentValue>.*)\n",
+        "registryUrl=(?<registryUrl>.*?) chart=(?<depName>.*?)\n.*\\/(?<currentValue>.*?)\\/"
+      ],
+      "datasourceTemplate": "helm"
+    },
+    // Read and process Custom Resources
+    {
+      "fileMatch": [
+        "cluster/.+\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)\n .*: (?<currentValue>.*=?)"
+      ],
+      "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [
