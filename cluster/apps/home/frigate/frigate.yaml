@@ -1,4 +1,9 @@
 ---
+logger:
+  default: info
+  logs:
+    frigate.record: debug
+
 mqtt:
   host: mosquitto
   topic_prefix: frigate
@@ -15,9 +20,6 @@ detectors:
 
 objects:
   track:
-    - car
-    - cat
-    - dog
     - person
   filters:
     person:
@@ -33,8 +35,10 @@ ffmpeg:
     - /dev/dri/renderD128
     - -hwaccel_output_format
     - yuv420p
-  output_args:
-    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -c:a aac
+  # Enable audio on recordings...
+  # might cause issues on recording playback
+  # output_args:
+  #   record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -c:a aac
 
 rtmp:
   enabled: true
@@ -44,7 +48,7 @@ snapshots:
   timestamp: false
   bounding_box: true
   retain:
-    default: 10
+    default: 7
 
 record:
   enabled: true
@@ -53,7 +57,7 @@ record:
     mode: motion
   events:
     retain:
-      default: 7
+      default: 5
       mode: active_objects
 
 cameras:
