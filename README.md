@@ -132,15 +132,15 @@ My home IP can change at any given time and in order to keep my WAN IP address u
 
 ## 🔧 Hardware
 
-| Device                    | Count | OS Disk Size | Data Disk Size       | Ram  | Operating System | Purpose                      |
-|---------------------------|-------|--------------|----------------------|------|------------------|------------------------------|
-| Protectli FW6D            | 1     | 500GB mSATA  | N/A                  | 64GB | Opnsense 22.x    | Router                       |
-| Intel NUC8i3BEK           | 3     | 256GB NVMe   | N/A                  | 16GB | Ubuntu 20.04     | Kubernetes (k3s) Masters     |
-| Intel NUC8i5BEH           | 3     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | Ubuntu 20.04     | Kubernetes (k3s) Workers     |
-| PowerEdge T340            | 1     | 120GB SSD    | 8x12TB RAIDz2        | 32GB | Ubuntu 21.10     | Shared file storage          |
-| Lenovo SA120              | 1     | N/A          | 8x12TB               | N/A  | N/A              | DAS                          |
-| Raspberry Pi              | 1     | 32GB SD Card | N/A                  | 4GB  | PiKVM            | Network KVM                  |
-| TESmart 8 Port KVM Switch | 1     | N/A          | N/A                  | N/A  | N/A              | Network KVM switch for PiKVM |
+| Device                    | Count | OS Disk Size | Data Disk Size       | Ram  | Operating System | Purpose                        |
+|---------------------------|-------|--------------|----------------------|------|------------------|--------------------------------|
+| Protectli FW6D            | 1     | 500GB mSATA  | N/A                  | 64GB | Opnsense 22.x    | Router                         |
+| Intel NUC8i3BEK           | 3     | 256GB NVMe   | N/A                  | 16GB | Ubuntu 20.04     | Kubernetes (k3s) Masters       |
+| Intel NUC8i5BEH           | 3     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | Ubuntu 20.04     | Kubernetes (k3s) Workers       |
+| PowerEdge T340            | 1     | 2TB SSD      | 8x12TB ZFS RAIDz2    | 64GB | Ubuntu 21.10     | Apps (Minio, Nexus, etc) & NFS |
+| Lenovo SA120              | 1     | N/A          | 8x12TB               | N/A  | N/A              | DAS                            |
+| Raspberry Pi              | 1     | 32GB SD Card | N/A                  | 4GB  | PiKVM            | Network KVM                    |
+| TESmart 8 Port KVM Switch | 1     | N/A          | N/A                  | N/A  | N/A              | Network KVM switch for PiKVM   |
 
 ---
 
