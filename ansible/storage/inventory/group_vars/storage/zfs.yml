@@ -37,6 +37,14 @@ zfs_pools:
       - "/dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_Z2J5SAAT"
     type: raidz2
     state: present
+  - name: tycho
+    action: add
+    compression: lz4
+    devices:
+      - "/dev/disk/by-id/scsi-SATA_WDC_WD120EDBZ-11_5QGV1ABF"
+      - "/dev/disk/by-id/scsi-SATA_WDC_WD120EDAZ-11_5PK3YT8B"
+    type: spare
+    state: present
 zfs_filesystems:
   - name: Media
     pool: tycho
@@ -90,6 +98,13 @@ zfs_filesystems:
     owner: 568
     group: 568
     mountpoint: /tycho/Nexus
+  - name: Kasten
+    pool: tycho
+    sharenfs: "no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24"
+    state: present
+    owner: 568
+    group: 568
+    mountpoint: /tycho/Kasten
 zfs_enable_monitoring: true
 zfs_monitoring_capacity_threshold: 80
 zfs_monitoring_scrub_max_age: 8
