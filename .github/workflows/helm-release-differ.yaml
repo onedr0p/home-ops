@@ -18,7 +18,7 @@ jobs:
     name: Detect File Changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
         id: filter
         with:
@@ -37,7 +37,7 @@ jobs:
         file: ${{ fromJSON(needs.detect-file-changes.outputs.yaml_files) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Generate Token
         uses: tibdex/github-app-token@v1
         id: generate-token
@@ -45,7 +45,7 @@ jobs:
           app_id: ${{ secrets.BOT_APP_ID }}
           private_key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
       - name: Checkout default branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: "${{ env.DEFAULT_BRANCH }}"
           path: default
