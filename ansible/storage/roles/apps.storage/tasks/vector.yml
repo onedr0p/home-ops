@@ -5,7 +5,8 @@
     state: directory
   loop:
     - "{{ containers_base_dir }}/apps/vector"
-    - "{{ containers_base_dir }}/data/vector"
+    - "{{ vector_data_dir }}/config"
+    - "{{ vector_data_dir }}/data"
 
 - block:
     - name: Create vector docker compose file
@@ -16,7 +17,7 @@
     - name: Create vector config
       ansible.builtin.template:
         src: vector/vector.yaml.j2
-        dest: "{{ containers_base_dir }}/apps/vector/vector.yaml"
+        dest: "{{ vector_data_dir }}/config/vector.yaml"
         mode: 0755
     - name: Create vector systemd service file
       ansible.builtin.template:

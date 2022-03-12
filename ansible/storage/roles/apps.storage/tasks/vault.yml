@@ -5,7 +5,9 @@
     state: directory
   loop:
     - "{{ containers_base_dir }}/apps/vault"
-    - "{{ containers_base_dir }}/data/vault"
+    - "{{ vault_data_dir }}/config"
+    - "{{ vault_data_dir }}/data"
+    - "{{ vault_data_dir }}/policies"
 
 - block:
     - name: Create vault docker compose file
@@ -16,7 +18,7 @@
     - name: Create vault config
       ansible.builtin.template:
         src: vault/vault.json.j2
-        dest: "{{ containers_base_dir }}/apps/vault/vault.json"
+        dest: "{{ vault_data_dir }}/config/vault.json"
         mode: 0755
     - name: Create vault systemd service file
       ansible.builtin.template:

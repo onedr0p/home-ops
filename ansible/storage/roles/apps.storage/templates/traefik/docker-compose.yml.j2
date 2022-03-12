@@ -21,7 +21,7 @@ services:
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
       - --entrypoints.web.http.redirections.entrypoint.scheme=https
       - --certificatesresolvers.letsencrypt.acme.email={{ SECRET_CLOUDFLARE_EMAIL }}
-      - --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json
+      - --certificatesresolvers.letsencrypt.acme.storage=/data/acme.json
       - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
       - --certificatesResolvers.letsencrypt.acme.dnschallenge=true
       - --certificatesResolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
@@ -36,7 +36,7 @@ services:
       - 443:443
       - 7071:7071
     volumes:
-      - traefik-certs:/certs
+      - traefik-data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
       - traefik.enable=true
@@ -47,9 +47,9 @@ services:
       - traefik.http.services.dashboard.loadbalancer.server.port=8080
 
 volumes:
-  traefik-certs:
+  traefik-data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: "{{ containers_base_dir }}/data/traefik/certs"
+      device: "{{ traefik_data_dir }}/data"

@@ -17,7 +17,7 @@ services:
     ports:
       - 8200:8200
     volumes:
-      - "{{ containers_base_dir }}/apps/vault/vault.json:/vault/config/vault.json"
+      - "{{ vault_data_dir }}/config/vault.json:/vault/config/vault.json"
       - vault-policies:/vault/policies
       - vault-data:/vault/data
     labels:
@@ -28,15 +28,15 @@ services:
       - traefik.http.services.vault.loadbalancer.server.port=8200
 
 volumes:
-  vault-policies:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "{{ containers_base_dir }}/data/vault/policies"
   vault-data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: "{{ containers_base_dir }}/data/vault/data"
+      device: "{{ vault_data_dir }}/data"
+  vault-policies:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "{{ vault_data_dir }}/policies"
