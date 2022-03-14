@@ -1,0 +1,69 @@
+---
+
+- name: Create default directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: users
+    mode: 0775
+  loop:
+    - "{{ docker_base_dir }}/rclone"
+    - "{{ docker_base_dir }}/rclone/etcd"
+    - "{{ docker_base_dir }}/rclone/music"
+    - "{{ docker_base_dir }}/rclone/opnsense"
+
+- name: Create rclone config
+  ansible.builtin.template:
+    src: rclone/rclone.conf.j2
+    dest: "{{ rclone_data_dir }}/rclone.conf"
+    mode: 0755
+
+- name: Create docker compose files
+  ansible.builtin.template:
+    src: rclone/docker-compose.yml.j2
+    dest: "{{ docker_base_dir }}/rclone/{{ item.name }}/docker-compose.yml"
+    mode: 0755
+  loop:
+    - { name: "etcd", source: "minio:k3s/", destination: "b2:k3s-etcd-snapshots-s0DL5a1k/" }
+    - { name: "music", source: "/media/Library/Music", destination: "b2:music-rcUFz3wc/" }
+    - { name: "opnsense", source: "minio:opnsense/", destination: "b2:opnsense-d5b252ad/" }
+  vars:
+    name: "{{ item.name }}"
+    source: "{{ item.source }}"
+    destination: "{{ item.destination }}"
+
+- name: Create systemd service files
+  ansible.builtin.template:
+    src: rclone/docker-compose@.service.j2
+    dest: "/etc/systemd/system/docker-compose@rclone-{{ item.name }}.service"
+    mode: 0644
+  loop:
+    - { name: etcd, heartbeat_url: "{{ SECRET_UPTIMEROBOT_HEARTBEAT_ETCD_B2 }}" }
+    - { name: music, heartbeat_url: "{{ SECRET_UPTIMEROBOT_HEARTBEAT_MUSIC_B2 }}" }
+    - { name: opnsense, heartbeat_url: "{{ SECRET_UPTIMEROBOT_HEARTBEAT_OPNSENSE_B2 }}" }
+  vars:
+    heartbeat_url: "{{ item.heartbeat_url }}"
+
+- name: Create systemd timer files
+  ansible.builtin.template:
+    src: rclone/docker-compose@.timer.j2
+    dest: "/etc/systemd/system/docker-compose@rclone-{{ item.name }}.timer"
+    mode: 0644
+  loop:
+    - { name: etcd }
+    - { name: music }
+    - { name: opnsense }
+  register: systemd
+
+- name: Enable systemd timer units
+  ansible.builtin.systemd:
+    name: "docker-compose@rclone-{{ item.name }}.timer"
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  loop:
+    - { name: etcd }
+    - { name: music }
+    - { name: opnsense }
+  when: systemd.changed

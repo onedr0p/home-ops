@@ -3,15 +3,21 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
+    owner: "{{ ansible_user }}"
+    group: users
+    mode: 0775
   loop:
-    - "{{ containers_base_dir }}/apps"
-    - "{{ containers_base_dir }}/data"
+    - "{{ docker_base_dir }}"
   tags:
     - always
 
 - import_tasks: docker.yml
   tags:
     - docker
+
+- import_tasks: rclone.yml
+  tags:
+    - rclone
 
 - import_tasks: cadvisor.yml
   tags:

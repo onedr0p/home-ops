@@ -3,18 +3,25 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
+    owner: "{{ ansible_user }}"
+    group: users
+    mode: 0775
   loop:
-    - "{{ containers_base_dir }}/apps/cadvisor"
+    - "{{ docker_base_dir }}/cadvisor"
 
 - block:
     - name: Create cadvisor docker compose file
       ansible.builtin.template:
         src: cadvisor/docker-compose.yml.j2
-        dest: "{{ containers_base_dir }}/apps/cadvisor/docker-compose.yml"
-        mode: 0755
+        dest: "{{ docker_base_dir }}/cadvisor/docker-compose.yml"
+        owner: "{{ ansible_user }}"
+        group: users
+        mode: 0775
     - name: Create cadvisor systemd service file
       ansible.builtin.template:
         src: "docker-compose@.service.j2"
         dest: "/etc/systemd/system/docker-compose@cadvisor.service"
         mode: 0644
+      vars:
+        condition_path_is_mount_point: "{{ zfs_zpool_base_dir }}"
   notify: Restart cadvisor

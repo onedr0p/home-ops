@@ -2,12 +2,12 @@
 Description=%i service with docker compose
 Requires=docker.service
 After=docker.service
-ConditionPathIsMountPoint={{ zfs_zpool_base_dir }}
+ConditionPathIsMountPoint={{ condition_path_is_mount_point }}
 
 [Service]
 Type=oneshot
 RemainAfterExit=true
-WorkingDirectory={{ containers_base_dir }}/apps/%i
+WorkingDirectory={{ docker_base_dir }}/%i
 ExecStart=/usr/local/bin/docker-compose up -d --remove-orphans
 ExecStop=/usr/local/bin/docker-compose down
 

@@ -2,9 +2,9 @@
 version: "3.8"
 
 services:
-  {{ container_name }}:
+  rclone-{{ name }}:
     image: ghcr.io/k8s-at-home/rclone:v1.57.0
-    container_name: {{ container_name }}
+    container_name: rclone-{{ name }}
     network_mode: host
     command:
       - "-v"
@@ -23,6 +23,5 @@ services:
       - "{{ source }}"
       - "{{ destination }}"
     volumes:
-      - "{{ containers_base_dir }}/apps/rclone/rclone.conf:/config/rclone.conf:ro"
-      - /tycho/Data:/data:ro
+      - "{{ rclone_data_dir }}/rclone.conf:/config/rclone.conf:ro"
       - /tycho/Media:/media:ro
