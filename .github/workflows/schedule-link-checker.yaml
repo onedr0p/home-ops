@@ -23,8 +23,6 @@ jobs:
         id: lychee
         env:
           GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
-        with:
-          output: ./lychee.md
       - name: Find Link Checker Issue
         id: link-checker-issue
         uses: micalevisk/last-issue-action@v1
@@ -37,7 +35,7 @@ jobs:
         with:
           title: Broken links detected in docs 🔗
           issue-number: "${{ steps.link-checker-issue.outputs.issue_number }}"
-          content-filepath: ./lychee.md
+          content-filepath: ./lychee/out.md
           token: "${{ steps.generate-token.outputs.token }}"
           labels: |
             link-checker
