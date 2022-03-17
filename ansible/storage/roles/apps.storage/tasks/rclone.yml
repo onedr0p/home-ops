@@ -8,10 +8,9 @@
     group: users
     mode: 0775
   loop:
-    - "{{ docker_base_dir }}/rclone"
-    - "{{ docker_base_dir }}/rclone/etcd"
-    - "{{ docker_base_dir }}/rclone/music"
-    - "{{ docker_base_dir }}/rclone/opnsense"
+    - "{{ docker_base_dir }}/rclone-etcd"
+    - "{{ docker_base_dir }}/rclone-music"
+    - "{{ docker_base_dir }}/rclone-opnsense"
 
 - name: Create rclone config
   ansible.builtin.template:
@@ -22,7 +21,7 @@
 - name: Create docker compose files
   ansible.builtin.template:
     src: rclone/docker-compose.yml.j2
-    dest: "{{ docker_base_dir }}/rclone/{{ item.name }}/docker-compose.yml"
+    dest: "{{ docker_base_dir }}/rclone-{{ item.name }}/docker-compose.yml"
     mode: 0755
   loop:
     - { name: "etcd", source: "minio:k3s/", destination: "b2:k3s-etcd-snapshots-s0DL5a1k/" }
