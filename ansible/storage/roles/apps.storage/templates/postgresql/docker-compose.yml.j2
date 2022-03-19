@@ -23,11 +23,11 @@ services:
     restart: *restartPolicy
     network_mode: bridge
     environment:
-      DATA_SOURCE_NAME: "postgresql://{{ SECRET_POSTGRESQL_USERNAME }}:{{ SECRET_POSTGRESQL_PASSWORD }}@pgsql-server:5432/postgres?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://{{ SECRET_POSTGRESQL_USERNAME }}:{{ SECRET_POSTGRESQL_PASSWORD }}@postgresql:5432/postgres?sslmode=disable"
     ports:
       - 9187:9187
     links:
-      - postgresql:pgsql-server
+      - postgresql:postgresql
 
   pgadmin:
     image: docker.io/dpage/pgadmin4:6.7
@@ -43,7 +43,7 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     links:
-      - postgresql:pgsql-server
+      - postgresql:postgresql
     depends_on:
       - postgresql
     labels:
@@ -59,7 +59,7 @@ services:
     restart: *restartPolicy
     network_mode: bridge
     environment:
-      POSTGRES_HOST: pgsql-server
+      POSTGRES_HOST: postgresql
       POSTGRES_DB: postgres
       POSTGRES_USER: "{{ SECRET_POSTGRESQL_USERNAME }}"
       POSTGRES_PASSWORD: "{{ SECRET_POSTGRESQL_PASSWORD }}"
@@ -72,7 +72,7 @@ services:
     volumes:
       - pgbackups-data:/backups
     links:
-      - postgresql:pgsql-server
+      - postgresql:postgresql
     depends_on:
       - postgresql
     healthcheck:
