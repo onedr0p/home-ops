@@ -35,6 +35,13 @@ spec:
     allowIcmp: true
     config:
       modules:
+        http_2xx:
+          prober: http
+          timeout: 5s
+          http:
+            valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+            follow_redirects: true
+            preferred_ip_protocol: "ip4"
         icmp:
           prober: icmp
           timeout: 30s
@@ -48,44 +55,53 @@ spec:
         interval: 2m
         scrapeTimeout: 30s
       targets:
+        - module: http_2xx
+          name: opnsense-http
+          url: "opnsense.${SECRET_PRIVATE_DOMAIN}"
+        - module: http_2xx
+          name: pikvm-http
+          url: "pikvm.${SECRET_PRIVATE_DOMAIN}"
+        - module: http_2xx
+          name: unifi-http
+          url: "unifi.${SECRET_PRIVATE_DOMAIN}"
         - module: icmp
-          name: opnsense
+          name: opnsense-icmp
           url: opnsense
         - module: icmp
-          name: open-garage
+          name: open-garage-icmp
           url: open-garage
         - module: icmp
-          name: valetudo
+          name: valetudo-icmp
           url: valetudo
         - module: icmp
-          name: zigbee-controller
+          name: zigbee-controller-icmp
           url: zigbee-controller
         - module: icmp
-          name: expanse
+          name: expanse-icmp
           url: expanse
         - module: icmp
-          name: hdhomerun
+          name: hdhomerun-icmp
           url: hdhomerun
         - module: icmp
-          name: hue-bridge
+          name: hue-bridge-icmp
           url: hue-bridge
         - module: icmp
-          name: cyberpower-pdu-0
+          name: cyberpower-pdu-0-icmp
           url: cyberpower-pdu-0
         - module: icmp
-          name: cyberpower-pdu-1
+          name: cyberpower-pdu-1-icmp
           url: cyberpower-pdu-1
         - module: icmp
-          name: apc-ups-0
+          name: apc-ups-0-icmp
           url: apc-ups-0
         - module: icmp
-          name: unifi
+          name: unifi-icmp
           url: unifi
         - module: icmp
-          name: pikvm
+          name: pikvm-icmp
           url: pikvm
         - module: icmp
-          name: dell-idrac-0
+          name: dell-idrac-0-icmp
           url: dell-idrac-0
     prometheusRule:
       enabled: true
