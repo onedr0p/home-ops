@@ -88,8 +88,6 @@ This is a hard topic to explain because there isn't a single great tool to work 
 
 Currently I am leveraging [Kasten K10 by Veeam](https://www.kasten.io/product/) which does a good job of snapshotting Ceph block volumes and the exports the data in the snapshot to durable storage (S3 / NFS).
 
-There is also the manual method of scaling down the application and using the rook-ceph toolbox to mount the PV which allows you to tar up the volume data and send it to a NFS server. This method works great if all other options do not work.
-
 ---
 
 ## 🌐 DNS
@@ -104,23 +102,21 @@ Over WAN, I have port forwarded ports `80` and `443` to the load balancer IP of 
 
 ### Internal DNS
 
-[CoreDNS](https://github.com/coredns/coredns) is deployed on `Opnsense` with the [k8s_gateway](https://github.com/ori-edge/k8s_gateway) external plugin. With this setup, `CoreDNS` has direct access to my clusters ingress records and serves DNS for them in my internal network. `CoreDNS` is only listening on `127.0.0.1` on port `53`.
+[k8s_gateway](https://github.com/ori-edge/k8s_gateway) is deployed on `Opnsense`. With this setup, `k8s_gateway` has direct access to my clusters ingress records and serves DNS for them in my internal network. `k8s_gateway` is only listening on `127.0.0.1` on port `53`.
 
-For adblocking, I have [AdGuard Home](https://github.com/AdguardTeam/AdGuardHome) also deployed on `Opnsense` which has a upstream server pointing the `CoreDNS` I mentioned above. `Adguard Home` listens on my `MANAGEMENT`, `SERVER`, `IOT` and `GUEST` networks on port `53`. In my firewall rules I have NAT port redirection forcing the `IOT` and `GUEST` networks to use the `Adguard Home` DNS server.
+For adblocking, I have [AdGuard Home](https://github.com/AdguardTeam/AdGuardHome) also deployed on `Opnsense` which has a upstream server pointing the `k8s_gateway` I mentioned above. `Adguard Home` listens on my `MANAGEMENT`, `SERVER`, `IOT` and `GUEST` networks on port `53`. In my firewall rules I have NAT port redirection forcing all the networks to use the `Adguard Home` DNS server.
 
 Without much engineering of DNS @home, these options have made my `Opnsense` router a single point of failure for DNS. I believe this is ok though because my router _should_ have the most uptime of all my systems.
-
-🔸 _I maintain a build of `CoreDNS` for FreeBSD over at [onedr0p/opnsense-coredns](https://github.com/onedr0p/opnsense-coredns) that includes the `k8s_gateway` plugin._
 
 ### External DNS
 
 [external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses `external-dns` looks at to gather DNS records to put in `Cloudflare` are ones that I explicitly set an annotation of `external-dns/is-public: "true"`
 
-🔸 _[Click here](./terraform/cloudflare) to see how else I manage Cloudflare._
+🔸 _[Click here](./terraform/cloudflare) to see how else I manage Cloudflare with Terraform._
 
 ### Dynamic DNS
 
-My home IP can change at any given time and in order to keep my WAN IP address up to date on Cloudflare I have deployed a [CronJob](./cluster/apps/networking/cloudflare-ddns) in my cluster. This periodically checks and updates the `A` record `ipv4.domain.tld`.
+My home IP can change at any given time and in order to keep my WAN IP address up to date on Cloudflare. I have deployed a [CronJob](./cluster/apps/networking/cloudflare-ddns) in my cluster, this periodically checks and updates the `A` record `ipv4.domain.tld`.
 
 ---
 
