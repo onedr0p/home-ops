@@ -9,6 +9,10 @@ provider "registry.terraform.io/backblaze/b2" {
     "h1:FE3HMI4Yxh+PgRp7QoP9N2WE955hrKIv5faQtXzpX1w=",
     "h1:MNmJigncHLKwTasOxIAu5hHiHnxZoTDjaH/jF1626wU=",
     "h1:Qs7+hCeIrlTg0F+VJUHVLR9q0dk8MqAzsUKcvwPsiv4=",
+    "zh:318194eb19b662f66396770914db6054bfb5f5bdf97a3a85e4e7e6e0fabb6b95",
+    "zh:48822edaffed3fe15b972de1d910254c1b8e982e853a7dd9ba6488275bfe8493",
+    "zh:91d1e88931d7a96ee3cd13982dc5a0309184f3d1b38a3a3068f8c1a1c912b3f6",
+    "zh:d764b5376e9091f288063c7272b6f415623a342f262886bf20d45fcf181287fc",
   ]
 }
 
