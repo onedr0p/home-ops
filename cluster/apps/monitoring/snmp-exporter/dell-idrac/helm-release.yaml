@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: snmp-exporter-apc-ups-0
+  name: snmp-exporter-dell-idrac
   namespace: monitoring
 spec:
   interval: 5m
   chart:
     spec:
       chart: prometheus-snmp-exporter
-      version: 0.2.0
+      version: 1.0.1
       sourceRef:
         kind: HelmRepository
         name: prometheus-community-charts
@@ -18,30 +18,28 @@ spec:
   install:
     createNamespace: true
   values:
-    fullnameOverride: snmp-exporter-apc-ups-0
+    fullnameOverride: snmp-exporter-dell-idrac
     image:
       repository: quay.io/prometheus/snmp-exporter
     extraArgs:
       - "--config.file=/config/snmp.yaml"
     extraConfigmapMounts:
-      - name: snmp-exporter-apc-ups-0
+      - name: snmp-exporter-dell-idrac
         mountPath: /config/snmp.yaml
         subPath: snmp.yaml
-        configMap: snmp-exporter-apc-ups-0
+        configMap: snmp-exporter-dell-idrac
         readOnly: true
         defaultMode: 420
     serviceMonitor:
       enabled: true
       namespace: monitoring
       params:
-        enabled: true
-        conf:
+        - name: dell-idrac
           module:
-            - apcups
+            - dell
           target:
-            - apc-ups-0
+            - dell-idrac-0
       path: /snmp
-      # interval: 60s
       scrapeTimeout: 10s
       relabelings:
         - sourceLabels: [__param_target]
