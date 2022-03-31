@@ -47,10 +47,10 @@ spec:
               name: libmodules
             - name: mon-endpoint-volume
               mountPath: /etc/rook
-            - name: nas-data
-              mountPath: /mnt/nas-data
-            - name: direct-mount-scripts
-              mountPath: /scripts
+            # - name: nas-data
+            #   mountPath: /mnt/nas-data
+            # - name: direct-mount-scripts
+            #   mountPath: /scripts
       # if hostNetwork: false, the "rbd map" command hangs, see https://github.com/rook/rook/issues/2021
       hostNetwork: true
       volumes:
@@ -69,13 +69,13 @@ spec:
             items:
               - key: data
                 path: mon-endpoints
-        - name: nas-data
-          nfs:
-            server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-            path: /tycho/Data
-        - name: direct-mount-scripts
-          projected:
-            defaultMode: 0775
-            sources:
-              - configMap:
-                  name: direct-mount-scripts
+        # - name: nas-data
+        #   nfs:
+        #     server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+        #     path: /tycho/Data
+        # - name: direct-mount-scripts
+        #   projected:
+        #     defaultMode: 0775
+        #     sources:
+        #       - configMap:
+        #           name: direct-mount-scripts
