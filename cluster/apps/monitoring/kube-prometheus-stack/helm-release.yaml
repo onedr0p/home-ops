@@ -37,15 +37,15 @@ spec:
                 send_resolved: true
                 title: |-
                   [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }}{{ else }}{{ .CommonLabels.alertname }}{{ end }}
-                text: |-
-                  {{ range .Alerts -}}
-                  **Alert:** {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
-                  **Description:** {{ if ne .Annotations.description ""}}{{ .Annotations.description }}{{else}}N/A{{ end }}
-                  **Details:**
-                  {{ range .Labels.SortedPairs }}
-                  • *{{ .Name }}:* `{{ .Value }}`
-                  {{ end }}
-                  {{ end }}
+                # text: |-
+                #   {{ range .Alerts -}}
+                #   **Alert:** {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+                #   **Description:** {{ if ne .Annotations.description ""}}{{ .Annotations.description }}{{else}}N/A{{ end }}
+                #   **Details:**
+                #   {{ range .Labels.SortedPairs }}
+                #   • *{{ .Name }}:* `{{ .Value }}`
+                #   {{ end }}
+                #   {{ end }}
           - name: "nodered"
             webhook_configs:
               - url: "http://node-red.home:1880/power-outage"
@@ -58,24 +58,24 @@ spec:
           receiver: "pushover"
           routes:
             - receiver: "null"
-              match:
-                alertname: InfoInhibitor
+              matchers:
+                - alertname = InfoInhibitor
             - receiver: "null"
-              match:
-                alertname: Watchdog
+              matchers:
+                - alertname = Watchdog
             - receiver: "pushover"
-              match_re:
-                severity: critical
+              matchers:
+                - severity = critical
               continue: true
             - receiver: "nodered"
-              match:
-                alertname: UPSOnBattery
+              matchers:
+                - alertname = UPSOnBattery
               continue: true
         inhibit_rules:
-          - source_match:
-              severity: "critical"
-            target_match:
-              severity: "warning"
+          - source_matchers:
+              - severity = critical
+            target_matchers:
+              - severity = warning
             equal: ["alertname", "namespace"]
       ingress:
         enabled: true
