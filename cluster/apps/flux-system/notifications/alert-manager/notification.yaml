@@ -7,3 +7,27 @@ metadata:
 spec:
   type: alertmanager
   address: http://prometheus-alertmanager:9093/api/v2/alerts/
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta1
+kind: Alert
+metadata:
+  name: alert-manager
+  namespace: flux-system
+spec:
+  providerRef:
+    name: alertmanager
+  eventSeverity: error
+  eventSources:
+    - kind: GitRepository
+      name: "*"
+    - kind: Kustomization
+      name: "*"
+    - kind: HelmRepository
+      name: "*"
+    - kind: HelmRelease
+      name: "*"
+  exclusionList:
+    - "error.*lookup github\\.com"
+    - "waiting.*socket"
+    - "dial.*tcp.*timeout"
+  suspend: false
