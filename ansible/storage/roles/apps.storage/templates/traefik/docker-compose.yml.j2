@@ -3,7 +3,7 @@ version: "3.8"
 
 services:
   traefik:
-    image: docker.io/library/traefik:v2.6.2
+    image: docker.io/library/traefik:v2.6.3
     container_name: traefik
     restart: unless-stopped
     network_mode: bridge
@@ -25,9 +25,7 @@ services:
       - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
       - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
       - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
-      - --certificatesresolvers.letsencrypt.acme.dnschallenge.delayBeforeCheck=30
-      - --certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers[0]=1.1.1.1:53
-      - --certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers[1]=1.0.0.1:53
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
       - --serverstransport.insecureskipverify=true
       - --log.level=INFO
       - --metrics.prometheus=true
