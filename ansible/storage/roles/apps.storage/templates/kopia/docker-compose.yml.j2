@@ -1,0 +1,56 @@
+---
+version: "3.8"
+
+services:
+  kopia:
+    image: docker.io/kopia/kopia:0.10.6
+    container_name: kopia
+    restart: unless-stopped
+    network_mode: bridge
+    environment:
+      KOPIA_PASSWORD: "{{ SECRET_KOPIA_PASSWORD }}"
+      TZ: America/New_York
+    command:
+      - server
+      - --insecure
+      - --address
+      - 0.0.0.0:51515
+      - --override-hostname
+      - "expanse.{{ SECRET_PRIVATE_DOMAIN }}"
+      - --override-username
+      - devin
+      - --without-password
+    ports:
+      - 51515:51515
+    volumes:
+      - kopia-config:/app/config
+      - kopia-cache:/app/cache
+      - kopia-logs:/app/logs
+      - /tycho:/tycho:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.kopia.service=kopia
+      - traefik.http.routers.kopia.rule=Host(`kopia.{{ SECRET_PRIVATE_DOMAIN }}`)
+      - traefik.http.routers.kopia.entrypoints=websecure
+      - traefik.http.routers.kopia.tls.certresolver=letsencrypt
+      - traefik.http.services.kopia.loadbalancer.server.port=51515
+
+volumes:
+  kopia-config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "{{ kopia_data_dir }}/config"
+  kopia-cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "{{ kopia_data_dir }}/cache"
+  kopia-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "{{ kopia_data_dir }}/logs"
