@@ -1,4 +1,15 @@
 ---
+
+- name: Restart docker-cleanup
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  loop:
+    - docker-cleanup.service
+    - docker-cleanup.timer
+
 - name: Restart cadvisor
   ansible.builtin.systemd:
     name: "docker-compose@cadvisor.service"

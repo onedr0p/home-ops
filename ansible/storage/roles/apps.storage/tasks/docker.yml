@@ -15,15 +15,4 @@
   loop:
     - docker-cleanup.service
     - docker-cleanup.timer
-  register: systemd
-
-- name: Enable docker-cleanup systemd timer unit
-  ansible.builtin.systemd:
-    name: "{{ item }}"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-  loop:
-    - docker-cleanup.service
-    - docker-cleanup.timer
-  when: systemd.changed
+  notify: Restart docker-cleanup
