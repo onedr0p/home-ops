@@ -43,27 +43,27 @@ spec:
                   {{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{- end -}}
                   ] {{ .CommonLabels.alertname }}
                 message: |-
-                  {{ range .Alerts -}}
-                    {{- if ne .Labels.severity "" -}}
+                  {{- range .Alerts }}
+                    {{- if ne .Labels.severity "" }}
                       <b>Severity:</b> <i>{{ .Labels.severity }}</i>
-                    {{- else -}}
+                    {{- else }}
                       <b>Severity:</b> <i>N/A</i>
-                    {{- end -}}
-                    {{- if ne .Annotations.description "" -}}
+                    {{- end }}
+                    {{- if ne .Annotations.description "" }}
                       <b>Description:</b> <i>{{ .Annotations.description }}</i>
-                    {{- else if .Annotations.summary "" -}}
+                    {{- else if .Annotations.summary "" }}
                       <b>Description:</b> <i>{{ .Annotations.summary }}</i>
-                    {{- else if .Annotations.message "" -}}
+                    {{- else if .Annotations.message "" }}
                       <b>Description:</b> <i>{{ .Annotations.message }}</i>
-                    {{- else -}}
+                    {{- else }}
                       <b>Description:</b> <i>N/A</i>
-                    {{- end -}}
-                    {{- if gt (len .Labels.SortedPairs) 0 -}}
+                    {{- end }}
+                    {{- if gt (len .Labels.SortedPairs) 0 }}
                       <b>Details:</b>
-                      {{- range .Labels.SortedPairs -}}
+                      {{- range .Labels.SortedPairs }}
                         • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
-                      {{- end -}}
-                    {{- end -}}
+                      {{- end }}
+                    {{- end }}
                   {{- end }}
           - name: "nodered"
             webhook_configs:
