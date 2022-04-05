@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 34.8.0
+      version: 34.7.1
       sourceRef:
         kind: HelmRepository
         name: prometheus-community-charts
@@ -34,21 +34,37 @@ spec:
             pushover_configs:
               - token: "${SECRET_PUSHOVER_ALERT_MANAGER_APIKEY}"
                 user_key: "${SECRET_PUSHOVER_USERKEY}"
-                priority: >-
-                  {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
                 send_resolved: true
-                # html: true
-                # title: |-
-                #   [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }}{{ else }}{{ .CommonLabels.alertname }}{{ end }}
-                # message: |-
-                #   {{ range .Alerts -}}
-                #   <b>Alert:</b> {{ .Annotations.title }}{{ if .Labels.severity }} - {{ .Labels.severity }}{{ end }}
-                #   <b>Description:</b> {{ if ne .Annotations.description ""}}{{ .Annotations.description }}{{else}}N/A{{ end }}
-                #   <b>Details:</b>
-                #   {{ range .Labels.SortedPairs }}
-                #   • <u>{{ .Name }}:</u> `{{ .Value }}`
-                #   {{ end }}
-                #   {{ end }}
+                html: true
+                priority: |-
+                  {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
+                title: |-
+                  [{{ .Status | toUpper -}}
+                  {{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{- end -}}
+                  ] {{ .CommonLabels.alertname }}
+                message: |-
+                  {{ range .Alerts -}}
+                    {{- if ne .Labels.severity "" -}}
+                      <b>Severity:</b> <i>{{ .Labels.severity }}</i>
+                    {{- else -}}
+                      <b>Severity:</b> <i>N/A</i>
+                    {{- end -}}
+                    {{- if ne .Annotations.description "" -}}
+                      <b>Description:</b> <i>{{ .Annotations.description }}</i>
+                    {{- else if .Annotations.summary "" -}}
+                      <b>Description:</b> <i>{{ .Annotations.summary }}</i>
+                    {{- else if .Annotations.message "" -}}
+                      <b>Description:</b> <i>{{ .Annotations.message }}</i>
+                    {{- else -}}
+                      <b>Description:</b> <i>N/A</i>
+                    {{- end -}}
+                    {{- if gt (len .Labels.SortedPairs) 0 -}}
+                      <b>Details:</b>
+                      {{- range .Labels.SortedPairs -}}
+                        • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
+                      {{- end -}}
+                    {{- end -}}
+                  {{- end }}
           - name: "nodered"
             webhook_configs:
               - url: "http://node-red.home:1880/power-outage"
