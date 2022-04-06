@@ -1,0 +1,38 @@
+# -- Export configuration
+# set -gx VOLUME plex-config-v1
+# set -gx NAMESPACE media
+# -- Apply a Pod with a volume attached to it
+# envsubst < ./hack/debug.yaml; kubectl apply -f -
+# -- Exec into the Pod
+# kubectl -n $NAMESPACE exec (kubectl get pod -n $NAMESPACE -l volume=$VOLUME -o name) -it debug
+# -- Remove a Pod with the volume attached to it
+# envsubst < ./hack/debug.yaml; kubectl delete -f -
+# -- Clear environment variables
+# set -e VOLUME; set -e NAMESPACE
+---
+kind: Pod
+metadata:
+  name: "debug-${VOLUME}"
+  namespace: "${NAMESPACE}"
+  labels:
+    volume: "${VOLUME}"
+spec:
+  containers:
+    - name: debug
+      image: docker.io/library/alpine:3.15
+      command:
+        - /bin/sh
+      volumeMounts:
+        - name: data
+          mountPath: /data
+      resources:
+        requests:
+          cpu: 10m
+          memory: 500Mi
+        limits:
+          cpu: 100m
+          memory: 1000Mi
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: "${VOLUME}"
