@@ -38,6 +38,9 @@ spec:
                 html: true
                 priority: |-
                   {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
+                url_title: View in Alert Manager
+                url: |-
+                  {{ .ExternalURL }}/#/alerts?receiver={{ .Receiver | urlquery }}
                 title: |-
                   [{{ .Status | toUpper -}}
                   {{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{- end -}}
