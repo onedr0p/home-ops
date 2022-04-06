@@ -2,8 +2,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: &app gaps
-  namespace: media
+  name: &app theme-park
+  namespace: default
   labels:
     app.kubernetes.io/name: *app
     app.kubernetes.io/instance: *app
@@ -12,8 +12,12 @@ spec:
     matchLabels:
       app.kubernetes.io/name: *app
       app.kubernetes.io/instance: *app
+  replicas: 3
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
   template:
     metadata:
       labels:
@@ -22,14 +26,11 @@ spec:
     spec:
       containers:
         - name: *app
-          image: docker.io/housewrecker/gaps:x64-v0.10.1
+          image: ghcr.io/k8s-at-home/theme-park:v1.7.3
           imagePullPolicy: IfNotPresent
-          env:
-            - name: TZ
-              value: "${TIMEZONE}"
           ports:
             - name: &port http
-              containerPort: 8484
+              containerPort: 80
               protocol: TCP
           livenessProbe:
             tcpSocket:
@@ -50,17 +51,17 @@ spec:
               port: *port
             failureThreshold: 30
             periodSeconds: 10
-          volumeMounts:
-            - name: config
-              mountPath: /usr/data
           resources:
             requests:
-              cpu: 100m
-              memory: 100Mi
+              cpu: 10m
+              memory: 50Mi
             limits:
-              cpu: 500m
-              memory: 1000Mi
-      volumes:
-        - name: config
-          persistentVolumeClaim:
-            claimName: gaps-config-v1
+              cpu: 100m
+              memory: 200Mi
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: *app
