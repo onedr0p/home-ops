@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: falcosidekick
-      version: 0.4.4
+      version: 0.4.5
       sourceRef:
         kind: HelmRepository
         name: falco-security-charts
@@ -20,12 +20,15 @@ spec:
       registry: public.ecr.aws
     replicaCount: 1
     config:
-      existingSecret: falcosidekick
       extraEnv:
         - name: WEBUI_URL
-          value: http://falco-sidekick-falcosidekick-ui:2802
-        - name: DISCORD_MINIMUMPRIORITY
-          value: critical
+          value: http://falco-sidekick-falco-sidekick-ui:2802
+        - name: ALERTMANAGER_HOSTPORT
+          value: http://alertmanager-operated.monitoring:9093
+        - name: ALERTMANAGER_ENDPOINT
+          value: /api/v2/alerts
+        - name: ALERTMANAGER_MINIMUMPRIORITY
+          value: emergency
     ingress:
       enabled: true
       annotations:

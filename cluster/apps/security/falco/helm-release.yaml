@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: falco
-      version: 1.16.2
+      version: 1.17.4
       sourceRef:
         kind: HelmRepository
         name: falco-security-charts
@@ -18,7 +18,7 @@ spec:
   values:
     image:
       registry: public.ecr.aws
-    timezone: "America/New_York"
+    timezone: "${TIMEZONE}"
     containerd:
       enabled: true
       socket: /var/run/k3s/containerd/containerd.sock
@@ -33,7 +33,7 @@ spec:
       jsonIncludeOutputProperty: true
       httpOutput:
         enabled: true
-        url: "http://falco-sidekick-falcosidekick:2801"
+        url: "http://falco-sidekick-falco-sidekick:2801"
       grpc:
         enabled: true
       grpcOutput:
@@ -143,3 +143,65 @@ spec:
             A new port is open to listen (port=%fd.sport ip=%fd.sip)
           priority: WARNING
           tags: [network]
+      rules-nginx.yaml: |-
+        - macro: nginx_consider_syscalls
+          condition: (evt.num < 0)
+
+        - macro: app_nginx
+          condition: container and container.image contains "nginx"
+
+        # Any outbound traffic raises a WARNING
+
+        - rule: Unauthorized process opened an outbound connection (nginx)
+          desc: A nginx process tried to open an outbound connection and is not whitelisted
+          condition: outbound and evt.rawres >= 0 and app_nginx
+          output: Non-whitelisted process opened an outbound connection (command=%proc.cmdline
+            connection=%fd.name)
+          priority: WARNING
+
+
+        # Restricting listening ports to selected set
+
+        - list: nginx_allowed_inbound_ports_tcp
+          items: [80, 443, 8080, 8443]
+
+        - rule: Unexpected inbound tcp connection nginx
+          desc: Detect inbound traffic to nginx using tcp on a port outside of expected set
+          condition: inbound and evt.rawres >= 0 and not fd.sport in (nginx_allowed_inbound_ports_tcp) and app_nginx
+          output: Inbound network connection to nginx on unexpected port (command=%proc.cmdline pid=%proc.pid connection=%fd.name sport=%fd.sport user=%user.name %container.info image=%container.image)
+          priority: NOTICE
+
+        # Restricting spawned processes to selected set
+
+        - list: nginx_allowed_processes
+          items: ["nginx", "app-entrypoint.", "basename", "dirname", "grep", "nami", "node", "tini"]
+
+        - rule: Unexpected spawned process nginx
+          desc: Detect a process started in a nginx container outside of an expected set
+          condition: spawned_process and not proc.name in (nginx_allowed_processes) and app_nginx
+          output: Unexpected process spawned in nginx container (command=%proc.cmdline pid=%proc.pid user=%user.name %container.info image=%container.image)
+          priority: NOTICE
+
+        # Restricting files read or written to specific set
+
+        - list: nginx_allowed_file_prefixes_readwrite
+          items: ["/var/log/nginx", "/var/run"]
+        # Remember to add your nginx cache path
+
+        - rule: Unexpected file access readwrite for nginx
+          desc: Detect an attempt to access a file readwrite other than below an expected list of directories
+          condition: (open_write) and not fd.name pmatch (nginx_allowed_file_prefixes_readwrite) and app_nginx
+          output: Unexpected file accessed readwrite for nginx (command=%proc.cmdline pid=%proc.pid file=%fd.name %container.info image=%container.image)
+          priority: NOTICE
+
+        # Restricting syscalls to selected set
+
+        - list: nginx_allowed_syscalls
+          items: [accept, bind, clone, connect, dup, listen, mkdir, open, recvfrom, recvmsg, sendto, setgid, setuid, socket, socketpair]
+
+        - rule: Unexpected syscall nginx
+          desc: Detect a syscall in a nginx container outside of an expected set
+          condition: nginx_consider_syscalls and not evt.type in ("<unknown>", nginx_allowed_syscalls) and app_nginx
+          output: Unexpected syscall in nginx container (command=%proc.cmdline pid=%proc.pid user=%user.name syscall=%evt.type args=%evt.args %container.info image=%container.image)
+          priority: NOTICE
+          warn_evttypes: False
