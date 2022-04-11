@@ -9,6 +9,10 @@ k3s_control_node: false
 k3s_agent:
   node-ip: "{{ ansible_host }}"
   kubelet-arg:
+    # Enable Alpha/Beta features
     - "feature-gates=EphemeralContainers=true"
     - "feature-gates=MixedProtocolLBService=true"
     - "feature-gates=ReadWriteOncePod=true"
+    # Allow pods to be rescheduled quicker in the case of a node failure
+    # https://github.com/k3s-io/k3s/issues/1264
+    - "node-status-update-frequency=4s"
