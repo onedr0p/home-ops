@@ -1,0 +1,57 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: falco-sidekick
+  namespace: security
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: falcosidekick
+      version: 0.4.4
+      sourceRef:
+        kind: HelmRepository
+        name: falco-security-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      registry: public.ecr.aws
+    replicaCount: 1
+    config:
+      existingSecret: falcosidekick
+      extraEnv:
+        - name: WEBUI_URL
+          value: http://falco-sidekick-falcosidekick-ui:2802
+        - name: DISCORD_MINIMUMPRIORITY
+          value: critical
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+      hosts:
+        - host: "falco-sidekick.${SECRET_PRIVATE_DOMAIN}"
+          paths:
+            - path: /
+      tls:
+        - hosts:
+            - "falco-sidekick.${SECRET_PRIVATE_DOMAIN}"
+    webui:
+      enabled: true
+      # image:
+      #   registry: public.ecr.aws
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: nginx
+        hosts:
+          - host: "falco-sidekick-ui.${SECRET_PRIVATE_DOMAIN}"
+            paths:
+              - path: /ui
+              - path: /events
+              - path: /healthz
+              - path: /ws
+        tls:
+          - hosts:
+              - "falco-sidekick-ui.${SECRET_PRIVATE_DOMAIN}"
