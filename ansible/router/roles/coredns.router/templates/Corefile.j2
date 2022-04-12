@@ -8,17 +8,6 @@
   cache 300
   loop
   local
-  # dnsmasq is only enabled for setting hostnames in the Opnsense UI.
-  # In the dnsmasq settings:
-  # 1) Set 'Listen Port' to 553
-  # 2) Network Interfaces is set to one local interface
-  # 3) Make sure 'Register DHCP static mappings' is enabled
-  # 4) Adding an 'Host Overrides' also appends to this host file
-  hosts /var/etc/dnsmasq-hosts {
-    ttl 600
-    reload 5s
-    fallthrough
-  }
   prometheus 192.168.1.1:9153
 }
 
@@ -26,7 +15,7 @@
   import common
   k8s_gateway {{ SECRET_PUBLIC_DOMAIN }} {
     resources Ingress
-    ttl 1
+    ttl 30
     kubeconfig /usr/local/etc/coredns/kubeconfig
     fallthrough
   }
@@ -41,5 +30,14 @@
     resources Ingress
     ttl 30
     kubeconfig /usr/local/etc/coredns/kubeconfig
+    fallthrough
   }
+  # Forward DNS requests for this domain to dnsmasq which
+  # contains host overrides and static dns mappings
+  # defined in the OPNsense UI
+  # In the dnsmasq settings:
+  # 1) Set 'Listen Port' to 6363
+  # 2) Network Interfaces is set to one local interface
+  # 3) Add as many 'Host Overrides' as you need
+  forward . 127.0.0.1:6363
 }
