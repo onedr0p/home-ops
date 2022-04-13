@@ -21,12 +21,10 @@ spec:
     image:
       registry: public.ecr.aws
       repository: bitnami/thanos
-    # TODO: https://github.com/bitnami/charts/pull/9788
-    # objstore:
-    #   type: s3
-    #   config:
-    #     insecure: true
-    existingObjstoreSecret: thanos-objstore
+    objstoreConfig:
+      type: s3
+      config:
+        insecure: true
     query:
       enabled: true
       replicaLabels:
@@ -58,26 +56,24 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
-  # TODO: https://github.com/bitnami/charts/pull/9788
-  # valuesFrom:
-  #   - kind: ConfigMap
-  #     name: thanos-ceph-bucket
-  #     valuesKey: BUCKET_NAME
-  #     targetPath: objstore.config.bucket
-  #   - kind: ConfigMap
-  #     name: thanos-ceph-bucket
-  #     valuesKey: BUCKET_HOST
-  #     targetPath: objstore.config.endpoint
-  #   - kind: ConfigMap
-  #     name: thanos-ceph-bucket
-  #     valuesKey: BUCKET_REGION
-  #     targetPath: objstore.config.region
-  #   - kind: Secret
-  #     name: thanos-ceph-bucket
-  #     valuesKey: AWS_ACCESS_KEY_ID
-  #     targetPath: objstore.config.access_key
-  #   - kind: Secret
-  #     name: thanos-ceph-bucket
-  #     valuesKey: AWS_SECRET_ACCESS_KEY
-  #     targetPath: objstore.config.secret_key
-  
+  valuesFrom:
+    - kind: ConfigMap
+      name: thanos-ceph-bucket
+      valuesKey: BUCKET_NAME
+      targetPath: objstore.config.bucket
+    - kind: ConfigMap
+      name: thanos-ceph-bucket
+      valuesKey: BUCKET_HOST
+      targetPath: objstore.config.endpoint
+    - kind: ConfigMap
+      name: thanos-ceph-bucket
+      valuesKey: BUCKET_REGION
+      targetPath: objstore.config.region
+    - kind: Secret
+      name: thanos-ceph-bucket
+      valuesKey: AWS_ACCESS_KEY_ID
+      targetPath: objstore.config.access_key
+    - kind: Secret
+      name: thanos-ceph-bucket
+      valuesKey: AWS_SECRET_ACCESS_KEY
+      targetPath: objstore.config.secret_key
