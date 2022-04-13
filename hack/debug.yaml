@@ -1,16 +1,17 @@
+# -- Suspend the Flux Helm Release if required
+# flux suspend -n default hr plex
+# -- Scale application to 0 replicas
+# kubectl scale -n default deployment plex --replicas 0
 # -- Export configuration
-# set -gx VOLUME plex-config-v1
-# set -gx NAMESPACE media
+# set -gx VOLUME plex
+# set -gx NAMESPACE default
+# set -gx NFS_SERVER domain.tld
+# set -gx NFS_PATH /tank/data
 # -- Apply a Pod with a volume attached to it
-# envsubst < ./hack/debug.yaml; kubectl apply -f -
-# -- Exec into the Pod
-# kubectl -n $NAMESPACE exec (kubectl get pod -n $NAMESPACE -l volume=$VOLUME -o name) -it debug
-# -- Remove a Pod with the volume attached to it
-# envsubst < ./hack/debug.yaml; kubectl delete -f -
-# -- Clear environment variables
-# set -e VOLUME; set -e NAMESPACE
+# envsubst < hack/debug.yaml | kubectl apply -f -
 ---
 kind: Pod
+apiVersion: v1
 metadata:
   name: "debug-${VOLUME}"
   namespace: "${NAMESPACE}"
@@ -20,19 +21,31 @@ spec:
   containers:
     - name: debug
       image: docker.io/library/alpine:3.15
-      command:
-        - /bin/sh
+      command: ["/bin/sh"]
+      tty: true
+      lifecycle:
+        postStart:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - apk add --no-cache curl nano
       volumeMounts:
         - name: data
           mountPath: /data
-      resources:
-        requests:
-          cpu: 10m
-          memory: 500Mi
-        limits:
-          cpu: 100m
-          memory: 1000Mi
+        - name: backups
+          mountPath: /mnt/backups
   volumes:
     - name: data
       persistentVolumeClaim:
         claimName: "${VOLUME}"
+    - name: backups
+      nfs:
+        server: "${NFS_SERVER}"
+        path: "${NFS_PATH}"
+# -- Exec into the Pod
+# kubectl -n $NAMESPACE exec (kubectl get pod -n $NAMESPACE -l volume=$VOLUME -o name) -it debug -- /bin/sh
+# -- Remove a Pod with the volume attached to it
+# envsubst < hack/debug.yaml | kubectl delete -f -
+# -- Clear environment variables
+# set -e VOLUME; set -e NAMESPACE; set -e NFS_SERVER; set -e NFS_PATH;
