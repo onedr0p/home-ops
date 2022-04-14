@@ -25,6 +25,7 @@ spec:
     image:
       repository: timberio/vector
       tag: 0.21.0-debian
+    replicas: 3
     customConfig:
       data_dir: /vector-data-dir
       api:
@@ -64,7 +65,7 @@ spec:
             codec: json
           batch:
             max_bytes: 2049000
-          out_of_order_action: rewrite_timestamp
+          out_of_order_action: accept
           remove_label_fields: true
           remove_timestamp: true
           labels:
@@ -79,7 +80,7 @@ spec:
             codec: json
           batch:
             max_bytes: 2049000
-          out_of_order_action: rewrite_timestamp
+          out_of_order_action: accept
           remove_label_fields: true
           remove_timestamp: true
           labels:
@@ -102,7 +103,7 @@ spec:
             codec: json
           batch:
             max_bytes: 2049000
-          out_of_order_action: rewrite_timestamp
+          out_of_order_action: accept
           labels:
             hostname: opnsense
         loki_opnsense_filterlog:
@@ -114,7 +115,7 @@ spec:
             codec: json
           batch:
             max_bytes: 2049000
-          out_of_order_action: rewrite_timestamp
+          out_of_order_action: accept
           labels:
             hostname: opnsense
     podMonitor:
@@ -122,6 +123,18 @@ spec:
     service:
       enabled: true
       type: LoadBalancer
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/component
+                    operator: In
+                    values:
+                      - Stateless-Aggregator
+              topologyKey: kubernetes.io/hostname
   postRenderers:
     - kustomize:
         patchesJson6902:
