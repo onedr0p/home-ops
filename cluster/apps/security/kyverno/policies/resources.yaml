@@ -1,0 +1,26 @@
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: resources
+spec:
+  rules:
+    - name: remove-cpu-limits
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      mutate:
+        patchStrategicMerge:
+          spec:
+            initContainers:
+              - (name): "*"
+                resources:
+                  limits:
+                    cpu: null
+            containers:
+              - (name): "*"
+                resources:
+                  limits:
+                    cpu: null
