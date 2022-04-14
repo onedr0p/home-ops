@@ -17,10 +17,10 @@ spec:
   install:
     createNamespace: true
     remediation:
-      retries: 5
+      retries: 3
   upgrade:
     remediation:
-      retries: 5
+      retries: 3
   dependsOn:
     - name: rook-ceph
       namespace: rook-ceph
@@ -39,7 +39,7 @@ spec:
           - hosts:
               - *host
     cephClusterSpec:
-      # TODO: [rook-ceph] Enable host network on next rebuild
+      # TODO(rook-ceph): Enable host network on next rebuild
       # network:
       #   provider: host
       crashCollector:
@@ -54,15 +54,15 @@ spec:
         config:
           osdsPerDevice: "1"
         nodes:
-          - name: "k8s-3"
+          - name: k8s-3
             devices:
-              - name: "nvme0n1"
-          - name: "k8s-4"
+              - name: nvme0n1
+          - name: k8s-4
             devices:
-              - name: "nvme0n1"
-          - name: "k8s-5"
+              - name: nvme0n1
+          - name: k8s-5
             devices:
-              - name: "nvme0n1"
+              - name: nvme0n1
     cephBlockPoolsVolumeSnapshotClass:
       enabled: true
       name: csi-rbdplugin-snapclass
@@ -105,12 +105,11 @@ spec:
             activeCount: 1
             activeStandby: true
             resources:
-              limits:
-                cpu: "2000m"
-                memory: "4Gi"
               requests:
-                cpu: "1000m"
-                memory: "4Gi"
+                cpu: 1000m
+                memory: 4Gi
+              limits:
+                memory: 4Gi
         storageClass:
           enabled: true
           isDefault: false
@@ -142,12 +141,11 @@ spec:
           gateway:
             port: 80
             resources:
-              limits:
-                cpu: "2000m"
-                memory: "2Gi"
               requests:
-                cpu: "1000m"
-                memory: "1Gi"
+                cpu: 1000m
+                memory: 1Gi
+              limits:
+                memory: 2Gi
             instances: 1
           healthCheck:
             bucket:
