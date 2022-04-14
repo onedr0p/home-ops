@@ -17,10 +17,10 @@ spec:
   install:
     createNamespace: true
     remediation:
-      retries: 3
+      retries: 5
   upgrade:
     remediation:
-      retries: 3
+      retries: 5
   dependsOn:
     - name: rook-ceph
       namespace: rook-ceph
@@ -44,8 +44,6 @@ spec:
       #   provider: host
       crashCollector:
         disable: false
-      mgr:
-        count: 2
       dashboard:
         enabled: true
         urlPrefix: /
@@ -106,6 +104,13 @@ spec:
           metadataServer:
             activeCount: 1
             activeStandby: true
+            resources:
+              limits:
+                cpu: "2000m"
+                memory: "4Gi"
+              requests:
+                cpu: "1000m"
+                memory: "4Gi"
         storageClass:
           enabled: true
           isDefault: false
@@ -136,6 +141,13 @@ spec:
           preservePoolsOnDelete: true
           gateway:
             port: 80
+            resources:
+              limits:
+                cpu: "2000m"
+                memory: "2Gi"
+              requests:
+                cpu: "1000m"
+                memory: "1Gi"
             instances: 1
           healthCheck:
             bucket:
