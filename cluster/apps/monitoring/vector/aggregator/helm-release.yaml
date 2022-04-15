@@ -55,6 +55,12 @@ spec:
             - opnsense_logs
           source: |
             . |= parse_syslog!(.message)
+        opnsense_filterlog_remap:
+          type: remap
+          inputs:
+            - opnsense_filterlog_logs
+          source: |
+            . |= parse_syslog!(.message)
       sinks:
         loki_journal:
           type: loki
@@ -109,7 +115,7 @@ spec:
         loki_opnsense_filterlog:
           type: loki
           inputs:
-            - opnsense_filterlog_logs
+            - opnsense_filterlog_remap
           endpoint: http://loki:3100
           encoding:
             codec: json
