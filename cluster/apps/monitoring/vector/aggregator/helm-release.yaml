@@ -21,7 +21,7 @@ spec:
     - name: loki
       namespace: monitoring
   values:
-    role: Aggregator
+    role: Stateless-Aggregator
     image:
       repository: timberio/vector
       tag: 0.21.0-debian
@@ -118,10 +118,6 @@ spec:
           out_of_order_action: accept
           labels:
             hostname: opnsense
-    persistence:
-      enabled: true
-      storageClassName: ceph-block
-      size: 10Gi
     extraVolumeMounts:
       - name: geoip-config
         mountPath: /geoip-config
