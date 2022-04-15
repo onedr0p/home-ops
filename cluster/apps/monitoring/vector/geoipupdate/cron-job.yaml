@@ -1,0 +1,38 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: geoipupdate
+  namespace: monitoring
+spec:
+  schedule: "0 0 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      ttlSecondsAfterFinished: 300
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: geoipupdate
+              image: docker.io/maxmindinc/geoipupdate:v4.9
+              env:
+                - name: GEOIPUPDATE_EDITION_IDS
+                  value: GeoLite2-City
+                - name: GEOIPUPDATE_FREQUENCY
+                  value: "0"
+                - name: GEOIPUPDATE_VERBOSE
+                  value: "true"
+              envFrom:
+                - secretRef:
+                    name: geoipupdate
+              volumeMounts:
+                - name: config
+                  mountPath: /usr/share/GeoIP
+          volumes:
+            - name: config
+              persistentVolumeClaim:
+                claimName: geoipupdate-config-v1
