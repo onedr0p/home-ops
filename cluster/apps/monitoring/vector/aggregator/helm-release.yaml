@@ -41,6 +41,139 @@ spec:
     - name: loki
       namespace: monitoring
   values:
+    customConfig:
+      data_dir: /vector-data-dir
+      api:
+        enabled: true
+      #
+      # Sources
+      #
+      sources:
+        journal_logs:
+          type: vector
+          address: 0.0.0.0:6000
+          version: "2"
+        kubernetes_logs:
+          type: vector
+          address: 0.0.0.0:6010
+          version: "2"
+        opnsense_filterlog_logs:
+          type: syslog
+          address: 0.0.0.0:5140
+          mode: tcp
+      #
+      # Transformations
+      #
+      transforms:
+        opnsense_filterlog_remap:
+          type: remap
+          inputs:
+            - opnsense_filterlog_logs
+          source: |
+            . |= parse_syslog!(.message)
+            if .appname == "filterlog" {
+              log_data = parse_csv!(.message)
+              # IPv4 / IPv6
+              if log_data[8] == "4" || log_data[8] == "6" {
+                .filter_interface = log_data[4]
+                .filter_direction = log_data[7]
+                .filter_action = log_data[6]
+                .filter_ip_version = log_data[8]
+                .filter_protocol = log_data[16]
+                .filter_source_ip = log_data[18]
+                .filter_destination_ip = log_data[19]
+                # ICMP & IGMP & GRE
+                if (log_data[16] == "icmp" || log_data[16] == "igmp" || log_data[16] == "gre") {
+                  .filter_data = log_data[20]
+                } else {
+                  .filter_source_port = log_data[20]
+                  .filter_destination_port = log_data[21]
+                  .filter_data_length = log_data[22]
+                  # TCP Flags
+                  if log_data[8] == "4" && log_data[16] == "tcp" {
+                    .filter_tcp_flags = log_data[23]
+                  }
+                }
+              }
+            }
+        opnsense_filterlog_route:
+          type: route
+          inputs:
+            - opnsense_filterlog_remap
+          route:
+            pass_action: >-
+              .filter_action == "pass"
+            other_action: >-
+              .filter_action != "pass"
+        opnsense_filterlog_geoip:
+          type: geoip
+          inputs:
+            - opnsense_filterlog_route.pass_action
+          database: /geoip/GeoLite2-City.mmdb
+          source: filter_source_ip
+          target: geoip
+      #
+      # Sinks
+      #
+      sinks:
+        loki_journal:
+          type: loki
+          inputs:
+            - journal_logs
+          endpoint: http://loki:3100
+          encoding:
+            codec: json
+          batch:
+            max_bytes: 2049000
+          out_of_order_action: accept
+          remove_label_fields: true
+          remove_timestamp: true
+          labels:
+            hostname: >-
+              {{`{{ host }}`}}
+        loki_kubernetes:
+          type: loki
+          inputs:
+            - kubernetes_logs
+          endpoint: http://loki:3100
+          encoding:
+            codec: json
+          batch:
+            max_bytes: 2049000
+          out_of_order_action: accept
+          remove_label_fields: true
+          remove_timestamp: true
+          labels:
+            app: >-
+              {{`{{ kubernetes.pod_labels.app\.kubernetes\.io/name }}`}}
+            container: >-
+              {{`{{ kubernetes.container_name }}`}}
+            namespace: >-
+              {{`{{ kubernetes.pod_namespace }}`}}
+            node: >-
+              {{`{{ kubernetes.pod_node_name }}`}}
+            pod: >-
+              {{`{{ kubernetes.pod_name }}`}}
+        loki_opnsense_filterlog:
+          type: loki
+          inputs:
+            - opnsense_filterlog_route.other_action
+            - opnsense_filterlog_geoip
+          endpoint: http://loki:3100
+          encoding:
+            codec: json
+          batch:
+            max_bytes: 2049000
+          out_of_order_action: accept
+          labels:
+            hostname: opnsense
+        console_debug:
+          type: console
+          inputs:
+            - opnsense_filterlog_logs
+          target: stdout
+          encoding:
+            codec: json
     image:
       repository: timberio/vector
       tag: 0.21.0-debian
