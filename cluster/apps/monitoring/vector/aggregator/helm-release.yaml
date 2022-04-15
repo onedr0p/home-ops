@@ -118,6 +118,13 @@ spec:
           out_of_order_action: accept
           labels:
             hostname: opnsense
+    extraVolumeMounts:
+      - name: config
+        mountPath: /usr/share/GeoIP
+    extraVolumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: geoipupdate-config-v1
     podMonitor:
       enabled: true
     service:

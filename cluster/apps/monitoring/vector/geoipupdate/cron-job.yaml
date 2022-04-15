@@ -19,6 +19,14 @@ spec:
           containers:
             - name: geoipupdate
               image: docker.io/maxmindinc/geoipupdate:v4.9
+              imagePullPolicy: IfNotPresent
+              lifecycle:
+                preStop:
+                  exec:
+                    command:
+                      - /bin/sh
+                      - -c
+                      - rm -rf /usr/share/GeoIP/.geoipupdate.lock
               env:
                 - name: GEOIPUPDATE_EDITION_IDS
                   value: GeoLite2-City
