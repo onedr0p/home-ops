@@ -33,28 +33,18 @@ spec:
       # Sources
       sources:
         journal_logs:
-          address: 0.0.0.0:6000
           type: vector
+          address: 0.0.0.0:6000
           version: "2"
         kubernetes_logs:
+          type: vector
           address: 0.0.0.0:6010
-          type: vector
-          version: "2"
-        opnsense_logs:
-          address: 0.0.0.0:6020
-          type: vector
           version: "2"
         opnsense_filterlog_logs:
-          address: 0.0.0.0:6030
-          type: vector
-          version: "2"
+          type: syslog
+          address: 0.0.0.0:5140
+          mode: udp
       transforms:
-        opnsense_logs_remap:
-          type: remap
-          inputs:
-            - opnsense_logs
-          source: |
-            . |= parse_syslog!(.message)
         opnsense_filterlog_remap:
           type: remap
           inputs:
@@ -100,18 +90,6 @@ spec:
               {{`{{ kubernetes.pod_node_name }}`}}
             pod: >-
               {{`{{ kubernetes.pod_name }}`}}
-        loki_opnsense:
-          type: loki
-          inputs:
-            - opnsense_logs_remap
-          endpoint: http://loki:3100
-          encoding:
-            codec: json
-          batch:
-            max_bytes: 2049000
-          out_of_order_action: accept
-          labels:
-            hostname: opnsense
         loki_opnsense_filterlog:
           type: loki
           inputs:
