@@ -164,9 +164,16 @@ spec:
           out_of_order_action: accept
           labels:
             hostname: opnsense
-    env:
-      - name: VECTOR_LOG
-        value: debug
+        console_debug:
+          type: console
+          inputs:
+            - opnsense_filterlog_logs
+          target: stdout
+          encoding:
+            codec: json
+    # env:
+    #   - name: VECTOR_LOG
+    #     value: debug
     extraVolumeMounts:
       - name: geoip
         mountPath: /geoip
