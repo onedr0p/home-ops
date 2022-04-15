@@ -103,8 +103,6 @@ spec:
           route:
             pass_action: >-
               .filter_action == "pass"
-            other_action: >-
-              .filter_action != "pass"
         opnsense_filterlog_geoip:
           type: geoip
           inputs:
@@ -157,7 +155,7 @@ spec:
         loki_opnsense_filterlog:
           type: loki
           inputs:
-            - opnsense_filterlog_route.other_action
+            - opnsense_filterlog_route._unmatched
             - opnsense_filterlog_geoip
           endpoint: http://loki:3100
           encoding:
