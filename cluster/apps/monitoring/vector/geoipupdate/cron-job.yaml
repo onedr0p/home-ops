@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: geoipupdate
+  name: vector-geoipupdate
   namespace: monitoring
 spec:
   schedule: "0 0 * * *"
@@ -36,11 +36,11 @@ spec:
                   value: "true"
               envFrom:
                 - secretRef:
-                    name: geoipupdate
+                    name: vector-geoipupdate
               volumeMounts:
-                - name: config
+                - name: geoip-config
                   mountPath: /usr/share/GeoIP
           volumes:
-            - name: config
+            - name: geoip-config
               persistentVolumeClaim:
-                claimName: geoipupdate-config-v1
+                claimName: vector-geoipupdate-config-v1
