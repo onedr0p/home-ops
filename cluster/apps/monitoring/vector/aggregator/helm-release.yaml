@@ -50,28 +50,27 @@ spec:
           inputs:
             - opnsense_filterlog_logs
           source: |
-            . |= parse_syslog!(.message)
             if .appname == "filterlog" {
-              log_data = parse_csv!(.message)
+              msg = parse_csv!(string!(.message))
               # IPv4 / IPv6
-              if log_data[8] == "4" || log_data[8] == "6" {
-                .filter_interface = log_data[4]
-                .filter_direction = log_data[7]
-                .filter_action = log_data[6]
-                .filter_ip_version = log_data[8]
-                .filter_protocol = log_data[16]
-                .filter_source_ip = log_data[18]
-                .filter_destination_ip = log_data[19]
+              if msg[8] == "4" || msg[8] == "6" {
+                .filter_interface = msg[4]
+                .filter_direction = msg[7]
+                .filter_action = msg[6]
+                .filter_ip_version = msg[8]
+                .filter_protocol = msg[16]
+                .filter_source_ip = msg[18]
+                .filter_destination_ip = msg[19]
                 # ICMP & IGMP & GRE
-                if (log_data[16] == "icmp" || log_data[16] == "igmp" || log_data[16] == "gre") {
-                  .filter_data = log_data[20]
+                if (msg[16] == "icmp" || msg[16] == "igmp" || msg[16] == "gre") {
+                  .filter_data = msg[20]
                 } else {
-                  .filter_source_port = log_data[20]
-                  .filter_destination_port = log_data[21]
-                  .filter_data_length = log_data[22]
+                  .filter_source_port = msg[20]
+                  .filter_destination_port = msg[21]
+                  .filter_data_length = msg[22]
                   # TCP Flags
-                  if log_data[8] == "4" && log_data[16] == "tcp" {
-                    .filter_tcp_flags = log_data[23]
+                  if msg[8] == "4" && msg[16] == "tcp" {
+                    .filter_tcp_flags = msg[23]
                   }
                 }
               }
