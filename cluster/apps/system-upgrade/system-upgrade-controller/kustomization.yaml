@@ -2,5 +2,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - manifest.yaml
+  - github.com/rancher/system-upgrade-controller?ref=v0.9.1
   - plans
+images:
+  - name: rancher/system-upgrade-controller
+    newName: docker.io/rancher/system-upgrade-controller
+    newTag: v0.9.1
+patchesStrategicMerge:
+  - ./system-upgrade-patches.yaml
