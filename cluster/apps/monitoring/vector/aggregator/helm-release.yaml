@@ -50,28 +50,24 @@ spec:
           inputs:
             - opnsense_filterlog_logs
           source: |
-            if .appname == "filterlog" {
-              msg = parse_csv!(string!(.message))
-              # IPv4 / IPv6
-              if msg[8] == "4" || msg[8] == "6" {
-                .filter_interface = msg[4]
-                .filter_direction = msg[7]
-                .filter_action = msg[6]
-                .filter_ip_version = msg[8]
-                .filter_protocol = msg[16]
-                .filter_source_ip = msg[18]
-                .filter_destination_ip = msg[19]
-                # ICMP & IGMP & GRE
-                if (msg[16] == "icmp" || msg[16] == "igmp" || msg[16] == "gre") {
-                  .filter_data = msg[20]
-                } else {
-                  .filter_source_port = msg[20]
-                  .filter_destination_port = msg[21]
-                  .filter_data_length = msg[22]
-                  # TCP Flags
-                  if msg[8] == "4" && msg[16] == "tcp" {
-                    .filter_tcp_flags = msg[23]
-                  }
+            msg = parse_csv!(string!(.message))
+            # Only parse IPv4 / IPv6
+            if msg[8] == "4" || msg[8] == "6" {
+              .filter_interface = msg[4]
+              .filter_direction = msg[7]
+              .filter_action = msg[6]
+              .filter_ip_version = msg[8]
+              .filter_protocol = msg[16]
+              .filter_source_ip = msg[18]
+              .filter_destination_ip = msg[19]
+              if (msg[16] == "icmp" || msg[16] == "igmp" || msg[16] == "gre") {
+                .filter_data = msg[20]
+              } else {
+                .filter_source_port = msg[20]
+                .filter_destination_port = msg[21]
+                .filter_data_length = msg[22]
+                if msg[8] == "4" && msg[16] == "tcp" {
+                  .filter_tcp_flags = msg[23]
                 }
               }
             }
@@ -155,7 +151,7 @@ spec:
       repository: timberio/vector
       tag: 0.21.0-debian
     role: Stateless-Aggregator
-    replicas: 1
+    replicas: 3
     env:
       - name: VECTOR_LOG
         value: debug
