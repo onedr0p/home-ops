@@ -1,0 +1,75 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: jellyfin
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: jellyfin
+      version: 9.3.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+  values:
+    image:
+      repository: docker.io/jellyfin/jellyfin
+      tag: 10.8.0-beta1
+    env:
+      TZ: "${TIMEZONE}"
+      JELLYFIN_CACHE_DIR: "/config/cache"
+    podSecurityContext:
+      supplementalGroups:
+        - 44
+        - 109
+        - 100
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        hosts:
+          - host: &host "jellyfin.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    persistence:
+      config:
+        enabled: true
+        existingClaim: jellyfin-config-v1
+      media:
+        enabled: true
+        type: custom
+        volumeSpec:
+          nfs:
+            server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+            path: /tycho/Media
+        mountPath: /media
+        readOnly: true
+      transcode:
+        enabled: true
+        type: emptyDir
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: feature.node.kubernetes.io/custom-intel-gpu
+                  operator: In
+                  values:
+                    - "true"
+    resources:
+      requests:
+        gpu.intel.com/i915: 1
+        cpu: 100m
+        memory: 1000Mi
+      limits:
+        gpu.intel.com/i915: 1
+        memory: 4000Mi
