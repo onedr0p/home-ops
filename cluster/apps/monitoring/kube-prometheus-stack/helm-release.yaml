@@ -106,7 +106,7 @@ spec:
               - *host
       alertmanagerSpec:
         replicas: 3
-        podAntiAffinity: soft
+        podAntiAffinity: hard
         storage:
           volumeClaimTemplate:
             spec:
@@ -186,8 +186,9 @@ spec:
       thanosServiceMonitor:
         enabled: true
       prometheusSpec:
-        replicas: 1
+        replicas: 3
         replicaExternalLabelName: "replica"
+        podAntiAffinity: hard
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
@@ -204,10 +205,16 @@ spec:
                   storage: 10Gi
         thanos:
           image: quay.io/thanos/thanos:v0.25.2
-          version: v0.22.0
+          version: v0.25.2
           objectStorageConfig:
             name: thanos-objstore-secret
             key: objstore.yml
+        resources:
+          requests:
+            cpu: 250m
+            memory: 2000Mi
+          limits:
+            memory: 4000Mi
         additionalScrapeConfigs:
           - job_name: cadvisor
             honor_timestamps: true
