@@ -10,23 +10,9 @@
     - docker-cleanup.service
     - docker-cleanup.timer
 
-- name: Restart cadvisor
-  ansible.builtin.systemd:
-    name: "docker-compose@cadvisor.service"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-
 - name: Restart kopia
   ansible.builtin.systemd:
     name: "docker-compose@kopia.service"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-
-- name: Restart minio
-  ansible.builtin.systemd:
-    name: "docker-compose@minio.service"
     state: restarted
     enabled: true
     daemon_reload: true
@@ -45,13 +31,6 @@
     enabled: true
     daemon_reload: true
 
-- name: Restart postgresql
-  ansible.builtin.systemd:
-    name: "docker-compose@postgresql.service"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-
 - name: Restart time-machine
   ansible.builtin.systemd:
     name: "docker-compose@time-machine.service"
@@ -62,13 +41,6 @@
 - name: Restart traefik
   ansible.builtin.systemd:
     name: "docker-compose@traefik.service"
-    state: restarted
-    enabled: true
-    daemon_reload: true
-
-- name: Restart vault
-  ansible.builtin.systemd:
-    name: "docker-compose@vault.service"
     state: restarted
     enabled: true
     daemon_reload: true
