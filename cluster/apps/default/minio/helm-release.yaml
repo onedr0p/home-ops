@@ -1,0 +1,56 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: minio
+  namespace: default
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: minio
+      version: 11.2.8
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami-charts
+        namespace: flux-system
+      interval: 5m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    extraEnvVars:
+      - name: TZ
+        value: "${TIMEZONE}"
+      - name: MINIO_PROMETHEUS_URL
+        value: http://prometheus-operated.monitoring:9090
+      - name: MINIO_PROMETHEUS_JOB_ID
+        value: minio
+      - name: MINIO_UPDATE
+        value: "off"
+      # - name: MINIO_BROWSER_REDIRECT_URL
+      #   value: "https://minio.${SECRET_PUBLIC_DOMAIN}"
+      # - name: MINIO_SERVER_URL
+      #   value: "https://s3.${SECRET_PUBLIC_DOMAIN}"
+    auth:
+      existingSecret: minio-creds
+    ingress:
+      enabled: true
+      ingressClassname: "nginx"
+      hostname: "minio.${SECRET_PUBLIC_DOMAIN}"
+      tls: true
+    apiIngress:
+      enabled: true
+      ingressClassname: "nginx"
+      hostname: "s3.${SECRET_PUBLIC_DOMAIN}"
+      tls: true
+    persistence:
+      enabled: true
+      existingClaim: minio-nfs
+    prometheus:
+      servicemonitor:
+        enabled: true
