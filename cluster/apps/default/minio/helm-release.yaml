@@ -41,13 +41,19 @@ spec:
     ingress:
       enabled: true
       ingressClassname: "nginx"
-      hostname: "minio.${SECRET_PUBLIC_DOMAIN}"
+      hostname: &consoleHost "minio.${SECRET_PUBLIC_DOMAIN}"
       tls: true
+      extraTls:
+        - hosts:
+            - *consoleHost
     apiIngress:
       enabled: true
       ingressClassname: "nginx"
-      hostname: "s3.${SECRET_PUBLIC_DOMAIN}"
+      hostname: &apiHost "s3.${SECRET_PUBLIC_DOMAIN}"
       tls: true
+      extraTls:
+        - hosts:
+            - *apiHost
     persistence:
       enabled: true
       existingClaim: minio-nfs
