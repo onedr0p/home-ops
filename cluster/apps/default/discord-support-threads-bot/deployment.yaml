@@ -12,7 +12,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: *app
       app.kubernetes.io/instance: *app
-  replicas: 1
   strategy:
     type: Recreate
   template:
@@ -35,7 +34,7 @@ spec:
                 cp /tmp/messages.json /app/config/messages.json
               fi
           volumeMounts:
-            - name: discord-support-messages
+            - name: discord-support-threads-bot
               mountPath: /tmp/messages.json
               subPath: messages.json
               readOnly: false
@@ -60,21 +59,14 @@ spec:
             limits:
               memory: 150Mi
       volumes:
-        - name: discord-support-messages
+        - name: discord-support-threads-bot
           projected:
             defaultMode: 0775
             sources:
               - configMap:
-                  name: discord-support-messages
+                  name: discord-support-threads-bot
                   items:
                     - key: messages.json
                       path: messages.json
         - name: config
           emptyDir: {}
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
-          labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: *app
