@@ -23,6 +23,26 @@ spec:
         app.kubernetes.io/name: *app
         app.kubernetes.io/instance: *app
     spec:
+      initContainer:
+        - name: copy-config
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command:
+            - "sh"
+            - "-c"
+            - |
+              if [ ! -f /app/config/messages.json ]; then
+                cp /tmp/messages.json /app/config/messages.json
+              fi
+          volumeMounts:
+            - name: discord-support-messages
+              mountPath: /tmp/messages.json
+              subPath: messages.json
+              readOnly: false
+            - name: config
+              mountPath: /app/config
+          securityContext:
+            runAsUser: 0
       containers:
         - name: *app
           image: ghcr.io/sct/discord-support-threads:latest@sha256:b20953843728c5d2c97e2a7cbf96c98ce44a1cae21d0a8b8e2bf59845ddeed16
@@ -31,10 +51,8 @@ spec:
             - secretRef:
                 name: *app
           volumeMounts:
-            - name: discord-support-messages
-              mountPath: /app/config/messages.json
-              subPath: messages.json
-              readOnly: false
+            - name: config
+              mountPath: /app/config
           resources:
             requests:
               cpu: 10m
@@ -44,13 +62,15 @@ spec:
       volumes:
         - name: discord-support-messages
           projected:
-            defaultMode: 0777
+            defaultMode: 0775
             sources:
               - configMap:
                   name: discord-support-messages
                   items:
                     - key: messages.json
                       path: messages.json
+        - name: config
+          emptyDir: {}
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
