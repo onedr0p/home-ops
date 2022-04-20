@@ -2,6 +2,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - config-pvc.yaml
   - secret.sops.yaml
   - deployment.yaml
+namespace: default
+configMapGenerator:
+  - name: discord-support-messages
+    files:
+      - messages.json
+generatorOptions:
+  disableNameSuffixHash: true

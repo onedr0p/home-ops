@@ -12,8 +12,9 @@ spec:
     matchLabels:
       app.kubernetes.io/name: *app
       app.kubernetes.io/instance: *app
+  replicas: 3
   strategy:
-    type: Recreate
+    type: RollingUpdate
   template:
     metadata:
       annotations:
@@ -30,8 +31,10 @@ spec:
             - secretRef:
                 name: *app
           volumeMounts:
-            - name: &volume config
-              mountPath: /app/config
+            - name: discord-support-messages
+              mountPath: /app/config/messages.json
+              subPath: messages.json
+              readOnly: true
           resources:
             requests:
               cpu: 10m
@@ -39,6 +42,12 @@ spec:
             limits:
               memory: 150Mi
       volumes:
-        - name: *volume
-          persistentVolumeClaim:
-            claimName: discord-support-threads-bot-config-v1
+        - name: discord-support-messages
+          projected:
+            defaultMode: 0775
+            sources:
+              - configMap:
+                  name: discord-support-messages
+                  items:
+                    - key: messages.json
+                      path: messages.json
