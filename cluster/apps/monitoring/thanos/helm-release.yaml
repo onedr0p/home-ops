@@ -69,6 +69,14 @@ spec:
       retentionResolutionRaw: 14d
       retentionResolution5m: 30d
       retentionResolution1h: 180d
+      ingress:
+        enabled: true
+        hostname: &host "thanos-compactor.${SECRET_PUBLIC_DOMAIN}"
+        ingressClassName: "nginx"
+        tls: true
+        extraTls:
+          - hosts:
+              - *host
       persistence:
         enabled: true
         storageClass: "ceph-block"
@@ -78,6 +86,14 @@ spec:
       enabled: true
       replicaCount: 3
       podAntiAffinityPreset: hard
+      ingress:
+        enabled: true
+        hostname: &host "thanos-storegateway.${SECRET_PUBLIC_DOMAIN}"
+        ingressClassName: "nginx"
+        tls: true
+        extraTls:
+          - hosts:
+              - *host
       persistence:
         enabled: true
         storageClass: "ceph-block"
