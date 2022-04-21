@@ -44,7 +44,7 @@ spec:
         sidecarsNamespace: monitoring
       ingress:
         enabled: true
-        hostname: &host "thanos.${SECRET_PUBLIC_DOMAIN}"
+        hostname: &host "thanos-query.${SECRET_PUBLIC_DOMAIN}"
         ingressClassName: "nginx"
         tls: true
         extraTls:
@@ -54,11 +54,25 @@ spec:
       enabled: false
     bucketweb:
       enabled: true
+      replicaCount: 3
+      podAntiAffinityPreset: hard
+      ingress:
+        enabled: true
+        hostname: &host "thanos-bucketweb.${SECRET_PUBLIC_DOMAIN}"
+        ingressClassName: "nginx"
+        tls: true
+        extraTls:
+          - hosts:
+              - *host
     compactor:
       enabled: true
+      retentionResolutionRaw: 14d
+      retentionResolution5m: 30d
+      retentionResolution1h: 180d
       persistence:
         enabled: true
         storageClass: "ceph-block"
+        # TODO(thanos): change compactor volume to 5Gi
         size: 8Gi
     storegateway:
       enabled: true
@@ -67,6 +81,7 @@ spec:
       persistence:
         enabled: true
         storageClass: "ceph-block"
+        # TODO(thanos): change storegateway volume to 250Mi
         size: 8Gi
     ruler:
       enabled: true
@@ -85,6 +100,19 @@ spec:
             rules:
               - alert: "PrometheusDown"
                 expr: absent(up{job="kube-prometheus-stack-prometheus"})
+      ingress:
+        enabled: true
+        hostname: &host "thanos-ruler.${SECRET_PUBLIC_DOMAIN}"
+        ingressClassName: "nginx"
+        tls: true
+        extraTls:
+          - hosts:
+              - *host
+      persistence:
+        enabled: true
+        storageClass: "ceph-block"
+        # TODO(thanos): change ruler volume to 250Mi
+        size: 8Gi
     metrics:
       enabled: true
       serviceMonitor:
