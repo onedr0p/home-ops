@@ -17,6 +17,9 @@ spec:
       interval: 5m
   install:
     createNamespace: true
+  dependsOn:
+    - name: kube-prometheus-stack
+      namespace: monitoring
   values:
     image:
       registry: public.ecr.aws
@@ -28,6 +31,7 @@ spec:
     query:
       enabled: true
       replicaCount: 3
+      podAntiAffinityPreset: hard
       replicaLabels:
         - replica
       dnsDiscovery:
@@ -35,9 +39,12 @@ spec:
         sidecarsNamespace: monitoring
       ingress:
         enabled: true
-        hostname: "thanos.${SECRET_PUBLIC_DOMAIN}"
+        hostname: &host "thanos.${SECRET_PUBLIC_DOMAIN}"
         ingressClassName: "nginx"
         tls: true
+        extraTls:
+          - hosts:
+              - *host
     queryFrontend:
       enabled: false
     bucketweb:
@@ -45,14 +52,34 @@ spec:
     compactor:
       enabled: true
       persistence:
-        enabled: false
+        enabled: true
+        storageClass: "ceph-block"
+        size: 8Gi
     storegateway:
       enabled: true
+      replicaCount: 3
+      podAntiAffinityPreset: hard
       persistence:
         enabled: true
-        size: 5Gi
+        storageClass: "ceph-block"
+        size: 8Gi
     ruler:
-      enabled: false
+      enabled: true
+      replicaCount: 3
+      podAntiAffinityPreset: hard
+      dnsDiscovery:
+        enabled: true
+      alertmanagers:
+        - http://alertmanager-operated.monitoring:9093
+      clusterName: home-ops
+      extraFlags:
+        - "--web.prefix-header=X-Forwarded-Prefix"
+      config: |-
+        groups:
+          - name: "metamonitoring"
+            rules:
+              - alert: "PrometheusDown"
+                expr: absent(up{prometheus="monitoring/prom-prometheus"})
     metrics:
       enabled: true
       serviceMonitor:
