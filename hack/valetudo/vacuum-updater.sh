@@ -16,7 +16,7 @@ VALETUDO_VERSION="2022.03.1"
 NODE_EXPORTER_VERSION="v1.3.1"
 
 # renovate: datasource=github-releases depName=vectordotdev/vector
-VECTOR_VERSION="v0.21.0"
+VECTOR_VERSION="v0.21.1"
 
 #
 # valetudo
