@@ -31,14 +31,21 @@ spec:
       createPrometheusRules: true
     ingress:
       dashboard:
-        ingressClassName: "nginx"
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
         host:
           name: &host "rook.${SECRET_PUBLIC_DOMAIN}"
           path: "/"
         tls:
           - hosts:
               - *host
+    configOverride: |
+      [global]
+      bdev_enable_discard = true
+      bdev_async_discard = true
     cephClusterSpec:
+      cephVersion:
+        image: quay.io/ceph/ceph:v17.2.0
       # TODO(rook-ceph): Enable host network on next rebuild
       # network:
       #   provider: host
