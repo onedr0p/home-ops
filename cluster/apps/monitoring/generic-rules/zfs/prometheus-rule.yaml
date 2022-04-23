@@ -13,7 +13,8 @@ spec:
       rules:
         - alert: ZFSPoolNotHealthy
           annotations:
-            summary: ZFS Pool {{$labels.zpool}} is currently is {{$labels.state}}
+            summary: ZFS Pool {{$labels.zpool}} on {{$labels.instance}}
+              is currently {{$labels.state}}
           expr: |
             node_zfs_zpool_state{state="online"} != 1
           for: 1m
