@@ -22,7 +22,7 @@ resource "cloudflare_zone_settings_override" "cloudflare_settings" {
       js   = "on"
       html = "on"
     }
-    rocket_loader = "on"
+    rocket_loader = "off"
     # /caching/configuration
     always_online    = "off"
     development_mode = "off"
