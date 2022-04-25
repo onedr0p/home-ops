@@ -13,7 +13,7 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 <div align="center">
 
 [![Discord](https://img.shields.io/discord/673534664354430999?style=for-the-badge&label=discord&logo=discord&logoColor=white)](https://discord.gg/k8s-at-home)
-[![k3s](https://img.shields.io/badge/k3s-v1.23.1-brightgreen?style=for-the-badge&logo=kubernetes&logoColor=white)](https://k3s.io/)
+[![k3s](https://img.shields.io/badge/k3s-v1.23-brightgreen?style=for-the-badge&logo=kubernetes&logoColor=white)](https://k3s.io/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=for-the-badge)](https://github.com/pre-commit/pre-commit)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/onedr0p/home-ops/Schedule%20-%20Renovate?label=renovate&logo=renovatebot&style=for-the-badge)](https://github.com/onedr0p/home-ops/actions/workflows/schedule-renovate.yaml)
 [![Lines of code](https://img.shields.io/tokei/lines/github/onedr0p/home-ops?style=for-the-badge&color=brightgreen&label=lines&logo=codefactor&logoColor=white)](https://github.com/onedr0p/home-ops/graphs/contributors)
@@ -120,20 +120,14 @@ My home IP can change at any given time and in order to keep my WAN IP address u
 
 ---
 
-## ⚡ Network Attached Storage
-
-:construction: Work in Progress :construction:
-
----
-
 ## 🔧 Hardware
 
 | Device                    | Count | OS Disk Size | Data Disk Size       | Ram  | Operating System | Purpose                        |
 |---------------------------|-------|--------------|----------------------|------|------------------|--------------------------------|
-| Protectli FW6D            | 1     | 500GB mSATA  | N/A                  | 64GB | Opnsense 22.x    | Router                         |
-| Intel NUC8i3BEK           | 3     | 256GB NVMe   | N/A                  | 16GB | Ubuntu 20.04     | Kubernetes (k3s) Masters       |
-| Intel NUC8i5BEH           | 3     | 240GB SSD    | 1TB NVMe (rook-ceph) | 32GB | Ubuntu 20.04     | Kubernetes (k3s) Workers       |
-| PowerEdge T340            | 1     | 2TB SSD      | 8x12TB ZFS RAIDz2    | 64GB | Ubuntu 21.10     | Apps (Minio, Nexus, etc) & NFS |
+| Protectli FW6D            | 1     | 500GB mSATA  | N/A                  | 16GB | Opnsense 22      | Router                         |
+| Intel NUC8i3BEK           | 3     | 256GB NVMe   | N/A                  | 32GB | Ubuntu 22.04     | Kubernetes (k3s) Masters       |
+| Intel NUC8i5BEH           | 3     | 240GB SSD    | 1TB NVMe (rook-ceph) | 64GB | Ubuntu 22.04     | Kubernetes (k3s) Workers       |
+| PowerEdge T340            | 1     | 2TB SSD      | 8x12TB ZFS RAIDz2    | 64GB | Ubuntu 22.04     | Apps (Minio, Nexus, etc) & NFS |
 | Lenovo SA120              | 1     | N/A          | 8x12TB               | N/A  | N/A              | DAS                            |
 | Raspberry Pi              | 1     | 32GB SD Card | N/A                  | 4GB  | PiKVM            | Network KVM                    |
 | TESmart 8 Port KVM Switch | 1     | N/A          | N/A                  | N/A  | N/A              | Network KVM switch for PiKVM   |
