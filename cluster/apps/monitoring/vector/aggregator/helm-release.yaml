@@ -53,7 +53,7 @@ spec:
             - kubernetes_logs
           source: |
             # Standardize 'app' index
-            .custom_app_name = .pod_labels."app.kubernetes.io/name" ?? .pod_labels.app ?? .pod_labels."k8s-app" ?? "unknown"
+            .custom_app_name = .pod_labels."app.kubernetes.io/name" || .pod_labels.app || .pod_labels."k8s-app" || "unknown"
         opnsense_filterlog_remap:
           type: remap
           inputs:
