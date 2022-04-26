@@ -47,6 +47,14 @@ spec:
       # Transformations
       #
       transforms:
+        kubernetes_remap:
+          type: remap
+          inputs:
+            - kubernetes_logs
+          source: |
+            if !exists(.kubernetes.pod_labels."app.kubernetes.io/name") {
+              .kubernetes.pod_labels."app.kubernetes.io/name" = .kubernetes.pod_labels."app"
+            }
         opnsense_filterlog_remap:
           type: remap
           inputs:
@@ -109,7 +117,7 @@ spec:
         loki_kubernetes:
           type: loki
           inputs:
-            - kubernetes_logs
+            - kubernetes_remap
           endpoint: http://loki:3100
           encoding:
             codec: json
