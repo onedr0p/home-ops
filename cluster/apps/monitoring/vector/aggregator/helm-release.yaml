@@ -52,8 +52,10 @@ spec:
           inputs:
             - kubernetes_logs
           source: |
-            if exists(.kubernetes.pod_labels.app) {
-              .kubernetes.pod_labels."app.kubernetes.io/name" = .kubernetes.pod_labels.app
+            if exists(.kubernetes.pod_labels."app.kubernetes.io/name") {
+              .app_name = .kubernetes.pod_labels."app.kubernetes.io/name"
+            } else {
+              .app_name = .kubernetes.pod_labels.app
             }
         opnsense_filterlog_remap:
           type: remap
@@ -128,7 +130,7 @@ spec:
           remove_timestamp: true
           labels:
             app: >-
-              {{`{{ kubernetes.pod_labels."app.kubernetes.io/name" }}`}}
+              {{`{{ app_name }}`}}
             namespace: >-
               {{`{{ kubernetes.pod_namespace }}`}}
             node: >-
