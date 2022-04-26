@@ -54,7 +54,7 @@ spec:
           source: |
             if exists(.kubernetes.pod_labels."app.kubernetes.io/name") {
               .app_name = .kubernetes.pod_labels."app.kubernetes.io/name"
-            } else if exists(.app_name = .kubernetes.pod_labels.app) {
+            } else if exists(.kubernetes.pod_labels.app) {
               .app_name = .kubernetes.pod_labels.app
             } else {
               .app_name = "unknown"
@@ -132,7 +132,7 @@ spec:
           remove_timestamp: true
           labels:
             app: >-
-              {{`{{ .app_name }}`}}
+              {{`{{ app_name }}`}}
             namespace: >-
               {{`{{ kubernetes.pod_namespace }}`}}
             node: >-
