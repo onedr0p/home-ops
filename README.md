@@ -131,6 +131,8 @@ My home IP can change at any given time and in order to keep my WAN IP address u
 | Lenovo SA120              | 1     | N/A          | 8x12TB               | N/A  | N/A              | DAS                            |
 | Raspberry Pi              | 1     | 32GB SD Card | N/A                  | 4GB  | PiKVM            | Network KVM                    |
 | TESmart 8 Port KVM Switch | 1     | N/A          | N/A                  | N/A  | N/A              | Network KVM switch for PiKVM   |
+| APC SMT1500RM2U w/ NIC    | 1     | N/A          | N/A                  | N/A  | N/A              | UPS                            |
+| CyberPower PDU41001       | 2     | N/A          | N/A                  | N/A  | N/A              | PDU                            |
 
 ---
 
