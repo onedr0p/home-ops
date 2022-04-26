@@ -54,8 +54,10 @@ spec:
           source: |
             if exists(.kubernetes.pod_labels."app.kubernetes.io/name") {
               .app_name = .kubernetes.pod_labels."app.kubernetes.io/name"
-            } else {
+            } else if exists(.app_name = .kubernetes.pod_labels.app) {
               .app_name = .kubernetes.pod_labels.app
+            } else {
+              .app_name = "unknown"
             }
         opnsense_filterlog_remap:
           type: remap
