@@ -23,9 +23,7 @@ spec:
     remediation:
       retries: 5
   values:
-    ​deploymentStrategy​:
-      type​: Recreate
-    replicas: 1
+    replicas: 3
     env:
       GF_EXPLORE_ENABLED: true
       GF_PANELS_DISABLE_SANITIZE_HTML: true
@@ -139,4 +137,18 @@ spec:
             - *host
     persistence:
       enabled: true
-      existingClaim: grafana-config-v1
+      type: statefulset
+      storageClassName: "ceph-block"
+      size: 10Gi
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - grafana
+              topologyKey: kubernetes.io/hostname
