@@ -119,18 +119,12 @@ spec:
           remove_label_fields: true
           remove_timestamp: true
           labels:
-            pod_labels_*: >-
-              {{`{{ kubernetes.pod_labels }}`}}
             app: >-
-              {{`{{ kubernetes.pod_labels.app\.kubernetes\.io/name }}`}}
-            container: >-
-              {{`{{ kubernetes.container_name }}`}}
+              {{`{{ kubernetes.pod_labels."app.kubernetes.io/name" }}`}}
             namespace: >-
               {{`{{ kubernetes.pod_namespace }}`}}
             node: >-
               {{`{{ kubernetes.pod_node_name }}`}}
-            pod: >-
-              {{`{{ kubernetes.pod_name }}`}}
         loki_opnsense_filterlog:
           type: loki
           inputs:
