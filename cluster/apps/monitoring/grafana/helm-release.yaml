@@ -23,7 +23,6 @@ spec:
     remediation:
       retries: 5
   values:
-    replicas: 3
     env:
       GF_EXPLORE_ENABLED: true
       GF_PANELS_DISABLE_SANITIZE_HTML: true
@@ -143,15 +142,3 @@ spec:
       type: statefulset
       storageClassName: "ceph-block"
       size: 10Gi
-    affinity:
-      podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                  - key: app.kubernetes.io/name
-                    operator: In
-                    values:
-                      - grafana
-              topologyKey: kubernetes.io/hostname
