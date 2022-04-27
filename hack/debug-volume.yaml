@@ -9,6 +9,12 @@
 # set -gx NFS_PATH /tank/data
 # -- Apply a Pod with a volume attached to it
 # envsubst < hack/debug.yaml | kubectl apply -f -
+# -- Exec into the Pod
+# kubectl -n $NAMESPACE exec (kubectl get pod -n $NAMESPACE -l volume=$VOLUME -o name) -it debug -- /bin/sh
+# -- Remove a Pod with the volume attached to it
+# envsubst < hack/debug.yaml | kubectl delete -f -
+# -- Clear environment variables
+# set -e VOLUME; set -e NAMESPACE; set -e NFS_SERVER; set -e NFS_PATH;
 ---
 kind: Pod
 apiVersion: v1
@@ -43,9 +49,3 @@ spec:
       nfs:
         server: "${NFS_SERVER}"
         path: "${NFS_PATH}"
-# -- Exec into the Pod
-# kubectl -n $NAMESPACE exec (kubectl get pod -n $NAMESPACE -l volume=$VOLUME -o name) -it debug -- /bin/sh
-# -- Remove a Pod with the volume attached to it
-# envsubst < hack/debug.yaml | kubectl delete -f -
-# -- Clear environment variables
-# set -e VOLUME; set -e NAMESPACE; set -e NFS_SERVER; set -e NFS_PATH;
