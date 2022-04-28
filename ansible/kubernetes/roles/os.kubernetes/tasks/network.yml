@@ -32,27 +32,19 @@
       ff02::1 ip6-allnodes
       ff02::2 ip6-allrouters
 
-- name: Check for bridge-nf-call-iptables
-  ansible.builtin.stat:
-    path: /proc/sys/net/bridge/bridge-nf-call-iptables
-  register: bridge_nf_call_iptables_result
-
-- name: Set Kubernetes network configuration
-  ansible.builtin.blockinfile:
-    path: /etc/sysctl.d/99-kubernetes-cri.conf
-    mode: 0644
-    create: true
-    block: |
-      net.ipv4.ip_forward = 1
-      net.bridge.bridge-nf-call-iptables = 1
-      net.ipv6.conf.all.forwarding = 1
-      net.bridge.bridge-nf-call-ip6tables = 1
-  when:
-    - bridge_nf_call_iptables_result.stat.exists
-  register: sysctl_network
-
-- name: Reload Kubernetes network configuration
-  ansible.builtin.shell: sysctl -p /etc/sysctl.d/99-kubernetes-cri.conf
-  when:
-    - sysctl_network.changed
-    - bridge_nf_call_iptables_result.stat.exists
+- name: Set system controls for Kubernetes
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/99-kubernetes.conf
+    reload: true
+  with_dict: "{{ sysctl_config }}"
+  vars:
+    sysctl_config:
+      net.ipv4.ip_forward: 1
+      net.ipv4.conf.all.forwarding: 1
+      net.ipv6.conf.all.forwarding: 1
+      net.bridge.bridge-nf-call-iptables: 1
+      net.bridge.bridge-nf-call-ip6tables: 1
+      net.ipv4.conf.default.rp_filter: 0
+      net.ipv4.conf.all.rp_filter: 0

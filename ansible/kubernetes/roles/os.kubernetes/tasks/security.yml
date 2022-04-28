@@ -4,46 +4,22 @@
     path: /etc/default/grub
   register: grub_result
 
-- name: Check if apparmor is disabled
-  ansible.builtin.shell:
-    cmd: grep "GRUB_CMDLINE_LINUX=" /etc/default/grub | grep -c "apparmor=0"
-  register: apparmor_status
-  ignore_errors: true
-  changed_when: apparmor_status.rc != 0
-
-- name: Check if mitigations is disabled
-  ansible.builtin.shell:
-    cmd: grep "GRUB_CMDLINE_LINUX=" /etc/default/grub | grep -c "mitigations=off"
-  register: mitigations_status
-  ignore_errors: true
-  changed_when: mitigations_status.rc != 0
-
-- name: Disable apparmor
+- name: Disable apparmor and mitigations in grub
   ansible.builtin.replace:
     path: /etc/default/grub
-    regexp: '^(GRUB_CMDLINE_LINUX=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
-    replace: '\1 {{ option }}={{ value }}\2'
+    regexp: '^(GRUB_CMDLINE_LINUX=(?:(?![" ]{{ item.key | regex_escape }}=).)*)(?:[" ]{{ item.key | regex_escape }}=\S+)?(.*")$'
+    replace: '\1 {{ item.key }}={{ item.value }}\2'
+  with_dict: "{{ grub_config }}"
   vars:
-    option: apparmor
-    value: 0
+    grub_config:
+      apparmor: "0"
+      mitigations: "off"
+  register: grub_status
   when:
     - grub_result.stat.exists
-    - not apparmor_status.changed
-
-- name: Disable mitigations
-  ansible.builtin.replace:
-    path: /etc/default/grub
-    regexp: '^(GRUB_CMDLINE_LINUX=(?:(?![" ]{{ option | regex_escape }}=).)*)(?:[" ]{{ option | regex_escape }}=\S+)?(.*")$'
-    replace: '\1 {{ option }}={{ value }}\2'
-  vars:
-    option: mitigations
-    value: "off"
-  when:
-    - grub_result.stat.exists
-    - not mitigations_status.changed
 
 - name: Run grub-mkconfig
   ansible.builtin.command: update-grub
   when:
     - grub_result.stat.exists
-    - (apparmor_status.changed or mitigations_status.changed)
+    - grub_status.changed
