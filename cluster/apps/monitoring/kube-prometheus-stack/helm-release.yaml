@@ -154,8 +154,7 @@ spec:
         - 192.168.42.11
         - 192.168.42.12
     kubeProxy:
-      # Enable if using kube-proxy and not eBPF
-      enabled: false
+      enabled: true
       endpoints:
         - 192.168.42.10
         - 192.168.42.11
@@ -184,15 +183,28 @@ spec:
         enabled: true
       thanosServiceMonitor:
         enabled: true
+      thanosIngress:
+        enabled: true
+        pathType: Prefix
+        ingressClassName: "nginx"
+        annotations:
+          nginx.ingress.kubernetes.io/ssl-redirect: "true"
+          nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+        hosts:
+          - &host "thanos-sidecar.${SECRET_PUBLIC_DOMAIN}"
+        tls:
+          - hosts:
+              - *host
       prometheusSpec:
         replicas: 3
         replicaExternalLabelName: "replica"
         podAntiAffinity: hard
+        retentionSize: "6GB"
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false
-        retention: 6h
+        retention: 2d
         enableAdminAPI: true
         walCompression: true
         storageSpec:
