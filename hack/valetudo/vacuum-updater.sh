@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 #
-# One-shot script to install/upgrade valetudo, node-exporter and vector
+# One-shot script to install/upgrade valetudo, node-exporter and vector.
+# Doing this in Ansible would be way too gluey since the Vacuum doesn't
+# have Python installed.
 #
 
 PROJECT_DIR="$(git rev-parse --show-toplevel)"
@@ -30,7 +32,7 @@ ssh "${SSH_OPTS}" -T "${VACUUM_USER}@${VACUUM_ADDR}" <<'EOL'
     sleep 10
 EOL
 echo "*** Copying Valetudo to the Vacuum... ***"
-scp "${SSH_OPTS}" -q \
+scp -O "${SSH_OPTS}" -q \
     /tmp/valetudo \
     "${VACUUM_USER}@${VACUUM_ADDR}:/mnt/data/valetudo/valetudo"
 ssh "${SSH_OPTS}" -T "${VACUUM_USER}@${VACUUM_ADDR}" <<'EOL'
@@ -58,11 +60,11 @@ ssh "${SSH_OPTS}" -T "${VACUUM_USER}@${VACUUM_ADDR}" <<'EOL'
     sleep 10
 EOL
 echo "*** Copying node_exporter to the Vacuum... ***"
-scp "${SSH_OPTS}" -q \
+scp -O "${SSH_OPTS}" -q \
     /tmp/node_exporter \
     "${VACUUM_USER}@${VACUUM_ADDR}:/mnt/data/node_exporter/node_exporter"
 echo "*** Copying node_exporter init script to the Vacuum... ***"
-scp "${SSH_OPTS}" -q \
+scp -O "${SSH_OPTS}" -q \
     "${PROJECT_DIR}/hack/valetudo/S11node_exporter" \
     "${VACUUM_USER}@${VACUUM_ADDR}:/etc/init/S11node_exporter"
 ssh "${SSH_OPTS}" -T "${VACUUM_USER}@${VACUUM_ADDR}" <<'EOL'
@@ -86,11 +88,11 @@ ssh "${SSH_OPTS}" -T "${VACUUM_USER}@${VACUUM_ADDR}" <<'EOL'
     sleep 10
 EOL
 echo "*** Copying Vector to the Vacuum... ***"
-scp "${SSH_OPTS}" -q \
+scp -O "${SSH_OPTS}" -q \
     /tmp/vector-armv7-unknown-linux-musleabihf/bin/vector \
     "${VACUUM_USER}@${VACUUM_ADDR}:/mnt/data/vector/vector"
 echo "*** Copying Vector init script to the Vacuum... ***"
-scp "${SSH_OPTS}" -q \
+scp -O "${SSH_OPTS}" -q \
     "${PROJECT_DIR}/hack/valetudo/S11vector" \
     "${VACUUM_USER}@${VACUUM_ADDR}:/etc/init/S11vector"
 ssh "${SSH_OPTS}" -T "${VACUUM_USER}@${VACUUM_ADDR}" <<'EOL'
