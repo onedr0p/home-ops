@@ -111,7 +111,7 @@ spec:
       rules:
         - alert: BlackboxSslCertificateWillExpireSoon
           expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 3
-          for: 5m
+          for: 15m
           labels:
             severity: critical
           annotations:
@@ -119,7 +119,7 @@ spec:
               The SSL certificate for {{"{{ $labels.target }}"}} will expire in less than 3 days
         - alert: BlackboxSslCertificateExpired
           expr: probe_ssl_earliest_cert_expiry - time() <= 0
-          for: 5m
+          for: 15m
           labels:
             severity: critical
           annotations:
@@ -127,7 +127,7 @@ spec:
               The SSL certificate for {{"{{ $labels.target }}"}} has expired
         - alert: BlackboxProbeFailed
           expr: probe_success == 0
-          for: 5m
+          for: 15m
           labels:
             severity: critical
           annotations:

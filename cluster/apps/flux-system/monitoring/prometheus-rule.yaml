@@ -14,7 +14,7 @@ spec:
             summary: Flux component is down.
           expr: |
             absent(up{job=~".*flux-system.*"} == 1)
-          for: 5m
+          for: 15m
           labels:
             severity: critical
         - alert: FluxReconciliationFailure
@@ -28,6 +28,6 @@ spec:
               +
             on(namespace, name, kind) (max(gotk_reconcile_condition{status="Deleted"})
               by (namespace, name, kind)) * 2 == 1
-          for: 10m
+          for: 15m
           labels:
             severity: critical
