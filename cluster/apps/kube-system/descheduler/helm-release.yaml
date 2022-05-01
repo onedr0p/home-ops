@@ -19,10 +19,15 @@ spec:
     createNamespace: true
   values:
     kind: Deployment
+    replicas: 3
+    leaderElection:
+      enabled: true
     deschedulerPolicy:
       strategies:
         RemoveDuplicates:
-          enabled: false
+          enabled: true
+        RemovePodsViolatingNodeTaints:
+          enabled: true
         RemovePodsViolatingNodeAffinity:
           enabled: true
           params:
@@ -38,3 +43,19 @@ spec:
             nodeFit: true
         LowNodeUtilization:
           enabled: false
+        RemoveFailedPods:
+          enabled: true
+          params:
+            failedPods:
+              includingInitContainers: true
+              excludeOwnerKinds:
+                - "Job"
+              minPodLifetimeSeconds: 3600
+        RemovePodsHavingTooManyRestarts:
+          enabled: true
+          params:
+            podsHavingTooManyRestarts:
+              podRestartThreshold: 100
+              includingInitContainers: true
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "descheduler"
