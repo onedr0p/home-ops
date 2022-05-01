@@ -23,6 +23,7 @@ on: # yamllint disable-line rule:truthy
 env:
   LOG_LEVEL: debug
   DRY_RUN: false
+  RENOVATE_CONFIG_FILE: .github/renovate.json5
 
 jobs:
   renovate:
@@ -34,7 +35,7 @@ jobs:
       - name: Verify Renovate Configuration
         uses: tj-actions/renovate-config-validator@v1.3
         with:
-          config-file: .github/renovate.json5
+          config-file: "${{ env.RENOVATE_CONFIG_FILE }}"
       - name: Generate Token
         uses: tibdex/github-app-token@v1
         id: generate-token
@@ -48,5 +49,5 @@ jobs:
       - name: Renovate
         uses: renovatebot/github-action@v32.35.2
         with:
-          configurationFile: .github/renovate.json5
+          configurationFile: "${{ env.RENOVATE_CONFIG_FILE }}"
           token: "x-access-token:${{ steps.generate-token.outputs.token }}"
