@@ -12,7 +12,7 @@ VACUUM_ADDR="192.168.1.28"
 SSH_OPTS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR"
 
 # renovate: datasource=github-releases depName=Hypfer/Valetudo
-VALETUDO_VERSION="2022.03.1"
+VALETUDO_VERSION="2022.05.0"
 
 # renovate: datasource=github-releases depName=prometheus/node_exporter
 NODE_EXPORTER_VERSION="v1.3.1"
