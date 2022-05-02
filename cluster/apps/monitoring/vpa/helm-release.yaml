@@ -1,0 +1,34 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: vpa
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: vpa
+      version: 1.3.1
+      sourceRef:
+        kind: HelmRepository
+        name: fairwinds-charts
+        namespace: flux-system
+      interval: 5m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    recommender:
+      enabled: true
+      extraArgs:
+        pod-recommendation-min-cpu-millicores: 15
+        pod-recommendation-min-memory-mb: 61
+        storage: prometheus
+        prometheus-address: http://prometheus-operated:9090
+    updater:
+      enabled: false
