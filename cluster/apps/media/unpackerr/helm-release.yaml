@@ -8,8 +8,8 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: unpackerr
-      version: 5.3.1
+      chart: kah-common-chart
+      version: 1.1.1
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -18,11 +18,12 @@ spec:
   install:
     createNamespace: true
   values:
+    fullnameOverride: unpackerr
     image:
       repository: docker.io/golift/unpackerr
       tag: 0.9.9
     env:
-      TZ: "America/New_York"
+      TZ: "${TIMEZONE}"
       UN_SONARR_0_URL: http://sonarr:8989
       UN_SONARR_0_PATHS_0: /complete/sonarr
       UN_SONARR_1_URL: http://sonarr-uhd:8989
@@ -38,16 +39,22 @@ spec:
     envFrom:
       - secretRef:
           name: unpackerr
-    persistence:
-      config:
+    service:
+      main:
         enabled: false
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+      startup:
+        enabled: false
+    persistence:
       complete:
         enabled: true
-        type: custom
-        volumeSpec:
-          nfs:
-            server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-            path: /tycho/Media/Downloads/qbittorrent/complete
+        type: nfs
+        server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+        path: /tycho/Media/Downloads/qbittorrent/complete
         mountPath: /complete
     resources:
       requests:
