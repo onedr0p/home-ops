@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: vector-geoipupdate
+  name: &app vector-geoipupdate
   namespace: monitoring
 spec:
   schedule: "0 0 * * 0"
@@ -18,7 +18,7 @@ spec:
           automountServiceAccountToken: false
           restartPolicy: Never
           containers:
-            - name: geoipupdate
+            - name: *app
               image: docker.io/maxmindinc/geoipupdate:v4.9
               imagePullPolicy: IfNotPresent
               lifecycle:
@@ -37,11 +37,11 @@ spec:
                   value: "true"
               envFrom:
                 - secretRef:
-                    name: vector-geoipupdate
+                    name: *app
               volumeMounts:
-                - name: config
+                - name: *app
                   mountPath: /usr/share/GeoIP
           volumes:
-            - name: config
+            - name: *app
               persistentVolumeClaim:
                 claimName: vector-geoipupdate-config-v1
