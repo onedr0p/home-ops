@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: unpackerr
+  name: &app unpackerr
   namespace: media
 spec:
   interval: 5m
@@ -18,7 +18,7 @@ spec:
   install:
     createNamespace: true
   values:
-    fullnameOverride: unpackerr
+    fullnameOverride: *app
     image:
       repository: docker.io/golift/unpackerr
       tag: 0.9.9
@@ -38,10 +38,11 @@ spec:
       UN_READARR_0_PATHS_0: /complete/readarr
     envFrom:
       - secretRef:
-          name: unpackerr
+          name: *app
     service:
       main:
         enabled: false
+    # TODO(unpackerr): Write probes to check for something to tell if it's working
     probes:
       liveness:
         enabled: false

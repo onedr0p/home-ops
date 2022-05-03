@@ -2,8 +2,8 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app media-browser
-  namespace: media
+  name: &app echo-server
+  namespace: networking
 spec:
   interval: 5m
   chart:
@@ -19,20 +19,17 @@ spec:
     createNamespace: true
   values:
     fullnameOverride: *app
+    controller:
+      replicas: 3
+      strategy: RollingUpdate
     image:
-      repository: docker.io/filebrowser/filebrowser
-      tag: v2.21.1
-    env:
-      TZ: "${TIMEZONE}"
-      FB_DATABASE: "/config/filebrowser.db"
-      FB_ROOT: "/media"
-      FB_LOG: "stdout"
-      FB_NOAUTH: "true"
+      repository: docker.io/jmalloc/echo-server
+      tag: 0.3.1
     service:
       main:
         ports:
           http:
-            port: &port 80
+            port: &port 8080
     probes:
       liveness:
         enabled: true
@@ -69,27 +66,27 @@ spec:
       main:
         enabled: true
         ingressClassName: "nginx"
+        annotations:
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_PUBLIC_DOMAIN}"
+          external-dns/is-public: "true"
         hosts:
-          - host: &host "media-browser.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "echo-server.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
               - *host
-    persistence:
-      config:
-        enabled: true
-        existingClaim: media-browser-config-v1
-      media:
-        enabled: true
-        type: nfs
-        server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-        path: /tycho/Media
-        mountPath: /media
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app
     resources:
       requests:
         cpu: 10m
         memory: 50Mi
       limits:
-        memory: 500Mi
+        memory: 100Mi
