@@ -32,8 +32,20 @@ provider "cloudflare" {
   api_key = data.sops_file.cloudflare_secrets.data["cloudflare_apikey"]
 }
 
-data "cloudflare_zones" "domain" {
+data "cloudflare_zones" "domain_1" {
   filter {
-    name = data.sops_file.cloudflare_secrets.data["cloudflare_domain"]
+    name = data.sops_file.cloudflare_secrets.data["cloudflare_domain_1"]
+  }
+}
+
+data "cloudflare_zones" "domain_2" {
+  filter {
+    name = data.sops_file.cloudflare_secrets.data["cloudflare_domain_2"]
+  }
+}
+
+data "cloudflare_zones" "domain_3" {
+  filter {
+    name = data.sops_file.cloudflare_secrets.data["cloudflare_domain_3"]
   }
 }
