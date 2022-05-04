@@ -26,15 +26,6 @@ resource "cloudflare_record" "cname_root" {
   ttl     = 1
 }
 
-resource "cloudflare_record" "cname_wildcard" {
-  name    = "*"
-  zone_id = lookup(data.cloudflare_zones.domain_io.zones[0], "id")
-  value   = "ipv4.${data.sops_file.cloudflare_secrets.data["cloudflare_domain_io"]}"
-  proxied = true
-  type    = "CNAME"
-  ttl     = 1
-}
-
 resource "cloudflare_record" "cname_www" {
   name    = "www"
   zone_id = lookup(data.cloudflare_zones.domain_io.zones[0], "id")
