@@ -29,8 +29,7 @@ spec:
       GF_LOG_FILTERS: rendering:debug
       GF_DATE_FORMATS_FULL_DATE: "MMM Do, YYYY hh:mm:ss a"
       GF_SECURITY_ALLOW_EMBEDDING: true
-      GF_SECURTIY_COOKIE_SECURE: false
-      GF_SECURITY_COOKIE_SAMESITE: disabled
+      GF_SECURITY_COOKIE_SAMESITE: grafana
     admin:
       existingSecret: grafana-admin-creds
     grafana.ini:
@@ -132,6 +131,11 @@ spec:
     ingress:
       enabled: true
       ingressClassName: "nginx"
+      annotations:
+        nginx.ingress.kubernetes.io/affinity: "cookie"
+        nginx.ingress.kubernetes.io/session-cookie-name: "grafana"
+        nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+        nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
       hosts:
         - &host "grafana.${SECRET_PUBLIC_DOMAIN}"
       tls:
