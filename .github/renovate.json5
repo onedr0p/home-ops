@@ -73,7 +73,8 @@
       "matchStrings": [
         "datasource=(?<datasource>.*?)( versioning=(?<versioning>.*?))?\n *url: https:\/\/github\\.com\/(?<depName>.*?)\\.git\n *ref:\n *tag: (?<currentValue>.*)\n",
         "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\n.*?_version: \"(?<currentValue>.*)\"\n",
-        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\n.*?_VERSION=\"(?<currentValue>.*)\"\n"
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\n.*?_VERSION=\"(?<currentValue>.*)\"\n",
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\n.*?: \"(?<currentValue>.*)\"\n"
       ],
       "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
@@ -88,16 +89,6 @@
         "registryUrl=(?<registryUrl>.*?) chart=(?<depName>.*?)\n.*\\/(?<currentValue>.*?)\\/"
       ],
       "datasourceTemplate": "helm"
-    },
-    // Read and process Custom Resources
-    {
-      "fileMatch": [
-        "cluster/.+\\.ya?ml$"
-      ],
-      "matchStrings": [
-        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)\n .*: (?<currentValue>.*=?)"
-      ],
-      "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [
@@ -149,7 +140,8 @@
         "snapshot-controller"
       ],
       "additionalBranchPrefix": "",
-      "separateMinorPatch": true
+      "separateMinorPatch": true,
+      "stabilityDays": 2
     },
     {
       "groupName": "rook-ceph-suite",
@@ -161,31 +153,36 @@
         "rook.ceph"
       ],
       "additionalBranchPrefix": "",
-      "separateMinorPatch": true
+      "separateMinorPatch": true,
+      "stabilityDays": 2
     },
     {
       "groupName": "system-upgrade-controller-suite",
       "matchDatasources": [
         "docker",
-        "github-tags"
+        "github-releases"
       ],
       "matchPackagePatterns": [
         "rancher/system-upgrade-controller"
       ],
       "additionalBranchPrefix": "",
-      "separateMinorPatch": true
+      "separateMinorPatch": true,
+      "stabilityDays": 2
     },
     {
       "groupName": "thanos-suite",
       "matchDatasources": [
         "docker",
+        "github-releases",
         "helm"
       ],
       "matchPackagePatterns": [
+        "quay.io/thanos/thanos",
         "thanos"
       ],
       "additionalBranchPrefix": "",
-      "separateMinorPatch": true
+      "separateMinorPatch": true,
+      "stabilityDays": 2
     },
     {
       "groupName": "vector-suite",
@@ -198,7 +195,8 @@
         "vector"
       ],
       "additionalBranchPrefix": "",
-      "separateMinorPatch": true
+      "separateMinorPatch": true,
+      "stabilityDays": 2
     }
   ]
 }
