@@ -1,0 +1,68 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app whoogle
+  namespace: default
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: kah-common-chart
+      version: 1.1.1
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  install:
+    createNamespace: true
+  values:
+    fullnameOverride: *app
+    controller:
+      replicas: 3
+      strategy: RollingUpdate
+    image:
+      repository: docker.io/benbusby/whoogle-search
+      tag: 0.7.2
+    env:
+      WHOOGLE_CONFIG_DISABLE: "1"
+      WHOOGLE_CONFIG_COUNTRY: "US"
+      WHOOGLE_CONFIG_LANGUAGE: "lang_en"
+      WHOOGLE_CONFIG_SEARCH_LANGUAGE: "lang_en"
+      WHOOGLE_CONFIG_THEME: "dark"
+      WHOOGLE_CONFIG_SAFE: "0"
+      WHOOGLE_RESULTS_PER_PAGE: "25"
+    service:
+      main:
+        ports:
+          http:
+            port: 5000
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_PUBLIC_DOMAIN}"
+          external-dns/is-public: "true"
+        hosts:
+          - host: &host "whoogle.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app
+    resources:
+      requests:
+        cpu: 10m
+        memory: 50Mi
+      limits:
+        memory: 250Mi
