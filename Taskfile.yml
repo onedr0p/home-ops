@@ -45,3 +45,8 @@ tasks:
       - rsync --verbose --progress --partial --rsync-path="sudo rsync" {{.K3S_PRIMARY_MASTER_NODE_USERNAME}}@{{.K3S_PRIMARY_MASTER_NODE_ADDR}}:/etc/rancher/k3s/k3s.yaml "{{.CLUSTER_DIR}}/kubeconfig"
       - sed -i '' 's/127.0.0.1/{{.K3S_LB_ADDR}}/g' "{{.CLUSTER_DIR}}/kubeconfig"
       - chmod go-r "{{.CLUSTER_DIR}}/kubeconfig"
+
+  delete-failed-pods:
+    desc: Deletes failed pods
+    cmds:
+      - kubectl delete pods --field-selector status.phase=Failed -A --ignore-not-found=true
