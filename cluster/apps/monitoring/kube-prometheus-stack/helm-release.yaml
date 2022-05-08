@@ -113,6 +113,9 @@ spec:
                 requests:
                   # TODO(kube-prometheus-stack): change alertmanager volume to 250Mi
                   storage: 1Gi
+    kube-state-metrics:
+      metricLabelsAllowlist:
+        - "persistentvolumeclaims=[*]"
       prometheus:
         monitor:
           enabled: true
@@ -139,9 +142,6 @@ spec:
             sourceLabels:
               - node
             targetLabel: instance
-    kube-state-metrics:
-      metricLabelsAllowlist:
-        - "persistentvolumeclaims=[*]"
     kubeApiServer:
       enabled: true
     kubeControllerManager:
