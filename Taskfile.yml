@@ -105,4 +105,5 @@ tasks:
                 server: "expanse"
                 path: "/tycho/Apps/External/Backups"
         EOF
+      - kubectl -n $NAMESPACE wait --for=condition=ready pod -l volume=$VOLUME
       - kubectl -n $NAMESPACE exec (kubectl get pod -n $NAMESPACE -l volume=$VOLUME -o name) -it debug -- /bin/sh
