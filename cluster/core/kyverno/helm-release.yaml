@@ -17,22 +17,15 @@ spec:
       interval: 5m
   install:
     createNamespace: true
+    crds: CreateReplace
     remediation:
       retries: 5
   upgrade:
+    crds: CreateReplace
     remediation:
       retries: 5
   values:
-    installCRDs: false
-    # TODO(kyverno): change mode to ha on next version
+    installCRDs: true
     mode: standalone
-    replicaCount: 3
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/instance: kyverno
     serviceMonitor:
       enabled: true
