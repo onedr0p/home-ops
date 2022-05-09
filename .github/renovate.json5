@@ -45,15 +45,16 @@
   },
   "regexManagers": [
     {
-      "description": "Process 'thing_version:' and 'thing_version=' dependencies",
+      "description": "Process 'thing_version:', 'thing_version=' dependencies and kustomizations with urls that contain versions",
       "fileMatch": [
         "cluster/.+\\.ya?ml$",
         "ansible/.+\\.ya?ml$",
         "hack/.+\\.sh$"
       ],
       "matchStrings": [
-        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\n.*?: \"(?<currentValue>.*)\"\n",
-        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\n.*?=\"(?<currentValue>.*)\"\n"
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\n.*?: \"(?<currentValue>.*)\"",
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\n.*?=\"(?<currentValue>.*)\"",
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\n.*?https.*?(?<currentValue>v?\\d+\\.\\d+\\.\\d+)"
       ],
       "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
@@ -62,7 +63,7 @@
       "description": "Kube Prometheus Stack CRDs",
       "fileMatch": ["cluster/crds/.+\\.ya?ml$"],
       "matchStrings": [
-        "registryUrl=(?<registryUrl>.*?)\n.*?: \"(?<depName>[a-zA-Z-]+)-(?<currentValue>.*)\"\n"
+        "registryUrl=(?<registryUrl>.*?)\n.*?: \"(?<depName>[a-zA-Z-]+)-(?<currentValue>.*)\""
       ],
       "datasourceTemplate": "helm"
     }
