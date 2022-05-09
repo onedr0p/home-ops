@@ -5,39 +5,19 @@ vars:
   PROJECT_DIR:
     sh: "git rev-parse --show-toplevel"
   CLUSTER_DIR: "{{.PROJECT_DIR}}/cluster"
-  K3S_PRIMARY_MASTER_NODE_USERNAME: "ubuntu"
-  K3S_PRIMARY_MASTER_NODE_ADDR: "192.168.42.10"
-  K3S_LB_ADDR: "192.168.1.1"
 
 env:
   KUBECONFIG: "{{.CLUSTER_DIR}}/kubeconfig"
 
 includes:
-  formatter: .taskfiles/formatter.yml
-  linter: .taskfiles/linter.yml
+  ansible: .taskfiles/AnsibleTasks.yml
+  debug: .taskfiles/DebugTasks.yml
+  format: .taskfiles/FormatTasks.yml
+  linter: .taskfiles/LintTasks.yml
+  precommit: .taskfiles/PreCommitTasks.yml
+  terraform: .taskfiles/TerraformTasks.yml
 
 tasks:
-  update-deps:
-    - task: update-deps:ansible
-    - task: update-deps:pre-commit
-
-  update-deps:ansible:
-    desc: install/upgrade ansible deps
-    dir: ansible
-    cmds:
-      - "ansible-galaxy install -r requirements.yml --roles-path ~/.ansible/roles --force"
-      - "ansible-galaxy collection install -r requirements.yml --collections-path ~/.ansible/collections --force"
-
-  update-deps:pre-commit:
-    desc: install/upgrade pre-commit deps
-    cmds:
-      - pre-commit autoupdate
-      - pre-commit install --install-hooks
-
-  pre-commit:
-    desc: Run pre-commit
-    cmds:
-      - pre-commit run --all-files
 
   kubeconfig:
     desc: Remotely fetch kubeconfig from Kubernetes
@@ -45,65 +25,7 @@ tasks:
       - rsync --verbose --progress --partial --rsync-path="sudo rsync" {{.K3S_PRIMARY_MASTER_NODE_USERNAME}}@{{.K3S_PRIMARY_MASTER_NODE_ADDR}}:/etc/rancher/k3s/k3s.yaml "{{.CLUSTER_DIR}}/kubeconfig"
       - sed -i '' 's/127.0.0.1/{{.K3S_LB_ADDR}}/g' "{{.CLUSTER_DIR}}/kubeconfig"
       - chmod go-r "{{.CLUSTER_DIR}}/kubeconfig"
-
-  why-dockerhub:
-    desc: What dockerhub images are running in my cluster
-    cmds:
-      - kubectl get pods --all-namespaces -o=jsonpath="{range .items[*]}{'\n'}{range .spec.containers[*]}{.image}{'\n'}{end}{end}" | sort | uniq | grep -Ev 'quay|gcr|ghcr|ecr|us-docker' | grep -Ev 'bitnami|rook|intel|grafana' |  sed -e 's/docker\.io\///g' | sort | uniq
-
-  delete-failed-pods:
-    desc: Deletes failed pods
-    cmds:
-      - kubectl delete pods --field-selector status.phase=Failed -A --ignore-not-found=true
-
-  debug-networking:
-    desc: Create a netshoot container for debugging
-    cmds:
-      - kubectl run tmp-shell --rm -i --tty --image docker.io/nicolaka/netshoot:latest {{.CLI_ARGS}}
-
-  debug-volume:
-    desc: |
-      Attach a volume to a container for debugging, ex.
-      VOLUME=zigbee2mqtt-config-v1 NAMESPACE=home task debug-volume
-    interactive: true
-    cmds:
-      - defer: kubectl -n ${NAMESPACE} delete pod debug-${VOLUME}
-      - |
-        cat <<EOF | kubectl apply -f -
-        kind: Pod
-        apiVersion: v1
-        metadata:
-          name: "debug-${VOLUME}"
-          namespace: "${NAMESPACE}"
-          labels:
-            volume: "${VOLUME}"
-        spec:
-          containers:
-            - name: debug
-              image: docker.io/library/alpine:3.15
-              command: ["/bin/sh"]
-              tty: true
-              lifecycle:
-                postStart:
-                  exec:
-                    command:
-                      - /bin/sh
-                      - -c
-                      - apk add --no-cache curl nano
-              volumeMounts:
-                - name: data
-                  mountPath: /data
-                - name: backups
-                  mountPath: /mnt/backups
-                  readOnly: true
-          volumes:
-            - name: data
-              persistentVolumeClaim:
-                claimName: "${VOLUME}"
-            - name: backups
-              nfs:
-                server: "expanse"
-                path: "/tycho/Apps/External/Backups"
-        EOF
-      - kubectl -n $NAMESPACE wait --for=condition=ready pod -l volume=$VOLUME
-      - kubectl -n $NAMESPACE exec (kubectl get pod -n $NAMESPACE -l volume=$VOLUME -o name) -it debug -- /bin/sh
+    vars:
+      K3S_PRIMARY_MASTER_NODE_USERNAME: "ubuntu"
+      K3S_PRIMARY_MASTER_NODE_ADDR: "192.168.42.10"
+      K3S_LB_ADDR: "192.168.1.1"
