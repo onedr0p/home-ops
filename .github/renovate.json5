@@ -45,6 +45,7 @@
   },
   "regexManagers": [
     {
+      "description": "Process 'thing_version:' and 'thing_version=' dependencies",
       "fileMatch": [
         "cluster/.+\\.ya?ml$",
         "ansible/.+\\.ya?ml$",
@@ -56,19 +57,17 @@
       ],
       "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    },
+    {
+      "description": "Kube Prometheus Stack CRDs",
+      "fileMatch": ["cluster/crds/.+\\.ya?ml$"],
+      "matchStrings": [
+        "registryUrl=(?<registryUrl>.*?)\n.*?: \"(?<depName>[a-zA-Z-]+)-(?<currentValue>.*)\"\n"
+      ],
+      "datasourceTemplate": "helm"
     }
   ],
   "packageRules": [
-    {
-      "description": "Ignore deprecated helm charts",
-      "matchDatasources": ["helm"],
-      "ignoreDeprecated": true
-    },
-    {
-      "description": "Include additional commit message for docker images",
-      "matchDatasources": ["docker"],
-      "commitMessageExtra": "to {{newVersion}}"
-    },
     {
       "description": "Use custom regex versioning for frigate image",
       "matchDatasources": ["docker"],
@@ -76,17 +75,8 @@
       "matchPackageNames": ["docker.io/blakeblackshear/frigate"]
     },
     {
-      "description": "Use custom regex versioning for kube-prometheus-stack chart",
-      "matchDatasources": ["github-releases"],
-      "versioning": "regex:^kube-prometheus-stack-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
-      "matchPackageNames": ["kube-prometheus-stack"]
-    },
-    {
-      "description": "Use loose versioning for certain images",
-      "matchDatasources": [
-        "docker",
-        "github-releases"
-      ],
+      "description": "Use loose versioning for certain dependencies",
+      "matchDatasources": ["docker", "github-releases"],
       "versioning": "loose",
       "matchPackageNames": [
         "ghcr.io/k8s-at-home/plex",
