@@ -15,19 +15,14 @@
   ],
   "platform": "github",
   "username": "rosey-bot[bot]",
-  "repositories": [
-    "onedr0p/home-ops"
-  ],
+  "repositories": ["onedr0p/home-ops"],
   "onboarding": false,
   "requireConfig": false,
   "gitAuthor": "rosey-bot <98030736+rosey-bot[bot]@users.noreply.github.com>",
   "dependencyDashboardTitle": "Renovate Dashboard 🤖",
-  "suppressNotifications": [
-    "prIgnoreNotification"
-  ],
+  "suppressNotifications": ["prIgnoreNotification"],
   "rebaseWhen": "conflicted",
   "commitBodyTable": true,
-  // set up ignored deps
   "ignoreDeps": [
     "ghcr.io/fluxcd/helm-controller",
     "ghcr.io/fluxcd/image-automation-controller",
@@ -36,31 +31,20 @@
     "ghcr.io/fluxcd/notification-controller",
     "ghcr.io/fluxcd/source-controller"
   ],
-  // set up renovate managers
   "docker-compose": {
-    "fileMatch": [
-      "ansible/.+/docker-compose.*\\.ya?ml(\\.j2)?$"
-    ]
+    "fileMatch": ["ansible/.+/docker-compose.*\\.ya?ml(\\.j2)?$"]
   },
   "flux": {
-    "fileMatch": [
-      "cluster/.+\\.ya?ml$"
-    ]
+    "fileMatch": ["cluster/.+\\.ya?ml$"]
   },
   "helm-values": {
-    "fileMatch": [
-      "cluster/.+\\.ya?ml$"
-    ]
+    "fileMatch": ["cluster/.+\\.ya?ml$"]
   },
   "helmv3": {
-    "fileMatch": [
-      "charts/.+/Chart\\.ya?ml$"
-    ]
+    "fileMatch": ["charts/.+/Chart\\.ya?ml$"]
   },
   "kubernetes": {
-    "fileMatch": [
-      "cluster/.+\\.ya?ml$"
-    ]
+    "fileMatch": ["cluster/.+\\.ya?ml$"]
   },
   "regexManagers": [
     // Read and process various deps
@@ -79,9 +63,7 @@
     },
     // Read and process Custom Resource Definitions
     {
-      "fileMatch": [
-        "cluster/.+\\.ya?ml$"
-      ],
+      "fileMatch": ["cluster/.+\\.ya?ml$"],
       "matchStrings": [
         "registryUrl=(?<registryUrl>.*?)\n *tag: (?<depName>[a-zA-Z-]+)-(?<currentValue>.*)\n"
       ],
@@ -89,31 +71,24 @@
     }
   ],
   "packageRules": [
-    // setup datasources
     {
-      "matchDatasources": [
-        "helm"
-      ],
+      "description": "Ignore deprecated helm charts",
+      "matchDatasources": ["helm"],
       "ignoreDeprecated": true
     },
     {
-      "matchDatasources": [
-        "docker"
-      ],
+      "description": "Include additional commit message for docker images",
+      "matchDatasources": ["docker"],
       "commitMessageExtra": "to {{newVersion}}"
     },
-    // packages with custom versioning
     {
-      "matchDatasources": [
-        "docker"
-      ],
+      "description": "Use custom regex versioning for frigate image",
+      "matchDatasources": ["docker"],
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.*)$",
-      "matchPackageNames": [
-        "docker.io/blakeblackshear/frigate"
-      ]
+      "matchPackageNames": ["docker.io/blakeblackshear/frigate"]
     },
-    // packages with loose versioning
     {
+      "description": "Use loose versioning for certain images",
       "matchDatasources": [
         "docker",
         "github-releases"
