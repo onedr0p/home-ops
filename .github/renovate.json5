@@ -60,14 +60,6 @@
       ],
       "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
-    },
-    // Read and process Custom Resource Definitions
-    {
-      "fileMatch": ["cluster/.+\\.ya?ml$"],
-      "matchStrings": [
-        "registryUrl=(?<registryUrl>.*?)\n *tag: (?<depName>[a-zA-Z-]+)-(?<currentValue>.*)\n"
-      ],
-      "datasourceTemplate": "helm"
     }
   ],
   "packageRules": [
@@ -86,6 +78,12 @@
       "matchDatasources": ["docker"],
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.*)$",
       "matchPackageNames": ["docker.io/blakeblackshear/frigate"]
+    },
+    {
+      "description": "Use custom regex versioning for kube-prometheus-stack chart",
+      "matchDatasources": ["github-releases"],
+      "versioning": "regex:^kube-prometheus-stack-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
+      "matchPackageNames": ["kube-prometheus-stack"]
     },
     {
       "description": "Use loose versioning for certain images",
