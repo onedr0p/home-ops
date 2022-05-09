@@ -32,13 +32,15 @@ spec:
     kind: GitRepository
     name: cert-manager-source
   patches:
-    - patch: |-
+    - patch: |
+        - op: remove
+          path: /metadata/labels
+      target:
         apiVersion: apiextensions.k8s.io/v1
         kind: CustomResourceDefinition
-        metadata:
-          labels:
-            app: cert-manager
-            app.kubernetes.io/name: cert-manager
-            app.kubernetes.io/instance: cert-manager
+    - patch: |
+        - op: remove
+          path: /metadata/annotations
       target:
+        apiVersion: apiextensions.k8s.io/v1
         kind: CustomResourceDefinition
