@@ -66,13 +66,13 @@ My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Ubuntu 20.04
 This Git repository contains the following directories (_kustomizatons_) under [cluster](./cluster/).
 
 ```sh
- cluster      # k8s cluster defined as code
-├─ base       # flux
-├─ crds       # custom resources, loaded prior to  core and  apps
-├─ charts     # helm repos, loaded prior to  core and  apps
-├─ config     # cluster config, loaded prior to  core and  apps
-├─ core       # crucial apps, namespaced dir tree, loaded prior to  apps
-└─ apps       # regular apps, namespaced dir tree, loaded last
+📁 cluster      # k8s cluster defined as code
+├─📁 base       # flux, gitops operator, loaded before everything
+├─📁 crds       # custom resources, loaded before 📁 core and 📁 apps
+├─📁 charts     # helm repos, loaded before 📁 core and 📁 apps
+├─📁 config     # cluster config, loaded before 📁 core and 📁 apps
+├─📁 core       # crucial apps, namespaced dir tree, loaded before 📁 apps
+└─📁 apps       # regular apps, namespaced dir tree, loaded last
 ```
 
 ### Networking
