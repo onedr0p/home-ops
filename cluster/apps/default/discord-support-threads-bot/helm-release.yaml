@@ -24,12 +24,9 @@ spec:
         image: busybox
         imagePullPolicy: IfNotPresent
         command:
-          - sh
-          - -c
-          - |
-            if [ ! -f /app/config/messages.json ]; then
-              cp /tmp/messages.json /app/config/messages.json
-            fi
+          - "sh"
+          - "-c"
+          - "cp /tmp/messages.json /app/config/messages.json"
         volumeMounts:
           - name: tmp
             mountPath: /tmp/messages.json
@@ -42,8 +39,8 @@ spec:
     envFrom:
       - secretRef:
           name: *app
-    service:
-      main: &headless
+    service: &headless
+      main:
         enabled: false
     ingress:
       <<: *headless
