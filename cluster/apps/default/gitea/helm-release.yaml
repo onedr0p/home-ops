@@ -40,14 +40,24 @@ spec:
     persistence:
       enabled: true
       existingClaim: gitea-config-v1
+    signing:
+      enabled: true
+      gpgHome: /data/git/.gnupg
     gitea:
       config:
         APP_NAME: Tea, Git, Hot
         server:
           DISABLE_SSH: true
+          DOMAIN: "gitea.${SECRET_PUBLIC_DOMAIN}"
           ROOT_URL: "https://gitea.${SECRET_PUBLIC_DOMAIN}"
+          ENABLE_GZIP: true
+          LANDING_PAGE: explore
+          LFS_START_SERVER: true
+          ALLOW_GRACEFUL_RESTARTS: true
         admin:
           DISABLE_REGULAR_ORG_CREATION: true
+        ui:
+          DEFAULT_THEME: arc-green
         repository:
           DEFAULT_BRANCH: main
           DEFAULT_PRIVATE: true
@@ -56,6 +66,11 @@ spec:
         service:
           DISABLE_REGISTRATION: true
           REQUIRE_SIGNIN_VIEW: true
+          DEFAULT_KEEP_EMAIL_PRIVATE: true
+          DEFAULT_ALLOW_CREATE_ORGANIZATION: false
+          DEFAULT_USER_IS_RESTRICTED: true
+        cron:
+          ENABLED: true
       metrics:
         enabled: true
         serviceMonitor:
