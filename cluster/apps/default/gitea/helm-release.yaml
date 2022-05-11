@@ -71,23 +71,51 @@ spec:
           DEFAULT_USER_IS_RESTRICTED: true
         cron:
           ENABLED: true
+        attachment:
+          STORAGE_TYPE: minio
+          MINIO_ENDPOINT: "s3.${SECRET_PRIVATE_DOMAIN}"
+          MINIO_BUCKET: gitea
+        storage:
+          STORAGE_TYPE: minio
+          MINIO_ENDPOINT: "s3.${SECRET_PRIVATE_DOMAIN}"
+          MINIO_BUCKET: gitea
       metrics:
         enabled: true
         serviceMonitor:
           enabled: true
   valuesFrom:
     - kind: Secret
-      name: gitea-admin-credentials
+      name: gitea-config
       valuesKey: email
       targetPath: gitea.admin.email
       optional: false
     - kind: Secret
-      name: gitea-admin-credentials
+      name: gitea-config
       valuesKey: username
       targetPath: gitea.admin.username
       optional: false
     - kind: Secret
-      name: gitea-admin-credentials
+      name: gitea-config
       valuesKey: password
       targetPath: gitea.admin.password
+      optional: false
+    - kind: Secret
+      name: gitea-config
+      valuesKey: minio_access_key_id
+      targetPath: gitea.config.attachment.MINIO_ACCESS_KEY_ID
+      optional: false
+    - kind: Secret
+      name: gitea-config
+      valuesKey: minio_secret_access_key
+      targetPath: gitea.config.attachment.MINIO_SECRET_ACCESS_KEY
+      optional: false
+    - kind: Secret
+      name: gitea-config
+      valuesKey: minio_access_key_id
+      targetPath: gitea.config.storage.MINIO_ACCESS_KEY_ID
+      optional: false
+    - kind: Secret
+      name: gitea-config
+      valuesKey: minio_secret_access_key
+      targetPath: gitea.config.storage.MINIO_SECRET_ACCESS_KEY
       optional: false
