@@ -2,13 +2,13 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app gitea
+  name: gitea
   namespace: default
 spec:
   interval: 5m
   chart:
     spec:
-      chart: *app
+      chart: gitea
       version: 5.0.7
       sourceRef:
         kind: HelmRepository
@@ -70,17 +70,17 @@ spec:
           enabled: true
   valuesFrom:
     - kind: Secret
-      name: *app
+      name: gitea-admin-credentials
       valuesKey: email
       targetPath: gitea.admin.email
       optional: false
     - kind: Secret
-      name: *app
+      name: gitea-admin-credentials
       valuesKey: username
       targetPath: gitea.admin.username
       optional: false
     - kind: Secret
-      name: *app
+      name: gitea-admin-credentials
       valuesKey: username
       targetPath: gitea.admin.password
       optional: false
