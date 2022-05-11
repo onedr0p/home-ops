@@ -22,13 +22,6 @@ spec:
       capabilities:
         add:
           - SYS_CHROOT
-    service:
-      ssh:
-        type: LoadBalancer
-        port: 1337
-        externalTrafficPolicy: Local
-        externalIPs:
-          - "${SVC_GITEA_ADDR}"
     ingress:
       enabled: true
       ingressClassName: "nginx"
@@ -51,9 +44,7 @@ spec:
       config:
         APP_NAME: Tea, Git, Hot
         server:
-          SSH_PORT: 1337
-          SSH_LISTEN_PORT: 1337
-          SSH_DOMAIN: "gitea.${SECRET_PUBLIC_DOMAIN}"
+          DISABLE_SSH: true
           ROOT_URL: "https://gitea.${SECRET_PUBLIC_DOMAIN}"
         admin:
           DISABLE_REGULAR_ORG_CREATION: true
