@@ -6,3 +6,23 @@ resources:
 images:
   - name: gcr.io/k8s-staging-sig-storage/snapshot-controller
     newTag: v5.0.1
+patchesStrategicMerge:
+  - |-
+    kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      name: snapshot-controller
+      namespace: kube-system
+    spec:
+      replicas: 3
+      template:
+        spec:
+          containers:
+            - name: snapshot-controller
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app: snapshot-controller
