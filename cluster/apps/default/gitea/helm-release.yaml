@@ -79,6 +79,10 @@ spec:
           STORAGE_TYPE: minio
           MINIO_ENDPOINT: minio:9000
           MINIO_BUCKET: gitea
+        mailer:
+          enabled: true
+          mailer_type: smtp
+          host: smtp.mailgun.org
       metrics:
         enabled: true
         serviceMonitor:
@@ -118,4 +122,19 @@ spec:
       name: gitea-config
       valuesKey: minio_secret_access_key
       targetPath: gitea.config.storage.MINIO_SECRET_ACCESS_KEY
+      optional: false
+    - kind: Secret
+      name: gitea-config
+      valuesKey: user
+      targetPath: gitea.config.mailer.smtp_user
+      optional: false
+    - kind: Secret
+      name: gitea-config
+      valuesKey: passwd
+      targetPath: gitea.config.mailer.smtp_password
+      optional: false
+    - kind: Secret
+      name: gitea-config
+      valuesKey: from
+      targetPath: gitea.config.mailer.smtp_user
       optional: false
