@@ -21,25 +21,27 @@ spec:
     replicaCount: 3
     config:
       existingSecret: oauth2-proxy-config
+      configFile: |
+        silence_ping_logging = true
     extraArgs:
+      provider: github
       provider-display-name: "Gitea"
       whitelist-domain: ".${SECRET_PUBLIC_DOMAIN}"
       cookie-domain: ".${SECRET_PUBLIC_DOMAIN}"
-      provider: github
-      # cookie-name: _oauth2_proxy
-      # cookie-secure: "true"
-      # set-xauthrequest: "true"
-      redirect-url: |-
+      skip-provider-button:
+      cookie-secure: "true"
+      set-xauthrequest: "true"
+      redirect-url: |
         https://auth.${SECRET_PUBLIC_DOMAIN}/oauth2/callback
-      login-url: |-
+      login-url: |
         https://gitea.${SECRET_PUBLIC_DOMAIN}/login/oauth/authorize
-      redeem-url: |-
+      redeem-url: |
         https://gitea.${SECRET_PUBLIC_DOMAIN}/login/oauth/access_token
-      validate-url: |-
+      validate-url: |
         https://gitea.${SECRET_PUBLIC_DOMAIN}/api/v1
     authenticatedEmailsFile:
       enabled: true
-      restricted_access: |-
+      restricted_access: |
         ${SECRET_EMAIL}
     ingress:
       enabled: true
