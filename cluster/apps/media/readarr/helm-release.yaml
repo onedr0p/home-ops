@@ -29,12 +29,12 @@ spec:
         ingressClassName: "nginx"
         annotations:
           nginx.ingress.kubernetes.io/auth-url: |
-            https://auth.${SECRET_PUBLIC_DOMAIN}/oauth2/auth
+            https://auth.$host/oauth2/auth
           nginx.ingress.kubernetes.io/auth-signin: |
-            https://auth.${SECRET_PUBLIC_DOMAIN}/oauth2/start
+            https://auth.$host/oauth2/start
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/readarr/nord.css"></head>';
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.$host/css/base/readarr/nord.css"></head>';
             sub_filter_once on;
         hosts:
           - host: &host "readarr.${SECRET_PUBLIC_DOMAIN}"
