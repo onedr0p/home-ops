@@ -19,11 +19,21 @@ spec:
     createNamespace: true
   values:
     replicaCount: 3
+    ingress:
+      enabled: true
+      className: "nginx"
+      hosts:
+        - &host "auth.${SECRET_PUBLIC_DOMAIN}"
+      tls:
+        - hosts:
+            - *host
+      path: /oauth2
     config:
       existingSecret: oauth2-proxy-config
       configFile: |-
-        silence_ping_logging = true
+        email_domains = [ '*' ]
         upstreams = [ "file:///dev/null" ]
+        silence_ping_logging = true
     extraArgs:
       provider: github
       provider-display-name: "Gitea"
@@ -44,17 +54,6 @@ spec:
       enabled: true
       restricted_access: |-
         ${SECRET_PRIVATE_EMAIL}
-    ingress:
-      enabled: true
-      className: "nginx"
-      # annotations:
-      #   nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-      hosts:
-        - &host "auth.${SECRET_PUBLIC_DOMAIN}"
-      tls:
-        - hosts:
-            - *host
-      path: /oauth2
     metrics:
       enabled: true
       servicemonitor:
