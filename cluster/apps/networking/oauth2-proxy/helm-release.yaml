@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: oauth2-proxy
-      version: "6.2.1"
+      version: 6.2.1
       sourceRef:
         kind: HelmRepository
         name: oauth2-proxy-charts
@@ -21,7 +21,7 @@ spec:
     replicaCount: 3
     config:
       existingSecret: oauth2-proxy-config
-      configFile: |
+      configFile: |-
         silence_ping_logging = true
         upstreams = [ "file:///dev/null" ]
     extraArgs:
@@ -32,17 +32,17 @@ spec:
       skip-provider-button:
       cookie-secure: "true"
       set-xauthrequest: "true"
-      redirect-url: |
+      redirect-url: |-
         https://auth.${SECRET_PUBLIC_DOMAIN}/oauth2/callback
-      login-url: |
+      login-url: |-
         https://gitea.${SECRET_PUBLIC_DOMAIN}/login/oauth/authorize
-      redeem-url: |
+      redeem-url: |-
         https://gitea.${SECRET_PUBLIC_DOMAIN}/login/oauth/access_token
-      validate-url: |
+      validate-url: |-
         https://gitea.${SECRET_PUBLIC_DOMAIN}/api/v1
     authenticatedEmailsFile:
       enabled: true
-      restricted_access: |
+      restricted_access: |-
         ${SECRET_EMAIL}
     ingress:
       enabled: true

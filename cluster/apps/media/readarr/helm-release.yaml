@@ -28,8 +28,10 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         annotations:
+          # nginx.ingress.kubernetes.io/auth-url: |-
+          #   https://auth.$host/oauth2/auth
           nginx.ingress.kubernetes.io/auth-url: |-
-            https://auth.$host/oauth2/auth
+            http://oauth2-proxy.networking/oauth2/auth
           nginx.ingress.kubernetes.io/auth-signin: |-
             https://auth.$host/oauth2/start?rd=$escaped_request_uri
           nginx.ingress.kubernetes.io/configuration-snippet: |-
