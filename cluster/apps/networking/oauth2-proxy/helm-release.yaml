@@ -18,6 +18,7 @@ spec:
   install:
     createNamespace: true
   values:
+    replicaCount: 3
     config:
       existingSecret: oauth2-proxy-config
     extraArgs:
@@ -49,3 +50,17 @@ spec:
         - hosts:
             - *host
       path: /oauth2
+    metrics:
+      enabled: true
+      servicemonitor:
+        enabled: false
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - oauth2-proxy
+            topologyKey: "kubernetes.io/hostname"
