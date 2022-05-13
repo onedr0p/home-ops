@@ -18,6 +18,9 @@ spec:
   install:
     createNamespace: true
   values:
+    replicas: 3
+    extraArgs:
+      log.level: info
     ingress:
       enabled: true
       annotations:
@@ -29,17 +32,37 @@ spec:
       tls:
         - hosts:
             - *host
-    serviceMonitor:
-      enabled: true
-    # extraArgs:
-    #   log.level: debug
     config:
-      limits_config:
-        enforce_metric_name: false
-        reject_old_samples: true
-        reject_old_samples_max_age: 168h
-        ingestion_rate_mb: 16
-        ingestion_burst_size_mb: 24
+      distributor:
+        ring:
+          kvstore:
+            store: memberlist
+      ingester:
+        lifecycler:
+          ring:
+            kvstore:
+              store: memberlist
+            replication_factor: 1
+          final_sleep: 0s
+        chunk_idle_period: 5m
+        chunk_retain_period: 30s
+      memberlist:
+        abort_if_cluster_join_fails: false
+        bind_port: 7946
+        join_members:
+          - loki-headless.monitoring.svc.cluster.local:7946
+        max_join_backoff: 1m
+        max_join_retries: 10
+        min_join_backoff: 1s
+      schema_config:
+        configs:
+          - from: "2020-10-24"
+            store: boltdb-shipper
+            object_store: s3
+            schema: v11
+            index:
+              prefix: index_
+              period: 24h
       storage_config:
         aws:
           s3forcepathstyle: true
@@ -49,141 +72,28 @@ spec:
           cache_location: /data/loki/index_cache
           resync_interval: 5s
           shared_store: s3
-      compactor:
-        retention_enabled: true
-      ruler:
-        storage:
-          type: local
-          local:
-            directory: /rules
-        rule_path: /tmp/scratch
-        alertmanager_url: http://kube-prometheus-stack-alertmanager:9093
-        ring:
-          kvstore:
-            store: inmemory
-        enable_api: true
-    alerting_groups:
-      #
-      # SMART Failures
-      #
-      - name: smart-failure
-        rules:
-          - alert: SmartFailures
-            expr: |
-              sum by (hostname) (count_over_time({hostname=~".+"} | json | _SYSTEMD_UNIT = "smartmontools.service" !~ "(?i)previous self-test completed without error" !~ "(?i)Prefailure" |~ "(?i)(error|fail)"[2m])) > 0
-            for: 2m
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "SMART has reported failures on host {{ $labels.hostname }}"
-      #
-      # zigbee2mqtt
-      #
-      - name: zigbee2mqtt
-        rules:
-          - alert: ZigbeeUnableToReachMQTT
-            expr: |
-              sum(count_over_time({app="zigbee2mqtt"} |~ "(?i)not connected to mqtt server"[2m])) > 0
-            for: 2m
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "Zigbee2mqtt is unable to reach MQTT"
-      #
-      # zwavejs2mqtt
-      #
-      - name: zwavejs2mqtt
-        rules:
-          - alert: ZwaveUnableToReachMQTT
-            expr: |
-              sum(count_over_time({app="zwavejs2mqtt"} |~ "(?i)error while connecting mqtt"[2m])) > 0
-            for: 2m
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "Zwavejs2mqtt is unable to reach MQTT"
-      #
-      # frigate
-      #
-      - name: frigate
-        rules:
-          - alert: FrigateUnableToReachMQTT
-            expr: |
-              sum(count_over_time({app="frigate"} |~ "(?i)unable to connect to mqtt server"[2m])) > 0
-            for: 2m
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "Frigate is unable to reach MQTT"
-      #
-      # *arr
-      #
-      - name: arr
-        rules:
-          - alert: ArrDatabaseIsLocked
-            expr: |
-              sum by (app) (count_over_time({app=~".*arr"} |~ "(?i)database is locked"[2m])) > 0
-            for: 2m
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "{{ $labels.app }} is experiencing locked database issues"
-          - alert: ArrDatabaseIsMalformed
-            expr: |
-              sum by (app) (count_over_time({app=~".*arr"} |~ "(?i)database disk image is malformed"[2m])) > 0
-            for: 2m
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "{{ $labels.app }} is experiencing malformed database disk image issues"
-      #
-      # home-assistant
-      #
-      - name: home-assistant
-        rules:
-          - alert: HomeAssistantUnableToReachPostgresql
-            expr: |
-              sum by (app) (count_over_time({app="home-assistant"} |~ "(?i)error in database connectivity"[2m])) > 0
-            for: 2m
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "Home Assistant is unable to connect to postgresql"
-      #
-      # valetudo
-      #
-      - name: valetudo
-        rules:
-          - alert: ValetudoUnableToReachMQTT
-            expr: |
-              sum by (hostname) (count_over_time({hostname="valetudo"} |~ "(?i).*error.*mqtt.*"[2m])) > 0
-            for: 2m
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "Valetudo is unable to connect to mqtt"
-      #
-      # node-red
-      #
-      - name: node-red
-        rules:
-          - alert: NodeRedUnableToReachHomeAssistant
-            expr: |
-              sum by (app) (count_over_time({app="node-red"} |~ "(?i)home assistant.*connecting to undefined"[2m])) > 0
-            for: 2m
-            labels:
-              severity: critical
-              category: logs
-            annotations:
-              summary: "Node-Red is unable to connect to Home Assistant"
+    # useExistingAlertingGroup:
+    #   enabled: false
+    #   configmapName: ""
+    serviceMonitor:
+      enabled: true
+      prometheusRule:
+        enabled: false
+    extraPorts:
+      - port: 7956
+        protocol: TCP
+        name: loki-gossip-ring
+        targetPort: 7946
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - loki
+            topologyKey: "kubernetes.io/hostname"
   valuesFrom:
     - targetPath: config.storage_config.aws.bucketnames
       kind: ConfigMap
