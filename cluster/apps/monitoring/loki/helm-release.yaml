@@ -26,6 +26,7 @@ spec:
     loki:
       structuredConfig:
         auth_enabled: false
+        log_level: info
         server:
           http_listen_port: 3100
           grpc_listen_port: 9095
@@ -70,12 +71,16 @@ spec:
               store: memberlist
         compactor:
           working_directory: /var/loki/boltdb-shipper-compactor
-          shared_store: filesystem
+          shared_store: s3
           retention_enabled: true
         analytics:
           reporting_enabled: false
         ingester:
           max_chunk_age: 1h
+          lifecycler:
+            ring:
+              kvstore:
+                store: memberlist
     gateway:
       enabled: true
       replicas: 3
@@ -97,6 +102,13 @@ spec:
         storageClass: ceph-block
     read:
       replicas: 3
+      extraVolumeMounts:
+        - name: loki-rules
+          mountPath: /rules/fake
+      extraVolumes:
+        - name: loki-rules
+          configMap:
+            name: loki-alerting-rules
       persistence:
         size: 10Gi
         storageClass: ceph-block
