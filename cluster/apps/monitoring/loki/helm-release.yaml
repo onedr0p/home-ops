@@ -39,9 +39,9 @@ spec:
           split_queries_by_interval: 15m
         schema_config:
           configs:
-            - from: "2020-09-07"
+            - from: "2020-11-04"
               store: boltdb-shipper
-              object_store: filesystem
+              object_store: aws
               schema: v11
               index:
                 prefix: loki_index_
@@ -68,6 +68,14 @@ spec:
           ring:
             kvstore:
               store: memberlist
+        compactor:
+          working_directory: /var/loki/boltdb-shipper-compactor
+          shared_store: filesystem
+          retention_enabled: true
+        analytics:
+          reporting_enabled: false
+        ingester:
+          max_chunk_age: 1h
     gateway:
       enabled: true
       replicas: 3
