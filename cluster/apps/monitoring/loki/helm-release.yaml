@@ -63,10 +63,10 @@ spec:
           enable_alertmanager_v2: true
           alertmanager_url: http://kube-prometheus-stack-alertmanager:9093
           storage:
-            s3:
-              s3: null
-              insecure: true
-              s3forcepathstyle: true
+            type: local
+            local:
+              directory: /rules
+          rule_path: /tmp/scratch
           ring:
             kvstore:
               store: memberlist
@@ -110,10 +110,18 @@ spec:
       extraVolumeMounts:
         - name: loki-rules
           mountPath: /rules/fake
+        - name: loki-rules-tmp
+          mountPath: /tmp/scratch
+        - name: loki-tmp
+          mountPath: /tmp/loki-tmp
       extraVolumes:
         - name: loki-rules
           configMap:
             name: loki-alerting-rules
+        - name: loki-rules-tmp
+          emptyDir: {}
+        - name: loki-tmp
+          emptyDir: {}
       persistence:
         size: 10Gi
         storageClass: ceph-block
@@ -135,20 +143,4 @@ spec:
     - targetPath: loki.structuredConfig.common.storage.s3.secret_access_key
       kind: Secret
       name: loki-chunks-bucket
-      valuesKey: AWS_SECRET_ACCESS_KEY
-    - targetPath: loki.structuredConfig.ruler.storage.s3.bucketnames
-      kind: ConfigMap
-      name: loki-ruler-bucket
-      valuesKey: BUCKET_NAME
-    - targetPath: loki.structuredConfig.ruler.storage.s3.endpoint
-      kind: ConfigMap
-      name: loki-ruler-bucket
-      valuesKey: BUCKET_HOST
-    - targetPath: loki.structuredConfig.ruler.storage.s3.access_key_id
-      kind: Secret
-      name: loki-ruler-bucket
-      valuesKey: AWS_ACCESS_KEY_ID
-    - targetPath: loki.structuredConfig.ruler.storage.s3.secret_access_key
-      kind: Secret
-      name: loki-ruler-bucket
       valuesKey: AWS_SECRET_ACCESS_KEY
