@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: zigbee2mqtt
+  name: &app zigbee2mqtt
   namespace: home
 spec:
   interval: 5m
   chart:
     spec:
-      chart: zigbee2mqtt
-      version: 9.3.2
+      chart: kah-common-chart
+      version: 1.1.2
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -18,18 +18,24 @@ spec:
   install:
     createNamespace: true
   values:
+    fullnameOverride: *app
     image:
       repository: ghcr.io/koenkk/zigbee2mqtt
       tag: 1.25.1
     env:
       TZ: "${TIMEZONE}"
       ZIGBEE2MQTT_DATA: /data
+    service:
+      main:
+        ports:
+          http:
+            port: 8080
     ingress:
       main:
         enabled: true
         ingressClassName: "nginx"
         hosts:
-          - host: &host "zigbee2mqtt.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
@@ -44,28 +50,6 @@ spec:
     resources:
       requests:
         cpu: 100m
-        memory: 250Mi
+        memory: 100Mi
       limits:
         memory: 500Mi
-    # These config values are not what is my current state of zigbee2mqtt
-    # It's merely a guide for the initial start up on a fresh install
-    # Everything after the first start is managed in the UI
-    config:
-      homeassistant: true
-      device_options:
-        retain: true
-      permit_join: false
-      mqtt:
-        base_topic: zigbee2mqtt
-        server: "mqtt://mosquitto"
-        user: "${SECRET_MQTT_USERNAME}"
-        password: "${SECRET_MQTT_PASSWORD}"
-      serial:
-        port: "tcp://192.168.1.90:6638"
-      advanced:
-        log_output:
-          - console
-        network_key: GENERATE
-        pan_id: GENERATE
-      frontend:
-        port: 8080
