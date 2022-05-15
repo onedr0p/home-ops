@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: node-red
+  name: &app node-red
   namespace: home
 spec:
   interval: 5m
   chart:
     spec:
-      chart: node-red
-      version: 10.1.2
+      chart: kah-common-chart
+      version: 1.1.2
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -18,35 +18,26 @@ spec:
   install:
     createNamespace: true
   values:
-    initContainers:
-      npm-update:
-        image: node:18-alpine
-        command:
-          - /bin/sh
-          - -c
-          - |
-            if [[ -f /data/package.json ]]; then
-                npm install --save $(npm outdated | cut -d' ' -f 1 | sed '1d' | xargs -I '$' echo '$@latest' | xargs echo);
-            else
-                echo "Skipping npm updates, no package.json found.";
-            fi
-        workingDir: /data
-        volumeMounts:
-          - name: config
-            mountPath: /data
+    fullnameOverride: *app
     image:
       repository: ghcr.io/k8s-at-home/node-red
       tag: v2.2.2
     env:
       TZ: "${TIMEZONE}"
+      FLOWS: flows.json
       NODE_RED_ENABLE_PROJECTS: "true"
       NODE_RED_ENABLE_SAFE_MODE: "false"
+    service:
+      main:
+        ports:
+          http:
+            port: 1880
     ingress:
       main:
         enabled: true
         ingressClassName: "nginx"
         hosts:
-          - host: &host "node-red.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
@@ -61,6 +52,6 @@ spec:
     resources:
       requests:
         cpu: 100m
-        memory: 250Mi
+        memory: 100Mi
       limits:
         memory: 500Mi
