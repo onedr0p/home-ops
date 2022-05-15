@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: home-assistant
+  name: &app home-assistant
   namespace: home
 spec:
   interval: 5m
   chart:
     spec:
-      chart: home-assistant
-      version: 13.2.0
+      chart: kah-common-chart
+      version: 1.1.2
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -18,6 +18,7 @@ spec:
   install:
     createNamespace: true
   values:
+    fullnameOverride: *app
     image:
       repository: ghcr.io/home-assistant/home-assistant
       tag: 2022.5.4
@@ -25,8 +26,7 @@ spec:
       TZ: "${TIMEZONE}"
     envFrom:
       - secretRef:
-          name: home-assistant
-    hostNetwork: true
+          name: *app
     dnsPolicy: ClusterFirstWithHostNet
     service:
       main:
@@ -34,6 +34,9 @@ spec:
         externalIPs:
           - "${SVC_HOME_ASSISTANT_ADDR}"
         externalTrafficPolicy: Local
+      ports:
+        http:
+          port: 8123
     ingress:
       main:
         enabled: true
@@ -42,13 +45,18 @@ spec:
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_PUBLIC_DOMAIN}"
           external-dns/is-public: "true"
         hosts:
-          - host: &host "hass.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host-release "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: &host-custom "hass.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - *host
+              - *host-release
+              - *host-custom
     probes:
       liveness:
         enabled: false
@@ -68,7 +76,7 @@ spec:
         mountPath: /config/backups
         readOnly: false
     podAnnotations:
-      secret.reloader.stakater.com/reload: "home-assistant"
+      secret.reloader.stakater.com/reload: *app
     addons:
       codeserver:
         enabled: true
@@ -91,19 +99,24 @@ spec:
           enabled: true
           ingressClassName: "nginx"
           hosts:
-            - host: &host "hass-config.${SECRET_PUBLIC_DOMAIN}"
+            - host: &host-release-code "{{ .Release.Name }}-code.${SECRET_PUBLIC_DOMAIN}"
+              paths:
+                - path: /
+                  pathType: Prefix
+            - host: &host-custom-code "hass-code.${SECRET_PUBLIC_DOMAIN}"
               paths:
                 - path: /
                   pathType: Prefix
           tls:
             - hosts:
-                - *host
+                - *host-release-code
+                - *host-custom-code
         volumeMounts:
           - name: config
             mountPath: /config
     resources:
       requests:
         cpu: 100m
-        memory: 250Mi
+        memory: 100Mi
       limits:
-        memory: 2000Mi
+        memory: 750Mi
