@@ -1,0 +1,18 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: &app sonarr-uhd-exporter
+  namespace: media
+  labels: &labels
+    app.kubernetes.io/instance: *app
+    app.kubernetes.io/name: *app
+spec:
+  selector:
+    matchLabels:
+      <<: *labels
+  endpoints:
+    - port: http
+      interval: 10m
+      scrapeTimeout: 2m
+      path: /metrics
