@@ -32,13 +32,15 @@ spec:
       URL: "http://lidarr.media.svc.cluster.local:8686"
       ENABLE_ADDITIONAL_METRICS: "false"
       ENABLE_UNKNOWN_QUEUE_ITEMS: "false"
-    args: ["lidarr"]
     envFrom:
       - secretRef:
           name: *app
+    args: ["lidarr"]
     service:
       main:
-        enabled: false
+        ports:
+          metrics:
+            port: 7373
     resources:
       requests:
         cpu: 100m
