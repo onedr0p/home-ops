@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: jellyfin
+  name: &app jellyfin
   namespace: media
 spec:
   interval: 5m
   chart:
     spec:
-      chart: jellyfin
-      version: 9.4.2
+      chart: kah-common-chart
+      version: 1.1.2
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -17,23 +17,22 @@ spec:
   install:
     createNamespace: true
   values:
+    fullnameOverride: *app
     image:
       repository: docker.io/jellyfin/jellyfin
       tag: 10.8.0-beta2
     env:
       TZ: "${TIMEZONE}"
       JELLYFIN_CACHE_DIR: "/config/cache"
-    podSecurityContext:
-      supplementalGroups:
-        - 44
-        - 109
-        - 100
     service:
       main:
         type: LoadBalancer
         externalIPs:
           - "${SVC_JELLYFIN_ADDR}"
         externalTrafficPolicy: Local
+        ports:
+          http:
+            port: 8096
     ingress:
       main:
         enabled: true
@@ -46,6 +45,11 @@ spec:
         tls:
           - hosts:
               - *host
+    podSecurityContext:
+      supplementalGroups:
+        - 44
+        - 109
+        - 100
     persistence:
       config:
         enabled: true
