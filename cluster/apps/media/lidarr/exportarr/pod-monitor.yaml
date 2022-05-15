@@ -1,0 +1,22 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: &app lidarr
+  namespace: &namespace media
+  labels: &labels
+    app.kubernetes.io/instance: *app
+    app.kubernetes.io/name: *app
+spec:
+  namespaceSelector:
+    matchNames:
+      - *namespace
+  selector:
+    matchLabels:
+      <<: *labels
+  podMetricsEndpoints:
+    - port: 7373
+      interval: 10m
+      scrapeTimeout: 2m
+      path: /metrics
+      honorLabels: true
