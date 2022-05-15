@@ -49,7 +49,7 @@ My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Ubuntu 20.04
 ### Core Components
 
 - [projectcalico/calico](https://github.com/projectcalico/calico): Internal Kubernetes networking plugin.
-- [rook/rook](https://github.com/projectcalico/calico): Distributed block storage for peristent storage.
+- [rook/rook](https://github.com/rook/rook): Distributed block storage for peristent storage.
 - [mozilla/sops](https://toolkit.fluxcd.io/guides/mozilla-sops/): Manages secrets for Kubernetes, Ansible and Terraform.
 - [kubernetes-sigs/external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically manages DNS records from my cluster in a cloud DNS provider.
 - [jetstack/cert-manager](https://cert-manager.io/docs/): Creates SSL certificates for services in my Kubernetes cluster.
