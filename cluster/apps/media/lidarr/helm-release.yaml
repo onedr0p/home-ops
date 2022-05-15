@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: lidarr
+  name: &app lidarr
   namespace: media
 spec:
   interval: 5m
   chart:
     spec:
-      chart: lidarr
-      version: 14.1.3
+      chart: kah-common-chart
+      version: 1.1.2
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -18,11 +18,17 @@ spec:
   install:
     createNamespace: true
   values:
+    fullnameOverride: *app
     image:
       repository: ghcr.io/k8s-at-home/lidarr-nightly
       tag: v1.0.2.2579
     env:
       TZ: "${TIMEZONE}"
+    service:
+      main:
+        ports:
+          http:
+            port: 8686
     ingress:
       main:
         enabled: true
@@ -40,24 +46,26 @@ spec:
         tls:
           - hosts:
               - *host
+    probes:
+      liveness:
+        enabled: true
+        custom: true
+        spec:
+          exec:
+            command:
+              - /usr/bin/env
+              - bash
+              - -c
+              - curl --fail localhost:8686/api/v1/system/status?apiKey=`IFS=\> && while
+                read -d \< E C; do if [[ $E = "ApiKey" ]]; then echo $C; fi; done < /config/config.xml`
+          failureThreshold: 5
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 10
     podSecurityContext:
       supplementalGroups:
         - 100
-    metrics:
-      enabled: true
-      serviceMonitor:
-        interval: 5m
-        scrapeTimeout: 1m
-      prometheusRule:
-        enabled: false
-      exporter:
-        image:
-          repository: ghcr.io/onedr0p/exportarr
-          tag: v1.0.0
-        env:
-          port: 9794
-          additionalMetrics: true
-          unknownQueueItems: true
     persistence:
       config:
         enabled: true
