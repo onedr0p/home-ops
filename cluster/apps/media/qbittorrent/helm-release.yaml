@@ -54,13 +54,18 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/qbittorrent/nord.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: &host "qb.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host-release "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: &host-custom "qb.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - *host
+              - *host-release
+              - *host-custom
     podSecurityContext:
       supplementalGroups:
         - 100
