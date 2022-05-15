@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: qbittorrent
+  name: &app qbittorrent
   namespace: media
 spec:
   interval: 5m
   chart:
     spec:
-      chart: qbittorrent
-      version: 13.4.3
+      chart: kah-common-chart
+      version: 1.1.2
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -18,13 +18,12 @@ spec:
   install:
     createNamespace: true
   values:
+    fullnameOverride: *app
     image:
       repository: ghcr.io/k8s-at-home/qbittorrent
       tag: v4.4.2
     env:
       TZ: "${TIMEZONE}"
-    settings:
-      automaticPortSetup: false
     service:
       main:
         ports:
@@ -33,7 +32,6 @@ spec:
       bittorrent:
         enabled: true
         type: LoadBalancer
-        # loadBalancerIP: 192.168.70.106
         externalIPs:
           - "${SVC_QBITTORRENT_ADDR}"
         ports:
@@ -63,17 +61,6 @@ spec:
         tls:
           - hosts:
               - *host
-    metrics:
-      enabled: true
-      exporter:
-        image:
-          repository: ghcr.io/k8s-at-home/prometheus-qbittorrent-exporter
-          tag: v1.2.0
-      serviceMonitor:
-        interval: 5m
-        scrapeTimeout: 1m
-      prometheusRule:
-        enabled: false
     podSecurityContext:
       supplementalGroups:
         - 100
