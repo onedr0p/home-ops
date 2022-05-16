@@ -1,0 +1,31 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: radarr-uhd-exporter
+  namespace: media
+  labels:
+    prometheus: k8s
+    role: alert-rules
+spec:
+  groups:
+    - name: radarr-uhd.rules
+      rules:
+        - alert: RadarrUHDExporterAbsent
+          annotations:
+            summary: The exporter for Radarr UHD has disappeared from Prometheus
+              service discovery
+          expr: |
+            absent(up{job="radarr-uhd-exporter"} == 1)
+          for: 30m
+          labels:
+            severity: critical
+        - alert: RadarrUHDDown
+          annotations:
+            summary: The Radarr UHD application is down or metrics are not
+              being collected
+          expr: |
+            radarr_system_status{job="radarr-uhd-exporter"} == 0
+          for: 30m
+          labels:
+            severity: critical
