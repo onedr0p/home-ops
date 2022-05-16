@@ -18,7 +18,7 @@ terraform {
     }
     sops = {
       source  = "carlpett/sops"
-      version = "0.7.0"
+      version = "0.7.1"
     }
   }
 }
