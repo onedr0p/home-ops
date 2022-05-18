@@ -30,6 +30,9 @@ spec:
       tag: 0.11.0-beta2
     env:
       TZ: "${TIMEZONE}"
+    envFrom:
+      - secretRef:
+          name: *app
     service:
       main:
         ports:
@@ -127,8 +130,3 @@ spec:
       limits:
         memory: 6000Mi
         gpu.intel.com/i915: "1"
-  valuesFrom:
-    - targetPath: env.FRIGATE_MQTT_PASSWORD
-      kind: Secret
-      name: *app
-      valuesKey: mqtt_password
