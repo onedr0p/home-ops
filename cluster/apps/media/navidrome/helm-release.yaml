@@ -1,0 +1,72 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app navidrome
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: kah-common-chart
+      version: 1.1.2
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  install:
+    createNamespace: true
+  values:
+    global:
+      nameOverride: *app
+    image:
+      repository: docker.io/deluan/navidrome
+      tag: 0.47.5
+    env:
+      TZ: "${TIMEZONE}"
+      ND_LOGLEVEL: "info"
+      ND_SCANSCHEDULE: "1h"
+    service:
+      main:
+        ports:
+          http:
+            port: 4533
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        # annotations:
+        #   external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_PUBLIC_DOMAIN}"
+        #   external-dns/is-public: "true"
+        hosts:
+          - host: &host-release "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: &host-custom "music.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host-release
+              - *host-custom
+    persistence:
+      config:
+        enabled: true
+        existingClaim: navidrome-config-v1
+        mountPath: /data
+      music:
+        enabled: true
+        type: nfs
+        server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+        path: /tycho/Media/Library/Music
+        mountPath: /music
+        readOnly: true
+    resources:
+      requests:
+        cpu: 100m
+        memory: 250Mi
+      limits:
+        memory: 750Mi
