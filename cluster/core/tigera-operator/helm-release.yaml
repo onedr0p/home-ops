@@ -1,0 +1,47 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: tigera-operator
+  namespace: tigera-operator
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: tigera-operator
+      version: v3.23.1
+      sourceRef:
+        kind: HelmRepository
+        name: project-calico-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    crds: CreateReplace
+    remediation:
+      retries: 5
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 5
+  values:
+    installation:
+      enabled: true
+      registry: quay.io
+      imagePath: calico
+      calicoNetwork:
+        bgp: Enabled
+        hostPorts: Disabled
+        # Note: The ipPools section cannot be modified post-install.
+        ipPools:
+          - blockSize: 26
+            cidr: 10.69.0.0/16
+            encapsulation: None
+            natOutgoing: Enabled
+            nodeSelector: all()
+        linuxDataplane: Iptables
+        multiInterfaceMode: None
+        nodeAddressAutodetectionV4:
+          cidrs:
+            - 192.168.42.0/24
+      nodeMetricsPort: 9091
+      typhaMetricsPort: 9093
