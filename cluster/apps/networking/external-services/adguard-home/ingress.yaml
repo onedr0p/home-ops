@@ -1,0 +1,22 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: &app adguard-home
+  namespace: networking
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: &host adguard-home.${SECRET_PUBLIC_DOMAIN}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: *app
+                port:
+                  number: 3010
+  tls:
+    - hosts:
+        - *host
