@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: descheduler
+  name: &app descheduler
   namespace: kube-system
 spec:
   interval: 15m
   chart:
     spec:
-      chart: descheduler
-      version: 0.23.2
+      chart: *app
+      version: 0.24.0
       sourceRef:
         kind: HelmRepository
         name: descheduler-charts
@@ -19,10 +19,15 @@ spec:
     createNamespace: true
   values:
     kind: Deployment
-    # TODO(descheduler): scale app on next app release
-    # replicas: 3
-    # leaderElection:
-    #   enabled: true
+    replicas: 3
+    leaderElection:
+      enabled: true
+      leaseDuration: 15
+      renewDeadline: 10
+      retryPeriod: 2
+      resourceLock: "leases"
+      resourceName: "descheduler"
+      resourceNamescape: "kube-system"
     deschedulerPolicy:
       strategies:
         RemoveDuplicates:
@@ -58,5 +63,21 @@ spec:
             podsHavingTooManyRestarts:
               podRestartThreshold: 100
               includingInitContainers: true
+    service:
+      enabled: true
+    serviceMonitor:
+      enabled: true
     podAnnotations:
-      configmap.reloader.stakater.com/reload: "descheduler"
+      configmap.reloader.stakater.com/reload: *app
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - *app
+              topologyKey: kubernetes.io/hostname
