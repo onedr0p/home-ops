@@ -1,0 +1,30 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &meta-name kyverno
+  # namespace: sys-kyverno
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: *meta-name
+      version: v2.3.3
+      sourceRef:
+        kind: HelmRepository
+        name: *meta-name
+        namespace: flux-system
+      interval: 15m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    installCRDs: false
+    # TODO(kyverno): Enable ha mode
+    mode: standalone
+    serviceMonitor:
+      enabled: true

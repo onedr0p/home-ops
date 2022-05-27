@@ -1,0 +1,30 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: kyverno-source
+  namespace: flux-system
+spec:
+  interval: 12h
+  url: https://github.com/kyverno/kyverno.git
+  ref:
+    # renovate: registryUrl=https://kyverno.github.io/kyverno chart=kyverno
+    tag: helm-chart-v2.3.3
+  ignore: |
+    # exclude all
+    /*
+    # include crd directory
+    !/config/crds
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: crds-kyverno
+  namespace: flux-system
+spec:
+  interval: 30m
+  prune: false
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-source

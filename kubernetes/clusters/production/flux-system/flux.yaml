@@ -1,0 +1,31 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: flux-deployment
+  namespace: flux-system
+spec:
+  interval: 10m
+  ref:
+    # renovate: datasource=github-releases depName=fluxcd/flux2
+    tag: v0.30.2
+  url: https://github.com/fluxcd/flux2
+  ignore: |
+    # exclude all
+    /*
+    # include only what's needed
+    !/manifests
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: flux-deployment
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./manifests/install
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-deployment
