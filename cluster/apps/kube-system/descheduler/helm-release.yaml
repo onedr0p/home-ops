@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: *app
-      version: 0.24.0
+      version: 0.24.1
       sourceRef:
         kind: HelmRepository
         name: descheduler-charts
@@ -19,15 +19,15 @@ spec:
     createNamespace: true
   values:
     kind: Deployment
-    replicas: 1
-    # leaderElection:
-    #   enabled: true
-    #   leaseDuration: 15
-    #   renewDeadline: 10
-    #   retryPeriod: 2
-    #   resourceLock: "leases"
-    #   resourceName: "descheduler"
-    #   resourceNamescape: "kube-system"
+    replicas: 3
+    leaderElection:
+      enabled: true
+      leaseDuration: 15s
+      renewDeadline: 10s
+      retryPeriod: 2s
+      resourceLock: "leases"
+      resourceName: "descheduler"
+      resourceNamescape: "kube-system"
     deschedulerPolicy:
       strategies:
         RemoveDuplicates:
@@ -69,15 +69,15 @@ spec:
       enabled: true
     podAnnotations:
       configmap.reloader.stakater.com/reload: *app
-    # affinity:
-    #   podAntiAffinity:
-    #     preferredDuringSchedulingIgnoredDuringExecution:
-    #       - weight: 100
-    #         podAffinityTerm:
-    #           labelSelector:
-    #             matchExpressions:
-    #               - key: app.kubernetes.io/name
-    #                 operator: In
-    #                 values:
-    #                   - *app
-    #           topologyKey: kubernetes.io/hostname
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - *app
+              topologyKey: kubernetes.io/hostname
