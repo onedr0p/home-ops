@@ -1,16 +1,5 @@
 ---
 - block:
-    - name: Upgrade system
-      community.general.pacman:
-        update_cache: true
-        upgrade: true
-    - name: Install packages
-      community.general.pacman:
-        name: "{{ item }}"
-        state: present
-      loop:
-        - dnsutils
-        - ffmpeg
     - name: Set timezone
       community.general.timezone:
         name: "{{ os_timezone | default('America/New_York') }}"
@@ -39,6 +28,74 @@
         src: tc358743-edid.hex.j2
         dest: "/etc/kvmd/tc358743-edid.hex"
         mode: 0644
+  rescue:
+    - name: Mount read-only
+      ansible.builtin.command: /usr/local/bin/ro
+  notify: Restart kvmd
+
+- block:
+    - name: Install cronie
+      community.general.pacman:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - cronie
+    - name: Determine if acme.sh is installed
+      ansible.builtin.stat:
+        path: "~/.acme.sh/acme.sh"
+      register: acme_installed
+    - name: Git clone acme.sh
+      ansible.builtin.git:
+        repo: https://github.com/acmesh-official/acme.sh
+        version: 3.0.1
+        dest: /tmp/acme.sh
+      when: not acme_installed.stat.exists
+    - name: Install acme.sh
+      ansible.builtin.command: >-
+        /tmp/acme.sh --install -m {{ SECRET_CLOUDFLARE_EMAIL }}
+      args:
+        creates: "~/.acme.sh/acme.sh"
+    - name: Upgrade acme.sh
+      ansible.builtin.command: /root/.acme.sh/acme.sh --upgrade
+      register: upgrade_result
+      changed_when: upgrade_result.rc == 0 and "Upgrade success" not in upgrade_result.stdout
+    - name: Issue certificate
+      ansible.builtin.command: >-
+        /root/.acme.sh/acme.sh --issue --dns dns_cf
+        -d {{ inventory_hostname }}.{{ SECRET_PRIVATE_DOMAIN }}
+        --pre-hook "tar -zcvf /root/.acme.sh/DefaultSSL_`date +%Y-%m-%d_%H.%M.%S`.tgz /etc/kvmd/nginx/ssl/server.*"
+        --fullchainpath /etc/kvmd/nginx/ssl/server.crt
+        --keypath /etc/kvmd/nginx/ssl/server.key
+        --reloadcmd "systemctl restart kvmd-nginx.service"
+      environment:
+        CF_Email: "{{ SECRET_CLOUDFLARE_EMAIL }}"
+        CF_Key: "{{ SECRET_CLOUDFLARE_APIKEY }}"
+      register: issue_result
+      changed_when: issue_result.rc == 0 and "Cert success" in issue_result.stdout
+      failed_when: issue_result.rc != 0 and "Domains not changed" not in issue_result.stdout
+    - name: Create cloudflare email environment variable in crontab
+      ansible.builtin.cron:
+        name: CF_Email
+        env: true
+        job: "{{ SECRET_CLOUDFLARE_EMAIL }}"
+    - name: Create cloudflare apikey environment variable in crontab
+      ansible.builtin.cron:
+        name: CF_Key
+        env: true
+        job: "{{ SECRET_CLOUDFLARE_APIKEY }}"
+    - name: Create certificate renewal job in crontab
+      ansible.builtin.cron:
+        name: "renew cronjob"
+        minute: 0
+        hour: 0
+        job: >-
+          /root/.acme.sh/acme.sh --renew
+          -d {{ inventory_hostname }}.{{ SECRET_PRIVATE_DOMAIN }}
+          --pre-hook "rw"
+          --fullchainpath /etc/kvmd/nginx/ssl/server.crt
+          --keypath /etc/kvmd/nginx/ssl/server.key
+          --reloadcmd "systemctl restart kvmd-nginx.service"
+          --post-hook "ro"
   rescue:
     - name: Mount read-only
       ansible.builtin.command: /usr/local/bin/ro
