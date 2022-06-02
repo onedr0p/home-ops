@@ -11,7 +11,7 @@ data "http" "ipv4" {
 resource "cloudflare_record" "apex_ipv4" {
   name    = "ipv4"
   zone_id = lookup(data.cloudflare_zones.domain_io.zones[0], "id")
-  value   = chomp(data.http.ipv4.body)
+  value   = chomp(data.http.ipv4.response_body)
   proxied = true
   type    = "A"
   ttl     = 1
