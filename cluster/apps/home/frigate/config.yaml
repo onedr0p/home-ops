@@ -35,7 +35,7 @@ ffmpeg:
     # https://github.com/blakeblackshear/frigate/issues/3067
     # https://github.com/blakeblackshear/frigate/issues/3121
     # https://github.com/blakeblackshear/frigate/issues/3296
-    - -an
+    # - -an
   hwaccel_args:
     - -hwaccel
     - vaapi
@@ -46,8 +46,10 @@ ffmpeg:
   # https://github.com/blakeblackshear/frigate/issues/3067
   # https://github.com/blakeblackshear/frigate/issues/3121
   # https://github.com/blakeblackshear/frigate/issues/3296
-  # output_args:
-  #   record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -c:a aac
+  output_args:
+    # record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -c:a aac
+    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -ar 22050 -c:a aac -q:a 9
+    # rtmp: -c copy -f flv -an
 
 rtmp:
   enabled: true
