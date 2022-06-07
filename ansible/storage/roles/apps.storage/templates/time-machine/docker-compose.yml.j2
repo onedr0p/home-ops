@@ -12,33 +12,7 @@ services:
       TM_UID: 568
       TM_GID: 568
     volumes:
-      - time-machine-data:/opt/timemachine
-      - time-machine-var-lib-smb:/var/lib/samba
-      - time-machine-var-cache-smb:/var/cache/samba
-      - time-machine-run-smb:/run/samba
-
-volumes:
-  time-machine-data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "{{ time_machine_data_dir }}/data"
-  time-machine-var-lib-smb:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "{{ time_machine_data_dir }}/var-lib-smb"
-  time-machine-var-cache-smb:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "{{ time_machine_data_dir }}/var-cache-smb"
-  time-machine-run-smb:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "{{ time_machine_data_dir }}/run-smb"
+      - "{{ time_machine_data_dir }}/data:/opt/timemachine"
+      - "{{ time_machine_data_dir }}/var-lib-smb:/var/lib/samba"
+      - "{{ time_machine_data_dir }}/var-cache-smb:/var/cache/samba"
+      - "{{ time_machine_data_dir }}/run-smb:/run/samba"

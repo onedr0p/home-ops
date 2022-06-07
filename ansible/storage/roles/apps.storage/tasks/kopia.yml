@@ -8,6 +8,9 @@
     mode: 0775
   loop:
     - "{{ docker_base_dir }}/kopia"
+    - "{{ docker_base_dir }}/kopia/cache"
+    - "{{ docker_base_dir }}/kopia/config"
+    - "{{ docker_base_dir }}/kopia/logs"
 
 - block:
     - name: Create kopia docker compose file
@@ -23,5 +26,5 @@
         dest: "/etc/systemd/system/docker-compose@kopia.service"
         mode: 0644
       vars:
-        condition_path_is_mount_point: "{{ kopia_data_dir }}"
+        condition_path_is_mount_point: "/"
   notify: Restart kopia

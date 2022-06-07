@@ -8,6 +8,8 @@
     mode: 0775
   loop:
     - "{{ docker_base_dir }}/vector"
+    - "{{ docker_base_dir }}/vector/config"
+    - "{{ docker_base_dir }}/vector/data"
 
 - block:
     - name: Create vector docker compose file
@@ -20,7 +22,7 @@
     - name: Create vector config
       ansible.builtin.template:
         src: vector/vector.yaml.j2
-        dest: "{{ vector_data_dir }}/config/vector.yaml"
+        dest: "{{ docker_base_dir }}/vector/config/vector.yaml"
         owner: "{{ ansible_user }}"
         group: users
         mode: 0775
@@ -30,5 +32,5 @@
         dest: "/etc/systemd/system/docker-compose@vector.service"
         mode: 0644
       vars:
-        condition_path_is_mount_point: "{{ vector_data_dir }}"
+        condition_path_is_mount_point: "/"
   notify: Restart vector

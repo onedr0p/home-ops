@@ -23,34 +23,7 @@ services:
     ports:
       - 51515:51515
     volumes:
-      - kopia-config:/app/config
-      - kopia-cache:/app/cache
-      - kopia-logs:/app/logs
+      - "{{ docker_base_dir }}/kopia/config:/app/config"
+      - "{{ docker_base_dir }}/kopia/cache:/app/cache"
+      - "{{ docker_base_dir }}/kopia/logs:/app/logs"
       - /tycho:/tycho:ro
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.kopia.service=kopia
-      - traefik.http.routers.kopia.rule=Host(`kopia.{{ SECRET_PRIVATE_DOMAIN }}`)
-      - traefik.http.routers.kopia.entrypoints=websecure
-      - traefik.http.routers.kopia.tls.certresolver=letsencrypt
-      - traefik.http.services.kopia.loadbalancer.server.port=51515
-
-volumes:
-  kopia-config:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "{{ kopia_data_dir }}/config"
-  kopia-cache:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "{{ kopia_data_dir }}/cache"
-  kopia-logs:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "{{ kopia_data_dir }}/logs"

@@ -10,14 +10,6 @@ services:
     command:
       - --config=/etc/vector/vector.yaml
     volumes:
-      - "{{ vector_data_dir }}/config/vector.yaml:/etc/vector/vector.yaml:ro"
-      - vector-data:/vector-data-dir
+      - "{{ docker_base_dir }}/vector/config/vector.yaml:/etc/vector/vector.yaml:ro"
+      - "{{ docker_base_dir }}/vector/data:/vector-data-dir"
       - /var/log:/var/log:ro
-
-volumes:
-  vector-data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "{{ vector_data_dir }}/data"
