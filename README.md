@@ -127,6 +127,12 @@ My home IP can change at any given time and in order to keep my WAN IP address u
 
 ## 🔧 Hardware
 
+<details>
+  <summary>Click to see da rack!</summary>
+  
+  <img src="https://user-images.githubusercontent.com/213795/172947261-65a82dcd-3274-45bd-aabf-140d60a04aa9.png" align="center" width="200px" alt="rack"/>
+</details>
+
 | Device                    | Count | OS Disk Size | Data Disk Size       | Ram  | Operating System | Purpose                        |
 |---------------------------|-------|--------------|----------------------|------|------------------|--------------------------------|
 | Protectli FW6D            | 1     | 500GB mSATA  | N/A                  | 16GB | Opnsense 22      | Router                         |
