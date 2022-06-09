@@ -80,6 +80,27 @@ spec:
         server: "expanse.${SECRET_PRIVATE_DOMAIN}"
         path: /tycho/Media
         mountPath: /media
+    additionalContainers:
+      vuetorrent:
+        name: vuetorrent
+        image: k8s.gcr.io/git-sync/git-sync:v3.5.0
+        args:
+          - --repo
+          - https://github.com/WDaan/VueTorrent
+          - --branch
+          - latest-release
+          - --depth
+          - "1"
+          - --root
+          - /config
+          - --wait
+          - "86400"
+        volumeMounts:
+          - name: config
+            mountPath: /config
+        securityContext:
+          runAsUser: 568
+          runAsGroup: 568
     resources:
       requests:
         cpu: 100m
