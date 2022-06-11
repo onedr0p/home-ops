@@ -39,15 +39,13 @@ spec:
                   {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
                 url_title: View in Alert Manager
                 title: |-
-                  {{ if eq .Status "firing" }}🚨{{ else }}✅{{ end }} {{ .CommonLabels.alertname }}
+                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
                 message: |-
                   {{- range .Alerts }}
-                    {{- if eq .Labels.severity "warning" }}
-                      <b>Severity:</b> <i>{{ .Labels.severity }}</i> 😨
-                    {{- else if eq .Labels.severity "critical" }}
-                      <b>Severity:</b> <i>{{ .Labels.severity }}</i> 😱
+                    {{- if ne .Labels.severity "" }}
+                      <b>Severity:</b> <i>{{ .Labels.severity }}</i>
                     {{- else }}
-                      <b>Severity:</b> <i>N/A</i> 😕
+                      <b>Severity:</b> <i>N/A</i>
                     {{- end }}
                     {{- if ne .Annotations.description "" }}
                       <b>Description:</b> <i>{{ .Annotations.description }}</i>
