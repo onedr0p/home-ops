@@ -23,8 +23,14 @@ spec:
     image:
       repository: ghcr.io/k8s-at-home/sonarr-develop
       tag: v3.0.8.1526
+      pullPolicy: Always
     env:
       TZ: "${TIMEZONE}"
+      PUSHOVARR_APP_DISPLAY_NAME: "Sonarr UHD"
+      PUSHOVARR_APP_URL: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+    envFrom:
+      - secretRef:
+          name: *app
     service:
       main:
         ports:
@@ -40,7 +46,7 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/sonarr/hotline.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+          - host: *host
             paths:
               - path: /
                 pathType: Prefix
@@ -90,3 +96,24 @@ spec:
         memory: 250Mi
       limits:
         memory: 2000Mi
+    additionalContainers:
+      pushovarr:
+        name: pushovarr
+        image: k8s.gcr.io/git-sync/git-sync:v3.5.0
+        args:
+          - --repo
+          - https://gist.github.com/30620a99069fd8dde39bb8d35c9d753c.git
+          - --branch
+          - main
+          - --depth
+          - "1"
+          - --root
+          - /config
+          - --wait
+          - "180"
+        volumeMounts:
+          - name: config
+            mountPath: /config
+        securityContext:
+          runAsUser: 568
+          runAsGroup: 568
