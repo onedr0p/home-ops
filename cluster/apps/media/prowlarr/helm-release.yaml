@@ -26,13 +26,6 @@ spec:
       pullPolicy: Always
     env:
       TZ: "${TIMEZONE}"
-      STARR_INSTANCE_NAME: "Prowlarr"
-      STARR_APP_URL: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
-    envFrom:
-      - secretRef:
-          name: pushover-notify
-      - secretRef:
-          name: *app
     service:
       main:
         ports:
@@ -48,7 +41,7 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/prowlarr/nord.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: *host
+          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
@@ -66,14 +59,6 @@ spec:
         path: /tycho/Apps/External/Backups/prowlarr
         mountPath: /config/Backups
         readOnly: false
-      scripts:
-        enabled: true
-        type: configMap
-        name: pushover-notify
-        subPath: pushover-notify.sh
-        mountPath: /scripts/pushover-notify.sh
-        defaultMode: 0775
-        readOnly: true
     resources:
       requests:
         cpu: 100m
