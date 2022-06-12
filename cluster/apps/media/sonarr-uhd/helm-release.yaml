@@ -26,8 +26,8 @@ spec:
       pullPolicy: Always
     env:
       TZ: "${TIMEZONE}"
-      PUSHOVARR_APP_DISPLAY_NAME: "Sonarr UHD"
-      PUSHOVARR_APP_URL: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+      STARR_INSTANCE_NAME: "Sonarr UHD"
+      STARR_APP_URL: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
     envFrom:
       - secretRef:
           name: pushover-notify
@@ -45,7 +45,7 @@ spec:
         annotations:
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/sonarr/hotline.css"></head>';
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/sonarr/hotline.css"><link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/addons/sonarr/sonarr-4k-logo/sonarr-4k-logo.css"></head>';
             sub_filter_once on;
         hosts:
           - host: *host
@@ -55,23 +55,6 @@ spec:
         tls:
           - hosts:
               - *host
-    probes:
-      liveness:
-        enabled: true
-        custom: true
-        spec:
-          exec:
-            command:
-              - /usr/bin/env
-              - bash
-              - -c
-              - curl --fail localhost:8989/api/v3/system/status?apiKey=`IFS=\> && while
-                read -d \< E C; do if [[ $E = "ApiKey" ]]; then echo $C; fi; done < /config/config.xml`
-          failureThreshold: 5
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 10
     podSecurityContext:
       supplementalGroups:
         - 100
@@ -92,6 +75,14 @@ spec:
         path: /tycho/Apps/External/Backups/sonarr-uhd
         mountPath: /config/Backups
         readOnly: false
+      scripts:
+        enabled: true
+        type: configMap
+        name: pushover-notify
+        subPath: pushover-notify.sh
+        mountPath: /scripts/pushover-notify.sh
+        defaultMode: 0775
+        readOnly: true
     resources:
       requests:
         cpu: 100m
