@@ -23,8 +23,11 @@ spec:
     image:
       repository: ghcr.io/k8s-at-home/sonarr-develop
       tag: v3.0.8.1526
+      pullPolicy: Always
     env:
       TZ: "${TIMEZONE}"
+      STARR_INSTANCE_NAME: "Sonarr"
+      STARR_APP_URL: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
     service:
       main:
         ports:
@@ -40,30 +43,13 @@ spec:
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/sonarr/nord.css"></head>';
             sub_filter_once on;
         hosts:
-          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+          - host: *host
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
               - *host
-    probes:
-      liveness:
-        enabled: true
-        custom: true
-        spec:
-          exec:
-            command:
-              - /usr/bin/env
-              - bash
-              - -c
-              - curl --fail localhost:8989/api/v3/system/status?apiKey=`IFS=\> && while
-                read -d \< E C; do if [[ $E = "ApiKey" ]]; then echo $C; fi; done < /config/config.xml`
-          failureThreshold: 5
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 10
     podSecurityContext:
       supplementalGroups:
         - 100
