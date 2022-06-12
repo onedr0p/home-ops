@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DEBUG="true"
+DEBUG="false"
 # kubectl port-forward service/sonarr -n media 8989:8989
 # export PUSHOVER_STARR_INSTANCE_NAME=Sonarr;
 # export PUSHOVER_STARR_APP_URL="";

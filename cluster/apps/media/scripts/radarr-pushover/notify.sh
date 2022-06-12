@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-DEBUG="true"
-# kubectl port-forward service/radarr -n media 8989:8989
-# export PUSHOVER_STARR_INSTANCE_NAME=Sonarr;
+DEBUG="false"
+# kubectl port-forward service/radarr -n media 7878:7878
+# export PUSHOVER_STARR_INSTANCE_NAME=Radarr;
 # export PUSHOVER_STARR_APP_URL="";
 # export PUSHOVER_TOKEN="";
 # export PUSHOVER_USER_KEY="";
