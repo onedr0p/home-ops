@@ -28,6 +28,11 @@ spec:
       TZ: "${TIMEZONE}"
       STARR_INSTANCE_NAME: "Radarr (UHD)"
       STARR_APP_URL: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+    envFrom:
+      - secretRef:
+          name: pushover-notify
+      - secretRef:
+          name: *app
     service:
       main:
         ports:
