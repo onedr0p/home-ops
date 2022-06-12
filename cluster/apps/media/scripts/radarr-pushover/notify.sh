@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-DEBUG="false"
+PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"false"}"
 # kubectl port-forward service/radarr -n media 7878:7878
+# export PUSHOVER_DEBUG="true";
 # export PUSHOVER_STARR_INSTANCE_NAME=Radarr;
 # export PUSHOVER_STARR_APP_URL="";
 # export PUSHOVER_TOKEN="";
@@ -9,8 +10,8 @@ DEBUG="false"
 # export radarr_eventtype=Download;
 # ./pushover-notify.sh
 
+CONFIG_FILE="/config/config.xml" && [[ "${PUSHOVER_DEBUG}" == "true" ]] && CONFIG_FILE="config.xml"
 ERRORS=()
-CONFIG_FILE="/config/config.xml" && [[ "${DEBUG}" == "true" ]] && CONFIG_FILE="config.xml"
 
 #
 # Discoverable variables
