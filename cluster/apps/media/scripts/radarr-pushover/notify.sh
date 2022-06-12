@@ -4,7 +4,7 @@ PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"false"}"
 # kubectl port-forward service/radarr -n media 7878:7878
 # export PUSHOVER_DEBUG="true";
 # export PUSHOVER_STARR_INSTANCE_NAME=Radarr;
-# export PUSHOVER_STARR_APP_URL="";
+# export PUSHOVER_APP_URL="";
 # export PUSHOVER_TOKEN="";
 # export PUSHOVER_USER_KEY="";
 # export radarr_eventtype=Download;
@@ -26,7 +26,7 @@ PUSHOVER_STARR_APIKEY="$(xmlstarlet sel -t -v "//ApiKey" -nl ${CONFIG_FILE})" &&
 #
 # Required
 PUSHOVER_STARR_INSTANCE_NAME="${PUSHOVER_STARR_INSTANCE_NAME:-}" && [[ -z "${PUSHOVER_STARR_INSTANCE_NAME}" ]] && ERRORS+=("PUSHOVER_STARR_INSTANCE_NAME not defined")
-PUSHOVER_STARR_APP_URL="${PUSHOVER_STARR_APP_URL:-}" && [[ -z "${PUSHOVER_STARR_APP_URL}" ]] && ERRORS+=("PUSHOVER_STARR_APP_URL not defined")
+PUSHOVER_APP_URL="${PUSHOVER_APP_URL:-}" && [[ -z "${PUSHOVER_APP_URL}" ]] && ERRORS+=("PUSHOVER_APP_URL not defined")
 PUSHOVER_USER_KEY="${PUSHOVER_USER_KEY:-}" && [[ -z "${PUSHOVER_USER_KEY}" ]] && ERRORS+=("PUSHOVER_USER_KEY not defined")
 PUSHOVER_TOKEN="${PUSHOVER_TOKEN:-}" && [[ -z "${PUSHOVER_TOKEN}" ]] && ERRORS+=("PUSHOVER_TOKEN not defined")
 # Optional
@@ -71,7 +71,7 @@ if [[ "${radarr_eventtype:-}" == "Download" ]]; then
         "$(curl -s --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/movie/${radarr_movie_id:-"2619"}" \
             | jq -r ".overview")"
     printf -v PUSHOVER_URL "%s/movie/%s" \
-        "${PUSHOVER_STARR_APP_URL}" \
+        "${PUSHOVER_APP_URL}" \
         "${radarr_movie_tmdbid:-"122"}"
     printf -v PUSHOVER_URL_TITLE "View movie in %s" \
         "${PUSHOVER_STARR_INSTANCE_NAME}"

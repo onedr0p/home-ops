@@ -3,8 +3,7 @@
 PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"false"}"
 # kubectl port-forward service/sonarr -n media 8989:8989
 # export PUSHOVER_DEBUG="true";
-# export PUSHOVER_STARR_INSTANCE_NAME=Sonarr;
-# export PUSHOVER_STARR_APP_URL="";
+# export PUSHOVER_APP_URL="";
 # export PUSHOVER_TOKEN="";
 # export PUSHOVER_USER_KEY="";
 # export sonarr_eventtype=Download;
@@ -19,14 +18,13 @@ ERRORS=()
 # shellcheck disable=SC2086
 PUSHOVER_STARR_PORT="$(xmlstarlet sel -t -v "//Port" -nl ${CONFIG_FILE})" && [[ -z "${PUSHOVER_STARR_PORT}" ]] && ERRORS+=("PUSHOVER_STARR_PORT not defined")
 PUSHOVER_STARR_APIKEY="$(xmlstarlet sel -t -v "//ApiKey" -nl ${CONFIG_FILE})" && [[ -z "${PUSHOVER_STARR_APIKEY}" ]] && ERRORS+=("PUSHOVER_STARR_APIKEY not defined")
-# PUSHOVER_STARR_INSTANCE_NAME="$(xmlstarlet sel -t -v "//InstanceName" -nl ${CONFIG_FILE})" && [[ -z "${PUSHOVER_STARR_INSTANCE_NAME}" ]] && ERRORS+=("PUSHOVER_STARR_INSTANCE_NAME not defined")
+PUSHOVER_STARR_INSTANCE_NAME="$(xmlstarlet sel -t -v "//InstanceName" -nl ${CONFIG_FILE})" && [[ -z "${PUSHOVER_STARR_INSTANCE_NAME}" ]] && ERRORS+=("PUSHOVER_STARR_INSTANCE_NAME not defined")
 
 #
 # Configurable variables
 #
 # Required
-PUSHOVER_STARR_INSTANCE_NAME="${PUSHOVER_STARR_INSTANCE_NAME:-}" && [[ -z "${PUSHOVER_STARR_INSTANCE_NAME}" ]] && ERRORS+=("PUSHOVER_STARR_INSTANCE_NAME not defined")
-PUSHOVER_STARR_APP_URL="${PUSHOVER_STARR_APP_URL:-}" && [[ -z "${PUSHOVER_STARR_APP_URL}" ]] && ERRORS+=("PUSHOVER_STARR_APP_URL not defined")
+PUSHOVER_APP_URL="${PUSHOVER_APP_URL:-}" && [[ -z "${PUSHOVER_APP_URL}" ]] && ERRORS+=("PUSHOVER_APP_URL not defined")
 PUSHOVER_USER_KEY="${PUSHOVER_USER_KEY:-}" && [[ -z "${PUSHOVER_USER_KEY}" ]] && ERRORS+=("PUSHOVER_USER_KEY not defined")
 PUSHOVER_TOKEN="${PUSHOVER_TOKEN:-}" && [[ -z "${PUSHOVER_TOKEN}" ]] && ERRORS+=("PUSHOVER_TOKEN not defined")
 # Optional
@@ -73,7 +71,7 @@ if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
         "$(curl -s --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/episode?seriesId=${sonarr_series_id:-"1653"}" \
             | jq -r ".[] | select(.id==${sonarr_episodefile_id:-"167750"}) | .overview")"
     printf -v PUSHOVER_URL "%s/series/%s" \
-        "${PUSHOVER_STARR_APP_URL}" \
+        "${PUSHOVER_APP_URL}" \
         "$(curl -s --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/series/${sonarr_series_id:-"1653"}" \
             | jq -r ".titleSlug")"
     printf -v PUSHOVER_URL_TITLE "View series in %s" \
