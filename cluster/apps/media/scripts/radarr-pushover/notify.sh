@@ -69,7 +69,7 @@ if [[ "${radarr_eventtype:-}" == "Download" ]]; then
     printf -v PUSHOVER_MESSAGE "%s" \
         "$(curl --silent --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/movie/${radarr_movie_id:-"2619"}" \
             | jq -r ".overview")"
-    printf -v PUSHOVER_URL "%s/movie/%s" \
+    printf -v PUSHOVER_URL "https://%s/movie/%s" \
         "${PUSHOVER_APP_URL}" \
         "${radarr_movie_tmdbid:-"122"}"
     printf -v PUSHOVER_URL_TITLE "View movie in %s" \

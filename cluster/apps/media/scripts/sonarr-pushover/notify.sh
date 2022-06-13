@@ -69,7 +69,7 @@ if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
     printf -v PUSHOVER_MESSAGE "%s" \
         "$(curl --silent --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/episode?seriesId=${sonarr_series_id:-"1653"}" \
             | jq -r ".[] | select(.episodeFileId==${sonarr_episodefile_id:-"167750"}) | .overview")"
-    printf -v PUSHOVER_URL "%s/series/%s" \
+    printf -v PUSHOVER_URL "https://%s/series/%s" \
         "${PUSHOVER_APP_URL}" \
         "$(curl --silent --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/series/${sonarr_series_id:-"1653"}" \
             | jq -r ".titleSlug")"
