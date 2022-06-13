@@ -68,7 +68,7 @@ if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
         "${sonarr_episodefile_quality:-"Bluray-720p"}"
     printf -v PUSHOVER_MESSAGE "%s" \
         "$(curl --silent --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/episode?seriesId=${sonarr_series_id:-"1653"}" \
-            | jq -r ".[] | select(.id==${sonarr_episodefile_id:-"167750"}) | .overview")"
+            | jq -r ".[] | select(.episodeFileId==${sonarr_episodefile_id:-"167750"}) | .overview")"
     printf -v PUSHOVER_URL "%s/series/%s" \
         "${PUSHOVER_APP_URL}" \
         "$(curl --silent --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/series/${sonarr_series_id:-"1653"}" \
@@ -81,7 +81,7 @@ notification=$(jq -n \
     --arg token "${PUSHOVER_TOKEN}" \
     --arg user "${PUSHOVER_USER_KEY}" \
     --arg title "${PUSHOVER_TITLE}" \
-    --arg message "${PUSHOVER_MESSAGE}" \
+    --arg message "${PUSHOVER_MESSAGE:-"Unable to obtain plot summary"}" \
     --arg url "${PUSHOVER_URL}" \
     --arg url_title "${PUSHOVER_URL_TITLE}" \
     --arg priority "${PUSHOVER_PRIORITY}" \

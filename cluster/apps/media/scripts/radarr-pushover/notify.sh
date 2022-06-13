@@ -80,7 +80,7 @@ notification=$(jq -n \
     --arg token "${PUSHOVER_TOKEN}" \
     --arg user "${PUSHOVER_USER_KEY}" \
     --arg title "${PUSHOVER_TITLE}" \
-    --arg message "${PUSHOVER_MESSAGE}" \
+    --arg message "${PUSHOVER_MESSAGE:-"Unable to obtain plot summary"}" \
     --arg url "${PUSHOVER_URL}" \
     --arg url_title "${PUSHOVER_URL_TITLE}" \
     --arg priority "${PUSHOVER_PRIORITY}" \
