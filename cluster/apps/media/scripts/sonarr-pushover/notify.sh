@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
-PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"false"}"
+PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"true"}"
 # kubectl port-forward service/sonarr -n media 8989:8989
-# export PUSHOVER_DEBUG="true";
 # export PUSHOVER_APP_URL="";
 # export PUSHOVER_TOKEN="";
 # export PUSHOVER_USER_KEY="";
 # export sonarr_eventtype=Download;
-# ./pushover-notify.sh
+# ./notify.sh
 
 CONFIG_FILE="/config/config.xml" && [[ "${PUSHOVER_DEBUG}" == "true" ]] && CONFIG_FILE="config.xml"
 ERRORS=()
@@ -38,14 +37,14 @@ PUSHOVER_SOUND="${PUSHOVER_SOUND:-}"
 for pushover_vars in ${!PUSHOVER_*}
 do
     declare -n var="${pushover_vars}"
-    [[ -n "${var}" ]] && printf "%s - %s=%s\n" "$(date)" "${!var}" "${var}"
+    [[ -n "${var}" && "${PUSHOVER_DEBUG}" = "true" ]] && printf "%s - %s=%s\n" "$(date)" "${!var}" "${var}"
 done
 
 #
 # Validate required variables are set
 #
 if [ ${#ERRORS[@]} -gt 0 ]; then
-    for err in "${ERRORS[@]}"; do printf "%s - Error %s\n" "$(date)" "${err}"; done
+    for err in "${ERRORS[@]}"; do printf "%s - Undefined variable %s\n" "$(date)" "${err}" >&2; done
     exit 1
 fi
 
@@ -68,11 +67,11 @@ if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
         "${sonarr_episodefile_episodetitles:-"That '70s Finale"}" \
         "${sonarr_episodefile_quality:-"Bluray-720p"}"
     printf -v PUSHOVER_MESSAGE "%s" \
-        "$(curl -s --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/episode?seriesId=${sonarr_series_id:-"1653"}" \
+        "$(curl --silent --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/episode?seriesId=${sonarr_series_id:-"1653"}" \
             | jq -r ".[] | select(.id==${sonarr_episodefile_id:-"167750"}) | .overview")"
     printf -v PUSHOVER_URL "%s/series/%s" \
         "${PUSHOVER_APP_URL}" \
-        "$(curl -s --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/series/${sonarr_series_id:-"1653"}" \
+        "$(curl --silent --header "X-Api-Key:${PUSHOVER_STARR_APIKEY}" "http://localhost:${PUSHOVER_STARR_PORT}/api/v3/series/${sonarr_series_id:-"1653"}" \
             | jq -r ".titleSlug")"
     printf -v PUSHOVER_URL_TITLE "View series in %s" \
         "${PUSHOVER_STARR_INSTANCE_NAME}"
@@ -89,9 +88,20 @@ notification=$(jq -n \
     --arg sound "${PUSHOVER_SOUND}" \
     --arg device "${PUSHOVER_DEVICE}" \
     '{token: $token, user: $user, title: $title, message: $message, url: $url, url_title: $url_title, priority: $priority, sound: $sound, device: $device}' \
-) && printf "%s - Sending notification: %s\n" "$(date)" "$(echo "${notification}" | jq -c)"
+)
 
-curl \
+status_code=$(curl \
+    --write-out "%{http_code}" \
+    --silent \
+    --output /dev/null \
     --header "Content-Type: application/json" \
     --data-binary "${notification}" \
-    --request POST "https://api.pushover.net/1/messages.json"
+    --request POST "https://api.pushover.net/1/messages.json" \
+)
+
+if [[ "${status_code}" -ne 200 ]] ; then
+    printf "%s - Unable to send notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)" >&2
+    exit 1
+else
+    printf "%s - Sent notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)"
+fi
