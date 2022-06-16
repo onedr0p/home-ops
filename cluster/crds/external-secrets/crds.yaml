@@ -1,0 +1,30 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: source-external-secrets
+  namespace: flux-system
+spec:
+  interval: 12h
+  url: https://github.com/external-secrets/external-secrets.git
+  ref:
+    # renovate: registryUrl=https://charts.external-secrets.io chart=external-secrets
+    tag: helm-chart-0.5.6
+  ignore: |
+    # exclude all
+    /*
+    # include crd directory
+    !/deploy/crds
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: crds-external-secrets
+  namespace: flux-system
+spec:
+  interval: 30m
+  prune: false
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: source-external-secrets
