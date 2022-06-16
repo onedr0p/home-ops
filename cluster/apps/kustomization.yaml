@@ -2,15 +2,21 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - calico-system
   - cert-manager
   - default
   - flux-system
   - home
   - kasten-io
   - kube-system
+  - kyverno
   - media
   - monitoring
   - networking
   - rook-ceph
   - starboard-system
   - system-upgrade
+  # TODO(tigera-operator): Adding this chart post cluster installation
+  # requires Helm to take ownership of the existing manifests
+  # https://github.com/onedr0p/home-ops/issues/3385
+  - tigera-operator
