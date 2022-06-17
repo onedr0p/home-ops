@@ -2,13 +2,13 @@
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-production
+  name: letsencrypt-staging
 spec:
   acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
     email: "${SECRET_EMAIL}"
     privateKeySecretRef:
-      name: letsencrypt-production
+      name: letsencrypt-staging
     solvers:
       - dns01:
           cloudflare:
@@ -18,4 +18,4 @@ spec:
               key: cloudflare-token
         selector:
           dnsZones:
-            - ${SECRET_PUBLIC_DOMAIN}
+            - "${SECRET_PUBLIC_DOMAIN}"
