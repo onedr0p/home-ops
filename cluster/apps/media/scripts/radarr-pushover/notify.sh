@@ -18,19 +18,18 @@ ERRORS=()
 # shellcheck disable=SC2086
 PUSHOVER_STARR_PORT="$(xmlstarlet sel -t -v "//Port" -nl ${CONFIG_FILE})" && [[ -z "${PUSHOVER_STARR_PORT}" ]] && ERRORS+=("PUSHOVER_STARR_PORT not defined")
 PUSHOVER_STARR_APIKEY="$(xmlstarlet sel -t -v "//ApiKey" -nl ${CONFIG_FILE})" && [[ -z "${PUSHOVER_STARR_APIKEY}" ]] && ERRORS+=("PUSHOVER_STARR_APIKEY not defined")
-# PUSHOVER_STARR_INSTANCE_NAME="$(xmlstarlet sel -t -v "//InstanceName" -nl ${CONFIG_FILE})" && [[ -z "${PUSHOVER_STARR_INSTANCE_NAME}" ]] && ERRORS+=("PUSHOVER_STARR_INSTANCE_NAME not defined")
+PUSHOVER_STARR_INSTANCE_NAME="$(xmlstarlet sel -t -v "//InstanceName" -nl ${CONFIG_FILE})" && [[ -z "${PUSHOVER_STARR_INSTANCE_NAME}" ]] && ERRORS+=("PUSHOVER_STARR_INSTANCE_NAME not defined")
 
 #
 # Configurable variables
 #
 # Required
-PUSHOVER_STARR_INSTANCE_NAME="${PUSHOVER_STARR_INSTANCE_NAME:-}" && [[ -z "${PUSHOVER_STARR_INSTANCE_NAME}" ]] && ERRORS+=("PUSHOVER_STARR_INSTANCE_NAME not defined")
 PUSHOVER_APP_URL="${PUSHOVER_APP_URL:-}" && [[ -z "${PUSHOVER_APP_URL}" ]] && ERRORS+=("PUSHOVER_APP_URL not defined")
 PUSHOVER_USER_KEY="${PUSHOVER_USER_KEY:-}" && [[ -z "${PUSHOVER_USER_KEY}" ]] && ERRORS+=("PUSHOVER_USER_KEY not defined")
 PUSHOVER_TOKEN="${PUSHOVER_TOKEN:-}" && [[ -z "${PUSHOVER_TOKEN}" ]] && ERRORS+=("PUSHOVER_TOKEN not defined")
 # Optional
 PUSHOVER_DEVICE="${PUSHOVER_DEVICE:-}"
-PUSHOVER_PRIORITY="${PUSHOVER_PRIORITY:-"-1"}"
+PUSHOVER_PRIORITY="${PUSHOVER_PRIORITY:-"-2"}"
 PUSHOVER_SOUND="${PUSHOVER_SOUND:-}"
 
 #
