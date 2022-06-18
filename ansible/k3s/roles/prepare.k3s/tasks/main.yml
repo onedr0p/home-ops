@@ -44,11 +44,10 @@
     - ansible_hostname != inventory_hostname
 
 - name: Update /etc/hosts to include hostname
-  ansible.builtin.blockinfile:
-    path: /etc/hosts
+  ansible.builtin.copy:
+    dest: /etc/hosts
     mode: 0644
-    create: true
-    block: |
+    content: |
       127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
       127.0.1.1   {{ inventory_hostname }}
       ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
