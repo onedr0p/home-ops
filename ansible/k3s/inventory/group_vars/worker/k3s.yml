@@ -1,0 +1,16 @@
+---
+# https://rancher.com/docs/k3s/latest/en/installation/install-options/agent-config/
+# https://github.com/PyratLabs/ansible-role-k3s#agent-worker-configuration
+
+# Don't define the host as control plane nodes
+k3s_control_node: false
+
+# k3s settings for all worker nodes
+k3s_agent:
+  node-ip: "{{ ansible_host }}"
+  kubelet-arg:
+    # Enable Alpha/Beta features
+    - "feature-gates=EphemeralContainers=true,MixedProtocolLBService=true,ReadWriteOncePod=true"
+    # Allow pods to be rescheduled quicker in the case of a node failure
+    # https://github.com/k3s-io/k3s/issues/1264
+    - "node-status-update-frequency=4s"

@@ -1,0 +1,126 @@
+---
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ timezone | default('America/New_York') }}"
+
+- name: Add additional user SSH public keys
+  ansible.posix.authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ item }}"
+  loop: "{{ ssh_authorized_keys | default([]) }}"
+
+- name: Disable SELinux
+  ansible.posix.selinux:
+    state: disabled
+
+- name: Disable firewalld
+  ansible.builtin.systemd:
+    service: firewalld
+    enabled: false
+    state: stopped
+
+- name: Update dnf.conf
+  ansible.builtin.blockinfile:
+    path: /etc/dnf/dnf.conf
+    block: |
+      defaultyes=True
+      deltarpm=True
+      max_parallel_downloads=20
+
+- name: Upgrade all packages
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+
+- name: Install all required packages
+  ansible.builtin.dnf:
+    name: [dnf-utils, hdparm, htop, ipvsadm, nano, nvme-cli, socat]
+    state: latest
+
+- name: Set hostname to inventory hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  when:
+    - ansible_hostname != inventory_hostname
+
+- name: Update /etc/hosts to include hostname
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    mode: 0644
+    create: true
+    block: |
+      127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+      127.0.1.1   {{ inventory_hostname }}
+      ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+- name: Enable kernel modules runtime
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop: [br_netfilter, overlay, rbd]
+
+- name: Enable kernel modules on boot
+  ansible.builtin.copy:
+    mode: 0644
+    content: "{{ item }}"
+    dest: "/etc/modules-load.d/{{ item }}.conf"
+  loop: [br_netfilter, overlay, rbd]
+
+- name: Set system controls for Kubernetes
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/99-kubernetes.conf
+    reload: true
+  with_dict: "{{ sysctl_config }}"
+  vars:
+    sysctl_config:
+      net.ipv4.ip_forward: 1
+      net.ipv4.conf.all.forwarding: 1
+      net.ipv6.conf.all.forwarding: 1
+      net.bridge.bridge-nf-call-iptables: 1
+      net.bridge.bridge-nf-call-ip6tables: 1
+      net.ipv4.conf.default.rp_filter: 0
+      net.ipv4.conf.all.rp_filter: 0
+      fs.inotify.max_user_watches: 524288
+      fs.inotify.max_user_instances: 512
+
+- name: Disable swap at runtime
+  ansible.builtin.command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Disable swap on boot
+  ansible.posix.mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  loop: [swap, none]
+
+- name: Configure smartd
+  ansible.builtin.copy:
+    dest: /etc/smartd.conf
+    mode: 0644
+    content: |
+      DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40
+  notify: Restart smartd
+
+- name: Check for existence of grub
+  ansible.builtin.stat:
+    path: /etc/default/grub
+  register: grub_result
+
+- name: Disable mitigations in grub
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX=(?:(?![" ]{{ item.key | regex_escape }}=).)*)(?:[" ]{{ item.key | regex_escape }}=\S+)?(.*")$'
+    replace: '\1 {{ item.key }}={{ item.value }}\2'
+  with_dict: "{{ grub_config }}"
+  vars:
+    grub_config:
+      mitigations: "off"
+  when: grub_result.stat.exists
+  register: grub_status
+
+- name: Run grub-mkconfig
+  ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
+  when: [grub_result.stat.exists, grub_status.changed]

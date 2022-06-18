@@ -1,0 +1,33 @@
+---
+- hosts:
+    - worker
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+  pre_tasks:
+    - name: Pausing for 5 seconds...
+      pause:
+        seconds: 5
+  tasks:
+    - name: Reset disks
+      block:
+        - name: Remove /var/lib/rook
+          ansible.builtin.file:
+            state: absent
+            path: "/var/lib/rook"
+        - name: Zap the drives
+          ansible.builtin.shell: >
+            sgdisk --zap-all {{ item }} || true
+          loop:
+            - "{{ rook_devices | default([]) }}"
+        - name: Remove lvm partitions
+          ansible.builtin.shell: "{{ item }}"
+          loop:
+            - ls /dev/mapper/ceph--* | xargs -I% -- fuser --kill %
+            - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup clear %
+            - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup remove -f %
+            - ls /dev/mapper/ceph--* | xargs -I% -- rm -rf %
+        - name: Wipe the block device
+          ansible.builtin.command: "wipefs -af {{ item }}"
+          with_items:
+            - "{{ rook_devices | default([]) }}"

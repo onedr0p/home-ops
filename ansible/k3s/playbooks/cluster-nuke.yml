@@ -1,0 +1,37 @@
+---
+- hosts:
+    - master
+    - worker
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+  pre_tasks:
+    - name: Pausing for 5 seconds...
+      pause:
+        seconds: 5
+  roles:
+    - xanmanning.k3s
+  vars:
+    k3s_state: uninstalled
+  tasks:
+    - name: Remove containerd-hack
+      ansible.builtin.file:
+        path: /etc/systemd/system/containerd-hack.service
+        state: absent
+      notify:
+        - Reload systemd daemon
+    - name: Gather list of CNI files
+      ansible.builtin.find:
+        paths: /etc/cni/net.d
+        patterns: "*"
+        hidden: true
+      register: directory_contents
+    - name: Delete CNI files
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ directory_contents.files }}"
+  handlers:
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon-reload: true
