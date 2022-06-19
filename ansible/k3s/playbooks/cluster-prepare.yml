@@ -29,7 +29,7 @@
               127.0.1.1   {{ inventory_hostname }}
     - name: Packages
       block:
-        - name: Packages | Update dnf.conf
+        - name: Packages | Improve dnf performance
           ansible.builtin.blockinfile:
             path: /etc/dnf/dnf.conf
             block: |
@@ -78,10 +78,14 @@
           notify: Restart smartd
         - name: System Configuration (1) | Disable firewalld
           ansible.builtin.systemd:
-            service: firewalld
+            service: firewalld.service
             enabled: false
             masked: true
             state: stopped
+        - name: System Configuration (1) | Enable fstrim
+          ansible.builtin.systemd:
+            service: fstrim.timer
+            enabled: true
     - name: System Configuration (2)
       block:
         - name: System Configuration (2) | Enable kernel modules
