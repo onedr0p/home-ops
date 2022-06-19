@@ -26,11 +26,25 @@
         block: |
           defaultyes=True
           deltarpm=True
-          max_parallel_downloads=20
+          install_weak_deps=False
+          max_parallel_downloads={{ ansible_processor_vcpus | default('8') }}
+
     - name: Install required packages
       ansible.builtin.dnf:
-        name: [dnf-automatic, dnf-utils, fish, hdparm, htop, ipvsadm, nano, nvme-cli, socat]
-        state: latest
+        name:
+          - "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
+          - "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
+          - dnf-automatic
+          - dnf-utils
+          - fish
+          - hdparm
+          - htop
+          - ipvsadm
+          - lm_sensors
+          - nano
+          - nvme-cli
+          - socat
+        state: present
     - name: Enable automatic downloads of updates
       ansible.builtin.systemd:
         service: dnf-automatic-download.timer
@@ -108,6 +122,9 @@
           mitigations: "off"
       register: grub_status
     - name: Reconfigure Grub
-      ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
+      ansible.builtin.command: "{{ item }}"
+      loop:
+        - grub2-mkconfig -o /boot/grub2/grub.cfg
+        - dracut --force --regenerate-all -v
       when: grub_status.changed
   notify: Reboot
