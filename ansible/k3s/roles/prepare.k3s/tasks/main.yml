@@ -28,23 +28,11 @@
           deltarpm=True
           install_weak_deps=False
           max_parallel_downloads={{ ansible_processor_vcpus | default('8') }}
-
     - name: Install required packages
       ansible.builtin.dnf:
-        name:
-          - "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
-          - "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
-          - dnf-automatic
-          - dnf-utils
-          - fish
-          - hdparm
-          - htop
-          - ipvsadm
-          - lm_sensors
-          - nano
-          - nvme-cli
-          - socat
+        name: "{{ packages | default([]) }}"
         state: present
+        update_cache: true
     - name: Enable automatic downloads of updates
       ansible.builtin.systemd:
         service: dnf-automatic-download.timer
