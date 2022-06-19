@@ -33,6 +33,7 @@
         name: "{{ packages | default([]) }}"
         state: present
         update_cache: true
+        autoremove: true
     - name: Enable automatic downloads of updates
       ansible.builtin.systemd:
         service: dnf-automatic-download.timer
@@ -109,7 +110,7 @@
         grub_config:
           mitigations: "off"
       register: grub_status
-    - name: Reconfigure Grub
+    - name: Reconfigure grub and initramfs
       ansible.builtin.command: "{{ item }}"
       loop:
         - grub2-mkconfig -o /boot/grub2/grub.cfg
