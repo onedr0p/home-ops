@@ -9,5 +9,137 @@
     - name: Pausing for 5 seconds...
       pause:
         seconds: 5
-  roles:
-    - prepare.k3s
+  tasks:
+    - name: Locale
+      block:
+        - name: Locale | Set timezone
+          community.general.timezone:
+            name: "{{ timezone | default('America/New_York') }}"
+    - name: Networking
+      block:
+        - name: Networking | Set hostname to inventory hostname
+          ansible.builtin.hostname:
+            name: "{{ inventory_hostname }}"
+          when:
+            - ansible_hostname != inventory_hostname
+        - name: Networking | Update /etc/hosts to include inventory hostname
+          ansible.builtin.blockinfile:
+            path: /etc/hosts
+            block: |
+              127.0.1.1   {{ inventory_hostname }}
+    - name: Packages
+      block:
+        - name: Packages | Update dnf.conf
+          ansible.builtin.blockinfile:
+            path: /etc/dnf/dnf.conf
+            block: |
+              defaultyes=True
+              deltarpm=True
+              install_weak_deps=False
+              max_parallel_downloads={{ ansible_processor_vcpus | default('8') }}
+        - name: Packages | Importing (free) key
+          ansible.builtin.rpm_key:
+            state: present
+            key: https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020
+        - name: Packages | Importing (non-free) key
+          ansible.builtin.rpm_key:
+            state: present
+            key: https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020
+        - name: Packages | Install required packages
+          ansible.builtin.dnf:
+            name: "{{ packages | default([]) }}"
+            state: present
+            update_cache: true
+        - name: Packages | Remove leaf packages
+          ansible.builtin.dnf:
+            autoremove: true
+        - name: Packages | Enable automatic downloads of updates
+          ansible.builtin.systemd:
+            service: dnf-automatic-download.timer
+            enabled: true
+            state: started
+    - name: User Configuration
+      block:
+        - name: User Configuration | Change shell to fish
+          ansible.builtin.user:
+            name: root
+            shell: /usr/bin/fish
+        - name: User Configuration | Add additional SSH public keys
+          ansible.posix.authorized_key:
+            user: "{{ ansible_user }}"
+            key: "{{ item }}"
+          loop: "{{ public_ssh_keys | default([]) }}"
+    - name: System Configuration (1)
+      block:
+        - name: System Configuration (1) | Configure smartd
+          ansible.builtin.copy:
+            dest: /etc/smartd.conf
+            mode: 0644
+            content: DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40
+          notify: Restart smartd
+        - name: System Configuration (1) | Disable firewalld
+          ansible.builtin.systemd:
+            service: firewalld
+            enabled: false
+            masked: true
+            state: stopped
+    - name: System Configuration (2)
+      block:
+        - name: System Configuration (2) | Enable kernel modules
+          ansible.builtin.copy:
+            mode: 0644
+            content: "{{ item }}"
+            dest: "/etc/modules-load.d/{{ item }}.conf"
+          loop: [br_netfilter, overlay, rbd]
+        - name: System Configuration (2) | Set sysctls
+          ansible.posix.sysctl:
+            name: "{{ item.key }}"
+            value: "{{ item.value }}"
+            sysctl_file: /etc/sysctl.d/99-kubernetes.conf
+            reload: true
+          with_dict: "{{ sysctl_config }}"
+          vars:
+            sysctl_config:
+              net.ipv4.ip_forward: 1
+              net.ipv4.conf.all.forwarding: 1
+              net.ipv4.conf.all.rp_filter: 0
+              net.ipv4.conf.default.rp_filter: 0
+              net.ipv6.conf.all.forwarding: 1
+              net.bridge.bridge-nf-call-iptables: 1
+              net.bridge.bridge-nf-call-ip6tables: 1
+              fs.inotify.max_user_watches: 524288
+              fs.inotify.max_user_instances: 512
+        - name: System Configuration (2) | Disable swap
+          ansible.builtin.dnf:
+            name: zram-generator-defaults
+            state: absent
+        - name: System Configuration (2) | Disable SELinux
+          ansible.posix.selinux:
+            state: disabled
+        - name: System Configuration (2) | Disable mitigations
+          ansible.builtin.replace:
+            path: /etc/default/grub
+            regexp: '^(GRUB_CMDLINE_LINUX=(?:(?![" ]{{ item.key | regex_escape }}=).)*)(?:[" ]{{ item.key | regex_escape }}=\S+)?(.*")$'
+            replace: '\1 {{ item.key }}={{ item.value }}\2'
+          with_dict: "{{ grub_config }}"
+          vars:
+            grub_config:
+              mitigations: "off"
+          register: grub_status
+        - name: System Configuration (2) | Reconfigure grub and initramfs
+          ansible.builtin.command: "{{ item }}"
+          loop:
+            - grub2-mkconfig -o /boot/grub2/grub.cfg
+            - dracut --force --regenerate-all -v
+          when: grub_status.changed
+      notify: Reboot
+
+  handlers:
+    - name: Reboot
+      ansible.builtin.reboot:
+
+    - name: Restart smartd
+      ansible.builtin.service:
+        name: smartd.service
+        enabled: true
+        state: restarted
