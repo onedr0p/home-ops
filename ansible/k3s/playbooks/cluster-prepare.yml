@@ -37,14 +37,13 @@
               deltarpm=True
               install_weak_deps=False
               max_parallel_downloads={{ ansible_processor_vcpus | default('8') }}
-        - name: Packages | Importing (free) key
+        - name: Packages | Import rpmfusion keys
           ansible.builtin.rpm_key:
             state: present
-            key: https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020
-        - name: Packages | Importing (non-free) key
-          ansible.builtin.rpm_key:
-            state: present
-            key: https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020
+            key: "{{ item }}"
+          loop:
+            - https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020
+            - https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020
         - name: Packages | Install required packages
           ansible.builtin.dnf:
             name: "{{ packages | default([]) }}"
