@@ -1,0 +1,62 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app intel-gpu-exporter
+  namespace: monitoring
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: kah-common-chart
+      version: 1.1.2
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 15m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: intel-gpu-plugin
+      namespace: kube-system
+  values:
+    global:
+      nameOverride: *app
+    controller:
+      type: daemonset
+      strategy: RollingUpdate
+    image:
+      repository: ghcr.io/onedr0p/intel-gpu-exporter
+      tag: rolling@sha256:2b008054d0eaf2256765ed02be42779d8b4cf36e36f1e36b48c14a5e951f5bb4
+    service:
+      main:
+        ports:
+          http:
+            port: 8080
+    podSecurityContext:
+      supplementalGroups:
+        - 44
+        - 109
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: feature.node.kubernetes.io/custom-intel-gpu
+                  operator: In
+                  values:
+                    - "true"
+    resources:
+      requests:
+        gpu.intel.com/i915: 1
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        gpu.intel.com/i915: 1
+        memory: 500Mi
