@@ -17,5 +17,8 @@ spec:
       scrapeTimeout: 5s
       path: /metrics
       metricRelabelings:
-        - sourceLabels: [__meta_kubernetes_node_name]
+        - action: replace
+          regex: (.*)
+          replacement: $1
+          sourceLabels: [__meta_kubernetes_pod_node_name]
           targetLabel: instance
