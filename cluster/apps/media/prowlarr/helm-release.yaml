@@ -27,9 +27,15 @@ spec:
       nameOverride: *app
     image:
       repository: ghcr.io/k8s-at-home/prowlarr-nightly
-      tag: v0.4.0.1816@sha256:95813cd13acdb868b2857a489aedc4374957f231f43d0c756c69950b38a732d9
+      tag: v0.4.0.1816@sha256:56088085aba9d128ab55ae92733c9cbcb3af80d20627b6a2e7c15c40d518ee9f
     env:
       TZ: "${TIMEZONE}"
+      PROWLARR__LOG_LEVEL: info
+      PROWLARR__BRANCH: nightly
+      PROWLARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+    envFrom:
+      - secretRef:
+          name: *app
     service:
       main:
         ports:
