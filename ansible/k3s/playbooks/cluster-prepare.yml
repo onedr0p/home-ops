@@ -88,7 +88,12 @@
             enabled: true
     - name: System Configuration (2)
       block:
-        - name: System Configuration (2) | Enable kernel modules
+        - name: System Configuration (2) | Enable kernel modules now
+          community.general.modprobe:
+            name: "{{ item }}"
+            state: present
+          loop: [br_netfilter, overlay, rbd]
+        - name: System Configuration (2) | Enable kernel modules on boot
           ansible.builtin.copy:
             mode: 0644
             content: "{{ item }}"
