@@ -27,10 +27,14 @@ spec:
       nameOverride: *app
     image:
       repository: ghcr.io/k8s-at-home/radarr-nightly
-      tag: v4.2.0.6370
-      pullPolicy: IfNotPresent
+      tag: v4.2.0.6370@sha256:e6c7e26b5c8c6e3a93565d90e12c6c1478d360d287b5a32cdf96621dee76086a
     env:
       TZ: "${TIMEZONE}"
+      RADARR__INSTANCE_NAME: Radarr
+      RADARR__PORT: &port 7878
+      RADARR__BRANCH: nightly
+      RADARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+      RADARR__LOG_LEVEL: info
       PUSHOVER_DEBUG: "false"
       PUSHOVER_APP_URL: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
     envFrom:
@@ -40,7 +44,7 @@ spec:
       main:
         ports:
           http:
-            port: 7878
+            port: *port
     ingress:
       main:
         enabled: true
