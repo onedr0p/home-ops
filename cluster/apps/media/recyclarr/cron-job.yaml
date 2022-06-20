@@ -19,7 +19,7 @@ spec:
           restartPolicy: OnFailure
           initContainers:
             - name: render-configs
-              image: ghcr.io/k8s-at-home/recyclarr:v2.2.1
+              image: ghcr.io/k8s-at-home/recyclarr:v2.2.1@sha256:f9e2836e483e2f0cb5e8cb6642f9fc90ee6c0976e0d40c883a3cab289db8825e
               envFrom:
                 - secretRef:
                     name: *app
@@ -35,13 +35,10 @@ spec:
                   mountPath: /shared
           containers:
             - name: sonarrs
-              image: ghcr.io/k8s-at-home/recyclarr:v2.2.1
-              imagePullPolicy: IfNotPresent
+              image: ghcr.io/k8s-at-home/recyclarr:v2.2.1@sha256:f9e2836e483e2f0cb5e8cb6642f9fc90ee6c0976e0d40c883a3cab289db8825e
               env:
                 - name: TZ
                   value: "${TIMEZONE}"
-                - name: RECYCLARR_APP_DATA
-                  value: /config
               command:
                 - /app/recyclarr
               args:
@@ -54,13 +51,10 @@ spec:
                   subPath: recyclarr.yaml
                   readOnly: true
             - name: radarrs
-              image: ghcr.io/k8s-at-home/recyclarr:v2.2.1
-              imagePullPolicy: IfNotPresent
+              image: ghcr.io/k8s-at-home/recyclarr:v2.2.1@sha256:f9e2836e483e2f0cb5e8cb6642f9fc90ee6c0976e0d40c883a3cab289db8825e
               env:
                 - name: TZ
                   value: "${TIMEZONE}"
-                - name: RECYCLARR_APP_DATA
-                  value: /config
               command:
                 - /app/recyclarr
               args:
