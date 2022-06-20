@@ -27,15 +27,22 @@ spec:
       nameOverride: *app
     image:
       repository: ghcr.io/k8s-at-home/lidarr
-      tag: v1.0.2.2592
-      pullPolicy: Always
+      tag: v1.0.2.2592@sha256:b25033f3f1b38793dfb4c69ccfc81a11bd6264359e6ccc0ad7ba9a71538dd183
     env:
       TZ: "${TIMEZONE}"
+      LIDARR__INSTANCE_NAME: Lidarr
+      LIDARR__PORT: &port 8686
+      LIDARR__BRANCH: master
+      LIDARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+      LIDARR__LOG_LEVEL: info
+    envFrom:
+      - secretRef:
+          name: *app
     service:
       main:
         ports:
           http:
-            port: 8686
+            port: *port
     ingress:
       main:
         enabled: true

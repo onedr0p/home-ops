@@ -31,6 +31,7 @@ spec:
     env:
       TZ: "${TIMEZONE}"
       PROWLARR__INSTANCE_NAME: Prowlarr
+      PROWLARR__PORT: &port 9696
       PROWLARR__BRANCH: nightly
       PROWLARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
       PROWLARR__LOG_LEVEL: info
@@ -41,7 +42,7 @@ spec:
       main:
         ports:
           http:
-            port: 9696
+            port: *port
     ingress:
       main:
         enabled: true
