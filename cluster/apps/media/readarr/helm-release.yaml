@@ -27,15 +27,22 @@ spec:
       nameOverride: *app
     image:
       repository: ghcr.io/k8s-at-home/readarr-develop
-      tag: v0.1.1.1320
-      pullPolicy: Always
+      tag: v0.1.1.1320@sha256:b07387ec83766e5f69f566845fd3dd578fa4b1f229f9676f9abbb13589a7e549
     env:
       TZ: "${TIMEZONE}"
+      READARR__INSTANCE_NAME: Readarr (Audio)
+      READARR__PORT: &port 8787
+      READARR__BRANCH: develop
+      READARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+      READARR__LOG_LEVEL: info
+    envFrom:
+      - secretRef:
+          name: *app
     service:
       main:
         ports:
           http:
-            port: 8787
+            port: *port
     ingress:
       main:
         enabled: true
