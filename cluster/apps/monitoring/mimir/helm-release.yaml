@@ -37,6 +37,19 @@ spec:
           backend: s3
           s3:
             insecure: true
+    nginx:
+      replicas: 3
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        hosts:
+          - host: &host "mimir.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
     alertmanager:
       enabled: false
     minio:
