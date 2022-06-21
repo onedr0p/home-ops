@@ -1,0 +1,35 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+configMapGenerator:
+  - name: mimir-alertmanager-dashboard
+    files:
+      - mimir-alertmanager-dashboard.json=https://raw.githubusercontent.com/grafana/mimir/main/operations/mimir-mixin-compiled/dashboards/mimir-alertmanager.json
+  - name: mimir-compactor-dashboard
+    files:
+      - mimir-compactor-dashboard.json=https://raw.githubusercontent.com/grafana/mimir/main/operations/mimir-mixin-compiled/dashboards/mimir-compactor.json
+  - name: mimir-overrides-dashboard
+    files:
+      - mimir-overrides-dashboard.json=https://raw.githubusercontent.com/grafana/mimir/main/operations/mimir-mixin-compiled/dashboards/mimir-overrides.json
+  - name: mimir-object-store-dashboard
+    files:
+      - mimir-object-store-dashboard.json=https://raw.githubusercontent.com/grafana/mimir/main/operations/mimir-mixin-compiled/dashboards/mimir-object-store.json
+  - name: mimir-queries-dashboard
+    files:
+      - mimir-queries-dashboard.json=https://raw.githubusercontent.com/grafana/mimir/main/operations/mimir-mixin-compiled/dashboards/mimir-queries.json
+  - name: mimir-reads-dashboard
+    files:
+      - mimir-reads-dashboard.json=https://raw.githubusercontent.com/grafana/mimir/main/operations/mimir-mixin-compiled/dashboards/mimir-reads.json
+  - name: mimir-ruler-dashboard
+    files:
+      - mimir-ruler-dashboard.json=https://raw.githubusercontent.com/grafana/mimir/main/operations/mimir-mixin-compiled/dashboards/mimir-ruler.json
+  - name: mimir-writes-dashboard
+    files:
+      - mimir-writes-dashboard.json=https://raw.githubusercontent.com/grafana/mimir/main/operations/mimir-mixin-compiled/dashboards/mimir-writes.json
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+  labels:
+    grafana_dashboard: "true"

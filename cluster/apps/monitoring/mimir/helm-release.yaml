@@ -1,0 +1,78 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: mimir
+  namespace: monitoring
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: mimir-distributed
+      version: 2.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-charts
+        namespace: flux-system
+      interval: 15m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    mimir:
+      structuredConfig:
+        limits:
+          max_global_series_per_metric: 0
+          max_global_series_per_user: 0
+        blocks_storage:
+          backend: s3
+          s3:
+            insecure: true
+        ruler_storage:
+          backend: s3
+          s3:
+            insecure: true
+    minio:
+      enabled: false
+    nginx:
+      enabled: false
+    serviceMonitor:
+      enabled: true
+      clusterLabel: null
+  valuesFrom:
+    - targetPath: mimir.structuredConfig.ruler_storage.s3.bucket_name
+      name: mimir-ruler-ceph-bucket-v1
+      kind: ConfigMap
+      valuesKey: BUCKET_NAME
+    - targetPath: mimir.structuredConfig.ruler_storage.s3.endpoint
+      name: mimir-ruler-ceph-bucket-v1
+      kind: ConfigMap
+      valuesKey: BUCKET_HOST
+    - targetPath: mimir.structuredConfig.ruler_storage.s3.access_key_id
+      name: mimir-ruler-ceph-bucket-v1
+      kind: Secret
+      valuesKey: AWS_ACCESS_KEY_ID
+    - targetPath: mimir.structuredConfig.ruler_storage.s3.secret_access_key
+      name: mimir-ruler-ceph-bucket-v1
+      kind: Secret
+      valuesKey: AWS_SECRET_ACCESS_KEY
+    - targetPath: mimir.structuredConfig.blocks_storage.s3.bucket_name
+      name: mimir-tsdb-ceph-bucket-v1
+      kind: ConfigMap
+      valuesKey: BUCKET_NAME
+    - targetPath: mimir.structuredConfig.blocks_storage.s3.endpoint
+      name: mimir-tsdb-ceph-bucket-v1
+      kind: ConfigMap
+      valuesKey: BUCKET_HOST
+    - targetPath: mimir.structuredConfig.blocks_storage.s3.access_key_id
+      name: mimir-tsdb-ceph-bucket-v1
+      kind: Secret
+      valuesKey: AWS_ACCESS_KEY_ID
+    - targetPath: mimir.structuredConfig.blocks_storage.s3.secret_access_key
+      name: mimir-tsdb-ceph-bucket-v1
+      kind: Secret
+      valuesKey: AWS_SECRET_ACCESS_KEY
