@@ -180,25 +180,29 @@ spec:
         tls:
           - hosts:
               - *host
-      thanosService:
-        enabled: true
-      thanosServiceMonitor:
-        enabled: true
-      thanosIngress:
-        enabled: true
-        pathType: Prefix
-        ingressClassName: "nginx"
-        annotations:
-          nginx.ingress.kubernetes.io/ssl-redirect: "true"
-          nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-        hosts:
-          - &host "thanos-sidecar.${SECRET_PUBLIC_DOMAIN}"
-        tls:
-          - hosts:
-              - *host
+      # thanosService:
+      #   enabled: true
+      # thanosServiceMonitor:
+      #   enabled: true
+      # thanosIngress:
+      #   enabled: true
+      #   pathType: Prefix
+      #   ingressClassName: "nginx"
+      #   annotations:
+      #     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      #     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+      #   hosts:
+      #     - &host "thanos-sidecar.${SECRET_PUBLIC_DOMAIN}"
+      #   tls:
+      #     - hosts:
+      #         - *host
       prometheusSpec:
         replicas: 3
         replicaExternalLabelName: "replica"
+        remoteWrite:
+          - url: http://mimir-distributor.monitoring.svc.cluster.local:8080/api/v1/push
+            headers:
+              X-Scope-OrgID: anonymous
         podAntiAffinity: hard
         retentionSize: "6GB"
         ruleSelectorNilUsesHelmValues: false
@@ -215,13 +219,13 @@ spec:
               resources:
                 requests:
                   storage: 10Gi
-        thanos:
-          image: quay.io/thanos/thanos:v0.26.0
-          # renovate: datasource=docker depName=quay.io/thanos/thanos
-          version: "v0.26.0"
-          objectStorageConfig:
-            name: thanos-objstore-secret
-            key: objstore.yml
+        # thanos:
+        #   image: quay.io/thanos/thanos:v0.26.0
+        #   # renovate: datasource=docker depName=quay.io/thanos/thanos
+        #   version: "v0.26.0"
+        #   objectStorageConfig:
+        #     name: thanos-objstore-secret
+        #     key: objstore.yml
         resources:
           requests:
             cpu: 500m
