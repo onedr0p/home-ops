@@ -35,15 +35,6 @@
     regexp: "https://127.0.0.1:6443"
     replace: "https://{{ k3s_registration_address }}:6443"
 
-# TODO(ansible): Remove containerd-hack once k3s uses containerd 1.6+
-- name: Copy containerd-hack service
-  ansible.builtin.copy:
-    src: containerd-hack.service
-    dest: /etc/systemd/system/containerd-hack.service
-    owner: root
-    group: root
-    mode: 0644
-
 - name: Enable containerd-hack service
   ansible.builtin.systemd:
     name: containerd-hack
