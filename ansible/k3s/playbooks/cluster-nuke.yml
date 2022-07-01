@@ -9,17 +9,13 @@
     - name: Pausing for 2 seconds...
       pause:
         seconds: 2
-  roles:
-    - xanmanning.k3s
-  vars:
-    k3s_state: uninstalled
   tasks:
-    - name: Remove containerd-hack
-      ansible.builtin.file:
-        path: /etc/systemd/system/containerd-hack.service
-        state: absent
-      notify:
-        - Reload systemd daemon
+    - name: Uninstall k3s
+      include_role:
+        name: xanmanning.k3s
+        public: true
+      vars:
+        k3s_state: uninstalled
     - name: Gather list of CNI files
       ansible.builtin.find:
         paths: /etc/cni/net.d
@@ -31,7 +27,3 @@
         path: "{{ item.path }}"
         state: absent
       loop: "{{ directory_contents.files }}"
-  handlers:
-    - name: Reload systemd daemon
-      ansible.builtin.systemd:
-        daemon-reload: true
