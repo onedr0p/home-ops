@@ -37,18 +37,18 @@ tasks:
   debug-volume:
     desc: Attach a volume to a container for debugging, ex. VOLUME=zigbee2mqtt-config-v1 NAMESPACE=home task debug-volume
     interactive: true
-    silent: true
     cmds:
       - |
         kubectl run debug-{{.VOLUME}} -n {{.NAMESPACE}} -i --tty --rm --image=null --overrides='
           {
+            "apiVersion": "v1",
             "spec": {
               "containers": [
                 {
                   "name": "debug",
-                  "image": "docker.io/library/alpine:3.15",
+                  "image": "docker.io/library/ubuntu:jammy",
                   "command": [
-                    "/bin/sh"
+                    "/bin/bash"
                   ],
                   "stdin": true,
                   "stdinOnce": true,
@@ -59,16 +59,12 @@ tasks:
                         "command": [
                           "/bin/sh",
                           "-c",
-                          "apk add --no-cache curl vim"
+                          "apt update -y && apt install -y curl nano"
                         ]
                       }
                     }
                   },
                   "volumeMounts": [
-                    {
-                      "name": "backups",
-                      "mountPath": "/mnt/backups/"
-                    },
                     {
                       "name": "debug-volume",
                       "mountPath": "/mnt/volume/"
@@ -77,13 +73,6 @@ tasks:
                 }
               ],
               "volumes": [
-                {
-                  "name": "backups",
-                  "nfs": {
-                    "server": '{{.NAS_ADDRESS | default "expanse"}}',
-                    "path": '{{.NAS_PATH | default "/tycho/Apps/External/Backups"}}'
-                  }
-                },
                 {
                   "name": "debug-volume",
                   "persistentVolumeClaim": {
