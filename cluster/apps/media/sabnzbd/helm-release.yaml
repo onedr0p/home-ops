@@ -27,9 +27,10 @@ spec:
       nameOverride: *app
     image:
       repository: ghcr.io/onedr0p/sabnzbd
-      tag: 3.6.0@sha256:f87b5c52eb483ee4c1e6d1786c3208e0a37fe8b503a4403c610a0e281e55549d
+      tag: 3.6.0@sha256:005f7d7b586575182fedfaf70fcd906f26a7fb6aad4edbba0d2cd510832ebc64
     env:
       TZ: "${TIMEZONE}"
+      PORT: &port 80
       HOST_WHITELIST_ENTRIES: >-
         sabnzbd,
         sabnzbd.media,
@@ -41,7 +42,7 @@ spec:
       main:
         ports:
           http:
-            port: 80
+            port: *port
     ingress:
       main:
         enabled: true
