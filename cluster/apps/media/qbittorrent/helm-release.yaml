@@ -30,7 +30,9 @@ spec:
       tag: 4.4.3.1@sha256:36e89c0625f13e936391271dfff433cf4d7eb59cbabdaded077eee368f8c289b
     env:
       TZ: "${TIMEZONE}"
-      WEBUI_PORT: &port 80
+      QBITTORRENT__PORT: &port 80
+      QBITTORRENT__BT_PORT: &port-bt 50413
+      WEBUI_PORT: *port
     service:
       main:
         ports:
@@ -44,9 +46,9 @@ spec:
         ports:
           bittorrent:
             enabled: true
-            port: 50413
+            port: *port-bt
             protocol: TCP
-            targetPort: 50413
+            targetPort: *port-bt
         externalTrafficPolicy: Local
     ingress:
       main:
