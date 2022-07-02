@@ -1,0 +1,81 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app flood
+  namespace: media
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: kah-common-chart
+      version: 1.1.2
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 15m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    global:
+      nameOverride: *app
+    image:
+      repository: ghcr.io/onedr0p/flood
+      tag: 4.7.0@sha256:afac1732ed346701fe50b1a24701267e46331c51f62ad1e59b3a4fd6f47f0621
+    env:
+      TZ: "${TIMEZONE}"
+      FLOOD_OPTION_port: &port 80
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        hosts:
+          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+      supplementalGroups:
+        - 100
+    persistence:
+      config:
+        enabled: true
+        existingClaim: flood-config-v1
+      rtorrent:
+        enabled: true
+        type: emptyDir
+        medium: Memory
+        # sizeLimit: 200Mi
+    additionalContainers:
+      rtorrent:
+        name: rtorrent
+        image: ghcr.io/onedr0p/flood:0.9.8-r16@sha256:70e8d8412d9181472354dd78382446ae42d9c6c77df87e41fdd2e2506dc56914
+        volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: rtorrent
+            mountPath: /rtorrent
+    resources:
+      requests:
+        cpu: 10m
+        memory: 100Mi
+      limits:
+        memory: 1000Mi
