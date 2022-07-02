@@ -59,23 +59,49 @@ spec:
       config:
         enabled: true
         existingClaim: flood-config-v1
-      rtorrent:
+      rtorrent-rc:
+        enabled: true
+        type: configMap
+        name: *app
+        subPath: rtorrent.rc
+        mountPath: /data/rtorrent.rc
+        readOnly: true
+      rtorrent-sock:
         enabled: true
         type: emptyDir
         medium: Memory
-        # sizeLimit: 200Mi
+        mountPath: /rtorrent
+      media:
+        enabled: true
+        type: nfs
+        server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+        path: /tycho/Media
+        mountPath: /media
     additionalContainers:
       rtorrent:
         name: rtorrent
-        image: ghcr.io/onedr0p/rtorrent:0.9.8-r16@sha256:70e8d8412d9181472354dd78382446ae42d9c6c77df87e41fdd2e2506dc56914
+        image: ghcr.io/onedr0p/rtorrent:0.9.8-r16@sha256:e34ca1e5ba12d6912d2b72d93305f3a00ee0481315919ae422f3e13a3e8d3d42
+        env:
+          - name: RTORRENT__DEFAULT_CONFIG
+            value: "false"
+          - name: RTORRENT__CONFIG_FILE
+            value: "/data/rtorrent.rc"
+          - name: RTORRENT__BT_PORT_MIN
+            value: &port-bt "50415"
+          - name: RTORRENT__BT_PORT_MAX
+            value: *port-bt
         volumeMounts:
           - name: config
             mountPath: /config
-          - name: rtorrent
+          - name: rtorrent-rc
+            mountPath: /data/rtorrent.rc
+          - name: rtorrent-sock
             mountPath: /rtorrent
+          - name: media
+            mountPath: /media
     resources:
       requests:
         cpu: 10m
         memory: 100Mi
       limits:
-        memory: 1000Mi
+        memory: 1200Mi

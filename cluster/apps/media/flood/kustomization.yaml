@@ -4,3 +4,12 @@ kind: Kustomization
 resources:
   - config-pvc.yaml
   - helm-release.yaml
+namespace: media
+configMapGenerator:
+  - name: flood
+    files:
+      - rtorrent.rc
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
