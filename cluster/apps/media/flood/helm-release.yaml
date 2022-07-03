@@ -27,10 +27,13 @@ spec:
       nameOverride: *app
     image:
       repository: ghcr.io/onedr0p/flood
-      tag: 4.7.0@sha256:afac1732ed346701fe50b1a24701267e46331c51f62ad1e59b3a4fd6f47f0621
+      tag: 4.7.0@sha256:2622eb5e9a53cfea58ac1a79aac16dbf094d5646239609257a50708d6efa61c2
     env:
       TZ: "${TIMEZONE}"
-      FLOOD_OPTION_allowedpath: "/"
+      FLOOD_OPTION_auth: "none"
+      FLOOD_OPTION_allowedpath: "/config,/sock,/media,/rc"
+      FLOOD_OPTION_rtsocket: "/sock/rtorrent.sock"
+      FLOOD_OPTION_rtconfig: "/rc/rtorrent.rc"
       FLOOD_OPTION_port: &port 80
     service:
       main:
@@ -67,13 +70,13 @@ spec:
         type: configMap
         name: *app
         subPath: rtorrent.rc
-        mountPath: /data/rtorrent.rc
+        mountPath: /rc/rtorrent.rc
         readOnly: true
       rtorrent-sock:
         enabled: true
         type: emptyDir
         medium: Memory
-        mountPath: /rtorrent
+        mountPath: /sock
       media:
         enabled: true
         type: nfs
@@ -83,23 +86,21 @@ spec:
     additionalContainers:
       rtorrent:
         name: rtorrent
-        image: ghcr.io/onedr0p/rtorrent:0.9.8-r16@sha256:e34ca1e5ba12d6912d2b72d93305f3a00ee0481315919ae422f3e13a3e8d3d42
+        image: ghcr.io/onedr0p/rtorrent:0.9.8-r16@sha256:ac1148819398b66d8137b8e395ab9c50f11a84e71d7a3474427fa781bb4adc73
         env:
           - name: RTORRENT__DEFAULT_CONFIG
             value: "false"
           - name: RTORRENT__CONFIG_FILE
-            value: "/data/rtorrent.rc"
-          - name: RTORRENT__BT_PORT_MIN
-            value: &port-bt "50415"
-          - name: RTORRENT__BT_PORT_MAX
-            value: *port-bt
+            value: "/rc/rtorrent.rc"
+          - name: RTORRENT__BT_PORT
+            value: "50415"
         volumeMounts:
           - name: config
             mountPath: /config
           - name: rtorrent-rc
-            mountPath: /data/rtorrent.rc
+            mountPath: /rc/rtorrent.rc
           - name: rtorrent-sock
-            mountPath: /rtorrent
+            mountPath: /sock
           - name: media
             mountPath: /media
     resources:
