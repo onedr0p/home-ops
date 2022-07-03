@@ -1,11 +1,14 @@
 method.insert = cfg.basedir,  private|const|string, (cat, "/config/")
 method.insert = cfg.session,  private|const|string, (cat, (cfg.basedir), "session/")
-method.insert = cfg.logfile,  private|const|string, (cat, "/dev/stdout")
-method.insert = cfg.download, private|const|string, (cat, "/media/Downloads/rtorrent-flood/", "complete/")
+method.insert = cfg.download, private|const|string, (cat, (cfg.basedir), "downloads/")
+method.insert = cfg.logs,     private|const|string, (cat,(cfg.basedir),"log/")
+method.insert = cfg.logfile,  private|const|string, (cat,(cfg.logs),"rtorrent-",(system.time),".log")
+# method.insert = cfg.logfile,  private|const|string, (cat, "/dev/stdout")
 
 fs.mkdir.recursive = (cat,(cfg.basedir))
-fs.mkdir = (cat,(cfg.download))
 fs.mkdir = (cat,(cfg.session))
+fs.mkdir = (cat,(cfg.download))
+fs.mkdir = (cat,(cfg.logs))
 
 dht.mode.set = disable
 protocol.pex.set = no
@@ -29,6 +32,7 @@ network.xmlrpc.size_limit.set = 4M
 
 session.path.set = (cat, (cfg.session))
 directory.default.set = (cat, (cfg.download))
+log.execute = (cat, (cfg.logs), "execute.log")
 
 encoding.add = utf8
 system.umask.set = 0002
@@ -37,6 +41,10 @@ system.cwd.set = (directory.default)
 network.http.max_open.set = 50
 network.http.dns_cache_timeout.set = 25
 
+print = (cat, "Logging to ", (cfg.logfile))
 log.open_file = "log", (cfg.logfile)
 log.add_output = "info", "log"
-log.add_output = "torrent_info", "log"
+##log.add_output = "tracker_debug", "log"
+# log.open_file = "log", (cfg.logfile)
+# log.add_output = "info", "log"
+# log.add_output = "torrent_info", "log"
