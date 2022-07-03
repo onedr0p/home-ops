@@ -1,14 +1,20 @@
 method.insert = cfg.basedir,  private|const|string, (cat, "/config/")
 method.insert = cfg.session,  private|const|string, (cat, (cfg.basedir), "session/")
-method.insert = cfg.download, private|const|string, (cat, (cfg.basedir), "downloads/")
+method.insert = cfg.download, private|const|string, (cat, (cfg.basedir), "download/")
+method.insert = cfg.watch,    private|const|string, (cat,(cfg.basedir),"watch/")
 method.insert = cfg.logs,     private|const|string, (cat,(cfg.basedir),"log/")
 method.insert = cfg.logfile,  private|const|string, (cat,(cfg.logs),"rtorrent-",(system.time),".log")
 # method.insert = cfg.logfile,  private|const|string, (cat, "/dev/stdout")
 
-fs.mkdir.recursive = (cat,(cfg.basedir))
 fs.mkdir = (cat,(cfg.session))
 fs.mkdir = (cat,(cfg.download))
 fs.mkdir = (cat,(cfg.logs))
+fs.mkdir = (cat,(cfg.watch))
+fs.mkdir = (cat,(cfg.watch),"/load")
+fs.mkdir = (cat,(cfg.watch),"/start")
+
+schedule2 = watch_load, 11, 10, ((load.verbose, (cat, (cfg.watch), "load/*.torrent")))
+schedule2 = watch_start, 10, 10, ((load.start_verbose, (cat, (cfg.watch), "start/*.torrent")))
 
 dht.mode.set = disable
 protocol.pex.set = no
@@ -44,7 +50,6 @@ network.http.dns_cache_timeout.set = 25
 print = (cat, "Logging to ", (cfg.logfile))
 log.open_file = "log", (cfg.logfile)
 log.add_output = "info", "log"
-##log.add_output = "tracker_debug", "log"
 # log.open_file = "log", (cfg.logfile)
 # log.add_output = "info", "log"
 # log.add_output = "torrent_info", "log"
