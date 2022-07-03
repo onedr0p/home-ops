@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app flood
+  name: &app rtorrent-flood
   namespace: media
 spec:
   interval: 15m
@@ -45,13 +45,18 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         hosts:
-          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host-release "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: &host-custom "flood.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - *host
+              - *host-release
+              - *host-custom
     podAnnotations:
       configmap.reloader.stakater.com/reload: *app
     podSecurityContext:
@@ -64,7 +69,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: flood-config-v1
+        existingClaim: rtorrent-flood-config-v1
       rtorrent-rc:
         enabled: true
         type: configMap
