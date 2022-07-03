@@ -30,6 +30,7 @@ spec:
       tag: 4.7.0@sha256:afac1732ed346701fe50b1a24701267e46331c51f62ad1e59b3a4fd6f47f0621
     env:
       TZ: "${TIMEZONE}"
+      FLOOD_OPTION_allowedpath: "/config,/rtorrent,/media"
       FLOOD_OPTION_port: &port 80
     service:
       main:
@@ -48,6 +49,8 @@ spec:
         tls:
           - hosts:
               - *host
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: *app
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
