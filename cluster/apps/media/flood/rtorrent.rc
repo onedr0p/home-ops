@@ -4,11 +4,6 @@ method.insert = cfg.session,  private|const|string, (cat, (cfg.basedir), "sessio
 method.insert = cfg.logfile,  private|const|string, (cat, "/dev/stdout")
 method.insert = cfg.download, private|const|string, (cat, "/media/Downloads/rtorrent/", "complete/")
 
-## Get finished download directory
-system.method.insert = d.get_finished_dir, simple, "cat=/media/Downloads/rtorrent/complete/,$d.get_custom1="
-## Move completed torrent to tag directory
-system.method.set_key = event.download.finished, move_complete, "d.set_directory=$d.get_finished_dir=;execute=mkdir,-p,$d.get_finished_dir=;execute=mv,-u,$d.get_base_path=,$d.get_finished_dir="
-
 ## Create instance directories
 execute.throw = sh, -c, (cat,\
     "mkdir -p \"",(cfg.download),"\" ",\
