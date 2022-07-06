@@ -40,7 +40,7 @@ spec:
           http:
             port: &port 80
     probes:
-      liveness:
+      liveness: &probes
         enabled: true
         custom: true
         spec:
@@ -51,26 +51,9 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 1
           failureThreshold: 3
-      readiness:
-        enabled: true
-        custom: true
-        spec:
-          httpGet:
-            path: /health
-            port: *port
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
+      readiness: *probes
       startup:
-        enabled: true
-        custom: true
-        spec:
-          httpGet:
-            path: /health
-            port: *port
-          failureThreshold: 30
-          periodSeconds: 10
+        enabled: false
     ingress:
       main:
         enabled: true
