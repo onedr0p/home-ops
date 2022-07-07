@@ -26,8 +26,8 @@ spec:
     global:
       nameOverride: *app
     image:
-      repository: ghcr.io/home-assistant/home-assistant
-      tag: 2022.7.0
+      repository: ghcr.io/onedr0p/home-assistant
+      tag: 2022.7.0@sha256:001051ff3f4a1c4836ccec5793a9c08daeaec90ef7b4bd0abb164e1bc299150d
     env:
       TZ: "${TIMEZONE}"
     envFrom:
@@ -70,6 +70,13 @@ spec:
         enabled: false
       startup:
         enabled: false
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+      supplementalGroups:
+        - 100
     persistence:
       config:
         enabled: true
