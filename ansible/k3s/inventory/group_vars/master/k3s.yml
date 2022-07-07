@@ -56,6 +56,9 @@ k3s_server:
     # Required to monitor component with kube-prometheus-stack
     - "bind-address=0.0.0.0"
   kube-apiserver-arg:
+    # Enable the audit log
+    - "--audit-log-path=/var/lib/rancher/k3s/audit.log"
+    - "--audit-policy-file=/var/lib/rancher/k3s/audit-policy.yaml"
     # Enable Alpha/Beta features
     - "feature-gates=EphemeralContainers=true,MixedProtocolLBService=true,ReadWriteOncePod=true"
     # Required for HAProxy health-checks

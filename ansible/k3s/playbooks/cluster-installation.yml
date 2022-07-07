@@ -7,7 +7,71 @@
   any_errors_fatal: true
   pre_tasks:
     - name: Pausing for 2 seconds...
-      pause:
+      ansible.builtin.pause:
         seconds: 2
-  roles:
-    - installation.k3s
+  tasks:
+    - name: Check if cluster is installed
+      ansible.builtin.stat:
+        path: /etc/rancher/k3s/config.yaml
+      register: k3s_check_installed
+      check_mode: false
+
+    - name: Set manifest facts
+      ansible.builtin.set_fact:
+        k3s_server_manifests_templates: []
+        k3s_server_manifests_urls: []
+      when: k3s_check_installed.stat.exists
+
+    - name: Create the k3s data directory
+      ansible.builtin.file:
+        path: /var/lib/rancher/k3s
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Download the audit-policy configuration file
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/falcosecurity/evolution/master/examples/k8s_audit_config/audit-policy.yaml
+        dest: /var/lib/rancher/k3s/audit-policy.yaml
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Install Kubernetes
+      ansible.builtin.include_role:
+        name: xanmanning.k3s
+        public: true
+      vars:
+        k3s_state: installed
+
+    - name: Copy kubeconfig to provision folder
+      run_once: true
+      ansible.builtin.fetch:
+        src: "/etc/rancher/k3s/k3s.yaml"
+        dest: "{{ playbook_dir }}/../../../cluster/kubeconfig"
+        flat: true
+      when:
+        - k3s_control_node is defined
+        - k3s_control_node
+
+    - name: Update kubeconfig with the right IPv4 address
+      delegate_to: localhost
+      become: false
+      run_once: true
+      ansible.builtin.replace:
+        path: "{{ playbook_dir }}/../../../cluster/kubeconfig"
+        regexp: "https://127.0.0.1:6443"
+        replace: "https://{{ k3s_registration_address }}:6443"
+
+    - name: Remove deployed manifest templates
+      ansible.builtin.file:
+        path: "{{ k3s_server_manifests_dir }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
+        state: absent
+      loop: "{{ k3s_server_manifests_templates | default([]) }}"
+
+    - name: Remove deployed manifest urls
+      ansible.builtin.file:
+        path: "{{ k3s_server_manifests_dir }}/{{ item.filename }}"
+        state: absent
+      loop: "{{ k3s_server_manifests_urls | default([]) }}"
