@@ -64,6 +64,23 @@
         regexp: "https://127.0.0.1:6443"
         replace: "https://{{ k3s_registration_address }}:6443"
 
+    # Cleaning up the manifests from the /var/lib/rancher/k3s/server/manifests
+    # directory is needed because k3s has an awesome
+    # "feature" to always deploy these on restarting
+    # the k3s systemd service. Removing them does
+    # not uninstall the manifests.
+
+    # Removing them means we can manage the lifecycle
+    # of these components outside of the
+    # /var/lib/rancher/k3s/server/manifests directory
+
+    # FIXME(ansible): Check for deployments to be happy rather than waiting
+    - name: Wait for k3s to finish installing the deployed manifests
+      ansible.builtin.wait_for:
+        timeout: 15
+      when: k3s_server_manifests_templates | length > 0
+        or k3s_server_manifests_urls | length > 0
+
     - name: Remove deployed manifest templates
       ansible.builtin.file:
         path: "{{ k3s_server_manifests_dir }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
