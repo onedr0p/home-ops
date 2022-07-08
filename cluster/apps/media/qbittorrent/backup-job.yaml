@@ -1,0 +1,51 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: qbittorrent-backup
+  namespace: media
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: "Forbid"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          automountServiceAccountToken: false
+          containers:
+            - name: backup
+              image: public.ecr.aws/docker/library/alpine:3.16.0
+              lifecycle:
+                postStart:
+                  exec:
+                    command:
+                      - /bin/ash
+                      - -c
+                      - apk add --no-cache nano
+              command:
+                - /bin/ash
+                - -c
+                - ls /config && ls /backup
+              volumeMounts:
+                - name: config
+                  mountPath: /config
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: config
+              persistentVolumeClaim:
+                claimName: qbittorrent-config-v1
+            - name: backup
+              nfs:
+                server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+                path: /tycho/Apps/External/Backups/qbittorrent
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - qbittorrent
+                  topologyKey: kubernetes.io/hostname
