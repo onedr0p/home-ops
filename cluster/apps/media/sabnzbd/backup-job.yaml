@@ -1,0 +1,55 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sabznbd-backup
+  namespace: media
+spec:
+  schedule: "0 0 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      ttlSecondsAfterFinished: 300
+      template:
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: ghcr.io/onedr0p/rclone:1.58.1@sha256:402f8b487e517be3888310fa7921338af311b005ddb718fa853aceec34bd2b9a
+              command:
+                - /bin/sh
+                - -c
+                - |-
+                  rclone config create backup alias remote=/backup
+                  tar -zcvf - /config | rclone rcat backup:"/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v
+                  total_backups=$(rclone size backup:/ --json | jq --raw-output '.count')
+                  if [ $total_backups -gt 7 ]; then
+                      rclone delete backup:/ --min-age 8d -v
+                  fi
+              volumeMounts:
+                - name: config
+                  mountPath: /config
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: config
+              persistentVolumeClaim:
+                claimName: sabznbd-config-v1
+            - name: backup
+              nfs:
+                server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+                path: /tycho/Apps/External/Backups/sabznbd
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - sabznbd
+                  topologyKey: kubernetes.io/hostname
