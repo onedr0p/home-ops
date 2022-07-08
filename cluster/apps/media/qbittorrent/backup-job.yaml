@@ -15,19 +15,20 @@ spec:
       ttlSecondsAfterFinished: 300
       template:
         spec:
+          automountServiceAccountToken: false
           restartPolicy: OnFailure
           containers:
             - name: backup
-              image: public.ecr.aws/docker/library/alpine:3.16.0
+              image: ghcr.io/onedr0p/rclone:1.58.1@sha256:402f8b487e517be3888310fa7921338af311b005ddb718fa853aceec34bd2b9a
               command:
                 - /bin/sh
                 - -c
                 - |-
-                  apk add --no-cache rclone
-                  tar -zcvf - /config | rclone rcat "/backup/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v
-                  set -- /backup*
-                  if [ "$#" -gt 7 ]; then
-                      find /backup -maxdepth 1 -type f -name "*.tar.gz" -mtime +7 -delete
+                  rclone config create backup alias path=/backup
+                  tar -zcvf - /config | rclone rcat backup:"/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v
+                  total_backups=$(rclone size backup:/ --json | jq --raw-output '.count')
+                  if [ $total_backups -gt 7 ]; then
+                      rclone delete backup:/ --min-age 8d -v
                   fi
               volumeMounts:
                 - name: config
