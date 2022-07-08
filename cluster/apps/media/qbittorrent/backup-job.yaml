@@ -24,7 +24,7 @@ spec:
                 - /bin/sh
                 - -c
                 - |-
-                  rclone config create backup alias path=/backup
+                  rclone config create backup alias remote=/backup
                   tar -zcvf - /config | rclone rcat backup:"/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v
                   total_backups=$(rclone size backup:/ --json | jq --raw-output '.count')
                   if [ $total_backups -gt 7 ]; then
