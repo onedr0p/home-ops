@@ -25,7 +25,7 @@ spec:
                 - -c
                 - |-
                   rclone config create backup alias remote=/backup
-                  tar -zcvf - /config --exclude="/config/lost+found" | rclone rcat backup:"/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v
+                  tar --exclude="/config/lost+found" -zcvf - /config | rclone rcat backup:"/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v
                   total_backups=$(rclone size backup:/ --json | jq --raw-output '.count')
                   if [ $total_backups -gt 7 ]; then
                       rclone delete backup:/ --min-age 8d -v
