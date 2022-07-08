@@ -5,7 +5,7 @@ metadata:
   name: qbittorrent-backup
   namespace: media
 spec:
-  schedule: "0 * * * *"
+  schedule: "0 0 * * *"
   concurrencyPolicy: "Forbid"
   jobTemplate:
     spec:
@@ -20,13 +20,18 @@ spec:
                 postStart:
                   exec:
                     command:
-                      - /bin/ash
+                      - /bin/sh
                       - -c
-                      - apk add --no-cache nano
+                      - apk add --no-cache curl rclone
               command:
-                - /bin/ash
+                - /bin/sh
                 - -c
-                - ls /config && ls /backup
+                - |-
+                  tar -zcvf - /config | rclone rcat "/backup/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v
+                  set -- /backup*
+                  if [ "$#" -gt 7 ]; then
+                      find /backup -maxdepth 1 -type f -name "*.tar.gz" -mtime +7 -delete
+                  fi
               volumeMounts:
                 - name: config
                   mountPath: /config
