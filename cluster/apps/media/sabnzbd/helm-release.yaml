@@ -86,6 +86,28 @@ spec:
       incomplete:
         enabled: true
         type: emptyDir
+      backup:
+        enabled: true
+        type: nfs
+        server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+        path: /tycho/Apps/External/Backups/sabnzbd
+        mountPath: "-"
+        readOnly: false
+    additionalContainers:
+      backup:
+        image: ghcr.io/bjw-s/pmb:v0.1.1
+        env:
+          - name: TZ
+            value: "${TIMEZONE}"
+          - name: PMB__SOURCE
+            value: /config
+          - name: PMB__DESTINATION
+            value: /backup
+        volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: backup
+            mountPath: /backup
     resources:
       requests:
         cpu: 10m
