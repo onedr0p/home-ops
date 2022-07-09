@@ -21,20 +21,15 @@ spec:
                 - -c
                 - |-
                   rclone config create backup alias remote=/backup
+                  fsfreeze --freeze /config
                   tar -zcvf - /config | rclone rcat backup:"/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v
+                  fsfreeze --unfreeze /config
                   rclone delete backup:/ --min-age 8d -v
               volumeMounts:
                 - name: config
                   mountPath: /config
                 - name: backup
                   mountPath: /backup
-              lifecycle:
-                postStart:
-                  exec:
-                    command: ["/bin/sh", "-c", "fsfreeze --freeze /config"]
-                preStop:
-                  exec:
-                    command: ["/bin/sh", "-c", "fsfreeze --unfreeze /config"]
           volumes:
             - name: config
               persistentVolumeClaim:
