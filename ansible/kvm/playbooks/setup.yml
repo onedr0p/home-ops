@@ -6,7 +6,7 @@
   any_errors_fatal: true
   pre_tasks:
     - name: Pausing for 2 seconds...
-      pause:
+      ansible.builtin.pause:
         seconds: 2
     - name: Mount read-write
       ansible.builtin.command: /usr/local/bin/rw
@@ -35,6 +35,12 @@
             src: nginx.conf.j2
             dest: /etc/kvmd/nginx/nginx.conf
             mode: 0644
+      rescue:
+        - name: Mount read-only
+          ansible.builtin.command: /usr/local/bin/ro
+      notify: Restart kvmd-nginx
+
+    - block:
         - name: Create kvmd override configuration
           ansible.builtin.template:
             src: override.yaml.j2
@@ -58,7 +64,9 @@
   handlers:
     - name: Restart kvmd
       ansible.builtin.systemd:
-        name: "kvmd.service"
+        name: kvmd.service
         state: restarted
-        enabled: true
-        daemon_reload: true
+    - name: Restart kvmd-nginx
+      ansible.builtin.systemd:
+        name: kvmd-nginx.service
+        state: restarted
