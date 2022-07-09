@@ -28,6 +28,13 @@ spec:
                   mountPath: /config
                 - name: backup
                   mountPath: /backup
+              lifecycle:
+                postStart:
+                  exec:
+                    command: ["/bin/sh", "-c", "fsfreeze --freeze /config"]
+                preStop:
+                  exec:
+                    command: ["/bin/sh", "-c", "fsfreeze --unfreeze /config"]
           volumes:
             - name: config
               persistentVolumeClaim:
