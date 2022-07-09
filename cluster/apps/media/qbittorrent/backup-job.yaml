@@ -13,8 +13,6 @@ spec:
         spec:
           automountServiceAccountToken: false
           restartPolicy: OnFailure
-          securityContext:
-            runAsUser: 0
           containers:
             - name: backup
               image: ghcr.io/onedr0p/rclone:1.58.1@sha256:19c038be14cd61be6383a0242f213925bcdfef38d8629bcd90d86efb147ea86e
@@ -37,6 +35,8 @@ spec:
                 preStop:
                   exec:
                     command: ["/bin/sh", "-c", "fsfreeze --unfreeze /config"]
+              securityContext:
+                privileged: true
           volumes:
             - name: config
               persistentVolumeClaim:
