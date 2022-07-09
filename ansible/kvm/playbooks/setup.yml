@@ -5,9 +5,9 @@
   gather_facts: true
   any_errors_fatal: true
   pre_tasks:
-    - name: Pausing for 5 seconds...
+    - name: Pausing for 2 seconds...
       pause:
-        seconds: 5
+        seconds: 2
     - name: Mount read-write
       ansible.builtin.command: /usr/local/bin/rw
       tags: always
@@ -20,8 +20,6 @@
         - name: Set hostname to inventory hostname
           ansible.builtin.hostname:
             name: "{{ inventory_hostname }}"
-          when:
-            - ansible_hostname != inventory_hostname
         - name: Add additional user SSH public keys
           ansible.posix.authorized_key:
             user: "{{ ansible_user }}"
@@ -32,15 +30,20 @@
           ansible.builtin.command: /usr/local/bin/ro
 
     - block:
+        - name: Disable SSL
+          ansible.builtin.template:
+            src: nginx.conf.j2
+            dest: /etc/kvmd/nginx/nginx.conf
+            mode: 0644
         - name: Create kvmd override configuration
           ansible.builtin.template:
             src: override.yaml.j2
-            dest: "/etc/kvmd/override.yaml"
+            dest: /etc/kvmd/override.yaml
             mode: 0644
         - name: Load custom EDID file
           ansible.builtin.template:
             src: tc358743-edid.hex.j2
-            dest: "/etc/kvmd/tc358743-edid.hex"
+            dest: /etc/kvmd/tc358743-edid.hex
             mode: 0644
       rescue:
         - name: Mount read-only
