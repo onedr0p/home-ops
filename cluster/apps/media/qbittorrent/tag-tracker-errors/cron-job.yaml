@@ -5,18 +5,14 @@ metadata:
   name: tag-tracker-errors
   namespace: media
 spec:
-  schedule: "0 * * * *"
-  concurrencyPolicy: "Forbid"
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 5
+  schedule: "@hourly"
   jobTemplate:
     spec:
-      backoffLimit: 3
-      ttlSecondsAfterFinished: 300
+      ttlSecondsAfterFinished: 3600
       template:
         spec:
           automountServiceAccountToken: false
-          restartPolicy: Never
+          restartPolicy: OnFailure
           containers:
             - name: qbittorrent-scripts
               image: ghcr.io/k8s-at-home/qbittorrent-scripts:v1.0.2
