@@ -1,5 +1,5 @@
 ---
-name: MegaLinter
+name: Lint
 
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -20,26 +20,50 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - name: Generate Token
         uses: tibdex/github-app-token@v1
         id: generate-token
         with:
           app_id: "${{ secrets.BOT_APP_ID }}"
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
       - name: MegaLinter
-        uses: oxsecurity/megalinter/flavors/terraform@v6
+        uses: oxsecurity/megalinter@v6.0.2
         env:
-          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'workflow_dispatch' }}
-          PRINT_ALPACA: false
           GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
-          ENABLE_LINTERS: ACTION_ACTIONLINT, ANSIBLE_ANSIBLE_LINT, BASH_SHELLCHECK, DOCKERFILE_HADOLINT, ENV_DOTENV_LINTER, GIT_GIT_DIFF, JSON_JSONLINT, KUBERNETES_KUBEVAL, MARKDOWN_MARKDOWNLINT, TERRAFORM_TFLINT, YAML_YAMLLINT
+          PRINT_ALPACA: false
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'workflow_dispatch' }}
+          ENABLE_LINTERS: |-
+            ${{
+              join(
+                fromJSON('
+                  [
+                    "ACTION_ACTIONLINT",
+                    "ANSIBLE_ANSIBLE_LINT",
+                    "COPYPASTE_JSCPD",
+                    "CREDENTIALS_SECRETLINT",
+                    "GIT_GIT_DIFF",
+                    "KUBERNETES_KUBEVAL",
+                    "MARKDOWN_MARKDOWNLINT",
+                    "TERRAFORM_TERRAFORM_FMT",
+                    "YAML_PRETTIER",
+                    "YAML_YAMLLINT"
+                  ]
+                '),
+                ','
+              )
+            }}
           ANSIBLE_DIRECTORY: ansible
           ANSIBLE_ANSIBLE_LINT_CONFIG_FILE: .ansible-lint
           KUBERNETES_DIRECTORY: cluster
           KUBERNETES_KUBEVAL_ARGUMENTS: --ignore-missing-schemas
-          MARKDOWN_MARKDOWNLINT_CONFIG_FILE: .markdownlint.yaml
-          TERRAFORM_TFLINT_CONFIG_FILE: .tflint.hcl
-          YAML_YAMLLINT_CONFIG_FILE: .yamllint.yaml
+          KUBERNETES_KUBEVAL_FILTER_REGEX_INCLUDE: "(kubernetes)"
+          MARKDOWN_MARKDOWNLINT_CONFIG_FILE: .github/linters/.markdownlint.yaml
+          MARKDOWN_MARKDOWNLINT_RULES_PATH: .github/
+          YAML_YAMLLINT_CONFIG_FILE: .github/linters/.yamllint.yaml
+          YAML_PRETTIER_FILTER_REGEX_EXCLUDE: "(.*\\.sops\\.ya?ml)"
+
       - name: Archive production artifacts
         if: ${{ success() }} || ${{ failure() }}
         uses: actions/upload-artifact@v3
