@@ -1,0 +1,53 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: whisparr-backup
+  namespace: media
+spec:
+  schedule: "@daily"
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 3600
+      template:
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: ghcr.io/onedr0p/rclone:1.58.1@sha256:19c038be14cd61be6383a0242f213925bcdfef38d8629bcd90d86efb147ea86e
+              command:
+                - /bin/bash
+                - -c
+                - |-
+                  rclone config create backup alias remote=/backup
+                  fsfreeze --freeze /config
+                  tar -zcvf - /config | rclone rcat "backup:/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v
+                  fsfreeze --unfreeze /config
+                  total_backups=$(rclone size backup:/ --json | jq --raw-output '.count')
+                  [[ "${total_backups}" -gt 7 ]] && rclone delete backup:/ --min-age 7d -v
+              volumeMounts:
+                - name: config
+                  mountPath: /config
+                - name: backup
+                  mountPath: /backup
+              securityContext:
+                privileged: true
+          volumes:
+            - name: config
+              persistentVolumeClaim:
+                claimName: whisparr-config-v1
+            - name: backup
+              nfs:
+                server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+                path: /tycho/Apps/External/Backups/whisparr
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - whisparr
+                  topologyKey: kubernetes.io/hostname
