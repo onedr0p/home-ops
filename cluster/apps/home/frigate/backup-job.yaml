@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: zigbee2mqtt-backup
+  name: frigate-backup
   namespace: home
 spec:
   schedule: "@daily"
@@ -17,7 +17,7 @@ spec:
             - name: backup
               image: ghcr.io/onedr0p/rclone:1.58.1@sha256:19c038be14cd61be6383a0242f213925bcdfef38d8629bcd90d86efb147ea86e
               command:
-                - /bin/sh
+                - /bin/bash
                 - -c
                 - |-
                   echo "Creating rclone configuration ..." && rclone config create backup alias remote=/backup
@@ -35,11 +35,11 @@ spec:
           volumes:
             - name: config
               persistentVolumeClaim:
-                claimName: zigbee2mqtt-config-v2
+                claimName: frigate-config-v2
             - name: backup
               nfs:
                 server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-                path: /tycho/Apps/External/Backups/zigbee2mqtt
+                path: /tycho/Apps/External/Backups/frigate
           affinity:
             podAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
@@ -48,5 +48,5 @@ spec:
                       - key: app.kubernetes.io/name
                         operator: In
                         values:
-                          - zigbee2mqtt
+                          - frigate
                   topologyKey: kubernetes.io/hostname
