@@ -24,7 +24,7 @@ spec:
                   echo "Freezing /config ..." && fsfreeze --freeze /config
                   echo "Backing up /config ..." && tar -zcvf - -C /config . | rclone rcat "backup:/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v
                   echo "Unfreezing /config ..." && fsfreeze --unfreeze /config
-                  echo "Deleting old backups ..." && rclone delete backup:/ --min-age 7d -v
+                  echo "Deleting old backups ..." && [[ $(rclone size "backup:/" --json | jq --raw-output '.count') -gt 7 ]] && rclone delete backup:/ --min-age 7d -v
               volumeMounts:
                 - name: config
                   mountPath: /config
