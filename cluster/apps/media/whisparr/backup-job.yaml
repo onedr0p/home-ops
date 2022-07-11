@@ -20,12 +20,12 @@ spec:
                 - /bin/bash
                 - -c
                 - |-
-                  echo "Creating rclone configuration" && { rclone config create backup alias remote=/backup }
-                  echo "Freezing /config" && { fsfreeze --freeze /config }
-                  echo "Backing up /config" && { tar -zcvf - /config | rclone rcat "backup:/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v }
-                  echo "Unfreezing /config" && { fsfreeze --unfreeze /config }
+                  echo "Creating rclone configuration" && rclone config create backup alias remote=/backup
+                  echo "Freezing /config" && fsfreeze --freeze /config
+                  echo "Backing up /config" && tar -zcvf - /config | rclone rcat "backup:/$(date "+%Y-%m-%d_%H:%M:%S").tar.gz" -v
+                  echo "Unfreezing /config" && fsfreeze --unfreeze /config
                   total_backups=$(rclone size backup:/ --json | jq --raw-output '.count')
-                  [[ "${total_backups}" -gt 7 ]] && { echo "Removing old backups" && rclone delete backup:/ --min-age 7d -v }
+                  [[ "${total_backups}" -gt 7 ]] && echo "Removing old backups" && rclone delete backup:/ --min-age 7d -v
               volumeMounts:
                 - name: config
                   mountPath: /config
