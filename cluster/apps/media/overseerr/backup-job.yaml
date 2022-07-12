@@ -6,6 +6,8 @@ metadata:
   namespace: media
 spec:
   schedule: "@daily"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       ttlSecondsAfterFinished: 86400
@@ -17,7 +19,7 @@ spec:
             - name: backup
               image: ghcr.io/onedr0p/rclone:1.58.1@sha256:19c038be14cd61be6383a0242f213925bcdfef38d8629bcd90d86efb147ea86e
               command:
-                - /bin/sh
+                - /bin/bash
                 - -c
                 - |-
                   echo "Creating rclone configuration ..." && rclone config create backup alias remote=/backup
