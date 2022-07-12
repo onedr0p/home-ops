@@ -20,15 +20,15 @@ spec:
     backupsEnabled: false
     upgradeCRDs: false
     deployRestic: false
-    configuration:
-      features: EnableCSI
     initContainers:
       - name: velero-plugin-for-csi
         image: docker.io/velero/velero-plugin-for-csi:v0.3.0
-        imagePullPolicy: IfNotPresent
         volumeMounts:
           - mountPath: /target
             name: plugins
+    configuration:
+      provider: csi
+      features: EnableCSI
     metrics:
       enabled: true
       serviceMonitor:
