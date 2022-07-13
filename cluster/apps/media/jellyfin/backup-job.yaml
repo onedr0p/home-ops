@@ -33,16 +33,16 @@ spec:
                 - -c
                 - |-
                   mkdir -p /mnt/backup/{cache,logs,repo}
-                  kopia repository create filesystem --path=/mnt/backup/repo
-                  kopia policy set --global --keep-weekly 52 --keep-daily 30 --keep-latest 5
-                  kopia policy set --global --compression=zstd
-                  kopia repository connect filesystem --path=/mnt/backup/repo --override-hostname=cluster --override-username=cronjob
+                  /app/kopia repository create filesystem --path=/mnt/backup/repo
+                  /app/kopia policy set --global --keep-weekly 52 --keep-daily 30 --keep-latest 5
+                  /app/kopia policy set --global --compression=zstd
+                  /app/kopia repository connect filesystem --path=/mnt/backup/repo --override-hostname=cluster --override-username=cronjob
                   fsfreeze --freeze /mnt/config
-                  kopia snapshot create /mnt/config
+                  /app/kopia snapshot create /mnt/config
                   fsfreeze --unfreeze /mnt/config
-                  kopia snapshot list
-                  kopia content stats
-                  kopia repository disconnect
+                  /app/kopia snapshot list
+                  /app/kopia content stats
+                  /app/kopia repository disconnect
               volumeMounts:
                 - name: config
                   mountPath: /mnt/config
