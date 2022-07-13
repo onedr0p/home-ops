@@ -17,45 +17,45 @@ spec:
           automountServiceAccountToken: false
           restartPolicy: OnFailure
           containers:
-            - name: backup
+            - name: main
               image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
               env:
+                - name: APPLICATION_NAME
+                  value: *name
                 - name: KOPIA_PASSWORD
                   value: *name
-                - name: KOPIA_CACHE_DIRECTORY
-                  value: /mnt/backup/cache
-                - name: KOPIA_LOG_DIR
-                  value: /mnt/backup/logs
               command:
                 - /bin/bash
                 - -c
                 - |-
-                  mkdir -p /mnt/backup/{cache,logs,repo}
-                  kopia repository create filesystem --path=/mnt/backup/repo
-                  kopia repository connect filesystem --path=/mnt/backup/repo --override-hostname=cluster --override-username=cronjob
-                  kopia policy set /mnt/backup/repo --inherit=false --keep-daily 14 --keep-latest 5
-                  kopia policy set /mnt/backup/repo --compression=zstd
-                  fsfreeze --freeze /mnt/config
-                  kopia snapshot create /mnt/config
-                  fsfreeze --unfreeze /mnt/config
-                  kopia snapshot list
-                  kopia content stats
-                  kopia repository disconnect
+                  export DEST_BASE="/mnt/dest/${APPLICATION_NAME%-*}"
+                  export KOPIA_CACHE_DIRECTORY="${DEST_BASE}/cache"
+                  export KOPIA_LOG_DIR="${DEST_BASE}/logs"
+                  printf "\e[1;34m%-6s\e[m\n" "Creating kopia repository ..."                  && kopia repository create filesystem --path=${DEST_BASE}/repo
+                  printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."             && kopia repository connect filesystem --path=${DEST_BASE}/repo --override-hostname=cluster --override-username=cronjob
+                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia retention policy ..."             && kopia policy set ${DEST_BASE}/repo --inherit=false --keep-daily 14
+                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia compression policy ..."           && kopia policy set ${DEST_BASE}/repo --compression=zstd
+                  printf "\e[1;34m%-6s\e[m\n" "Freezing /mnt/src ..."                          && fsfreeze --freeze /mnt/src
+                  printf "\e[1;34m%-6s\e[m\n" "Backing up /mnt/src to ${DEST_BASE}/repo ..."   && kopia snapshot create /mnt/src
+                  printf "\e[1;34m%-6s\e[m\n" "Unfreezing /mnt/src ..."                        && fsfreeze --unfreeze /mnt/src
+                  printf "\e[1;34m%-6s\e[m\n" "Listing snapshots ..."                          && kopia snapshot list
+                  printf "\e[1;34m%-6s\e[m\n" "Printing Stats ..."                             && kopia content stats
+                  printf "\e[1;34m%-6s\e[m\n" "Disconnecting from ${DEST_BASE}/repo ..."       && kopia repository disconnect
               volumeMounts:
-                - name: config
-                  mountPath: /mnt/config
-                - name: backup
-                  mountPath: /mnt/backup
+                - name: src
+                  mountPath: /mnt/src
+                - name: dest
+                  mountPath: /mnt/dest
               securityContext:
                 privileged: true
           volumes:
-            - name: config
+            - name: src
               persistentVolumeClaim:
                 claimName: jellyfin-config-v1
-            - name: backup
+            - name: dest
               nfs:
                 server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-                path: /tycho/Apps/External/Backups/jellyfin
+                path: /tycho/Apps/External/Backups
           affinity:
             podAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:

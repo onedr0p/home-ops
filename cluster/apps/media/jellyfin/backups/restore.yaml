@@ -1,12 +1,16 @@
 ---
 apiVersion: batch/v1
-kind: CronJob
+kind: Job
 metadata:
   name: &name jellyfin-restore
   namespace: media
 spec:
   ttlSecondsAfterFinished: 86400
   template:
+    metadata:
+      labels:
+        application-name: jellyfin
+        controller-type: deployment
     spec:
       automountServiceAccountToken: true
       restartPolicy: OnFailure
@@ -20,17 +24,29 @@ spec:
               value: /mnt/backup/cache
             - name: KOPIA_LOG_DIR
               value: /mnt/backup/logs
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_APPLICATION_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['application-name']
+            - name: POD_CONTROLLER_TYPE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['controller-type']
           command:
             - /bin/bash
             - -c
             - |-
-              flux -n media suspend hr jellyfin
-              kubectl -n media scale  deployment jellyfin --replicas 0
+              flux -n ${POD_NAMESPACE} suspend helmrelease ${POD_APPLICATION_NAME}
+              kubectl -n ${POD_NAMESPACE} scale ${POD_CONTROLLER_TYPE} ${POD_APPLICATION_NAME} --replicas 0
               kopia repository connect filesystem --path=/mnt/backup/repo --override-hostname=cluster --override-username=cronjob
               rm -rf /mnt/config/{*,.*}
-              latest_snapshot=$(kopia snapshot list --json | jq --raw-output '.[0] | .rootEntry.obj')
-              kopia snapshot restore ${latest_snapshot} /mnt/config
-              flux -n media resume hr jellyfin
+              latest_snapshot_id=$(kopia snapshot list --json | jq --raw-output '.[0] | .id')
+              kopia snapshot restore ${latest_snapshot_id} /mnt/config
+              flux -n ${POD_NAMESPACE} resume helmrelease ${POD_APPLICATION_NAME}
           volumeMounts:
             - name: config
               mountPath: /mnt/config
