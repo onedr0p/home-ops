@@ -21,7 +21,7 @@ spec:
               image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
               env:
                 - name: BASE_DIR
-                  value: "/mnt/dest/jellyfin"
+                  value: /mnt/dest/jellyfin
                 - name: REPO_DIR
                   value: "$(BASE_DIR)/repo"
                 - name: KOPIA_CACHE_DIRECTORY
@@ -34,11 +34,11 @@ spec:
                 - /bin/bash
                 - -c
                 - |-
-                  printf "\e[1;34m%-6s\e[m\n" "Setting up directories ..."           && mkdir -p "${BASE_DIR}"/{cache,logs,repo}
-                  printf "\e[1;34m%-6s\e[m\n" "Creating kopia repository ..."        && kopia repository create filesystem --path="${REPO_DIR}"
-                  printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."   && kopia repository connect filesystem --path="${REPO_DIR}" --override-hostname=cluster --override-username=cronjob
-                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia retention policy ..."   && kopia policy set "${REPO_DIR}" --inherit=false --keep-daily 7
-                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia compression policy ..." && kopia policy set "${REPO_DIR}" --compression=zstd
+                  printf "\e[1;34m%-6s\e[m\n" "Setting up directories ..."           && mkdir -p "$(BASE_DIR)"/{cache,logs,repo}
+                  printf "\e[1;34m%-6s\e[m\n" "Creating kopia repository ..."        && kopia repository create filesystem --path="$(REPO_DIR)"
+                  printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."   && kopia repository connect filesystem --path="$(REPO_DIR)" --override-hostname=cluster --override-username=cronjob
+                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia retention policy ..."   && kopia policy set "$(REPO_DIR)" --inherit=false --keep-daily 7
+                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia compression policy ..." && kopia policy set "$(REPO_DIR)" --compression=zstd
                   printf "\e[1;34m%-6s\e[m\n" "Freezing /mnt/src ..."                && fsfreeze --freeze /mnt/src
                   printf "\e[1;34m%-6s\e[m\n" "Backing up /mnt/src ..."              && kopia snapshot create /mnt/src
                   printf "\e[1;34m%-6s\e[m\n" "Unfreezing /mnt/src ..."              && fsfreeze --unfreeze /mnt/src
