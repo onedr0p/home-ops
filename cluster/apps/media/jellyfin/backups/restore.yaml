@@ -25,7 +25,7 @@ spec:
             - -c
             - |-
               flux -n media suspend hr jellyfin
-              kubectl scale -n media deployment jellyfin --replicas 0
+              kubectl -n media scale  deployment jellyfin --replicas 0
               kopia repository connect filesystem --path=/mnt/backup/repo --override-hostname=cluster --override-username=cronjob
               rm -rf /mnt/config/{*,.*}
               latest_snapshot=$(kopia snapshot list --json | jq --raw-output '.[0] | .rootEntry.obj')
