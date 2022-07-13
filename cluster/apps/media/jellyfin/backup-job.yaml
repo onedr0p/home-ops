@@ -18,7 +18,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: backup
-              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:54df58c5c138d5ace220eaee09ccf83809c101287f0b0cf7908f607d6de31820
+              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
               env:
                 - name: KOPIA_PASSWORD
                   value: *name
@@ -33,16 +33,16 @@ spec:
                 - -c
                 - |-
                   mkdir -p /mnt/backup/{cache,logs,repo}
-                  /app/kopia repository create filesystem --path=/mnt/backup/repo
-                  /app/kopia policy set --global --keep-weekly 52 --keep-daily 30 --keep-latest 5
-                  /app/kopia policy set --global --compression=zstd
-                  /app/kopia repository connect filesystem --path=/mnt/backup/repo --override-hostname=cluster --override-username=cronjob
+                  kopia repository create filesystem --path=/mnt/backup/repo
+                  kopia policy set /mnt/backup/repo --inherit=false --keep-daily 14 --keep-latest 5
+                  kopia policy set /mnt/backup/repo --compression=zstd
+                  kopia repository connect filesystem --path=/mnt/backup/repo --override-hostname=cluster --override-username=cronjob
                   fsfreeze --freeze /mnt/config
-                  /app/kopia snapshot create /mnt/config
+                  kopia snapshot create /mnt/config
                   fsfreeze --unfreeze /mnt/config
-                  /app/kopia snapshot list
-                  /app/kopia content stats
-                  /app/kopia repository disconnect
+                  kopia snapshot list
+                  kopia content stats
+                  kopia repository disconnect
               volumeMounts:
                 - name: config
                   mountPath: /mnt/config
