@@ -30,9 +30,9 @@ spec:
                 - |-
                   export DEST="/mnt/dest/${APPLICATION_NAME%-*}"
                   export REPO="${DEST}/repo"
-                  export KOPIA_CACHE_DIRECTORY="${DEST}/.cache"
-                  export KOPIA_LOG_DIR="${DEST}/.logs"
-                  printf "\e[1;34m%-6s\e[m\n" "Setting up directories ..."           && mkdir -p "${DEST}"/{.cache,.logs,repo}
+                  export KOPIA_CACHE_DIRECTORY="${DEST}/cache"
+                  export KOPIA_LOG_DIR="${DEST}/logs"
+                  printf "\e[1;34m%-6s\e[m\n" "Setting up directories ..."           && mkdir -p "${DEST}"/{cache,logs,repo}
                   printf "\e[1;34m%-6s\e[m\n" "Creating kopia repository ..."        && kopia repository create filesystem --path="${REPO}"
                   printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."   && kopia repository connect filesystem --path="${REPO}" --override-hostname=cluster --override-username=cronjob
                   printf "\e[1;34m%-6s\e[m\n" "Setting kopia retention policy ..."   && kopia policy set "${REPO}" --inherit=false --keep-daily 7
