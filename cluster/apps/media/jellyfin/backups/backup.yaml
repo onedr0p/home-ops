@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: &name jellyfin-backup
+  name: jellyfin-backup
   namespace: media
 spec:
   schedule: "@daily"
@@ -13,9 +13,6 @@ spec:
     spec:
       ttlSecondsAfterFinished: 86400
       template:
-        metadata:
-          labels:
-            app.kubernetes.io/name: jellyfin
         spec:
           automountServiceAccountToken: false
           restartPolicy: OnFailure
@@ -23,17 +20,13 @@ spec:
             - name: backup
               image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
               env:
-                - name: POD_APPLICATION_NAME
-                  valueFrom:
-                    fieldRef:
-                      fieldPath: metadata.labels['app.kubernetes.io/name']
                 - name: KOPIA_PASSWORD
                   value: "none"
               command:
                 - /bin/bash
                 - -c
                 - |-
-                  export DEST="/mnt/dest/${POD_APPLICATION_NAME}"
+                  export DEST="/mnt/dest/jellyfin"
                   export REPO="${DEST}/repo"
                   export KOPIA_CACHE_DIRECTORY="${DEST}/cache"
                   export KOPIA_LOG_DIR="${DEST}/logs"
