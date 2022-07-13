@@ -32,9 +32,9 @@ spec:
                 - |-
                   mkdir -p /mnt/backup/{cache,logs,repo}
                   kopia repository create filesystem --path=/mnt/backup/repo
+                  kopia repository connect filesystem --path=/mnt/backup/repo --override-hostname=cluster --override-username=cronjob
                   kopia policy set /mnt/backup/repo --inherit=false --keep-daily 14 --keep-latest 5
                   kopia policy set /mnt/backup/repo --compression=zstd
-                  kopia repository connect filesystem --path=/mnt/backup/repo --override-hostname=cluster --override-username=cronjob
                   fsfreeze --freeze /mnt/config
                   kopia snapshot create /mnt/config
                   fsfreeze --unfreeze /mnt/config
