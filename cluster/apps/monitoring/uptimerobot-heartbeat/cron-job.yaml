@@ -6,20 +6,19 @@ metadata:
   name: &app uptimerobot-heartbeat
 spec:
   schedule: "* * * * *"
-  concurrencyPolicy: "Forbid"
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 5
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
-      backoffLimit: 3
       ttlSecondsAfterFinished: 300
       template:
         spec:
           automountServiceAccountToken: false
-          restartPolicy: Never
+          restartPolicy: OnFailure
           containers:
             - name: *app
-              image: ghcr.io/k8s-at-home/kubectl:v1.24.1@sha256:908fa0166aa250e0d70716fc7694623173a49681281697c8cedb5d29eeb2c540
+              image: ghcr.io/onedr0p/kubectl:1.24.2@sha256:297d9e22c137ebfdbed3982985c8ca837ac2460d3014d34f669fbcc1f9f94a5e
               envFrom:
                 - secretRef:
                     name: *app
