@@ -26,10 +26,10 @@ spec:
                 - /bin/bash
                 - -c
                 - |-
-                  export DEST="/mnt/dest/jellyfin"
-                  export REPO="${DEST}/repo"
-                  export KOPIA_CACHE_DIRECTORY="${DEST}/cache"
-                  export KOPIA_LOG_DIR="${DEST}/logs"
+                  DEST="/mnt/dest/jellyfin" && export DEST
+                  REPO="${DEST}/repo" && export REPO
+                  KOPIA_CACHE_DIRECTORY="${DEST}/cache" && export KOPIA_CACHE_DIRECTORY
+                  KOPIA_LOG_DIR="${DEST}/logs" && export KOPIA_LOG_DIR
                   printf "\e[1;34m%-6s\e[m\n" "Setting up directories ..."           && mkdir -p "${DEST}"/{cache,logs,repo}
                   printf "\e[1;34m%-6s\e[m\n" "Creating kopia repository ..."        && kopia repository create filesystem --path="${REPO}"
                   printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."   && kopia repository connect filesystem --path="${REPO}" --override-hostname=cluster --override-username=cronjob
