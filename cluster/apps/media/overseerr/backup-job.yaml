@@ -18,19 +18,12 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: backup
-              image: ghcr.io/bjw-s/pmb:v0.3.1
-              env:
-                - name: PMB__SOURCE_DIR
-                  value: /config
-                - name: PMB__DESTINATION_DIR
-                  value: /backup
-                - name: PMB__FSFREEZE
-                  value: "true"
+              image: ghcr.io/bjw-s/pmb:v0.3.1@sha256:a0b4d61fdc79084e6a253fff9db083e37ae2d523a7d31f6f896f0a1e50227d38
               volumeMounts:
                 - name: config
-                  mountPath: /config
+                  mountPath: /data/src
                 - name: backup
-                  mountPath: /backup
+                  mountPath: /data/dest
               securityContext:
                 privileged: true
           volumes:
