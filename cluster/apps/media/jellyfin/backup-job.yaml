@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: jellyfin-backup
+  name: &name jellyfin-backup
   namespace: media
 spec:
   schedule: "@daily"
@@ -18,12 +18,36 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: backup
-              image: ghcr.io/bjw-s/pmb:v0.3.1@sha256:a0b4d61fdc79084e6a253fff9db083e37ae2d523a7d31f6f896f0a1e50227d38
+              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:54df58c5c138d5ace220eaee09ccf83809c101287f0b0cf7908f607d6de31820
+              env:
+                - name: KOPIA_PASSWORD
+                  value: *name
+                - name: KOPIA_CACHE_DIRECTORY
+                  value: /mnt/backup/cache
+                - name: KOPIA_LOG_DIR
+                  value: /mnt/backup/logs
+                - name: KOPIA_CHECK_FOR_UPDATES
+                  value: "false"
+              command:
+                - /bin/bash
+                - -c
+                - |-
+                  mkdir -p /mnt/backup/{cache,logs,repo}
+                  kopia repository create filesystem --path=/mnt/backup/repo
+                  kopia policy set --global --keep-weekly 52 --keep-daily 30 --keep-latest 5
+                  kopia policy set --global --compression=zstd
+                  kopia repository connect filesystem --path=/mnt/backup/repo --override-hostname=cluster --override-username=cronjob
+                  fsfreeze --freeze /mnt/config
+                  kopia snapshot create /mnt/config
+                  fsfreeze --unfreeze /mnt/config
+                  kopia snapshot list
+                  kopia content stats
+                  kopia repository disconnect
               volumeMounts:
                 - name: config
-                  mountPath: /data/src
+                  mountPath: /mnt/config
                 - name: backup
-                  mountPath: /data/dest
+                  mountPath: /mnt/backup
               securityContext:
                 privileged: true
           volumes:
