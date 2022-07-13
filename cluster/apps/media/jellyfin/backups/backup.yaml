@@ -17,7 +17,7 @@ spec:
           automountServiceAccountToken: false
           restartPolicy: OnFailure
           containers:
-            - name: main
+            - name: backup
               image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
               env:
                 - name: APPLICATION_NAME
@@ -28,19 +28,21 @@ spec:
                 - /bin/bash
                 - -c
                 - |-
-                  export DEST_BASE="/mnt/dest/${APPLICATION_NAME%-*}"
-                  export KOPIA_CACHE_DIRECTORY="${DEST_BASE}/cache"
-                  export KOPIA_LOG_DIR="${DEST_BASE}/logs"
-                  printf "\e[1;34m%-6s\e[m\n" "Creating kopia repository ..."                  && kopia repository create filesystem --path=${DEST_BASE}/repo
-                  printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."             && kopia repository connect filesystem --path=${DEST_BASE}/repo --override-hostname=cluster --override-username=cronjob
-                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia retention policy ..."             && kopia policy set ${DEST_BASE}/repo --inherit=false --keep-daily 14
-                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia compression policy ..."           && kopia policy set ${DEST_BASE}/repo --compression=zstd
-                  printf "\e[1;34m%-6s\e[m\n" "Freezing /mnt/src ..."                          && fsfreeze --freeze /mnt/src
-                  printf "\e[1;34m%-6s\e[m\n" "Backing up /mnt/src to ${DEST_BASE}/repo ..."   && kopia snapshot create /mnt/src
-                  printf "\e[1;34m%-6s\e[m\n" "Unfreezing /mnt/src ..."                        && fsfreeze --unfreeze /mnt/src
-                  printf "\e[1;34m%-6s\e[m\n" "Listing snapshots ..."                          && kopia snapshot list
-                  printf "\e[1;34m%-6s\e[m\n" "Printing Stats ..."                             && kopia content stats
-                  printf "\e[1;34m%-6s\e[m\n" "Disconnecting from ${DEST_BASE}/repo ..."       && kopia repository disconnect
+                  export DEST="/mnt/dest/${APPLICATION_NAME%-*}"
+                  export REPO="${DEST}/repo"
+                  export KOPIA_CACHE_DIRECTORY="${DEST}/.cache"
+                  export KOPIA_LOG_DIR="${DEST}/.logs"
+                  printf "\e[1;34m%-6s\e[m\n" "Setting up directories ..."           && mkdir -p "${DEST}"/{cache,logs,repo}
+                  printf "\e[1;34m%-6s\e[m\n" "Creating kopia repository ..."        && kopia repository create filesystem --path="${REPO}"
+                  printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."   && kopia repository connect filesystem --path="${REPO}" --override-hostname=cluster --override-username=cronjob
+                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia retention policy ..."   && kopia policy set "${REPO}" --inherit=false --keep-daily 14
+                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia compression policy ..." && kopia policy set "${REPO}" --compression=zstd
+                  printf "\e[1;34m%-6s\e[m\n" "Freezing /mnt/src ..."                && fsfreeze --freeze /mnt/src
+                  printf "\e[1;34m%-6s\e[m\n" "Backing up /mnt/src ..."              && kopia snapshot create /mnt/src
+                  printf "\e[1;34m%-6s\e[m\n" "Unfreezing /mnt/src ..."              && fsfreeze --unfreeze /mnt/src
+                  printf "\e[1;34m%-6s\e[m\n" "Listing snapshots ..."                && kopia snapshot list
+                  printf "\e[1;34m%-6s\e[m\n" "Printing stats ..."                   && kopia content stats
+                  printf "\e[1;34m%-6s\e[m\n" "Disconnecting from kopia repo ..."    && kopia repository disconnect
               volumeMounts:
                 - name: src
                   mountPath: /mnt/src
