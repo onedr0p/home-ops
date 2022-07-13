@@ -1,0 +1,48 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: &name jellyfin-restore
+  namespace: media
+spec:
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      automountServiceAccountToken: true
+      restartPolicy: OnFailure
+      containers:
+        - name: backup
+          image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
+          env:
+            - name: KOPIA_PASSWORD
+              value: *name
+            - name: KOPIA_CACHE_DIRECTORY
+              value: /mnt/backup/cache
+            - name: KOPIA_LOG_DIR
+              value: /mnt/backup/logs
+          command:
+            - /bin/bash
+            - -c
+            - |-
+              flux -n media suspend hr jellyfin
+              scale -n media deployment jellyfin --replicas 0
+              kopia repository connect filesystem --path=/mnt/backup/repo --override-hostname=cluster --override-username=cronjob
+              rm -rf /mnt/config/{*,.*}
+              latest_snapshot=$(kopia snapshot list --json | jq --raw-output '.[0] | .rootEntry.obj')
+              kopia snapshot restore ${latest_snapshot} /mnt/config
+              flux -n media resume hr jellyfin
+          volumeMounts:
+            - name: config
+              mountPath: /mnt/config
+            - name: backup
+              mountPath: /mnt/backup
+          securityContext:
+            privileged: true
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: jellyfin-config-v1
+        - name: backup
+          nfs:
+            server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+            path: /tycho/Apps/External/Backups/jellyfin
