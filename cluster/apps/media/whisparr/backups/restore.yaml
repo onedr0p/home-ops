@@ -1,0 +1,65 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: whisparr-restore
+  namespace: media
+spec:
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      automountServiceAccountToken: true
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for
+          image: ghcr.io/onedr0p/kubernetes-kubectl:1.24.3@sha256:d68ebf4e48a112978af7f0e56c26e31d10dc271a894fbf5937d5edc69504412c
+          env:
+            - name: APP
+              value: whisparr
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          command:
+            - /bin/bash
+            - -c
+            - |-
+              kubectl -n $(POD_NAMESPACE) wait --for delete pod --selector="app.kubernetes.io/name=$(APP)"
+      containers:
+        - name: restore
+          image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
+          env:
+            - name: APP
+              value: whisparr
+            - name: BASE_DIR
+              value: "/mnt/dest/$(APP)"
+            - name: REPO_DIR
+              value: "$(BASE_DIR)/repo"
+            - name: KOPIA_PASSWORD
+              value: "none"
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          command:
+            - /bin/bash
+            - -c
+            - |-
+              printf "\e[1;34m%-6s\e[m\n" "Removing previous data ..."           && rm -rf /mnt/src/{*,.*}
+              printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."   && kopia repository connect filesystem --path=$(REPO_DIR) --override-hostname=cluster --override-username=cronjob
+              printf "\e[1;34m%-6s\e[m\n" "Restoring latest snapshot ..."        && kopia snapshot restore "$(kopia snapshot list --json | jq --raw-output '.[0] | .id')" /mnt/src
+          volumeMounts:
+            - name: src
+              mountPath: /mnt/src
+            - name: dest
+              mountPath: /mnt/dest
+          securityContext:
+            privileged: true
+      volumes:
+        - name: src
+          persistentVolumeClaim:
+            claimName: whisparr-config-v1
+        - name: dest
+          nfs:
+            server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+            path: /tycho/Apps/External/Backups

@@ -1,0 +1,74 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: whisparr-backup
+  namespace: media
+spec:
+  schedule: "@daily"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
+              env:
+                - name: APP
+                  value: whisparr
+                - name: BASE_DIR
+                  value: "/mnt/dest/$(APP)"
+                - name: REPO_DIR
+                  value: "$(BASE_DIR)/repo"
+                - name: KOPIA_CACHE_DIRECTORY
+                  value: "$(BASE_DIR)/cache"
+                - name: KOPIA_LOG_DIR
+                  value: "$(BASE_DIR)/logs"
+                - name: KOPIA_PASSWORD
+                  value: "none"
+              command:
+                - /bin/bash
+                - -c
+                - |-
+                  printf "\e[1;34m%-6s\e[m\n" "Setting up directories ..."           && mkdir -p "$(BASE_DIR)"/{cache,logs,repo}
+                  printf "\e[1;34m%-6s\e[m\n" "Creating kopia repository ..."        && kopia repository create filesystem --path="$(REPO_DIR)"
+                  printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."   && kopia repository connect filesystem --path="$(REPO_DIR)" --override-hostname=cluster --override-username=cronjob
+                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia retention policy ..."   && kopia policy set "$(REPO_DIR)" --keep-latest 14 --keep-hourly 0 --keep-daily 0 --keep-weekly 0 --keep-monthly 0 --keep-annual 0
+                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia compression policy ..." && kopia policy set "$(REPO_DIR)" --compression=zstd
+                  printf "\e[1;34m%-6s\e[m\n" "Freezing /mnt/src ..."                && fsfreeze --freeze /mnt/src
+                  printf "\e[1;34m%-6s\e[m\n" "Backing up /mnt/src ..."              && kopia snapshot create /mnt/src
+                  printf "\e[1;34m%-6s\e[m\n" "Unfreezing /mnt/src ..."              && fsfreeze --unfreeze /mnt/src
+                  printf "\e[1;34m%-6s\e[m\n" "Listing snapshots ..."                && kopia snapshot list
+                  printf "\e[1;34m%-6s\e[m\n" "Printing stats ..."                   && kopia content stats
+                  printf "\e[1;34m%-6s\e[m\n" "Disconnecting from kopia repo ..."    && kopia repository disconnect
+              volumeMounts:
+                - name: src
+                  mountPath: /mnt/src
+                - name: dest
+                  mountPath: /mnt/dest
+              securityContext:
+                privileged: true
+          volumes:
+            - name: src
+              persistentVolumeClaim:
+                claimName: whisparr-config-v1
+            - name: dest
+              nfs:
+                server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+                path: /tycho/Apps/External/Backups
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - whisparr
+                  topologyKey: kubernetes.io/hostname
