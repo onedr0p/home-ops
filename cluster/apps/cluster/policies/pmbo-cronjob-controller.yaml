@@ -18,9 +18,6 @@ spec:
           - resources:
               kinds:
                 - Deployment
-              selector:
-                matchLabels:
-                  rip: "*"
 
       context:
         - name: appName
@@ -29,6 +26,12 @@ spec:
         - name: claimName
           variable:
             jmesPath: request.object.metadata.labels."pmbo.home.arpa/backup-claim"
+
+      preconditions:
+        any:
+          - key: "{{ claimName }}"
+            operator: NotEquals
+            value: ""
 
       generate:
         synchronize: true
