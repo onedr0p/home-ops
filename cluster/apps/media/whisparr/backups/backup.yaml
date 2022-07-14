@@ -25,29 +25,29 @@ spec:
               env:
                 - name: APP
                   value: *app
-                - name: BASE_DIR
+                - name: APP_BACKUP_DIR
                   value: "/data/backups/$(APP)"
                 - name: KOPIA_CACHE_DIRECTORY
-                  value: "$(BASE_DIR)/cache"
+                  value: "$(APP_BACKUP_DIR)/cache"
                 - name: KOPIA_LOG_DIR
-                  value: "$(BASE_DIR)/logs"
+                  value: "$(APP_BACKUP_DIR)/logs"
                 - name: KOPIA_PASSWORD
                   value: "none"
               command:
                 - /bin/bash
                 - -c
                 - |-
-                  printf "\e[1;34m%-6s\e[m\n" "Setting up directories ..."               && mkdir -p "$(BASE_DIR)"/{cache,logs,repo}
-                  printf "\e[1;34m%-6s\e[m\n" "Creating kopia repository ..."            && [[ ! -f "$(BASE_DIR)/repo/kopia.repository.f" ]] && kopia repository create filesystem --path="$(BASE_DIR)/repo"
-                  printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."       && kopia repository connect filesystem --path="$(BASE_DIR)/repo" --override-hostname=cluster --override-username=cronjob
-                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia retention policy ..."       && kopia policy set "$(BASE_DIR)/repo" --keep-latest 14 --keep-hourly 0 --keep-daily 0 --keep-weekly 0 --keep-monthly 0 --keep-annual 0
-                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia compression policy ..."     && kopia policy set "$(BASE_DIR)/repo" --compression=zstd
-                  printf "\e[1;34m%-6s\e[m\n" "Freezing config volume ..."               && fsfreeze --freeze /data/config
-                  printf "\e[1;34m%-6s\e[m\n" "Backing up config volume ..."             && kopia snapshot create /data/config
-                  printf "\e[1;34m%-6s\e[m\n" "Unfreezing config volume ..."             && fsfreeze --unfreeze /data/config
-                  printf "\e[1;34m%-6s\e[m\n" "Listing snapshots ..."                    && kopia snapshot list
-                  printf "\e[1;34m%-6s\e[m\n" "Printing stats ..."                       && kopia content stats
-                  printf "\e[1;34m%-6s\e[m\n" "Disconnecting from kopia repo ..."        && kopia repository disconnect
+                  printf "\e[1;34m%-6s\e[m\n" "[1/11]  Setting up directories ..."               && mkdir -p "$(APP_BACKUP_DIR)"/{cache,logs,repo}
+                  printf "\e[1;34m%-6s\e[m\n" "[2/11]  Creating kopia repository ..."            && [[ ! -f "$(APP_BACKUP_DIR)/repo/kopia.repository.f" ]] && kopia repository create filesystem --path="$(APP_BACKUP_DIR)/repo"
+                  printf "\e[1;34m%-6s\e[m\n" "[3/11]  Connecting to kopia repository ..."       && kopia repository connect filesystem --path="$(APP_BACKUP_DIR)/repo" --override-hostname=cluster --override-username=cronjob
+                  printf "\e[1;34m%-6s\e[m\n" "[4/11]  Setting kopia retention policy ..."       && kopia policy set "$(APP_BACKUP_DIR)/repo" --keep-latest 14 --keep-hourly 0 --keep-daily 0 --keep-weekly 0 --keep-monthly 0 --keep-annual 0
+                  printf "\e[1;34m%-6s\e[m\n" "[5/11]  Setting kopia compression policy ..."     && kopia policy set "$(APP_BACKUP_DIR)/repo" --compression=zstd
+                  printf "\e[1;34m%-6s\e[m\n" "[6/11]  Freezing config volume ..."               && fsfreeze --freeze /data/config
+                  printf "\e[1;34m%-6s\e[m\n" "[7/11]  Backing up config volume ..."             && kopia snapshot create /data/config
+                  printf "\e[1;34m%-6s\e[m\n" "[8/11]  Unfreezing config volume ..."             && fsfreeze --unfreeze /data/config
+                  printf "\e[1;34m%-6s\e[m\n" "[9/11]  Listing snapshots ..."                    && kopia snapshot list
+                  printf "\e[1;34m%-6s\e[m\n" "[10/11] Printing stats ..."                       && kopia content stats
+                  printf "\e[1;34m%-6s\e[m\n" "[11/11] Disconnecting from kopia repo ..."        && kopia repository disconnect
               volumeMounts:
                 - name: config
                   mountPath: /data/config
