@@ -1,0 +1,89 @@
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pmbo-cronjob-controller
+  annotations:
+    policies.kyverno.io/title: PMBO CronJob controller
+    policies.kyverno.io/subject: Deployment
+    policies.kyverno.io/description: >-
+      This policy generates a backup CronJob for Deployments
+spec:
+  rules:
+    - name: create-cronjob
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+              selector:
+                matchLabels:
+                  pmbo.home.arpa/backup-claim: "*"
+
+      context:
+        - name: appName
+          variable:
+            jmesPath: request.object.metadata.name
+
+        - name: claimName
+          variable:
+            jmesPath: request.object.metadata.labels."pmbo.home.arpa/backup-claim"
+
+      preconditions:
+        all:
+          - key: "{{ claimName }}"
+            operator: NotEquals
+            value: ""
+
+      generate:
+        synchronize: true
+        apiVersion: batch/v1
+        kind: CronJob
+        name: "{{ appName }}-backup"
+        namespace: "{{request.object.metadata.namespace}}"
+        data:
+          metadata:
+            ownerReferences:
+              - apiVersion: "{{request.object.apiVersion}}"
+                kind: "{{request.object.kind}}"
+                name: "{{request.object.metadata.name}}"
+                uid: "{{request.object.metadata.uid}}"
+          spec:
+            schedule: "@daily"
+            concurrencyPolicy: Forbid
+            successfulJobsHistoryLimit: 1
+            failedJobsHistoryLimit: 2
+            jobTemplate:
+              spec:
+                ttlSecondsAfterFinished: 86400
+                template:
+                  spec:
+                    automountServiceAccountToken: false
+                    restartPolicy: OnFailure
+                    containers:
+                      - name: backup
+                        image: ghcr.io/bjw-s/pmb:rolling@sha256:2d930ee9230a1a50d5db68cd91f9a13ae659de80cb116f4564c33ff76332d598
+                        securityContext:
+                          privileged: true
+                        env:
+                          - name: KOPIA_PASSWORD
+                            value: "none"
+                        volumeMounts:
+                          - name: config
+                            mountPath: /data/src
+                          - name: backup
+                            mountPath: /data/dest
+                    volumes:
+                      - name: config
+                        persistentVolumeClaim:
+                          claimName: "{{ claimName }}"
+                      - name: backup
+                        nfs:
+                          server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+                          path: "/tycho/Apps/External/Backups/{{ appName }}"
+                    affinity:
+                      podAffinity:
+                        requiredDuringSchedulingIgnoredDuringExecution:
+                          - labelSelector:
+                              matchExpressions: "{{ items(request.object.spec.selector.matchLabels, 'key', 'value')[].{key: key, operator: 'In', values: [value] } }}"
+                            topologyKey: kubernetes.io/hostname
