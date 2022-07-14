@@ -18,35 +18,12 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: backup
-              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
+              image: ghcr.io/bjw-s/pmb:rolling@sha256:cf7101a09d96c87fe8b6fb6b43f340d3baafb815580a186dc92a509a458531ee
               env:
-                - name: APP
-                  value: frigate
-                - name: BASE_DIR
-                  value: "/data/dest/$(APP)"
-                - name: REPO_DIR
-                  value: "$(BASE_DIR)/repo"
-                - name: KOPIA_CACHE_DIRECTORY
-                  value: "$(BASE_DIR)/cache"
-                - name: KOPIA_LOG_DIR
-                  value: "$(BASE_DIR)/logs"
+                - name: PMB__ACTION
+                  value: backup
                 - name: KOPIA_PASSWORD
                   value: "none"
-              command:
-                - /bin/bash
-                - -c
-                - |-
-                  printf "\e[1;34m%-6s\e[m\n" "Setting up directories ..."           && mkdir -p "$(BASE_DIR)"/{cache,logs,repo}
-                  printf "\e[1;34m%-6s\e[m\n" "Creating kopia repository ..."        && kopia repository create filesystem --path="$(REPO_DIR)"
-                  printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."   && kopia repository connect filesystem --path="$(REPO_DIR)" --override-hostname=cluster --override-username=cronjob
-                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia retention policy ..."   && kopia policy set "$(REPO_DIR)" --keep-latest 14 --keep-hourly 0 --keep-daily 0 --keep-weekly 0 --keep-monthly 0 --keep-annual 0
-                  printf "\e[1;34m%-6s\e[m\n" "Setting kopia compression policy ..." && kopia policy set "$(REPO_DIR)" --compression=zstd
-                  printf "\e[1;34m%-6s\e[m\n" "Freezing /data/src ..."               && fsfreeze --freeze /data/src
-                  printf "\e[1;34m%-6s\e[m\n" "Backing up /data/src ..."             && kopia snapshot create /data/src
-                  printf "\e[1;34m%-6s\e[m\n" "Unfreezing /data/src ..."             && fsfreeze --unfreeze /data/src
-                  printf "\e[1;34m%-6s\e[m\n" "Listing snapshots ..."                && kopia snapshot list
-                  printf "\e[1;34m%-6s\e[m\n" "Printing stats ..."                   && kopia content stats
-                  printf "\e[1;34m%-6s\e[m\n" "Disconnecting from kopia repo ..."    && kopia repository disconnect
               volumeMounts:
                 - name: src
                   mountPath: /data/src
@@ -61,7 +38,7 @@ spec:
             - name: dest
               nfs:
                 server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-                path: /tycho/Apps/External/Backups
+                path: /tycho/Apps/External/Backups/frigate
           affinity:
             podAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
