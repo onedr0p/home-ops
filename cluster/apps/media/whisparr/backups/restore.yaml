@@ -48,7 +48,7 @@ spec:
             - |-
               printf "\e[1;34m%-6s\e[m\n" "Removing previous data ..."           && shopt -s dotglob && rm -rf /mnt/src/* && shopt -u dotglob
               printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."   && kopia repository connect filesystem --path=$(REPO_DIR) --override-hostname=cluster --override-username=cronjob
-              printf "\e[1;34m%-6s\e[m\n" "Restoring latest snapshot ..."        && kopia snapshot restore "$(kopia snapshot list --json | jq --raw-output '.[0] | .id')" /mnt/src
+              printf "\e[1;34m%-6s\e[m\n" "Restoring latest snapshot ..."        && kopia snapshot restore "$(kopia snapshot list --json | jq --raw-output '.[-1] | .id')" /mnt/src
           volumeMounts:
             - name: src
               mountPath: /mnt/src
