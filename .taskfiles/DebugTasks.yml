@@ -1,0 +1,76 @@
+---
+version: "3"
+
+tasks:
+
+  network:
+    desc: Create a netshoot container for debugging
+    cmds:
+      - kubectl run netshoot --rm -i --tty --image ghcr.io/nicolaka/netshoot:latest {{.CLI_ARGS}}
+
+  volume:
+    desc: |-
+      Create a container for debugging a PVC (ex. task PVC=plex-config-v1 debug:volume)
+    interactive: true
+    cmds:
+      - |
+        kubectl run -n $(kubectl get pvc -A | grep {{.PVC}} | awk '{print $1}') debug-{{.PVC}} -i --tty --rm --image=null --privileged --overrides='
+          {
+            "apiVersion": "v1",
+            "spec": {
+              "containers": [
+                {
+                  "name": "debug",
+                  "image": "ghcr.io/onedr0p/alpine:rolling",
+                  "command": [
+                    "/bin/bash"
+                  ],
+                  "stdin": true,
+                  "stdinOnce": true,
+                  "tty": true,
+                  "volumeMounts": [
+                    {
+                      "name": "config",
+                      "mountPath": "/data/config"
+                    },
+                    {
+                      "name": "backups",
+                      "mountPath": "/data/backups"
+                    }
+                  ]
+                }
+              ],
+              "volumes": [
+                {
+                  "name": "config",
+                  "persistentVolumeClaim": {
+                    "claimName": "{{.PVC}}"
+                  }
+                },
+                {
+                  "name": "backups",
+                  "nfs": {
+                    "server": "{{.NAS_ADDRESS | default "expanse"}}",
+                    "path": "{{.NAS_PATH | default "/tycho/Apps/External/Backups"}}"
+                  }
+                }
+              ],
+              "restartPolicy": "Never"
+            }
+          }'
+
+  node:
+    desc: |-
+      Create a privileged container on a node for debugging (ex. task NODE=k8s-0 debug:node)
+    interactive: true
+    cmds:
+      - |
+        kubectl run debug-{{.NODE}} -i --tty --rm --image="docker.io/library/alpine:3.16" --privileged --overrides='
+          {
+            "spec": {
+              "nodeSelector": {
+                "kubernetes.io/hostname": "{{.NODE}}"
+              },
+              "restartPolicy": "Never"
+            }
+          }'

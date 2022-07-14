@@ -2,8 +2,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: whisparr-restore
-  namespace: media
+  name: $APP-restore
+  namespace: $NAMESPACE
 spec:
   ttlSecondsAfterFinished: 86400
   template:
@@ -16,7 +16,7 @@ spec:
           image: ghcr.io/onedr0p/kubernetes-kubectl:1.24.3@sha256:d68ebf4e48a112978af7f0e56c26e31d10dc271a894fbf5937d5edc69504412c
           env:
             - name: APP
-              value: whisparr
+              value: $APP
             - name: POD_NAMESPACE
               valueFrom:
                 fieldRef:
@@ -31,7 +31,7 @@ spec:
           image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
           env:
             - name: APP
-              value: whisparr
+              value: $APP
             - name: BASE_DIR
               value: "/data/dest/$(APP)"
             - name: REPO_DIR
@@ -59,7 +59,7 @@ spec:
       volumes:
         - name: src
           persistentVolumeClaim:
-            claimName: whisparr-config-v1
+            claimName: $PVC
         - name: dest
           nfs:
             server: "expanse.${SECRET_PRIVATE_DOMAIN}"

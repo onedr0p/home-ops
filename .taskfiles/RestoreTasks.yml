@@ -1,0 +1,47 @@
+---
+version: "3"
+
+tasks:
+
+  volume:
+    desc: Create a job to restore a kopia snapshot (ex. task PVC=plex-config-v1 restore:volume)
+    cmds:
+      - |
+        kubectl -n $(kubectl get pvc -A | grep {{.PVC}} | awk '{print $1}') create job {{.PVC}}-restore --image=null --overrides='
+          {
+            "apiVersion": "v1",
+            "spec": {
+              "containers": [
+                {
+                  "name": "restore",
+                  "image": "ghcr.io/bjw-s/pmb:rolling",
+                  "volumeMounts": [
+                    {
+                      "name": "src",
+                      "mountPath": "/data/src"
+                    },
+                    {
+                      "name": "dest",
+                      "mountPath": "/data/dest"
+                    }
+                  ]
+                }
+              ],
+              "volumes": [
+                {
+                  "name": "src",
+                  "persistentVolumeClaim": {
+                    "claimName": "{{.PVC}}"
+                  }
+                },
+                {
+                  "name": "dest",
+                  "nfs": {
+                    "server": "{{.NAS_ADDRESS | default "expanse"}}",
+                    "path": "{{.NAS_PATH | default "/tycho/Apps/External/Backups"}}"
+                  }
+                }
+              ],
+              "restartPolicy": "Never"
+            }
+          }'

@@ -32,7 +32,7 @@ spec:
             - name: APP
               value: jellyfin
             - name: BASE_DIR
-              value: "/mnt/dest/$(APP)"
+              value: "/data/dest/$(APP)"
             - name: REPO_DIR
               value: "$(BASE_DIR)/repo"
             - name: KOPIA_PASSWORD
@@ -45,14 +45,14 @@ spec:
             - /bin/bash
             - -c
             - |-
-              printf "\e[1;34m%-6s\e[m\n" "Removing previous data ..."           && rm -rf /mnt/src/{*,.*}
+              printf "\e[1;34m%-6s\e[m\n" "Removing previous data ..."           && rm -rf /data/src/{*,.*}
               printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."   && kopia repository connect filesystem --path=$(REPO_DIR) --override-hostname=cluster --override-username=cronjob
-              printf "\e[1;34m%-6s\e[m\n" "Restoring latest snapshot ..."        && kopia snapshot restore $(kopia snapshot list --json | jq --raw-output '.[0] | .id') /mnt/src
+              printf "\e[1;34m%-6s\e[m\n" "Restoring latest snapshot ..."        && kopia snapshot restore $(kopia snapshot list --json | jq --raw-output '.[0] | .id') /data/src
           volumeMounts:
             - name: src
-              mountPath: /mnt/src
+              mountPath: /data/src
             - name: dest
-              mountPath: /mnt/dest
+              mountPath: /data/dest
           securityContext:
             privileged: true
       volumes:

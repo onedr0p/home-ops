@@ -23,7 +23,7 @@ spec:
                 - name: APP
                   value: jellyfin
                 - name: BASE_DIR
-                  value: "/mnt/dest/$(APP)"
+                  value: "/data/dest/$(APP)"
                 - name: REPO_DIR
                   value: "$(BASE_DIR)/repo"
                 - name: KOPIA_CACHE_DIRECTORY
@@ -41,17 +41,17 @@ spec:
                   printf "\e[1;34m%-6s\e[m\n" "Connecting to kopia repository ..."   && kopia repository connect filesystem --path="$(REPO_DIR)" --override-hostname=cluster --override-username=cronjob
                   printf "\e[1;34m%-6s\e[m\n" "Setting kopia retention policy ..."   && kopia policy set "$(REPO_DIR)" --keep-latest 14 --keep-hourly 0 --keep-daily 0 --keep-weekly 0 --keep-monthly 0 --keep-annual 0
                   printf "\e[1;34m%-6s\e[m\n" "Setting kopia compression policy ..." && kopia policy set "$(REPO_DIR)" --compression=zstd
-                  printf "\e[1;34m%-6s\e[m\n" "Freezing /mnt/src ..."                && fsfreeze --freeze /mnt/src
-                  printf "\e[1;34m%-6s\e[m\n" "Backing up /mnt/src ..."              && kopia snapshot create /mnt/src
-                  printf "\e[1;34m%-6s\e[m\n" "Unfreezing /mnt/src ..."              && fsfreeze --unfreeze /mnt/src
+                  printf "\e[1;34m%-6s\e[m\n" "Freezing /data/src ..."               && fsfreeze --freeze /data/src
+                  printf "\e[1;34m%-6s\e[m\n" "Backing up /data/src ..."             && kopia snapshot create /data/src
+                  printf "\e[1;34m%-6s\e[m\n" "Unfreezing /data/src ..."             && fsfreeze --unfreeze /data/src
                   printf "\e[1;34m%-6s\e[m\n" "Listing snapshots ..."                && kopia snapshot list
                   printf "\e[1;34m%-6s\e[m\n" "Printing stats ..."                   && kopia content stats
                   printf "\e[1;34m%-6s\e[m\n" "Disconnecting from kopia repo ..."    && kopia repository disconnect
               volumeMounts:
                 - name: src
-                  mountPath: /mnt/src
+                  mountPath: /data/src
                 - name: dest
-                  mountPath: /mnt/dest
+                  mountPath: /data/dest
               securityContext:
                 privileged: true
           volumes:
