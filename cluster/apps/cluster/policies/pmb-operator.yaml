@@ -33,6 +33,11 @@ spec:
           variable:
             jmesPath: |-
               {{ request.object.metadata.labels."pmb.home.arpa/suspend" || "false" }}
+      preconditions:
+        all:
+          - key: "{{request.operation}}"
+            operator: Equals
+            value: UPDATE
       generate:
         synchronize: true
         apiVersion: batch/v1
