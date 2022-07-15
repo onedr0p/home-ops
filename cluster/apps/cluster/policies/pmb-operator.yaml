@@ -5,9 +5,9 @@ metadata:
   name: pmb-operator
   annotations:
     policies.kyverno.io/title: pmb-operator
-    policies.kyverno.io/subject: HelmRelease
+    policies.kyverno.io/subject: Deployment
     policies.kyverno.io/description: >-
-      This policy generates a backup CronJob for HelmRelease
+      This policy generates a backup CronJob for Deployments
       with the 'pmb.home.arpa/backup-claim' label
 spec:
   generateExistingOnPolicyUpdate: true
@@ -18,7 +18,7 @@ spec:
         any:
           - resources:
               kinds:
-                - HelmRelease
+                - Deployment
               selector:
                 matchLabels:
                   pmb.home.arpa/backup-claim: "*"
@@ -32,10 +32,10 @@ spec:
         - name: suspend
           variable:
             jmesPath: |-
-              {{ request.object.metadata.labels."pmb.home.arpa/backup-suspend" || "false" }}
+              {{ request.object.metadata.labels."pmb.home.arpa/suspend" || "false" }}
       preconditions:
         all:
-          - key: "{{request.operation}}"
+          - key: "{{ request.operation }}"
             operator: Equals
             value: UPDATE
       generate:
