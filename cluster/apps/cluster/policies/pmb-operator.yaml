@@ -43,20 +43,20 @@ spec:
         apiVersion: batch/v1
         kind: CronJob
         name: "{{ appName }}-backup"
-        namespace: "{{request.object.metadata.namespace}}"
+        namespace: "{{ request.object.metadata.namespace }}"
         data:
           metadata:
             ownerReferences:
-              - apiVersion: "{{request.object.apiVersion}}"
-                kind: "{{request.object.kind}}"
-                name: "{{request.object.metadata.name}}"
-                uid: "{{request.object.metadata.uid}}"
+              - apiVersion: "{{ request.object.apiVersion }}"
+                kind: "{{ request.object.kind }}"
+                name: "{{ request.object.metadata.name }}"
+                uid: "{{ request.object.metadata.uid }}"
           spec:
             schedule: "@daily"
             suspend: "{{ suspend }}"
             concurrencyPolicy: Forbid
             successfulJobsHistoryLimit: 1
-            failedJobsHistoryLimit: 2
+            failedJobsHistoryLimit: 3
             jobTemplate:
               spec:
                 ttlSecondsAfterFinished: 86400
