@@ -29,6 +29,9 @@ spec:
         - name: claimName
           variable:
             jmesPath: request.object.metadata.labels."pmb.home.arpa/backup-claim"
+        - name: suspend
+          variable:
+            jmesPath: request.object.metadata.labels."pmb.home.arpa/suspend"
       generate:
         synchronize: true
         apiVersion: batch/v1
@@ -44,6 +47,7 @@ spec:
                 uid: "{{request.object.metadata.uid}}"
           spec:
             schedule: "@daily"
+            suspend: "{{ suspend }}"
             concurrencyPolicy: Forbid
             successfulJobsHistoryLimit: 1
             failedJobsHistoryLimit: 2
