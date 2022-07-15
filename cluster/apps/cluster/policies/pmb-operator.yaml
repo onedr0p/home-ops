@@ -2,9 +2,9 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: pmbo-cronjob-controller
+  name: pmb-operator
   annotations:
-    policies.kyverno.io/title: PMBO CronJob controller
+    policies.kyverno.io/title: pmb-operator
     policies.kyverno.io/subject: Deployment
     policies.kyverno.io/description: >-
       This policy generates a backup CronJob for Deployments
@@ -20,7 +20,7 @@ spec:
                 - Deployment
               selector:
                 matchLabels:
-                  pmbo.home.arpa/backup-claim: "*"
+                  pmb.home.arpa/backup-claim: "*"
 
       context:
         - name: appName
@@ -28,7 +28,7 @@ spec:
             jmesPath: request.object.metadata.name
         - name: claimName
           variable:
-            jmesPath: request.object.metadata.labels."pmbo.home.arpa/backup-claim"
+            jmesPath: request.object.metadata.labels."pmb.home.arpa/backup-claim"
 
       generate:
         synchronize: true
