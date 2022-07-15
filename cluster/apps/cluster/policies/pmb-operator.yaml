@@ -37,6 +37,12 @@ spec:
         name: "{{ appName }}-backup"
         namespace: "{{request.object.metadata.namespace}}"
         data:
+          metadata:
+            ownerReferences:
+              - apiVersion: "{{request.object.apiVersion}}"
+                kind: "{{request.object.kind}}"
+                name: "{{request.object.metadata.name}}"
+                uid: "{{request.object.metadata.uid}}"
           spec:
             schedule: "@daily"
             concurrencyPolicy: Forbid
