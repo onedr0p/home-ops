@@ -32,7 +32,7 @@ spec:
         - name: suspend
           variable:
             jmesPath: |-
-              {{ request.object.metadata.labels."pmb.home.arpa/backup-suspend" || "false" }}
+              {{ request.object.metadata.labels."pmb.home.arpa/backup-suspend" || `true` }}
       preconditions:
         all:
           - key: "{{ request.operation }}"
@@ -55,8 +55,8 @@ spec:
             schedule: "@daily"
             suspend: "{{ suspend }}"
             concurrencyPolicy: Forbid
-            successfulJobsHistoryLimit: 1
-            failedJobsHistoryLimit: 3
+            successfulJobsHistoryLimit: 2
+            failedJobsHistoryLimit: 5
             jobTemplate:
               spec:
                 ttlSecondsAfterFinished: 86400
