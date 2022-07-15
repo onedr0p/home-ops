@@ -25,6 +25,9 @@ spec:
   values:
     global:
       nameOverride: *app
+    controller:
+      labels:
+        pmb.home.arpa/backup-claim: &claimName "readarr-config-v1"
     image:
       repository: ghcr.io/onedr0p/readarr-nightly
       tag: 0.1.1.1377@sha256:3ba8ef4b9ed4ad0607eeb8dc77db5bb49f2f89c0e3a2f5aaddc88a4c6bccc970
@@ -66,20 +69,13 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: readarr-config-v1
+        existingClaim: *claimName
       media:
         enabled: true
         type: nfs
         server: "expanse.${SECRET_PRIVATE_DOMAIN}"
         path: /tycho/Media
         mountPath: /media
-      backup:
-        enabled: true
-        type: nfs
-        server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-        path: /tycho/Apps/External/Backups/readarr
-        mountPath: /config/Backups
-        readOnly: false
     resources:
       requests:
         cpu: 10m

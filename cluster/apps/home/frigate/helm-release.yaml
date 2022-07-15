@@ -30,6 +30,9 @@ spec:
   values:
     global:
       nameOverride: *app
+    controller:
+      labels:
+        pmb.home.arpa/backup-claim: &claimName "frigate-config-v2"
     image:
       repository: docker.io/blakeblackshear/frigate
       tag: 0.11.0-beta5
@@ -77,7 +80,7 @@ spec:
     persistence:
       data:
         enabled: true
-        existingClaim: frigate-config-v2
+        existingClaim: *claimName
       config:
         enabled: true
         type: configMap

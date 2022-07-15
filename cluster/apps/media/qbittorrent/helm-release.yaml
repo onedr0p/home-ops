@@ -25,6 +25,9 @@ spec:
   values:
     global:
       nameOverride: *app
+    controller:
+      labels:
+        pmb.home.arpa/backup-claim: &claimName "qbittorrent-config-v1"
     image:
       repository: ghcr.io/onedr0p/qbittorrent
       tag: 4.4.3.1@sha256:c056a9906d393aa43de46be1ba483c72b680bc93b7661cb636e7f8fd162dfd20
@@ -81,7 +84,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: qbittorrent-config-v1
+        existingClaim: *claimName
       media:
         enabled: true
         type: nfs

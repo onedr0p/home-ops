@@ -25,6 +25,9 @@ spec:
   values:
     global:
       nameOverride: *app
+    controller:
+      labels:
+        pmb.home.arpa/backup-claim: &claimName "sabnzbd-config-v1"
     image:
       repository: ghcr.io/onedr0p/sabnzbd
       tag: 3.6.0@sha256:d624cfb2a0e91d8bf724a4659f817b680362dbc90055a86ae893a9be7fe6dd52
@@ -74,7 +77,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: sabnzbd-config-v1
+        existingClaim: *claimName
       downloads:
         enabled: true
         type: nfs

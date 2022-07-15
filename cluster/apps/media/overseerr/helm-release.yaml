@@ -25,6 +25,9 @@ spec:
   values:
     global:
       nameOverride: *app
+    controller:
+      labels:
+        pmb.home.arpa/backup-claim: &claimName "overseerr-config-v1"
     image:
       repository: ghcr.io/sct/overseerr
       tag: 1.29.1
@@ -64,7 +67,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: overseerr-config-v1
+        existingClaim: *claimName
         mountPath: /app/config
     resources:
       requests:

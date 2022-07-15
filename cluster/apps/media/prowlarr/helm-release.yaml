@@ -25,6 +25,9 @@ spec:
   values:
     global:
       nameOverride: *app
+    controller:
+      labels:
+        pmb.home.arpa/backup-claim: &claimName "prowlarr-config-v1"
     image:
       repository: ghcr.io/onedr0p/prowlarr-nightly
       tag: 0.4.3.1898@sha256:65bffae71bde4a45df5f706ed2c415ce7ca749ddecbbf85b6afc705c1bd50457
@@ -63,14 +66,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: prowlarr-config-v1
-      backup:
-        enabled: true
-        type: nfs
-        server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-        path: /tycho/Apps/External/Backups/prowlarr
-        mountPath: /config/Backups
-        readOnly: false
+        existingClaim: *claimName
     resources:
       requests:
         cpu: 10m

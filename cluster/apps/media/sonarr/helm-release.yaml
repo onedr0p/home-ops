@@ -25,6 +25,9 @@ spec:
   values:
     global:
       nameOverride: *app
+    controller:
+      labels:
+        pmb.home.arpa/backup-claim: &claimName "sonarr-config-v1"
     image:
       repository: ghcr.io/onedr0p/sonarr-develop
       tag: 3.0.8.1540@sha256:3568eaa34e0b6d1744aa2a5e0a8de5c3c02c11a8f198ec73f2a020e9b8ab8ec0
@@ -69,20 +72,13 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: sonarr-config-v1
+        existingClaim: *claimName
       media:
         enabled: true
         type: nfs
         server: "expanse.${SECRET_PRIVATE_DOMAIN}"
         path: /tycho/Media
         mountPath: /media
-      backup:
-        enabled: true
-        type: nfs
-        server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-        path: /tycho/Apps/External/Backups/sonarr
-        mountPath: /config/Backups
-        readOnly: false
       scripts:
         enabled: true
         type: configMap

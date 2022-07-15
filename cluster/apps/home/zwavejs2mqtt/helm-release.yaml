@@ -28,6 +28,9 @@ spec:
   values:
     global:
       nameOverride: *app
+    controller:
+      labels:
+        pmb.home.arpa/backup-claim: &claimName "zwavejs2mqtt-config-v1"
     image:
       repository: ghcr.io/zwave-js/zwavejs2mqtt
       tag: 6.13.0
@@ -60,20 +63,13 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: zwavejs2mqtt-config-v1
-        mountPath: "/usr/src/app/store"
+        existingClaim: *claimName
+        mountPath: /usr/src/app/store
       usb:
         enabled: true
         type: hostPath
         hostPath: /dev/serial/by-id/usb-0658_0200-if00
         hostPathType: CharDevice
-      backup:
-        enabled: true
-        type: nfs
-        server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-        path: /tycho/Apps/External/Backups/zwavejs2mqtt
-        mountPath: /usr/src/app/store/backups
-        readOnly: false
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
