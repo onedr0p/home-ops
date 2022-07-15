@@ -31,7 +31,8 @@ spec:
             jmesPath: request.object.metadata.labels."pmb.home.arpa/backup-claim"
         - name: suspend
           variable:
-            jmesPath: request.object.metadata.labels."pmb.home.arpa/suspend"
+            jmesPath: |-
+              {{ request.object.metadata.labels."pmb.home.arpa/suspend" || false }}
       generate:
         synchronize: true
         apiVersion: batch/v1
