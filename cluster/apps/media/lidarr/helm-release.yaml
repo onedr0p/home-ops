@@ -4,6 +4,9 @@ kind: HelmRelease
 metadata:
   name: &app lidarr
   namespace: media
+  labels:
+    pmb.home.arpa/backup-claim: &claimName "lidarr-config-v1"
+    pmb.home.arpa/backup-suspend: "true"
 spec:
   interval: 15m
   chart:
@@ -25,10 +28,6 @@ spec:
   values:
     global:
       nameOverride: *app
-    controller:
-      labels:
-        pmb.home.arpa/backup-claim: &claimName "lidarr-config-v1"
-        pmb.home.arpa/suspend: "false"
     image:
       repository: ghcr.io/onedr0p/lidarr
       tag: 1.0.2.2592@sha256:592351b9287fc96a5b4eaba3ebf93b3f99cfab4b1be8779a63cb6f08fa7bfb8b
