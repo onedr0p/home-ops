@@ -61,21 +61,21 @@ spec:
                           - name: APP
                             value: "{{ appName }}"
                           - name: BACKUP_DIR
-                            value: "/data/backups/$(APP)"
+                            value: /data/backups/\$(APP)
                           - name: KOPIA_CACHE_DIRECTORY
-                            value: "$(BACKUP_DIR)/cache"
+                            value: \$(BACKUP_DIR)/cache
                           - name: KOPIA_LOG_DIR
-                            value: "$(BACKUP_DIR)/logs"
+                            value: \$(BACKUP_DIR)/logs
                           - name: KOPIA_PASSWORD
                             value: "none"
                         command:
                           - /bin/bash
                           - -c
                           - |-
-                            printf "\e[1;34m%-6s\e[m\n" "[01/10] Setting up directories ..."               && mkdir -p "$(BACKUP_DIR)"/{cache,logs,repo}
-                            printf "\e[1;34m%-6s\e[m\n" "[02/10] Creating kopia repository ..."            && [[ ! -f "$(BACKUP_DIR)/repo/kopia.repository.f" ]] && kopia repository create filesystem --path="$(BACKUP_DIR)/repo"
-                            printf "\e[1;34m%-6s\e[m\n" "[03/10] Connecting to kopia repository ..."       && kopia repository connect filesystem --path="$(BACKUP_DIR)/repo" --override-hostname=cluster --override-username=cronjob
-                            printf "\e[1;34m%-6s\e[m\n" "[04/10] Setting kopia policies ..."               && kopia policy set "$(BACKUP_DIR)/repo" --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 0 --keep-weekly 0 --keep-monthly 0 --keep-annual 0
+                            printf "\e[1;34m%-6s\e[m\n" "[01/10] Setting up directories ..."               && mkdir -p "\$(BACKUP_DIR)"/{cache,logs,repo}
+                            printf "\e[1;34m%-6s\e[m\n" "[02/10] Creating kopia repository ..."            && [[ ! -f "\$(BACKUP_DIR)/repo/kopia.repository.f" ]] && kopia repository create filesystem --path="\$(BACKUP_DIR)/repo"
+                            printf "\e[1;34m%-6s\e[m\n" "[03/10] Connecting to kopia repository ..."       && kopia repository connect filesystem --path="\$(BACKUP_DIR)/repo" --override-hostname=cluster --override-username=cronjob
+                            printf "\e[1;34m%-6s\e[m\n" "[04/10] Setting kopia policies ..."               && kopia policy set "\$(BACKUP_DIR)/repo" --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 0 --keep-weekly 0 --keep-monthly 0 --keep-annual 0
                             printf "\e[1;34m%-6s\e[m\n" "[05/10] Freezing config volume ..."               && fsfreeze --freeze /data/config
                             printf "\e[1;34m%-6s\e[m\n" "[06/10] Backing up config volume ..."             && kopia snapshot create /data/config
                             printf "\e[1;34m%-6s\e[m\n" "[07/10] Unfreezing config volume ..."             && fsfreeze --unfreeze /data/config
