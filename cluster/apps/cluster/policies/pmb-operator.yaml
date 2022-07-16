@@ -58,8 +58,9 @@ spec:
                     # Stagger jobs to run randomly within an hour to avoid bringing down all apps at once
                     initContainers:
                       - name: wait
-                        image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
-                        command: ["/bin/bash", "-c", "trap : TERM INT; sleep $(shuf -i 1-3600 -n 1)"]
+                        image: ghcr.io/onedr0p/alpine:3.16.0@sha256:96119a1af7e88b8833dc5dc9a777229b6c04a700441b13ae7423586635ca48b3
+                        command: ["/scripts/sleep.sh"]
+                        args: ["10", "1800"]
                     containers:
                       - name: backup
                         image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
