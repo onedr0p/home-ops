@@ -40,7 +40,6 @@ spec:
                 - name: backups
                   mountPath: /data/backups
                 - name: config
-                  subPath: repository.config
                   mountPath: /kopia
                   readOnly: true
               securityContext:
@@ -51,6 +50,5 @@ spec:
                 server: "expanse.${SECRET_PRIVATE_DOMAIN}"
                 path: /tycho/Apps/External/Backups/kopia
             - name: config
-              configMap:
-                name: kopia-s3
-                defaultMode: 420
+              secret:
+                secretName: kopia-s3
