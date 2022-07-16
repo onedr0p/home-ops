@@ -71,8 +71,8 @@ spec:
                           - -c
                           - |-
                             printf "\e[1;32m%-6s\e[m\n" "[01/09] Create repo ..."          && [[ ! -f /data/backups/kopia.repository.f ]] && kopia repository create filesystem --path=/data/backups
-                            printf "\e[1;32m%-6s\e[m\n" "[02/09] Connect to repo ..."      && kopia repo connect filesystem --path=/data/backups --override-hostname=cluster --override-username=cronjob
-                            printf "\e[1;32m%-6s\e[m\n" "[03/09] Set policies ..."         && kopia policy set /data/backups --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 7 --keep-weekly 2 --keep-monthly 0 --keep-annual 0
+                            printf "\e[1;32m%-6s\e[m\n" "[02/09] Connect to repo ..."      && kopia repo connect filesystem --path=/data/backups --override-hostname=cluster --override-username=root
+                            printf "\e[1;32m%-6s\e[m\n" "[03/09] Set policies ..."         && kopia policy set /{{ appName }} --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 7 --keep-weekly 2 --keep-monthly 0 --keep-annual 0
                             printf "\e[1;32m%-6s\e[m\n" "[04/09] Freeze config vol ..."    && fsfreeze -f /{{ appName }}
                             printf "\e[1;32m%-6s\e[m\n" "[05/09] Back up config vol ..."   && kopia snap create /{{ appName }}
                             printf "\e[1;32m%-6s\e[m\n" "[06/09] Unfreeze config vol ..."  && fsfreeze -u /{{ appName }}
