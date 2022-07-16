@@ -14,7 +14,7 @@ tasks:
       - kubectl -n {{.NAMESPACE}} wait --for condition=complete job {{.APP}}-restore --timeout=60m
       - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
       - kubectl -n {{.NAMESPACE}} logs job/{{.APP}}-restore
-      - kubectl -n {{.NAMESPACE}} delete job/{{.APP}}-restore
+      - defer: kubectl -n {{.NAMESPACE}} delete job/{{.APP}}-restore
     vars:
       NAMESPACE:
         sh: kubectl get pvc -A | grep {{.PVC}} | awk '{print $1}'
@@ -22,8 +22,10 @@ tasks:
         sh: kubectl -n {{.NAMESPACE}} get pvc {{.PVC}} -o jsonpath='{.metadata.labels.app\.kubernetes\.io\/name}'
     env:
       PVC: "{{.PVC}}"
-      NAMESPACE: "{{.NAMESPACE}}"
-      APP: "{{.APP}}"
+      NAMESPACE:
+        sh: kubectl get pvc -A | grep {{.PVC}} | awk '{print $1}'
+      APP:
+        sh: kubectl -n {{.NAMESPACE}} get pvc {{.PVC}} -o jsonpath='{.metadata.labels.app\.kubernetes\.io\/name}'
     preconditions:
       - sh: kubectl -n {{.NAMESPACE}} get pvc {{.PVC}}
         msg: "Error: pvc/{{.PVC}} in namespace/{{.NAMESPACE}} not found"

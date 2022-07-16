@@ -1,0 +1,68 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kopia-s3-sync
+  namespace: default
+spec:
+  schedule: "0 */12 * * *"
+  suspend: false
+  concurrencyPolicy: "Forbid"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          containers:
+            - name: sync
+              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
+              env:
+                - name: TZ
+                  value: "${TIMEZONE}"
+                - name: KOPIA_PASSWORD
+                  value: "none"
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  printf "\e[1;32m%-6s\e[m\n" "[01/02] Connect to repo ..."      && kopia repo connect filesystem --path=/data/backups --override-hostname=cluster --override-username=root
+                  printf "\e[1;32m%-6s\e[m\n" "[02/02] Sync to s3 ..."           && kopia repo sync-to from-config --file=/config/s3.config --delete
+                  printf "\e[1;32m%-6s\e[m\n" "[09/09] Disconnect from repo ..." && kopia repo disconnect
+              volumeMounts:
+                - name: backups
+                  mountPath: /data/backups
+                - name: filesystem-config
+                  mountPath: /config/repository.config
+                  subPath: repository.config
+                  readOnly: true
+                - name: s3-config
+                  mountPath: /config/s3.config
+                  subPath: repository.config
+                  readOnly: true
+          volumes:
+            - name: backups
+              nfs:
+                server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+                path: /tycho/Apps/External/Backups/kopia
+            - name: filesystem-config
+              projected:
+                defaultMode: 0775
+                sources:
+                  - configMap:
+                      name: kopia
+                      items:
+                        - key: repository.config
+                          path: repository.config
+            - name: s3-config
+              projected:
+                defaultMode: 0775
+                sources:
+                  - secret:
+                      name: kopia-s3
+                      items:
+                        - key: repository.config
+                          path: repository.config

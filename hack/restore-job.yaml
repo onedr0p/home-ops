@@ -14,8 +14,6 @@ spec:
         - name: restore
           image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
           env:
-            - name: APP
-              value: $APP
             - name: KOPIA_PASSWORD
               value: "none"
           command:
@@ -25,7 +23,8 @@ spec:
               shopt -s dotglob
               printf "\e[1;32m%-6s\e[m\n" "[01/03] Remove previous data ..." && rm -rf /data/config/*
               printf "\e[1;32m%-6s\e[m\n" "[02/03] Connect to repo ..."      && kopia repo connect filesystem --path=/data/backups --override-hostname=cluster --override-username=root
-              printf "\e[1;32m%-6s\e[m\n" "[03/03] Restore latest snap ..."  && kopia snap restore "$(kopia snapshot list \$(APP) --json | jq --raw-output '.[-1] | .id')" /data/config
+              printf "\e[1;32m%-6s\e[m\n" "[03/03] Restore latest snap ..."  && kopia snap restore "$(kopia snapshot list /$APP --json | jq --raw-output '.[-1] | .id')" /data/config
+              printf "\e[1;32m%-6s\e[m\n" "[09/09] Disconnect from repo ..." && kopia repo disconnect
           volumeMounts:
             - name: config
               mountPath: /data/config
