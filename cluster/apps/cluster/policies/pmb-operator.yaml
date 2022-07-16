@@ -61,7 +61,7 @@ spec:
                           - name: APP
                             value: "{{ appName }}"
                           - name: BACKUP_DIR
-                            value: /data/backups/\$(APP)
+                            value: /data/backups
                           - name: KOPIA_CACHE_DIRECTORY
                             value: \$(BACKUP_DIR)/cache
                           - name: KOPIA_LOG_DIR
@@ -73,18 +73,18 @@ spec:
                           - -c
                           - |-
                             printf "\e[1;32m%-6s\e[m\n" "[01/10] Set up dirs ..."          && mkdir -p "\$(BACKUP_DIR)"/{cache,logs,repo}
-                            printf "\e[1;32m%-6s\e[m\n" "[02/10] Create repo ..."          && [[ ! -f "\$(BACKUP_DIR)/repo/kopia.repository.f" ]] && kopia repository create filesystem --path="\$(BACKUP_DIR)/repo"
-                            printf "\e[1;32m%-6s\e[m\n" "[03/10] Connect to repo ..."      && kopia repo connect filesystem --path="\$(BACKUP_DIR)/repo" --override-hostname=cluster --override-username=cronjob
-                            printf "\e[1;32m%-6s\e[m\n" "[04/10] Set policies ..."         && kopia policy set "\$(BACKUP_DIR)/repo" --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 7 --keep-weekly 2 --keep-monthly 0 --keep-annual 0
-                            printf "\e[1;32m%-6s\e[m\n" "[05/10] Freeze config vol ..."    && fsfreeze --freeze /data/config
-                            printf "\e[1;32m%-6s\e[m\n" "[06/10] Back up config vol ..."   && kopia snap create /data/config
-                            printf "\e[1;32m%-6s\e[m\n" "[07/10] Unfreeze config vol ..."  && fsfreeze --unfreeze /data/config
+                            printf "\e[1;32m%-6s\e[m\n" "[02/10] Create repo ..."          && [[ ! -f "\$(BACKUP_DIR)/kopia.repository.f" ]] && kopia repository create filesystem --path="\$(BACKUP_DIR)"
+                            printf "\e[1;32m%-6s\e[m\n" "[03/10] Connect to repo ..."      && kopia repo connect filesystem --path="\$(BACKUP_DIR)" --override-hostname=cluster --override-username=cronjob
+                            printf "\e[1;32m%-6s\e[m\n" "[04/10] Set policies ..."         && kopia policy set "\$(BACKUP_DIR)" --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 7 --keep-weekly 2 --keep-monthly 0 --keep-annual 0
+                            printf "\e[1;32m%-6s\e[m\n" "[05/10] Freeze config vol ..."    && fsfreeze --freeze /\$(APP)
+                            printf "\e[1;32m%-6s\e[m\n" "[06/10] Back up config vol ..."   && kopia snap create /\$(APP)
+                            printf "\e[1;32m%-6s\e[m\n" "[07/10] Unfreeze config vol ..."  && fsfreeze --unfreeze /\$(APP)
                             printf "\e[1;32m%-6s\e[m\n" "[08/10] List snaps ..."           && kopia snap list
                             printf "\e[1;32m%-6s\e[m\n" "[09/10] Show stats ..."           && kopia content stats
                             printf "\e[1;32m%-6s\e[m\n" "[10/10] Disconnect from repo ..." && kopia repo disconnect
                         volumeMounts:
                           - name: config
-                            mountPath: /data/config
+                            mountPath: "/{{ appName }}"
                           - name: backups
                             mountPath: /data/backups
                         securityContext:
@@ -96,7 +96,7 @@ spec:
                       - name: backups
                         nfs:
                           server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-                          path: /tycho/Apps/External/Backups
+                          path: /tycho/Apps/External/Backups/kopia
                     affinity:
                       podAffinity:
                         requiredDuringSchedulingIgnoredDuringExecution:
