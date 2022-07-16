@@ -14,6 +14,7 @@ tasks:
       - kubectl -n {{.NAMESPACE}} wait --for condition=complete job {{.APP}}-restore --timeout=60m
       - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
       - kubectl -n {{.NAMESPACE}} logs job/{{.APP}}-restore
+      - kubectl -n {{.NAMESPACE}} delete job/{{.APP}}-restore
     vars:
       NAMESPACE:
         sh: kubectl get pvc -A | grep {{.PVC}} | awk '{print $1}'
