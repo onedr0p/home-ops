@@ -34,13 +34,15 @@ spec:
                 - -c
                 - |
                   printf "\e[1;32m%-6s\e[m\n" "[01/02] Connect to repo ..."      && kopia repo connect filesystem --path=/data/backups --override-hostname=cluster --override-username=root
-                  printf "\e[1;32m%-6s\e[m\n" "[02/02] Sync to s3 ..."           && kopia repo sync-to from-config --file=/config/s3.config --delete
+                  printf "\e[1;32m%-6s\e[m\n" "[02/02] Sync to s3 ..."           && kopia repo sync-to from-config --file=/kopia/repository.config --delete
                   printf "\e[1;32m%-6s\e[m\n" "[09/09] Disconnect from repo ..." && kopia repo disconnect
               volumeMounts:
                 - name: backups
                   mountPath: /data/backups
                 - name: config
-                  mountPath: /config
+                  subPath: repository.config
+                  mountPath: /kopia
+                  readOnly: true
               securityContext:
                 privileged: true
           volumes:
@@ -49,16 +51,6 @@ spec:
                 server: "expanse.${SECRET_PRIVATE_DOMAIN}"
                 path: /tycho/Apps/External/Backups/kopia
             - name: config
-              projected:
-                defaultMode: 0775
-                sources:
-                  - configMap:
-                      name: kopia
-                      items:
-                        - key: repository.config
-                          path: repository.config
-                  - secret:
-                      name: kopia-s3
-                      items:
-                        - key: s3.config
-                          path: s3.config
+              configMap:
+                name: kopia-s3
+                defaultMode: 420
