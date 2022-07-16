@@ -58,30 +58,27 @@ spec:
                       - name: backup
                         image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
                         env:
-                          - name: APP
-                            value: "{{ appName }}"
                           - name: BACKUP_DIR
                             value: /data/backups
                           - name: KOPIA_CACHE_DIRECTORY
-                            value: \$(BACKUP_DIR)/cache
+                            value: /data/backups/{{ appName }}/cache
                           - name: KOPIA_LOG_DIR
-                            value: \$(BACKUP_DIR)/logs
+                            value: /data/backups/{{ appName }}/logs
                           - name: KOPIA_PASSWORD
                             value: "none"
                         command:
                           - /bin/bash
                           - -c
                           - |-
-                            printf "\e[1;32m%-6s\e[m\n" "[01/10] Set up dirs ..."          && mkdir -p "\$(BACKUP_DIR)"/{cache,logs,repo}
-                            printf "\e[1;32m%-6s\e[m\n" "[02/10] Create repo ..."          && [[ ! -f "\$(BACKUP_DIR)/kopia.repository.f" ]] && kopia repository create filesystem --path="\$(BACKUP_DIR)"
-                            printf "\e[1;32m%-6s\e[m\n" "[03/10] Connect to repo ..."      && kopia repo connect filesystem --path="\$(BACKUP_DIR)" --override-hostname=cluster --override-username=cronjob
-                            printf "\e[1;32m%-6s\e[m\n" "[04/10] Set policies ..."         && kopia policy set "\$(BACKUP_DIR)" --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 7 --keep-weekly 2 --keep-monthly 0 --keep-annual 0
-                            printf "\e[1;32m%-6s\e[m\n" "[05/10] Freeze config vol ..."    && fsfreeze --freeze /\$(APP)
-                            printf "\e[1;32m%-6s\e[m\n" "[06/10] Back up config vol ..."   && kopia snap create /\$(APP)
-                            printf "\e[1;32m%-6s\e[m\n" "[07/10] Unfreeze config vol ..."  && fsfreeze --unfreeze /\$(APP)
-                            printf "\e[1;32m%-6s\e[m\n" "[08/10] List snaps ..."           && kopia snap list
-                            printf "\e[1;32m%-6s\e[m\n" "[09/10] Show stats ..."           && kopia content stats
-                            printf "\e[1;32m%-6s\e[m\n" "[10/10] Disconnect from repo ..." && kopia repo disconnect
+                            printf "\e[1;32m%-6s\e[m\n" "[01/09] Create repo ..."          && [[ ! -f /data/backups/kopia.repository.f ]] && kopia repository create filesystem --path=/data/backups
+                            printf "\e[1;32m%-6s\e[m\n" "[02/09] Connect to repo ..."      && kopia repo connect filesystem --path=/data/backups --override-hostname=cluster --override-username=cronjob
+                            printf "\e[1;32m%-6s\e[m\n" "[03/09] Set policies ..."         && kopia policy set /data/backups --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 7 --keep-weekly 2 --keep-monthly 0 --keep-annual 0
+                            printf "\e[1;32m%-6s\e[m\n" "[04/09] Freeze config vol ..."    && fsfreeze -f /{{ appName }}
+                            printf "\e[1;32m%-6s\e[m\n" "[05/09] Back up config vol ..."   && kopia snap create /{{ appName }}
+                            printf "\e[1;32m%-6s\e[m\n" "[06/09] Unfreeze config vol ..."  && fsfreeze -u /{{ appName }}
+                            printf "\e[1;32m%-6s\e[m\n" "[07/09] List snaps ..."           && kopia snap list
+                            printf "\e[1;32m%-6s\e[m\n" "[08/09] Show stats ..."           && kopia content stats
+                            printf "\e[1;32m%-6s\e[m\n" "[09/09] Disconnect from repo ..." && kopia repo disconnect
                         volumeMounts:
                           - name: config
                             mountPath: "/{{ appName }}"

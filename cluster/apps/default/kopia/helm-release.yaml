@@ -26,10 +26,12 @@ spec:
     global:
       nameOverride: *app
     image:
-      repository: docker.io/kopia/kopia
-      tag: "0.11.3"
+      repository: ghcr.io/onedr0p/kopia
+      tag: 0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
     env:
       TZ: "${TIMEZONE}"
+      KOPIA_PASSWORD: "none"
+    command: kopia
     args:
       - server
       - --insecure
@@ -38,7 +40,7 @@ spec:
       - --override-hostname
       - cluster
       - --override-username
-      - kopia
+      - cronjob
       - --without-password
     service:
       main:
