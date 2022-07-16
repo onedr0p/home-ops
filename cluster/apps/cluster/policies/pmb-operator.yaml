@@ -59,11 +59,7 @@ spec:
                     initContainers:
                       - name: wait
                         image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
-                        command:
-                          - /bin/bash
-                          - -c
-                          - |-
-                            trap : TERM INT; seconds=$(shuf -i 1-3600 -n 1) && echo "Delaying job for ${seconds}s ..." && sleep $seconds
+                        command: ["/bin/bash", "-c", "trap : TERM INT; sleep $(shuf -i 1-3600 -n 1)"]
                     containers:
                       - name: backup
                         image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
