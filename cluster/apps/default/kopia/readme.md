@@ -10,8 +10,9 @@ This will set up replication to have your backups sent to a [backblaze](https://
     ```sh
     export B2_APPLICATION_KEY_ID="<master-key-id>"
     export B2_APPLICATION_KEY="<master-key>"
-    b2 create-bucket "<bucket-name>" --fileLockEnabled --defaultServerSideEncryption "SSE-B2"
-    b2 create-key --bucket "<bucket-name>" "<bucket-name>" listBuckets,readBuckets,listFiles,readFiles,writeFiles,readBucketEncryption,readBucketReplications,readBucketRetentions,readFileRetentions,writeFileRetentions,readFileLegalHolds
+    export B2_BUCKET_NAME="<bucket-name>"
+    b2 create-bucket $B2_BUCKET_NAME --fileLockEnabled --defaultServerSideEncryption "SSE-B2"
+    b2 create-key --bucket $B2_BUCKET_NAME $B2_BUCKET_NAME listBuckets,readBuckets,listFiles,readFiles,writeFiles,readBucketEncryption,readBucketReplications,readBucketRetentions,readFileRetentions,writeFileRetentions,readFileLegalHolds
     ```
 
 3. Create `secret.sops.yaml` for Kopia to use for s3 replication with `repository.config` as the key
