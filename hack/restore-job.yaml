@@ -1,0 +1,45 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: $APP-restore
+  namespace: $NAMESPACE
+spec:
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: OnFailure
+      containers:
+        - name: restore
+          image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
+          env:
+            - name: APP
+              value: $APP
+            - name: BACKUP_DIR
+              value: "/data/backups/$(APP)"
+            - name: KOPIA_PASSWORD
+              value: "none"
+          command:
+            - /bin/bash
+            - -c
+            - |-
+              shopt -s dotglob
+              printf "\e[1;32m%-6s\e[m\n" "[01/03] Remove previous data ..." && rm -rf /data/config/*
+              printf "\e[1;32m%-6s\e[m\n" "[02/03] Connect to repo ..."      && kopia repo connect filesystem --path="$(BACKUP_DIR)/repo" --override-hostname=cluster --override-username=cronjob
+              printf "\e[1;32m%-6s\e[m\n" "[03/03] Restore latest snap ..."  && kopia snap restore "$(kopia snapshot list --json | jq --raw-output '.[-1] | .id')" /data/config
+          volumeMounts:
+            - name: config
+              mountPath: /data/config
+            - name: backups
+              mountPath: /data/backups
+          securityContext:
+            privileged: true
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: $PVC
+        - name: backups
+          nfs:
+            server: expanse
+            path: /tycho/Apps/External/Backups

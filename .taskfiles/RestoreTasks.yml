@@ -5,43 +5,24 @@ tasks:
 
   volume:
     desc: Create a job to restore a kopia snapshot (ex. task PVC=plex-config-v1 restore:volume)
+    interactive: true
     cmds:
-      - |
-        kubectl -n $(kubectl get pvc -A | grep {{.PVC}} | awk '{print $1}') create job {{.PVC}}-restore --image=null --overrides='
-          {
-            "apiVersion": "v1",
-            "spec": {
-              "containers": [
-                {
-                  "name": "restore",
-                  "image": "ghcr.io/bjw-s/pmb:rolling",
-                  "volumeMounts": [
-                    {
-                      "name": "src",
-                      "mountPath": "/data/src"
-                    },
-                    {
-                      "name": "dest",
-                      "mountPath": "/data/dest"
-                    }
-                  ]
-                }
-              ],
-              "volumes": [
-                {
-                  "name": "src",
-                  "persistentVolumeClaim": {
-                    "claimName": "{{.PVC}}"
-                  }
-                },
-                {
-                  "name": "dest",
-                  "nfs": {
-                    "server": "{{.NAS_ADDRESS | default "expanse"}}",
-                    "path": "{{.NAS_PATH | default "/tycho/Apps/External/Backups"}}"
-                  }
-                }
-              ],
-              "restartPolicy": "Never"
-            }
-          }'
+      - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
+      - kubectl -n {{.NAMESPACE}} scale deployment {{.APP}} --replicas 0
+      - kubectl -n {{.NAMESPACE}} wait --for delete pod --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
+      - envsubst < <(cat ./hack/restore-job.yaml) | kubectl apply -f -
+      - kubectl -n {{.NAMESPACE}} wait --for condition=complete job {{.APP}}-restore --timeout=60m
+      - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
+      - kubectl -n {{.NAMESPACE}} logs job/{{.APP}}-restore
+    vars:
+      NAMESPACE:
+        sh: kubectl get pvc -A | grep {{.PVC}} | awk '{print $1}'
+      APP:
+        sh: kubectl -n {{.NAMESPACE}} get pvc {{.PVC}} -o jsonpath='{.metadata.labels.app\.kubernetes\.io\/name}'
+    env:
+      PVC: "{{.PVC}}"
+      NAMESPACE: "{{.NAMESPACE}}"
+      APP: "{{.APP}}"
+    preconditions:
+      - sh: kubectl -n {{.NAMESPACE}} get pvc {{.PVC}}
+        msg: "Error: pvc/{{.PVC}} in namespace/{{.NAMESPACE}} not found"
