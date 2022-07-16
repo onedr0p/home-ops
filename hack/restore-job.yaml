@@ -16,8 +16,6 @@ spec:
           env:
             - name: APP
               value: $APP
-            - name: BACKUP_DIR
-              value: "/data/backups/$(APP)"
             - name: KOPIA_PASSWORD
               value: "none"
           command:
@@ -26,8 +24,8 @@ spec:
             - |-
               shopt -s dotglob
               printf "\e[1;32m%-6s\e[m\n" "[01/03] Remove previous data ..." && rm -rf /data/config/*
-              printf "\e[1;32m%-6s\e[m\n" "[02/03] Connect to repo ..."      && kopia repo connect filesystem --path="$(BACKUP_DIR)/repo" --override-hostname=cluster --override-username=cronjob
-              printf "\e[1;32m%-6s\e[m\n" "[03/03] Restore latest snap ..."  && kopia snap restore "$(kopia snapshot list --json | jq --raw-output '.[-1] | .id')" /data/config
+              printf "\e[1;32m%-6s\e[m\n" "[02/03] Connect to repo ..."      && kopia repo connect filesystem --path=/data/backups --override-hostname=cluster --override-username=root
+              printf "\e[1;32m%-6s\e[m\n" "[03/03] Restore latest snap ..."  && kopia snap restore "$(kopia snapshot list \$(APP) --json | jq --raw-output '.[-1] | .id')" /data/config
           volumeMounts:
             - name: config
               mountPath: /data/config
@@ -42,4 +40,4 @@ spec:
         - name: backups
           nfs:
             server: expanse
-            path: /tycho/Apps/External/Backups
+            path: /tycho/Apps/External/Backups/kopia
