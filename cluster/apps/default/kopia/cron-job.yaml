@@ -35,20 +35,15 @@ spec:
               volumeMounts:
                 - name: backups
                   mountPath: /data/backups
-                - name: filesystem-config
-                  mountPath: /config/repository.config
-                  subPath: repository.config
-                  readOnly: true
-                - name: s3-config
-                  mountPath: /config/s3.config
-                  subPath: repository.config
+                - name: config
+                  mountPath: /config
                   readOnly: true
           volumes:
             - name: backups
               nfs:
                 server: "expanse.${SECRET_PRIVATE_DOMAIN}"
                 path: /tycho/Apps/External/Backups/kopia
-            - name: filesystem-config
+            - name: config
               projected:
                 defaultMode: 0775
                 sources:
@@ -57,12 +52,8 @@ spec:
                       items:
                         - key: repository.config
                           path: repository.config
-            - name: s3-config
-              projected:
-                defaultMode: 0775
-                sources:
                   - secret:
                       name: kopia-s3
                       items:
-                        - key: repository.config
-                          path: repository.config
+                        - key: s3.config
+                          path: s3.config
