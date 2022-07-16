@@ -1,6 +1,8 @@
 # kopia
 
-## Setup repository replication
+## Setup CronJob repository replication
+
+This will set up replication to have your backups replicated to a [backblaze](https://www.backblaze.com/) b2 bucket.
 
 1. Create master `key-id` and `key` on [Account > App Keys](https://secure.backblaze.com/app_keys.htm)
 
