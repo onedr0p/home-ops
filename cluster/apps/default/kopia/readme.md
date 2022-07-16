@@ -11,7 +11,7 @@ This will set up replication to have your backups sent to a [backblaze](https://
     export B2_APPLICATION_KEY_ID="<master-key-id>"
     export B2_APPLICATION_KEY="<master-key>"
     export B2_BUCKET_NAME="<bucket-name>"
-    b2 create-bucket $B2_BUCKET_NAME --fileLockEnabled --defaultServerSideEncryption "SSE-B2"
+    b2 create-bucket $B2_BUCKET_NAME allPrivate --defaultServerSideEncryption "SSE-B2"  --lifecycleRules '[{"daysFromHidingToDeleting": 1,"daysFromUploadingToHiding": null,"fileNamePrefix": ""}]'
     b2 create-key --bucket $B2_BUCKET_NAME $B2_BUCKET_NAME listBuckets,readBuckets,listFiles,readFiles,writeFiles,readBucketEncryption,readBucketReplications,readBucketRetentions,readFileRetentions,writeFileRetentions,readFileLegalHolds
     ```
 
