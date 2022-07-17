@@ -9,12 +9,12 @@ tasks:
     cmds:
       - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
       - kubectl -n {{.NAMESPACE}} scale deployment {{.APP}} --replicas 0
-      - kubectl -n {{.NAMESPACE}} wait --for delete pod --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
+      - kubectl -n {{.NAMESPACE}} wait pod --for delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
       - envsubst < <(cat ./hack/restore-job.yaml) | kubectl apply -f -
-      - kubectl -n {{.NAMESPACE}} wait --for condition=complete job {{.APP}}-restore --timeout=60m
+      - kubectl -n {{.NAMESPACE}} wait job --for condition=complete {{.APP}}-restore --timeout=60m
       - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
-      - kubectl -n {{.NAMESPACE}} logs job/{{.APP}}-restore
-      - defer: kubectl -n {{.NAMESPACE}} delete job/{{.APP}}-restore
+      - kubectl -n {{.NAMESPACE}} logs job {{.APP}}-restore
+      - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-restore
     vars:
       NAMESPACE:
         sh: kubectl get pvc -A | grep {{.PVC}} | awk '{print $1}'
