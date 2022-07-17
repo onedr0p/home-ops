@@ -11,33 +11,28 @@
   tasks:
     - name: Fetch service account for home-dns
       ansible.builtin.set_fact:
-        dns_service_account_raw: |-
-          {{ lookup("kubernetes.core.k8s", kubeconfig=playbook_dir + "/../../../cluster/kubeconfig", namespace="kube-system", kind="ServiceAccount", resource_name="home-dns") }}
+        dns_service_account_raw: "{{ lookup('kubernetes.core.k8s', kubeconfig=playbook_dir + '/../../../cluster/kubeconfig', namespace='kube-system', kind='ServiceAccount', resource_name='home-dns') }}"
 
     - name: Extract service account token from service account
       ansible.builtin.set_fact:
-        dns_service_account_token: |-
-          {{ dns_service_account_raw | json_query("secrets[*].name | [0]") }}
+        dns_service_account_token: "{{ dns_service_account_raw | json_query('secrets[*].name | [0]') }}"
 
     - name: Fetch CA
       ansible.builtin.set_fact:
-        dns_certificate_authority_raw: |-
-          {{ lookup("kubernetes.core.k8s", kubeconfig=playbook_dir + "/../../../cluster/kubeconfig", namespace="kube-system", kind="Secret", resource_name=dns_service_account_token) }}
+        dns_certificate_authority_raw: "{{ lookup('kubernetes.core.k8s', kubeconfig=playbook_dir + '/../../../cluster/kubeconfig', namespace='kube-system', kind='Secret', resource_name=dns_service_account_token) }}"
 
     - name: Extract CA Cert from CA
       ansible.builtin.set_fact:
-        dns_certificate_authority: |-
-          {{ dns_certificate_authority_raw | json_query("data.'ca.crt'") }}
+        dns_certificate_authority: '{{ dns_certificate_authority_raw | json_query(''data."ca.crt"'') }}'
 
     - name: Extract CA Token from CA
       ansible.builtin.set_fact:
-        dns_certificate_authority_token: |-
-          {{ dns_certificate_authority_raw | json_query("data.token") | b64decode }}
+        dns_certificate_authority_token: "{{ dns_certificate_authority_raw | json_query('data.token') | b64decode }}"
 
     - name: Create kubeconfig
       ansible.builtin.copy:
         dest: /tmp/kubeconfig-homedns
-        content: |-
+        content: |
           ---
           apiVersion: v1
           kind: Config
