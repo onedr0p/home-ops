@@ -22,5 +22,7 @@ tasks:
       TS: |-
         {{now | date "20060102150405"}}
     preconditions:
+      - sh: kubectl -n {{.NAMESPACE}} get cronjob {{.APP}}-backup
+        msg: "Error: cronjob/{{.APP}}-backup in namespace/{{.NAMESPACE}} not found"
       - sh: kubectl -n {{.NAMESPACE}} get pvc {{.PVC}}
         msg: "Error: pvc/{{.PVC}} in namespace/{{.NAMESPACE}} not found"
