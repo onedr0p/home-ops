@@ -19,8 +19,8 @@ tasks:
         sh: kubectl get pvc -A | grep {{.PVC}} | awk '{print $1}'
       APP:
         sh: kubectl -n {{.NAMESPACE}} get pvc {{.PVC}} -o jsonpath='{.metadata.labels.app\.kubernetes\.io\/name}'
-      TS: |-
-        {{now | date "20060102150405"}}
+      TS:
+        sh: date "+%Y%m%d%H%M%S"
     preconditions:
       - sh: kubectl -n {{.NAMESPACE}} get cronjob {{.APP}}-backup
         msg: "Error: cronjob/{{.APP}}-backup in namespace/{{.NAMESPACE}} not found"
