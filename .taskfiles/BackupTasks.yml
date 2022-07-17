@@ -11,13 +11,9 @@ tasks:
         kubectl -n {{.NAMESPACE}} create job --from=cronjob/{{.APP}}-backup {{.APP}}-backup-{{.TS}} --dry-run=client --output yaml \
           | yq eval "del(.spec.template.spec.initContainers)" - \
           | kubectl apply -f -
-      - kubectl -n {{.NAMESPACE}} wait job --for condition=complete {{.APP}}-backup-{{.TS}} --timeout=60m
-      - kubectl -n {{.NAMESPACE}} logs --selector=job-name={{.APP}}-backup-{{.TS}}
-      - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
-      - kubectl -n {{.NAMESPACE}} scale deployment {{.APP}} --replicas 0
-      # - kubectl -n {{.NAMESPACE}} wait pod --for condition=ready --selector=job-name={{.APP}}-backup-{{.TS}} --timeout=1m
-      # - kubectl -n {{.NAMESPACE}} logs --selector=job-name={{.APP}}-backup-{{.TS}} -f
-      # - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-backup-{{.TS}}
+      - kubectl -n {{.NAMESPACE}} wait pod --for condition=ready --selector=job-name={{.APP}}-backup-{{.TS}} --timeout=1m
+      - kubectl -n {{.NAMESPACE}} logs --selector=job-name={{.APP}}-backup-{{.TS}} -f
+      - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-backup-{{.TS}}
     vars:
       NAMESPACE:
         sh: kubectl get pvc -A | grep {{.PVC}} | awk '{print $1}'
@@ -30,15 +26,3 @@ tasks:
         msg: "Error: cronjob/{{.APP}}-backup in namespace/{{.NAMESPACE}} not found"
       - sh: kubectl -n {{.NAMESPACE}} get pvc {{.PVC}}
         msg: "Error: pvc/{{.PVC}} in namespace/{{.NAMESPACE}} not found"
-
-  temp:
-    desc: Backup all the PVCs with pmb annotations
-    interactive: true
-    cmds:
-      - |
-        for volume in {{.VOLUMES | catLines}}; do
-          task PVC=$volume backup:volume
-        done
-    vars:
-      VOLUMES:
-        sh: kubectl get pvc -n media --no-headers -l 'pmb.home.arpa/backup=true' | awk '{print $1}'

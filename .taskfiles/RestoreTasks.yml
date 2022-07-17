@@ -13,7 +13,7 @@ tasks:
       - envsubst < <(cat ./hack/restore-job.yaml) | kubectl apply -f -
       - kubectl -n {{.NAMESPACE}} wait job --for condition=complete {{.APP}}-restore --timeout=60m
       - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
-      - kubectl -n {{.NAMESPACE}} logs job {{.APP}}-restore
+      - kubectl -n {{.NAMESPACE}} logs job/{{.APP}}-restore
       - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-restore
     vars:
       NAMESPACE:
