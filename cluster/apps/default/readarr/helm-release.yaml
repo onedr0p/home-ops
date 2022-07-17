@@ -1,0 +1,84 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app readarr
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: kah-common-chart
+      version: 1.1.2
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 15m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    global:
+      nameOverride: *app
+    controller:
+      labels:
+        pmb.home.arpa/backup-claim: &claimName "readarr-config-v1"
+    image:
+      repository: ghcr.io/onedr0p/readarr-nightly
+      tag: 0.1.1.1377@sha256:70a793d877a29a358c94f474a5cec92c68e24eb78f4cc709a2b02f9131e2da4d
+    env:
+      TZ: "${TIMEZONE}"
+      READARR__INSTANCE_NAME: Readarr (Audio)
+      READARR__PORT: &port 80
+      READARR__BRANCH: develop
+      READARR__LOG_LEVEL: info
+    envFrom:
+      - secretRef:
+          name: *app
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+          nginx.ingress.kubernetes.io/configuration-snippet: |-
+            proxy_set_header Accept-Encoding "";
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/readarr/nord.css"></head>';
+            sub_filter_once on;
+        hosts:
+          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    podSecurityContext:
+      supplementalGroups:
+        - 100
+    persistence:
+      config:
+        enabled: true
+        existingClaim: *claimName
+      media:
+        enabled: true
+        type: nfs
+        server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+        path: /tycho/Media
+        mountPath: /media
+    resources:
+      requests:
+        cpu: 10m
+        memory: 250Mi
+      limits:
+        memory: 1000Mi

@@ -2,8 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  # TODO(rook-ceph): Rename HR to rook-ceph-operator
-  name: rook-ceph
+  name: rook-ceph-operator
   namespace: rook-ceph
 spec:
   interval: 15m
@@ -17,19 +16,14 @@ spec:
         namespace: flux-system
   install:
     createNamespace: true
-    # TODO(rook-ceph): On rebuild, switch CRDs to be managed outside helm release
-    crds: CreateReplace
     remediation:
       retries: 5
   upgrade:
-    # TODO(rook-ceph): On rebuild, switch CRDs to be managed outside helm release
-    crds: CreateReplace
     remediation:
       retries: 5
   values:
-    # TODO(rook-ceph): On rebuild, switch CRDs to be managed outside helm release
     crds:
-      enabled: true
+      enabled: false
     monitoring:
       enabled: true
     resources:

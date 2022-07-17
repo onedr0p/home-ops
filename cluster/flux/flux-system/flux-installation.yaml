@@ -1,0 +1,60 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: flux-installation
+  namespace: flux-system
+spec:
+  interval: 10m
+  ref:
+    # renovate: datasource=github-releases depName=fluxcd/flux2
+    tag: "v0.31.3"
+  url: https://github.com/fluxcd/flux2
+  ignore: |
+    # exclude all
+    /*
+    # path to manifests
+    !/manifests
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: flux-installation
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./manifests/install
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-installation
+  patches:
+    - target:
+        kind: Deployment
+        labelSelector: control-plane=controller
+      patch: |-
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: not-used
+        spec:
+          template:
+            spec:
+              containers:
+                - name: manager
+                  resources:
+                    requests:
+                      memory: 512Mi
+                    limits:
+                      memory: "2Gi"
+    - target:
+        group: networking.k8s.io
+        version: v1
+        kind: NetworkPolicy
+      patch: |-
+        $patch: delete
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        metadata:
+          name: not-used

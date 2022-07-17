@@ -1,0 +1,25 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: qbittorrent-tracker-errors
+  namespace: default
+spec:
+  schedule: "@hourly"
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 3600
+      template:
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          containers:
+            - name: qbittorrent-scripts
+              image: ghcr.io/k8s-at-home/qbittorrent-scripts:v1.0.2
+              env:
+                - name: QB_HOST
+                  value: http://qbittorrent:80
+                - name: QB_TAG
+                  value: "Tracker Errors"
+              args:
+                - "/app/tag-tracker-errors.py"

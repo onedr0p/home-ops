@@ -9,8 +9,6 @@ k3s_control_node: true
 k3s_server:
   node-ip: "{{ ansible_host }}"
   tls-san:
-    # # kube-vip
-    # - "{{ kubevip_address }}"
     # haproxy
     - "{{ k3s_registration_address }}"
   docker: false
@@ -23,22 +21,21 @@ k3s_server:
     - local-storage
   disable-network-policy: true
   disable-cloud-controller: true
-  write-kubeconfig-mode: "644"
   # Network CIDR to use for pod IPs
-  cluster-cidr: "10.69.0.0/16"
+  cluster-cidr: "10.42.0.0/16"
   # Network CIDR to use for service IPs
-  service-cidr: "10.96.0.0/16"
+  service-cidr: "10.43.0.0/16"
   # Required to monitor component with kube-prometheus-stack
   etcd-expose-metrics: true
   kubelet-arg:
     # Enable Alpha/Beta features
-    - "feature-gates=EphemeralContainers=true,MixedProtocolLBService=true,ReadWriteOncePod=true"
+    - "feature-gates=MixedProtocolLBService=true"
     # Allow pods to be rescheduled quicker in the case of a node failure
     # https://github.com/k3s-io/k3s/issues/1264
     - "node-status-update-frequency=4s"
   kube-controller-manager-arg:
     # Enable Alpha/Beta features
-    - "feature-gates=EphemeralContainers=true,MixedProtocolLBService=true,ReadWriteOncePod=true"
+    - "feature-gates=MixedProtocolLBService=true"
     # Required to monitor component with kube-prometheus-stack
     - "bind-address=0.0.0.0"
     # Allow pods to be rescheduled quicker in the case of a node failure
@@ -48,17 +45,21 @@ k3s_server:
     - "pod-eviction-timeout=20s"
   kube-proxy-arg:
     # Enable Alpha/Beta features
-    - "feature-gates=EphemeralContainers=true,MixedProtocolLBService=true,ReadWriteOncePod=true"
+    - "feature-gates=MixedProtocolLBService=true"
     # Required to monitor component with kube-prometheus-stack
     - "metrics-bind-address=0.0.0.0"
   kube-scheduler-arg:
     # Enable Alpha/Beta features
-    - "feature-gates=EphemeralContainers=true,MixedProtocolLBService=true,ReadWriteOncePod=true"
+    - "feature-gates=MixedProtocolLBService=true"
     # Required to monitor component with kube-prometheus-stack
     - "bind-address=0.0.0.0"
   kube-apiserver-arg:
+    # Enable the audit log
+    - "--audit-log-path=/var/lib/rancher/k3s/audit.log"
+    - "--audit-policy-file=/var/lib/rancher/k3s/audit-policy.yaml"
+    - "--audit-log-maxage=2"
     # Enable Alpha/Beta features
-    - "feature-gates=EphemeralContainers=true,MixedProtocolLBService=true,ReadWriteOncePod=true"
+    - "feature-gates=MixedProtocolLBService=true"
     # Required for HAProxy health-checks
     - "anonymous-auth=true"
     # Allow pods to be rescheduled quicker in the case of a node failure

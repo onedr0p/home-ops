@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: plex-config-v1
+  namespace: default
+  labels:
+    app.kubernetes.io/name: &name plex
+    app.kubernetes.io/instance: *name
+    pmb.home.arpa/backup: "true"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: ceph-block
