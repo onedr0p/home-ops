@@ -2,18 +2,18 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: pmb-operator
+  name: create-snapshot-cronjob
   annotations:
-    policies.kyverno.io/title: pmb-operator
+    policies.kyverno.io/title: Create snapshot cronjob
     policies.kyverno.io/subject: Deployment,StatefulSet
     policies.kyverno.io/description: >-
-      This policy generates a snapshot CronJob for Deployments
-      or StatefulSets with the 'pmb.home.arpa/snapshot-claim' label.
+      This policy creates a snapshot CronJob for Deployments or
+      StatefulSets that contain the 'pmb.home.arpa/snapshot-claim' label
 spec:
   generateExistingOnPolicyUpdate: true
   mutateExistingOnPolicyUpdate: true
   rules:
-    - name: pmb-operator
+    - name: create-snapshot-cronjob
       match:
         any:
           - resources:
