@@ -29,9 +29,8 @@ tasks:
 
   list:
     desc: List all existing snapshots for an app (task APP=plex [KOPIA_NAMESPACE=<namespace>] restore:list)
-    silent: true
+    silent: false
     cmds:
-      - printf "\e[1;35m%-6s\e[m\n" "List snapshots for {{.APP}} ..."
       - kubectl -n {{.KOPIA_NAMESPACE | default "default"}} exec -it deployment/kopia -- kopia snapshot list /{{.APP}} {{.CLI_ARGS}}
     preconditions:
       - sh: kubectl -n {{.KOPIA_NAMESPACE | default "default"}} get deployment kopia
@@ -40,18 +39,14 @@ tasks:
 
   create:
     desc: Spawn a job to create a snapshot for an app (task APP=plex snapshot:create)
-    silent: true
+    silent: false
     cmds:
-      - printf "\e[1;35m%-6s\e[m\n" "Create snapshot for volume '{{.VOLUME}}' and '{{.APP}}' in namespace '{{.NAMESPACE}}' ..."
       - |
         kubectl -n {{.NAMESPACE}} create job --from=cronjob/{{.APP}}-snapshot {{.APP}}-snapshot-{{.TS}} --dry-run=client --output yaml \
           | yq eval "del(.spec.template.spec.initContainers)" - \
           | kubectl apply -f -
-      - printf "\e[1;35m%-6s\e[m\n" "Wait for '{{.APP}}-snapshot-{{.TS}}' job to run ..."
       - kubectl -n {{.NAMESPACE}} wait pod --for condition=ready --selector=job-name={{.APP}}-snapshot-{{.TS}} --timeout=1m
-      - printf "\e[1;35m%-6s\e[m\n" "Tail logs for '{{.APP}}-snapshot-{{.TS}}' job ..."
       - kubectl -n {{.NAMESPACE}} logs --selector=job-name={{.APP}}-snapshot-{{.TS}} -f
-      - printf "\e[1;35m%-6s\e[m\n" "Delete '{{.APP}}-snapshot-{{.TS}}' job ..."
       - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-snapshot-{{.TS}}
     vars: *vars
     preconditions: *preconditions
@@ -60,21 +55,13 @@ tasks:
     desc: Spawn a job to restore an app from a snapshot (task APP=plex [SNAPSHOT=(latest|<snapshot-id>) KOPIA_NAMESPACE=<namespace>] snapshot:restore)
     silent: true
     cmds:
-      - printf "\e[1;35m%-6s\e[m\n" "Suspend '{{.APP}}' HelmRelease ..."
       - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
-      - printf "\e[1;35m%-6s\e[m\n" "Scale '{{.NAME}}' to 0 replicas ..."
       - kubectl -n {{.NAMESPACE}} scale deployment {{.APP}} --replicas 0
-      - printf "\e[1;35m%-6s\e[m\n" "Wait for '{{.NAME}}' pod to terminate ..."
       - kubectl -n {{.NAMESPACE}} wait pod --for delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
-      - printf "\e[1;35m%-6s\e[m\n" "Restore volume '{{.VOLUME}}' for '{{.NAME}}' in namespace '{{.NAMESPACE}}' using snapshot id '$SNAPSHOT' ..."
       - envsubst < <(cat ./hack/restore-job.yaml) | kubectl apply -f -
-      - printf "\e[1;35m%-6s\e[m\n" "Wait for restore '{{.APP}}-restore-snapshot' job to complete ..."
       - kubectl -n {{.NAMESPACE}} wait job --for condition=complete {{.APP}}-restore-snapshot --timeout=120m
-      - printf "\e[1;35m%-6s\e[m\n" "Resume '{{.APP}}' HelmRelease ..."
       - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
-      - printf "\e[1;35m%-6s\e[m\n" "Show logs for '{{.APP}}-restore-snapshot' job ..."
       - kubectl -n {{.NAMESPACE}} logs job/{{.APP}}-restore-snapshot
-      - printf "\e[1;35m%-6s\e[m\n" "Delete '{{.APP}}-restore-snapshot' job ..."
       - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-restore-snapshot
     vars: *vars
     env:
