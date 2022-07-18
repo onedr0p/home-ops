@@ -27,7 +27,7 @@ spec:
       nameOverride: *app
     controller:
       labels:
-        pmb.home.arpa/backup-claim: &claimName "lidarr-config-v1"
+        pmb.home.arpa/snapshot-claim: &claimName "lidarr-config-v1"
     image:
       repository: ghcr.io/onedr0p/lidarr
       tag: 1.0.2.2592@sha256:bc8b15eca2f4982f06d145b559d670f2a89f8361355320451593b2298ba9f023
@@ -50,7 +50,6 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/lidarr/nord.css"></head>';

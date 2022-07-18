@@ -27,7 +27,7 @@ spec:
       nameOverride: *app
     controller:
       labels:
-        pmb.home.arpa/backup-claim: &claimName "prowlarr-config-v1"
+        pmb.home.arpa/snapshot-claim: &claimName "prowlarr-config-v1"
     image:
       repository: ghcr.io/onedr0p/prowlarr-nightly
       tag: 0.4.3.1905@sha256:6ab6eeda688638c62fe8a08cae069762517f8b1c83342d92beff004f90ebe0a6
@@ -50,7 +50,6 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/prowlarr/nord.css"></head>';

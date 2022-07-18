@@ -31,7 +31,7 @@ spec:
       nameOverride: *app
     controller:
       labels:
-        pmb.home.arpa/backup-claim: &claimName "jellyfin-config-v1"
+        pmb.home.arpa/snapshot-claim: &claimName "jellyfin-config-v1"
     image:
       repository: ghcr.io/onedr0p/jellyfin
       tag: 10.8.1@sha256:2394e5ee4b31872bed3c0e72dfb20e6b73029243fece8702e2cbd59b8480be1c
@@ -50,8 +50,6 @@ spec:
       main:
         enabled: true
         ingressClassName: "nginx"
-        annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
         hosts:
           - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
             paths:

@@ -27,7 +27,7 @@ spec:
       nameOverride: *app
     controller:
       labels:
-        pmb.home.arpa/backup-claim: &claimName "sabnzbd-config-v1"
+        pmb.home.arpa/snapshot-claim: &claimName "sabnzbd-config-v1"
     image:
       repository: ghcr.io/onedr0p/sabnzbd
       tag: 3.6.0@sha256:47de9cea07d6dc96a31be2e5a069665c09342016cbaf683ab5303d7b7a5154e2
@@ -54,7 +54,6 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
             sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/sabnzbd/nord.css"></head>';

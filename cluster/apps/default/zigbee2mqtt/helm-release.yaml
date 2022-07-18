@@ -27,7 +27,7 @@ spec:
       nameOverride: *app
     controller:
       labels:
-        pmb.home.arpa/backup-claim: &claimName "zigbee2mqtt-config-v1"
+        pmb.home.arpa/snapshot-claim: &claimName "zigbee2mqtt-config-v1"
     image:
       repository: ghcr.io/koenkk/zigbee2mqtt
       tag: 1.26.0
@@ -43,8 +43,6 @@ spec:
       main:
         enabled: true
         ingressClassName: "nginx"
-        annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
         hosts:
           - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
             paths:
