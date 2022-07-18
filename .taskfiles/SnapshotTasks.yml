@@ -17,9 +17,9 @@ x-preconditions: &preconditions
 
 x-vars: &vars
   NAMESPACE:
-    sh: kubectl get deploy,sts -A | grep {{.APP}} | awk '{print $1}'
+    sh: kubectl get deploy,sts -A | awk '/{{.APP}}\s/{print $1}'
   NAME:
-    sh: kubectl get deploy,sts -n {{.NAMESPACE}} | grep {{.APP}} | awk '{print $1}'
+    sh: kubectl get deploy,sts -n {{.NAMESPACE}} | awk '/{{.APP}}\s/{print $1}'
   VOLUME:
     sh: kubectl get pvc -n {{.NAMESPACE}} --no-headers -l "app.kubernetes.io/name={{.APP}}" | awk '{print $1}'
   SNAPSHOT: '{{.SNAPSHOT | default "latest"}}'
@@ -53,7 +53,7 @@ tasks:
     desc: Spawn a job to restore an app from a snapshot (task APP=plex [SNAPSHOT=(latest|<snapshot-id>) KOPIA_NAMESPACE=<namespace>] snapshot:restore)
     cmds:
       - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
-      - kubectl -n {{.NAMESPACE}} scale deployment {{.APP}} --replicas 0
+      - kubectl -n {{.NAMESPACE}} scale {{.NAME}} --replicas 0
       - kubectl -n {{.NAMESPACE}} wait pod --for delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
       - envsubst < <(cat ./hack/restore-job.yaml) | kubectl apply -f -
       - kubectl -n {{.NAMESPACE}} wait job --for condition=complete {{.APP}}-restore-snapshot --timeout=120m
