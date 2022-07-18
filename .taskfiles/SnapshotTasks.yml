@@ -29,7 +29,6 @@ tasks:
 
   list:
     desc: List all existing snapshots for an app (task APP=plex [KOPIA_NAMESPACE=<namespace>] restore:list)
-    silent: false
     cmds:
       - kubectl -n {{.KOPIA_NAMESPACE | default "default"}} exec -it deployment/kopia -- kopia snapshot list /{{.APP}} {{.CLI_ARGS}}
     preconditions:
@@ -39,7 +38,6 @@ tasks:
 
   create:
     desc: Spawn a job to create a snapshot for an app (task APP=plex snapshot:create)
-    silent: false
     cmds:
       - |
         kubectl -n {{.NAMESPACE}} create job --from=cronjob/{{.APP}}-snapshot {{.APP}}-snapshot-{{.TS}} --dry-run=client --output yaml \
@@ -53,7 +51,6 @@ tasks:
 
   restore:
     desc: Spawn a job to restore an app from a snapshot (task APP=plex [SNAPSHOT=(latest|<snapshot-id>) KOPIA_NAMESPACE=<namespace>] snapshot:restore)
-    silent: true
     cmds:
       - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
       - kubectl -n {{.NAMESPACE}} scale deployment {{.APP}} --replicas 0
