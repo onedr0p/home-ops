@@ -1,0 +1,137 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: gitea
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: gitea
+      version: 5.0.9
+      sourceRef:
+        kind: HelmRepository
+        name: gitea-charts
+        namespace: flux-system
+      interval: 15m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    image:
+      rootless: true
+    containerSecurityContext:
+      capabilities:
+        add:
+          - SYS_CHROOT
+    ingress:
+      enabled: true
+      ingressClassName: "nginx"
+      hosts:
+        - host: &host "gitea.${SECRET_PUBLIC_DOMAIN}"
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - *host
+    memcached:
+      enabled: false
+    postgresql:
+      enabled: false
+    persistence:
+      enabled: true
+      existingClaim: gitea-config-v1
+    signing:
+      enabled: true
+      gpgHome: /data/git/.gnupg
+    gitea:
+      config:
+        APP_NAME: Tea, Git, Hot
+        server:
+          DISABLE_SSH: true
+          DOMAIN: "gitea.${SECRET_PUBLIC_DOMAIN}"
+          ROOT_URL: "https://gitea.${SECRET_PUBLIC_DOMAIN}"
+          ENABLE_GZIP: true
+          LANDING_PAGE: explore
+          LFS_START_SERVER: true
+          ALLOW_GRACEFUL_RESTARTS: true
+        admin:
+          DISABLE_REGULAR_ORG_CREATION: true
+        ui:
+          DEFAULT_THEME: arc-green
+        repository:
+          DEFAULT_BRANCH: main
+          DEFAULT_PRIVATE: true
+        database:
+          DB_TYPE: sqlite3
+        service:
+          DISABLE_REGISTRATION: true
+          REQUIRE_SIGNIN_VIEW: true
+          DEFAULT_KEEP_EMAIL_PRIVATE: true
+          DEFAULT_ALLOW_CREATE_ORGANIZATION: false
+          DEFAULT_USER_IS_RESTRICTED: true
+        cron:
+          ENABLED: true
+        attachment:
+          STORAGE_TYPE: minio
+          MINIO_ENDPOINT: minio:9000
+          MINIO_BUCKET: gitea
+        storage:
+          STORAGE_TYPE: minio
+          MINIO_ENDPOINT: minio:9000
+          MINIO_BUCKET: gitea
+        mailer:
+          enabled: true
+          mailer_type: smtp
+          host: smtp.mailgun.org
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+  valuesFrom:
+    - targetPath: gitea.admin.email
+      kind: Secret
+      name: gitea-config
+      valuesKey: email
+    - targetPath: gitea.admin.username
+      kind: Secret
+      name: gitea-config
+      valuesKey: username
+    - targetPath: gitea.admin.password
+      kind: Secret
+      name: gitea-config
+      valuesKey: password
+    - targetPath: gitea.config.attachment.MINIO_ACCESS_KEY_ID
+      kind: Secret
+      name: gitea-config
+      valuesKey: minio_access_key_id
+    - targetPath: gitea.config.attachment.MINIO_SECRET_ACCESS_KEY
+      kind: Secret
+      name: gitea-config
+      valuesKey: minio_secret_access_key
+    - targetPath: gitea.config.storage.MINIO_ACCESS_KEY_ID
+      kind: Secret
+      name: gitea-config
+      valuesKey: minio_access_key_id
+    - targetPath: gitea.config.storage.MINIO_SECRET_ACCESS_KEY
+      kind: Secret
+      name: gitea-config
+      valuesKey: minio_secret_access_key
+    - targetPath: gitea.config.mailer.user
+      kind: Secret
+      name: gitea-config
+      valuesKey: smtp_user
+    - targetPath: gitea.config.mailer.passwd
+      kind: Secret
+      name: gitea-config
+      valuesKey: smtp_password
+    - targetPath: gitea.config.mailer.from
+      kind: Secret
+      name: gitea-config
+      valuesKey: smtp_user
