@@ -23,6 +23,9 @@ spec:
     remediation:
       retries: 5
   values:
+    statefulset:
+      labels:
+        pmb.home.arpa/backup-claim: &claimName "gitea-config-v1"
     image:
       rootless: true
     containerSecurityContext:
@@ -46,7 +49,7 @@ spec:
       enabled: false
     persistence:
       enabled: true
-      existingClaim: gitea-config-v1
+      existingClaim: *claimName
     signing:
       enabled: true
       gpgHome: /data/git/.gnupg
