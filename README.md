@@ -103,6 +103,7 @@ Some important notes on the implementation of this method:
 - Ensure the `PersistentVolumeClaim` resources all contain the labels `app.kubernetes.io/name`, `app.kubernetes.io/instance`, and `pmb.home.arpa/snapshot`
 - Kopia has a Web UI which you can deploy into your cluster to have access to the repository via the UI or by executing into the `Pod` and using the Kopia CLI. This deployment is required if using the [Taskfile](https://taskfile.dev/) `snapshot:create` and `snapshot:restore` tasks I created.
 - Recovery is done manually by using a different `Job` which utilizes a task with Taskfile I wrote a task that creates a restore `Job` that shutdowns the app and restores a snapshot from the Kopia repository into the apps' data `PersistentVolumeClaim` and then puts the app back into a running state
+- There is another `CronJob` that syncs the Kopia repository to Backblaze B2 everyday.
 
 ---
 
