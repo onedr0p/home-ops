@@ -68,14 +68,14 @@ tasks:
       - kubectl -n {{.NAMESPACE}} wait pod --for delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
       - printf "\e[1;35m%-6s\e[m\n" "Restore volume '{{.VOLUME}}' for '{{.NAME}}' in namespace '{{.NAMESPACE}}' using snapshot id '$SNAPSHOT' ..."
       - envsubst < <(cat ./hack/restore-job.yaml) | kubectl apply -f -
-      - printf "\e[1;35m%-6s\e[m\n" "Wait for restore '{{.APP}}-restore' job to complete ..."
-      - kubectl -n {{.NAMESPACE}} wait job --for condition=complete {{.APP}}-restore --timeout=120m
+      - printf "\e[1;35m%-6s\e[m\n" "Wait for restore '{{.APP}}-restore-snapshot' job to complete ..."
+      - kubectl -n {{.NAMESPACE}} wait job --for condition=complete {{.APP}}-restore-snapshot --timeout=120m
       - printf "\e[1;35m%-6s\e[m\n" "Resume '{{.APP}}' HelmRelease ..."
       - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
-      - printf "\e[1;35m%-6s\e[m\n" "Show logs for '{{.APP}}-restore' job ..."
-      - kubectl -n {{.NAMESPACE}} logs job/{{.APP}}-restore
-      - printf "\e[1;35m%-6s\e[m\n" "Delete '{{.APP}}-restore' job ..."
-      - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-restore
+      - printf "\e[1;35m%-6s\e[m\n" "Show logs for '{{.APP}}-restore-snapshot' job ..."
+      - kubectl -n {{.NAMESPACE}} logs job/{{.APP}}-restore-snapshot
+      - printf "\e[1;35m%-6s\e[m\n" "Delete '{{.APP}}-restore-snapshot' job ..."
+      - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-restore-snapshot
     vars: *vars
     env:
       APP: "{{.APP}}"
