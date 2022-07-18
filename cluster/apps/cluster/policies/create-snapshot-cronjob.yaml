@@ -17,9 +17,7 @@ spec:
       match:
         any:
           - resources:
-              kinds:
-                - Deployment
-                - StatefulSet
+              kinds: [Deployment, StatefulSet]
               selector:
                 matchLabels:
                   pmb.home.arpa/snapshot-claim: "*"
@@ -104,9 +102,5 @@ spec:
                       podAffinity:
                         requiredDuringSchedulingIgnoredDuringExecution:
                           - labelSelector:
-                              matchExpressions:
-                                - key: app.kubernetes.io/name
-                                  operator: In
-                                  values:
-                                    - "{{appName}}"
+                              matchExpressions: "{{ items(request.object.spec.selector.matchLabels, 'key', 'value')[].{key: key, operator: 'In', values: [value] } }}"
                             topologyKey: kubernetes.io/hostname

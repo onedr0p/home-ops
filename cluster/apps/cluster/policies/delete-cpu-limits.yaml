@@ -16,8 +16,14 @@ spec:
       match:
         any:
           - resources:
-              kinds:
-                - Pod
+              kinds: [Pod]
+      exclude:
+        any:
+          - resources:
+              kinds: [Pod]
+              selector:
+                matchLabels:
+                  job-name: "*"
       mutate:
         patchStrategicMerge:
           spec:
