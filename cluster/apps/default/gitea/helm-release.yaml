@@ -49,7 +49,7 @@ spec:
       enabled: false
     persistence:
       enabled: true
-      existingClaim: *claimName
+      existingClaim: &claimName "gitea-config-v1"
     signing:
       enabled: true
       gpgHome: /data/git/.gnupg
@@ -138,3 +138,14 @@ spec:
       kind: Secret
       name: gitea-config
       valuesKey: smtp_user
+  postRenderers:
+    - kustomize:
+        patchesJson6902:
+          - target:
+              kind: StatefulSet
+              name: gitea
+            patch:
+              - op: add
+                path: /spec/metadata/labels
+                value:
+                  pmb.home.arpa/snapshot-claim: *claimName
