@@ -67,7 +67,7 @@ This Git repository contains the following directories (_kustomizatons_) under [
 
 ```sh
 📁 cluster      # k8s cluster defined as code
-├─📁 base       # flux, gitops operator, loaded before everything
+├─📁 flux       # flux, gitops operator, loaded before everything
 ├─📁 crds       # custom resources, loaded before 📁 core and 📁 apps
 ├─📁 charts     # helm repos, loaded before 📁 core and 📁 apps
 ├─📁 config     # cluster config, loaded before 📁 core and 📁 apps
@@ -81,17 +81,28 @@ This Git repository contains the following directories (_kustomizatons_) under [
 |----------------------------------------------|-------------------|
 | Kubernetes Nodes                             | `192.168.42.0/24` |
 | Kubernetes external services (Calico w/ BGP) | `192.168.69.0/24` |
-| Kubernetes pods                              | `10.69.0.0/16`    |
-| Kubernetes services                          | `10.96.0.0/16`    |
+| Kubernetes pods                              | `10.42.0.0/16`    |
+| Kubernetes services                          | `10.43.0.0/16`    |
 
 - HAProxy configured on Opnsense for the Kubernetes Control Plane Load Balancer.
 - Calico configured with `externalIPs` to expose Kubernetes services with their own IP over BGP which is configured on my router.
 
-### Persistent Volume Data Backup and Recovery
+### Data Backup and Recovery
 
-This is a hard topic to explain because there isn't a single great tool to work with rook-ceph. There's [Velero](https://github.com/vmware-tanzu/velero), [Benji](https://github.com/elemental-lf/benji), [Gemini](https://github.com/FairwindsOps/gemini), and others but they all have different amount of issues or nuances which makes them unsable for me.
+Due to issues, retrictions or nuances with [Velero](https://github.com/vmware-tanzu/velero), [Benji](https://github.com/elemental-lf/benji), [Gemini](https://github.com/FairwindsOps/gemini), [Kasten K10 by Veeam](https://www.kasten.io/product/), [Stash by AppsCode](https://stash.run/) and others I am currently using a DIY _(or more specifically a "Poor Man's Backup")_ solution that is leveraging [Kyverno](https://kyverno.io/), [Kopia](https://kopia.io/) and native Kubernetes `CronJob` and `Job` resources.
 
-Currently I am leveraging [Kasten K10 by Veeam](https://www.kasten.io/product/) which does a good job of snapshotting Ceph block volumes and the exports the data in the snapshot to durable storage (S3 / NFS).
+At a high level the way this operates is that:
+
+- Kyverno creates a `CronJob` for each `Deployment` or `StatefulSet` resource that contain a label of `pmb.home.arpa/snapshot-claim="<pvc-claim>"`
+- Everyday the `CronJob` creates a `Job` and uses Kopia to connect to a Kopia repository on my NAS over NFS and then snapshots the contents of the app data mount into the Kopia repository
+
+Some important notes on the implementation of this method:
+
+- The snapshots made by Kopia are incremental which makes the `Job` run very quick.
+- The app data mount is frozen during backup to prevent writes and unfrozen when the snapshot is complete.
+- Ensure the `PersistentVolumeClaim` resources all contain the labels `app.kubernetes.io/name`, `app.kubernetes.io/instance`, and `pmb.home.arpa/snapshot`
+- Kopia has a Web UI which you can deploy into your cluster to have access to the repository via the UI or by executing into the `Pod` and using the Kopia CLI. This deployment is required if using the [Taskfile](https://taskfile.dev/) `snapshot:create` and `snapshot:restore` tasks I created.
+- Recovery is done manually by using a different `Job` which utilizes a task with Taskfile I wrote a task that creates a restore `Job` that shutdowns the app and restores a snapshot from the Kopia repository into the apps' data `PersistentVolumeClaim` and then puts the app back into a running state
 
 ---
 
