@@ -38,26 +38,26 @@ tasks:
         msg: |
           deployment/kopia in namespace/{{.KOPIA_NAMESPACE | default "default"}} not found
 
-  backup:
-    desc: Create a job to backup an app (task APP=plex snapshot:backup)
+  create:
+    desc: Spawn a job to create a snapshot for an app (task APP=plex snapshot:create)
     silent: true
     cmds:
-      - printf "\e[1;35m%-6s\e[m\n" "Backup volume '{{.VOLUME}}' for '{{.APP}}' in namespace '{{.NAMESPACE}}' ..."
+      - printf "\e[1;35m%-6s\e[m\n" "Create snapshot for volume '{{.VOLUME}}' and '{{.APP}}' in namespace '{{.NAMESPACE}}' ..."
       - |
-        kubectl -n {{.NAMESPACE}} create job --from=cronjob/{{.APP}}-backup {{.APP}}-backup-{{.TS}} --dry-run=client --output yaml \
+        kubectl -n {{.NAMESPACE}} create job --from=cronjob/{{.APP}}-snapshot {{.APP}}-snapshot-{{.TS}} --dry-run=client --output yaml \
           | yq eval "del(.spec.template.spec.initContainers)" - \
           | kubectl apply -f -
-      - printf "\e[1;35m%-6s\e[m\n" "Wait for '{{.APP}}-backup-{{.TS}}' job to run ..."
-      - kubectl -n {{.NAMESPACE}} wait pod --for condition=ready --selector=job-name={{.APP}}-backup-{{.TS}} --timeout=1m
-      - printf "\e[1;35m%-6s\e[m\n" "Tail logs for '{{.APP}}-backup-{{.TS}}' job ..."
-      - kubectl -n {{.NAMESPACE}} logs --selector=job-name={{.APP}}-backup-{{.TS}} -f
-      - printf "\e[1;35m%-6s\e[m\n" "Delete '{{.APP}}-backup-{{.TS}}' job ..."
-      - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-backup-{{.TS}}
+      - printf "\e[1;35m%-6s\e[m\n" "Wait for '{{.APP}}-snapshot-{{.TS}}' job to run ..."
+      - kubectl -n {{.NAMESPACE}} wait pod --for condition=ready --selector=job-name={{.APP}}-snapshot-{{.TS}} --timeout=1m
+      - printf "\e[1;35m%-6s\e[m\n" "Tail logs for '{{.APP}}-snapshot-{{.TS}}' job ..."
+      - kubectl -n {{.NAMESPACE}} logs --selector=job-name={{.APP}}-snapshot-{{.TS}} -f
+      - printf "\e[1;35m%-6s\e[m\n" "Delete '{{.APP}}-snapshot-{{.TS}}' job ..."
+      - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-snapshot-{{.TS}}
     vars: *vars
     preconditions: *preconditions
 
   restore:
-    desc: Create a job to restore an app (task APP=plex [SNAPSHOT=(latest|<snapshot-id>) KOPIA_NAMESPACE=<namespace>] snapshot:restore)
+    desc: Spawn a job to restore an app from a snapshot (task APP=plex [SNAPSHOT=(latest|<snapshot-id>) KOPIA_NAMESPACE=<namespace>] snapshot:restore)
     silent: true
     cmds:
       - printf "\e[1;35m%-6s\e[m\n" "Suspend '{{.APP}}' HelmRelease ..."
