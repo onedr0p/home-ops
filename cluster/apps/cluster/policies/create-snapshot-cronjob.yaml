@@ -104,5 +104,9 @@ spec:
                       podAffinity:
                         requiredDuringSchedulingIgnoredDuringExecution:
                           - labelSelector:
-                              matchExpressions: "{{ items(request.object.spec.selector.matchLabels, 'key', 'value')[].{key: key, operator: 'In', values: [value] } }}"
+                              matchExpressions:
+                                - key: app.kubernetes.io/name
+                                  operator: In
+                                  values:
+                                    - "{{appName}}"
                             topologyKey: kubernetes.io/hostname
