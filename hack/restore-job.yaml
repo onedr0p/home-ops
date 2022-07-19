@@ -2,8 +2,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "${APP}-restore-snapshot"
-  namespace: "${NAMESPACE}"
+  name: ${APP}-restore-snapshot
+  namespace: ${NAMESPACE}
 spec:
   ttlSecondsAfterFinished: 3600
   template:
@@ -21,22 +21,22 @@ spec:
             - -c
             - |-
               shopt -s dotglob
-              printf "\e[1;32m%-6s\e[m\n" "[01/03] Remove previous data ..." && rm -rf /data/config/*
-              printf "\e[1;32m%-6s\e[m\n" "[02/03] Connect to repo ..."      && kopia repo connect filesystem --path=/data/backups --override-hostname=cluster --override-username=root
-              printf "\e[1;32m%-6s\e[m\n" "[03/03] Restore snapshot ..."     && kopia snap restore "${SNAPSHOT}" /data/config
+              printf "\e[1;32m%-6s\e[m\n" "[01/03] Remove previous data ..." && rm -rf /data/${NAMESPACE}/${APP}/*
+              printf "\e[1;32m%-6s\e[m\n" "[02/03] Connect to repo ..."      && kopia repo connect filesystem --path=/snapshots --override-hostname=cluster --override-username=root
+              printf "\e[1;32m%-6s\e[m\n" "[03/03] Restore snapshot ..."     && kopia snap restore "${SNAPSHOT}" /data/${NAMESPACE}/${APP}
               printf "\e[1;32m%-6s\e[m\n" "[09/09] Disconnect from repo ..." && kopia repo disconnect
           volumeMounts:
-            - name: config
-              mountPath: /data/config
-            - name: backups
-              mountPath: /data/backups
+            - name: ${APP}-data
+              mountPath: /data/${NAMESPACE}/${APP}
+            - name: snapshots
+              mountPath: /snapshots
           securityContext:
             privileged: true
       volumes:
-        - name: config
+        - name: ${APP}-data
           persistentVolumeClaim:
-            claimName: "${VOLUME}"
-        - name: backups
+            claimName: ${VOLUME}
+        - name: snapshots
           nfs:
             server: expanse
-            path: /tycho/Apps/External/Backups/kopia
+            path: /tycho/Apps/External/Kopia
