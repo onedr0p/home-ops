@@ -3,7 +3,7 @@ version: "3"
 
 x-preconditions: &preconditions
   - &has-app
-    sh: kubectl get deploy,sts -A | grep {{.APP}}
+    sh: kubectl get deploy,sts -A | awk '/{{.APP}}\s/{print $1}' | grep .
     msg: "App '{{.APP}}' not found"
   - &has-cronjob
     sh: kubectl get cronjob -n {{.NAMESPACE}} {{.APP}}-snapshot
@@ -49,27 +49,27 @@ tasks:
     vars: *vars
     preconditions: *preconditions
 
-  restore:
-    desc: Spawn a job to restore an app from a snapshot (task APP=plex [SNAPSHOT=(latest|<snapshot-id>) KOPIA_NAMESPACE=<namespace>] snapshot:restore)
-    cmds:
-      - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
-      - kubectl -n {{.NAMESPACE}} scale {{.NAME}} --replicas 0
-      - kubectl -n {{.NAMESPACE}} wait pod --for delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
-      - envsubst < <(cat ./hack/restore-job.yaml) | kubectl apply -f -
-      - kubectl -n {{.NAMESPACE}} wait job --for condition=complete {{.APP}}-restore-snapshot --timeout=120m
-      - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
-      - kubectl -n {{.NAMESPACE}} logs job/{{.APP}}-restore-snapshot
-      - defer: kubectl -n {{.NAMESPACE}} delete job {{.APP}}-restore-snapshot
-    vars: *vars
-    env:
-      APP: "{{.APP}}"
-      NAMESPACE: "{{.NAMESPACE}}"
-      VOLUME: "{{.VOLUME}}"
-      SNAPSHOT:
-        sh: |
-          if [[ {{.SNAPSHOT}} == "latest" ]]; then
-            kubectl exec deployment/kopia -n {{.KOPIA_NAMESPACE | default "default"}} -- kopia snapshot list /{{.APP}} --json | jq --raw-output '.[-1] | .id'
-          else
-            echo {{.SNAPSHOT}}
-          fi
-    preconditions: *preconditions
+  # restore:
+  #   desc: Spawn a job to restore an app from a snapshot (task APP=plex [SNAPSHOT=(latest|<snapshot-id>) KOPIA_NAMESPACE=<namespace>] snapshot:restore)
+  #   cmds:
+  #     - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
+  #     - kubectl -n {{.NAMESPACE}} scale {{.NAME}} --replicas 0
+  #     - kubectl -n {{.NAMESPACE}} wait pod --for delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
+  #     - envsubst < <(cat ./hack/restore-job.yaml) | kubectl apply -f -
+  #     - kubectl -n {{.NAMESPACE}} wait job --for condition=complete {{.APP}}-restore-snapshot --timeout=120m
+  #     - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
+  #     - kubectl -n {{.NAMESPACE}} logs job/{{.APP}}-restore-snapshot
+  #     - defer: kubectl -n {{.NAMESPACE}} delete job {{.APP}}-restore-snapshot
+  #   vars: *vars
+  #   env:
+  #     APP: "{{.APP}}"
+  #     NAMESPACE: "{{.NAMESPACE}}"
+  #     VOLUME: "{{.VOLUME}}"
+  #     SNAPSHOT:
+  #       sh: |
+  #         if [[ {{.SNAPSHOT}} == "latest" ]]; then
+  #           kubectl exec deployment/kopia -n {{.KOPIA_NAMESPACE | default "default"}} -- kopia snapshot list /{{.APP}} --json | jq --raw-output '.[-1] | .id'
+  #         else
+  #           echo {{.SNAPSHOT}}
+  #         fi
+  #   preconditions: *preconditions
