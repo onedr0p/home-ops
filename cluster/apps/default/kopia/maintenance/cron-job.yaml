@@ -1,0 +1,48 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kopia-maintenance
+  namespace: default
+spec:
+  schedule: "0 6 * * 0"
+  suspend: false
+  concurrencyPolicy: "Forbid"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          containers:
+            - name: maintenance
+              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:db13525a2779b77e4c1db2e14470a369a2c8c9ebac575706c1141f0a786c7f62
+              env:
+                - name: TZ
+                  value: "${TIMEZONE}"
+                - name: KOPIA_CACHE_DIRECTORY
+                  value: /snapshots/cache
+                - name: KOPIA_LOG_DIR
+                  value: /snapshots/logs
+                - name: KOPIA_PASSWORD
+                  value: "none"
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  printf "\e[1;32m%-6s\e[m\n" "[01/03] Connect to repo ..."      && kopia repo connect filesystem --path=/snapshots --override-hostname=cluster --override-username=root
+                  printf "\e[1;32m%-6s\e[m\n" "[02/03] Run maintenance ..."      && kopia maintenance run --full
+                  printf "\e[1;32m%-6s\e[m\n" "[03/03] Disconnect from repo ..." && kopia repo disconnect
+              volumeMounts:
+                - name: snapshots
+                  mountPath: /snapshots
+              securityContext:
+                privileged: true
+          volumes:
+            - name: snapshots
+              nfs:
+                server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+                path: /tycho/Apps/External/Kopia
