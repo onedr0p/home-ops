@@ -35,7 +35,10 @@ frr_exporter_start()
 {
     echo -n "Starting ${name}."
     /usr/sbin/daemon -p ${pidfile} -m 3 -H -f -o ${frr_exporter_logfile} \
-        ${command}
+        ${command} \
+        --frr.vtysh.path="/usr/local/bin/vtysh" \
+        --no-collector.ospf \
+        --no-collector.bfd
 }
 
 run_rc_command "$1"
