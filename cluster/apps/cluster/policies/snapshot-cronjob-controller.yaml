@@ -82,15 +82,16 @@ spec:
                           - /bin/bash
                           - -c
                           - |-
-                            printf "\e[1;32m%-6s\e[m\n" "[01/09] Create repo ..."              && [[ ! -f /snapshots/kopia.repository.f ]] && kopia repository create filesystem --path=/snapshots
-                            printf "\e[1;32m%-6s\e[m\n" "[02/09] Connect to repo ..."          && kopia repo connect filesystem --path=/snapshots --override-hostname=cluster --override-username=root
-                            printf "\e[1;32m%-6s\e[m\n" "[03/09] Set policies ..."             && kopia policy set /data/{{ namespace }}/{{ appName }} --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 7 --keep-weekly 2 --keep-monthly 0 --keep-annual 0
-                            printf "\e[1;32m%-6s\e[m\n" "[04/09] Freeze {{ claimName }} ..."   && fsfreeze -f /data/{{ namespace }}/{{ appName }}
-                            printf "\e[1;32m%-6s\e[m\n" "[05/09] Snapshot {{ claimName }} ..." && kopia snap create /data/{{ namespace }}/{{ appName }}
-                            printf "\e[1;32m%-6s\e[m\n" "[06/09] Unfreeze {{ claimName }} ..." && fsfreeze -u /data/{{ namespace }}/{{ appName }}
-                            printf "\e[1;32m%-6s\e[m\n" "[07/09] List snapshots ..."           && kopia snap list /data/{{ namespace }}/{{ appName }}
-                            printf "\e[1;32m%-6s\e[m\n" "[08/09] Show stats ..."               && kopia content stats
-                            printf "\e[1;32m%-6s\e[m\n" "[09/09] Disconnect from repo ..."     && kopia repo disconnect
+                            printf "\e[1;32m%-6s\e[m\n" "[01/10] Create repo ..."              && [[ ! -f /snapshots/kopia.repository.f ]] && kopia repository create filesystem --path=/snapshots
+                            printf "\e[1;32m%-6s\e[m\n" "[02/10] Connect to repo ..."          && kopia repo connect filesystem --path=/snapshots --override-hostname=cluster --override-username=root
+                            printf "\e[1;32m%-6s\e[m\n" "[03/10] Set policies ..."             && kopia policy set /data/{{ namespace }}/{{ appName }} --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 7 --keep-weekly 2 --keep-monthly 0 --keep-annual 0
+                            printf "\e[1;32m%-6s\e[m\n" "[04/10] Freeze {{ claimName }} ..."   && fsfreeze -f /data/{{ namespace }}/{{ appName }}
+                            printf "\e[1;32m%-6s\e[m\n" "[05/10] Snapshot {{ claimName }} ..." && kopia snap create /data/{{ namespace }}/{{ appName }}
+                            printf "\e[1;32m%-6s\e[m\n" "[06/10] Unfreeze {{ claimName }} ..." && fsfreeze -u /data/{{ namespace }}/{{ appName }}
+                            printf "\e[1;32m%-6s\e[m\n" "[07/10] List snapshots ..."           && kopia snap list /data/{{ namespace }}/{{ appName }}
+                            printf "\e[1;32m%-6s\e[m\n" "[08/10] Show stats ..."               && kopia content stats
+                            printf "\e[1;32m%-6s\e[m\n" "[09/10] Show maintenance info ..."    && kopia maintenance info
+                            printf "\e[1;32m%-6s\e[m\n" "[10/10] Disconnect from repo ..."     && kopia repo disconnect
                         volumeMounts:
                           - name: "{{ appName }}-data"
                             mountPath: "/data/{{ namespace }}/{{ appName }}"

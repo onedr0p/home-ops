@@ -28,7 +28,7 @@ x-vars: &vars
 tasks:
 
   list:
-    desc: List all existing snapshots for an app (task APP=plex [KOPIA_NAMESPACE=<namespace>] restore:list)
+    desc: List all existing snapshots for an app (task snapshot:list APP=plex [KOPIA_NAMESPACE=<namespace>])
     cmds:
       - kubectl -n {{.KOPIA_NAMESPACE | default "default"}} exec -it deployment/kopia -- kopia snapshot list /data/{{.NAMESPACE}}/{{.APP}} {{.CLI_ARGS}}
     vars: *vars
@@ -38,7 +38,7 @@ tasks:
           deployment/kopia in namespace/{{.KOPIA_NAMESPACE | default "default"}} not found
 
   create:
-    desc: Spawn a job to create a snapshot for an app (task APP=plex [TIMEOUT=<timeout>] snapshot:create)
+    desc: Spawn a job to create a snapshot for an app (task snapshot:create APP=plex [TIMEOUT=<timeout>])
     cmds:
       - |
         kubectl -n {{.NAMESPACE}} create job --from=cronjob/{{.APP}}-snapshot {{.APP}}-snapshot-{{.TS}} --dry-run=client --output yaml \
@@ -52,7 +52,7 @@ tasks:
     preconditions: *preconditions
 
   restore:
-    desc: Spawn a job to restore an app from a snapshot (task APP=plex [SNAPSHOT=(latest|<snapshot-id>) KOPIA_NAMESPACE=<namespace> TIMEOUT=<timeout>] snapshot:restore)
+    desc: Spawn a job to restore an app from a snapshot (task snapshot:restore APP=plex [SNAPSHOT=(latest|<snapshot-id>) KOPIA_NAMESPACE=<namespace> TIMEOUT=<timeout>])
     cmds:
       - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
       - kubectl -n {{.NAMESPACE}} scale {{.NAME}} --replicas 0
