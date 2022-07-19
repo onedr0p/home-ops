@@ -47,21 +47,22 @@ tasks:
       - sleep 2
       - kubectl -n {{.NAMESPACE}} wait pod --for condition=ready --selector=job-name={{.APP}}-snapshot-{{.TS}} --timeout={{.TIMEOUT | default "1m"}}
       - kubectl -n {{.NAMESPACE}} logs --selector=job-name={{.APP}}-snapshot-{{.TS}} -f
-      - defer: kubectl -n {{.NAMESPACE}} delete job {{.APP}}-snapshot-{{.TS}}
+      - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-snapshot-{{.TS}}
     vars: *vars
     preconditions: *preconditions
 
   restore:
-    desc: Spawn a job to restore an app from a snapshot (task APP=plex [SNAPSHOT=(latest|<snapshot-id>) KOPIA_NAMESPACE=<namespace>] snapshot:restore)
+    desc: Spawn a job to restore an app from a snapshot (task APP=plex [SNAPSHOT=(latest|<snapshot-id>) KOPIA_NAMESPACE=<namespace> TIMEOUT=<timeout>] snapshot:restore)
     cmds:
       - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
       - kubectl -n {{.NAMESPACE}} scale {{.NAME}} --replicas 0
       - kubectl -n {{.NAMESPACE}} wait pod --for delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
       - envsubst < <(cat ./hack/restore-job.yaml) | kubectl apply -f -
-      - kubectl -n {{.NAMESPACE}} wait job --for condition=complete {{.APP}}-restore-snapshot --timeout=120m
+      - sleep 2
+      - kubectl -n {{.NAMESPACE}} wait job --for condition=complete {{.APP}}-restore-snapshot --timeout={{.TIMEOUT | default "60m"}}
       - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
       - kubectl -n {{.NAMESPACE}} logs job/{{.APP}}-restore-snapshot
-      - defer: kubectl -n {{.NAMESPACE}} delete job {{.APP}}-restore-snapshot
+      - kubectl -n {{.NAMESPACE}} delete job {{.APP}}-restore-snapshot
     vars: *vars
     env:
       APP: "{{.APP}}"

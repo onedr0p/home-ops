@@ -93,14 +93,14 @@ Due to issues, retrictions or nuances with [Velero](https://github.com/vmware-ta
 
 At a high level the way this operates is that:
 
-- Kyverno creates a `CronJob` for each `Deployment` or `StatefulSet` resource that contain a label of `pmb.home.arpa/snapshot-claim="<pvc-claim>"`
+- Kyverno creates a `CronJob` for each `PersistentVolumeClaim` resource that contain a label of `policy.home.arpa/snapshot: "true"`
 - Everyday the `CronJob` creates a `Job` and uses Kopia to connect to a Kopia repository on my NAS over NFS and then snapshots the contents of the app data mount into the Kopia repository
 
 Some important notes on the implementation of this method:
 
 - The snapshots made by Kopia are incremental which makes the `Job` run very quick.
 - The app data mount is frozen during backup to prevent writes and unfrozen when the snapshot is complete.
-- Ensure the `PersistentVolumeClaim` resources all contain the labels `app.kubernetes.io/name`, `app.kubernetes.io/instance`, and `pmb.home.arpa/snapshot`
+- The `PersistentVolumeClaim` resources must contain the labels `app.kubernetes.io/name`, `app.kubernetes.io/instance`, and `policy.home.arpa/snapshot`
 - Kopia has a Web UI which you can deploy into your cluster to have access to the repository via the UI or by executing into the `Pod` and using the Kopia CLI. This deployment is required if using the [Taskfile](https://taskfile.dev/) `snapshot:create` and `snapshot:restore` tasks I created.
 - Recovery is done manually by using a different `Job` which utilizes a task with Taskfile I wrote a task that creates a restore `Job` that shutdowns the app and restores a snapshot from the Kopia repository into the apps' data `PersistentVolumeClaim` and then puts the app back into a running state
 - There is another `CronJob` that syncs the Kopia repository to Backblaze B2 everyday.
