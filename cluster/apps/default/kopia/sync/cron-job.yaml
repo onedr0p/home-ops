@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: kopia-sync
+  name: &app kopia-sync
   namespace: default
 spec:
   schedule: "0 */12 * * *"
@@ -34,13 +34,13 @@ spec:
                 - -c
                 - |
                   printf "\e[1;32m%-6s\e[m\n" "[01/03] Connect to repo ..."      && kopia repo connect filesystem --path=/snapshots --override-hostname=cluster --override-username=root
-                  printf "\e[1;32m%-6s\e[m\n" "[02/03] Sync to s3 ..."           && kopia repo sync-to from-config --file=/sync/repository.config --parallel 8 --delete
+                  printf "\e[1;32m%-6s\e[m\n" "[02/03] Sync to s3 ..."           && kopia repo sync-to from-config --file=/config/repository.config --parallel 8 --delete
                   printf "\e[1;32m%-6s\e[m\n" "[03/03] Disconnect from repo ..." && kopia repo disconnect
               volumeMounts:
                 - name: snapshots
                   mountPath: /snapshots
-                - name: repository-config
-                  mountPath: /sync
+                - name: config
+                  mountPath: /config
                   readOnly: true
               securityContext:
                 privileged: true
@@ -49,6 +49,6 @@ spec:
               nfs:
                 server: "expanse.${SECRET_PRIVATE_DOMAIN}"
                 path: /tycho/Apps/External/Kopia
-            - name: repository-config
+            - name: config
               secret:
                 secretName: *app
