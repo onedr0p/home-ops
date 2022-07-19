@@ -1,0 +1,33 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: postgres-operator-source
+  namespace: flux-system
+spec:
+  interval: 12h
+  url: https://github.com/movetokube/postgres-operator.git
+  ref:
+    # renovate: datasource=github-releases depName=movetokube/postgres-operator
+    tag: "1.1.1"
+  ignore: |
+    # exclude all
+    /*
+    # include crd directory
+    !/deploy/crds
+    # exclude crs from crd dir
+    /deploy/crds/db_v1alpha1_postgres_cr.yaml
+    /deploy/crds/db_v1alpha1_postgresuser_cr.yaml
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: crds-postgres-operator
+  namespace: flux-system
+spec:
+  interval: 30m
+  prune: false
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: postgres-operator-source
