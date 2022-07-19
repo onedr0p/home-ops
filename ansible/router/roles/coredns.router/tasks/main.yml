@@ -49,27 +49,27 @@
         dest: /usr/local/etc/coredns/kubeconfig
     - name: Create Corefile
       ansible.builtin.template:
-        src: Corefile.j2
+        src: coredns/Corefile.j2
         dest: /usr/local/etc/coredns/Corefile
         mode: 0755
     - name: Create CoreDNS rc.conf script
       ansible.builtin.template:
-        src: coredns-rc.conf.j2
+        src: coredns/coredns-rc.conf.j2
         dest: /etc/rc.conf.d/coredns
         mode: 0755
     - name: Create CoreDNS rc.d script
       ansible.builtin.template:
-        src: coredns-rc.d.j2
+        src: coredns/coredns-rc.d.j2
         dest: /usr/local/etc/rc.d/coredns
         mode: 0755
     - name: Create CoreDNS action script
       ansible.builtin.template:
-        src: actions_coredns.conf.j2
+        src: coredns/actions_coredns.conf.j2
         dest: /usr/local/opnsense/service/conf/actions.d/actions_coredns.conf
         mode: 0755
     - name: Create CoreDNS start up script
       ansible.builtin.template:
-        src: 99-coredns.j2
+        src: coredns/99-coredns.j2
         dest: /usr/local/etc/rc.syshook.d/start/99-coredns
         mode: 0755
   notify: Restart coredns

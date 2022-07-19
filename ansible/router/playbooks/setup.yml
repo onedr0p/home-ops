@@ -1,0 +1,15 @@
+---
+- hosts:
+    - opnsense
+  become: false
+  gather_facts: false
+  any_errors_fatal: true
+  tasks:
+    - name: Enable ZFS autotrim on zroot
+      ansible.builtin.command: zpool set autotrim=on zroot
+
+    - name: Install the community repository
+      ansible.builtin.get_url:
+        url: https://www.routerperformance.net/mimugmail.conf
+        dest: /usr/local/etc/pkg/repos/mimugmail.conf
+        mode: 0644

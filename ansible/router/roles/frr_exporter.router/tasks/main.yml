@@ -1,0 +1,60 @@
+---
+- name: Create frr_exporter directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - /usr/local/etc/cron.d
+    - /usr/local/etc/frr_exporter
+    - /var/log/frr_exporter
+
+- name: Check current frr_exporter version
+  ansible.builtin.command: "/usr/local/sbin/frr_exporter --version"
+  failed_when: false
+  changed_when: false
+  register: frr_exporter_version_check
+
+- block:
+    - name: Download frr_exporter
+      ansible.builtin.get_url:
+        url: "{{ frr_exporter_download_url }}"
+        dest: "/tmp/frr_exporter_{{ frr_exporter_version }}_freebsd_amd64.tar.gz"
+    - name: Extract frr_exporter
+      ansible.builtin.shell:
+        cmd: >-
+          mkdir -p /tmp/frr_exporter_{{ frr_exporter_version }}_freebsd_amd64;
+          tar xvf /tmp/frr_exporter_{{ frr_exporter_version }}_freebsd_amd64.tar.gz --strip-components 1 -C /tmp/frr_exporter_{{ frr_exporter_version }}_freebsd_amd64
+    - name: Move frr_exporter binary into place
+      ansible.builtin.copy:
+        src: /tmp/frr_exporter_{{ frr_exporter_version }}_freebsd_amd64/frr_exporter
+        dest: /usr/local/sbin/frr_exporter
+        mode: 0755
+        remote_src: true
+  when: >
+    frr_exporter_version_check.stdout is not defined
+    or frr_exporter_version not in frr_exporter_version_check.stdout
+  notify: Restart frr_exporter
+
+- block:
+    - name: Create frr_exporter rc.conf script
+      ansible.builtin.template:
+        src: frr_exporter/frr_exporter-rc.conf.j2
+        dest: /etc/rc.conf.d/frr_exporter
+        mode: 0755
+    - name: Create frr_exporter rc.d script
+      ansible.builtin.template:
+        src: frr_exporter/frr_exporter-rc.d.j2
+        dest: /usr/local/etc/rc.d/frr_exporter
+        mode: 0755
+    - name: Create frr_exporter action script
+      ansible.builtin.template:
+        src: frr_exporter/actions_frr_exporter.conf.j2
+        dest: /usr/local/opnsense/service/conf/actions.d/actions_frr_exporter.conf
+        mode: 0755
+    - name: Create frr_exporter start up script
+      ansible.builtin.template:
+        src: frr_exporter/99-frr_exporter.j2
+        dest: /usr/local/etc/rc.syshook.d/start/99-frr_exporter
+        mode: 0755
+  notify: Restart frr_exporter

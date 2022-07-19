@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# PROVIDE: frr_exporter
+# REQUIRE: DAEMON NETWORKING
+# KEYWORD: shutdown
+#
+# Add the following to /etc/rc.conf[.local] to enable this service
+#
+# frr_exporter_enable    (bool):        Set to NO by default.
+#                                       Set it to YES to enable frr_exporter.
+# frr_exporter_work_dir  (str):         Set to /usr/local/etc/frr_exporter/ by default.
+#
+# frr_exporter_logfile   (str):         Set to /var/log/frr_exporter/frr_exporter.log by default.
+#
+
+. /etc/rc.subr
+
+name=frr_exporter
+rcvar=frr_exporter_enable
+
+load_rc_config ${name}
+
+: ${frr_exporter_enable:=NO}
+: ${frr_exporter_work_dir:="/usr/local/etc/frr_exporter"}
+
+: ${frr_exporter_flags:=}
+: ${frr_exporter_logfile:="/var/log/frr_exporter/frr_exporter.log"}
+
+pidfile=/var/run/frr_exporter.pid
+command="/usr/local/sbin/frr_exporter"
+
+start_cmd="${name}_start"
+
+frr_exporter_start()
+{
+    echo -n "Starting ${name}."
+    /usr/sbin/daemon -p ${pidfile} -m 3 -H -f -o ${frr_exporter_logfile} \
+        ${command}
+}
+
+run_rc_command "$1"
