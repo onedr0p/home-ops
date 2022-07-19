@@ -7,14 +7,14 @@ metadata:
 spec:
   type: github
   events:
-    - "ping"
-    - "push"
+    - ping
+    - push
   secretRef:
     name: github-webhook-token
   resources:
     - apiVersion: source.toolkit.fluxcd.io/v1beta2
       kind: GitRepository
-      name: flux-system
+      name: flux-cluster
       namespace: flux-system
     - apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
       kind: Kustomization
@@ -34,25 +34,9 @@ spec:
       namespace: flux-system
     - apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
       kind: Kustomization
-      name: flux-system
+      name: flux-cluster
       namespace: flux-system
     - apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
       kind: Kustomization
       name: crds
-      namespace: flux-system
-    - apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-      kind: Kustomization
-      name: crds-cert-manager
-      namespace: flux-system
-    - apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-      kind: Kustomization
-      name: crds-external-snapshotter
-      namespace: flux-system
-    - apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-      kind: Kustomization
-      name: crds-kube-prometheus-stack
-      namespace: flux-system
-    - apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-      kind: Kustomization
-      name: crds-kyverno
       namespace: flux-system
