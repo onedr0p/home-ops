@@ -2,17 +2,17 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: minio
+  name: &app minio
   namespace: default
 spec:
   interval: 15m
   chart:
     spec:
-      chart: minio
-      version: 11.7.13
+      chart: kah-common-chart
+      version: 1.1.2
       sourceRef:
         kind: HelmRepository
-        name: bitnami-charts
+        name: k8s-at-home-charts
         namespace: flux-system
       interval: 15m
   install:
@@ -23,47 +23,75 @@ spec:
     remediation:
       retries: 5
   values:
-    extraEnvVars:
-      - name: TZ
-        value: "${TIMEZONE}"
-      - name: MINIO_PROMETHEUS_URL
-        value: http://kube-prometheus-stack-prometheus.monitoring:9090
-      - name: MINIO_PROMETHEUS_JOB_ID
-        value: minio
-      - name: MINIO_UPDATE
-        value: "off"
-      - name: MINIO_BROWSER_REDIRECT_URL
-        value: "https://minio.${SECRET_PUBLIC_DOMAIN}"
-      - name: MINIO_SERVER_URL
-        value: "https://s3.${SECRET_PUBLIC_DOMAIN}"
-    auth:
-      existingSecret: minio-creds
-    ingress:
-      enabled: true
-      ingressClassname: "nginx"
-      hostname: &consoleHost "minio.${SECRET_PUBLIC_DOMAIN}"
-      tls: true
-      extraTls:
-        - hosts:
-            - *consoleHost
-    apiIngress:
-      enabled: true
-      ingressClassname: "nginx"
-      hostname: &apiHost "s3.${SECRET_PUBLIC_DOMAIN}"
-      tls: true
-      extraTls:
-        - hosts:
-            - *apiHost
-    podSecurityContext:
-      enabled: true
-      fsGroup: 100
-    containerSecurityContext:
-      enabled: true
-      runAsUser: 568
-      runAsNonRoot: true
-    persistence:
-      enabled: true
-      existingClaim: minio-nfs
-    prometheus:
-      servicemonitor:
+    global:
+      nameOverride: *app
+    image:
+      repository: quay.io/minio/minio
+      tag: RELEASE.2022-07-17T15-43-14Z
+    env:
+      TZ: "America/New_York"
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"
+      MINIO_UPDATE: "off"
+      MINIO_PROMETHEUS_URL: http://kube-prometheus-stack-prometheus.monitoring:9090
+      MINIO_PROMETHEUS_JOB_ID: minio
+      MINIO_BROWSER_REDIRECT_URL: "https://minio.${SECRET_PUBLIC_DOMAIN}"
+      MINIO_SERVER_URL: "https://s3.${SECRET_PUBLIC_DOMAIN}"
+    envFrom:
+      - secretRef:
+          name: *app
+    args:
+      - server
+      - /data
+      - --console-address
+      - :9001
+    service:
+      main:
         enabled: true
+        ports:
+          http:
+            enabled: true
+            port: &port-console 9001
+          api:
+            enabled: true
+            port: &port-api 9000
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        hosts:
+          - host: &host-console "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  port: *port-console
+          - host: &host-api "s3.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  port: *port-api
+        tls:
+          - hosts:
+              - *host-console
+              - *host-api
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+      supplementalGroups:
+        - 100
+    persistence:
+      config:
+        enabled: true
+        existingClaim: minio-nfs
+        mountPath: /data
+    podAnnotations:
+      secret.reloader.stakater.com/reload: *app
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 750Mi
