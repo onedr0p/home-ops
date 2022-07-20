@@ -11,8 +11,8 @@ const action    = argv["_"][0]
 const app       = argv["app"] || argv["a"] || process.env.APP
 const namespace = argv["namespace"] || argv["n"] || process.env.NAMESPACE
 
-if (!app)       { throw new Error("Argument --app or envirornment variable APP not set") }
-if (!namespace) { throw new Error("Argument --namespace or envirornment variable NAMESPACE not set") }
+if (!app)       { throw new Error("Argument --app, -a or env APP not set") }
+if (!namespace) { throw new Error("Argument --namespace, -n or env NAMESPACE not set") }
 
 switch(action) {
     case "create":
