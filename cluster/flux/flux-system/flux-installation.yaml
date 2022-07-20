@@ -29,25 +29,20 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-installation
+  images:
+    - name: fluxcd/helm-controller
+      newName: ghcr.io/fluxcd/helm-controller
+    - name: fluxcd/image-automation-controller
+      newName: ghcr.io/fluxcd/image-automation-controller
+    - name: fluxcd/image-reflector-controller
+      newName: ghcr.io/fluxcd/image-reflector-controller
+    - name: fluxcd/kustomize-controller
+      newName: ghcr.io/fluxcd/kustomize-controller
+    - name: fluxcd/notification-controller
+      newName: ghcr.io/fluxcd/notification-controller
+    - name: fluxcd/source-controller
+      newName: ghcr.io/fluxcd/source-controller
   patches:
-    - target:
-        kind: Deployment
-        labelSelector: control-plane=controller
-      patch: |-
-        apiVersion: apps/v1
-        kind: Deployment
-        metadata:
-          name: not-used
-        spec:
-          template:
-            spec:
-              containers:
-                - name: manager
-                  resources:
-                    requests:
-                      memory: 512Mi
-                    limits:
-                      memory: "2Gi"
     - target:
         group: networking.k8s.io
         version: v1
