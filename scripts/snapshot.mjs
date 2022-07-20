@@ -21,6 +21,6 @@ switch(action) {
     case "list":
         await list(app, namespace)
         break;
-  default:
+    default:
         console.log(`404: ${action} not found`)
 }
