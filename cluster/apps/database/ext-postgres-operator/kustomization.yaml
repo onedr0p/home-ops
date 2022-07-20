@@ -1,7 +1,7 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: default
+namespace: database
 resources:
   - https://raw.githubusercontent.com/movetokube/postgres-operator/1.1.1/deploy/operator.yaml
   - https://raw.githubusercontent.com/movetokube/postgres-operator/1.1.1/deploy/role.yaml
@@ -49,7 +49,7 @@ patchesJson6902:
         path: /spec/template/spec/containers/0/env/-
         value:
           name: POSTGRES_HOST
-          value: postgres-default-rw.default.svc.cluster.local
+          value: postgres-default-rw.database.svc.cluster.local
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
