@@ -1,7 +1,7 @@
 #!/usr/bin/env zx
 
 // Usage:
-// ctl snapshot list --app whisparr --namespace default
+// ctl.mjs snapshot list --app whisparr --namespace default
 
 import { Snapshot } from './lib/Snapshot.class.mjs';
 
