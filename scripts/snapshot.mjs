@@ -7,9 +7,9 @@ import { create, list } from './lib/snapshot.mjs';
 
 $.verbose = false
 
-const action = argv["_"][0]
-const app = argv["app"] || process.env.APP
-const namespace = argv["namespace"] || process.env.NAMESPACE
+const action    = argv["_"][0]
+const app       = argv["app"] || argv["a"] || process.env.APP
+const namespace = argv["namespace"] || argv["n"] || process.env.NAMESPACE
 
 if (!app)       { throw new Error("Argument --app or envirornment variable APP not set") }
 if (!namespace) { throw new Error("Argument --namespace or envirornment variable NAMESPACE not set") }
