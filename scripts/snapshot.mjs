@@ -1,9 +1,9 @@
 #!/usr/bin/env zx
 
 // Usage:
-// snapshot.mjs --action list --app whisparr --namespace default
+// snapshot.mjs list --app whisparr --namespace default
 
-// import { create, list } from './lib/snapshot.mjs';
+import { create, list } from './lib/snapshot.mjs';
 
 $.verbose = false
 
@@ -14,15 +14,13 @@ const namespace = argv["namespace"] || process.env.NAMESPACE
 if (!app)       { throw new Error("Argument --app or envirornment variable APP not set") }
 if (!namespace) { throw new Error("Argument --namespace or envirornment variable NAMESPACE not set") }
 
-console.log(action, app, namespace)
-
-// switch(action) {
-//   case "create":
-//     await create(app, namespace)
-//     break;
-//   case "list":
-//     await list(app, namespace)
-//     break;
-//   default:
-//     // code block
-// }
+switch(action) {
+    case "create":
+        await create(app, namespace)
+        break;
+    case "list":
+        await list(app, namespace)
+        break;
+  default:
+        console.log(`404: ${action} not found`)
+}
