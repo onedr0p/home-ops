@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: falco-sidekick
+  name: &app falco-sidekick
   namespace: falco-system
 spec:
   interval: 15m
@@ -26,8 +26,9 @@ spec:
     - name: falco
       namespace: falco-system
   values:
-    image:
-      registry: public.ecr.aws
+    fullnameOverride: *app
+    # image:
+    #   registry: public.ecr.aws
     replicaCount: 1
     config:
       alertmanager:
