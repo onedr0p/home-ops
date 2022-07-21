@@ -1,0 +1,16 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-csi
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+  share: /tycho/Apps/External/PVCs
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions:
+  - nfsvers=4.2
+  - nconnect=8
+  - hard
+  - noatime
