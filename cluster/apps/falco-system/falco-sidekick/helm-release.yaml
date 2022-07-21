@@ -29,7 +29,6 @@ spec:
     fullnameOverride: *app
     # image:
     #   registry: public.ecr.aws
-    replicaCount: 1
     config:
       # extraEnv:
       #   - name: WEBUI_URL
@@ -38,6 +37,18 @@ spec:
         hostport: http://kube-prometheus-stack-alertmanager.monitoring:9093
         endpoint: /api/v2/alerts
         minimumpriority: emergency
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+      hosts:
+        - host: "falcosidekick.${SECRET_PUBLIC_DOMAIN}"
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - "falcosidekick.${SECRET_PUBLIC_DOMAIN}"
     webui:
       enabled: true
       # image:
@@ -47,9 +58,10 @@ spec:
         annotations:
           kubernetes.io/ingress.class: nginx
         hosts:
-          - host: "falco.${SECRET_PUBLIC_DOMAIN}"
+          - host: "falcosidekick-ui.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
+                pathType: Prefix
         tls:
           - hosts:
-              - "falco.${SECRET_PUBLIC_DOMAIN}"
+              - "falcosidekick-ui.${SECRET_PUBLIC_DOMAIN}"
