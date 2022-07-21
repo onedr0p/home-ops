@@ -36,14 +36,15 @@ spec:
         enabled: false
       crio:
         enabled: false
-    # falco:
-    #   json_output: true
-    #   json_include_output_property: true
-    #   http_output:
-    #     enabled: true
-    #     url: http://falco-sidekick:2801
     falcosidekick:
       enabled: true
+      # image:
+      #   registry: public.ecr.aws
+      config:
+        alertmanager:
+          hostport: http://kube-prometheus-stack-alertmanager.monitoring:9093
+          endpoint: /api/v2/alerts
+          minimumpriority: emergency
       webui:
         enabled: true
         # image:
