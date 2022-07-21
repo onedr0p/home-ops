@@ -5,14 +5,13 @@ metadata:
   name: &app vector-geoipupdate
   namespace: monitoring
 spec:
-  schedule: "0 0 * * 0"
+  schedule: "@daily"
   concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
   jobTemplate:
     spec:
-      backoffLimit: 3
-      ttlSecondsAfterFinished: 300
+      ttlSecondsAfterFinished: 86400
       template:
         spec:
           automountServiceAccountToken: false
