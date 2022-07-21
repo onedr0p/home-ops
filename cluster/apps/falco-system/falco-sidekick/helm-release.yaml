@@ -5,7 +5,7 @@ metadata:
   name: falco-sidekick
   namespace: falco-system
 spec:
-  interval: 5m
+  interval: 15m
   chart:
     spec:
       chart: falcosidekick
@@ -14,7 +14,17 @@ spec:
         kind: HelmRepository
         name: falco-security-charts
         namespace: flux-system
-      interval: 5m
+      interval: 15m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: falco
+      namespace: falco-system
   values:
     image:
       registry: public.ecr.aws
