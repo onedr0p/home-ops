@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 37.3.0
+      version: 38.0.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community-charts
@@ -109,7 +109,6 @@ spec:
               storageClassName: "ceph-block"
               resources:
                 requests:
-                  # TODO(kube-prometheus-stack): change alertmanager volume to 250Mi
                   storage: 1Gi
     kube-state-metrics:
       metricLabelsAllowlist:
@@ -135,8 +134,6 @@ spec:
     kubelet:
       enabled: true
       serviceMonitor:
-        # https://github.com/k3s-io/k3s/issues/5891
-        cAdvisorMetricRelabelings: []
         metricRelabelings:
           - action: replace
             sourceLabels:
