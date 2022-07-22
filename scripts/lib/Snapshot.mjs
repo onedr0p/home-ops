@@ -18,11 +18,11 @@ class Snapshot {
 
     switch (this.arg) {
       case 'list':
-          this.list()
-        break;
+        this.list()
+        break
       case 'create':
-          this.create()
-        break;    
+        this.create()
+        break
       default:
         throw new Error(`404: ${arg} arg not found`)
     }
