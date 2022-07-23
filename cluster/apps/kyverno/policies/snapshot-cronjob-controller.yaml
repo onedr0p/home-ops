@@ -44,7 +44,7 @@ spec:
         - name: nodeAffinity
           variable:
             value:
-              enabled: "{{ (request.object.metadata.labels.\"snapshot.home.arpa/ignoreAffinity\" || 'true') == 'true' }}"
+              ignored: "{{ (request.object.metadata.labels.\"snapshot.home.arpa/ignoreAffinity\" || 'false') == 'false' }}"
               labels:
                 - key: app.kubernetes.io/name
                   operator: "In"
@@ -134,4 +134,4 @@ spec:
                         requiredDuringSchedulingIgnoredDuringExecution:
                           - topologyKey: kubernetes.io/hostname
                             labelSelector:
-                              matchExpressions: "{{ nodeAffinity.enabled && nodeAffinity.labels || [] }}"
+                              matchExpressions: "{{ nodeAffinity.ignored && [] || nodeAffinity.labels }}"
