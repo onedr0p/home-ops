@@ -7,7 +7,7 @@ metadata:
 spec:
   schedule: "0 */12 * * *"
   suspend: false
-  concurrencyPolicy: "Forbid"
+  concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 2
   jobTemplate:
@@ -17,6 +17,20 @@ spec:
         spec:
           automountServiceAccountToken: false
           restartPolicy: OnFailure
+          initContainers:
+            - name: wait-for-repo
+              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:37e10143585ff2e668a10d878d854831e92bfb7f482f823d1f58af3910fcff41
+              command:
+                - /bin/bash
+                - -c
+                - |-
+                  until [ -f /snapshots/kopia.repository.f ]; do
+                      printf "\e[1;32m%-6s\e[m\n" "Awaiting for the Kopia repo to become ready ..."
+                      sleep 1
+                  done
+              volumeMounts:
+                - name: snapshots
+                  mountPath: /snapshots
           containers:
             - name: sync
               image: ghcr.io/onedr0p/kopia:0.11.3@sha256:37e10143585ff2e668a10d878d854831e92bfb7f482f823d1f58af3910fcff41
