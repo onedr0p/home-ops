@@ -33,11 +33,24 @@ spec:
         - name: namespace
           variable:
             jmesPath: "request.object.metadata.namespace"
+        - name: nodeAffinity
+          variable:
+            value:
+              enabled: "{{ (request.object.metadata.labels.\"snapshot.home.arpa/nodeAffinity\" || 'true') == 'true' }}"
+              labels:
+                - key: app.kubernetes.io/name
+                  operator: "In"
+                  values:
+                    - "{{ request.object.metadata.labels.\"app.kubernetes.io/name\" }}"
+                - key: app.kubernetes.io/instance
+                  operator: "In"
+                  values:
+                    - "{{ request.object.metadata.labels.\"app.kubernetes.io/instance\" }}"
       generate:
         synchronize: true
         apiVersion: batch/v1
         kind: CronJob
-        name: "{{ appName }}-snapshot"
+        name: "{{ appName }}-{{ claimName }}-snapshot"
         namespace: "{{ request.object.metadata.namespace }}"
         data:
           metadata:
@@ -57,6 +70,7 @@ spec:
             failedJobsHistoryLimit: 2
             jobTemplate:
               spec:
+                # Keep at least one job in completed state in accordance to the schedule
                 ttlSecondsAfterFinished: 86400
                 template:
                   spec:
@@ -64,8 +78,8 @@ spec:
                     restartPolicy: OnFailure
                     # Stagger jobs to run randomly within X seconds to avoid bringing down all apps at once
                     initContainers:
-                      - name: wait-for
-                        image: ghcr.io/onedr0p/alpine:3.16.1@sha256:ed7edf90c1e7df516ff37267841a17d0bedf7ef873f8f81bb3ddf06b3a464d06
+                      - name: wait
+                        image: ghcr.io/onedr0p/kopia:0.11.3@sha256:37e10143585ff2e668a10d878d854831e92bfb7f482f823d1f58af3910fcff41
                         command: ["/scripts/sleep.sh"]
                         args: ["1", "900"]
                     containers:
@@ -73,9 +87,9 @@ spec:
                         image: ghcr.io/onedr0p/kopia:0.11.3@sha256:37e10143585ff2e668a10d878d854831e92bfb7f482f823d1f58af3910fcff41
                         env:
                           - name: KOPIA_CACHE_DIRECTORY
-                            value: /snapshots/{{ namespace }}/{{ appName }}/cache
+                            value: /snapshots/{{ namespace }}/{{ appName }}/{{ claimName }}/cache
                           - name: KOPIA_LOG_DIR
-                            value: /snapshots/{{ namespace }}/{{ appName }}/logs
+                            value: /snapshots/{{ namespace }}/{{ appName }}/{{ claimName }}/logs
                           - name: KOPIA_PASSWORD
                             value: "none"
                         command:
@@ -84,23 +98,23 @@ spec:
                           - |-
                             printf "\e[1;32m%-6s\e[m\n" "[01/10] Create repo ..."              && [[ ! -f /snapshots/kopia.repository.f ]] && kopia repository create filesystem --path=/snapshots
                             printf "\e[1;32m%-6s\e[m\n" "[02/10] Connect to repo ..."          && kopia repo connect filesystem --path=/snapshots --override-hostname=cluster --override-username=root
-                            printf "\e[1;32m%-6s\e[m\n" "[03/10] Set policies ..."             && kopia policy set /data/{{ namespace }}/{{ appName }} --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 7 --keep-weekly 2 --keep-monthly 0 --keep-annual 0
-                            printf "\e[1;32m%-6s\e[m\n" "[04/10] Freeze {{ claimName }} ..."   && fsfreeze -f /data/{{ namespace }}/{{ appName }}
-                            printf "\e[1;32m%-6s\e[m\n" "[05/10] Snapshot {{ claimName }} ..." && kopia snap create /data/{{ namespace }}/{{ appName }}
-                            printf "\e[1;32m%-6s\e[m\n" "[06/10] Unfreeze {{ claimName }} ..." && fsfreeze -u /data/{{ namespace }}/{{ appName }}
-                            printf "\e[1;32m%-6s\e[m\n" "[07/10] List snapshots ..."           && kopia snap list /data/{{ namespace }}/{{ appName }}
+                            printf "\e[1;32m%-6s\e[m\n" "[03/10] Set policies ..."             && kopia policy set /data/{{ namespace }}/{{ appName }}/{{ claimName }} --compression=zstd --keep-latest 14 --keep-hourly 0 --keep-daily 7 --keep-weekly 2 --keep-monthly 0 --keep-annual 0
+                            printf "\e[1;32m%-6s\e[m\n" "[04/10] Freeze {{ claimName }} ..."   && fsfreeze -f /data/{{ namespace }}/{{ appName }}/{{ claimName }}
+                            printf "\e[1;32m%-6s\e[m\n" "[05/10] Snapshot {{ claimName }} ..." && kopia snap create /data/{{ namespace }}/{{ appName }}/{{ claimName }}
+                            printf "\e[1;32m%-6s\e[m\n" "[06/10] Unfreeze {{ claimName }} ..." && fsfreeze -u /data/{{ namespace }}/{{ appName }}/{{ claimName }}
+                            printf "\e[1;32m%-6s\e[m\n" "[07/10] List snapshots ..."           && kopia snap list /data/{{ namespace }}/{{ appName }}/{{ claimName }}
                             printf "\e[1;32m%-6s\e[m\n" "[08/10] Show stats ..."               && kopia content stats
                             printf "\e[1;32m%-6s\e[m\n" "[09/10] Show maintenance info ..."    && kopia maintenance info
                             printf "\e[1;32m%-6s\e[m\n" "[10/10] Disconnect from repo ..."     && kopia repo disconnect
                         volumeMounts:
-                          - name: "{{ appName }}-data"
-                            mountPath: "/data/{{ namespace }}/{{ appName }}"
+                          - name: data
+                            mountPath: "/data/{{ namespace }}/{{ appName }}/{{ claimName }}"
                           - name: snapshots
                             mountPath: /snapshots
                         securityContext:
                           privileged: true
                     volumes:
-                      - name: "{{ appName }}-data"
+                      - name: data
                         persistentVolumeClaim:
                           claimName: "{{ claimName }}"
                       - name: snapshots
@@ -110,14 +124,6 @@ spec:
                     affinity:
                       podAffinity:
                         requiredDuringSchedulingIgnoredDuringExecution:
-                          - labelSelector:
-                              matchExpressions:
-                                - key: app.kubernetes.io/name
-                                  operator: In
-                                  values:
-                                    - "{{ request.object.metadata.labels.\"app.kubernetes.io/name\" }}"
-                                - key: app.kubernetes.io/instance
-                                  operator: In
-                                  values:
-                                    - "{{ request.object.metadata.labels.\"app.kubernetes.io/instance\" }}"
-                            topologyKey: kubernetes.io/hostname
+                          - topologyKey: kubernetes.io/hostname
+                            labelSelector:
+                              matchExpressions: "{{ nodeAffinity.enabled && nodeAffinity.labels || [] }}"
