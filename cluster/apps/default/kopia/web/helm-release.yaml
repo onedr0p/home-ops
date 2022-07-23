@@ -25,6 +25,17 @@ spec:
   values:
     global:
       nameOverride: *app
+    initContainers:
+      wait-for-repo:
+        image: ghcr.io/onedr0p/kopia:0.11.3@sha256:37e10143585ff2e668a10d878d854831e92bfb7f482f823d1f58af3910fcff41
+        command:
+          - /bin/bash
+          - -c
+          - |-
+            until [ -f /snapshots/kopia.repository.f ]; do
+                printf "\e[1;32m%-6s\e[m\n" "Kopia repo not created yet awaiting creation ..."
+                sleep 1
+            done
     image:
       repository: ghcr.io/onedr0p/kopia
       tag: 0.11.3@sha256:37e10143585ff2e668a10d878d854831e92bfb7f482f823d1f58af3910fcff41
