@@ -6,19 +6,32 @@ metadata:
   namespace: database
 spec:
   instances: 3
+  primaryUpdateStrategy: unsupervised
   storage:
     size: 20Gi
+    storageClass: ceph-block
+  superuserSecret:
+    name: postgres-superuser
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+      secret:
+        name: postgres-app
   monitoring:
     enablePodMonitor: true
   backup:
     retentionPolicy: 30d
     barmanObjectStore:
+      wal:
+        compression: bzip2
+        maxParallel: 8
       destinationPath: s3://postgresql/
       endpointURL: http://minio.default:9000
       s3Credentials:
         accessKeyId:
-          name: minio-creds
+          name: postgres-minio
           key: MINIO_ACCESS_KEY
         secretAccessKey:
-          name: minio-creds
+          name: postgres-minio
           key: MINIO_SECRET_KEY
