@@ -7,13 +7,13 @@ metadata:
 spec:
   values:
     initContainers:
-      init-main-db:
-        image: ghcr.io/onedr0p/postgres-initdb:14.4@sha256:db4a6069aa909a6e440674f5e74881096aa3c0d78bb2178419587d28fcd20012
+      init-db:
+        image: ghcr.io/onedr0p/postgres-initdb:14.4@sha256:292b21d929904eebcccbff404ce7111e1722de1f051cfaca9351813a5b9bb78d
         env:
           - name: POSTGRES_HOST
             value: postgres-default-rw
           - name: POSTGRES_DB
-            value: radarr-main
+            value: radarrr-main radarrr-log
           - name: POSTGRES_SUPER_PASS
             valueFrom:
               secretKeyRef:
@@ -29,35 +29,3 @@ spec:
               secretKeyRef:
                 name: postgres-default-app
                 key: password
-      init-log-db:
-        image: ghcr.io/onedr0p/postgres-initdb:14.4@sha256:db4a6069aa909a6e440674f5e74881096aa3c0d78bb2178419587d28fcd20012
-        env:
-          - name: POSTGRES_HOST
-            value: postgres-default-rw
-          - name: POSTGRES_DB
-            value: radarr-log
-          - name: POSTGRES_SUPER_PASS
-            valueFrom:
-              secretKeyRef:
-                name: postgres-default-superuser
-                key: password
-          - name: POSTGRES_USER
-            valueFrom:
-              secretKeyRef:
-                name: postgres-default-app
-                key: username
-          - name: POSTGRES_PASS
-            valueFrom:
-              secretKeyRef:
-                name: postgres-default-app
-                key: password
-      wait-for-db:
-        image: ghcr.io/patrickdappollonio/wait-for:v1.0.0
-        env:
-          - name: POSTGRES_HOST
-            value: postgres-default-rw
-        command:
-          - /wait-for
-        args:
-          - --host="$(POSTGRES_HOST):5432"
-          - --verbose
