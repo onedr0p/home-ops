@@ -6,8 +6,16 @@ metadata:
   annotations:
     policies.kyverno.io/title: Snapshot CronJob controller
     policies.kyverno.io/subject: PersistentVolumeClaim
-    policies.kyverno.io/description: >-
-      This policy creates a snapshot CronJob for labeled PersistentVolumeClaims
+    policies.kyverno.io/description: |
+      This policy creates a Kopia snapshot CronJob for labeled PersistentVolumeClaims
+
+      The following labels on PVCs with their respective labels are required for this to run:
+        - snapshot.home.arpa/enabled
+        - app.kubernetes.io/name
+        - app.kubernetes.io/instance
+
+      An optional label of "snapshot.home.arpa/ignoreAffinity" may be set on the PVC
+      if the pod is guaranteed to not run during the time of this jobs execution
 spec:
   generateExistingOnPolicyUpdate: true
   mutateExistingOnPolicyUpdate: true
@@ -20,7 +28,7 @@ spec:
                 - PersistentVolumeClaim
               selector:
                 matchLabels:
-                  policy.home.arpa/snapshot: "true"
+                  snapshot.home.arpa/enabled: "true"
                   app.kubernetes.io/name: "*"
                   app.kubernetes.io/instance: "*"
       context:
@@ -36,7 +44,7 @@ spec:
         - name: nodeAffinity
           variable:
             value:
-              enabled: "{{ (request.object.metadata.labels.\"policy.home.arpa/nodeAffinity\" || 'true') == 'true' }}"
+              enabled: "{{ (request.object.metadata.labels.\"snapshot.home.arpa/ignoreAffinity\" || 'true') == 'true' }}"
               labels:
                 - key: app.kubernetes.io/name
                   operator: "In"
