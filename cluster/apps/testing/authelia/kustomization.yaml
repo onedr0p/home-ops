@@ -5,5 +5,11 @@ resources:
   - secret.sops.yaml
   - helm-release.yaml
 patchesStrategicMerge:
-  # - patches/configuration.yaml
   - patches/postgres.yaml
+namespace: testing
+configMapGenerator:
+  - name: authelia
+    files:
+      - config/configuration.yml
+generatorOptions:
+  disableNameSuffixHash: true

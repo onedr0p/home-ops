@@ -31,6 +31,9 @@ spec:
     image:
       repository: docker.io/authelia/authelia
       tag: 4.36.2
+    envFrom:
+      - secretRef:
+          name: *app
     service:
       main:
         ports:
@@ -59,18 +62,14 @@ spec:
     persistence:
       config:
         enabled: true
-        type: secret
+        type: configMap
         name: *app
-        items:
-          - key: configuration.yml
-            path: configuration.yml
-      # config:
-      #   enabled: true
-      #   type: configMap
-      #   name: *app
-      #   subPath: configuration.yaml
-      #   mountPath: /config/configuration.yaml
-      #   readOnly: true
+        subPath: configuration.yml
+        mountPath: /config/configuration.yml
+        readOnly: true
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: *app
+      secret.reloader.stakater.com/reload: *app
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
