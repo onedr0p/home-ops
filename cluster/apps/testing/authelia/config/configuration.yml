@@ -2,8 +2,28 @@
 access_control:
   default_policy: one_factor
   networks:
-    - name: internal
+    - name: private
       networks:
-        - 10.42.0.0/16
-        - 192.168.1.0/24
-        - 192.168.42.0/24
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+
+  rules:
+    # - domain:
+    #     - "*.${SECRET_PRIVATE_DOMAIN}"
+    #   policy: bypass
+    #   networks:
+    #     - private
+
+    - domain:
+        - "*.${SECRET_DOMAIN}"
+      policy: one_factor
+      subject: ["group:people", "group:users"]
+      networks:
+        - private
+
+    - domain:
+        - whisparr.${SECRET_DOMAIN}
+      policy: bypass
+      resources:
+        - "^/api([/?].*)?$"
