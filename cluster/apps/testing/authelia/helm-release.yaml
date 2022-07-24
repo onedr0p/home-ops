@@ -22,11 +22,16 @@ spec:
   upgrade:
     remediation:
       retries: 5
+  dependsOn:
+    - name: cloudnative-pg
+      namespace: testing
+    - name: glauth
+      namespace: testing
   values:
     global:
       nameOverride: *app
     controller:
-      replicas: 1
+      replicas: 3
       strategy: RollingUpdate
     image:
       repository: docker.io/authelia/authelia

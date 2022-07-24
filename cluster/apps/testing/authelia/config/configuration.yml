@@ -2,10 +2,6 @@ theme: dark
 
 default_redirection_url: https://requests.${SECRET_PUBLIC_DOMAIN}
 
-server:
-  host: 0.0.0.0
-  path: ""
-
 telemetry:
   metrics:
     enabled: true
@@ -18,22 +14,12 @@ webauthn:
 duo_api:
   disable: true
 
-ntp:
-  address: "time.cloudflare.com:123"
-  version: 4
-  max_desync: 3s
-  disable_startup_check: false
-  disable_failure: false
-
 authentication_backend:
   password_reset:
     disable: true
-  refresh_interval: 5m
 
   ldap:
-    implementation: custom
     url: ldap://glauth:3893
-    timeout: 5s
     base_dn: dc=buhl,dc=casa
     username_attribute: uid
     additional_users_dn: ou=users
@@ -43,7 +29,6 @@ authentication_backend:
     group_name_attribute: cn
     mail_attribute: mail
     display_name_attribute: displayName
-    permit_referrals: false
     user: cn=svcacct,dc=buhl,dc=casa
 
 access_control:
@@ -56,42 +41,17 @@ access_control:
         - 192.168.42.0/24
 
 session:
-  name: authelia_session
   domain: buhl.casa
-  same_site: lax
-  expiration: 1h
-  inactivity: 5m
-  remember_me_duration: 1M
   redis:
     host: 192.168.42.1
-    port: 6379
-    database_index: 0
-    maximum_active_connections: 8
-    minimum_idle_connections: 0
-
-regulation:
-  max_retries: 3
-  find_time: 2m
-  ban_time: 5m
 
 storage:
   postgres:
     host: postgres-rw
-    port: 5432
-    database: authelia
-    schema: public
-    timeout: 5s
-    ssl:
-      mode: disable
-      root_certificate: disable
-      certificate: disable
-      key: disable
 
 notifier:
-  disable_startup_check: false
   smtp:
     username: authelia@mg.buhl.casa
     host: smtp.mailgun.org
     port: 587
     sender: "Authelia <authelia@mg.buhl.casa>"
-    subject: "[Authelia] {title}"
