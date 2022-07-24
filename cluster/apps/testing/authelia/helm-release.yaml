@@ -99,18 +99,13 @@ spec:
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_PUBLIC_DOMAIN}"
           external-dns/is-public: "true"
         hosts:
-          - host: &host-release "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
-          - host: &host-custom "auth.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "auth.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - *host-release
-              - *host-custom
+              - *host
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
