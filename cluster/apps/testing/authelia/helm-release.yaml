@@ -1,0 +1,171 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: authelia
+  namespace: testing
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: authelia
+      version: 0.8.38
+      sourceRef:
+        kind: HelmRepository
+        name: authelia-charts
+        namespace: flux-system
+    interval: 15m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: cloudnative-pg
+      namespace: testing
+    - name: glauth
+      namespace: testing
+  values:
+    domain: "${SECRET_PUBLIC_DOMAIN}"
+    ingress:
+      enabled: true
+      subdomain: auth
+      className: nginx
+      tls:
+        enabled: "true"
+        secret: authelia-tls
+      annotations:
+        kubernetes.io/tls-acme: "true"
+        nginx.ingress.kubernetes.io/enable-global-auth: "false"
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          # https://www.authelia.com/docs/security/measures.html
+          add_header Cache-Control "no-store";
+          add_header Pragma "no-cache";
+          add_header X-Frame-Options "SAMEORIGIN";
+          add_header X-XSS-Protection "1; mode=block";
+    pod:
+      kind: Deployment
+      replicas: 3
+      env:
+        - name: TZ
+          value: "${TIMEZONE}"
+    resources:
+      requests:
+        cpu: 25m
+        memory: 50Mi
+      limits:
+        memory: 128Mi
+    configMap:
+      enabled: true
+      theme: auto
+      default_redirection_url: "https://hajimari.${SECRET_DOMAIN}"
+      server:
+        read_buffer_size: 8192
+        write_buffer_size: 8192
+      authentication_backend:
+        disable_reset_password: false
+        ldap:
+          enabled: true
+          implementation: custom
+          url: "ldap://glauth:3893"
+          base_dn: "${LDAP_BASE_DN}"
+          user: "cn=admin,${LDAP_BASE_DN}"
+          username_attribute: uid
+          group_name_attribute: cn
+          additional_users_dn: "ou=People"
+          additional_groups_dn: "ou=Groups"
+          users_filter: "(&({username_attribute}={input})(objectClass=person))"
+          groups_filter: "(&(uniqueMember={dn})(objectClass=groupOfUniqueNames))"
+          mail_attribute: mail
+      access_control:
+        ## Default policy can either be 'bypass', 'one_factor', 'two_factor' or 'deny'. It is the policy applied to any
+        ## resource if there is no policy to be applied to the user.
+        default_policy: deny
+
+        networks:
+          - name: private
+            networks:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+          # - name: vpn
+          #   networks:
+          #     - 10.10.0.0/16
+
+        rules:
+          # Bypass Authelia WAN + LAN
+          - domain:
+              - auth.${SECRET_DOMAIN}
+            policy: bypass
+
+          # Deny admin services to users
+          - domain:
+              - alert-manager.${SECRET_DOMAIN}
+              - prometheus.${SECRET_DOMAIN}
+              - longhorn.${SECRET_DOMAIN}
+              - k10.${SECRET_DOMAIN}
+              - emy.${SECRET_DOMAIN}
+              - "code-*.${SECRET_DOMAIN}"
+            subject: ["group:Users"]
+            policy: deny
+
+          # One factor auth for LAN
+          - domain:
+              - "*.${SECRET_DOMAIN}"
+            policy: one_factor
+            subject: ["group:Admins", "group:Users"]
+            networks:
+              - private
+
+          # Two factors auth for WAN
+          - domain:
+              - "*.${SECRET_DOMAIN}"
+            subject: ["group:Admins", "group:Users"]
+            policy: two_factor
+
+      storage:
+        postgres:
+          enabled: true
+          host: postgresql.dev.svc.cluster.local
+          port: 5432
+          database: authelia
+          schema: public
+          username: authelia
+          ssl:
+            mode: disable
+      session:
+        redis:
+          enabled: true
+          host: 192.168.42.1
+          port: 6379
+          database_index: 0
+      notifier:
+        disable_startup_check: false
+        smtp:
+          enabled: true
+          enabledSecret: true
+          host: "${SECRET_SMTP_SERVER}"
+          port: ${SECRET_SMTP_PORT}
+          username: "${SECRET_SMTP_USERNAME}"
+          sender: "${SECRET_AUTH_SMTP_SENDER}"
+          identifier: "${SECRET_DOMAIN}"
+          subject: "[Authelia] {title}"
+          startup_check_address: "${SECRET_DEFAULT_EMAIL}"
+    secret:
+      ldap:
+        key: LDAP_PASSWORD
+        value: "${SECRET_DEFAULT_PASSWORD}"
+      smtp:
+        key: SMTP_PASSWORD
+        value: "${SECRET_SMTP_PASSWORD}"
+        filename: SMTP_PASSWORD
+      storage:
+        key: STORAGE_PASSWORD
+        value: "${SECRET_DEFAULT_PASSWORD}"
+        filename: STORAGE_PASSWORD
+      redis:
+        key: REDIS_PASSWORD
+        value: "${SECRET_DEFAULT_PASSWORD}"
+        filename: REDIS_PASSWORD
