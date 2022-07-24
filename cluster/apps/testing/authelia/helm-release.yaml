@@ -31,6 +31,20 @@ spec:
     image:
       repository: docker.io/authelia/authelia
       tag: 4.36.2
+    env:
+      AUTHELIA_LOG_LEVEL: debug
+      AUTHELIA_SERVER_PORT: &port-http 9091
+      AUTHELIA_SERVER_DISABLE_HEALTHCHECK: "true"
+      AUTHELIA_STORAGE_POSTGRES_USERNAME:
+        valueFrom:
+          secretKeyRef:
+            name: postgres-app
+            key: username
+      AUTHELIA_STORAGE_POSTGRES_PASSWORD:
+        valueFrom:
+          secretKeyRef:
+            name: postgres-app
+            key: password
     envFrom:
       - secretRef:
           name: *app
@@ -39,7 +53,7 @@ spec:
       main:
         ports:
           http:
-            port: 9091
+            port: *port-http
           metrics:
             enabled: true
             port: 9959
@@ -60,6 +74,11 @@ spec:
           - hosts:
               - *host-release
               - *host-custom
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
     persistence:
       config:
         enabled: true
