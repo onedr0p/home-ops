@@ -51,18 +51,13 @@ spec:
           external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_PUBLIC_DOMAIN}"
           external-dns/is-public: "true"
         hosts:
-          - host: &host-release "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
-          - host: &host-custom "hass.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "hass.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - *host-release
-              - *host-custom
+              - *host
     probes:
       liveness:
         enabled: false
@@ -103,18 +98,13 @@ spec:
           enabled: true
           ingressClassName: "nginx"
           hosts:
-            - host: &host-release-code "{{ .Release.Name }}-code.${SECRET_PUBLIC_DOMAIN}"
-              paths:
-                - path: /
-                  pathType: Prefix
-            - host: &host-custom-code "hass-code.${SECRET_PUBLIC_DOMAIN}"
+            - host: &host "hass-code.${SECRET_PUBLIC_DOMAIN}"
               paths:
                 - path: /
                   pathType: Prefix
           tls:
             - hosts:
-                - *host-release-code
-                - *host-custom-code
+                - *host
         volumeMounts:
           - name: config
             mountPath: /config
