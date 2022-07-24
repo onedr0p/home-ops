@@ -17,10 +17,8 @@ duo_api:
 authentication_backend:
   password_reset:
     disable: true
-
   ldap:
     url: ldap://glauth:3893
-    base_dn: dc=buhl,dc=casa
     username_attribute: uid
     additional_users_dn: ou=users
     users_filter: (&({username_attribute}={input})(objectClass=person))
@@ -29,7 +27,6 @@ authentication_backend:
     group_name_attribute: cn
     mail_attribute: mail
     display_name_attribute: displayName
-    user: cn=svcacct,dc=buhl,dc=casa
 
 access_control:
   default_policy: one_factor
@@ -39,20 +36,3 @@ access_control:
         - 10.42.0.0/16
         - 192.168.1.0/24
         - 192.168.42.0/24
-
-session:
-  domain: buhl.casa
-  redis:
-    host: 192.168.42.1
-    port: 6379
-
-storage:
-  postgres:
-    host: postgres-rw
-
-notifier:
-  smtp:
-    username: authelia@mg.buhl.casa
-    host: smtp.mailgun.org
-    port: 587
-    sender: "Authelia <authelia@mg.buhl.casa>"
