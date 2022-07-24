@@ -9,16 +9,17 @@ access_control:
     - domain: ["auth.${SECRET_PUBLIC_DOMAIN}"]
       policy: bypass
 
+    - domain: ["*.${SECRET_PUBLIC_DOMAIN}"]
+      policy: bypass
+      networks: ["internal"]
+
     - domain:
         - "radarr-test.${SECRET_PUBLIC_DOMAIN}"
       policy: bypass
       resources: ["^/api([/?].*)?$"]
 
     - domain: ["*.${SECRET_PUBLIC_DOMAIN}"]
-      policy: bypass
-      networks: ["internal"]
-
-    - domain: ["*.${SECRET_PUBLIC_DOMAIN}"]
+      subject: ["group:people", "group:users"]
       policy: one_factor
 
     # - domain:
