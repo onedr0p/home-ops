@@ -59,11 +59,18 @@ spec:
     persistence:
       config:
         enabled: true
-        type: configMap
+        type: secret
         name: *app
-        subPath: configuration.yaml
-        mountPath: /config/configuration.yaml
-        readOnly: true
+        items:
+          - key: configuration.yaml
+            path: configuration.yaml
+      # config:
+      #   enabled: true
+      #   type: configMap
+      #   name: *app
+      #   subPath: configuration.yaml
+      #   mountPath: /config/configuration.yaml
+      #   readOnly: true
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
