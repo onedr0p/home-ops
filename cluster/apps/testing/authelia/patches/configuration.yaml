@@ -1,0 +1,146 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: authelia
+  namespace: testing
+spec:
+  values:
+    configMap:
+      authelia:
+        enabled: true
+        data:
+          theme: dark
+          jwt_secret: none
+          default_redirection_url: https://google.com
+          default_2fa_method: ""
+
+          server:
+            host: 0.0.0.0
+            port: 9091
+            path: ""
+            read_buffer_size: 4096
+            write_buffer_size: 4096
+            enable_pprof: false
+            enable_expvars: false
+            disable_healthcheck: false
+            tls:
+              key: ""
+              certificate: ""
+              client_certificates: []
+            headers:
+              csp_template: ""
+
+          log:
+            level: debug
+
+          telemetry:
+            metrics:
+              enabled: true
+              address: tcp://0.0.0.0:9959
+
+          totp:
+            disable: true
+          webauthn:
+            disable: true
+          duo_api:
+            disable: true
+
+          ntp:
+            address: "time.cloudflare.com:123"
+            version: 4
+            max_desync: 3s
+            disable_startup_check: false
+            disable_failure: false
+
+          authentication_backend:
+            password_reset:
+              disable: true
+            refresh_interval: 5m
+
+            ldap:
+              implementation: custom
+              url: ldap://glauth:3893
+              timeout: 5s
+              start_tls: false
+              tls:
+                skip_verify: false
+                minimum_version: TLS1.2
+              base_dn: dc=buhl,dc=casa
+              username_attribute: uid
+              additional_users_dn: ou=users
+              users_filter: (&(|({username_attribute}={input})({mail_attribute}={input}))(objectClass=person))
+              additional_groups_dn: ou=groups
+              groups_filter: (&(uniqueMember={dn})(objectClass=groupOfUniqueNames))
+              group_name_attribute: cn
+              mail_attribute: mail
+              display_name_attribute: displayName
+              permit_referrals: false
+              user: cn=svcacct,dc=buhl,dc=casa
+              password: none
+
+          access_control:
+            default_policy: one_factor
+            networks:
+              - name: internal
+                networks:
+                  - 10.42.0.0/16
+                  - 192.168.1.0/24
+                  - 192.168.42.0/24
+
+          session:
+            name: authelia_session
+            domain: buhl.casa
+            same_site: lax
+            secret: none
+            expiration: 1h
+            inactivity: 5m
+            remember_me_duration: 1M
+            redis:
+              host: 192.168.42.1
+              port: 6379
+              password: none
+              database_index: 0
+              maximum_active_connections: 8
+              minimum_idle_connections: 0
+
+          regulation:
+            max_retries: 3
+            find_time: 2m
+            ban_time: 5m
+
+          storage:
+            encryption_key: nonenonenonenonenonenonenonenonenonenonenonenonenonenonenonenonenone
+            postgres:
+              host: postgres-rw
+              port: 5432
+              database: authelia
+              schema: public
+              username: authelia
+              password: none
+              timeout: 5s
+              ssl:
+                mode: disable
+                root_certificate: disable
+                certificate: disable
+                key: disable
+
+          notifier:
+            disable_startup_check: false
+            smtp:
+              host: 127.0.0.1
+              port: 1025
+              timeout: 5s
+              username: test
+              password: password
+              sender: "Authelia <admin@example.com>"
+              identifier: localhost
+              subject: "[Authelia] {title}"
+              startup_check_address: test@authelia.com
+              disable_require_tls: false
+              disable_html_emails: false
+              tls:
+                skip_verify: false
+                minimum_version: TLS1.2
+  # valuesFrom:
+  #   - type: Secret
