@@ -2,7 +2,7 @@
 access_control:
   default_policy: one_factor
   networks:
-    - name: private
+    - name: internal
       networks: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
 
   rules:
@@ -16,11 +16,14 @@ access_control:
 
     - domain: ["*.${SECRET_PUBLIC_DOMAIN}"]
       policy: bypass
-      networks: ["private"]
+      networks: ["internal"]
+
+    - domain: ["*.${SECRET_PUBLIC_DOMAIN}"]
+      policy: one_factor
 
     # - domain:
     #     - "*.${SECRET_PUBLIC_DOMAIN}"
     #   policy: one_factor
     #   subject: ["group:people", "group:users"]
     #   networks:
-    #     - private
+    #     - internal
