@@ -27,11 +27,13 @@ spec:
       nameOverride: *app
     image:
       repository: public.ecr.aws/docker/library/redis
-      tag: 7.0.4-alpine
+      tag: 7.0.4
+    env:
+      REDIS_REPLICATION_MODE: master
     envFrom:
       - secretRef:
           name: *app
-    command: ["/bin/sh", "-c", "redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
+    command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
     service:
       main:
         ports:
