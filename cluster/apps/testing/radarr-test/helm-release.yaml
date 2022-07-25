@@ -75,6 +75,17 @@ spec:
         tls:
           - hosts:
               - *host
+      api:
+        enabled: true
+        ingressClassName: "nginx"
+        hosts:
+          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /api
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
