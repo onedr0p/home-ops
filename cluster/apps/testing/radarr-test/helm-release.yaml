@@ -63,14 +63,23 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         annotations:
-          external-dns.alpha.kubernetes.io/target: "ipv4.${SECRET_PUBLIC_DOMAIN}"
-          external-dns/is-public: "true"
-          nginx.ingress.kubernetes.io/auth-signin: "https://auth.${SECRET_PUBLIC_DOMAIN}"
-          nginx.ingress.kubernetes.io/auth-url: "http://authelia.testing.svc.cluster.local/api/verify"
+          auth.home.arpa/enabled: "true"
+          external-dns.home.arpa/enabled: "true"
         hosts:
           - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+      api:
+        enabled: true
+        ingressClassName: "nginx"
+        hosts:
+          - host: *host
+            paths:
+              - path: /api
                 pathType: Prefix
         tls:
           - hosts:
