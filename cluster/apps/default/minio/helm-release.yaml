@@ -30,7 +30,6 @@ spec:
       tag: RELEASE.2022-07-24T01-54-52Z
     env:
       TZ: "America/New_York"
-      MINIO_PROMETHEUS_AUTH_TYPE: "public"
       MINIO_UPDATE: "off"
       MINIO_PROMETHEUS_URL: http://kube-prometheus-stack-prometheus.monitoring:9090
       MINIO_PROMETHEUS_JOB_ID: minio
@@ -58,6 +57,12 @@ spec:
       main:
         enabled: true
         ingressClassName: "nginx"
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+          nginx.ingress.kubernetes.io/proxy-body-size: 5000m
+          nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            chunked_transfer_encoding off;
         hosts:
           - host: &host-console "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
             paths:
