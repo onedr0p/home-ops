@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: &app minio
+  name: &app smtp-relay
   namespace: default
   labels: &labels
     app.kubernetes.io/instance: *app
@@ -12,11 +12,8 @@ spec:
     matchLabels:
       <<: *labels
   endpoints:
-    - port: api
+    - port: metrics
       scheme: http
-      path: /minio/v2/metrics/cluster
+      path: /metrics
       interval: 1m
       scrapeTimeout: 10s
-      bearerTokenSecret:
-        name: minio-prometheus
-        key: token
