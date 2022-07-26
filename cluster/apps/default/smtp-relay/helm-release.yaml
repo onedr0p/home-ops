@@ -34,7 +34,8 @@ spec:
     env:
       TZ: "${TIMEZONE}"
       DEBUG: "true"
-      DOMAIN: "smtp.fastmail.com"
+      DOMAIN: "${SECRET_EMAIL_DOMAIN}"
+      REMOTE_HOST: "smtp.fastmail.com"
       REMOTE_USER: "devin@${SECRET_EMAIL_DOMAIN}"
       REMOTE_PORT: "465"
     envFrom:
@@ -42,21 +43,12 @@ spec:
           name: *app
     service:
       main:
-        enabled: true
-        type: LoadBalancer
-        externalIPs:
-          - "${SVC_SMTP_RELAY_ADDR}"
         ports:
           http:
             port: 2525
-      metrics:
-        enabled: true
-        ports:
           metrics:
             enabled: true
             port: 9749
-            protocol: TCP
-            targetPort: 9749
     persistence:
       config:
         enabled: true
