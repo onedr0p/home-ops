@@ -1,0 +1,31 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: rtorrent-flood
+  namespace: media
+spec:
+  values:
+    additionalContainers:
+      rtorrent:
+        name: rtorrent
+        image: ghcr.io/onedr0p/rtorrent:0.9.8-r16@sha256:3695d190b8eed62b74fa0828a900a08968491757f29da9ebc2d180f317625c47
+        env:
+          - name: RTORRENT__DEFAULT_CONFIG
+            value: "false"
+          - name: RTORRENT__CONFIG_FILE
+            value: "/rc/rtorrent.rc"
+          - name: RTORRENT__SOCKET
+            value: "/sock/rtorrent.sock"
+          - name: RTORRENT__BT_PORT
+            value: "50415"
+        volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: rtorrent-rc
+            mountPath: /rc/rtorrent.rc
+            subPath: rtorrent.rc
+          - name: rtorrent-sock
+            mountPath: /sock
+          - name: media
+            mountPath: /media
