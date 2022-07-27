@@ -31,14 +31,10 @@ k3s_server:
   # Required to monitor component with kube-prometheus-stack
   etcd-expose-metrics: true
   kubelet-arg:
-    # Enable Alpha/Beta features
-    - "feature-gates=MixedProtocolLBService=true"
     # Allow pods to be rescheduled quicker in the case of a node failure
     # https://github.com/k3s-io/k3s/issues/1264
     - "node-status-update-frequency=4s"
   kube-controller-manager-arg:
-    # Enable Alpha/Beta features
-    - "feature-gates=MixedProtocolLBService=true"
     # Required to monitor component with kube-prometheus-stack
     - "bind-address=0.0.0.0"
     # Allow pods to be rescheduled quicker in the case of a node failure
@@ -47,13 +43,9 @@ k3s_server:
     - "node-monitor-grace-period=16s"
     - "pod-eviction-timeout=20s"
   kube-proxy-arg:
-    # Enable Alpha/Beta features
-    - "feature-gates=MixedProtocolLBService=true"
     # Required to monitor component with kube-prometheus-stack
     - "metrics-bind-address=0.0.0.0"
   kube-scheduler-arg:
-    # Enable Alpha/Beta features
-    - "feature-gates=MixedProtocolLBService=true"
     # Required to monitor component with kube-prometheus-stack
     - "bind-address=0.0.0.0"
   kube-apiserver-arg:
@@ -61,8 +53,6 @@ k3s_server:
     - "--audit-log-path=/var/lib/rancher/k3s/audit.log"
     - "--audit-policy-file=/var/lib/rancher/k3s/audit-policy.yaml"
     - "--audit-log-maxage=2"
-    # Enable Alpha/Beta features
-    - "feature-gates=MixedProtocolLBService=true"
     # Required for HAProxy health-checks
     - "anonymous-auth=true"
     # Allow pods to be rescheduled quicker in the case of a node failure
