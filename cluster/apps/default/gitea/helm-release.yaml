@@ -51,6 +51,9 @@ spec:
       enabled: true
       gpgHome: /data/git/.gnupg
     gitea:
+      admin:
+        email: "devin@${SECRET_EMAIL_DOMAIN}"
+        username: devin
       config:
         APP_NAME: Tea, Git, Hot
         server:
@@ -87,22 +90,15 @@ spec:
           MINIO_ENDPOINT: minio:9000
           MINIO_BUCKET: gitea
         mailer:
-          enabled: true
-          mailer_type: smtp
-          host: smtp.mailgun.org
+          ENABLED: true
+          MAILER_TYPE: smtp
+          HOST: smtp-relay:2525
+          FROM: "Gitea <gitea@${SECRET_EMAIL_DOMAIN}>"
       metrics:
         enabled: true
         serviceMonitor:
           enabled: true
   valuesFrom:
-    - targetPath: gitea.admin.email
-      kind: Secret
-      name: gitea-config
-      valuesKey: email
-    - targetPath: gitea.admin.username
-      kind: Secret
-      name: gitea-config
-      valuesKey: username
     - targetPath: gitea.admin.password
       kind: Secret
       name: gitea-config
@@ -123,15 +119,3 @@ spec:
       kind: Secret
       name: gitea-config
       valuesKey: minio_secret_access_key
-    - targetPath: gitea.config.mailer.user
-      kind: Secret
-      name: gitea-config
-      valuesKey: smtp_user
-    - targetPath: gitea.config.mailer.passwd
-      kind: Secret
-      name: gitea-config
-      valuesKey: smtp_password
-    - targetPath: gitea.config.mailer.from
-      kind: Secret
-      name: gitea-config
-      valuesKey: smtp_user
