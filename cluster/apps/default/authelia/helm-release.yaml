@@ -1,0 +1,95 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app authelia
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: kah-common-chart
+      version: 1.1.2
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 15m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: postgres
+      namespace: default
+    - name: glauth
+      namespace: default
+    - name: redis
+      namespace: default
+  values:
+    global:
+      nameOverride: *app
+    controller:
+      replicas: 3
+      strategy: RollingUpdate
+    image:
+      repository: docker.io/authelia/authelia
+      tag: 4.36.3
+    envFrom:
+      - secretRef:
+          name: *app
+    enableServiceLinks: false
+    service:
+      main:
+        ports:
+          http:
+            port: 80
+          metrics:
+            enabled: true
+            port: 8080
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          external-dns.home.arpa/enabled: "true"
+        hosts:
+          - host: &host "auth.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+    persistence:
+      config:
+        enabled: true
+        type: configMap
+        name: *app
+        subPath: configuration.yml
+        mountPath: /config/configuration.yml
+        readOnly: false
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: *app
+      secret.reloader.stakater.com/reload: *app
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app
+    resources:
+      requests:
+        cpu: 10m
+        memory: 50Mi
+      limits:
+        memory: 250Mi
