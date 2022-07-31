@@ -33,6 +33,19 @@ spec:
       READARR__INSTANCE_NAME: Readarr (Audio)
       READARR__PORT: &port 80
       READARR__LOG_LEVEL: info
+      READARR__POSTGRES_HOST: postgres-rw
+      READARR__POSTGRES_MAIN_DB: readarr
+      READARR__POSTGRES_MAIN_LOG: readarr_logs
+      READARR__POSTGRES_USER:
+        valueFrom:
+          secretKeyRef:
+            name: *app
+            key: POSTGRES_USER
+      READARR__POSTGRES_PASSWORD:
+        valueFrom:
+          secretKeyRef:
+            name: *app
+            key: POSTGRES_PASS
     envFrom:
       - secretRef:
           name: *app
