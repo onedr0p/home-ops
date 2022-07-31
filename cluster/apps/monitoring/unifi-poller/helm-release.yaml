@@ -2,14 +2,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: unifi-poller
+  name: &app unifi-poller
   namespace: monitoring
 spec:
   interval: 15m
   chart:
     spec:
-      chart: unifi-poller
-      version: 11.0.0
+      chart: kah-common-chart
+      version: 1.1.2
       sourceRef:
         kind: HelmRepository
         name: k8s-at-home-charts
@@ -23,6 +23,8 @@ spec:
     remediation:
       retries: 5
   values:
+    global:
+      nameOverride: *app
     image:
       repository: docker.io/golift/unifi-poller
       tag: 2.1.3
@@ -38,10 +40,14 @@ spec:
       UP_INFLUXDB_DISABLE: true
       UP_PROMETHEUS_DISABLE: false
       UP_PROMETHEUS_NAMESPACE: "unifipoller"
-    metrics:
-      enabled: true
-      serviceMonitor:
-        interval: 2m
-        scrapeTimeout: 30s
-      prometheusRule:
-        enabled: false
+    service:
+      main:
+        ports:
+          http:
+            port: 9130
+    resources:
+      requests:
+        cpu: 10m
+        memory: 100Mi
+      limits:
+        memory: 500Mi
