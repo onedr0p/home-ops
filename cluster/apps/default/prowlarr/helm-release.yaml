@@ -33,6 +33,19 @@ spec:
       PROWLARR__INSTANCE_NAME: Prowlarr
       PROWLARR__PORT: &port 80
       PROWLARR__LOG_LEVEL: info
+      PROWLARR__POSTGRES_HOST: postgres-rw
+      PROWLARR__POSTGRES_MAIN_DB: prowlarr_main
+      PROWLARR__POSTGRES_MAIN_LOG: prowlarr_log
+      PROWLARR__POSTGRES_USER:
+        valueFrom:
+          secretKeyRef:
+            name: *app
+            key: POSTGRES_USER
+      PROWLARR__POSTGRES_PASSWORD:
+        valueFrom:
+          secretKeyRef:
+            name: *app
+            key: POSTGRES_PASS
     envFrom:
       - secretRef:
           name: *app
