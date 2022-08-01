@@ -46,14 +46,14 @@ spec:
       enabled: false
     persistence:
       enabled: true
-      existingClaim: gitea-config-v1
+      existingClaim: gitea-config-v2
     signing:
       enabled: true
       gpgHome: /data/git/.gnupg
     gitea:
       admin:
-        email: "devin@${SECRET_EMAIL_DOMAIN}"
-        username: devin
+        email: "admin@${SECRET_EMAIL_DOMAIN}"
+        username: admin
       config:
         APP_NAME: Tea, Git, Hot
         server:
@@ -61,9 +61,8 @@ spec:
           DOMAIN: "gitea.${SECRET_PUBLIC_DOMAIN}"
           ROOT_URL: "https://gitea.${SECRET_PUBLIC_DOMAIN}"
           ENABLE_GZIP: true
-          LANDING_PAGE: explore
+          LANDING_PAGE: login
           LFS_START_SERVER: true
-          ALLOW_GRACEFUL_RESTARTS: true
         admin:
           DISABLE_REGULAR_ORG_CREATION: true
         ui:
@@ -83,16 +82,16 @@ spec:
           ENABLED: true
         attachment:
           STORAGE_TYPE: minio
-          MINIO_ENDPOINT: minio:9000
+          MINIO_ENDPOINT: minio.default:9000
           MINIO_BUCKET: gitea
         storage:
           STORAGE_TYPE: minio
-          MINIO_ENDPOINT: minio:9000
+          MINIO_ENDPOINT: minio.default:9000
           MINIO_BUCKET: gitea
         mailer:
           ENABLED: true
           MAILER_TYPE: smtp
-          HOST: smtp-relay:2525
+          HOST: smtp-relay.default:2525
           FROM: "Gitea <gitea@${SECRET_EMAIL_DOMAIN}>"
       metrics:
         enabled: true
