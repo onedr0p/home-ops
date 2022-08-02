@@ -1,6 +1,14 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: default
 resources:
-  - secret.sops.yaml
   - helm-release.yaml
+secretGenerator:
+  - name: glauth
+    files:
+      - server.toml=config/server.sops.toml
+      - groups.toml=config/groups.sops.toml
+      - users.toml=config/users.sops.toml
+generatorOptions:
+  disableNameSuffixHash: true
