@@ -93,6 +93,18 @@ spec:
           MAILER_TYPE: smtp
           HOST: smtp-relay.default:2525
           FROM: "Gitea <gitea@${SECRET_EMAIL_DOMAIN}>"
+      ldap:
+        - name: glauth
+          securityProtocol: unencrypted
+          host: glauth.default
+          port: "389"
+          userSearchBase: ou=people,dc=home,dc=arpa
+          userFilter: (objectClass=posixAccount)
+          adminFilter: (memberOf=ou=admins,ou=groups,dc=home,dc=arpa)
+          emailAttribute: mail
+          usernameAttribute: uid
+          publicSSHKeyAttribute: publicSSHKey
+          existingSecret: gitea-config
       metrics:
         enabled: true
         serviceMonitor:
