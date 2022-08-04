@@ -1,7 +1,16 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: default
 resources:
   - secret.sops.yaml
-  - config-pvc.yaml
-  - helm-release.yaml
+  - standard
+  - uhd
+configMapGenerator:
+  - name: radarr-pushover
+    files:
+      - scripts/pushover-notify.sh
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled

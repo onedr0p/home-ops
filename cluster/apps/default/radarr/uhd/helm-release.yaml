@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app radarr
+  name: &app radarr-uhd
   namespace: default
 spec:
   interval: 15m
@@ -32,13 +32,15 @@ spec:
       TZ: "${TIMEZONE}"
       PUSHOVER_DEBUG: "false"
       PUSHOVER_APP_URL: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
-      RADARR__INSTANCE_NAME: Radarr
+      RADARR__INSTANCE_NAME: Radarr (UHD)
       RADARR__PORT: &port 80
       RADARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
       RADARR__LOG_LEVEL: info
     envFrom:
       - secretRef:
-          name: *app
+          name: radarr
+      - secretRef:
+          name: radarr-uhd
     service:
       main:
         ports:
@@ -49,11 +51,9 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         annotations:
-          auth.home.arpa/enabled: "true"
-          external-dns.home.arpa/enabled: "true"
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/radarr/nord.css"></head>';
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/radarr/hotline.css"><link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/addons/radarr/radarr-4k-logo/radarr-4k-logo.css"></head>';
             sub_filter_once on;
         hosts:
           - host: *host
@@ -73,7 +73,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: radarr-config-v1
+        existingClaim: radarr-uhd-config-v1
       media:
         enabled: true
         type: nfs
@@ -84,16 +84,16 @@ spec:
         enabled: true
         type: configMap
         name: radarr-pushover
-        subPath: notify.sh
+        subPath: pushover-notify.sh
         mountPath: /scripts/pushover-notify.sh
         defaultMode: 0775
         readOnly: true
     podAnnotations:
       configmap.reloader.stakater.com/reload: radarr-pushover
-      secret.reloader.stakater.com/reload: *app
+      secret.reloader.stakater.com/reload: radarr,radarr-uhd
     resources:
       requests:
         cpu: 10m
         memory: 250Mi
       limits:
-        memory: 2000Mi
+        memory: 1000Mi
