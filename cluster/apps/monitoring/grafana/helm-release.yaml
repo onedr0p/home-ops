@@ -47,8 +47,27 @@ spec:
         mode: console
       grafana_net:
         url: https://grafana.net
+      auth:
+        signout_redirect_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/logout"
+        oauth_auto_login: true
       auth.basic:
         disable_login_form: false
+      auth.generic_oauth:
+        enabled: true
+        name: "${SECRET_PUBLIC_DOMAIN/./-}"
+        client_id: "${SECRET_GRAFANA_OAUTH_CLIENT_ID}"
+        client_secret: "${SECRET_GRAFANA_OAUTH_CLIENT_SECRET}"
+        scopes: "openid profile email groups"
+        empty_scopes: false
+        auth_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/api/oidc/authorization"
+        token_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/api/oidc/token"
+        api_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/api/oidc/userinfo"
+        login_attribute_path: preferred_username
+        groups_attribute_path: groups
+        name_attribute_path: name
+        use_pkce: true
+        role_attribute_path: |
+          contains(groups[*], 'admins') && 'Admin' || contains(groups[*], 'people') && 'Viewer'
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
@@ -139,6 +158,7 @@ spec:
       enabled: true
       ingressClassName: "nginx"
       annotations:
+        external-dns.home.arpa/enabled: "true"
         nginx.ingress.kubernetes.io/affinity: "cookie"
         nginx.ingress.kubernetes.io/session-cookie-name: "grafana"
         nginx.ingress.kubernetes.io/session-cookie-expires: "172800"

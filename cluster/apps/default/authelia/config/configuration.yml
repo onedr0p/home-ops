@@ -21,3 +21,28 @@ access_control:
     - domain: "*.${SECRET_PUBLIC_DOMAIN}"
       policy: bypass
       networks: ["internal"]
+
+identity_providers:
+  oidc:
+    cors:
+      endpoints:
+        - authorization
+        - token
+        - revocation
+        - introspection
+      allowed_origins_from_client_redirect_uris: true
+    clients:
+      - id: grafana
+        description: Grafana
+        secret: ${SECRET_GRAFANA_OAUTH_CLIENT_SECRET}
+        public: false
+        authorization_policy: one_factor
+        pre_configured_consent_duration: 1y
+        scopes:
+          - openid
+          - profile
+          - groups
+          - email
+        redirect_uris:
+          - https://grafana.${SECRET_PUBLIC_DOMAIN}/login/generic_oauth
+        userinfo_signing_algorithm: none
