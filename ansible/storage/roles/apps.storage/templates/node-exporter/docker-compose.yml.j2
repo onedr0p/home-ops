@@ -6,16 +6,14 @@ services:
     image: quay.io/prometheus/node-exporter:v1.3.1
     container_name: node-exporter
     restart: unless-stopped
-    network_mode: host
-    pid: host
-    cap_add:
-      - SYS_TIME
-      - SYS_NICE
     command:
       - --path.procfs=/host/proc
       - --path.rootfs=/rootfs
       - --path.sysfs=/host/sys
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro,rslave
+    ports:
+      - 9100:9100
