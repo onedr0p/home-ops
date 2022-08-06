@@ -81,6 +81,11 @@ spec:
             url: http://loki-gateway:80
     dashboards:
       default:
+        # Ref: https://grafana.com/grafana/dashboards/13133
+        cloudflare:
+          gnetId: 13133
+          revision: 3
+          datasource: Prometheus
         # Ref: https://grafana.com/grafana/dashboards/7845
         zfs:
           gnetId: 7845
@@ -128,7 +133,6 @@ spec:
       - vonage-status-panel
       - grafana-worldmap-panel
       - grafana-clock-panel
-      - cloudflare-app
     serviceMonitor:
       enabled: true
     ingress:
@@ -146,9 +150,6 @@ spec:
             - *host
     persistence:
       enabled: false
-      # type: statefulset
-      # storageClassName: "ceph-block"
-      # size: 10Gi
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
