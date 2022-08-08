@@ -33,9 +33,7 @@ spec:
     grafana.ini:
       auth:
         signout_redirect_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/logout"
-        oauth_auto_login: true
-      auth.basic:
-        disable_login_form: false
+        oauth_auto_login: false
       auth.generic_oauth:
         enabled: true
         name: Authelia
@@ -52,6 +50,14 @@ spec:
         use_pkce: true
         role_attribute_path: |
           contains(groups[*], 'admins') && 'Admin' || contains(groups[*], 'people') && 'Viewer'
+      auth.basic:
+        enabled: false
+        # disable_login_form: false
+      auth.anonymous:
+        enabled: true
+        org_name: HomeOps
+        org_id: 1
+        org_role: Viewer
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
