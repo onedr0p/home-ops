@@ -26,33 +26,11 @@ spec:
       namespace: default
   values:
     replicas: 3
-    env:
-      GF_EXPLORE_ENABLED: true
-      GF_PANELS_DISABLE_SANITIZE_HTML: true
-      GF_LOG_FILTERS: rendering:debug
-      GF_DATE_FORMATS_FULL_DATE: "MMM Do, YYYY hh:mm:ss a"
-      GF_SECURITY_ALLOW_EMBEDDING: true
-      GF_SECURITY_COOKIE_SAMESITE: grafana
-      GF_DATABASE_TYPE: postgres
-      GF_DATABASE_NAME: grafana
-      GF_DATABASE_HOST: postgres-rw.default:5432
-      GF_DATABASE_SSL_MODE: disable
     admin:
-      existingSecret: grafana-admin-creds
+      existingSecret: grafana-admin
+    envFromSecrets:
+      - name: grafana
     grafana.ini:
-      server:
-        root_url: "https://grafana.${SECRET_PUBLIC_DOMAIN}"
-      paths:
-        data: /var/lib/grafana/data
-        logs: /var/log/grafana
-        plugins: /var/lib/grafana/plugins
-        provisioning: /etc/grafana/provisioning
-      analytics:
-        check_for_updates: false
-      log:
-        mode: console
-      grafana_net:
-        url: https://grafana.net
       auth:
         signout_redirect_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/logout"
         oauth_auto_login: true
@@ -166,10 +144,10 @@ spec:
       annotations:
         auth.home.arpa/enabled: "true"
         external-dns.home.arpa/enabled: "true"
-        nginx.ingress.kubernetes.io/affinity: "cookie"
-        nginx.ingress.kubernetes.io/session-cookie-name: "grafana"
-        nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
-        nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+        # nginx.ingress.kubernetes.io/affinity: "cookie"
+        # nginx.ingress.kubernetes.io/session-cookie-name: "grafana"
+        # nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+        # nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
       hosts:
         - &host "grafana.${SECRET_PUBLIC_DOMAIN}"
       tls:
@@ -189,12 +167,3 @@ spec:
                     values:
                       - grafana
               topologyKey: kubernetes.io/hostname
-  valuesFrom:
-    - targetPath: env.GF_DATABASE_USER
-      kind: Secret
-      name: grafana-postgres-creds
-      valuesKey: POSTGRES_USERNAME
-    - targetPath: env.GF_DATABASE_PASSWORD
-      kind: Secret
-      name: grafana-postgres-creds
-      valuesKey: POSTGRES_PASSWORD
