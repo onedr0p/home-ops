@@ -21,6 +21,9 @@ spec:
   upgrade:
     remediation:
       retries: 5
+  dependsOn:
+    - name: postgres
+      namespace: default
   values:
     replicas: 3
     env:
@@ -67,6 +70,11 @@ spec:
         use_pkce: true
         role_attribute_path: |
           contains(groups[*], 'admins') && 'Admin' || contains(groups[*], 'people') && 'Viewer'
+      database:
+        type: postgres
+        name: grafana
+        url: postgres-rw.default:5432
+        ssl_mode: disabled
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
@@ -182,3 +190,14 @@ spec:
                     values:
                       - grafana
               topologyKey: kubernetes.io/hostname
+  valuesFrom:
+    - targetPath: |-
+        "grafana.ini".database.user
+      kind: Secret
+      name: grafana-postgres-creds
+      valuesKey: POSTGRES_USERNAME
+    - targetPath: |-
+        "grafana.ini".database.password
+      kind: Secret
+      name: grafana-postgres-creds
+      valuesKey: POSTGRES_PASSWORD
