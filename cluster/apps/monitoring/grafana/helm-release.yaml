@@ -33,6 +33,10 @@ spec:
       GF_DATE_FORMATS_FULL_DATE: "MMM Do, YYYY hh:mm:ss a"
       GF_SECURITY_ALLOW_EMBEDDING: true
       GF_SECURITY_COOKIE_SAMESITE: grafana
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_NAME: grafana
+      GF_DATABASE_HOST: postgres-rw.default:5432
+      GF_DATABASE_SSL_MODE: disable
     admin:
       existingSecret: grafana-admin-creds
     grafana.ini:
@@ -70,11 +74,6 @@ spec:
         use_pkce: true
         role_attribute_path: |
           contains(groups[*], 'admins') && 'Admin' || contains(groups[*], 'people') && 'Viewer'
-      database:
-        type: postgres
-        name: grafana
-        host: postgres-rw.default:5432
-        ssl_mode: disable
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
@@ -191,13 +190,11 @@ spec:
                       - grafana
               topologyKey: kubernetes.io/hostname
   valuesFrom:
-    - targetPath: |-
-        'grafana\.ini'.database.user
+    - targetPath: env.GF_DATABASE_USER
       kind: Secret
       name: grafana-postgres-creds
       valuesKey: POSTGRES_USERNAME
-    - targetPath: |-
-        'grafana\.ini'.database.password
+    - targetPath: env.GF_DATABASE_PASSWORD
       kind: Secret
       name: grafana-postgres-creds
       valuesKey: POSTGRES_PASSWORD
