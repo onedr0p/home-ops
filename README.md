@@ -19,7 +19,6 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 [![Lines of code](https://img.shields.io/tokei/lines/github/onedr0p/home-ops?style=for-the-badge&color=brightgreen&label=lines&logo=codefactor&logoColor=white)](https://github.com/onedr0p/home-ops/graphs/contributors)
 
 <br/>
-<div align="center">
 
 [![Home-Internet](https://img.shields.io/uptimerobot/status/m784591389-ddbc4c84041a70eb6f6a3fb4?color=important&label=Home%20Internet&style=flat-square&logo=opnSense&logoColor=white)](https://uptimerobot.com)
 [![Plex](https://img.shields.io/uptimerobot/status/m784591338-cbf3205bc18109108eb0ea8e?logo=plex&logoColor=white&color=important&label=Plex&style=flat-square)](https://plex.tv)
