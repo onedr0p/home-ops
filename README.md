@@ -20,10 +20,10 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 
 <br/>
 
-[![Home-Internet](https://img.shields.io/uptimerobot/status/m784591389-ddbc4c84041a70eb6f6a3fb4?color=important&label=Home%20Internet&style=flat-square&logo=opnSense&logoColor=white)](https://uptimerobot.com)
-[![Plex](https://img.shields.io/uptimerobot/status/m784591338-cbf3205bc18109108eb0ea8e?logo=plex&logoColor=white&color=important&label=Plex&style=flat-square)](https://plex.tv)
-[![Home-Assistant](https://img.shields.io/uptimerobot/status/m786203807-32ce99612d7b2d01b89c4315?logo=homeassistant&logoColor=white&color=important&label=Home%20Assistant&style=flat-square)](https://www.home-assistant.io/)
-[![Grafana](https://img.shields.io/uptimerobot/status/m792427620-04fcdd7089a84863ec9f398d?logo=grafana&logoColor=white&color=important&label=Grafana&style=flat-square)](https://www.grafana.com/)
+[![Home-Internet](https://img.shields.io/uptimerobot/status/m784591389-ddbc4c84041a70eb6f6a3fb4?color=important&label=Home%20Internet&style=for-the-badge&logo=opnSense&logoColor=white)](https://uptimerobot.com)
+[![Plex](https://img.shields.io/uptimerobot/status/m784591338-cbf3205bc18109108eb0ea8e?logo=plex&logoColor=white&color=important&label=Plex&style=for-the-badge)](https://plex.tv)
+[![Home-Assistant](https://img.shields.io/uptimerobot/status/m786203807-32ce99612d7b2d01b89c4315?logo=homeassistant&logoColor=white&color=important&label=Home%20Assistant&style=for-the-badge)](https://www.home-assistant.io/)
+[![Grafana](https://img.shields.io/uptimerobot/status/m792427620-04fcdd7089a84863ec9f398d?logo=grafana&logoColor=white&color=important&label=Grafana&style=for-the-badge)](https://www.grafana.com/)
 
 </div>
 
