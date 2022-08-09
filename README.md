@@ -8,9 +8,6 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 
 </div>
 
----
-
-<br/>
 <div align="center">
 
 [![Discord](https://img.shields.io/discord/673534664354430999?style=for-the-badge&label&logo=discord&logoColor=white&color=blue)](https://discord.gg/k8s-at-home)
