@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: prometheus-blackbox-exporter
-      version: 6.0.0
+      version: 7.0.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community-charts
@@ -36,7 +36,11 @@ spec:
       tls:
         - hosts:
             - *host
-    allowIcmp: true
+    securityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        add: ["NET_RAW"]
     config:
       modules:
         http_2xx:
