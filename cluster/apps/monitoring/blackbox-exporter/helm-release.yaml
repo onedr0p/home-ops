@@ -63,53 +63,44 @@ spec:
         interval: 2m
         scrapeTimeout: 30s
       targets:
-        - module: http_2xx
-          name: opnsense-http
-          url: "http://opnsense.${SECRET_PRIVATE_DOMAIN}"
-        - module: http_2xx
-          name: pikvm-http
-          url: "http://pikvm.${SECRET_PRIVATE_DOMAIN}"
-        - module: http_2xx
-          name: unifi-http
-          url: "https://unifi.${SECRET_PRIVATE_DOMAIN}"
-        - module: icmp
-          name: opnsense-icmp
+        - name: opnsense-icmp
+          module: icmp
           url: opnsense
-        - module: icmp
-          name: open-garage-icmp
+        - name: open-garage-icmp
+          module: icmp
           url: open-garage
-        - module: icmp
-          name: valetudo-icmp
+        - name: valetudo-icmp
+          module: icmp
           url: valetudo
-        - module: icmp
-          name: zigbee-controller-icmp
+        - name: zigbee-controller-icmp
+          module: icmp
           url: zigbee-controller
-        - module: icmp
-          name: expanse-icmp
+        - name: expanse-icmp
+          module: icmp
           url: expanse
-        - module: icmp
-          name: hdhomerun-icmp
+        - name: hdhomerun-icmp
+          module: icmp
           url: hdhomerun
-        - module: icmp
-          name: hue-bridge-icmp
+        - name: hue-bridge-icmp
+          module: icmp
           url: hue-bridge
-        - module: icmp
-          name: cyberpower-pdu-0-icmp
+        - name: cyberpower-pdu-0-icmp
+          module: icmp
           url: cyberpower-pdu-0
-        - module: icmp
-          name: cyberpower-pdu-1-icmp
+        - name: cyberpower-pdu-1-icmp
+          module: icmp
           url: cyberpower-pdu-1
-        - module: icmp
-          name: apc-ups-0-icmp
+        - name: apc-ups-0-icmp
+          module: icmp
           url: apc-ups-0
-        - module: icmp
-          name: unifi-icmp
+        - name: unifi-icmp
+          module: icmp
           url: unifi
-        - module: icmp
-          name: pikvm-icmp
+        - name: pikvm-icmp
+          module: icmp
           url: pikvm
-        - module: icmp
-          name: dell-idrac-0-icmp
+        - name: dell-idrac-0-icmp
+          module: icmp
           url: dell-idrac-0
     prometheusRule:
       enabled: true
@@ -117,22 +108,6 @@ spec:
         app: prometheus-operator
         release: prometheus
       rules:
-        - alert: BlackboxSslCertificateWillExpireSoon
-          expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 3
-          for: 15m
-          labels:
-            severity: critical
-          annotations:
-            description: |-
-              The SSL certificate for {{"{{ $labels.target }}"}} will expire in less than 3 days
-        - alert: BlackboxSslCertificateExpired
-          expr: probe_ssl_earliest_cert_expiry - time() <= 0
-          for: 15m
-          labels:
-            severity: critical
-          annotations:
-            description: |-
-              The SSL certificate for {{"{{ $labels.target }}"}} has expired
         - alert: BlackboxProbeFailed
           expr: probe_success == 0
           for: 15m

@@ -3,9 +3,11 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: navidrome-config-v1
-  namespace: media
+  namespace: default
   labels:
-    kasten.io/backup-volume: "enabled"
+    app.kubernetes.io/name: &name navidrome
+    app.kubernetes.io/instance: *name
+    snapshot.home.arpa/enabled: "true"
 spec:
   accessModes:
     - ReadWriteOnce

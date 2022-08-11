@@ -3,7 +3,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: &app navidrome
-  namespace: media
+  namespace: default
 spec:
   interval: 15m
   chart:
@@ -14,7 +14,6 @@ spec:
         kind: HelmRepository
         name: bjw-s-charts
         namespace: flux-system
-      interval: 15m
   install:
     createNamespace: true
     remediation:
@@ -25,12 +24,19 @@ spec:
   values:
     image:
       repository: ghcr.io/onedr0p/navidrome
-      tag: 0.47.5@sha256:9c4c351200cdb0df3d0740fee7eaf8d7009e4da290288aeed3c71f87b4e499b5
+      tag: 0.47.5@sha256:6ba893d5ed44bea3e29efd54ed97c31adb6f687ba7546bdfa67b378a6b6bfe95
     env:
       TZ: "${TIMEZONE}"
-      ND_LOGLEVEL: "info"
-      ND_SCANSCHEDULE: "1h"
+      ND_DATAFOLDER: /config
+      ND_LOGLEVEL: info
+      ND_MUSICFOLDER: /music
       ND_PORT: &port 80
+      ND_REVERSEPROXYUSERHEADER: "Remote-User"
+      ND_REVERSEPROXYWHITELIST: "${NET_POD_CIDR}"
+      ND_SCANSCHEDULE: "@every 1h"
+    envFrom:
+      - secretRef:
+          name: *app
     service:
       main:
         ports:
@@ -40,19 +46,17 @@ spec:
       main:
         enabled: true
         ingressClassName: "nginx"
+        annotations:
+          auth.home.arpa/enabled: "true"
+          # external-dns.home.arpa/enabled: "true"
         hosts:
-          - host: &host-release "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
-          - host: &host-custom "music.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - *host-release
-              - *host-custom
+              - *host
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
