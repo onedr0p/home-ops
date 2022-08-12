@@ -2,10 +2,10 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: &app cloudflare-ddns
+  name: &app opnsense-backup
   namespace: networking
 spec:
-  schedule: "*/15 * * * *"
+  schedule: "@daily"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 2
@@ -24,11 +24,11 @@ spec:
                     name: *app
               command:
                 - "/bin/bash"
-                - &scriptPath "/app/cloudflare-ddns.sh"
+                - &scriptPath "/app/opnsense-backup.sh"
               volumeMounts:
                 - name: *app
                   mountPath: *scriptPath
-                  subPath: &scriptName cloudflare-ddns.sh
+                  subPath: &scriptName opnsense-backup.sh
                   readOnly: true
           volumes:
             - name: *app
