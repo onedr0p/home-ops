@@ -25,6 +25,11 @@ spec:
     - name: loki
       namespace: monitoring
   values:
+    image:
+      repository: timberio/vector
+      tag: 0.23.3-debian
+    role: Stateless-Aggregator
+    replicas: 3
     customConfig:
       data_dir: /vector-data-dir
       api:
@@ -154,21 +159,6 @@ spec:
           inputs:
             - vector_metrics
           address: 0.0.0.0:9090
-        # console_debug:
-        #   type: console
-        #   inputs:
-        #     - opnsense_filterlog_logs
-        #   target: stdout
-        #   encoding:
-        #     codec: json
-    image:
-      repository: timberio/vector
-      tag: 0.23.3-debian
-    role: Stateless-Aggregator
-    replicas: 3
-    # env:
-    #   - name: VECTOR_LOG
-    #     value: debug
     extraVolumeMounts:
       - name: geoip
         mountPath: /geoip
