@@ -32,6 +32,8 @@ spec:
       TZ: "${TIMEZONE}"
       PORT: &port 8080
       ENABLE_PERIODIC_VISIT_LOCATE: "true"
+      DEFAULT_DOMAIN: &host "ln.${SECRET_PUBLIC_DOMAIN}"
+      IS_HTTPS_ENABLED: "true"
       DB_DRIVER: postgres
       DB_HOST: postgres-rw.default.svc.cluster.local
       DB_NAME: shlink
@@ -50,7 +52,7 @@ spec:
         annotations:
           external-dns.home.arpa/enabled: "true"
         hosts:
-          - host: &host "ln.${SECRET_PUBLIC_DOMAIN}"
+          - host: *host
             paths:
               - path: /
                 pathType: Prefix
