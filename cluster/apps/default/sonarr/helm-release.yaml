@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app radarr
+  name: &app sonarr
   namespace: default
 spec:
   interval: 15m
@@ -23,21 +23,19 @@ spec:
       retries: 5
   values:
     image:
-      repository: ghcr.io/onedr0p/radarr-develop
-      tag: 4.2.1.6478@sha256:2c6a39da876e6085147da4320a0406a35058c95e7be8bbfb8fa791ff0e9abe71
+      repository: ghcr.io/onedr0p/sonarr-develop
+      tag: 3.0.9.1555@sha256:dc60e4ead825dc2716638e592123db520bf0a2ee1967f897c8174da8f56f4daf
     env:
       TZ: "${TIMEZONE}"
       PUSHOVER_DEBUG: "false"
       PUSHOVER_APP_URL: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
-      RADARR__INSTANCE_NAME: Radarr
-      RADARR__PORT: &port 80
-      RADARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
-      RADARR__LOG_LEVEL: info
+      SONARR__INSTANCE_NAME: Sonarr
+      SONARR__PORT: &port 80
+      SONARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+      SONARR__LOG_LEVEL: info
     envFrom:
       - secretRef:
-          name: radarr
-      - secretRef:
-          name: radarr-standard
+          name: *app
     service:
       main:
         ports:
@@ -50,7 +48,7 @@ spec:
         annotations:
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/radarr/nord.css"></head>';
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/sonarr/nord.css"></head>';
             sub_filter_once on;
         hosts:
           - host: *host
@@ -70,7 +68,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: radarr-config-v1
+        existingClaim: sonarr-config-v1
       media:
         enabled: true
         type: nfs
@@ -80,14 +78,14 @@ spec:
       scripts:
         enabled: true
         type: configMap
-        name: radarr-pushover
+        name: sonarr-pushover
         subPath: pushover-notify.sh
         mountPath: /scripts/pushover-notify.sh
         defaultMode: 0775
         readOnly: true
     podAnnotations:
-      configmap.reloader.stakater.com/reload: radarr-pushover
-      secret.reloader.stakater.com/reload: radarr,radarr-standard
+      configmap.reloader.stakater.com/reload: sonarr-pushover
+      secret.reloader.stakater.com/reload: *app
     resources:
       requests:
         cpu: 10m

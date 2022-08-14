@@ -26,10 +26,12 @@
 
 ## App Configuration
 
+Below are the decrypted versions of the sops encrypted toml files.
+
 > `passbcrypt` can be generated at https://gchq.github.io/CyberChef/#recipe=Bcrypt(12)To_Hex(%27None%27,0)
 
 
-1. `server.sops.yaml`
+1. `server.sops.toml`
     ```toml
     debug = true
     [ldap]
@@ -46,7 +48,7 @@
         baseDN = "dc=home,dc=arpa"
     ```
 
-2. `groups.sops.yaml`
+2. `groups.sops.toml`
     ```toml
     [[groups]]
         name = "svcaccts"
@@ -59,7 +61,7 @@
         gidnumber = 6502
     ```
 
-3. `users.sops.yaml`
+3. `users.sops.toml`
     ```toml
     [[users]]
         name = "search"
