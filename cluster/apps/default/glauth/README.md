@@ -1,8 +1,33 @@
 # glauth
 
-## Configuration
+## Repo configuration
 
-1. server.sops.yaml
+
+1. Add/Update `.vscode/extensions.json`
+    ```json
+    {
+        "files.associations": {
+            "**/cluster/**/*.sops.toml": "plaintext"
+        }
+    }
+    ```
+
+2. Add/Update `.gitattributes`
+    ```text
+    *.sops.toml linguist-language=JSON
+    ```
+
+3. Add/Update `.sops.yaml`
+    ```yaml
+    - path_regex: cluster/.*\.sops\.toml
+        key_groups:
+        - age:
+            - age15uzrw396e67z9wdzsxzdk7ka0g2gr3l460e0slaea563zll3hdfqwqxdta
+    ```
+
+## App Configuration
+
+1. `server.sops.yaml`
     ```toml
     debug = true
     [ldap]
@@ -19,7 +44,7 @@
         baseDN = "dc=home,dc=arpa"
     ```
 
-2. groups.sops.yaml
+2. `groups.sops.yaml`
     ```toml
     [[groups]]
         name = "svcaccts"
@@ -32,7 +57,7 @@
         gidnumber = 6502
     ```
 
-3. users.sops.yaml
+3. `users.sops.yaml`
     ```toml
     [[users]]
         name = "search"
