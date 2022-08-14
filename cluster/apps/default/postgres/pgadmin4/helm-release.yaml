@@ -1,0 +1,71 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: pgadmin
+  namespace: dbms
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: pgadmin4
+      version: 1.11.0
+      sourceRef:
+        kind: HelmRepository
+        name: runix-charts
+        namespace: flux-system
+      interval: 15m
+  dependsOn:
+    - name: postgres
+      namespace: default
+  values:
+    image:
+      registry: docker.io
+      repository: dpage/pgadmin4
+      tag: "6.12"
+    env:
+      email:
+        valueFrom:
+          secretKeyRef:
+            name: *app
+            key: username
+      password:
+        valueFrom:
+          secretKeyRef:
+            name: *app
+            key: password
+      pgpassfile: /var/lib/pgadmin/storage/pgadmin/file.pgpass
+    extraSecretMounts:
+      - name: pgadmin
+        secret: postgres-superuser
+        subPath: password
+        mountPath: /var/lib/pgadmin/storage/pgadmin/file.pgpass
+        readOnly: true
+    serverDefinitions:
+      enabled: true
+      servers:
+        firstServer:
+          Name: cloudnative-pg
+          Group: kubernetes
+          Port: 5432
+          Username: postgres
+          Host: postgres-rw.default.svc.cluster.local
+          SSLMode: disable
+          MaintenanceDB: postgres
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginc
+      hosts:
+        - host: "pgadmin4.${SECRET_PUBLIC_DOMAIN}"
+          paths:
+            - path: /
+              pathType: Prefix
+    persistentVolume:
+      enabled: false
+    resources:
+      requests:
+        cpu: 15m
+        memory: 100M
+      limits:
+        memory: 250M
