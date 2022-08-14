@@ -2,7 +2,6 @@
 
 ## Repo configuration
 
-
 1. Add/Update `.vscode/extensions.json`
     ```json
     {
@@ -26,6 +25,9 @@
     ```
 
 ## App Configuration
+
+> `passbcrypt` can be generated at https://gchq.github.io/CyberChef/#recipe=Bcrypt(12)To_Hex(%27None%27,0)
+
 
 1. `server.sops.yaml`
     ```toml
@@ -85,5 +87,3 @@
         primarygroup = 6502
         passbcrypt = ""
     ```
-
-4. `passbcrypt` can be generated at https://gchq.github.io/CyberChef/#recipe=Bcrypt(12)To_Hex(%27None%27,0)
