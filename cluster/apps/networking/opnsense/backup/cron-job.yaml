@@ -19,6 +19,11 @@ spec:
           containers:
             - name: *app
               image: ghcr.io/onedr0p/kubernetes-kubectl:1.24.3@sha256:d9fa7859b20cce83bcb23d138dbd8ff8de00bf963d6ceee3b3bf85a62b9bcc2f
+              env:
+                - name: OPNSENSE_URL
+                  value: "http://opnsense.${PRIVATE_SECRET_DOMAIN}"
+                - name: S3_URL
+                  value: "http://minio.default.svc.cluster.local:9000"
               envFrom:
                 - secretRef:
                     name: *app
