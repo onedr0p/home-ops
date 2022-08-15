@@ -25,21 +25,15 @@ spec:
     global:
       imageRegistry: public.ecr.aws
       storageClass: ceph-block
-    architecture: replication
     auth:
       existingSecret: *app
-    # master:
-    #   persistence:
-    #     enabled: false
-    # replica:
-    #   persistence:
-    #     enabled: false
     sentinel:
       enabled: true
       masterSet: redis-master
-      # persistence:
-      #   enabled: false
+      getMasterTimeout: 10
+      startupProbe:
+        failureThreshold: 2
     metrics:
-      enabled: false
+      enabled: true
       serviceMonitor:
-        enabled: false
+        enabled: true
