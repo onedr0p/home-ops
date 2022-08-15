@@ -24,12 +24,20 @@ spec:
   values:
     global:
       imageRegistry: public.ecr.aws
-      storageClass: ceph-block
+      # storageClass: ceph-block
     auth:
       existingSecret: *app
+    master:
+      persistence:
+        enabled: false
+    replica:
+      persistence:
+        enabled: false
     sentinel:
       enabled: true
       masterSet: redis-master
+      persistence:
+        enabled: false
     metrics:
       enabled: true
       serviceMonitor:
