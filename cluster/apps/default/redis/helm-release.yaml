@@ -8,11 +8,11 @@ spec:
   interval: 15m
   chart:
     spec:
-      chart: app-template
-      version: 0.1.1
+      chart: redis
+      version: 17.0.10
       sourceRef:
         kind: HelmRepository
-        name: bjw-s-charts
+        name: bitnami-charts
         namespace: flux-system
   install:
     createNamespace: true
@@ -22,25 +22,31 @@ spec:
     remediation:
       retries: 5
   values:
-    controller:
-      strategy: RollingUpdate
-    image:
-      repository: public.ecr.aws/docker/library/redis
-      tag: 7.0.4
-    env:
-      REDIS_REPLICATION_MODE: master
-    envFrom:
-      - secretRef:
-          name: *app
-    command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
-    service:
-      main:
-        ports:
-          http:
-            port: 6379
-    resources:
-      requests:
-        cpu: 10m
-        memory: 10Mi
-      limits:
-        memory: 100Mi
+    architecture: replication
+    global:
+      imageRegistry: public.ecr.aws
+      storageClass: ceph-block
+    auth:
+      enabled: true
+      sentinel: true
+      existingSecret: *app
+    master:
+      persistence:
+        enabled: true
+        accessModes:
+          - ReadWriteOnce
+        size: 5Gi
+    replica:
+      replicaCount: 3
+      persistence:
+        enabled: true
+        accessModes:
+          - ReadWriteOnce
+        size: 5Gi
+    sentinal:
+      enabled: true
+      masterSet: redis-master
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
