@@ -22,27 +22,11 @@ spec:
     remediation:
       retries: 5
   values:
-    architecture: replication
     global:
       imageRegistry: public.ecr.aws
       storageClass: ceph-block
     auth:
-      enabled: true
-      sentinel: true
       existingSecret: *app
-    master:
-      persistence:
-        enabled: true
-        accessModes:
-          - ReadWriteOnce
-        size: 5Gi
-    replica:
-      replicaCount: 3
-      persistence:
-        enabled: true
-        accessModes:
-          - ReadWriteOnce
-        size: 5Gi
     sentinal:
       enabled: true
       masterSet: redis-master

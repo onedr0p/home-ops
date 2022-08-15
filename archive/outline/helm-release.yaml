@@ -1,0 +1,56 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app outline
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 0.1.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: postgres
+      namespace: default
+  values:
+    image:
+      repository: docker.io/outlinewiki/outline
+      tag: 0.65.2
+    envFrom:
+      - secretRef:
+          name: *app
+    service:
+      main:
+        ports:
+          http:
+            port: 80
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        hosts:
+          - host: &host "wiki.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    resources:
+      requests:
+        cpu: 10m
+        memory: 50Mi
+      limits:
+        memory: 500Mi
