@@ -24,6 +24,8 @@ spec:
   dependsOn:
     - name: postgres
       namespace: default
+    - name: redis
+      namespace: default
   values:
     image:
       repository: docker.io/outlinewiki/outline
@@ -42,7 +44,7 @@ spec:
         enabled: true
         ingressClassName: "nginx"
         hosts:
-          - host: &host "wiki.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "docs.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
