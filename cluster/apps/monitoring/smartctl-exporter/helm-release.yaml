@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: smartctl-exporter
+  name: &app smartctl-exporter
   namespace: monitoring
 spec:
   interval: 15m
@@ -22,7 +22,10 @@ spec:
     remediation:
       retries: 5
   values:
-    fullnameOverride: smartctl-exporter
+    fullnameOverride: *app
+    image:
+      repository: docker.io/pnnlmiscscripts/smartctl-exporter
+      tag: 0.7-2
     config:
       devices:
         - /dev/sda
