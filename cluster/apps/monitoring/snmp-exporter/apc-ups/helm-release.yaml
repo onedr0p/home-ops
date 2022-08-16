@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: snmp-exporter-apc-ups
+  name: &app snmp-exporter-apc-ups
   namespace: monitoring
 spec:
   interval: 15m
@@ -22,16 +22,16 @@ spec:
     remediation:
       retries: 5
   values:
-    fullnameOverride: snmp-exporter-apc-ups
+    fullnameOverride: *app
     image:
       repository: quay.io/prometheus/snmp-exporter
     extraArgs:
       - "--config.file=/config/snmp.yaml"
     extraConfigmapMounts:
-      - name: snmp-exporter-apc-ups
+      - name: *app
         mountPath: /config/snmp.yaml
         subPath: snmp.yaml
-        configMap: snmp-exporter-apc-ups
+        configMap: *app
         readOnly: true
         defaultMode: 420
     serviceMonitor:

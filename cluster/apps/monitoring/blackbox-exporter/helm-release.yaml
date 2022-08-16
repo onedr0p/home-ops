@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: blackbox-exporter
+  name: &app blackbox-exporter
   namespace: monitoring
 spec:
   interval: 15m
@@ -22,7 +22,7 @@ spec:
     remediation:
       retries: 5
   values:
-    fullnameOverride: blackbox-exporter
+    fullnameOverride: *app
     image:
       repository: quay.io/prometheus/blackbox-exporter
     ingress:
