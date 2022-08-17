@@ -36,32 +36,102 @@
     mc admin user add minio outline <super-secret-password>
     ```
 
-3. Create `bucket-policy.json`
+3. Create the outline bucket
+    ```sh
+    mc mb minio/outline
+    ```
+
+4. Create `outline-user-policy.json`
     ```json
     {
         "Version": "2012-10-17",
         "Statement": [
             {
-            "Action": [
-                "s3:ListBucket",
-                "s3:PutObject",
-                "s3:GetObject",
-                "s3:DeleteObject"
-            ],
-            "Effect": "Allow",
-            "Resource": ["arn:aws:s3:::outline/*", "arn:aws:s3:::outline"],
-            "Sid": "BucketAccessForUser"
+                "Action": [
+                    "s3:ListBucket",
+                    "s3:PutObject",
+                    "s3:GetObject",
+                    "s3:DeleteObject"
+                ],
+                "Effect": "Allow",
+                "Resource": ["arn:aws:s3:::outline/*", "arn:aws:s3:::outline"],
+                "Sid": ""
             }
         ]
     }
     ```
 
-4. Apply the bucket policy
-    ```sh
-    mc admin policy add minio outline-bucket-policy bucket-policy.json
+5. Create `bucket-policy.json`
+    ```json
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": {
+                    "AWS": [
+                        "*"
+                    ]
+                },
+                "Action": [
+                    "s3:GetBucketLocation"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::outline"
+                ]
+            },
+            {
+                "Effect": "Allow",
+                "Principal": {
+                    "AWS": [
+                        "*"
+                    ]
+                },
+                "Action": [
+                    "s3:ListBucket"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::outline"
+                ],
+                "Condition": {
+                    "StringEquals": {
+                        "s3:prefix": [
+                            "avatars",
+                            "public"
+                        ]
+                    }
+                }
+            },
+            {
+                "Effect": "Allow",
+                "Principal": {
+                    "AWS": [
+                        "*"
+                    ]
+                },
+                "Action": [
+                    "s3:GetObject"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::outline/avatars*",
+                    "arn:aws:s3:::outline/public*"
+                ]
+            }
+        ]
+    }
     ```
 
-5. Associate policy with the user
+6. Apply the bucket policies
     ```sh
-    mc admin policy set minio outline-bucket-policy user=outline
+    mc admin policy add minio outline-private outline-user-policy.json
+    ```
+
+7. Associate private policy with the user
+    ```sh
+    mc admin policy set minio outline-private user=outline
+    ```
+
+8. Associate public policy with the bucket
+    ```sh
+    mc policy set-json bucket-policy.json minio/outline
     ```
