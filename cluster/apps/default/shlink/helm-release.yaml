@@ -29,15 +29,21 @@ spec:
       repository: docker.io/shlinkio/shlink
       tag: 3.2.1
     env:
-      TIMEZONE: "${TIMEZONE}"
-      PORT: &port 8080
-      ENABLE_PERIODIC_VISIT_LOCATE: "true"
-      DEFAULT_DOMAIN: &host "ln.${SECRET_PUBLIC_DOMAIN}"
-      IS_HTTPS_ENABLED: "true"
-      DISABLE_TRACKING_FROM: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       DB_DRIVER: postgres
       DB_HOST: postgres-rw.default.svc.cluster.local
       DB_NAME: shlink
+      DEFAULT_DOMAIN: &host "ln.${SECRET_PUBLIC_DOMAIN}"
+      DISABLE_TRACKING_FROM: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+      ENABLE_PERIODIC_VISIT_LOCATE: "true"
+      IS_HTTPS_ENABLED: "true"
+      PORT: &port 8080
+      REDIS_PUB_SUB_ENABLED: "true"
+      REDIS_SENTINEL_SERVICE: redis-master
+      REDIS_SERVERS: >-
+        redis-node-0.redis-headless.default.svc.cluster.local:26379,
+        redis-node-1.redis-headless.default.svc.cluster.local:26379,
+        redis-node-2.redis-headless.default.svc.cluster.local:26379
+      TIMEZONE: "${TIMEZONE}"
     envFrom:
       - secretRef:
           name: *app
