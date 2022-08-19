@@ -29,6 +29,13 @@ identity_providers:
       endpoints: ["authorization", "token", "revocation", "introspection"]
       allowed_origins_from_client_redirect_uris: true
     clients:
+      - id: gitea
+        secret: "${SECRET_GITEA_OAUTH_CLIENT_SECRET}"
+        public: false
+        authorization_policy: two_factor
+        scopes: ["openid", "profile", "email"]
+        redirect_uris: ["https://gitea.${SECRET_PUBLIC_DOMAIN}/user/oauth2/authelia/callback"]
+        userinfo_signing_algorithm: none
       - id: grafana
         description: Grafana
         secret: "${SECRET_GRAFANA_OAUTH_CLIENT_SECRET}"

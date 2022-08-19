@@ -72,7 +72,9 @@ spec:
         database:
           DB_TYPE: sqlite3
         service:
-          DISABLE_REGISTRATION: true
+          DISABLE_REGISTRATION: false
+          ALLOW_ONLY_EXTERNAL_REGISTRATION: true
+          SHOW_REGISTRATION_BUTTON: false
           REQUIRE_SIGNIN_VIEW: true
           DEFAULT_KEEP_EMAIL_PRIVATE: true
           DEFAULT_ALLOW_CREATE_ORGANIZATION: false
@@ -92,22 +94,32 @@ spec:
           MAILER_TYPE: smtp
           HOST: smtp-relay.default:2525
           FROM: "Gitea <gitea@${SECRET_EMAIL_DOMAIN}>"
-      ldap:
-        - name: glauth
-          securityProtocol: unencrypted
-          host: glauth.default
-          port: "389"
-          userSearchBase: ou=people,dc=home,dc=arpa
-          userFilter: (&(objectClass=posixAccount)(|(uid=%[1]s)(mail=%[1]s)))
-          adminFilter: (memberOf=ou=admins,ou=groups,dc=home,dc=arpa)
-          emailAttribute: mail
-          usernameAttribute: uid
-          firstnameAttribute: givenname
-          surnameAttribute: sn
-          publicSSHKeyAttribute: publicSSHKey
-          synchronizeUsers: "true"
-          attributesInBind: "true"
-          existingSecret: gitea-config
+        openid:
+          ENABLE_OPENID_SIGNIN: false
+          ENABLE_OPENID_SIGNUP: true
+          WHITELISTED_URIS: "auth.${SECRET_PUBLIC_DOMAIN}"
+      oauth:
+        - name: Authelia
+          provider: openidConnect
+          key: gitea
+          secret: "${SECRET_GITEA_OAUTH_CLIENT_SECRET}"
+          autoDiscoverUrl: "https://auth.${SECRET_PUBLIC_DOMAIN}/.well-known/openid-configuration"
+      # ldap:
+      #   - name: glauth
+      #     securityProtocol: unencrypted
+      #     host: glauth.default
+      #     port: "389"
+      #     userSearchBase: ou=people,dc=home,dc=arpa
+      #     userFilter: (&(objectClass=posixAccount)(|(uid=%[1]s)(mail=%[1]s)))
+      #     adminFilter: (memberOf=ou=admins,ou=groups,dc=home,dc=arpa)
+      #     emailAttribute: mail
+      #     usernameAttribute: uid
+      #     firstnameAttribute: givenname
+      #     surnameAttribute: sn
+      #     publicSSHKeyAttribute: publicSSHKey
+      #     synchronizeUsers: "true"
+      #     attributesInBind: "true"
+      #     existingSecret: gitea-config
       metrics:
         enabled: true
         serviceMonitor:
