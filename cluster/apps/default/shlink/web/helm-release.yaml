@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app shlink
+  name: &app shlink-web
   namespace: default
 spec:
   interval: 15m
@@ -21,34 +21,15 @@ spec:
   upgrade:
     remediation:
       retries: 5
-  dependsOn:
-    - name: postgres
-      namespace: default
-    - name: redis
-      namespace: default
   values:
     controller:
       replicas: 3
       strategy: RollingUpdate
     image:
-      repository: ghcr.io/shlinkio/shlink
-      tag: 3.2.1
+      repository: ghcr.io/shlinkio/shlink-web-client
+      tag: 3.7.1
     env:
-      DB_DRIVER: postgres
-      DB_HOST: postgres-rw.default.svc.cluster.local
-      DB_NAME: shlink
-      DEFAULT_DOMAIN: &host "ln.${SECRET_PUBLIC_DOMAIN}"
-      DISABLE_TRACKING_FROM: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-      ENABLE_PERIODIC_VISIT_LOCATE: "true"
-      IS_HTTPS_ENABLED: "true"
-      PORT: &port 8080
-      REDIS_PUB_SUB_ENABLED: "true"
-      REDIS_SENTINEL_SERVICE: redis-master
-      REDIS_SERVERS: >-
-        redis-node-0.redis-headless.default.svc.cluster.local:26379,
-        redis-node-1.redis-headless.default.svc.cluster.local:26379,
-        redis-node-2.redis-headless.default.svc.cluster.local:26379
-      TIMEZONE: "${TIMEZONE}"
+      SHLINK_SERVER_URL: "https://ln.${SECRET_PUBLIC_DOMAIN}"
     envFrom:
       - secretRef:
           name: *app
@@ -56,23 +37,19 @@ spec:
       main:
         ports:
           http:
-            port: *port
+            port: 8000
     ingress:
       main:
         enabled: true
         ingressClassName: "nginx"
-        annotations:
-          external-dns.home.arpa/enabled: "true"
         hosts:
-          - host: *host
+          - host: &host "shlink.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
               - *host
-    podAnnotations:
-      secret.reloader.stakater.com/reload: *app
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
@@ -85,4 +62,4 @@ spec:
         cpu: 10m
         memory: 100Mi
       limits:
-        memory: 500Mi
+        memory: 250Mi
