@@ -31,9 +31,11 @@ spec:
     env:
       GENERIC_TIMEZONE: "${TIMEZONE}"
       TZ: "${TIMEZONE}"
+      N8N_PORT: &port 80
       DB_TYPE: postgresdb
       DB_POSTGRESDB_DATABASE: *app
       DB_POSTGRESDB_HOST: postgres-rw.default.svc.cluster.local
+      DB_POSTGRESDB_PORT: 5432
     envFrom:
       - secretRef:
           name: *app
@@ -41,7 +43,7 @@ spec:
       main:
         ports:
           http:
-            port: 5678
+            port: *port
     ingress:
       main:
         enabled: true
