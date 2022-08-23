@@ -50,8 +50,6 @@ spec:
           type: syslog
           address: 0.0.0.0:5140
           mode: udp
-        vector_metrics:
-          type: internal_metrics
       #
       # Transformations
       #
@@ -154,11 +152,6 @@ spec:
           out_of_order_action: accept
           labels:
             hostname: opnsense
-        prometheus_sink:
-          type: prometheus_exporter
-          inputs:
-            - vector_metrics
-          address: 0.0.0.0:9090
     extraVolumeMounts:
       - name: geoip
         mountPath: /geoip
@@ -169,10 +162,6 @@ spec:
     service:
       enabled: true
       type: LoadBalancer
-    podMonitor:
-      enabled: true
-      jobLabel: vector-aggregator
-      port: prometheus-sink
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:

@@ -46,8 +46,6 @@ spec:
             pod_annotations: "pod_annotations"
             pod_labels: "pod_labels"
             pod_name: "pod_name"
-        vector_metrics:
-          type: internal_metrics
       # Sinks
       sinks:
         loki_journal_sink:
@@ -62,16 +60,7 @@ spec:
             - kubernetes_logs
           address: vector-aggregator:6010
           version: "2"
-        prometheus_sink:
-          type: prometheus_exporter
-          inputs:
-            - vector_metrics
-          address: 0.0.0.0:9090
     service:
       enabled: false
-    podMonitor:
-      enabled: true
-      jobLabel: vector-agent
-      port: prometheus-sink
     securityContext:
       privileged: true
