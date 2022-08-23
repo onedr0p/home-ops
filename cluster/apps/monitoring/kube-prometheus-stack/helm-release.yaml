@@ -62,10 +62,6 @@ spec:
                       {{- end }}
                     {{- end }}
                   {{- end }}
-          - name: "nodered"
-            webhook_configs:
-              - url: "http://node-red.home:1880/power-outage"
-                send_resolved: true
         route:
           group_by: ["alertname", "job"]
           group_wait: 30s
@@ -79,10 +75,6 @@ spec:
             - receiver: "pushover"
               matchers:
                 - severity = "critical"
-              continue: true
-            - receiver: "nodered"
-              matchers:
-                - alertname = "UPSOnBattery"
               continue: true
         inhibit_rules:
           - source_matchers:
