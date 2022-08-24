@@ -133,5 +133,5 @@
 
 8. Associate public policy with the bucket
     ```sh
-    mc policy set-json bucket-policy.json minio/outline
+    mc anonymous set-json bucket-policy.json minio/outline
     ```
