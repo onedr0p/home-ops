@@ -1,0 +1,60 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app zigbee2mqtt-exporter
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 0.1.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: emqx
+      namespace: default
+    - name: zigbee2mqtt
+      namespace: default
+  values:
+    image:
+      repository: docker.io/kpetrem/mqtt-exporter
+      tag: latest@sha256:d7fa08b7c6ba1172803661efb8f486868a89f77d48b911b40a90fa063ac06661
+    env:
+      MQTT_ADDRESS: emqx.default.svc.cluster.local
+      MQTT_TOPIC: zigbee2mqtt
+      MQTT_V5_PROTOCOL: "True"
+      MQTT_USERNAME:
+        valueFrom:
+          secretKeyRef:
+            name: emqx-config
+            key: user_1_username
+      MQTT_PASSWORD:
+        valueFrom:
+          secretKeyRef:
+            name: emqx-config
+            key: user_1_password
+      PROMETHEUS_PORT: &port 80
+      PROMETHEUS_PREFIX: zigbee2mqtt_
+      ZIGBEE2MQTT_AVAILABILITY: "True"
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+    resources:
+      requests:
+        cpu: 10m
+        memory: 50Mi
+      limits:
+        memory: 200Mi

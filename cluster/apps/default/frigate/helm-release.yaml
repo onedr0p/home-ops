@@ -22,6 +22,8 @@ spec:
     remediation:
       retries: 5
   dependsOn:
+    - name: emqx
+      namespace: default
     - name: intel-gpu-plugin
       namespace: kube-system
     - name: node-feature-discovery
@@ -33,6 +35,11 @@ spec:
     env:
       TZ: "${TIMEZONE}"
       LIBVA_DRIVER_NAME_JELLYFIN: "i965"
+      FRIGATE_MQTT_PASSWORD:
+        valueFrom:
+          secretKeyRef:
+            name: emqx-config
+            key: user_1_password
     envFrom:
       - secretRef:
           name: *app
