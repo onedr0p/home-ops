@@ -58,8 +58,6 @@ record:
       mode: active_objects
 
 objects:
-  track:
-    - person
   filters:
     person:
       min_area: 5000
@@ -83,20 +81,8 @@ cameras:
       fps: 10
     objects:
       track:
-        - cat
-        - dog
         - person
       filters:
-        cat:
-          mask:
-            - 39,445,199,427,198,263,36,228
-            - 304,218,304,408,198,434,198,262
-            - 305,411,485,382,615,393,612,335,578,321,574,233,549,118,308,209
-        dog:
-          mask:
-            - 39,445,199,427,198,263,36,228
-            - 304,218,304,408,198,434,198,262
-            - 305,411,485,382,615,393,612,335,578,321,574,233,549,118,308,209
         person:
           mask:
             - 39,445,199,427,198,263,36,228
@@ -107,7 +93,7 @@ cameras:
     record:
       events:
         required_zones:
-          - entrance
+          - frigate_driveway_entrance_zone
     ffmpeg:
       inputs:
         - path: rtsp://192.168.1.2:7447/Bbu0H4JuPjzK6zy9
@@ -124,8 +110,6 @@ cameras:
     objects:
       track:
         - car
-        - cat
-        - dog
         - person
       filters:
         car:
@@ -141,12 +125,16 @@ cameras:
           mask:
             - 822,204,1280,360,1280,0,0,0,0,313
     zones:
-      parking:
-        coordinates: 410,720,1194,720,1280,539,739,236,285,280
-      entrance:
+      frigate_driveway_entrance_zone:
         coordinates: 656,208,694,236,288,285,279,248
+      frigate_driveway_parking_zone:
+        coordinates: 410,720,1194,720,1280,539,739,236,285,280
 
   frigate_garage:
+    record:
+      events:
+        required_zones:
+          - frigate_garage_entrance_zone
     ffmpeg:
       inputs:
         - path: rtsp://192.168.1.2:7447/3mzDU0htPbIcPPFH
@@ -164,6 +152,11 @@ cameras:
       track:
         - car
         - person
+    zones:
+      frigate_garage_entrance_zone:
+        coordinates: 928,245,927,279,448,215,444,184
+      frigate_garage_parking_zone:
+        coordinates: 1024,322,1024,576,0,576,0,410,398,216
 
   frigate_river:
     ffmpeg:
@@ -179,6 +172,9 @@ cameras:
       width: 1024
       height: 576
       fps: 10
+    objects:
+      track:
+        - person
 
   frigate_living_room:
     ffmpeg:
@@ -194,6 +190,9 @@ cameras:
       width: 1024
       height: 576
       fps: 10
+    objects:
+      track:
+        - person
 
   frigate_basement_2:
     ffmpeg:
@@ -209,3 +208,6 @@ cameras:
       width: 1024
       height: 576
       fps: 10
+    objects:
+      track:
+        - person
