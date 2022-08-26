@@ -23,18 +23,15 @@ objects:
     - person
   filters:
     person:
-      min_area: 2500
+      min_area: 5000
       max_area: 100000
-      threshold: 0.7
+      threshold: 0.5
 
 ffmpeg:
   global_args:
     - -hide_banner
     - -loglevel
     - warning
-    # https://github.com/blakeblackshear/frigate/issues/3067
-    # https://github.com/blakeblackshear/frigate/issues/3121
-    # https://github.com/blakeblackshear/frigate/issues/3296
     - -an
   hwaccel_args:
     - -hwaccel
@@ -84,21 +81,10 @@ cameras:
       width: 960
       height: 720
       fps: 10
-
-  frigate_river:
-    ffmpeg:
-      inputs:
-        - path: rtsp://192.168.1.2:7447/GtBsJuujvMQwA42n
-          roles:
-            - detect
-        - path: rtsp://192.168.1.2:7447/b2K0uh13iekTbyA1
-          roles:
-            - rtmp
-            - record
-    detect:
-      width: 1024
-      height: 576
-      fps: 10
+    objects:
+      track:
+        - car
+        - person
 
   frigate_driveway:
     ffmpeg:
@@ -114,6 +100,10 @@ cameras:
       width: 1280
       height: 720
       fps: 10
+    objects:
+      track:
+        - car
+        - person
 
   frigate_garage:
     ffmpeg:
@@ -122,6 +112,25 @@ cameras:
           roles:
             - detect
         - path: rtsp://192.168.1.2:7447/Cpb9YqiSgX16LjsX
+          roles:
+            - rtmp
+            - record
+    detect:
+      width: 1024
+      height: 576
+      fps: 10
+    objects:
+      track:
+        - car
+        - person
+
+  frigate_river:
+    ffmpeg:
+      inputs:
+        - path: rtsp://192.168.1.2:7447/GtBsJuujvMQwA42n
+          roles:
+            - detect
+        - path: rtsp://192.168.1.2:7447/b2K0uh13iekTbyA1
           roles:
             - rtmp
             - record
