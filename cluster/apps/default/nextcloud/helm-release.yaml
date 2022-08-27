@@ -27,10 +27,10 @@ spec:
     - name: redis
       namespace: default
   values:
-    image:
-      flavor: fpm-alpine
-    nginx:
-      enabled: true
+    # image:
+    #   flavor: fpm-alpine
+    # nginx:
+    #   enabled: true
     nextcloud:
       existingSecret:
         enabled: true
@@ -88,16 +88,12 @@ spec:
       enabled: true
       className: "nginx"
       annotations:
-        nginx.ingress.kubernetes.io/cors-allow-headers: "X-Forwarded-For, X-Real-IP, X-Frame-Options, X-Content-Type-Options, X-Forwarded-Proto"
         nginx.ingress.kubernetes.io/proxy-body-size: "10G"
         nginx.ingress.kubernetes.io/proxy-buffering: "off"
         nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
         nginx.ingress.kubernetes.io/server-snippet: |-
           server_tokens off;
           proxy_hide_header X-Powered-By;
-          rewrite ^/.well-known/webfinger /public.php?service=webfinger last;
-          rewrite ^/.well-known/host-meta /public.php?service=host-meta last;
-          rewrite ^/.well-known/host-meta.json /public.php?service=host-meta-json;
       path: /
       pathType: Prefix
       tls:
