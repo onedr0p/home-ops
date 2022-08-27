@@ -50,6 +50,21 @@ spec:
         redis.config.php: false
         autoconfig.php: true
       configs:
+        proxy.config.php: |-
+          <?php
+          $CONFIG = array (
+            'trusted_proxies' =>
+            array (
+              0 => '${NET_NODE_CIDR}',
+            ),
+            'forwarded_for_headers' =>
+            array (
+              0 => 'HTTP_X_FORWARDED_FOR',
+            ),
+            'overwrite.cli.url' => 'https://cloud.${SECRET_PUBLIC_DOMAIN}',
+            'overwriteprotocol' => 'https',
+            'skeletondirectory' => '',
+          );
         redis.config.php: |-
           <?php
           $CONFIG = array (
