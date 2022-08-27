@@ -1,0 +1,91 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nextcloud
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: nextcloud
+      version: 3.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: nextcloud-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: postgres
+      namespace: default
+    - name: redis
+      namespace: default
+  values:
+    nextcloud:
+      existingSecret:
+        enabled: true
+        secretName: nextcloud
+      host: "cloud.${SECRET_PUBLIC_DOMAIN}"
+      mail:
+        enabled: true
+        fromAddress: cloud
+        domain: "${SECRET_EMAIL_DOMAIN}"
+        smtp:
+          host: smtp-relay.default.svc.cluster.local
+          port: 2525
+      configs:
+        redis.config.php: |-
+          <?php
+          $CONFIG = array (
+            'memcache.local' => '\\OC\\Memcache\\Redis',
+            'memcache.distributed' => '\OC\Memcache\Redis',
+            'memcache.locking' => '\OC\Memcache\Redis',
+            'redis' => array(
+              'host' => 'redis.default.svc.cluster.local',
+              'port' => 6379,
+              'dbindex' => 10
+            )
+          );
+    internalDatabase:
+      enabled: false
+    externalDatabase:
+      enabled: true
+      type: postgresql
+      host: postgres-rw.default.svc.cluster.local
+      database: nextcloud
+    ingress:
+      enabled: true
+      className: "nginx"
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "4G"
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          location ^~ /.well-known {
+              location = /.well-known/carddav { return 301 /remote.php/dav/; }
+              location = /.well-known/caldav  { return 301 /remote.php/dav/; }
+              location /.well-known/acme-challenge { try_files $uri $uri/ =404; }
+              location /.well-known/pki-validation { try_files $uri $uri/ =404; }
+              return 301 /index.php$request_uri;
+          }
+      path: /
+      pathType: Prefix
+      tls:
+        - hosts:
+            - "cloud.${SECRET_PUBLIC_DOMAIN}"
+    persistence:
+      enabled: true
+      existingClaim: nextcloud
+  valuesFrom:
+    - targetPath: externalDatabase.user
+      kind: Secret
+      name: nextcloud
+      valuesKey: database-username
+    - targetPath: externalDatabase.password
+      kind: Secret
+      name: nextcloud
+      valuesKey: database-password

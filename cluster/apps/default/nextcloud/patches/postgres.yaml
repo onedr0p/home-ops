@@ -2,23 +2,30 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app outline
+  name: nextcloud
   namespace: default
 spec:
   values:
-    initContainers:
-      init-db:
+    extraInitContainers:
+      - name: init-db
         image: ghcr.io/onedr0p/postgres-initdb:14.5
         env:
           - name: POSTGRES_HOST
             value: postgres-rw.default.svc.cluster.local
           - name: POSTGRES_DB
-            value: *app
+            value: nextcloud
           - name: POSTGRES_SUPER_PASS
             valueFrom:
               secretKeyRef:
                 name: postgres-superuser
                 key: password
-        envFrom:
-          - secretRef:
-              name: *app
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: nextcloud
+                key: database-username
+          - name: POSTGRES_PASS
+            valueFrom:
+              secretKeyRef:
+                name: nextcloud-database
+                key: database-password
