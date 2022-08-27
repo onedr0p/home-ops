@@ -67,21 +67,11 @@ spec:
     externalDatabase:
       enabled: true
       type: postgresql
-      host: postgres-rw.default.svc.cluster.local
+      host: postgres-rw.default.svc.cluster.local:5432
       database: nextcloud
     ingress:
       enabled: true
       className: "nginx"
-      annotations:
-        nginx.ingress.kubernetes.io/proxy-body-size: "4G"
-        nginx.ingress.kubernetes.io/configuration-snippet: |
-          location ^~ /.well-known {
-              location = /.well-known/carddav { return 301 /remote.php/dav/; }
-              location = /.well-known/caldav  { return 301 /remote.php/dav/; }
-              location /.well-known/acme-challenge { try_files $uri $uri/ =404; }
-              location /.well-known/pki-validation { try_files $uri $uri/ =404; }
-              return 301 /index.php$request_uri;
-          }
       path: /
       pathType: Prefix
       tls:
