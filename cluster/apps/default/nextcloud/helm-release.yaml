@@ -35,7 +35,7 @@ spec:
       existingSecret:
         enabled: true
         secretName: nextcloud
-      host: "cloud.${SECRET_PUBLIC_DOMAIN}"
+      host: &host "cloud.${SECRET_PUBLIC_DOMAIN}"
       mail:
         enabled: true
         fromAddress: cloud
@@ -73,7 +73,7 @@ spec:
             'memcache.locking' => '\OC\Memcache\Redis',
             'redis' => array(
               'host' => 'redis.default.svc.cluster.local',
-              'port' => 6379,
+              'port' => 26379,
               'dbindex' => 10
             )
           );
@@ -102,7 +102,7 @@ spec:
       pathType: Prefix
       tls:
         - hosts:
-            - "cloud.${SECRET_PUBLIC_DOMAIN}"
+            - *host
     persistence:
       enabled: true
       existingClaim: nextcloud
