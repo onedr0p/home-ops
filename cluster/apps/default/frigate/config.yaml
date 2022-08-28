@@ -23,7 +23,6 @@ ffmpeg:
     - -hide_banner
     - -loglevel
     - warning
-    - -an
   hwaccel_args:
     - -hwaccel
     - vaapi
@@ -31,11 +30,10 @@ ffmpeg:
     - /dev/dri/renderD128
     - -hwaccel_output_format
     - yuv420p
-  # https://github.com/blakeblackshear/frigate/issues/3067
-  # https://github.com/blakeblackshear/frigate/issues/3121
   # https://github.com/blakeblackshear/frigate/issues/3296
-  # output_args:
-  #   record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -c:a aac
+  output_args:
+    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -ar 44100 -c:a aac
+    rtmp: -c:v copy -f flv -ar 44100 -c:a aac
 
 rtmp:
   enabled: true
