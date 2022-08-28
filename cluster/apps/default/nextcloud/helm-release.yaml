@@ -27,11 +27,17 @@ spec:
     - name: redis
       namespace: default
   values:
-    # image:
-    #   flavor: fpm-alpine
-    # nginx:
-    #   enabled: true
+    image:
+      flavor: fpm-alpine
+    nginx:
+      enabled: true
     nextcloud:
+      datadir: /var/www/data
+      extraEnv:
+        - name: REDIS_HOST
+          value: redis.default.svc.cluster.local
+        - name: REDIS_HOST_PORT
+          value: "26379"
       existingSecret:
         enabled: true
         secretName: nextcloud
@@ -46,37 +52,6 @@ spec:
           authtype: NONE
           name: ""
           password: ""
-      defaultConfigs:
-        redis.config.php: false
-        autoconfig.php: true
-      configs:
-        proxy.config.php: |-
-          <?php
-          $CONFIG = array (
-            'trusted_proxies' =>
-            array (
-              0 => '${NET_NODE_CIDR}',
-            ),
-            'forwarded_for_headers' =>
-            array (
-              0 => 'HTTP_X_FORWARDED_FOR',
-            ),
-            'overwrite.cli.url' => 'https://cloud.${SECRET_PUBLIC_DOMAIN}',
-            'overwriteprotocol' => 'https',
-            'skeletondirectory' => '',
-          );
-        redis.config.php: |-
-          <?php
-          $CONFIG = array (
-            'memcache.local' => '\\OC\\Memcache\\Redis',
-            'memcache.distributed' => '\OC\Memcache\Redis',
-            'memcache.locking' => '\OC\Memcache\Redis',
-            'redis' => array(
-              'host' => 'redis.default.svc.cluster.local',
-              'port' => 26379,
-              'dbindex' => 10
-            )
-          );
     internalDatabase:
       enabled: false
     externalDatabase:
