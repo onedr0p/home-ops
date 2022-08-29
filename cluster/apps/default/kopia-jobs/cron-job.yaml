@@ -1,0 +1,131 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kopia-maintenance
+  namespace: default
+spec:
+  schedule: "0 6 */3 * *"
+  suspend: false
+  concurrencyPolicy: "Forbid"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 259200
+      template:
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          initContainers:
+            - name: wait-for-repo
+              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:72406602c99357951cb7284abbf88699081d60f6cffd22baddd8a6a2afe919f5
+              command:
+                - /bin/bash
+                - -c
+                - |-
+                  until [ -f /snapshots/kopia.repository.f ]; do
+                      printf "\e[1;32m%-6s\e[m\n" "Awaiting for the Kopia repo to become ready ..."
+                      sleep 1
+                  done
+              volumeMounts:
+                - name: snapshots
+                  mountPath: /snapshots
+          containers:
+            - name: maintenance
+              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:72406602c99357951cb7284abbf88699081d60f6cffd22baddd8a6a2afe919f5
+              env:
+                - name: TZ
+                  value: "${TIMEZONE}"
+                - name: KOPIA_CACHE_DIRECTORY
+                  value: /snapshots/cache
+                - name: KOPIA_LOG_DIR
+                  value: /snapshots/logs
+                - name: KOPIA_PASSWORD
+                  value: "none"
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  printf "\e[1;32m%-6s\e[m\n" "[01/04] Connect to repo ..."       && kopia repo connect filesystem --path=/snapshots --override-hostname=cluster --override-username=root
+                  printf "\e[1;32m%-6s\e[m\n" "[02/04] Set maintenance owner ..." && kopia maintenance set --owner=root@cluster
+                  printf "\e[1;32m%-6s\e[m\n" "[03/04] Run maintenance ..."       && kopia maintenance run --full
+                  printf "\e[1;32m%-6s\e[m\n" "[04/04] Disconnect from repo ..."  && kopia repo disconnect
+              volumeMounts:
+                - name: snapshots
+                  mountPath: /snapshots
+              securityContext:
+                privileged: true
+          volumes:
+            - name: snapshots
+              nfs:
+                server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+                path: /tycho/Apps/External/Kopia
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: &name kopia-sync
+  namespace: default
+spec:
+  schedule: "0 */12 * * *"
+  suspend: false
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 43200
+      template:
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          initContainers:
+            - name: wait-for-repo
+              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:72406602c99357951cb7284abbf88699081d60f6cffd22baddd8a6a2afe919f5
+              command:
+                - /bin/bash
+                - -c
+                - |-
+                  until [ -f /snapshots/kopia.repository.f ]; do
+                      printf "\e[1;32m%-6s\e[m\n" "Awaiting for the Kopia repo to become ready ..."
+                      sleep 1
+                  done
+              volumeMounts:
+                - name: snapshots
+                  mountPath: /snapshots
+          containers:
+            - name: sync
+              image: ghcr.io/onedr0p/kopia:0.11.3@sha256:72406602c99357951cb7284abbf88699081d60f6cffd22baddd8a6a2afe919f5
+              env:
+                - name: TZ
+                  value: "${TIMEZONE}"
+                - name: KOPIA_CACHE_DIRECTORY
+                  value: /snapshots/cache
+                - name: KOPIA_LOG_DIR
+                  value: /snapshots/logs
+                - name: KOPIA_PASSWORD
+                  value: "none"
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  printf "\e[1;32m%-6s\e[m\n" "[01/03] Connect to repo ..."      && kopia repo connect filesystem --path=/snapshots --override-hostname=cluster --override-username=root
+                  printf "\e[1;32m%-6s\e[m\n" "[02/03] Sync to remote ..."       && kopia repo sync-to from-config --file=/remote/repository.config --parallel 8 --delete
+                  printf "\e[1;32m%-6s\e[m\n" "[03/03] Disconnect from repo ..." && kopia repo disconnect
+              volumeMounts:
+                - name: snapshots
+                  mountPath: /snapshots
+                - name: remote-config
+                  mountPath: /remote
+                  readOnly: true
+              securityContext:
+                privileged: true
+          volumes:
+            - name: snapshots
+              nfs:
+                server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+                path: /tycho/Apps/External/Kopia
+            - name: remote-config
+              secret:
+                secretName: *name

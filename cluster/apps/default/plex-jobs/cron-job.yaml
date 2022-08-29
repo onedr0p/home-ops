@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: plex-off-deck
+  name: &name plex-off-deck
   namespace: default
 spec:
   schedule: "@hourly"
@@ -14,7 +14,7 @@ spec:
           automountServiceAccountToken: false
           restartPolicy: OnFailure
           containers:
-            - name: jbops
+            - name: off-deck
               image: ghcr.io/onedr0p/jbops:1.0.880@sha256:aa77a04b21d65b3b9e44cc44b5c598242a21c792e0ed7160a41b39622b9aebca
               env:
                 - name: TZ
@@ -27,13 +27,12 @@ spec:
                 - "Smart Toons"
               volumeMounts:
                 - name: config
-                  mountPath: /config/config.ini
-                  subPath: config.ini
-                  readOnly: true
+                  mountPath: /config
           volumes:
             - name: config
               secret:
-                secretName: plex-jbops
+                secretName: plex-jobs
+                defaultMode: 700
                 items:
                   - key: config.ini
                     path: config.ini
