@@ -3,19 +3,16 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: &app cloudflare-ddns
-  namespace: networking
+  namespace: default
 spec:
-  schedule: "*/15 * * * *"
-  concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 1
-  failedJobsHistoryLimit: 2
+  schedule: "@hourly"
   jobTemplate:
     spec:
-      ttlSecondsAfterFinished: 86400
+      ttlSecondsAfterFinished: 3600
       template:
         spec:
           automountServiceAccountToken: false
-          restartPolicy: Never
+          restartPolicy: OnFailure
           containers:
             - name: *app
               image: ghcr.io/onedr0p/kubernetes-kubectl:1.25.0@sha256:94ef8af361238220e5858fae7a55e9d3dfa6006f3fc74167cf5790ec921d3661
