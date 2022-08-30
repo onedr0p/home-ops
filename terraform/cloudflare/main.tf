@@ -14,7 +14,7 @@ terraform {
     }
     http = {
       source  = "hashicorp/http"
-      version = "3.0.1"
+      version = "3.1.0"
     }
     sops = {
       source  = "carlpett/sops"
