@@ -2,16 +2,16 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  namespace: monitoring
+  namespace: default
   name: &app uptimerobot-heartbeat
 spec:
   schedule: "* * * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
-  failedJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
   jobTemplate:
     spec:
-      ttlSecondsAfterFinished: 300
+      ttlSecondsAfterFinished: 60
       template:
         spec:
           automountServiceAccountToken: false

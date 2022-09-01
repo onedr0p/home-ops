@@ -3,7 +3,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: ingress-nginx
-  namespace: networking
+  namespace: default
 spec:
   interval: 15m
   chart:
@@ -60,7 +60,8 @@ spec:
           namespaceSelector:
             any: true
       extraArgs:
-        default-ssl-certificate: "networking/${SECRET_PUBLIC_DOMAIN/./-}-tls"
+        default-ssl-certificate: |-
+          networking/${SECRET_PUBLIC_DOMAIN/./-}-tls
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname

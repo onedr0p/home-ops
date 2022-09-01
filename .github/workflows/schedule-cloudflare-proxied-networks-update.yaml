@@ -7,8 +7,8 @@ on: # yamllint disable-line rule:truthy
     - cron: "0 0 * * *"
 
 env:
-  CLOUDFLARE_PROXIED_NETWORKS_FILE: >-
-    cluster/apps/networking/ingress-nginx/cloudflare-proxied-networks.txt
+  DEFAULT_CLOUDFLARE_PROXIED_NETWORKS_FILE: |-
+    cluster/apps/default/ingress-nginx/cloudflare-proxied-networks.txt
 
 jobs:
   cloudflare-proxied-networks-update:
@@ -25,7 +25,12 @@ jobs:
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
       - name: Cloudflare Proxied Networks
         run: |
-          bash ./.github/scripts/cloudflare-proxied-networks.sh > ${{ env.CLOUDFLARE_PROXIED_NETWORKS_FILE }}
+          cloudflare_proxied_networks_file=$(find . -name "cloudflare-proxied-networks.txt" -print -quit)
+          if [[ ! -f "${cloudflare_proxied_networks_file}" ]]; then
+              bash ./.github/scripts/cloudflare-proxied-networks.sh > ${{ env.DEFAULT_CLOUDFLARE_PROXIED_NETWORKS_FILE }}
+          else
+              bash ./.github/scripts/cloudflare-proxied-networks.sh > "${cloudflare_proxied_networks_file}"
+          fi
       - name: Create pull request
         uses: peter-evans/create-pull-request@v4
         with:
