@@ -1,0 +1,51 @@
+---
+name: Publish Docs
+
+on: # yamllint disable-line rule:truthy
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/publish-docs.yaml"
+      - "mkdocs.yaml"
+      - "**/*.md"
+
+env:
+  BOT_USERNAME: "rosey[bot]"
+
+jobs:
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event.pull_request.head.repo.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Token
+        uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: "${{ secrets.BOT_APP_ID }}"
+          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - name: Configure Git
+        run: |
+          git config user.name "${{ env.BOT_USERNAME }}"
+          git config user.email "${{ env.BOT_USERNAME }}@users.noreply.github.com"
+      - name: Set up mkdocs
+        run: |
+          pip install \
+            mkdocs>=1.1 \
+            mkdocs-macros-plugin >=0.5 \
+            mkdocs-material >=1.0 \
+            mkdocs-minify-plugin>=0.3 \
+            mkdocs-redirects>=1.0
+      - name: Deploy Docs
+        run: |
+          mkdocs gh-deploy --config-file ./mkdocs.yaml --force
