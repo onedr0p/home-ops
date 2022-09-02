@@ -1,6 +1,8 @@
-# Outline
+# Documentation
 
-## Redis Sentinel Configuration
+## Outline
+
+### Redis Sentinel Configuration
 
 1. Create base64 encoded Redis configuation
     ```sh

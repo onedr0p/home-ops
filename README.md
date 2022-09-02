@@ -68,7 +68,7 @@ This Git repository contains the following directories (_kustomizatons_) under [
 ├─📁 charts     # helm repos, loaded before 📁 core and 📁 apps
 ├─📁 config     # cluster config, loaded before 📁 core and 📁 apps
 ├─📁 core       # crucial apps, namespaced dir tree, loaded before 📁 apps
-└─📁 apps       # regular apps, namespaced dir tree, loaded last
+└─📁 apps       # regular apps, categorized dir tree, loaded last
 ```
 
 ### Networking

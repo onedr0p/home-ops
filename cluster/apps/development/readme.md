@@ -1,6 +1,8 @@
-# Gitea
+# Development
 
-## S3 Configuration
+## Gitea
+
+### S3 Configuration
 
 1. Create `~/.mc/config.json`
     ```json

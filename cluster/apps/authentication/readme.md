@@ -1,6 +1,8 @@
-# glauth
+# Authentication
 
-## Repo configuration
+## GLAuth
+
+### Repo configuration
 
 1. Add/Update `.vscode/extensions.json`
     ```json
