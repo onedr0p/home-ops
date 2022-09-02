@@ -1,6 +1,8 @@
-# Postgres
+# Databases
 
-## S3 Configuration
+## Postgres
+
+### S3 Configuration
 
 1. Create `~/.mc/config.json`
     ```json
