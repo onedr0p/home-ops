@@ -1,7 +1,24 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: default
 resources:
   - apc-ups
   - cyberpower-pdu
   - dell-idrac
+configMapGenerator:
+  - name: apc-ups-dashboard
+    files:
+      - apc-ups-dashboard.json=apc-ups/dashboard.json
+  - name: cyberpower-pdu-dashboard
+    files:
+      - cyberpower-pdu-dashboard.json=cyberpower-pdu/dashboard.json
+  - name: dell-idrac-dashboard
+    files:
+      - dell-idrac-dashboard.json=dell-idrac/dashboard.json
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+  labels:
+    grafana_dashboard: "true"

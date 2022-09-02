@@ -1,0 +1,18 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - secret.sops.yaml
+  - helm-release.yaml
+  - cluster.yaml
+  - scheduled-backup.yaml
+configMapGenerator:
+  - name: cloudnative-pg-dashboard
+    files:
+      - cloudnative-pg-dashboard.json=https://raw.githubusercontent.com/cloudnative-pg/charts/main/charts/cnpg-sandbox/dashboard.json
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+  labels:
+    grafana_dashboard: "true"
