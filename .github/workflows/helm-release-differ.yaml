@@ -1,5 +1,5 @@
 ---
-name: Helm Release Differ
+name: "Helm Release Differ"
 
 on: # yamllint disable-line rule:truthy
   pull_request:
@@ -18,8 +18,11 @@ jobs:
     name: Detect File Changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Filter Helm Releases
+        uses: dorny/paths-filter@v2
         id: filter
         with:
           list-files: json
@@ -28,6 +31,7 @@ jobs:
               - added|modified: "**/helm-release.yaml"
     outputs:
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
+
   helm-release-differ:
     name: Helm Release Differ
     runs-on: ubuntu-latest
@@ -38,21 +42,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Generate Token
         uses: tibdex/github-app-token@v1
         id: generate-token
         with:
           app_id: ${{ secrets.BOT_APP_ID }}
           private_key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+
       - name: Checkout default branch
         uses: actions/checkout@v3
         with:
           ref: "${{ env.DEFAULT_BRANCH }}"
           path: default
+
       - name: Install Helm
         uses: azure/setup-helm@v3
         with:
-          version: v3.6.3
+          version: latest
+
       - name: Helm Release Differ
         id: diff
         run: |
@@ -62,6 +70,7 @@ jobs:
           diff="${diff//$'\n'/'%0A'}"
           diff="${diff//$'\r'/'%0D'}"
           echo "::set-output name=diff::$(echo ${diff})"
+
       - name: Find Comment
         uses: peter-evans/find-comment@v2
         id: find-comment
@@ -69,6 +78,7 @@ jobs:
           issue-number: "${{ github.event.pull_request.number }}"
           comment-author: "${{ env.BOT_USERNAME }}"
           body-includes: "${{ matrix.file }}"
+
       - name: Create or update comment
         uses: peter-evans/create-or-update-comment@v2
         with:

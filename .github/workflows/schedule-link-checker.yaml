@@ -1,4 +1,4 @@
-name: Schedule - Link Checker
+name: "Schedule: Link Checker"
 
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -12,17 +12,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Generate Token
         uses: tibdex/github-app-token@v1
         id: generate-token
         with:
           app_id: "${{ secrets.BOT_APP_ID }}"
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
       - name: Link Checker
         uses: lycheeverse/lychee-action@v1.5.1
         id: lychee
         env:
           GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
+
       - name: Find Link Checker Issue
         id: link-checker-issue
         uses: micalevisk/last-issue-action@v2
@@ -30,6 +33,7 @@ jobs:
           state: open
           labels: |
             link-checker
+
       - name: Update Issue
         uses: peter-evans/create-issue-from-file@v4
         with:

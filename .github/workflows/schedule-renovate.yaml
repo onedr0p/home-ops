@@ -1,4 +1,4 @@
-name: Schedule - Renovate
+name: "Schedule: Renovate"
 
 on: # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -32,16 +32,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Generate Token
         uses: tibdex/github-app-token@v1
         id: generate-token
         with:
           app_id: "${{ secrets.BOT_APP_ID }}"
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
       - name: Override default config from dispatch variables
         run: |
           echo "RENOVATE_DRY_RUN=${{ github.event.inputs.dryRun || env.RENOVATE_DRY_RUN }}" >> "${GITHUB_ENV}"
           echo "LOG_LEVEL=${{ github.event.inputs.logLevel || env.LOG_LEVEL }}" >> "${GITHUB_ENV}"
+
       - name: Renovate
         uses: renovatebot/github-action@v32.190.0
         with:

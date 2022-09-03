@@ -16,10 +16,6 @@ assignees: ""
 
 <!-- Note: Describe in as mush detail what you expect to happen. -->
 
-**Anything else you would like to add:**
-
-<!-- Note: Miscellaneous information that will assist in solving the issue. -->
-
 **Additional Information:**
 
 <!-- Note: Anything to give further context to the bug report. -->
