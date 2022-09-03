@@ -1,0 +1,14 @@
+[Unit]
+Description=Run etcdctl defrag
+After=k3s.service
+[Service]
+Type=oneshot
+Environment="LOG_DIR=/var/log"
+Environment="ETCDCTL_ENDPOINTS=https://127.0.0.1:2379"
+Environment="ETCDCTL_CACERT=/var/lib/rancher/k3s/server/tls/etcd/server-ca.crt"
+Environment="ETCDCTL_CERT=/var/lib/rancher/k3s/server/tls/etcd/server-client.crt"
+Environment="ETCDCTL_KEY=/var/lib/rancher/k3s/server/tls/etcd/server-client.key"
+Environment="ETCDCTL_API=3"
+ExecStart=/usr/local/bin/etcdctl defrag
+[Install]
+WantedBy=multi-user.target
