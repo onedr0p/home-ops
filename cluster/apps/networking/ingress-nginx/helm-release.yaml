@@ -31,8 +31,7 @@ spec:
         - name: TZ
           value: "${TIMEZONE}"
       service:
-        externalIPs:
-          - "${SVC_NGINX_ADDR}"
+        externalIPs: ["${SVC_NGINX_ADDR}"]
         externalTrafficPolicy: Local
       publishService:
         enabled: true
@@ -98,12 +97,10 @@ spec:
                   matchExpressions:
                     - key: app.kubernetes.io/name
                       operator: In
-                      values:
-                        - ingress-nginx
+                      values: ["ingress-nginx"]
                     - key: app.kubernetes.io/component
                       operator: In
-                      values:
-                        - default-backend
+                      values: ["default-backend"]
                 topologyKey: kubernetes.io/hostname
   valuesFrom:
     # Cloudflare Networks

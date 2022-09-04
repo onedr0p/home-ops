@@ -171,8 +171,7 @@ spec:
                 matchExpressions:
                   - key: app.kubernetes.io/component
                     operator: In
-                    values:
-                      - Stateless-Aggregator
+                    values: ["Stateless-Aggregator"]
               topologyKey: kubernetes.io/hostname
   postRenderers:
     - kustomize:
@@ -183,8 +182,7 @@ spec:
             patch:
               - op: add
                 path: /spec/externalIPs
-                value:
-                  - "${SVC_SYSLOG_ADDR}"
+                value: ["${SVC_SYSLOG_ADDR}"]
               - op: replace
                 path: /spec/externalTrafficPolicy
                 value: Local

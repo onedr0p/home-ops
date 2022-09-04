@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app home-assistant
+  name: &app home-assistant-code
   namespace: default
 spec:
   interval: 15m
@@ -22,50 +22,41 @@ spec:
     remediation:
       retries: 5
   dependsOn:
-    - name: emqx
-      namespace: default
-    - name: postgres
+    - name: home-assistant
       namespace: default
   values:
     image:
-      repository: ghcr.io/onedr0p/home-assistant
-      tag: 2022.8.7@sha256:0bacc45203340df0a2ef000261ace0d788c4dc906ace33e7cea7d764a1186c23
+      repository: ghcr.io/coder/code-server
+      tag: 4.6.1
     env:
       TZ: "${TIMEZONE}"
-      POSTGRES_HOST: postgres-rw.default.svc.cluster.local
-      POSTGRES_DB: home_assistant
-    envFrom:
-      - secretRef:
-          name: *app
+    args:
+      - --auth
+      - "none"
+      - --user-data-dir
+      - "/config/.vscode"
+      - --extensions-dir
+      - "/config/.vscode"
+      - --port
+      - "80"
+      - "/config"
     service:
       main:
-        type: LoadBalancer
-        externalIPs: ["${SVC_HOME_ASSISTANT_ADDR}"]
-        externalTrafficPolicy: Local
         ports:
           http:
-            port: 8123
+            port: 80
     ingress:
       main:
         enabled: true
         ingressClassName: "nginx"
-        annotations:
-          external-dns.home.arpa/enabled: "true"
         hosts:
-          - host: &host "hass.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "hass-code.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
               - *host
-    probes:
-      liveness:
-        enabled: false
-      readiness:
-        enabled: false
-      startup:
-        enabled: false
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
@@ -77,11 +68,21 @@ spec:
       config:
         enabled: true
         existingClaim: home-assistant-config-v1
-    podAnnotations:
-      secret.reloader.stakater.com/reload: *app
+    affinity:
+      podAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values: ["home-assistant"]
+                - key: app.kubernetes.io/instance
+                  operator: In
+                  values: ["home-assistant"]
+            topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 10m
         memory: 100Mi
       limits:
-        memory: 750Mi
+        memory: 500Mi
