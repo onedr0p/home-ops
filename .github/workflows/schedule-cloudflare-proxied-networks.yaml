@@ -17,12 +17,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Generate Token
         uses: tibdex/github-app-token@v1
         id: generate-token
         with:
           app_id: "${{ secrets.BOT_APP_ID }}"
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
       - name: Cloudflare Proxied Networks
         run: |
           cloudflare_proxied_networks_file=$(find . -name "cloudflare-proxied-networks.txt" -print -quit)
@@ -31,6 +33,7 @@ jobs:
           else
               bash ./.github/scripts/cloudflare-proxied-networks.sh > "${cloudflare_proxied_networks_file}"
           fi
+
       - name: Create pull request
         uses: peter-evans/create-pull-request@v4
         with:
