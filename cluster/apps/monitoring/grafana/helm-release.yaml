@@ -3,7 +3,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: grafana
-  namespace: monitoring
+  namespace: default
 spec:
   interval: 15m
   chart:
@@ -82,12 +82,12 @@ spec:
           - name: Prometheus
             type: prometheus
             access: proxy
-            url: http://thanos-query:9090/
+            url: http://thanos-query.monitoring.svc.cluster.local:9090
             isDefault: true
           - name: Loki
             type: loki
             access: proxy
-            url: http://loki-gateway:80
+            url: http://loki-gateway.monitoring.svc.cluster.local:80
     dashboards:
       default:
         # Ref: https://grafana.com/grafana/dashboards/7845
