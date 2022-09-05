@@ -1,17 +1,35 @@
 ---
 apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: flux-system
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/part-of: flux
+spec:
+  namespaceSelector:
+    matchNames:
+      - flux-system
+  selector:
+    matchExpressions:
+      - key: app
+        operator: Exists
+  podMetricsEndpoints:
+    - port: http-prom
+      honorLabels: true
+---
+apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: flux
   namespace: flux-system
 spec:
   groups:
-    - name: flux
+    - name: flux.rules
       rules:
         - alert: FluxComponentAbsent
           annotations:
-            description: Flux component has disappeared from Prometheus target discovery.
-            summary: Flux component is down.
+            summary: Flux component has disappeared from Prometheus target discovery.
           expr: |
             absent(up{job=~".*flux-system.*"} == 1)
           for: 15m
@@ -19,10 +37,9 @@ spec:
             severity: critical
         - alert: FluxReconciliationFailure
           annotations:
-            description:
-              "{{ $labels.kind }} {{ $labels.namespace }}/{{ $labels.name }} reconciliation has been failing
-              for more than ten minutes."
-            summary: Flux reconciliation failure.
+            summary: >-
+              {{ $labels.kind }} {{ $labels.namespace }}/{{ $labels.name }} reconciliation
+              has been failing for more than 15 minutes."
           expr: |
             max(gotk_reconcile_condition{status="False",type="Ready"}) by (namespace, name, kind)
               +
