@@ -22,6 +22,8 @@ spec:
     remediation:
       retries: 5
   dependsOn:
+    - name: loki
+      namespace: monitoring
     - name: vector-aggregator
       namespace: monitoring
   values:
@@ -33,7 +35,6 @@ spec:
       data_dir: /vector-data-dir
       api:
         enabled: false
-      # Sources
       sources:
         journal_logs:
           type: journald
@@ -41,12 +42,11 @@ spec:
         kubernetes_logs:
           type: kubernetes_logs
           pod_annotation_fields:
-            container_image: "container_image"
-            container_name: "container_name"
-            pod_annotations: "pod_annotations"
-            pod_labels: "pod_labels"
-            pod_name: "pod_name"
-      # Sinks
+            container_image: container_image
+            container_name: container_name
+            pod_annotations: pod_annotations
+            pod_labels: pod_labels
+            pod_name: pod_name
       sinks:
         loki_journal_sink:
           type: vector
