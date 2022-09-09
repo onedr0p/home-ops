@@ -24,7 +24,7 @@ spec:
   values:
     image:
       repository: ghcr.io/sct/overseerr
-      tag: develop@sha256:132d1b010b1d89eb3f6c9cdbe5c5935944ead5690e332c239595defe7c65096d
+      tag: 1.29.1
     env:
       TZ: "${TIMEZONE}"
       LOG_LEVEL: "info"
@@ -52,10 +52,15 @@ spec:
         tls:
           - hosts:
               - *host
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      fsGroupChangePolicy: "OnRootMismatch"
     persistence:
       config:
         enabled: true
-        existingClaim: overseerr-config-v1
+        existingClaim: *app
         mountPath: /app/config
     resources:
       requests:
