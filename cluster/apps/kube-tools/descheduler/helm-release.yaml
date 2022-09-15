@@ -29,9 +29,9 @@ spec:
       leaseDuration: 15s
       renewDeadline: 10s
       retryPeriod: 2s
-      resourceLock: "leases"
-      resourceName: "descheduler"
-      resourceNamescape: "default"
+      resourceLock: leases
+      resourceName: descheduler
+      resourceNamescape: default
     deschedulerPolicy:
       strategies:
         RemoveDuplicates:
@@ -41,8 +41,7 @@ spec:
         RemovePodsViolatingNodeAffinity:
           enabled: true
           params:
-            nodeAffinityType:
-              - requiredDuringSchedulingIgnoredDuringExecution
+            nodeAffinityType: ["requiredDuringSchedulingIgnoredDuringExecution"]
         RemovePodsViolatingTopologySpreadConstraint:
           enabled: true
           params:
@@ -58,8 +57,7 @@ spec:
           params:
             failedPods:
               includingInitContainers: true
-              excludeOwnerKinds:
-                - "Job"
+              excludeOwnerKinds: ["Job"]
               minPodLifetimeSeconds: 3600
         RemovePodsHavingTooManyRestarts:
           enabled: true
