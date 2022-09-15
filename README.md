@@ -139,17 +139,17 @@ My home IP can change at any given time and in order to keep my WAN IP address u
   <img src="https://user-images.githubusercontent.com/213795/172947261-65a82dcd-3274-45bd-aabf-140d60a04aa9.png" align="center" width="200px" alt="rack"/>
 </details>
 
-| Device                    | Count | OS Disk Size | Data Disk Size       | Ram  | Operating System | Purpose                        |
-|---------------------------|-------|--------------|----------------------|------|------------------|--------------------------------|
-| Protectli FW6D            | 1     | 500GB mSATA  | N/A                  | 16GB | Opnsense 22      | Router                         |
-| Intel NUC8i3BEK           | 3     | 256GB NVMe   | N/A                  | 32GB | Ubuntu 22.04     | Kubernetes (k3s) Masters       |
-| Intel NUC8i5BEH           | 3     | 240GB SSD    | 1TB NVMe (rook-ceph) | 64GB | Ubuntu 22.04     | Kubernetes (k3s) Workers       |
-| PowerEdge T340            | 1     | 2TB SSD      | 8x12TB ZFS RAIDz2    | 64GB | Ubuntu 22.04     | Apps (Minio, Nexus, etc) & NFS |
-| Lenovo SA120              | 1     | N/A          | 8x12TB               | N/A  | N/A              | DAS                            |
-| Raspberry Pi              | 1     | 32GB SD Card | N/A                  | 4GB  | PiKVM            | Network KVM                    |
-| TESmart 8 Port KVM Switch | 1     | N/A          | N/A                  | N/A  | N/A              | Network KVM switch for PiKVM   |
-| APC SMT1500RM2U w/ NIC    | 1     | N/A          | N/A                  | N/A  | N/A              | UPS                            |
-| CyberPower PDU41001       | 2     | N/A          | N/A                  | N/A  | N/A              | PDU                            |
+| Device                    | Count | OS Disk Size | Data Disk Size              | Ram  | Operating System | Purpose             |
+|---------------------------|-------|--------------|-----------------------------|------|------------------|---------------------|
+| Protectli FW6D            | 1     | 500GB mSATA  | -                           | 16GB | Opnsense 22      | Router              |
+| Intel NUC8i3BEK           | 3     | 256GB NVMe   | -                           | 32GB | Fedora 36        | Kubernetes Masters  |
+| Intel NUC8i5BEH           | 3     | 240GB SSD    | 1TB NVMe (rook-ceph)        | 64GB | Fedora 36        | Kubernetes Workers  |
+| PowerEdge T340            | 1     | 2TB SSD      | 8x12TB ZFS (mirrored vdevs) | 64GB | Ubuntu 22.04     | NFS + Backup Server |
+| Lenovo SA120              | 1     | -            | 6x12TB (+2 hot spares)      | -    | -                | DAS                 |
+| Raspberry Pi              | 1     | 32GB (SD)    | -                           | 4GB  | PiKVM            | Network KVM         |
+| TESmart 8 Port KVM Switch | 1     | -            | -                           | -    | -                | Network KVM (PiKVM) |
+| APC SMT1500RM2U w/ NIC    | 1     | -            | -                           | -    | -                | UPS                 |
+| CyberPower PDU41001       | 2     | -            | -                           | -    | -                | PDU                 |
 
 ---
 
