@@ -1,0 +1,13 @@
+---
+version: "3.8"
+
+services:
+  smartctl-exporter:
+    image: docker.io/pnnlmiscscripts/smartctl-exporter:0.7-2
+    container_name: smartctl-exporter
+    restart: unless-stopped
+    network_mode: host
+    privileged: true
+    volumes:
+      - "{{ docker_base_dir }}/smartctl-exporter/config/smartctl-exporter.yaml:/etc/smartctl_exporter.yaml:ro"
+      - /dev:/dev:ro,rslave
