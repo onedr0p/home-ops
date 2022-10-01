@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: cloudnative-pg
-      version: 0.14.3
+      version: 0.15.0
       sourceRef:
         kind: HelmRepository
         name: cloudnative-pg-charts
@@ -22,19 +22,8 @@ spec:
     remediation:
       retries: 5
   values:
+    crds:
+      create: false
     config:
       data:
         INHERITED_ANNOTATIONS: kyverno.io/ignore
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              group: apiextensions.k8s.io
-              version: v1
-              kind: CustomResourceDefinition
-            patch: |-
-              $patch: delete
-              apiVersion: apiextensions.k8s.io/v1
-              kind: CustomResourceDefinition
-              metadata:
-                name: not-used
