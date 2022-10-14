@@ -4,12 +4,12 @@ version: "3"
 tasks:
 
   toolbox:
-    desc: Exec into the Rook Ceph toolbox
+    desc: Open a shell to debug ceph via the toolbox
     interactive: true
     cmds:
       - kubectl -n rook-ceph exec -it $(kubectl -n rook-ceph get pod -l "app=rook-direct-mount" -o jsonpath='{.items[0].metadata.name}') -- bash
 
-  password:
+  dashboard-password:
     desc: Retrieve the rook-ceph dashboard password
     cmds:
       - kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o jsonpath="{['data']['password']}" | base64 --decode && echo

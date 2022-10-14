@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: ${APP}-restore-snapshot
+  name: ${APP}-${CLAIM}-restore
   namespace: ${NAMESPACE}
 spec:
   ttlSecondsAfterFinished: 3600
@@ -12,7 +12,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: restore
-          image: ghcr.io/onedr0p/kopia:0.11.3@sha256:2ae9ede0edac68c09d517abd71fa12c96efcf19f27ce7ffca968cebb10ed0e2d
+          image: ghcr.io/onedr0p/kopia:0.12.1@sha256:e333295b519ce586e7c050c970b2255d87bdb2979298ff87ebdb1113e381ba3b
           env:
             - name: KOPIA_PASSWORD
               value: "none"
@@ -22,21 +22,21 @@ spec:
             - |-
               shopt -s dotglob
               printf "\e[1;32m%-6s\e[m\n" "[01/04] Connect to repo ..."      && kopia repo connect filesystem --path=/snapshots --override-hostname=cluster --override-username=root
-              printf "\e[1;32m%-6s\e[m\n" "[02/04] Remove previous data ..." && rm -rf /data/${NAMESPACE}/${APP}/*
-              printf "\e[1;32m%-6s\e[m\n" "[03/04] Restore snapshot ..."     && kopia snap restore "${SNAPSHOT}" /data/${NAMESPACE}/${APP}
+              printf "\e[1;32m%-6s\e[m\n" "[02/04] Remove previous data ..." && rm -rf /data/${NAMESPACE}/${APP}/${CLAIM}/*
+              printf "\e[1;32m%-6s\e[m\n" "[03/04] Restore snapshot ..."     && kopia snap restore "${SNAPSHOT}" /data/${NAMESPACE}/${APP}/${CLAIM}
               printf "\e[1;32m%-6s\e[m\n" "[04/04] Disconnect from repo ..." && kopia repo disconnect
           volumeMounts:
-            - name: ${APP}-data
-              mountPath: /data/${NAMESPACE}/${APP}
+            - name: data
+              mountPath: /data/${NAMESPACE}/${APP}/${CLAIM}
             - name: snapshots
               mountPath: /snapshots
           securityContext:
             privileged: true
       volumes:
-        - name: ${APP}-data
+        - name: data
           persistentVolumeClaim:
-            claimName: ${VOLUME}
+            claimName: ${CLAIM}
         - name: snapshots
           nfs:
             server: expanse
-            path: /tycho/Apps/External/Kopia
+            path: /eros/Apps/Kopia

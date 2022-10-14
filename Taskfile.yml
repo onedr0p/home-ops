@@ -10,22 +10,28 @@ env:
   KUBECONFIG: "{{.CLUSTER_DIR}}/local/kubeconfig"
 
 includes:
-  ansible: .taskfiles/AnsibleTasks.yml
   cluster: .taskfiles/ClusterTasks.yml
   debug: .taskfiles/DebugTasks.yml
   precommit: .taskfiles/PreCommitTasks.yml
+  rook: .taskfiles/RookTasks.yml
   snapshot: .taskfiles/SnapshotTasks.yml
-  terraform: .taskfiles/TerraformTasks.yml
 
 tasks:
 
   kubeconfig:
     desc: Remotely fetch kubeconfig from Kubernetes
     cmds:
-      - rsync --verbose --progress --partial --rsync-path="sudo rsync" {{.K3S_PRIMARY_MASTER_NODE_USERNAME}}@{{.K3S_PRIMARY_MASTER_NODE_ADDR}}:/etc/rancher/k3s/k3s.yaml "{{.CLUSTER_DIR}}/kubeconfig"
-      - sed -i '' 's/127.0.0.1/{{.K3S_LB_ADDR}}/g' "{{.CLUSTER_DIR}}/kubeconfig"
-      - chmod go-r "{{.CLUSTER_DIR}}/kubeconfig"
+      - rsync --verbose --progress --partial --rsync-path="sudo rsync" {{.K3S_PRIMARY_MASTER_NODE_USERNAME}}@{{.K3S_PRIMARY_MASTER_NODE_ADDR}}:/etc/rancher/k3s/k3s.yaml "${KUBECONFIG}"
+      - sed -i '' 's/127.0.0.1/{{.K3S_LB_ADDR}}/g' "${KUBECONFIG}"
+      - chmod go-r "${KUBECONFIG}"
     vars:
-      K3S_PRIMARY_MASTER_NODE_USERNAME: "root"
-      K3S_PRIMARY_MASTER_NODE_ADDR: "192.168.42.10"
-      K3S_LB_ADDR: "192.168.1.1"
+      K3S_PRIMARY_MASTER_NODE_USERNAME: root
+      K3S_PRIMARY_MASTER_NODE_ADDR: 192.168.42.10
+      K3S_LB_ADDR: 192.168.1.1
+
+  ansible:
+    desc: Install/Upgrade Ansible deps
+    dir: ansible
+    cmds:
+      - ansible-galaxy install -r requirements.yml --roles-path ~/.ansible/roles --force
+      - ansible-galaxy collection install -r requirements.yml --collections-path ~/.ansible/collections --force
