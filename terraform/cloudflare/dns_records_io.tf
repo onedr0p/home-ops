@@ -34,9 +34,8 @@ resource "cloudflare_record" "cname_www" {
   type    = "CNAME"
   ttl     = 1
 }
-
-resource "cloudflare_record" "cname_wireguard" {
-  name    = "wg1"
+resource "cloudflare_record" "cname_public" {
+  name    = "${data.sops_file.cloudflare_secrets.data["cloudflare_public_cname_domain_io"]}"
   zone_id = lookup(data.cloudflare_zones.domain_io.zones[0], "id")
   value   = "ipv4.${data.sops_file.cloudflare_secrets.data["cloudflare_domain_io"]}"
   proxied = false
