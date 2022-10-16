@@ -1,24 +1,5 @@
 ---
 apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: &app zigbee2mqtt-exporter
-  namespace: default
-  labels: &labels
-    app.kubernetes.io/instance: *app
-    app.kubernetes.io/name: *app
-spec:
-  selector:
-    matchLabels:
-      <<: *labels
-  endpoints:
-    - port: http
-      scheme: http
-      path: /metrics
-      interval: 1m
-      scrapeTimeout: 10s
----
-apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: zigbee2mqtt-exporter
