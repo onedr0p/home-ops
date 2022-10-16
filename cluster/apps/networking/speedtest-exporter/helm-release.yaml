@@ -31,11 +31,15 @@ spec:
       main:
         ports:
           http:
-            enabled: false
-          metrics:
-            enabled: true
-            protocol: TCP
             port: 9798
+        monitor:
+          enabled: true
+          endpoints:
+            - port: http
+              scheme: http
+              path: /metrics
+              interval: 60m
+              scrapeTimeout: 1m
     resources:
       requests:
         cpu: 15m
