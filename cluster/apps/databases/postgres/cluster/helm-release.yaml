@@ -1,0 +1,65 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: postgres-cluster
+  namespace: &namespace default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: raw
+      version: v0.3.1
+      sourceRef:
+        kind: HelmRepository
+        name: dysnix-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: minio
+      namespace: default
+    - name: postgres
+      namespace: default
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+  values:
+    resources:
+      - apiVersion: postgresql.cnpg.io/v1
+        kind: Cluster
+        metadata:
+          name: postgres
+          namespace: *namespace
+          annotations:
+            kyverno.io/ignore: "true"
+        spec:
+          instances: 3
+          primaryUpdateStrategy: unsupervised
+          storage:
+            size: 20Gi
+            storageClass: ceph-block
+          superuserSecret:
+            name: postgres-superuser
+          monitoring:
+            enablePodMonitor: true
+          backup:
+            retentionPolicy: 30d
+            barmanObjectStore:
+              wal:
+                compression: bzip2
+                maxParallel: 8
+              destinationPath: s3://postgresql/
+              endpointURL: http://minio.default.svc.cluster.local:9000
+              serverName: postgres-v1
+              s3Credentials:
+                accessKeyId:
+                  name: postgres-minio
+                  key: MINIO_ACCESS_KEY
+                secretAccessKey:
+                  name: postgres-minio
+                  key: MINIO_SECRET_KEY
