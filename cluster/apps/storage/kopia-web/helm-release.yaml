@@ -30,7 +30,7 @@ spec:
           - -c
           - |-
             until [ -f /snapshots/kopia.repository.f ]; do
-                printf "\e[1;32m%-6s\e[m\n" "Awaiting for the Kopia repo to become ready ..."
+                printf "\e[1;32m%-6s\e[m\n" "Waiting for the Kopia repo to become ready ..."
                 sleep 1
             done
         volumeMounts:
@@ -51,6 +51,8 @@ spec:
       - --metrics-listen-addr
       - 0.0.0.0:8080
       - --without-password
+      - --log-level
+      - debug
     service:
       main:
         ports:
@@ -95,4 +97,4 @@ spec:
         cpu: 10m
         memory: 100Mi
       limits:
-        memory: 250Mi
+        memory: 500Mi
