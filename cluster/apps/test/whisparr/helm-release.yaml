@@ -27,8 +27,6 @@ spec:
   values:
     controller:
       type: statefulset
-      labels:
-        snapshot.home.arpa/enabled: "true"
     image:
       repository: ghcr.io/onedr0p/whisparr-nightly
       tag: 0.1.0.53@sha256:915f534c155693c49b4e55d81802f676244182860c1d55455eedd3053b16329d
@@ -89,3 +87,17 @@ spec:
         memory: 250Mi
       limits:
         memory: 2000Mi
+  postRenderers:
+    - kustomize:
+        patchesJson6902:
+          - target:
+              version: v1
+              kind: StatefulSet
+              name: *app
+            patch:
+              - op: add
+                path: /spec/volumeClaimTemplates/0/-
+                value:
+                  metadata:
+                    labels:
+                      snapshot.home.arpa/enabled: "true"
