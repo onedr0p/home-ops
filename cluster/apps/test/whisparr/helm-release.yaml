@@ -89,15 +89,13 @@ spec:
         memory: 2000Mi
   postRenderers:
     - kustomize:
-        patchesJson6902:
-          - target:
+        patches:
+          - patch: |-
+              - op: add
+                path: /spec/volumeClaimTemplates/0/metadata/labels
+                value:
+                  snapshot.home.arpa~1enabled: "true"
+            target:
+              group: apps
               version: v1
               kind: StatefulSet
-              name: *app
-            patch:
-              - op: add
-                path: /spec/volumeClaimTemplates/0/-
-                value:
-                  metadata:
-                    labels:
-                      snapshot.home.arpa/enabled: "true"
