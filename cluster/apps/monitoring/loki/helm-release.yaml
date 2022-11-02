@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: loki
-      version: 3.2.2
+      version: 3.3.1
       sourceRef:
         kind: HelmRepository
         name: grafana-charts
@@ -134,10 +134,18 @@ spec:
         size: 10Gi
         storageClass: ceph-block
     monitoring:
+      serviceMonitor:
+        enabled: false
+        metricsInstance:
+          enabled: false
       selfMonitoring:
         enabled: false
         grafanaAgent:
           installOperator: false
+        lokiCanary:
+          enabled: false
+    test:
+      enabled: false
   valuesFrom:
     - targetPath: loki.structuredConfig.common.storage.s3.bucketnames
       kind: ConfigMap
