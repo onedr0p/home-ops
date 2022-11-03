@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 0.2.2
+      version: 1.0.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -73,6 +73,8 @@ spec:
         accessMode: ReadWriteOnce
         size: 1Gi
         storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
     persistence:
       media:
         enabled: true
@@ -87,15 +89,3 @@ spec:
         memory: 250Mi
       limits:
         memory: 2000Mi
-  postRenderers:
-    - kustomize:
-        patches:
-          - patch: |-
-              - op: add
-                path: /spec/volumeClaimTemplates/0/metadata/labels
-                value:
-                  snapshot.home.arpa/enabled: "true"
-            target:
-              group: apps
-              version: v1
-              kind: StatefulSet
