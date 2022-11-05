@@ -29,6 +29,8 @@ spec:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   values:
+    controller:
+      type: statefulset
     image:
       repository: ghcr.io/onedr0p/jellyfin
       tag: 10.8.7@sha256:e309605c9f9c1fd3810da6159185f2bea96a161341c81af9b4731e43be3d9bb1
@@ -63,10 +65,15 @@ spec:
         - 44
         - 109
         - 100
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 50Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
     persistence:
-      config:
-        enabled: true
-        existingClaim: jellyfin-config-v1
       media:
         enabled: true
         type: nfs

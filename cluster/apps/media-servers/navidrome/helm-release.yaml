@@ -25,6 +25,8 @@ spec:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   values:
+    controller:
+      type: statefulset
     image:
       repository: ghcr.io/onedr0p/navidrome
       tag: 0.48.0@sha256:2ff33a7fd75521998683a4e50b490adfad9697c97edd2106b56f835547781de7
@@ -72,10 +74,15 @@ spec:
       fsGroupChangePolicy: "OnRootMismatch"
       supplementalGroups:
         - 100
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
     persistence:
-      config:
-        enabled: true
-        existingClaim: navidrome-config-v1
       music:
         enabled: true
         type: nfs
