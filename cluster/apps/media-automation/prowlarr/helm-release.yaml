@@ -25,6 +25,8 @@ spec:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   values:
+    controller:
+      type: statefulset
     image:
       repository: ghcr.io/onedr0p/prowlarr-nightly
       tag: 0.4.7.2066@sha256:fb0c4e01f6f3c9f59fe6fd95c0815c295168bed90e872df7f1003168e8f25de7
@@ -63,10 +65,14 @@ spec:
       runAsGroup: 568
       fsGroup: 568
       fsGroupChangePolicy: "OnRootMismatch"
-    persistence:
-      config:
-        enabled: true
-        existingClaim: prowlarr-config-v1
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 2Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
     podAnnotations:
       secret.reloader.stakater.com/reload: *app
     resources:

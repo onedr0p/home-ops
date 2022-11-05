@@ -25,6 +25,8 @@ spec:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   values:
+    controller:
+      type: statefulset
     image:
       repository: ghcr.io/onedr0p/sonarr-develop
       tag: 4.0.0.145@sha256:b2e9de23ec5824f76637751580f7be90767c3eb9de8992abaa897587958e2bf4
@@ -68,16 +70,15 @@ spec:
       fsGroupChangePolicy: "OnRootMismatch"
       supplementalGroups:
         - 100
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
     persistence:
-      config:
-        enabled: true
-        existingClaim: sonarr-config-v1
-      # downloads:
-      #   enabled: true
-      #   type: nfs
-      #   server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-      #   path: /eros/Downloads
-      #   mountPath: /downloads
       media:
         enabled: true
         type: nfs

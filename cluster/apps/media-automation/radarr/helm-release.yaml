@@ -25,6 +25,8 @@ spec:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   values:
+    controller:
+      type: statefulset
     image:
       repository: ghcr.io/onedr0p/radarr-develop
       tag: 4.3.0.6671@sha256:9d0b59314b79a1a93a66a0f87bae63e63be7b6275042aaaa0ad1260e1f0dea6c
@@ -68,16 +70,15 @@ spec:
       fsGroupChangePolicy: "OnRootMismatch"
       supplementalGroups:
         - 100
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 15Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
     persistence:
-      config:
-        enabled: true
-        existingClaim: radarr-config-v1
-      # downloads:
-      #   enabled: true
-      #   type: nfs
-      #   server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-      #   path: /eros/Downloads
-      #   mountPath: /downloads
       media:
         enabled: true
         type: nfs
