@@ -25,6 +25,8 @@ spec:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   values:
+    controller:
+      type: statefulset
     image:
       repository: ghcr.io/onedr0p/lidarr-develop
       tag: 1.1.0.2649@sha256:dd3f84cf26508a48d9c34f4f2af81cdb07dde22063bb1568acb2c0b752c1551c
@@ -65,16 +67,15 @@ spec:
       fsGroupChangePolicy: "OnRootMismatch"
       supplementalGroups:
         - 100
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
     persistence:
-      config:
-        enabled: true
-        existingClaim: lidarr-config-v1
-      # downloads:
-      #   enabled: true
-      #   type: nfs
-      #   server: "expanse.${SECRET_PRIVATE_DOMAIN}"
-      #   path: /eros/Downloads
-      #   mountPath: /downloads
       media:
         enabled: true
         type: nfs
