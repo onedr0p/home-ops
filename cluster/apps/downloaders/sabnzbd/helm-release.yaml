@@ -25,6 +25,8 @@ spec:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   values:
+    controller:
+      type: statefulset
     image:
       repository: ghcr.io/onedr0p/sabnzbd
       tag: 3.7.0@sha256:67bba2c3aa9912817eb3aa070bebeb68313d43a4dd7e4912aeba103c9598bd2e
@@ -70,10 +72,15 @@ spec:
       fsGroupChangePolicy: "OnRootMismatch"
       supplementalGroups:
         - 100
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
     persistence:
-      config:
-        enabled: true
-        existingClaim: sabnzbd-config-v1
       downloads:
         enabled: true
         type: nfs
