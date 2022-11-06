@@ -29,6 +29,8 @@ spec:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   values:
+    controller:
+      type: statefulset
     image:
       repository: ghcr.io/onedr0p/home-assistant
       tag: 2022.11.1@sha256:8a3b44e1ce7b90f196a9c76a3b743d74971ebe23c448c1ccda9abe3cf8a626d8
@@ -75,10 +77,14 @@ spec:
       fsGroupChangePolicy: "OnRootMismatch"
       supplementalGroups:
         - 100
-    persistence:
-      config:
-        enabled: true
-        existingClaim: home-assistant-config-v1
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
     podAnnotations:
       secret.reloader.stakater.com/reload: *app
     resources:

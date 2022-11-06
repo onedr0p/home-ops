@@ -27,6 +27,8 @@ spec:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   values:
+    controller:
+      type: statefulset
     image:
       repository: ghcr.io/zwave-js/zwave-js-ui
       tag: 8.3.0
@@ -72,11 +74,15 @@ spec:
               - *host
     securityContext:
       privileged: true
-    persistence:
-      config:
-        enabled: true
-        existingClaim: zwavejs2mqtt-config-v1
+    volumeClaimTemplates:
+      - name: config
         mountPath: /usr/src/app/store
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
+    persistence:
       usb:
         enabled: true
         type: hostPath

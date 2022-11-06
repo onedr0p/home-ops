@@ -31,6 +31,8 @@ spec:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   values:
+    controller:
+      type: statefulset
     image:
       repository: docker.io/blakeblackshear/frigate
       tag: 0.11.1
@@ -79,11 +81,16 @@ spec:
               - *host
     securityContext:
       privileged: true
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /data
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
     persistence:
-      data:
-        enabled: true
-        existingClaim: frigate-config-v1
-      config:
+      config-file:
         enabled: true
         type: configMap
         name: *app
