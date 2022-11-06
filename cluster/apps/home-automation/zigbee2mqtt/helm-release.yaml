@@ -40,6 +40,18 @@ spec:
         ports:
           http:
             port: 8080
+          metrics:
+            enabled: true
+            port: 80
+    serviceMonitor:
+      main:
+        enabled: true
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
     ingress:
       main:
         enabled: true
