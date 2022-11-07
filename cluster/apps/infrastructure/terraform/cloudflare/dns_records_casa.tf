@@ -43,7 +43,7 @@ resource "cloudflare_record" "txt_mailgun_spf" {
 resource "cloudflare_record" "txt_mailgun_cert" {
   name    = "krs._domainkey.mg"
   zone_id = lookup(data.cloudflare_zones.domain_casa.zones[0], "id")
-  value   = data.sops_file.cloudflare_secrets.data["mailgun_cert"]
+  value   = var.mailgun_cert
   proxied = false
   type    = "TXT"
   ttl     = 1
@@ -56,7 +56,7 @@ resource "cloudflare_record" "txt_mailgun_cert" {
 resource "cloudflare_record" "cname_fastmail_1" {
   name    = "fm1._domainkey"
   zone_id = lookup(data.cloudflare_zones.domain_casa.zones[0], "id")
-  value   = "fm1.${data.sops_file.cloudflare_secrets.data["cloudflare_domain_casa"]}.dkim.fmhosted.com"
+  value   = "fm1.${var.cloudflare_domain_casa}.dkim.fmhosted.com"
   proxied = false
   type    = "CNAME"
   ttl     = 1
@@ -65,7 +65,7 @@ resource "cloudflare_record" "cname_fastmail_1" {
 resource "cloudflare_record" "cname_fastmail_2" {
   name    = "fm2._domainkey"
   zone_id = lookup(data.cloudflare_zones.domain_casa.zones[0], "id")
-  value   = "fm2.${data.sops_file.cloudflare_secrets.data["cloudflare_domain_casa"]}.dkim.fmhosted.com"
+  value   = "fm2.${var.cloudflare_domain_casa}.dkim.fmhosted.com"
   proxied = false
   type    = "CNAME"
   ttl     = 1
@@ -74,14 +74,14 @@ resource "cloudflare_record" "cname_fastmail_2" {
 resource "cloudflare_record" "cname_fastmail_3" {
   name    = "fm3._domainkey"
   zone_id = lookup(data.cloudflare_zones.domain_casa.zones[0], "id")
-  value   = "fm3.${data.sops_file.cloudflare_secrets.data["cloudflare_domain_casa"]}.dkim.fmhosted.com"
+  value   = "fm3.${var.cloudflare_domain_casa}.dkim.fmhosted.com"
   proxied = false
   type    = "CNAME"
   ttl     = 1
 }
 
 resource "cloudflare_record" "mx_fastmail_1" {
-  name    = data.sops_file.cloudflare_secrets.data["cloudflare_domain_casa"]
+  name    = var.cloudflare_domain_casa
   zone_id = lookup(data.cloudflare_zones.domain_casa.zones[0], "id")
   value   = "in1-smtp.messagingengine.com"
   proxied = false
@@ -91,7 +91,7 @@ resource "cloudflare_record" "mx_fastmail_1" {
 }
 
 resource "cloudflare_record" "mx_fastmail_2" {
-  name    = data.sops_file.cloudflare_secrets.data["cloudflare_domain_casa"]
+  name    = var.cloudflare_domain_casa
   zone_id = lookup(data.cloudflare_zones.domain_casa.zones[0], "id")
   value   = "in2-smtp.messagingengine.com"
   proxied = false
@@ -101,7 +101,7 @@ resource "cloudflare_record" "mx_fastmail_2" {
 }
 
 resource "cloudflare_record" "txt_fastmail_spf" {
-  name    = data.sops_file.cloudflare_secrets.data["cloudflare_domain_casa"]
+  name    = var.cloudflare_domain_casa
   zone_id = lookup(data.cloudflare_zones.domain_casa.zones[0], "id")
   value   = "v=spf1 include:spf.messagingengine.com ?all"
   proxied = false
@@ -116,7 +116,7 @@ resource "cloudflare_record" "txt_fastmail_spf" {
 resource "cloudflare_record" "txt_dmarc" {
   name    = "_dmarc"
   zone_id = lookup(data.cloudflare_zones.domain_casa.zones[0], "id")
-  value   = "v=DMARC1; p=none; rua=mailto:${data.sops_file.cloudflare_secrets.data["cloudflare_email"]}"
+  value   = "v=DMARC1; p=none; rua=mailto:${var.cloudflare_email}"
   proxied = false
   type    = "TXT"
   ttl     = 1

@@ -1,8 +1,3 @@
-# Obtain current home IP address
-data "http" "ipv4" {
-  url = "http://ipv4.icanhazip.com"
-}
-
 #
 # Base records
 #
@@ -18,9 +13,9 @@ resource "cloudflare_record" "apex_ipv4" {
 }
 
 resource "cloudflare_record" "cname_root" {
-  name    = data.sops_file.cloudflare_secrets.data["cloudflare_domain_io"]
+  name    = var.cloudflare_domain_io
   zone_id = lookup(data.cloudflare_zones.domain_io.zones[0], "id")
-  value   = "ipv4.${data.sops_file.cloudflare_secrets.data["cloudflare_domain_io"]}"
+  value   = "ipv4.${var.cloudflare_domain_io}"
   proxied = true
   type    = "CNAME"
   ttl     = 1
@@ -29,15 +24,15 @@ resource "cloudflare_record" "cname_root" {
 resource "cloudflare_record" "cname_www" {
   name    = "www"
   zone_id = lookup(data.cloudflare_zones.domain_io.zones[0], "id")
-  value   = "ipv4.${data.sops_file.cloudflare_secrets.data["cloudflare_domain_io"]}"
+  value   = "ipv4.${var.cloudflare_domain_io}"
   proxied = true
   type    = "CNAME"
   ttl     = 1
 }
 resource "cloudflare_record" "cname_public" {
-  name    = "${data.sops_file.cloudflare_secrets.data["cloudflare_public_cname_domain_io"]}"
+  name    = "${var.cloudflare_public_cname_domain_io}"
   zone_id = lookup(data.cloudflare_zones.domain_io.zones[0], "id")
-  value   = "ipv4.${data.sops_file.cloudflare_secrets.data["cloudflare_domain_io"]}"
+  value   = "ipv4.${var.cloudflare_domain_io}"
   proxied = false
   type    = "CNAME"
   ttl     = 1
