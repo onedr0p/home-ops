@@ -1,5 +1,6 @@
 ---
-- hosts:
+- name: Cluster Rook-Ceph
+  hosts:
     - worker
   become: true
   gather_facts: true
@@ -10,6 +11,7 @@
         seconds: 2
   tasks:
     - name: Reset disks
+      ignore_errors: true
       block:
         - name: Remove /var/lib/rook
           ansible.builtin.file:
@@ -33,4 +35,3 @@
             wipefs --all --force {{ item }}
           with_items:
             - "{{ rook_devices | default([]) }}"
-      ignore_errors: true

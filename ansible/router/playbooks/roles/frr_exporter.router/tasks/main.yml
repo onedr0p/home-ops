@@ -15,11 +15,17 @@
   changed_when: false
   register: frr_exporter_version_check
 
-- block:
+- name: Download frr-exporter
+  notify: Restart frr_exporter
+  when: >
+    frr_exporter_version_check.stdout is not defined
+    or frr_exporter_version[1:] not in frr_exporter_version_check.stdout
+  block:
     - name: Download frr_exporter
       ansible.builtin.get_url:
         url: "{{ frr_exporter_download_url }}"
         dest: "/tmp/frr_exporter_{{ frr_exporter_version }}_freebsd_amd64.tar.gz"
+        mode: 0755
     - name: Extract frr_exporter
       ansible.builtin.shell:
         cmd: >-
@@ -31,12 +37,10 @@
         dest: /usr/local/sbin/frr_exporter
         mode: 0755
         remote_src: true
-  when: >
-    frr_exporter_version_check.stdout is not defined
-    or frr_exporter_version[1:] not in frr_exporter_version_check.stdout
-  notify: Restart frr_exporter
 
-- block:
+- name: Configure frr-exporter
+  notify: Restart frr_exporter
+  block:
     - name: Create frr_exporter rc.conf script
       ansible.builtin.template:
         src: frr_exporter/frr_exporter-rc.conf.j2
@@ -57,4 +61,3 @@
         src: frr_exporter/99-frr_exporter.j2
         dest: /usr/local/etc/rc.syshook.d/start/99-frr_exporter
         mode: 0755
-  notify: Restart frr_exporter

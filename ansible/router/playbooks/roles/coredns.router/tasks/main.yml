@@ -15,11 +15,17 @@
   changed_when: false
   register: coredns_version_check
 
-- block:
+- name: Download k8s_gateway
+  notify: Restart coredns
+  when: >
+    coredns_version_check.stdout is not defined
+    or coredns_version[1:] not in coredns_version_check.stdout
+  block:
     - name: Download CoreDNS
       ansible.builtin.get_url:
         url: "{{ coredns_download_url }}"
         dest: "/tmp/k8s_gateway_{{ coredns_version }}_freebsd_amd64.tar.gz"
+        mode: 0755
     - name: Extract CoreDNS
       ansible.builtin.shell:
         cmd: >-
@@ -31,10 +37,6 @@
         dest: /usr/local/sbin/coredns
         mode: 0755
         remote_src: true
-  when: >
-    coredns_version_check.stdout is not defined
-    or coredns_version[1:] not in coredns_version_check.stdout
-  notify: Restart coredns
 
 - name: Create CoreDNS log rotation config
   ansible.builtin.template:
@@ -42,11 +44,14 @@
     dest: /etc/newsyslog.conf.d/coredns
     mode: 0755
 
-- block:
+- name: Configure k8s_gateway
+  notify: Restart coredns
+  block:
     - name: Copy kubeconfig
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/../../../cluster/local/kubeconfig-homedns"
         dest: /usr/local/etc/coredns/kubeconfig
+        mode: 0755
     - name: Create Corefile
       ansible.builtin.template:
         src: coredns/Corefile.j2
@@ -72,4 +77,3 @@
         src: coredns/99-coredns.j2
         dest: /usr/local/etc/rc.syshook.d/start/99-coredns
         mode: 0755
-  notify: Restart coredns

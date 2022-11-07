@@ -1,0 +1,24 @@
+---
+- name: Create default directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: users
+    mode: 0775
+  loop:
+    - "{{ docker_base_dir }}"
+  tags:
+    - always
+
+# Manage Docker installation
+- name: Deploy Docker
+  ansible.builtin.import_tasks: docker.yml
+
+# Manage applications
+# - ansible.builtin.import_tasks: kopia.yml
+- name: Deploy Node Exporter
+  ansible.builtin.import_tasks: node-exporter.yml
+# - ansible.builtin.import_tasks: smartctl-exporter.yml
+- name: Deploy Vector
+  ansible.builtin.import_tasks: vector.yml

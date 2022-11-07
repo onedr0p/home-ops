@@ -36,6 +36,9 @@
     manager: auto
 
 - name: Remove snapd
+  when:
+    - "'snapd' in os_packages_remove"
+    - "'snapd' in ansible_facts.packages"
   block:
     - name: Check if snap is installed
       ansible.builtin.debug:
@@ -61,9 +64,6 @@
         - "/var/lib/snapd"
         - "/var/cache/snapd"
         - "/usr/lib/snapd"
-  when:
-    - "'snapd' in os_packages_remove"
-    - "'snapd' in ansible_facts.packages"
 
 - name: Remove packages
   ansible.builtin.apt:

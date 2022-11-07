@@ -1,5 +1,6 @@
 ---
-- hosts:
+- name: Cluster Installation
+  hosts:
     - master
     - worker
   become: true
@@ -34,6 +35,7 @@
       ansible.builtin.template:
         src: audit-policy.yaml.j2
         dest: /var/lib/rancher/k3s/audit-policy.yaml
+        mode: 0755
 
     - name: Install Kubernetes
       ansible.builtin.include_role:

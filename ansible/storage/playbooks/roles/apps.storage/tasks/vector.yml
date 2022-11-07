@@ -11,7 +11,9 @@
     - "{{ docker_base_dir }}/vector/config"
     - "{{ docker_base_dir }}/vector/data"
 
-- block:
+- name: Deploy Vector
+  notify: Restart vector
+  block:
     - name: Create vector docker compose file
       ansible.builtin.template:
         src: vector/docker-compose.yml.j2
@@ -33,4 +35,3 @@
         mode: 0644
       vars:
         condition_path_is_mount_point: "/"
-  notify: Restart vector

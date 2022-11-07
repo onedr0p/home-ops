@@ -10,7 +10,9 @@
     - "{{ docker_base_dir }}/smartctl-exporter"
     - "{{ docker_base_dir }}/smartctl-exporter/config"
 
-- block:
+- name: Deploy smartctl-exporter
+  notify: Restart smartctl-exporter
+  block:
     - name: Create smartctl-exporter docker compose file
       ansible.builtin.template:
         src: smartctl-exporter/docker-compose.yml.j2
@@ -32,4 +34,3 @@
         mode: 0644
       vars:
         condition_path_is_mount_point: "/"
-  notify: Restart smartctl-exporter

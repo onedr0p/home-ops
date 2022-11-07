@@ -1,5 +1,6 @@
 ---
-- hosts:
+- name: PiKVM
+  hosts:
     - pikvm
   become: true
   gather_facts: true
@@ -13,7 +14,8 @@
       tags: always
 
   tasks:
-    - block:
+    - name: Configure OS
+      block:
         - name: Set timezone
           community.general.timezone:
             name: "{{ timezone | default('America/New_York') }}"
@@ -29,7 +31,9 @@
         - name: Mount read-only
           ansible.builtin.command: /usr/local/bin/ro
 
-    - block:
+    - name: Disable SSL
+      notify: Restart kvmd-nginx
+      block:
         - name: Disable SSL
           ansible.builtin.template:
             src: nginx.conf.j2
@@ -38,9 +42,10 @@
       rescue:
         - name: Mount read-only
           ansible.builtin.command: /usr/local/bin/ro
-      notify: Restart kvmd-nginx
 
-    - block:
+    - name: Configure PiKVM
+      notify: Restart kvmd
+      block:
         - name: Create kvmd override configuration
           ansible.builtin.template:
             src: override.yaml.j2
@@ -54,7 +59,6 @@
       rescue:
         - name: Mount read-only
           ansible.builtin.command: /usr/local/bin/ro
-      notify: Restart kvmd
 
   post_tasks:
     - name: Mount read-only

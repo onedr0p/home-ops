@@ -15,11 +15,17 @@
   changed_when: false
   register: adguardhome_version_check
 
-- block:
+- name: Download Adguard Home
+  notify: Restart adguardhome
+  when: >
+    adguardhome_version_check.stdout is not defined
+    or adguardhome_version not in adguardhome_version_check.stdout
+  block:
     - name: Download AdGuard Home
       ansible.builtin.get_url:
         url: "{{ adguardhome_download_url }}"
         dest: "/tmp/adguardhome-{{ adguardhome_version }}-freebsd-amd64.tar.gz"
+        mode: 0755
     - name: Extract AdGuard Home
       ansible.builtin.shell:
         cmd: >-
@@ -31,10 +37,6 @@
         dest: /usr/local/sbin/adguardhome
         mode: 0755
         remote_src: true
-  when: >
-    adguardhome_version_check.stdout is not defined
-    or adguardhome_version not in adguardhome_version_check.stdout
-  notify: Restart adguardhome
 
 - name: Create AdGuard Home log rotation config
   ansible.builtin.template:
@@ -42,7 +44,9 @@
     dest: /etc/newsyslog.conf.d/adguardhome
     mode: 0755
 
-- block:
+- name: Configure Adguard Home
+  notify: Restart adguardhome
+  block:
     - name: Create AdGuard Home rc.conf script
       ansible.builtin.template:
         src: adguardhome/adguardhome-rc.conf.j2
@@ -63,4 +67,3 @@
         src: adguardhome/99-adguardhome.j2
         dest: /usr/local/etc/rc.syshook.d/start/99-adguardhome
         mode: 0755
-  notify: Restart adguardhome

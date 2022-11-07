@@ -9,7 +9,9 @@
   loop:
     - "{{ docker_base_dir }}/node-exporter"
 
-- block:
+- name: Deploy node-exporter
+  notify: Restart node-exporter
+  block:
     - name: Create node-exporter docker compose file
       ansible.builtin.template:
         src: node-exporter/docker-compose.yml.j2
@@ -24,4 +26,3 @@
         mode: 0644
       vars:
         condition_path_is_mount_point: "/"
-  notify: Restart node-exporter

@@ -1,13 +1,17 @@
 ---
-- hosts:
+- name: Configure Opnsense
+  hosts:
     - opnsense
   become: false
   gather_facts: false
   any_errors_fatal: true
   roles:
-    - role: "adguardhome.router"
+    - name: Deploy Adguard Home
+      role: "adguardhome.router"
       tags: [adguardhome]
-    - role: "coredns.router"
+    - name: Deploy k8s_gateway
+      role: "coredns.router"
       tags: [coredns]
-    - role: "frr_exporter.router"
+    - name: Deploy FRR Exporter
+      role: "frr_exporter.router"
       tags: [frr_exporter]
