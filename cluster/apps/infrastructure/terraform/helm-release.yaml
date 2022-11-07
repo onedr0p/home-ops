@@ -33,12 +33,11 @@ spec:
           namespace: *namespace
         spec:
           approvePlan: auto
-          interval: 30m
-          path: ./cluster/apps/infrastructure/terraform/cloudflare
+          interval: 1m
+          path: ./
           sourceRef:
-            kind: GitRepository
-            name: flux-cluster
-            namespace: flux-system
+            kind: OCIRepository
+            name: cloudflare-terraform-oci
           backendConfig:
             disable: true
           cliConfigSecretRef:
@@ -46,3 +45,5 @@ spec:
           varsFrom:
             - kind: Secret
               name: cloudflare-terraform-vars
+          writeOutputsToSecret:
+            name: cloudflare-terraform-outputs
