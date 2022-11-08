@@ -29,7 +29,7 @@ spec:
       - apiVersion: infra.contrib.fluxcd.io/v1alpha1
         kind: Terraform
         metadata:
-          name: cloudflare-terraform
+          name: terraform-cloudflare
           namespace: *namespace
         spec:
           approvePlan: auto
@@ -37,7 +37,7 @@ spec:
           path: ./terraform/cloudflare
           sourceRef:
             kind: OCIRepository
-            name: cloudflare-terraform-oci
+            name: terraform-cloudflare-oci
             namespace: flux-system
           backendConfig:
             disable: true
@@ -45,6 +45,6 @@ spec:
             name: tfe-cli-config
           varsFrom:
             - kind: Secret
-              name: cloudflare-terraform-vars
+              name: terraform-cloudflare-vars
           writeOutputsToSecret:
-            name: cloudflare-terraform-outputs
+            name: terraform-cloudflare-outputs
