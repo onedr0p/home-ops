@@ -22,9 +22,9 @@ spec:
                 - PersistentVolumeClaim
               selector:
                 matchLabels:
-                  snapshot.home.arpa/enabled: "true"
                   app.kubernetes.io/name: "*"
                   app.kubernetes.io/instance: "*"
+                  snapshot.home.arpa/enabled: "true"
       context:
         - name: appName
           variable:
@@ -35,7 +35,7 @@ spec:
         - name: namespace
           variable:
             jmesPath: "request.object.metadata.namespace"
-        - name: affinity
+        - name: nodeAffinity
           variable:
             value:
               labels:
@@ -127,4 +127,4 @@ spec:
                         requiredDuringSchedulingIgnoredDuringExecution:
                           - topologyKey: kubernetes.io/hostname
                             labelSelector:
-                              matchExpressions: "{{ affinity.labels }}"
+                              matchExpressions: "{{ nodeAffinity.labels }}"
