@@ -17,20 +17,9 @@
 
 ## S3 Configuration
 
-1. Create `~/.mc/config.json`
-    ```json
-    {
-        "version": "10",
-        "aliases": {
-            "minio": {
-                "url": "https://s3.<domain>",
-                "accessKey": "<access-key>",
-                "secretKey": "<secret-key>",
-                "api": "S3v4",
-                "path": "auto"
-            }
-        }
-    }
+1. Create the Minio CLI configuration file (`~/.mc/config.json`)
+    ```sh
+    mc alias set minio https://s3.<domain> <access-key> <secret-key>
     ```
 
 2. Create the outline user and password
@@ -43,7 +32,7 @@
     mc mb minio/outline
     ```
 
-4. Create `outline-user-policy.json`
+4. Create `/tmp/outline-user-policy.json`
     ```json
     {
         "Version": "2012-10-17",
@@ -63,7 +52,7 @@
     }
     ```
 
-5. Create `bucket-policy.json`
+5. Create `/tmp/outline-bucket-policy.json`
     ```json
     {
         "Version": "2012-10-17",
@@ -125,7 +114,7 @@
 
 6. Apply the bucket policies
     ```sh
-    mc admin policy add minio outline-private outline-user-policy.json
+    mc admin policy add minio outline-private /tmp/outline-user-policy.json
     ```
 
 7. Associate private policy with the user
@@ -135,5 +124,5 @@
 
 8. Associate public policy with the bucket
     ```sh
-    mc anonymous set-json bucket-policy.json minio/outline
+    mc anonymous set-json /tmp/outline-bucket-policy.json minio/outline
     ```
