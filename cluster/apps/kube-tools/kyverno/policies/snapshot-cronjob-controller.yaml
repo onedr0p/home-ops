@@ -31,7 +31,9 @@ spec:
             jmesPath: "request.object.metadata.labels.\"app.kubernetes.io/name\""
         - name: claimName
           variable:
-            jmesPath: "{{ regex_replace_all('^([^-]*)', \"{{ request.object.metadata.name }}\", '${1}') }}" # 'config' instead of 'config-home-assistant-0'
+            jmesPath: "request.object.metadata.name"
+            # TODO(kyverno): https://github.com/kyverno/kyverno/pull/4767
+            # jmesPath: "{{ regex_replace_all('^([^-]*)', {{ request.object.metadata.name }}, '${1}') }}" # 'config' instead of 'config-home-assistant-0'
         - name: namespace
           variable:
             jmesPath: "request.object.metadata.namespace"
