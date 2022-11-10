@@ -6,7 +6,7 @@
 
 1. Create base64 encoded Redis configuation
     ```sh
-    echo -n '{"db":15,"sentinels":[{"host":"redis-node-0.redis-headless.default.svc.cluster.local","port":26379},{"host":"redis-node-1.redis-headless.default.svc.cluster.local","port":26379},{"host":"redis-node-2.redis-headless.default.svc.cluster.local","port":26379}],"name":"redis-master"}' \
+    echo -n '{"db":15,"sentinels":[{"host":"redis-node-0.redis-headless.default","port":26379},{"host":"redis-node-1.redis-headless.default","port":26379},{"host":"redis-node-2.redis-headless.default","port":26379}],"name":"redis-master"}' \
         | base64 -w 0
     ```
 
