@@ -37,11 +37,23 @@ spec:
         ports:
           http:
             enabled: false
+          metrics:
+            enabled: true
+            port: 9153
           dns:
             enabled: true
             port: 53
             targetPort: 1053
             protocol: UDP
+    serviceMonitor:
+      main:
+        enabled: true
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
     probes:
       readiness:
         custom: true
