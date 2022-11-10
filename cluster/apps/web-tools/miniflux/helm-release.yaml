@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 0.2.1
+      version: 1.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s-charts
@@ -25,6 +25,9 @@ spec:
     - name: postgres
       namespace: default
   values:
+    # controller:
+    #   replicas: 3
+    #   strategy: RollingUpdate
     image:
       repository: docker.io/miniflux/miniflux
       tag: 2.0.38
@@ -51,6 +54,15 @@ spec:
         ports:
           http:
             port: &port 8080
+    serviceMonitor:
+      main:
+        enabled: true
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
     ingress:
       main:
         enabled: true
