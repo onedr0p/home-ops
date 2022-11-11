@@ -1,45 +1,52 @@
 (common) {
-  # AdGuardHome is bound to port 53 on other interfaces
-  bind 127.0.0.1 ::1
   errors
   log
   reload
   loadbalance
-  cache 300
+  cache
   loop
   local
-  # dnsmasq is only enabled for setting hostnames in the Opnsense UI.
-  # In the dnsmasq settings:
-  # 1) Set 'Listen Port' to 6363
-  # 2) Network Interfaces is set to one local interface
-  # 3) Make sure 'Register DHCP static mappings' is enabled
-  # 4) Adding an 'Host Overrides' also appends to this host file
+  prometheus 192.168.1.1:9153
+}
+
+(localhostz) {
+  # dnsmasq is only enabled for setting hostnames in Opnsense
   hosts /var/etc/dnsmasq-hosts {
-    ttl 600
+    ttl 1
     reload 5s
     fallthrough
   }
-  prometheus 192.168.1.1:9153
+}
+
+(k8s_gatewayz) {
+  forward . 192.168.69.108:53
 }
 
 . {
   import common
-  k8s_gateway {{ SECRET_PUBLIC_DOMAIN }} {
-    resources Ingress
-    ttl 1
-    kubeconfig /usr/local/etc/k8s_gateway/kubeconfig
-    fallthrough
-  }
+  import localhostz
   forward . tls://1.1.1.1 tls://1.0.0.1 {
     tls_servername cloudflare-dns.com
   }
+  health {
+    lameduck 5s
+  }
+}
+
+{{ SECRET_PUBLIC_DOMAIN }} {
+  import common
+  import localhostz
+  import k8s_gatewayz
 }
 
 {{ SECRET_PRIVATE_DOMAIN }} {
   import common
-  k8s_gateway . {
-    resources Ingress
-    ttl 30
-    kubeconfig /usr/local/etc/k8s_gateway/kubeconfig
-  }
+  import localhostz
+  import k8s_gatewayz
+}
+
+{{ SECRET_EMAIL_DOMAIN }} {
+  import common
+  import localhostz
+  import k8s_gatewayz
 }
