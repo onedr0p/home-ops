@@ -1,0 +1,68 @@
+---
+- name: Create AdGuard Home directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - /usr/local/etc/adguard_home
+    - /var/log/adguard_home
+
+- name: Check current AdGuard Home version
+  ansible.builtin.command: "/usr/local/sbin/adguard_home --version"
+  failed_when: false
+  changed_when: false
+  register: adguard_home_version_check
+
+- name: Download Adguard Home
+  notify: Restart adguard_home
+  when: >
+    adguard_home_version_check.stdout is not defined
+    or adguard_home_version not in adguard_home_version_check.stdout
+  block:
+    - name: Download AdGuard Home
+      ansible.builtin.get_url:
+        url: "{{ adguard_home_download_url }}"
+        dest: "/tmp/adguard_home-{{ adguard_home_version }}-freebsd-amd64.tar.gz"
+        mode: 0755
+    - name: Extract AdGuard Home
+      ansible.builtin.shell:
+        cmd: >-
+          mkdir -p /tmp/adguard_home-{{ adguard_home_version }}-freebsd-amd64;
+          tar xvf /tmp/adguard_home-{{ adguard_home_version }}-freebsd-amd64.tar.gz -C /tmp/adguard_home-{{ adguard_home_version }}-freebsd-amd64
+    - name: Move AdGuard Home binary into place
+      ansible.builtin.copy:
+        src: /tmp/adguard_home-{{ adguard_home_version }}-freebsd-amd64/AdGuardHome/AdGuardHome
+        dest: /usr/local/sbin/adguard_home
+        mode: 0755
+        remote_src: true
+
+- name: Create AdGuard Home log rotation config
+  ansible.builtin.template:
+    src: adguard_home-newsyslog.conf.j2
+    dest: /etc/newsyslog.conf.d/adguard_home
+    mode: 0755
+
+- name: Configure Adguard Home
+  notify: Restart adguard_home
+  block:
+    - name: Create AdGuard Home rc.conf script
+      ansible.builtin.template:
+        src: adguard_home-rc.conf.j2
+        dest: /etc/rc.conf.d/adguard_home
+        mode: 0755
+    - name: Create AdGuard Home rc.d script
+      ansible.builtin.template:
+        src: adguard_home-rc.d.j2
+        dest: /usr/local/etc/rc.d/adguard_home
+        mode: 0755
+    - name: Create AdGuard Home action script
+      ansible.builtin.template:
+        src: actions_adguard_home.conf.j2
+        dest: /usr/local/opnsense/service/conf/actions.d/actions_adguard_home.conf
+        mode: 0755
+    - name: Create AdGuard Home start up script
+      ansible.builtin.template:
+        src: 99-adguard_home.j2
+        dest: /usr/local/etc/rc.syshook.d/start/99-adguard_home
+        mode: 0755

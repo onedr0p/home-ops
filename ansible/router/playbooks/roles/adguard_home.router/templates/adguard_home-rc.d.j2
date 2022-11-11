@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# PROVIDE: adguard_home
+# REQUIRE: DAEMON NETWORKING
+# KEYWORD: shutdown
+#
+# Add the following to /etc/rc.conf[.local] to enable this service
+#
+# adguard_home_enable    (bool):        Set to NO by default.
+#                                      Set it to YES to enable adguard_home.
+# adguard_home_config    (str):         Set to /usr/local/etc/adguard_home/config.yml by default.
+#
+# adguard_home_work_dir  (str):         Set to /usr/local/etc/adguard_home/ by default.
+#
+# adguard_home_logfile   (str):         Set to /var/log/adguard_home/adguard_home.log by default.
+#
+
+. /etc/rc.subr
+
+name=adguard_home
+rcvar=adguard_home_enable
+
+load_rc_config ${name}
+
+: ${adguard_home_enable:=NO}
+: ${adguard_home_config:="/usr/local/etc/adguard_home/config.yaml"}
+: ${adguard_home_work_dir:="/usr/local/etc/adguard_home"}
+
+: ${adguard_home_flags:=}
+: ${adguard_home_logfile:="/var/log/adguard_home/adguard_home.log"}
+
+pidfile=/var/run/adguard_home.pid
+command="/usr/local/sbin/adguard_home"
+
+start_cmd="${name}_start"
+
+adguard_home_start()
+{
+    echo -n "Starting ${name}."
+    /usr/sbin/daemon -p ${pidfile} -m 3 -H -f -o ${adguard_home_logfile} \
+        ${command} \
+            --config ${adguard_home_config} \
+            --work-dir ${adguard_home_work_dir} \
+            --port 3010 \
+            --verbose \
+            ${adguard_home_flags}
+}
+
+run_rc_command "$1"
