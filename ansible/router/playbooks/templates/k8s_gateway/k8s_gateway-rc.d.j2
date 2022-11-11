@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# PROVIDE: k8s_gateway
+# REQUIRE: DAEMON NETWORKING
+# KEYWORD: shutdown
+#
+# Add the following to /etc/rc.conf[.local] to enable this service
+#
+# k8s_gateway_enable  (bool):        Set to NO by default.
+#                                Set it to YES to enable k8s_gateway.
+# k8s_gateway_config  (str):         Set to /usr/local/etc/k8s_gateway/Corefile by default.
+#
+# k8s_gateway_logfile (str):         Set to /var/log/k8s_gateway/k8s_gateway.log by default.
+#
+
+. /etc/rc.subr
+
+name=k8s_gateway
+rcvar=k8s_gateway_enable
+
+load_rc_config ${name}
+
+: ${k8s_gateway_enable:=NO}
+: ${k8s_gateway_config:="/usr/local/etc/k8s_gateway/Corefile"}
+: ${k8s_gateway_flags:=}
+: ${k8s_gateway_logfile:="/var/log/k8s_gateway/k8s_gateway.log"}
+
+pidfile=/var/run/k8s_gateway.pid
+command="/usr/local/sbin/k8s_gateway"
+
+start_cmd="${name}_start"
+
+k8s_gateway_start()
+{
+    echo -n "Starting ${name}."
+    /usr/sbin/daemon -p ${pidfile} -H -m 3 -f -o ${k8s_gateway_logfile} \
+        ${command} \
+            -conf ${k8s_gateway_config} \
+            ${k8s_gateway_flags}
+}
+
+run_rc_command "$1"
