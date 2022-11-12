@@ -88,7 +88,6 @@ At a high level the way this operates is that:
 - Everyday the `CronJob` creates a `Job` and uses Kopia to connect to a Kopia repository on my NAS over NFS and then snapshots the contents of the app data mount into the Kopia repository
 - The snapshots made by Kopia are incremental which makes the `Job` run very quick.
 - The app data mount is frozen during backup to prevent writes and unfrozen when the snapshot is complete.
-- The `PersistentVolumeClaim` resources must contain the labels `app.kubernetes.io/name`, `app.kubernetes.io/instance`, and `snapshot.home.arpa/enabled`
 - Recovery is a manual process. By using a different `Job` a temporary pod is created and the fresh PVC and existing NFS mount are attached to it. The data is then copied over to the fresh PVC and the temporary pod is deleted.
 
 🔸 _[Velero](https://github.com/vmware-tanzu/velero), [Benji](https://github.com/elemental-lf/benji), [Gemini](https://github.com/FairwindsOps/gemini), [Kasten K10 by Veeam](https://www.kasten.io/product/), [Stash by AppsCode](https://stash.run/) are some alternatives but have limitations._
