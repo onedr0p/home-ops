@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app overseerr
+  name: homarr
   namespace: default
 spec:
   interval: 15m
@@ -28,11 +28,10 @@ spec:
     controller:
       type: statefulset
     image:
-      repository: ghcr.io/sct/overseerr
-      tag: 1.30.1
+      repository: ghcr.io/ajnart/homarr
+      tag: 0.10.5
     env:
       TZ: "${TIMEZONE}"
-      LOG_LEVEL: "info"
       PORT: &port 80
     service:
       main:
@@ -43,10 +42,8 @@ spec:
       main:
         enabled: true
         ingressClassName: "nginx"
-        annotations:
-          external-dns.home.arpa/enabled: "true"
         hosts:
-          - host: &host "requests.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "home.${SECRET_PUBLIC_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
@@ -60,7 +57,7 @@ spec:
       fsGroupChangePolicy: "OnRootMismatch"
     volumeClaimTemplates:
       - name: config
-        mountPath: /app/config
+        mountPath: /app/data/configs
         accessMode: ReadWriteOnce
         size: 1Gi
         storageClass: ceph-block
@@ -70,7 +67,7 @@ spec:
       cache:
         enabled: true
         type: emptyDir
-        mountPath: /app/.next/cache
+        mountPath: /app/public/icons
     resources:
       requests:
         cpu: 10m
