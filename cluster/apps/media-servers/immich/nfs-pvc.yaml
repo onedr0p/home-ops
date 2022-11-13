@@ -1,0 +1,33 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-nfs
+spec:
+  storageClassName: immich-nfs
+  capacity:
+    storage: 1Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+    path: /eros/Apps/Immich
+  mountOptions:
+    - nfsvers=4.2
+    - nconnect=8
+    - hard
+    - noatime
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: immich-nfs
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: immich-nfs
+  resources:
+    requests:
+      storage: 1Mi
