@@ -1,0 +1,84 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app k8s-gateway
+  namespace: kube-system
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.1.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    controller:
+      replicas: 3
+      strategy: RollingUpdate
+    image:
+      repository: quay.io/oriedge/k8s_gateway
+      tag: v0.3.2
+    args: ["-conf", "/etc/coredns/Corefile"]
+    service:
+      main:
+        type: LoadBalancer
+        externalIPs: ["${SVC_K8S_GATEWAY_ADDR}"]
+        externalTrafficPolicy: Local
+        ports:
+          http:
+            enabled: false
+          metrics:
+            enabled: true
+            port: 9153
+          dns:
+            enabled: true
+            port: 53
+            targetPort: 1053
+            protocol: UDP
+    serviceMonitor:
+      main:
+        enabled: true
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
+    probes:
+      readiness:
+        custom: true
+        spec:
+          httpGet:
+            path: /ready
+            port: 8181
+      liveness:
+        custom: true
+        spec:
+          httpGet:
+            path: /health
+            port: 8080
+      startup:
+        enabled: false
+    serviceAccount:
+      create: true
+      name: *app
+    persistence:
+      config-file:
+        enabled: true
+        type: configMap
+        name: *app
+        subPath: Corefile
+        mountPath: /etc/coredns/Corefile
+        readOnly: true
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: *app

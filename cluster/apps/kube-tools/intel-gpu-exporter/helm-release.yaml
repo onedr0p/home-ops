@@ -2,8 +2,8 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app intel-gpu-exporter
-  namespace: default
+  name: intel-gpu-exporter
+  namespace: kube-system
 spec:
   interval: 15m
   chart:
@@ -23,7 +23,7 @@ spec:
       retries: 5
   dependsOn:
     - name: intel-gpu-plugin
-      namespace: default
+      namespace: kube-system
   values:
     controller:
       type: daemonset
@@ -56,8 +56,7 @@ spec:
             - matchExpressions:
                 - key: feature.node.kubernetes.io/custom-intel-gpu
                   operator: In
-                  values:
-                    - "true"
+                  values: ["true"]
     resources:
       requests:
         gpu.intel.com/i915: 1

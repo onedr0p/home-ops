@@ -2,8 +2,8 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app onepassword-connect
-  namespace: default
+  name: onepassword-connect
+  namespace: kube-system
 spec:
   values:
     additionalContainers:
@@ -14,7 +14,7 @@ spec:
           - name: OP_SESSION
             valueFrom:
               secretKeyRef:
-                name: *app
+                name: onepassword-connect
                 key: 1password-credentials.json
           - name: OP_HTTP_PORT
             value: &port 8081

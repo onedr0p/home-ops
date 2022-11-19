@@ -29,3 +29,11 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
+        optional: false
+      - kind: Secret
+        name: cluster-secrets
+        optional: false

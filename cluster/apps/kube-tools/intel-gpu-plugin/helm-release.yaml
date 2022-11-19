@@ -2,8 +2,8 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app intel-gpu-plugin
-  namespace: default
+  name: intel-gpu-plugin
+  namespace: kube-system
 spec:
   interval: 15m
   chart:
@@ -23,7 +23,7 @@ spec:
       retries: 5
   dependsOn:
     - name: node-feature-discovery
-      namespace: default
+      namespace: kube-system
   values:
     controller:
       type: daemonset

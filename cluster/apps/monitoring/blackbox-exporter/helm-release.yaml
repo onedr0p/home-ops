@@ -1,0 +1,113 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app blackbox-exporter
+  namespace: monitoring
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: prometheus-blackbox-exporter
+      version: 7.1.3
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    fullnameOverride: *app
+    image:
+      repository: quay.io/prometheus/blackbox-exporter
+    pspEnabled: false
+    ingress:
+      enabled: true
+      className: nginx
+      hosts:
+        - host: &host "blackbox.${SECRET_PUBLIC_DOMAIN}"
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - *host
+    securityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        add: ["NET_RAW"]
+    config:
+      modules:
+        http_2xx:
+          prober: http
+          timeout: 5s
+          http:
+            valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+            follow_redirects: true
+            preferred_ip_protocol: "ip4"
+        icmp:
+          prober: icmp
+          timeout: 30s
+          icmp:
+            preferred_ip_protocol: "ip4"
+    serviceMonitor:
+      enabled: true
+      defaults:
+        labels:
+          release: prometheus
+        interval: 2m
+        scrapeTimeout: 30s
+      targets:
+        - name: opnsense-icmp
+          module: icmp
+          url: opnsense
+        - name: open-garage-icmp
+          module: icmp
+          url: open-garage
+        - name: valetudo-icmp
+          module: icmp
+          url: valetudo
+        - name: zigbee-controller-icmp
+          module: icmp
+          url: zigbee-controller
+        - name: expanse-icmp
+          module: icmp
+          url: expanse
+        - name: hdhomerun-icmp
+          module: icmp
+          url: hdhomerun
+        - name: hue-bridge-icmp
+          module: icmp
+          url: hue-bridge
+        - name: apc-ups-0-icmp
+          module: icmp
+          url: apc-ups-0
+        - name: unifi-icmp
+          module: icmp
+          url: unifi
+        - name: pikvm-icmp
+          module: icmp
+          url: pikvm
+        - name: dell-idrac-0-icmp
+          module: icmp
+          url: dell-idrac-0
+    prometheusRule:
+      enabled: true
+      additionalLabels:
+        app: prometheus-operator
+        release: prometheus
+      rules:
+        - alert: BlackboxProbeFailed
+          expr: probe_success == 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            description: |-
+              The host {{"{{ $labels.target }}"}} is currently unreachable
