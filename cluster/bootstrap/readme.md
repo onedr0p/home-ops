@@ -6,7 +6,7 @@
 kubectl apply --kustomize ./cluster/bootstrap
 ```
 
-## 2. Apply the Age, GitHub and cluster variable secrets
+## 2. Apply Cluster Secrets and ConfigMaps needed before bootstrapping this Git Repository
 
 _These cannot be applied with `kubectl` in the regular fashion due to be encrypted with sops_
 
