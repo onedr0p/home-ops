@@ -3,11 +3,17 @@ version: "3.8"
 
 services:
   smartctl-exporter:
-    image: docker.io/pnnlmiscscripts/smartctl-exporter:0.7-2
+    image: quay.io/prometheuscommunity/smartctl-exporter:v0.9.1
     container_name: smartctl-exporter
     restart: unless-stopped
-    network_mode: host
+    user: root
     privileged: true
+    command:
+      - --smartctl.path=/usr/sbin/smartctl
+      - --smartctl.interval=120s
+      - --web.listen-address=0.0.0.0:9633
+      - --web.telemetry-path=/metrics
     volumes:
-      - "{{ docker_base_dir }}/smartctl-exporter/config/smartctl-exporter.yaml:/etc/smartctl_exporter.yaml:ro"
-      - /dev:/dev:ro,rslave
+      - /dev:/hostdev
+    ports:
+      - 9633:9633
