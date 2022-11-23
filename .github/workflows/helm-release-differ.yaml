@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # renovate: tag=v3.1.0
 
       - name: Filter Helm Releases
         uses: dorny/paths-filter@v2
@@ -41,23 +41,23 @@ jobs:
         file: ${{ fromJSON(needs.detect-file-changes.outputs.yaml_files) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # renovate: tag=v3.1.0
 
       - name: Generate Token
-        uses: tibdex/github-app-token@v1
+        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # renovate: tag=v1.7.0
         id: generate-token
         with:
           app_id: ${{ secrets.BOT_APP_ID }}
           private_key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
 
       - name: Checkout default branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # renovate: tag=v3.1.0
         with:
           ref: "${{ env.DEFAULT_BRANCH }}"
           path: default
 
       - name: Install Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@f382f75448129b3be48f8121b9857be18d815a82 # renovate: tag=v3.4
         with:
           version: latest
 
@@ -72,7 +72,7 @@ jobs:
           echo "::set-output name=diff::$(echo ${diff})"
 
       - name: Find Comment
-        uses: peter-evans/find-comment@v2
+        uses: peter-evans/find-comment@b657a70ff16d17651703a84bee1cb9ad9d2be2ea # renovate: tag=v2.0.1
         id: find-comment
         with:
           issue-number: "${{ github.event.pull_request.number }}"
@@ -80,7 +80,7 @@ jobs:
           body-includes: "${{ matrix.file }}"
 
       - name: Create or update comment
-        uses: peter-evans/create-or-update-comment@v2
+        uses: peter-evans/create-or-update-comment@5adcb0bb0f9fb3f95ef05400558bdb3f329ee808 # renovate: tag=v2.1.0
         with:
           token: "${{ steps.generate-token.outputs.token }}"
           comment-id: "${{ steps.find-comment.outputs.comment-id }}"
