@@ -75,6 +75,15 @@ identity_providers:
         scopes: ["openid", "profile", "email", "offline_access"]
         redirect_uris: ["https://docs.${SECRET_PUBLIC_DOMAIN}/auth/oidc.callback"]
         userinfo_signing_algorithm: none
+      - id: weave-gitops
+        description: Weave GitOps
+        secret: "${SECRET_WEAVEGITOPS_OAUTH_CLIENT_SECRET}"
+        public: false
+        authorization_policy: two_factor
+        pre_configured_consent_duration: 1y
+        scopes: ["openid", "profile", "email"]
+        redirect_uris: ["https://gitops.${SECRET_PUBLIC_DOMAIN}/oauth2/callback"]
+        userinfo_signing_algorithm: none
       # - id: minio
       #   description: Minio
       #   secret: "${SECRET_MINIO_OAUTH_CLIENT_SECRET}"
