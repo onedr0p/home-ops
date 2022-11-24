@@ -44,6 +44,20 @@ spec:
         ports:
           http:
             port: *port
+    probes:
+      liveness: &probes
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /api
+            port: *port
+            httpHeaders:
+              - name: X-Api-Key
+                value: "$(SONARR__API_KEY)"
+      readiness: *probes
+      startup:
+        enabled: false
     ingress:
       main:
         enabled: true
