@@ -1,6 +1,6 @@
 terraform {
   cloud {
-    hostname = "app.terraform.io"
+    hostname     = "app.terraform.io"
     organization = "onedr0p"
     workspaces {
       name = "arpa-home"
@@ -25,7 +25,7 @@ provider "minio" {
 }
 
 module "minio" {
-  source           = "../modules/minio"
+  source = "../modules/minio"
   providers = {
     minio = minio.cluster
   }

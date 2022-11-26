@@ -26,8 +26,8 @@ data "minio_iam_policy_document" "outline_user_policy_document" {
 }
 
 resource "minio_iam_policy" "outline_iam_policy" {
-  name      = minio_s3_bucket.outline_bucket.bucket
-  policy    = data.minio_iam_policy_document.outline_user_policy_document.json
+  name   = minio_s3_bucket.outline_bucket.bucket
+  policy = data.minio_iam_policy_document.outline_user_policy_document.json
 }
 
 resource "minio_iam_user_policy_attachment" "outline_user_policy_attachment" {
@@ -37,9 +37,9 @@ resource "minio_iam_user_policy_attachment" "outline_user_policy_attachment" {
 
 data "minio_iam_policy_document" "outline_bucket_policy_document" {
   statement {
-    sid = "1"
-    actions = ["s3:GetBucketLocation"]
-    effect = "Allow"
+    sid       = "1"
+    actions   = ["s3:GetBucketLocation"]
+    effect    = "Allow"
     principal = "*"
     resources = ["arn:aws:s3:::${minio_s3_bucket.outline_bucket.bucket}"]
   }
@@ -54,14 +54,14 @@ data "minio_iam_policy_document" "outline_bucket_policy_document" {
         "public",
       ]
     }
-    effect = "Allow"
+    effect    = "Allow"
     principal = "*"
     resources = ["arn:aws:s3:::${minio_s3_bucket.outline_bucket.bucket}"]
   }
 
   statement {
-    actions = ["s3:GetObject"]
-    effect = "Allow"
+    actions   = ["s3:GetObject"]
+    effect    = "Allow"
     principal = "*"
     resources = [
       "arn:aws:s3:::${minio_s3_bucket.outline_bucket.bucket}/public*",
