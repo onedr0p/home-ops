@@ -1,0 +1,23 @@
+---
+apiVersion: infra.contrib.fluxcd.io/v1alpha1
+kind: Terraform
+metadata:
+  name: minio
+  namespace: flux-system
+spec:
+  approvePlan: auto
+  interval: 12h
+  path: ./terraform/minio
+  sourceRef:
+    kind: OCIRepository
+    name: terraform-minio-oci
+    namespace: flux-system
+  backendConfig:
+    disable: true
+  cliConfigSecretRef:
+    name: tfe-cli-config
+  varsFrom:
+    - kind: Secret
+      name: minio-vars
+  writeOutputsToSecret:
+    name: minio-outputs

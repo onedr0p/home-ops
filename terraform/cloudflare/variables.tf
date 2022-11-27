@@ -1,32 +1,22 @@
-variable "cloudflare_account_id" {
-    type = string
-    description = "Cloudflare Account ID"
-}
+# Provider
 variable "cloudflare_email" {
-    type = string
-    description = "Cloudflare Email Address"
+  description = "cloudflare email address"
+  type        = string
 }
 variable "cloudflare_apikey" {
-    type = string
-    description = "Cloudflare Account API Key"
+  description = "cloudflare api key (not token)"
+  type        = string
 }
-variable "cloudflare_domain_io" {
-    type = string
-    description = "My .io domain"
+# Domains
+variable "cloudflare_domain_public_name" {
+  description = "cloudflare public domain name"
+  type        = string
 }
-variable "cloudflare_domain_ac" {
-    type = string
-    description = "My .ac domain"
+variable "cloudflare_domain_public_unproxied_cname" {
+  description = "cloudflare public domain unproxied cname"
+  type        = string
 }
-variable "cloudflare_domain_casa" {
-    type = string
-    description = "My .casa domain"
-}
-variable "mailgun_cert" {
-    type = string
-    description = "Mailgun Certificate"
-}
-variable "cloudflare_public_cname_domain_io" {
-    type = string
-    description = "Public CNAME that do not proxy thru Cloudflare"
+variable "cloudflare_domain_email_name" {
+  description = "cloudflare email domain name"
+  type        = string
 }
