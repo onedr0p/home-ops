@@ -1,17 +1,15 @@
-# /etc/msmtprc
 defaults
-auth on
-tls  on
+auth off
+tls  off
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
 logfile /var/log/msmtp
 
-account  {{ smtp_account_name }}
-host     {{ smtp_address }}
-port     {{ smtp_port }}
-from     {{ smtp_from }}
-user     {{ smtp_username }}
-password {{ smtp_password }}
+account        smtp-relay
+host           192.168.69.102
+port           2525
+from           expanse@{{ SECRET_EMAIL_DOMAIN }}
+tls_starttls   off
 
-account default: {{ smtp_account_name }}
+account default: smtp-relay
 
 aliases /etc/aliases
