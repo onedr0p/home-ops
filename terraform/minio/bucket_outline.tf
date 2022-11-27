@@ -5,6 +5,7 @@ resource "minio_s3_bucket" "outline_bucket" {
 
 resource "minio_iam_user" "outline_user" {
   name          = var.outline_bucket_user
+  secret        = var.outline_bucket_secret
   force_destroy = true
 }
 

@@ -3,7 +3,7 @@ terraform {
     hostname     = "app.terraform.io"
     organization = "onedr0p"
     workspaces {
-      name = "arpa-home"
+      name = "arpa-home-minio"
     }
   }
   required_providers {
@@ -16,17 +16,9 @@ terraform {
 }
 
 provider "minio" {
-  alias          = "cluster"
   minio_server   = var.minio_server
   minio_region   = var.minio_region
   minio_user     = var.minio_access_key
   minio_password = var.minio_secret_key
   minio_ssl      = true
-}
-
-module "minio" {
-  source = "../modules/minio"
-  providers = {
-    minio = minio.cluster
-  }
 }
