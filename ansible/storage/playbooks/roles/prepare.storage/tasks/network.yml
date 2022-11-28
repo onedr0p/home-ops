@@ -1,12 +1,4 @@
 ---
-- name: Install network tools
-  ansible.builtin.apt:
-    name: "{{ item }}"
-    update_cache: true
-  loop:
-    - iputils-ping
-    - net-tools
-
 - name: Set hostname to inventory hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
@@ -21,10 +13,3 @@
     block: |
       127.0.0.1 localhost
       127.0.1.1 {{ inventory_hostname }}
-
-      # The following lines are desirable for IPv6 capable hosts
-      ::1 ip6-localhost ip6-loopback
-      fe00::0 ip6-localnet
-      ff00::0 ip6-mcastprefix
-      ff02::1 ip6-allnodes
-      ff02::2 ip6-allrouters

@@ -1,15 +1,12 @@
 ---
-#
-# TODO(ansible): Create a new user instead of modifying the ansible_user
-# Ansible cannot change the UID of the user running ansible
-#
-- name: Modify ansible_user group
+
+- name: Create group
   ansible.builtin.group:
     name: "{{ ansible_user }}"
     state: present
     gid: 568
 
-- name: Modify ansible_user user
+- name: Create user
   ansible.builtin.user:
     name: "{{ ansible_user }}"
     shell: /usr/bin/fish
@@ -17,12 +14,6 @@
     group: "{{ ansible_user }}"
     groups: users
     append: true
-
-- name: Update file and folder permissions for ansible_user
-  ansible.builtin.file:
-    path: "/home/{{ ansible_user }}"
-    owner: 568
-    group: 568
 
 - name: Add user to sudoers
   ansible.builtin.copy:
@@ -34,12 +25,7 @@
   ansible.posix.authorized_key:
     user: "{{ ansible_user }}"
     key: "{{ item }}"
-  loop: "{{ os_ssh_authorized_keys | default([]) }}"
-
-- name: Check if hushlogin exists
-  ansible.builtin.stat:
-    path: "/home/{{ ansible_user }}/.hushlogin"
-  register: hushlogin_status
+  loop: "{{ ssh_authorized_keys | default([]) }}"
 
 - name: Silence the login prompt
   ansible.builtin.file:
@@ -47,5 +33,3 @@
     state: touch
     owner: "{{ ansible_user }}"
     mode: "0775"
-  when:
-    - not hushlogin_status.stat.exists

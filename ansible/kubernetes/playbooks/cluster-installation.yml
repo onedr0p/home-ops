@@ -48,7 +48,7 @@
       run_once: true
       ansible.builtin.fetch:
         src: "/etc/rancher/k3s/k3s.yaml"
-        dest: "{{ playbook_dir }}/../../../cluster/local/kubeconfig"
+        dest: "{{ playbook_dir }}/../../../ansible/kubernetes/kubeconfig"
         flat: true
       when:
         - k3s_control_node is defined
@@ -59,7 +59,7 @@
       become: false
       run_once: true
       ansible.builtin.replace:
-        path: "{{ playbook_dir }}/../../../cluster/local/kubeconfig"
+        path: "{{ playbook_dir }}/../../../ansible/kubernetes/kubeconfig"
         regexp: "https://127.0.0.1:6443"
         replace: "https://{{ k3s_registration_address }}:6443"
 
