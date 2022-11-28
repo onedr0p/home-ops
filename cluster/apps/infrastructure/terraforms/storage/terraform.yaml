@@ -1,0 +1,23 @@
+---
+apiVersion: infra.contrib.fluxcd.io/v1alpha1
+kind: Terraform
+metadata:
+  name: storage
+  namespace: flux-system
+spec:
+  approvePlan: auto
+  interval: 12h
+  path: ./terraform/storage
+  sourceRef:
+    kind: OCIRepository
+    name: terraform-storage-oci
+    namespace: flux-system
+  backendConfig:
+    disable: true
+  cliConfigSecretRef:
+    name: tfe-cli-config
+  varsFrom:
+    - kind: Secret
+      name: storage-vars
+  writeOutputsToSecret:
+    name: storage-outputs
