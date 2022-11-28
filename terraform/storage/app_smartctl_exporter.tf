@@ -21,7 +21,7 @@ resource "kubernetes_daemonset" "smartctl_exporter" {
       spec {
         container {
           name  = "main"
-          image = "quay.io/prometheuscommunity/smartctl-exporter:v0.8.0"
+          image = "quay.io/prometheuscommunity/smartctl-exporter:v0.9.1"
           args = [
             "--smartctl.path=/usr/sbin/smartctl",
             "--smartctl.interval=120s",
