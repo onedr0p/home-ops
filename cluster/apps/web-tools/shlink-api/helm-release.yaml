@@ -30,6 +30,8 @@ spec:
     controller:
       replicas: 3
       strategy: RollingUpdate
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/shlinkio/shlink
       tag: 3.3.2
@@ -48,7 +50,7 @@ spec:
       TIMEZONE: "${TIMEZONE}"
     envFrom:
       - secretRef:
-          name: *app
+          name: shlink-api-secret
     service:
       main:
         ports:
@@ -68,8 +70,6 @@ spec:
         tls:
           - hosts:
               - *host
-    podAnnotations:
-      secret.reloader.stakater.com/reload: *app
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname

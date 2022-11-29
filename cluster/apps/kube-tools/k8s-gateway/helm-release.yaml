@@ -25,6 +25,8 @@ spec:
     controller:
       replicas: 3
       strategy: RollingUpdate
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
       repository: quay.io/oriedge/k8s_gateway
       tag: v0.3.2
@@ -76,9 +78,14 @@ spec:
       config-file:
         enabled: true
         type: configMap
-        name: *app
+        name: k8s-gateway-configmap
         subPath: Corefile
         mountPath: /etc/coredns/Corefile
         readOnly: true
-    podAnnotations:
-      configmap.reloader.stakater.com/reload: *app
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app

@@ -25,6 +25,8 @@ spec:
     controller:
       replicas: 3
       strategy: RollingUpdate
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/shlinkio/shlink-web-client
       tag: 3.7.3
@@ -32,7 +34,7 @@ spec:
       SHLINK_SERVER_URL: "https://ln.${SECRET_PUBLIC_DOMAIN}"
     envFrom:
       - secretRef:
-          name: *app
+          name: shlink-web-secret
     service:
       main:
         ports:
