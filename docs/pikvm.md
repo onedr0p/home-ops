@@ -1,8 +1,8 @@
-# PiKVM
+# PiKVM Configuration
 
 ## Update PiKVM
 
-```bash
+```sh
 rw; pacman -Syyu
 reboot
 ```
@@ -106,26 +106,26 @@ reboot
     ```
 
 2. Restart kvmd
-    ```bash
+    ```sh
     systemctl restart kvmd.service
     ```
 
 ## Load Custom EDID
 
 1. Add or replace the file `/etc/kvmd/tc358743-edid.hex`
-    ```bash
+    ```text
     00FFFFFFFFFFFF0052628888008888881C150103800000780AEE91A3544C99260F505425400001000100010001000100010001010101D32C80A070381A403020350040442100001E7E1D00A0500019403020370080001000001E000000FC0050492D4B564D20566964656F0A000000FD00323D0F2E0F000000000000000001C402030400DE0D20A03058122030203400F0B400000018E01500A04000163030203400000000000018B41400A050D011203020350080D810000018AB22A0A050841A3030203600B00E1100001800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045
     ```
 
 2. Restart kvmd
-    ```bash
+    ```sh
     systemctl restart kvmd.service
     ```
 
 ## Disable SSL
 
 1. Add or replace the file `/etc/kvmd/nginx/nginx.conf`
-    ```bash
+    ```nginx
     worker_processes 4;
 
     error_log stderr;
@@ -174,7 +174,7 @@ reboot
     ```
 
 2. Restart kvmd-nginx
-    ```bash
+    ```sh
     systemctl restart kvmd-nginx.service
     ```
 
@@ -182,7 +182,7 @@ reboot
 
 ### Install node-exporter
 
-```bash
+```sh
 pacman -S prometheus-node-exporter
 systemctl enable --now prometheus-node-exporter
 ```
@@ -190,13 +190,13 @@ systemctl enable --now prometheus-node-exporter
 ### Install promtail
 
 1. Install promtail
-    ```bash
+    ```sh
     pacman -S promtail
     systemctl enable promtail
     ```
 
 2. Override the promtail systemd service
-    ```bash
+    ```sh
     mkdir -p /etc/systemd/system/promtail.service.d/
     cat >/etc/systemd/system/promtail.service.d/override.conf <<EOL
     [Service]
@@ -233,7 +233,7 @@ systemctl enable --now prometheus-node-exporter
     ```
 
 4. Start promtail
-    ```bash
+    ```sh
     systemctl daemon-reload
     systemctl start promtail.service
     ```
