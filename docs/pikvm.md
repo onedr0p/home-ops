@@ -7,6 +7,13 @@ rw; pacman -Syyu
 reboot
 ```
 
+## Install node-exporter
+
+```bash
+pacman -S prometheus-node-exporter
+systemctl enable --now prometheus-node-exporter
+```
+
 ## Load TESmart KVM
 
 1. Add or replace file `/etc/kvmd/override.yaml`
