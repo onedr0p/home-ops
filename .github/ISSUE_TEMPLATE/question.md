@@ -1,6 +1,6 @@
 ---
 name: Question
-about: Ask a question to the maintainer
+about: Ask a question
 title: ""
 labels: kind/question
 assignees: ""
