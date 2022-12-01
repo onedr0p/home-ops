@@ -7,16 +7,9 @@ rw; pacman -Syyu
 reboot
 ```
 
-## Install node-exporter
-
-```bash
-pacman -S prometheus-node-exporter
-systemctl enable --now prometheus-node-exporter
-```
-
 ## Load TESmart KVM
 
-1. Add or replace file `/etc/kvmd/override.yaml`
+1. Add or replace the file `/etc/kvmd/override.yaml`
     ```yaml
     kvmd:
         gpio:
@@ -119,7 +112,7 @@ systemctl enable --now prometheus-node-exporter
 
 ## Load Custom EDID
 
-1. Add or replace file `/etc/kvmd/tc358743-edid.hex`
+1. Add or replace the file `/etc/kvmd/tc358743-edid.hex`
     ```bash
     00FFFFFFFFFFFF0052628888008888881C150103800000780AEE91A3544C99260F505425400001000100010001000100010001010101D32C80A070381A403020350040442100001E7E1D00A0500019403020370080001000001E000000FC0050492D4B564D20566964656F0A000000FD00323D0F2E0F000000000000000001C402030400DE0D20A03058122030203400F0B400000018E01500A04000163030203400000000000018B41400A050D011203020350080D810000018AB22A0A050841A3030203600B00E1100001800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045
     ```
@@ -131,7 +124,7 @@ systemctl enable --now prometheus-node-exporter
 
 ## Disable SSL
 
-1. Add or replace file `/etc/kvmd/nginx/nginx.conf`
+1. Add or replace the file `/etc/kvmd/nginx/nginx.conf`
     ```bash
     worker_processes 4;
 
@@ -183,4 +176,64 @@ systemctl enable --now prometheus-node-exporter
 2. Restart kvmd-nginx
     ```bash
     systemctl restart kvmd-nginx.service
+    ```
+
+## Monitoring
+
+### Install node-exporter
+
+```bash
+pacman -S prometheus-node-exporter
+systemctl enable --now prometheus-node-exporter
+```
+
+### Install promtail
+
+1. Install promtail
+    ```bash
+    pacman -S promtail
+    systemctl enable promtail
+    ```
+
+2. Override the promtail systemd service
+    ```bash
+    mkdir -p /etc/systemd/system/promtail.service.d/
+    cat >/etc/systemd/system/promtail.service.d/override.conf <<EOL
+    [Service]
+    Type=simple
+    ExecStart=
+    ExecStart=/usr/bin/promtail -config.file /etc/loki/promtail.yaml
+    EOL
+    ```
+
+3. Add or replace the file `/etc/loki/promtail.yaml`
+    ```yaml
+    server:
+      log_level: info
+      disable: true
+
+    client:
+      url: "https://loki.$domain/loki/api/v1/push"
+
+    positions:
+      filename: /tmp/positions.yaml
+
+    scrape_configs:
+      - job_name: journal
+        journal:
+          path: /run/log/journal
+          max_age: 12h
+          labels:
+            job: systemd-journal
+        relabel_configs:
+          - source_labels: ["__journal__systemd_unit"]
+            target_label: unit
+          - source_labels: ["__journal__hostname"]
+            target_label: hostname
+    ```
+
+4. Start promtail
+    ```bash
+    systemctl daemon-reload
+    systemctl start promtail.service
     ```
