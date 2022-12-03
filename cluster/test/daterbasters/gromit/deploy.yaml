@@ -2,35 +2,33 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: gromit-app
-  namespace: daterbasters
+  name: daterbasters-gromit-app
+  namespace: flux-system
   labels:
-    sops.home.arpa/enabled: "true"
+    substitution.flux.home.arpa/enabled: "true"
 spec:
   interval: 30m
   wait: true
   sourceRef:
     kind: GitRepository
     name: flux-cluster
-    namespace: flux-system
   path: ./cluster/test/daterbasters/gromit/app
   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: gromit-resource
-  namespace: daterbasters
+  name: daterbasters-gromit-resource
+  namespace: flux-system
   labels:
-    sops.home.arpa/enabled: "true"
+    substitution.flux.home.arpa/enabled: "true"
 spec:
   interval: 30m
   wait: true
   sourceRef:
     kind: GitRepository
     name: flux-cluster
-    namespace: flux-system
   dependsOn:
-    - name: gromit-app
+    - name: daterbasters-gromit-app
   path: ./cluster/test/daterbasters/gromit/resource
   prune: true
