@@ -1,0 +1,32 @@
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: kyverno-app
+#   namespace: kyverno
+# spec:
+#   interval: 30m
+#   wait: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: flux-cluster
+#     namespace: flux-system
+#   path: ./cluster/test/kyverno/app
+#   prune: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: kyverno-policies
+  namespace: kyverno
+spec:
+  interval: 30m
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-cluster
+    namespace: flux-system
+  # dependsOn:
+  #   - name: kyverno-app
+  path: ./cluster/test/kyverno/policies
+  prune: true
