@@ -2,15 +2,17 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: automason-app-bunny
+  name: automason-app-robot-bunny
   namespace: flux-system
   labels:
     substitution.flux.home.arpa/enabled: "true"
 spec:
   interval: 10m
-  path: ./cluster/test/automason/bunny/app
+  path: ./cluster/test/automason/robot-bunny/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-cluster
+  dependsOn:
+    - name: automason-app-bunny
   wait: true

@@ -2,7 +2,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: nomitoring-wallace-app
+  name: nomitoring-app-wallace
   namespace: flux-system
   labels:
     substitution.flux.home.arpa/enabled: "true"
@@ -13,14 +13,14 @@ spec:
     kind: GitRepository
     name: flux-cluster
   dependsOn:
-    - name: daterbasters-gromit-app
+    - name: daterbasters-app-gromit
   path: ./cluster/test/nomitoring/wallace/app
   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: nomitoring-wallace-resource
+  name: nomitoring-resource-wallace
   namespace: flux-system
   labels:
     substitution.flux.home.arpa/enabled: "true"
@@ -31,6 +31,6 @@ spec:
     kind: GitRepository
     name: flux-cluster
   dependsOn:
-    - name: nomitoring-wallace-app
+    - name: nomitoring-app-wallace
   path: ./cluster/test/nomitoring/wallace/resource
   prune: true
