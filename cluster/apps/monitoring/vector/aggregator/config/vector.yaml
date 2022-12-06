@@ -4,85 +4,38 @@ api:
   enabled: true
   address: 0.0.0.0:8686
 
-sinks:
-  loki_journal:
-    type: loki
-    batch:
-      max_bytes: 2049000
-    encoding:
-      codec: json
-    endpoint: http://loki-gateway.monitoring.svc.cluster.local:80
-    inputs:
-      - journal_logs
-    labels:
-      hostname: '{{ host }}'
-    out_of_order_action: accept
-    remove_label_fields: true
-    remove_timestamp: true
-  loki_kubernetes:
-    type: loki
-    batch:
-      max_bytes: 2049000
-    encoding:
-      codec: json
-    endpoint: http://loki-gateway.monitoring.svc.cluster.local:80
-    inputs:
-      - kubernetes_logs_remap
-    labels:
-      app: '{{ custom_app_name }}'
-      namespace: '{{ kubernetes.pod_namespace }}'
-      node: '{{ kubernetes.pod_node_name }}'
-    out_of_order_action: accept
-    remove_label_fields: true
-    remove_timestamp: true
-
-  loki_opnsense_filterlog:
-    type: loki
-    batch:
-      max_bytes: 2049000
-    encoding:
-      codec: json
-    endpoint: http://loki-gateway.monitoring.svc.cluster.local:80
-    inputs:
-      - opnsense_filterlog_route._unmatched
-      - opnsense_filterlog_geoip
-    labels:
-      hostname: opnsense
-    out_of_order_action: accept
+enrichment_tables:
+  geoip:
+    type: geoip
+    path: /geoip/GeoLite2-City.mmdb
 
 sources:
-  journal_logs:
+  journald_source:
     type: vector
     version: "2"
     address: 0.0.0.0:6000
-  kubernetes_logs:
+  kubernetes_source:
     type: vector
     version: "2"
     address: 0.0.0.0:6010
-  opnsense_filterlog_logs:
+  opnsense_source:
     type: syslog
     address: 0.0.0.0:5140
     mode: udp
 
 transforms:
-  kubernetes_logs_remap:
+  kubernetes_remap:
     type: remap
     inputs:
-      - kubernetes_logs
+      - kubernetes_source
     source: |
       # Standardize 'app' index
       .custom_app_name = .pod_labels."app.kubernetes.io/name" || .pod_labels.app || .pod_labels."k8s-app" || "unknown"
-  opnsense_filterlog_geoip:
-    type: geoip
-    inputs:
-      - opnsense_filterlog_route.pass_action
-    database: /geoip/GeoLite2-City.mmdb
-    source: filter_source_ip
-    target: geoip
-  opnsense_filterlog_remap:
+
+  opnsense_remap:
     type: remap
     inputs:
-      - opnsense_filterlog_logs
+      - opnsense_source
     source: |
       msg = parse_csv!(string!(.message))
       # Only parse IPv4 / IPv6
@@ -105,9 +58,61 @@ transforms:
           }
         }
       }
-  opnsense_filterlog_route:
+  opnsense_route:
     type: route
     inputs:
-      - opnsense_filterlog_remap
+      - opnsense_remap
     route:
       pass_action: .filter_action == "pass"
+  opnsense_geoip:
+    type: geoip
+    inputs:
+      - opnsense_route.pass_action
+    database: /geoip/GeoLite2-City.mmdb
+    source: filter_source_ip
+    target: geoip
+
+sinks:
+  journald:
+    type: loki
+    batch:
+      max_bytes: 2049000
+    encoding:
+      codec: json
+    endpoint: http://loki-gateway.monitoring.svc.cluster.local:80
+    inputs:
+      - journald_source
+    labels:
+      hostname: '{{ host }}'
+    out_of_order_action: accept
+    remove_label_fields: true
+    remove_timestamp: true
+  kubernetes:
+    type: loki
+    batch:
+      max_bytes: 2049000
+    encoding:
+      codec: json
+    endpoint: http://loki-gateway.monitoring.svc.cluster.local:80
+    inputs:
+      - kubernetes_remap
+    labels:
+      app: '{{ custom_app_name }}'
+      namespace: '{{ kubernetes.pod_namespace }}'
+      node: '{{ kubernetes.pod_node_name }}'
+    out_of_order_action: accept
+    remove_label_fields: true
+    remove_timestamp: true
+  opnsense:
+    type: loki
+    batch:
+      max_bytes: 2049000
+    encoding:
+      codec: json
+    endpoint: http://loki-gateway.monitoring.svc.cluster.local:80
+    inputs:
+      - opnsense_route._unmatched
+      - opnsense_geoip
+    labels:
+      hostname: opnsense
+    out_of_order_action: accept

@@ -1,25 +1,11 @@
 ---
 data_dir: /vector-data-dir
 
-sinks:
-  loki_journal_sink:
-    type: vector
-    version: "2"
-    address: vector-aggregator.monitoring.svc.cluster.local:6000
-    inputs:
-      - journal_logs
-  loki_kubernetes_sink:
-    type: vector
-    version: "2"
-    address: vector-aggregator.monitoring.svc.cluster.local:6010
-    inputs:
-      - kubernetes_logs
-
 sources:
-  journal_logs:
+  journald_source:
     type: journald
     journal_directory: /var/log/journal
-  kubernetes_logs:
+  kubernetes_source:
     type: kubernetes_logs
     pod_annotation_fields:
       container_image: container_image
@@ -27,3 +13,17 @@ sources:
       pod_annotations: pod_annotations
       pod_labels: pod_labels
       pod_name: pod_name
+
+sinks:
+  journald:
+    type: vector
+    version: "2"
+    address: vector-aggregator.monitoring.svc.cluster.local:6000
+    inputs:
+      - journald_source
+  kubernetes:
+    type: vector
+    version: "2"
+    address: vector-aggregator.monitoring.svc.cluster.local:6010
+    inputs:
+      - kubernetes_source
