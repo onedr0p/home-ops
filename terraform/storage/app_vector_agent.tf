@@ -34,7 +34,7 @@ resource "kubernetes_daemonset" "vector_agent" {
       spec {
         container {
           name  = "main"
-          image = "docker.io/timberio/vector:0.26.0-debian"
+          image = "docker.io/timberio/vector:0.25.2-debian"
           args = [
             "--config=/etc/vector/vector.yaml"
           ]
