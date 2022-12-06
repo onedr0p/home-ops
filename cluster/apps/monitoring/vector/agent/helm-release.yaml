@@ -8,11 +8,11 @@ spec:
   interval: 15m
   chart:
     spec:
-      chart: vector
-      version: 0.17.1
+      chart: app-template
+      version: 1.2.0
       sourceRef:
         kind: HelmRepository
-        name: vector-charts
+        name: bjw-s-charts
         namespace: flux-system
   install:
     createNamespace: true
@@ -22,45 +22,86 @@ spec:
     remediation:
       retries: 5
   dependsOn:
-    - name: loki
-      namespace: monitoring
     - name: vector-aggregator
       namespace: monitoring
   values:
+    controller:
+      type: daemonset
+      strategy: RollingUpdate
     image:
-      repository: timberio/vector
+      repository: docker.io/timberio/vector
       tag: 0.25.2-debian
-    role: Agent
-    customConfig:
-      data_dir: /vector-data-dir
-      api:
-        enabled: false
-      sources:
-        journal_logs:
-          type: journald
-          journal_directory: /var/log/journal
-        kubernetes_logs:
-          type: kubernetes_logs
-          pod_annotation_fields:
-            container_image: container_image
-            container_name: container_name
-            pod_annotations: pod_annotations
-            pod_labels: pod_labels
-            pod_name: pod_name
-      sinks:
-        loki_journal_sink:
-          type: vector
-          inputs:
-            - journal_logs
-          address: vector-aggregator:6000
-          version: "2"
-        loki_kubernetes_sink:
-          type: vector
-          inputs:
-            - kubernetes_logs
-          address: vector-aggregator:6010
-          version: "2"
+    args: ["--config-dir", "/etc/vector/"]
+    env:
+      PROCFS_ROOT: /host/proc
+      SYSFS_ROOT: /host/sys
+      VECTOR_SELF_NODE_NAME:
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: spec.nodeName
+      VECTOR_SELF_POD_NAME:
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: metadata.name
+      VECTOR_SELF_POD_NAMESPACE:
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: metadata.namespace
     service:
-      enabled: false
+      main:
+        enabled: false
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+      startup:
+        enabled: false
+    serviceAccount:
+      create: true
+      name: vector-agent
     securityContext:
       privileged: true
+    persistence:
+      config:
+        enabled: true
+        type: configMap
+        name: vector-agent-configmap
+        subPath: vector.yaml
+        mountPath: /etc/vector/vector.yaml
+        readOnly: true
+      data:
+        enabled: true
+        type: emptyDir
+        mountPath: /vector-data-dir
+      var-log:
+        enabled: true
+        type: hostPath
+        hostPath: /var/log
+        hostPathType: Directory
+        mountPath: /var/log
+        readOnly: true
+      var-lib:
+        enabled: true
+        type: hostPath
+        hostPath: /var/lib
+        hostPathType: Directory
+        mountPath: /var/lib
+        readOnly: true
+      procfs:
+        enabled: true
+        type: hostPath
+        hostPath: /proc
+        hostPathType: Directory
+        mountPath: /host/proc
+        readOnly: true
+      sysfs:
+        enabled: true
+        type: hostPath
+        hostPath: /sys
+        hostPathType: Directory
+        mountPath: /host/sys
+        readOnly: true

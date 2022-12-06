@@ -2,17 +2,17 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: vector-aggregator
+  name: &app vector-aggregator
   namespace: monitoring
 spec:
   interval: 15m
   chart:
     spec:
-      chart: vector
-      version: 0.17.1
+      chart: app-template
+      version: 1.2.0
       sourceRef:
         kind: HelmRepository
-        name: vector-charts
+        name: bjw-s-charts
         namespace: flux-system
   install:
     createNamespace: true
@@ -21,159 +21,53 @@ spec:
   upgrade:
     remediation:
       retries: 5
-  dependsOn:
-    - name: loki
-      namespace: monitoring
   values:
+    controller:
+      replicas: 3
+      strategy: RollingUpdate
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
-      repository: timberio/vector
+      repository: docker.io/timberio/vector
       tag: 0.25.2-debian
-    role: Stateless-Aggregator
-    replicas: 3
-    customConfig:
-      data_dir: /vector-data-dir
-      api:
-        enabled: false
-      sources:
-        journal_logs:
-          type: vector
-          address: 0.0.0.0:6000
-          version: "2"
-        kubernetes_logs:
-          type: vector
-          address: 0.0.0.0:6010
-          version: "2"
-        opnsense_filterlog_logs:
-          type: syslog
-          address: 0.0.0.0:5140
-          mode: udp
-      transforms:
-        kubernetes_logs_remap:
-          type: remap
-          inputs:
-            - kubernetes_logs
-          source: |
-            # Standardize 'app' index
-            .custom_app_name = .pod_labels."app.kubernetes.io/name" || .pod_labels.app || .pod_labels."k8s-app" || "unknown"
-        opnsense_filterlog_remap:
-          type: remap
-          inputs:
-            - opnsense_filterlog_logs
-          source: |
-            msg = parse_csv!(string!(.message))
-            # Only parse IPv4 / IPv6
-            if msg[8] == "4" || msg[8] == "6" {
-              .filter_interface = msg[4]
-              .filter_direction = msg[7]
-              .filter_action = msg[6]
-              .filter_ip_version = msg[8]
-              .filter_protocol = msg[16]
-              .filter_source_ip = msg[18]
-              .filter_destination_ip = msg[19]
-              if (msg[16] == "icmp" || msg[16] == "igmp" || msg[16] == "gre") {
-                .filter_data = msg[20]
-              } else {
-                .filter_source_port = msg[20]
-                .filter_destination_port = msg[21]
-                .filter_data_length = msg[22]
-                if msg[8] == "4" && msg[16] == "tcp" {
-                  .filter_tcp_flags = msg[23]
-                }
-              }
-            }
-        opnsense_filterlog_route:
-          type: route
-          inputs:
-            - opnsense_filterlog_remap
-          route:
-            pass_action: >-
-              .filter_action == "pass"
-        opnsense_filterlog_geoip:
-          type: geoip
-          inputs:
-            - opnsense_filterlog_route.pass_action
-          database: /geoip/GeoLite2-City.mmdb
-          source: filter_source_ip
-          target: geoip
-      sinks:
-        loki_journal:
-          type: loki
-          inputs:
-            - journal_logs
-          endpoint: http://loki-gateway:80
-          encoding:
-            codec: json
-          batch:
-            max_bytes: 2049000
-          out_of_order_action: accept
-          remove_label_fields: true
-          remove_timestamp: true
-          labels:
-            hostname: >-
-              {{`{{ host }}`}}
-        loki_kubernetes:
-          type: loki
-          inputs:
-            - kubernetes_logs_remap
-          endpoint: http://loki-gateway:80
-          encoding:
-            codec: json
-          batch:
-            max_bytes: 2049000
-          out_of_order_action: accept
-          remove_label_fields: true
-          remove_timestamp: true
-          labels:
-            app: >-
-              {{`{{ custom_app_name }}`}}
-            namespace: >-
-              {{`{{ kubernetes.pod_namespace }}`}}
-            node: >-
-              {{`{{ kubernetes.pod_node_name }}`}}
-        loki_opnsense_filterlog:
-          type: loki
-          inputs:
-            - opnsense_filterlog_route._unmatched
-            - opnsense_filterlog_geoip
-          endpoint: http://loki-gateway:80
-          encoding:
-            codec: json
-          batch:
-            max_bytes: 2049000
-          out_of_order_action: accept
-          labels:
-            hostname: opnsense
-    extraVolumeMounts:
-      - name: geoip
-        mountPath: /geoip
-    extraVolumes:
-      - name: geoip
-        persistentVolumeClaim:
-          claimName: vector-geoipupdate-config-v1
+    args: ["--config-dir", "/etc/vector/"]
     service:
-      enabled: true
-      type: LoadBalancer
-    affinity:
-      podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                  - key: app.kubernetes.io/component
-                    operator: In
-                    values: ["Stateless-Aggregator"]
-              topologyKey: kubernetes.io/hostname
-  postRenderers:
-    - kustomize:
-        patchesJson6902:
-          - target:
-              kind: Service
-              name: vector-aggregator
-            patch:
-              - op: add
-                path: /spec/externalIPs
-                value: ["${SVC_SYSLOG_ADDR}"]
-              - op: replace
-                path: /spec/externalTrafficPolicy
-                value: Local
+      main:
+        type: LoadBalancer
+        externalIPs: ["${SVC_SYSLOG_ADDR}"]
+        externalTrafficPolicy: Local
+        ports:
+          http:
+            port: 8686
+          journald-logs:
+            enabled: true
+            port: 6000
+          kubernetes-logs:
+            enabled: true
+            port: 6010
+          opnsense-logs:
+            enabled: true
+            port: 5140
+            protocol: UDP
+    persistence:
+      config:
+        enabled: true
+        type: configMap
+        name: vector-aggregator-configmap
+        subPath: vector.yaml
+        mountPath: /etc/vector/vector.yaml
+        readOnly: true
+      data:
+        enabled: true
+        type: emptyDir
+        mountPath: /vector-data-dir
+      geoip:
+        enabled: true
+        existingClaim: vector-geoipupdate-config-v1
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app
