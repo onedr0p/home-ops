@@ -25,6 +25,9 @@ spec:
     - name: immich-server
       namespace: default
   values:
+    controller:
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/immich-app/immich-web
       tag: v1.37.0_58-dev
@@ -33,9 +36,9 @@ spec:
       - ./entrypoint.sh
     envFrom:
       - secretRef:
-          name: immich
+          name: immich-secret
       - configMapRef:
-          name: immich
+          name: immich-configmap
     service:
       main:
         ports:
@@ -46,9 +49,6 @@ spec:
         enabled: true
         existingClaim: immich-nfs
         mountPath: /usr/src/app/upload
-    podAnnotations:
-      secret.reloader.stakater.com/reload: immich
-      configmap.reloader.stakater.com/reload: immich
     resources:
       requests:
         cpu: 100m

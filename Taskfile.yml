@@ -4,20 +4,19 @@ version: "3"
 vars:
   PROJECT_DIR:
     sh: "git rev-parse --show-toplevel"
+  ANSIBLE_DIR: "{{.PROJECT_DIR}}/ansible"
   CLUSTER_DIR: "{{.PROJECT_DIR}}/cluster"
 
 env:
-  KUBECONFIG: "{{.CLUSTER_DIR}}/local/kubeconfig"
+  KUBECONFIG: "{{.ANSIBLE_DIR}}/kubernetes/kubeconfig"
 
 includes:
   cluster: .taskfiles/ClusterTasks.yml
   debug: .taskfiles/DebugTasks.yml
-  precommit: .taskfiles/PreCommitTasks.yml
   rook: .taskfiles/RookTasks.yml
   snapshot: .taskfiles/SnapshotTasks.yml
 
 tasks:
-
   kubeconfig:
     desc: Remotely fetch kubeconfig from Kubernetes
     cmds:
@@ -31,7 +30,9 @@ tasks:
 
   ansible:
     desc: Install/Upgrade Ansible deps
-    dir: ansible
+    dir: "{{.ANSIBLE_DIR}}"
     cmds:
       - ansible-galaxy install -r requirements.yml --roles-path ~/.ansible/roles --force
       - ansible-galaxy collection install -r requirements.yml --collections-path ~/.ansible/collections --force
+    preconditions:
+      - test -f "{{.ANSIBLE_DIR}}/requirements.yml"
