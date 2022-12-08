@@ -1,0 +1,34 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-qbittorrent-app
+  namespace: flux-system
+  labels:
+    substitution.flux.home.arpa/enabled: "true"
+spec:
+  interval: 10m
+  path: ./kubernetes/apps/default/qbittorrent/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: cluster-home-ops
+  wait: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-qbittorrent-jobs
+  namespace: flux-system
+  labels:
+    substitution.flux.home.arpa/enabled: "true"
+spec:
+  dependsOn:
+    - name: cluster-apps-qbittorrent-app
+  interval: 10m
+  path: ./kubernetes/apps/downloaders/qbittorrent/jobs
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: cluster-home-ops
+  wait: true

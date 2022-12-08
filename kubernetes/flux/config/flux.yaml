@@ -1,0 +1,49 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: flux-manifests
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: oci://ghcr.io/fluxcd/flux-manifests
+  ref:
+    tag: v0.37.0
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-flux-manifests
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./
+  prune: true
+  wait: true
+  sourceRef:
+    kind: OCIRepository
+    name: flux-manifests
+  images:
+    - name: fluxcd/helm-controller
+      newName: ghcr.io/fluxcd/helm-controller
+    - name: fluxcd/image-automation-controller
+      newName: ghcr.io/fluxcd/image-automation-controller
+    - name: fluxcd/image-reflector-controller
+      newName: ghcr.io/fluxcd/image-reflector-controller
+    - name: fluxcd/kustomize-controller
+      newName: ghcr.io/fluxcd/kustomize-controller
+    - name: fluxcd/notification-controller
+      newName: ghcr.io/fluxcd/notification-controller
+    - name: fluxcd/source-controller
+      newName: ghcr.io/fluxcd/source-controller
+  patches:
+    - target:
+        group: networking.k8s.io
+        version: v1
+        kind: NetworkPolicy
+      patch: |-
+        $patch: delete
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        metadata:
+          name: all

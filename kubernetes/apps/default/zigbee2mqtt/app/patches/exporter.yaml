@@ -1,0 +1,39 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: zigbee2mqtt
+  namespace: default
+spec:
+  values:
+    additionalContainers:
+      exporter:
+        name: exporter
+        image: docker.io/kpetrem/mqtt-exporter:latest@sha256:a2c43b0ff2f2cb7f5e2d1ec9b19891c01197a55025a73f90d4249b926b34c773
+        env:
+          - name: LOG_LEVEL
+            value: DEBUG
+          - name: LOG_MQTT_MESSAGE
+            value: "True"
+          - name: MQTT_ADDRESS
+            value: emqx.default.svc.cluster.local
+          - name: MQTT_TOPIC
+            value: "zigbee2mqtt/#"
+          - name: MQTT_V5_PROTOCOL
+            value: "True"
+          - name: MQTT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: emqx-config
+                key: user_1_username
+          - name: MQTT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: emqx-config
+                key: user_1_password
+          - name: PROMETHEUS_PORT
+            value: "80"
+          - name: PROMETHEUS_PREFIX
+            value: zigbee2mqtt_
+          - name: ZIGBEE2MQTT_AVAILABILITY
+            value: "True"

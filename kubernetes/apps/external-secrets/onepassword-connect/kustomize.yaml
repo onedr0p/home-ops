@@ -1,0 +1,18 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-external-secrets-onepassword-connect-app
+  namespace: flux-system
+  labels:
+    substitution.flux.home.arpa/enabled: "true"
+spec:
+  dependsOn:
+    - name: cluster-apps-external-secrets-app
+  interval: 10m
+  path: ./kubernetes/apps/external-secrets/one-password-connect/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: cluster-home-ops
+  wait: true

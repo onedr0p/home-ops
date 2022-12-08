@@ -1,0 +1,271 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: 42.2.1
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+  values:
+    alertmanager:
+      config:
+        global:
+          resolve_timeout: 5m
+        receivers:
+          - name: "null"
+          - name: "pushover"
+            pushover_configs:
+              - token: "${SECRET_PUSHOVER_ALERT_MANAGER_APIKEY}"
+                user_key: "${SECRET_PUSHOVER_USERKEY}"
+                send_resolved: true
+                html: true
+                priority: |-
+                  {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
+                url_title: View in Alert Manager
+                title: |-
+                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+                message: |-
+                  {{- range .Alerts }}
+                    {{- if ne .Labels.severity "" }}
+                      <b>Severity:</b> <i>{{ .Labels.severity }}</i>
+                    {{- else }}
+                      <b>Severity:</b> <i>N/A</i>
+                    {{- end }}
+                    {{- if ne .Annotations.description "" }}
+                      <b>Description:</b> <i>{{ .Annotations.description }}</i>
+                    {{- else if ne .Annotations.summary "" }}
+                      <b>Summary:</b> <i>{{ .Annotations.summary }}</i>
+                    {{- else if ne .Annotations.message "" }}
+                      <b>Message:</b> <i>{{ .Annotations.message }}</i>
+                    {{- else }}
+                      <b>Description:</b> <i>N/A</i>
+                    {{- end }}
+                    {{- if gt (len .Labels.SortedPairs) 0 }}
+                      <b>Details:</b>
+                      {{- range .Labels.SortedPairs }}
+                        • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
+                      {{- end }}
+                    {{- end }}
+                  {{- end }}
+        route:
+          group_by: ["alertname", "job"]
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 6h
+          receiver: "pushover"
+          routes:
+            - receiver: "null"
+              matchers:
+                - alertname =~ "InfoInhibitor|Watchdog"
+            - receiver: "pushover"
+              matchers:
+                - severity = "critical"
+              continue: true
+        inhibit_rules:
+          - source_matchers:
+              - severity = "critical"
+            target_matchers:
+              - severity = "warning"
+            equal: ["alertname", "namespace"]
+      ingress:
+        enabled: true
+        pathType: Prefix
+        ingressClassName: "nginx"
+        hosts:
+          - &host "alert-manager.${SECRET_PUBLIC_DOMAIN}"
+        tls:
+          - hosts:
+              - *host
+      alertmanagerSpec:
+        replicas: 3
+        podAntiAffinity: hard
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: "ceph-block"
+              resources:
+                requests:
+                  storage: 1Gi
+    kube-state-metrics:
+      metricLabelsAllowlist:
+        - "persistentvolumeclaims=[*]"
+      prometheus:
+        monitor:
+          enabled: true
+          relabelings:
+            - action: replace
+              regex: (.*)
+              replacement: $1
+              sourceLabels:
+                - __meta_kubernetes_pod_node_name
+              targetLabel: kubernetes_node
+    grafana:
+      enabled: false
+      forceDeployDashboards: true
+      sidecar:
+        dashboards:
+          multicluster:
+            etcd:
+              enabled: true
+    kubelet:
+      enabled: true
+      serviceMonitor:
+        metricRelabelings:
+          - action: replace
+            sourceLabels:
+              - node
+            targetLabel: instance
+    kubeApiServer:
+      enabled: true
+    kubeControllerManager:
+      enabled: true
+      endpoints:
+        - 192.168.42.10
+        - 192.168.42.11
+        - 192.168.42.12
+    kubeScheduler:
+      enabled: true
+      endpoints:
+        - 192.168.42.10
+        - 192.168.42.11
+        - 192.168.42.12
+    kubeProxy:
+      enabled: true
+      endpoints:
+        - 192.168.42.10
+        - 192.168.42.11
+        - 192.168.42.12
+    kubeEtcd:
+      enabled: true
+      endpoints:
+        - 192.168.42.10
+        - 192.168.42.11
+        - 192.168.42.12
+      service:
+        enabled: true
+        port: 2381
+        targetPort: 2381
+    prometheus:
+      ingress:
+        enabled: true
+        pathType: Prefix
+        ingressClassName: "nginx"
+        hosts:
+          - &host "prometheus.${SECRET_PUBLIC_DOMAIN}"
+        tls:
+          - hosts:
+              - *host
+      thanosService:
+        enabled: true
+      thanosServiceMonitor:
+        enabled: true
+      thanosIngress:
+        enabled: true
+        pathType: Prefix
+        ingressClassName: "nginx"
+        annotations:
+          nginx.ingress.kubernetes.io/ssl-redirect: "true"
+          nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+        hosts:
+          - &host "thanos-sidecar.${SECRET_PUBLIC_DOMAIN}"
+        tls:
+          - hosts:
+              - *host
+      prometheusSpec:
+        replicas: 3
+        replicaExternalLabelName: __replica__
+        externalLabels:
+          cluster: home-ops
+        thanos:
+          image: quay.io/thanos/thanos:v0.29.0
+          # renovate: datasource=docker depName=quay.io/thanos/thanos
+          version: "v0.29.0"
+        podAntiAffinity: hard
+        ruleSelectorNilUsesHelmValues: false
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        retention: 14d
+        retentionSize: 45GB
+        enableAdminAPI: true
+        walCompression: true
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: "ceph-block"
+              resources:
+                requests:
+                  storage: 50Gi
+        resources:
+          requests:
+            cpu: 10m
+            memory: 2000Mi
+          limits:
+            memory: 8000Mi
+        additionalScrapeConfigs:
+          - job_name: haproxy
+            scrape_interval: 1m
+            scrape_timeout: 10s
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - "opnsense.${SECRET_PRIVATE_DOMAIN}:8404"
+          - job_name: coredns
+            scrape_interval: 1m
+            scrape_timeout: 10s
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - "opnsense.${SECRET_PRIVATE_DOMAIN}:9153"
+          - job_name: frr-exporter
+            scrape_interval: 1m
+            scrape_timeout: 10s
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - "opnsense.${SECRET_PRIVATE_DOMAIN}:9342"
+          - job_name: node-exporter
+            scrape_interval: 1m
+            scrape_timeout: 10s
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - "expanse.${SECRET_PRIVATE_DOMAIN}:9100"
+                  - "opnsense.${SECRET_PRIVATE_DOMAIN}:9100"
+                  - "pikvm.${SECRET_PRIVATE_DOMAIN}:9100"
+          - job_name: smartctl-exporter
+            scrape_interval: 1m
+            scrape_timeout: 10s
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - "expanse.${SECRET_PRIVATE_DOMAIN}:9633"
+          - job_name: pikvm
+            scrape_interval: 1m
+            scrape_timeout: 10s
+            metrics_path: /api/export/prometheus/metrics
+            basic_auth:
+              username: "${SECRET_PIKVM_USERNAME}"
+              password: "${SECRET_PIKVM_PASSWORD}"
+            honor_timestamps: true
+            static_configs:
+              - targets:
+                  - "pikvm.${SECRET_PRIVATE_DOMAIN}"
