@@ -1,15 +1,5 @@
 # Bootstrap
 
-## Prometheus CRDs
-
-### Install Prometheus CRDs
-
-_These do not need to be fully up-to-date because the kube-prometheus-stack chart will upgrade them_
-
-```sh
-kubectl apply --server-side --kustomize ./kubernetes/bootstrap/prometheus
-```
-
 ## Flux
 
 ### Install Flux
