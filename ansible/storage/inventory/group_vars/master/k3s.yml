@@ -1,23 +1,16 @@
 ---
-#
-# Below vars are for the xanmanning.k3s role
-# ...see https://github.com/PyratLabs/ansible-role-k3s
-#
-
 # renovate: datasource=github-releases depName=k3s-io/k3s
 k3s_release_version: "v1.25.4+k3s1"
 k3s_install_hard_links: true
 k3s_become: true
 k3s_registration_address: 192.168.1.81
 k3s_control_node: true
-
 k3s_server:
   node-ip: "{{ ansible_host }}"
   tls-san:
     - "{{ k3s_registration_address }}"
   docker: false
   disable:
-    - traefik
     - servicelb
   disable-network-policy: true
   disable-cloud-controller: true
