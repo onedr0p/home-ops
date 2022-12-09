@@ -60,9 +60,10 @@ My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Fedora Serve
 This Git repository contains the following directories (_kustomizatons_) under [kubernetes](./kubernetes/).
 
 ```sh
-📁 cluster      # k8s cluster defined as code
-├─📁 flux       # flux components which are loaded before everything
-└─📁 apps       # workloads in a categorized directory structure
+📁 kubernetes      # Kubernetes cluster defined as code
+├─📁 bootstrap     # Manual Flux and Repo installation
+├─📁 flux          # Main Flux configuration of repository
+└─📁 apps          # Applications deployed into my cluster
 ```
 
 ### Networking
@@ -106,7 +107,7 @@ Over WAN, I have port forwarded ports `80` and `443` to the load balancer IP of 
 
 ### Internal DNS
 
-[coredns](https://github.com/coredns/coredns) is deployed on my `Opnsense` router and all DNS queries for my domains are forwarded to [k8s_gateway](https://github.com/ori-edge/k8s_gateway) that is running in my cluster. With this setup `k8s_gateway` has direct access to my clusters ingresses and services and serves DNS for them in my internal network.
+[coredns](https://github.com/coredns/coredns) is deployed on my `Opnsense` router and all DNS queries for **my** domains are forwarded to [k8s_gateway](https://github.com/ori-edge/k8s_gateway) that is running in my cluster. With this setup `k8s_gateway` has direct access to my clusters ingresses and services and serves DNS for them in my internal network.
 
 ### Ad Blocking
 
