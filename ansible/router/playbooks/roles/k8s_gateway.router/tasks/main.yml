@@ -46,11 +46,6 @@
 - name: Configure k8s_gateway
   notify: Restart k8s_gateway
   block:
-    - name: Copy kubeconfig
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../../../cluster/local/kubeconfig-homedns"
-        dest: /usr/local/etc/k8s_gateway/kubeconfig
-        mode: 0755
     - name: Create Corefile
       ansible.builtin.template:
         src: Corefile.j2

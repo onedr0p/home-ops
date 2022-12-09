@@ -51,13 +51,13 @@ My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Fedora Serve
 
 ### GitOps
 
-[Flux](https://github.com/fluxcd/flux2) watches my [cluster](./cluster/) folder (see Directories below) and makes the changes to my cluster based on the YAML manifests.
+[Flux](https://github.com/fluxcd/flux2) watches my [kubernetes](./kubernetes/) folder (see Directories below) and makes the changes to my cluster based on the YAML manifests.
 
 [Renovate](https://github.com/renovatebot/renovate) watches my **entire** repository looking for dependency updates, when they are found a PR is automatically created. When some PRs are merged [Flux](https://github.com/fluxcd/flux2) applies the changes to my cluster.
 
 ### Directories
 
-This Git repository contains the following directories (_kustomizatons_) under [cluster](./cluster/).
+This Git repository contains the following directories (_kustomizatons_) under [kubernetes](./kubernetes/).
 
 ```sh
 📁 cluster      # k8s cluster defined as code
@@ -120,7 +120,7 @@ Over WAN, I have port forwarded ports `80` and `443` to the load balancer IP of 
 
 ### Dynamic DNS
 
-My home IP can change at any given time and in order to keep my WAN IP address up to date on Cloudflare. I have deployed a [CronJob](./cluster/apps/networking/cloudflare-ddns) in my cluster, this periodically checks and updates the `A` record `ipv4.domain.tld`.
+My home IP can change at any given time and in order to keep my WAN IP address up to date on Cloudflare. I have deployed a [CronJob](./kubernetes/apps/networking/cloudflare-ddns) in my cluster, this periodically checks and updates the `A` record `ipv4.domain.tld`.
 
 ---
 

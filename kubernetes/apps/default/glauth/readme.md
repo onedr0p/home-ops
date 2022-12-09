@@ -6,7 +6,7 @@
     ```json
     {
         "files.associations": {
-            "**/cluster/**/*.sops.toml": "plaintext"
+            "**/kubernetes/**/*.sops.toml": "plaintext"
         }
     }
     ```
@@ -18,7 +18,7 @@
 
 3. Add/Update `.sops.yaml`
     ```yaml
-    - path_regex: cluster/.*\.sops\.toml
+    - path_regex: kubernetes/.*\.sops\.toml
         key_groups:
         - age:
             - age15uzrw396e67z9wdzsxzdk7ka0g2gr3l460e0slaea563zll3hdfqwqxdta

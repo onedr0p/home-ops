@@ -6,7 +6,7 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
     paths:
-      - "cluster/**.yaml"
+      - "kubernetes/**.yaml"
 
 env:
   # Currently no way to detect automatically
@@ -28,11 +28,11 @@ jobs:
           list-files: json
           filters: |
             yaml:
-              - added|modified: "**/helm-release.yaml"
+              - added|modified: "**/helmrelease.yaml"
     outputs:
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
 
-  helm-release-differ:
+  helmrelease-differ:
     name: Helm Release Differ
     runs-on: ubuntu-latest
     needs: detect-file-changes
@@ -64,7 +64,7 @@ jobs:
       - name: Helm Release Differ
         id: diff
         run: |
-          diff=$(.github/scripts/helm-release-differ.sh --source-file "default/${{ matrix.file }}" --target-file "${{ matrix.file }}" --remove-common-labels)
+          diff=$(.github/scripts/helmrelease-differ.sh --source-file "default/${{ matrix.file }}" --target-file "${{ matrix.file }}" --remove-common-labels)
           echo "${diff}"
           diff="${diff//'%'/'%25'}"
           diff="${diff//$'\n'/'%0A'}"
