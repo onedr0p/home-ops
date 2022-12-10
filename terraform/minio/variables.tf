@@ -35,3 +35,14 @@ variable "postgresql_bucket_user" {
 variable "postgresql_bucket_secret" {
   type = string
 }
+variable "volsync_bucket_name" {
+  default = "volsync"
+  type    = string
+}
+variable "volsync_bucket_user" {
+  default = "volsync"
+  type    = string
+}
+variable "volsync_bucket_secret" {
+  type = string
+}
