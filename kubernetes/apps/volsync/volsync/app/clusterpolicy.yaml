@@ -7,14 +7,14 @@ metadata:
     policies.kyverno.io/title: Sync Restic Secret
     policies.kyverno.io/subject: Secret
 spec:
+  mutateExistingOnPolicyUpdate: true
+  generateExistingOnPolicyUpdate: true
   rules:
     - name: restic-secret-sync
       match:
         resources:
-          kinds:
-            - Namespace
-          names:
-            - default
+          kinds: ["Namespace"]
+          names: ["default"]
       generate:
         apiVersion: v1
         kind: Secret
