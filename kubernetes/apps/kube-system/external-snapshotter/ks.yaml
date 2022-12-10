@@ -1,4 +1,37 @@
 ---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: external-snapshotter-manifests
+  namespace: flux-system
+spec:
+  interval: 30m
+  url: https://github.com/kubernetes-csi/external-snapshotter
+  ref:
+    tag: v6.1.0
+  ignore: |
+    # exclude all
+    /*
+    # include kubernetes directory
+    !/client/config/crd
+    !/deploy/kubernetes/snapshot-controller
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-external-snapshotter-crds
+  namespace: flux-system
+  labels:
+    substitution.flux.home.arpa/enabled: "true"
+spec:
+  interval: 10m
+  path: ./client/config/crd
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: external-snapshotter-manifests
+  wait: true
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
@@ -7,10 +40,12 @@ metadata:
   labels:
     substitution.flux.home.arpa/enabled: "true"
 spec:
+  dependsOn:
+    - name: cluster-apps-external-snapshotter-crds
   interval: 10m
-  path: ./kubernetes/apps/kube-system/external-snapshotter/app
+  path: ./deploy/kubernetes/snapshot-controller
   prune: true
   sourceRef:
     kind: GitRepository
-    name: home-ops-kubernetes
+    name: external-snapshotter-manifests
   wait: true
