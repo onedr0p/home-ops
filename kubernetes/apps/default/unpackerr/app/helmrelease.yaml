@@ -1,0 +1,88 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: unpackerr
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: lidarr
+    - name: qbittorrent
+    - name: radarr
+    - name: sonarr
+  values:
+    image:
+      repository: ghcr.io/onedr0p/unpackerr
+      tag: 0.10.1@sha256:1382d6094df6ac9f7c5938158d414ccaf32186ee19824d450144829824927ce0
+    env:
+      TZ: "${TIMEZONE}"
+      UN_SONARR_0_URL: http://sonarr.default.svc.cluster.local
+      UN_SONARR_0_PATHS_0: /complete/sonarr
+      UN_SONARR_0_API_KEY:
+        valueFrom:
+          secretKeyRef:
+            name: sonarr-secret
+            key: SONARR__API_KEY
+      UN_RADARR_0_URL: http://radarr.default.svc.cluster.local
+      UN_RADARR_0_PATHS_0: /complete/radarr
+      UN_RADARR_0_API_KEY:
+        valueFrom:
+          secretKeyRef:
+            name: radarr-secret
+            key: RADARR__API_KEY
+      UN_LIDARR_0_URL: http://lidarr.default.svc.cluster.local
+      UN_LIDARR_0_PATHS_0: /complete/lidarr
+      UN_LIDARR_0_API_KEY:
+        valueFrom:
+          secretKeyRef:
+            name: lidarr-secret
+            key: LIDARR__API_KEY
+    service:
+      main:
+        enabled: false
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+      startup:
+        enabled: false
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+      supplementalGroups:
+        - 100
+    podAnnotations:
+      secret.reloader.stakater.com/reload: |-
+        lidarr-secret,radarr-secret,sonarr-secret
+    persistence:
+      complete:
+        enabled: true
+        type: nfs
+        server: "expanse.${SECRET_PRIVATE_DOMAIN}"
+        path: /eros/Media/Downloads/qbittorrent/complete
+        mountPath: /complete
+    resources:
+      requests:
+        cpu: 10m
+        memory: 250Mi
+      limits:
+        memory: 1000Mi

@@ -1,0 +1,110 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app miniflux
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  dependsOn:
+    - name: postgres
+      namespace: default
+  values:
+    controller:
+      replicas: 3
+      strategy: RollingUpdate
+      annotations:
+        reloader.stakater.com/auto: "true"
+    image:
+      repository: docker.io/miniflux/miniflux
+      tag: 2.0.40
+    env:
+      BASE_URL: "https://miniflux.${SECRET_PUBLIC_DOMAIN}"
+      CREATE_ADMIN: "1"
+      DEBUG: "1"
+      LOG_DATE_TIME: "1"
+      METRICS_ALLOWED_NETWORKS: "${NET_POD_CIDR}"
+      METRICS_COLLECTOR: "1"
+      OAUTH2_CLIENT_ID: miniflux
+      OAUTH2_CLIENT_SECRET: "${SECRET_MINIFLUX_OAUTH_CLIENT_SECRET}"
+      OAUTH2_USER_CREATION: "1"
+      OAUTH2_OIDC_DISCOVERY_ENDPOINT: "https://auth.${SECRET_PUBLIC_DOMAIN}"
+      OAUTH2_PROVIDER: oidc
+      OAUTH2_REDIRECT_URL: "https://miniflux.${SECRET_PUBLIC_DOMAIN}/oauth2/oidc/callback"
+      POLLING_SCHEDULER: entry_frequency
+      POLLING_FREQUENCY: "15"
+      RUN_MIGRATIONS: "1"
+    envFrom:
+      - secretRef:
+          name: miniflux-secret
+    service:
+      main:
+        ports:
+          http:
+            port: &port 8080
+    serviceMonitor:
+      main:
+        enabled: true
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          external-dns.home.arpa/enabled: "true"
+        hosts:
+          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    probes:
+      liveness: &probes
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /healthcheck
+            port: *port
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 3
+      readiness: *probes
+      startup:
+        enabled: false
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app
+    resources:
+      requests:
+        cpu: 10m
+        memory: 100Mi
+      limits:
+        memory: 750Mi

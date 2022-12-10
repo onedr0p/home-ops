@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-find ./cluster -name '*.sops.yaml' | while read -r file;
+find ./kubernetes -name '*.sops.yaml' | while read -r file;
 do
     sops -d "${file}" >/dev/null 2>&1 && rc=$? || rc=$?
     # In case of MAC mismatch, then MAC is regenerated

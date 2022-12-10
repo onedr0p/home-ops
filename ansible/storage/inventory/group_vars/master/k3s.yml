@@ -1,0 +1,19 @@
+---
+# renovate: datasource=github-releases depName=k3s-io/k3s
+k3s_release_version: "v1.25.4+k3s1"
+k3s_install_hard_links: true
+k3s_become: true
+k3s_registration_address: 192.168.1.81
+k3s_control_node: true
+k3s_server:
+  node-ip: "{{ ansible_host }}"
+  tls-san:
+    - "{{ k3s_registration_address }}"
+  docker: false
+  disable:
+    - servicelb
+  disable-network-policy: true
+  disable-cloud-controller: true
+  cluster-cidr: "10.42.0.0/16"
+  service-cidr: "10.43.0.0/16"
+  write-kubeconfig-mode: "0644"
