@@ -81,15 +81,7 @@ This Git repository contains the following directories (_kustomizatons_) under [
 
 ### Data Backup and Recovery
 
-Rook does not have built in support for backing up PVC data so I am currently using a DIY _(or more specifically a "Poor Man's Backup")_ solution that is leveraging [Kyverno](https://kyverno.io/), [Kopia](https://kopia.io/) and native Kubernetes `CronJob` and `Job` resources.
-
-At a high level the way this operates is that:
-
-- Kyverno creates a `CronJob` for each `PersistentVolumeClaim` resource that contain a label of `snapshot.home.arpa/enabled: "true"`
-- Everyday the `CronJob` creates a `Job` and uses Kopia to connect to a Kopia repository on my NAS over NFS and then snapshots the contents of the app data mount into the Kopia repository
-- The snapshots made by Kopia are incremental which makes the `Job` run very quick.
-- The app data mount is frozen during backup to prevent writes and unfrozen when the snapshot is complete.
-- Recovery is a manual process. By using a different `Job` a temporary pod is created and the fresh PVC and existing NFS mount are attached to it. The data is then copied over to the fresh PVC and the temporary pod is deleted.
+Rook does not have built in support for backing up PVC data. I am currently leveraging [VolSync](https://github.com/backube/volsync) with the Restic integration to handle backups of persistent data.
 
 🔸 _[Velero](https://github.com/vmware-tanzu/velero), [Benji](https://github.com/elemental-lf/benji), [Gemini](https://github.com/FairwindsOps/gemini), [Kasten K10 by Veeam](https://www.kasten.io/product/), [Stash by AppsCode](https://stash.run/) are some alternatives but have limitations._
 
