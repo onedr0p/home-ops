@@ -32,22 +32,3 @@ spec:
     kind: GitRepository
     name: home-ops-kubernetes
   wait: true
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: cluster-apps-cloudnative-pg-scheduledbackup
-  namespace: flux-system
-  labels:
-    substitution.flux.home.arpa/enabled: "true"
-spec:
-  dependsOn:
-    - name: cluster-apps-cloudnative-pg-app
-    - name: cluster-apps-cloudnative-pg-cluster
-  interval: 10m
-  path: ./kubernetes/apps/default/cloudnative-pg/scheduledbackup
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: home-ops-kubernetes
-  wait: true
