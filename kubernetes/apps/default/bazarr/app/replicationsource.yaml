@@ -2,19 +2,19 @@
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: audiobookshelf-restic
+  name: bazarr-restic
   namespace: default
 spec:
   secretStoreRef:
     kind: ClusterSecretStore
     name: onepassword-connect
   target:
-    name: audiobookshelf-restic-secret
+    name: bazarr-restic-secret
     creationPolicy: Owner
     template:
       engineVersion: v2
       data:
-        RESTIC_REPOSITORY: '{{ .REPOSITORY_TEMPLATE }}/audiobookshelf'
+        RESTIC_REPOSITORY: '{{ .REPOSITORY_TEMPLATE }}/bazarr'
         RESTIC_PASSWORD: '{{ .RESTIC_PASSWORD }}'
         AWS_ACCESS_KEY_ID: '{{ .AWS_ACCESS_KEY_ID }}'
         AWS_SECRET_ACCESS_KEY: '{{ .AWS_SECRET_ACCESS_KEY }}'
@@ -25,15 +25,15 @@ spec:
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
-  name: audiobookshelf
+  name: bazarr
 spec:
-  sourcePVC: config-audiobookshelf-0
+  sourcePVC: config-bazarr-0
   trigger:
     schedule: "0 */12 * * *"
   restic:
     copyMethod: Snapshot
     pruneIntervalDays: 14
-    repository: audiobookshelf-restic-secret
+    repository: bazarr-restic-secret
     retain:
       hourly: 0
       daily: 14
