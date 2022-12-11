@@ -15,9 +15,6 @@ spec:
     storageClass: ceph-block
   superuserSecret:
     name: postgres-superuser
-  bootstrap:
-    recovery:
-      source: postgres-v1
   postgresql:
     parameters:
       max_connections: "300"
@@ -40,18 +37,3 @@ spec:
         secretAccessKey:
           name: postgres-minio
           key: MINIO_SECRET_KEY
-  externalClusters:
-    - name: postgres-v1
-      barmanObjectStore:
-        wal:
-          compression: bzip2
-          maxParallel: 8
-        destinationPath: s3://postgresql/
-        endpointURL: http://minio.default.svc.cluster.local:9000
-        s3Credentials:
-          accessKeyId:
-            name: postgres-minio
-            key: MINIO_ACCESS_KEY
-          secretAccessKey:
-            name: postgres-minio
-            key: MINIO_SECRET_KEY
