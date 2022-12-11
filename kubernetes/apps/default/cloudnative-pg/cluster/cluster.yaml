@@ -18,8 +18,28 @@ spec:
   bootstrap:
     recovery:
       source: postgres-v1
+  postgresql:
+    parameters:
+      max_connections: "300"
+      shared_buffers: 512MB
   monitoring:
     enablePodMonitor: true
+  backup:
+    retentionPolicy: 30d
+    barmanObjectStore:
+      wal:
+        compression: bzip2
+        maxParallel: 8
+      destinationPath: s3://postgresql/
+      endpointURL: http://minio.default.svc.cluster.local:9000
+      serverName: postgres-v2
+      s3Credentials:
+        accessKeyId:
+          name: postgres-minio
+          key: MINIO_ACCESS_KEY
+        secretAccessKey:
+          name: postgres-minio
+          key: MINIO_SECRET_KEY
   externalClusters:
     - name: postgres-v1
       barmanObjectStore:
