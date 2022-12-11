@@ -47,7 +47,7 @@ spec:
             key: user_1_password
     envFrom:
       - secretRef:
-          name: *app
+          name: frigate-secret
     service:
       main:
         ports:
@@ -91,10 +91,10 @@ spec:
         labels:
           snapshot.home.arpa/enabled: "true"
     persistence:
-      config-file:
+      config:
         enabled: true
         type: configMap
-        name: *app
+        name: frigate-configmap
         subPath: config.yaml
         mountPath: /config/config.yml
         readOnly: true
