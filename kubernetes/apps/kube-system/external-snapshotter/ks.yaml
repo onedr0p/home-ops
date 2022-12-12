@@ -45,11 +45,14 @@ spec:
   dependsOn:
     - name: cluster-apps-external-snapshotter-crds
   interval: 10m
-  timeout: 2m
-  retryInterval: 1m
   path: ./deploy/kubernetes/snapshot-controller
   prune: true
   sourceRef:
     kind: GitRepository
     name: external-snapshotter-manifests
-  wait: true
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: snapshot-controller
+      namespace: kube-system
+  timeout: 2m
