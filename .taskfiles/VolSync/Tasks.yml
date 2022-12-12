@@ -1,0 +1,108 @@
+---
+version: "3"
+
+x-task-vars: &task-vars
+  APP: '{{.APP}}'
+  CONTROLLER: '{{.CONTROLLER}}'
+  NAMESPACE: '{{.NAMESPACE}}'
+  CLAIM: '{{.CLAIM}}'
+  TS: '{{.TS}}'
+  KUSTOMIZATION: '{{.KUSTOMIZATION}}'
+
+vars:
+  REPLICATION_DESTINATION_TEMPLATE: "{{.PROJECT_DIR}}/.taskfiles/VolSync/ReplicationDestination.tmpl.yaml"
+  WIPE_JOB_TEMPLATE: "{{.PROJECT_DIR}}/.taskfiles/VolSync/WipeJob.tmpl.yaml"
+  TS: '{{now | date "150405"}}'
+
+tasks:
+
+  backup:
+    desc: Backup a PVC now (ex. task volsync:backup APP=plex [NAMESPACE=default])
+    cmds:
+      - kubectl -n {{.NAMESPACE}} patch replicationsources {{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"'{{.TS}}'"}}}'
+      - sleep 2
+      - kubectl -n {{.NAMESPACE}} wait job/volsync-src-{{.APP}} --for condition=complete --timeout=120m
+    vars:
+      NAMESPACE: '{{.NAMESPACE | default "default"}}'
+
+  restore:
+    desc: Restore a PVC now (ex. task volsync:restore APP=plex [NAMESPACE=default])
+    cmds:
+      - task: suspend-app
+        vars: *task-vars
+      - task: wipe-job
+        vars: *task-vars
+      - task: restore-job
+        vars: *task-vars
+      - task: resume-app
+        vars: *task-vars
+    vars:
+      APP: '{{ or .APP (fail "Variable `APP` is required") }}'
+      NAMESPACE: '{{.NAMESPACE | default "default"}}'
+      CONTROLLER:
+        sh: |
+          query="$(kubectl -n {{.NAMESPACE}} get deployment,statefulset --selector="app.kubernetes.io/name={{.APP}}" --no-headers 2>&1)"
+          if echo "${query}" | grep -q "No resources"; then
+              echo "Controller not found in cluster" && exit 1
+          else
+              echo "${query}" | awk '{print $1}'
+          fi
+      CLAIM:
+        sh: |
+          query="$(kubectl -n {{.NAMESPACE}} get persistentvolumeclaim --selector="app.kubernetes.io/name={{.APP}}" --no-headers 2>&1)"
+          if echo "${query}" | grep -q "No resources"; then
+              echo "Claim not found in cluster"
+          else
+              echo "${query}" | awk '{print $1}'
+          fi
+      KUSTOMIZATION:
+        sh: |
+          query="$(kubectl -n {{.NAMESPACE}} get helmrelease {{.APP}} -o yaml 2>&1)"
+          if echo "${query}" | grep -q "NotFound"; then
+              echo "Kustomization not found in cluster" && exit 1
+          else
+              echo "${query}" | yq eval '.metadata.labels."kustomize.toolkit.fluxcd.io/name"'
+          fi
+    env: *task-vars
+    preconditions:
+      - sh: test -f {{.WIPE_JOB_TEMPLATE}}
+      - sh: test -f {{.REPLICATION_DESTINATION_TEMPLATE}}
+
+  # Suspend the Flux ks and hr
+  suspend-app:
+    internal: true
+    cmds:
+      - flux -n flux-system suspend kustomization {{.KUSTOMIZATION}}
+      - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
+      - kubectl -n {{.NAMESPACE}} scale {{.CONTROLLER}} --replicas 0
+      - kubectl -n {{.NAMESPACE}} wait pod --for delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
+    env: *task-vars
+
+  # Wipe the PVC of all data
+  wipe-job:
+    internal: true
+    cmds:
+      - envsubst < <(cat {{.WIPE_JOB_TEMPLATE}}) | kubectl apply -f -
+      - sleep 5
+      - kubectl -n {{.NAMESPACE}} wait job/wipe-{{.APP}}-{{.CLAIM}}-{{.TS}} --for condition=complete --timeout=120m
+      - kubectl -n {{.NAMESPACE}} logs job/wipe-{{.APP}}-{{.CLAIM}}-{{.TS}} --container wipe
+      - kubectl -n {{.NAMESPACE}} delete job wipe-{{.APP}}-{{.CLAIM}}-{{.TS}}
+    env: *task-vars
+
+  # Run VolSync to restore data
+  restore-job:
+    internal: true
+    cmds:
+      - envsubst < <(cat {{.REPLICATION_DESTINATION_TEMPLATE}}) | kubectl apply -f -
+      - sleep 5
+      - kubectl -n {{.NAMESPACE}} wait job/volsync-dst-{{.APP}}-{{.CLAIM}}-{{.TS}} --for condition=complete --timeout=120m
+      - kubectl -n {{.NAMESPACE}} delete replicationdestination {{.APP}}-{{.CLAIM}}-{{.TS}}
+    env: *task-vars
+
+  # Resume Flux ks and hr
+  resume-app:
+    internal: true
+    cmds:
+      - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
+      - flux -n flux-system resume kustomization {{.KUSTOMIZATION}}
+    env: *task-vars
