@@ -15,27 +15,11 @@ spec:
     name: home-ops-kubernetes
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2beta1
+      kind: CronJob
+      name: plex-off-deck
+      namespace: default
+    - apiVersion: helm.toolkit.fluxcd.io/v2beta1
       kind: HelmRelease
       name: plex
       namespace: default
   timeout: 2m
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: cluster-apps-plex-jobs
-  namespace: flux-system
-  labels:
-    substitution.flux.home.arpa/enabled: "true"
-spec:
-  dependsOn:
-    - name: cluster-apps-plex-app
-  interval: 10m
-  timeout: 2m
-  retryInterval: 1m
-  path: ./kubernetes/apps/default/plex/jobs
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: home-ops-kubernetes
-  wait: true
