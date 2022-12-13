@@ -1,0 +1,48 @@
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: home-ops
+  namespace: actions-runner-system
+spec:
+  template:
+    spec:
+      image: summerwind/actions-runner-dind
+      imagePullPolicy: Always
+      dockerdWithinRunnerContainer: true
+      ephemeral: true
+      repository: onedr0p/home-ops
+      labels:
+        - self-hosted
+      securityContext:
+        supplementalGroups:
+          - 65542
+      volumeMounts:
+        - name: cache-volume
+          mountPath: /cache
+      volumes:
+        - name: cache-volume
+          persistentVolumeClaim:
+            claimName: actions-runner-controller-cache
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: home-ops
+  namespace: actions-runner-system
+spec:
+  scaleTargetRef:
+    name: home-ops
+  scaleUpTriggers:
+    - githubEvent:
+        checkRun:
+          types: ["created"]
+          status: "queued"
+      amount: 1
+      duration: "1m"
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: TotalNumberOfQueuedAndInProgressWorkflowRuns
+      repositoryNames:
+        - onedr0p/home-ops
