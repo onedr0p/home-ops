@@ -10,7 +10,7 @@ x-task-vars: &task-vars
   KUSTOMIZATION: '{{.KUSTOMIZATION}}'
 
 vars:
-  REPLICATION_DESTINATION_TEMPLATE: "{{.PROJECT_DIR}}/.taskfiles/VolSync/ReplicationDestination.tmpl.yaml"
+  DESTINATION_TEMPLATE: "{{.PROJECT_DIR}}/.taskfiles/VolSync/ReplicationDestination.tmpl.yaml"
   WIPE_JOB_TEMPLATE: "{{.PROJECT_DIR}}/.taskfiles/VolSync/WipeJob.tmpl.yaml"
   WAIT_FOR_JOB_SCRIPT: "{{.PROJECT_DIR}}/.taskfiles/VolSync/wait-for-job.sh"
   TS: '{{now | date "150405"}}'
@@ -23,13 +23,16 @@ tasks:
   backup:
     desc: Backup a PVC now (ex. task volsync:backup APP=plex [NAMESPACE=default])
     cmds:
-      - kubectl -n {{.NAMESPACE}} patch replicationsources {{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"'{{.TS}}'"}}}'
+      - kubectl -n {{.NAMESPACE}} patch replicationsources {{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"{{.TS}}"}}}'
       - bash {{.WAIT_FOR_JOB_SCRIPT}} volsync-src-{{.APP}} {{.NAMESPACE}}
       - kubectl -n {{.NAMESPACE}} wait job/volsync-src-{{.APP}} --for condition=complete --timeout=120m
+      - kubectl -n {{.NAMESPACE}} logs job/volsync-src-{{.APP}}
     vars:
       NAMESPACE: '{{.NAMESPACE | default "default"}}'
+    env: *task-vars
     preconditions:
       - sh: test -f {{.WAIT_FOR_JOB_SCRIPT}}
+      - sh: test -f {{.SOURCE_TEMPLATE}}
 
   # To run restore jobs in parallel for all replicationdestinations:
   #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore APP=$0 NAMESPACE=$1'
@@ -75,7 +78,7 @@ tasks:
     env: *task-vars
     preconditions:
       - sh: test -f {{.WIPE_JOB_TEMPLATE}}
-      - sh: test -f {{.REPLICATION_DESTINATION_TEMPLATE}}
+      - sh: test -f {{.DESTINATION_TEMPLATE}}
       - sh: test -f {{.WAIT_FOR_JOB_SCRIPT}}
 
   # Suspend the Flux ks and hr
@@ -103,7 +106,7 @@ tasks:
   restore-volsync-job:
     internal: true
     cmds:
-      - envsubst < <(cat {{.REPLICATION_DESTINATION_TEMPLATE}}) | kubectl apply -f -
+      - envsubst < <(cat {{.DESTINATION_TEMPLATE}}) | kubectl apply -f -
       - bash {{.WAIT_FOR_JOB_SCRIPT}} volsync-dst-{{.APP}}-{{.CLAIM}}-{{.TS}} {{.NAMESPACE}}
       - kubectl -n {{.NAMESPACE}} wait job/volsync-dst-{{.APP}}-{{.CLAIM}}-{{.TS}} --for condition=complete --timeout=120m
       - kubectl -n {{.NAMESPACE}} delete replicationdestination {{.APP}}-{{.CLAIM}}-{{.TS}}
