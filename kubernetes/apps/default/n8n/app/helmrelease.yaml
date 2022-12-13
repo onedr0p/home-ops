@@ -1,0 +1,83 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app n8n
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  dependsOn:
+    - name: cloudnative-pg
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: smtp-relay
+  values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+    image:
+      repository: docker.io/n8nio/n8n
+      tag: 0.194.0
+    env:
+      GENERIC_TIMEZONE: "${TIMEZONE}"
+      TZ: "${TIMEZONE}"
+      N8N_PORT: &port 80
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_DATABASE: *app
+      DB_POSTGRESDB_HOST: postgres-rw.default.svc.cluster.local
+      DB_POSTGRESDB_PORT: 5432
+      N8N_EMAIL_MODE: smtp
+      N8N_SMTP_HOST: smtp-relay.default.svc.cluster.local
+      N8N_SMTP_PORT: 2525
+      N8N_SMTP_SENDER: "n8n@${SECRET_EMAIL_DOMAIN}"
+      N8N_METRICS: "true"
+    envFrom:
+      - secretRef:
+          name: n8n-secret
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        hosts:
+          - host: &host "n8n.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /home/node/.n8n
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
+    resources:
+      requests:
+        cpu: 10m
+        memory: 50Mi
+      limits:
+        memory: 500Mi

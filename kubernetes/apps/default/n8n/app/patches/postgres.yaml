@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: miniflux
+  name: n8n
   namespace: default
 spec:
   values:
@@ -13,12 +13,19 @@ spec:
           - name: POSTGRES_HOST
             value: postgres-rw.default.svc.cluster.local
           - name: POSTGRES_DB
-            value: miniflux
+            value: n8n
           - name: POSTGRES_SUPER_PASS
             valueFrom:
               secretKeyRef:
                 name: postgres-superuser
                 key: password
-        envFrom:
-          - secretRef:
-              name: miniflux-secret
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: n8n-secret
+                key: DB_POSTGRESDB_USER
+          - name: POSTGRES_PASS
+            valueFrom:
+              secretKeyRef:
+                name: n8n-secret
+                key: DB_POSTGRESDB_PASSWORD
