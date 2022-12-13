@@ -27,7 +27,10 @@ spec:
     hajimari:
       title: Apps
       darkTheme: espresso
+      alwaysTargetBlank: true
       showGreeting: false
+      showAppGroups: false
+      showAppStatus: false
       showBookmarkGroups: false
       showGlobalBookmarks: false
       showAppUrls: false
@@ -37,11 +40,14 @@ spec:
           - default
           - flux-system
           - monitoring
+          - networking
           - rook-ceph
     ingress:
       main:
         enabled: true
         ingressClassName: "nginx"
+        annotations:
+          hajimari.io/enable: "false"
         hosts:
           - host: &host "apps.${SECRET_PUBLIC_DOMAIN}"
             paths:
