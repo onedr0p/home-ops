@@ -1,0 +1,55 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: actions-runner-controller
+  namespace: actions-runner-system
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: actions-runner-controller
+      version: 0.21.1
+      sourceRef:
+        kind: HelmRepository
+        name: actions-runner-controller
+        namespace: flux-system
+  install:
+    createNamespace: true
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  values:
+    authSecret:
+      create: false
+      name: &auth-secret arc-auth-secret
+    podAnnotations:
+      secret.reloader.stakater.com/reload: *auth-secret
+    githubWebhookServer:
+      enabled: true
+      syncPeriod: 10m
+      secret:
+        create: false
+        name: &webhook-secret arc-webhook-secret
+      podAnnotations:
+        secret.reloader.stakater.com/reload: *webhook-secret
+      ingress:
+        enabled: true
+        annotations:
+          external-dns.home.arpa/enabled: "true"
+          hajimari.io/enable: "false"
+        ingressClassName: "nginx"
+        hosts:
+          - host: &host "arc-webhook.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    metrics:
+      serviceMonitor: true
