@@ -52,7 +52,7 @@ tasks:
         sh: |
           query="$(kubectl -n {{.NAMESPACE}} get deployment,statefulset --selector="app.kubernetes.io/name={{.APP}}" --no-headers 2>&1)"
           if echo "${query}" | grep -q "No resources"; then
-              echo "Controller not found in cluster" && exit 1
+              echo "Deployment or StatefulSet not found in cluster" && exit 1
           else
               echo "${query}" | awk '{print $1}'
           fi
@@ -60,7 +60,7 @@ tasks:
         sh: |
           query="$(kubectl -n {{.NAMESPACE}} get persistentvolumeclaim --selector="app.kubernetes.io/name={{.APP}}" --no-headers 2>&1)"
           if echo "${query}" | grep -q "No resources"; then
-              echo "Claim not found in cluster"
+              echo "PersistentVolumeClaim not found in cluster"
           else
               echo "${query}" | awk '{print $1}'
           fi
@@ -68,7 +68,7 @@ tasks:
         sh: |
           query="$(kubectl -n {{.NAMESPACE}} get helmrelease {{.APP}} -o yaml 2>&1)"
           if echo "${query}" | grep -q "NotFound"; then
-              echo "Kustomization not found in cluster" && exit 1
+              echo "HelmRelease not found in cluster" && exit 1
           else
               echo "${query}" | yq eval '.metadata.labels."kustomize.toolkit.fluxcd.io/name"'
           fi
