@@ -91,6 +91,9 @@ spec:
         enabled: true
         pathType: Prefix
         ingressClassName: "nginx"
+        annotations:
+          hajimari.io/appName: "Alert Manager"
+          hajimari.io/icon: "mdi:alert-decagram-outline"
         hosts:
           - &host "alert-manager.${SECRET_PUBLIC_DOMAIN}"
         tls:
@@ -168,8 +171,11 @@ spec:
     prometheus:
       ingress:
         enabled: true
-        pathType: Prefix
         ingressClassName: "nginx"
+        annotations:
+          hajimari.io/appName: "Prometheus"
+          hajimari.io/icon: "mdi:fire"
+        pathType: Prefix
         hosts:
           - &host "prometheus.${SECRET_PUBLIC_DOMAIN}"
         tls:
@@ -186,6 +192,7 @@ spec:
         annotations:
           nginx.ingress.kubernetes.io/ssl-redirect: "true"
           nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+          hajimari.io/enable: "false"
         hosts:
           - &host "thanos-sidecar.${SECRET_PUBLIC_DOMAIN}"
         tls:

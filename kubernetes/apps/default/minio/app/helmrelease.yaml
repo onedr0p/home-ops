@@ -65,6 +65,8 @@ spec:
       main:
         enabled: true
         ingressClassName: "nginx"
+        annotations:
+          hajimari.io/icon: pail
         hosts:
           - host: &host-console "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
             paths:
@@ -85,6 +87,7 @@ spec:
           nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
           nginx.ingress.kubernetes.io/configuration-snippet: |
             chunked_transfer_encoding off;
+          hajimari.io/enable: "false"
         hosts:
           - host: &host-api "s3.${SECRET_PUBLIC_DOMAIN}"
             paths:
