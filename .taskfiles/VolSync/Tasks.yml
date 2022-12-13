@@ -13,20 +13,33 @@ vars:
   DESTINATION_TEMPLATE: "{{.PROJECT_DIR}}/.taskfiles/VolSync/ReplicationDestination.tmpl.yaml"
   WIPE_JOB_TEMPLATE: "{{.PROJECT_DIR}}/.taskfiles/VolSync/WipeJob.tmpl.yaml"
   WAIT_FOR_JOB_SCRIPT: "{{.PROJECT_DIR}}/.taskfiles/VolSync/wait-for-job.sh"
+  LIST_JOB_TEMPLATE: "{{.PROJECT_DIR}}/.taskfiles/VolSync/ListJob.tmpl.yaml"
   TS: '{{now | date "150405"}}'
 
 tasks:
 
-  # list:
-  #   desc: List snapshots for an ReplicationDestintion
-  #   cmds:
-  #     -
+  list:
+    desc: List all snapshots taken by restic for a given ReplicationSource (ex. task volsync:list RSRC=plex [NAMESPACE=default])
+    silent: true
+    cmds:
+      - envsubst < <(cat {{.LIST_JOB_TEMPLATE}}) | kubectl apply -f -
+      - bash {{.WAIT_FOR_JOB_SCRIPT}} list-{{.RSRC}}-{{.TS}} {{.NAMESPACE}}
+      - kubectl -n {{.NAMESPACE}} wait job/list-{{.RSRC}}-{{.TS}} --for condition=complete --timeout=1m
+      - kubectl -n {{.NAMESPACE}} logs job/list-{{.RSRC}}-{{.TS}} --container list
+      - kubectl -n {{.NAMESPACE}} delete job list-{{.RSRC}}-{{.TS}}
+    vars:
+      RSRC: '{{ or .RSRC (fail "ReplicationSource `RSRC` is required") }}'
+      NAMESPACE: '{{.NAMESPACE | default "default"}}'
+    env: *task-vars
+    preconditions:
+      - sh: test -f {{.WAIT_FOR_JOB_SCRIPT}}
+      - sh: test -f {{.LIST_JOB_TEMPLATE}}
 
   # To run backup jobs in parallel for all replicationsources:
   #  - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:snapshot RSRC=$0 NAMESPACE=$1'
   #
   snapshot:
-    desc: Trigger a ReplicationSource snapshot (ex. task volsync:snapshot RSRC=plex [NAMESPACE=default])
+    desc: Trigger a Restic ReplicationSource snapshot (ex. task volsync:snapshot RSRC=plex [NAMESPACE=default])
     cmds:
       - kubectl -n {{.NAMESPACE}} patch replicationsources {{.RSRC}} --type merge -p '{"spec":{"trigger":{"manual":"{{.TS}}"}}}'
       - bash {{.WAIT_FOR_JOB_SCRIPT}} volsync-src-{{.RSRC}} {{.NAMESPACE}}
@@ -46,7 +59,7 @@ tasks:
   #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore RSRC=$0 NAMESPACE=$1'
   #
   restore:
-    desc: Restore a PVC now (ex. task volsync:restore RSRC=plex [NAMESPACE=default])
+    desc: Trigger a Restic ReplicationSource restore (ex. task volsync:restore RSRC=plex [NAMESPACE=default])
     cmds:
       - task: restore-suspend-app
         vars: *task-vars
@@ -59,22 +72,24 @@ tasks:
     vars:
       RSRC: '{{ or .RSRC (fail "Variable `RSRC` is required") }}'
       NAMESPACE: '{{.NAMESPACE | default "default"}}'
-      CLAIM:
-        sh: |
-          kubectl -n {{.NAMESPACE}} get replicationsource {{.RSRC}} \
-            -o jsonpath="{.spec.sourcePVC}"
-      CONTROLLER:
-        sh: |
-          app=$(kubectl -n {{.NAMESPACE}} get persistentvolumeclaim {{.CLAIM}} -o jsonpath="{.metadata.labels.app\.kubernetes\.io/name}")
-          if [[ -z $(kubectl -n {{.NAMESPACE}} get persistentvolumeclaim {{.CLAIM}} -o jsonpath="{.metadata.annotations.volume\.kubernetes\.io/storage-provisioner}") ]]; then
-            echo "deployments.apps/$app"
-          else
-            echo "statefulsets.apps/$app"
-          fi
+      # 1) Query to find the Flux Kustomization associated with the ReplicationSource (RSRC)
       KUSTOMIZATION:
         sh: |
           kubectl -n {{.NAMESPACE}} get replicationsource {{.RSRC}} \
             -o jsonpath="{.metadata.labels.kustomize\.toolkit\.fluxcd\.io/name}"
+      # 2) Query to find the Claim associated with the ReplicationSource (RSRC)
+      CLAIM:
+        sh: |
+          kubectl -n {{.NAMESPACE}} get replicationsource {{.RSRC}} \
+            -o jsonpath="{.spec.sourcePVC}"
+      # 3) Query to find the controller associated with the PersistentVolumeClaim (CLAIM)
+      CONTROLLER:
+        sh: |
+          app=$(kubectl -n {{.NAMESPACE}} get persistentvolumeclaim {{.CLAIM}} -o jsonpath="{.metadata.labels.app\.kubernetes\.io/name}")
+          if [[ -z $(kubectl -n {{.NAMESPACE}} get persistentvolumeclaim {{.CLAIM}} -o jsonpath="{.metadata.annotations.volume\.kubernetes\.io/storage-provisioner}") ]]; then
+            echo "deployments.apps/$app" && exit 0
+          fi
+          echo "statefulsets.apps/$app"
     env: *task-vars
     preconditions:
       - sh: test -f {{.WIPE_JOB_TEMPLATE}}
