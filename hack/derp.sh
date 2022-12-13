@@ -51,6 +51,11 @@
 # echo "Job succeeded"
 
 
-[[ -z $(kubectl -n default get persistentvolumeclaim immich-nfs -o jsonpath='{.metadata.labels.app\.kubernetes\.io/name}') ]] || echo "immich"
+# [[ -z $(kubectl -n default get persistentvolumeclaim immich-nfs -o jsonpath='{.metadata.labels.app\.kubernetes\.io/name}') ]] || exit 1
 
-[[ -z $(kubectl -n default get persistentvolumeclaim config-zzztest-0 -o jsonpath='{.metadata.labels.app\.kubernetes\.io/name}') ]] || echo "zzztest"
+# [[ -z $(kubectl -n default get persistentvolumeclaim config-zzztest-0 -o jsonpath='{.metadata.labels.app\.kubernetes\.io/name}') ]] || echo "zzztest"
+
+shopt -s dotglob
+find ./kubernetes -type f -name "*.yaml" | while IFS= read -r f; do
+    kubeconform -schema-location default -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" "$f"
+done
