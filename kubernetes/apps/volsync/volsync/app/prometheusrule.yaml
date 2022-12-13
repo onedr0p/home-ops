@@ -1,0 +1,28 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: volsync
+  namespace: volsync
+spec:
+  groups:
+    - name: volsync.rules
+      rules:
+        - alert: VolSyncComponentAbsent
+          annotations:
+            summary: VolSync component has disappeared from Prometheus target discovery.
+          expr: |
+            absent(up{job=~".*volsync.*"} == 1)
+          for: 15m
+          labels:
+            severity: critical
+        - alert: VolSyncVolumeOutOfSync
+          annotations:
+            summary: >-
+              {{ $labels.obj_namespace }}/{{ $labels.obj_name }} volume
+              is out of sync.
+          expr: |
+            volsync_volume_out_of_sync == 1
+          for: 15m
+          labels:
+            severity: critical
