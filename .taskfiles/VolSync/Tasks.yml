@@ -2,7 +2,7 @@
 version: "3"
 
 x-task-vars: &task-vars
-  APP: '{{.APP}}'
+  RSRC: '{{.RSRC}}'
   CONTROLLER: '{{.CONTROLLER}}'
   NAMESPACE: '{{.NAMESPACE}}'
   CLAIM: '{{.CLAIM}}'
@@ -17,28 +17,36 @@ vars:
 
 tasks:
 
+  # list:
+  #   desc: List snapshots for an ReplicationDestintion
+  #   cmds:
+  #     -
+
   # To run backup jobs in parallel for all replicationsources:
-  #  - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:backup APP=$0 NAMESPACE=$1'
+  #  - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:snapshot RSRC=$0 NAMESPACE=$1'
   #
-  backup:
-    desc: Backup a PVC now (ex. task volsync:backup APP=plex [NAMESPACE=default])
+  snapshot:
+    desc: Trigger a ReplicationSource snapshot (ex. task volsync:snapshot RSRC=plex [NAMESPACE=default])
     cmds:
-      - kubectl -n {{.NAMESPACE}} patch replicationsources {{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"{{.TS}}"}}}'
-      - bash {{.WAIT_FOR_JOB_SCRIPT}} volsync-src-{{.APP}} {{.NAMESPACE}}
-      - kubectl -n {{.NAMESPACE}} wait job/volsync-src-{{.APP}} --for condition=complete --timeout=120m
+      - kubectl -n {{.NAMESPACE}} patch replicationsources {{.RSRC}} --type merge -p '{"spec":{"trigger":{"manual":"{{.TS}}"}}}'
+      - bash {{.WAIT_FOR_JOB_SCRIPT}} volsync-src-{{.RSRC}} {{.NAMESPACE}}
+      - kubectl -n {{.NAMESPACE}} wait job/volsync-src-{{.RSRC}} --for condition=complete --timeout=120m
       # TODO: Error from server (NotFound): jobs.batch "volsync-src-zzztest" not found
-      # - kubectl -n {{.NAMESPACE}} logs job/volsync-src-{{.APP}}
+      # - kubectl -n {{.NAMESPACE}} logs job/volsync-src-{{.RSRC}}
     vars:
+      RSRC: '{{ or .RSRC (fail "ReplicationSource `RSRC` is required") }}'
       NAMESPACE: '{{.NAMESPACE | default "default"}}'
     env: *task-vars
     preconditions:
       - sh: test -f {{.WAIT_FOR_JOB_SCRIPT}}
+      - sh: kubectl -n {{.NAMESPACE}} get replicationsources {{.RSRC}}
+        msg: "ReplicationSource '{{.RSRC}}' not found in namespace '{{.NAMESPACE}}'"
 
   # To run restore jobs in parallel for all replicationdestinations:
-  #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore APP=$0 NAMESPACE=$1'
+  #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore RSRC=$0 NAMESPACE=$1'
   #
   restore:
-    desc: Restore a PVC now (ex. task volsync:restore APP=plex [NAMESPACE=default])
+    desc: Restore a PVC now (ex. task volsync:restore RSRC=plex [NAMESPACE=default])
     cmds:
       - task: restore-suspend-app
         vars: *task-vars
@@ -49,32 +57,24 @@ tasks:
       - task: restore-resume-app
         vars: *task-vars
     vars:
-      APP: '{{ or .APP (fail "Variable `APP` is required") }}'
+      RSRC: '{{ or .RSRC (fail "Variable `RSRC` is required") }}'
       NAMESPACE: '{{.NAMESPACE | default "default"}}'
-      CONTROLLER:
-        sh: |
-          query="$(kubectl -n {{.NAMESPACE}} get deployment,statefulset --selector="app.kubernetes.io/name={{.APP}}" --no-headers 2>&1)"
-          if echo "${query}" | grep -q "No resources"; then
-              echo "Deployment or StatefulSet not found in cluster" && exit 1
-          else
-              echo "${query}" | awk '{print $1}'
-          fi
       CLAIM:
         sh: |
-          query="$(kubectl -n {{.NAMESPACE}} get persistentvolumeclaim --selector="app.kubernetes.io/name={{.APP}}" --no-headers 2>&1)"
-          if echo "${query}" | grep -q "No resources"; then
-              echo "PersistentVolumeClaim not found in cluster"
+          kubectl -n {{.NAMESPACE}} get replicationsource {{.RSRC}} \
+            -o jsonpath="{.spec.sourcePVC}"
+      CONTROLLER:
+        sh: |
+          app=$(kubectl -n {{.NAMESPACE}} get persistentvolumeclaim {{.CLAIM}} -o jsonpath="{.metadata.labels.app\.kubernetes\.io/name}")
+          if [[ -z $(kubectl -n {{.NAMESPACE}} get persistentvolumeclaim {{.CLAIM}} -o jsonpath="{.metadata.annotations.volume\.kubernetes\.io/storage-provisioner}") ]]; then
+            echo "deployments.apps/$app"
           else
-              echo "${query}" | awk '{print $1}'
+            echo "statefulsets.apps/$app"
           fi
       KUSTOMIZATION:
         sh: |
-          query="$(kubectl -n {{.NAMESPACE}} get helmrelease {{.APP}} -o yaml 2>&1)"
-          if echo "${query}" | grep -q "NotFound"; then
-              echo "HelmRelease not found in cluster" && exit 1
-          else
-              echo "${query}" | yq eval '.metadata.labels."kustomize.toolkit.fluxcd.io/name"'
-          fi
+          kubectl -n {{.NAMESPACE}} get replicationsource {{.RSRC}} \
+            -o jsonpath="{.metadata.labels.kustomize\.toolkit\.fluxcd\.io/name}"
     env: *task-vars
     preconditions:
       - sh: test -f {{.WIPE_JOB_TEMPLATE}}
@@ -86,9 +86,9 @@ tasks:
     internal: true
     cmds:
       - flux -n flux-system suspend kustomization {{.KUSTOMIZATION}}
-      - flux -n {{.NAMESPACE}} suspend helmrelease {{.APP}}
+      - flux -n {{.NAMESPACE}} suspend helmrelease {{.RSRC}}
       - kubectl -n {{.NAMESPACE}} scale {{.CONTROLLER}} --replicas 0
-      - kubectl -n {{.NAMESPACE}} wait pod --for delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
+      - kubectl -n {{.NAMESPACE}} wait pod --for delete --selector="app.kubernetes.io/name={{.RSRC}}" --timeout=2m
     env: *task-vars
 
   # Wipe the PVC of all data
@@ -96,10 +96,10 @@ tasks:
     internal: true
     cmds:
       - envsubst < <(cat {{.WIPE_JOB_TEMPLATE}}) | kubectl apply -f -
-      - bash {{.WAIT_FOR_JOB_SCRIPT}} wipe-{{.APP}}-{{.CLAIM}}-{{.TS}} {{.NAMESPACE}}
-      - kubectl -n {{.NAMESPACE}} wait job/wipe-{{.APP}}-{{.CLAIM}}-{{.TS}} --for condition=complete --timeout=120m
-      - kubectl -n {{.NAMESPACE}} logs job/wipe-{{.APP}}-{{.CLAIM}}-{{.TS}} --container wipe
-      - kubectl -n {{.NAMESPACE}} delete job wipe-{{.APP}}-{{.CLAIM}}-{{.TS}}
+      - bash {{.WAIT_FOR_JOB_SCRIPT}} wipe-{{.RSRC}}-{{.CLAIM}}-{{.TS}} {{.NAMESPACE}}
+      - kubectl -n {{.NAMESPACE}} wait job/wipe-{{.RSRC}}-{{.CLAIM}}-{{.TS}} --for condition=complete --timeout=120m
+      - kubectl -n {{.NAMESPACE}} logs job/wipe-{{.RSRC}}-{{.CLAIM}}-{{.TS}} --container wipe
+      - kubectl -n {{.NAMESPACE}} delete job wipe-{{.RSRC}}-{{.CLAIM}}-{{.TS}}
     env: *task-vars
 
   # Create VolSync replicationdestination CR to restore data
@@ -107,15 +107,15 @@ tasks:
     internal: true
     cmds:
       - envsubst < <(cat {{.DESTINATION_TEMPLATE}}) | kubectl apply -f -
-      - bash {{.WAIT_FOR_JOB_SCRIPT}} volsync-dst-{{.APP}}-{{.CLAIM}}-{{.TS}} {{.NAMESPACE}}
-      - kubectl -n {{.NAMESPACE}} wait job/volsync-dst-{{.APP}}-{{.CLAIM}}-{{.TS}} --for condition=complete --timeout=120m
-      - kubectl -n {{.NAMESPACE}} delete replicationdestination {{.APP}}-{{.CLAIM}}-{{.TS}}
+      - bash {{.WAIT_FOR_JOB_SCRIPT}} volsync-dst-{{.RSRC}}-{{.CLAIM}}-{{.TS}} {{.NAMESPACE}}
+      - kubectl -n {{.NAMESPACE}} wait job/volsync-dst-{{.RSRC}}-{{.CLAIM}}-{{.TS}} --for condition=complete --timeout=120m
+      - kubectl -n {{.NAMESPACE}} delete replicationdestination {{.RSRC}}-{{.CLAIM}}-{{.TS}}
     env: *task-vars
 
   # Resume Flux ks and hr
   restore-resume-app:
     internal: true
     cmds:
-      - flux -n {{.NAMESPACE}} resume helmrelease {{.APP}}
+      - flux -n {{.NAMESPACE}} resume helmrelease {{.RSRC}}
       - flux -n flux-system resume kustomization {{.KUSTOMIZATION}}
     env: *task-vars

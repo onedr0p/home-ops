@@ -29,23 +29,28 @@
 # fi
 
 
-while true; do
-  if kubectl wait --for=condition=complete --timeout=0 job/name 2>/dev/null; then
-    job_result=0
-    break
-  fi
+# while true; do
+#   if kubectl wait --for=condition=complete --timeout=0 job/name 2>/dev/null; then
+#     job_result=0
+#     break
+#   fi
 
-  if kubectl wait --for=condition=failed --timeout=0 job/name 2>/dev/null; then
-    job_result=1
-    break
-  fi
+#   if kubectl wait --for=condition=failed --timeout=0 job/name 2>/dev/null; then
+#     job_result=1
+#     break
+#   fi
 
-  sleep 3
-done
+#   sleep 3
+# done
 
-if [[ $job_result -eq 1 ]]; then
-    echo "Job failed!"
-    exit 1
-fi
+# if [[ $job_result -eq 1 ]]; then
+#     echo "Job failed!"
+#     exit 1
+# fi
 
-echo "Job succeeded"
+# echo "Job succeeded"
+
+
+[[ -z $(kubectl -n default get persistentvolumeclaim immich-nfs -o jsonpath='{.metadata.labels.app\.kubernetes\.io/name}') ]] || echo "immich"
+
+[[ -z $(kubectl -n default get persistentvolumeclaim config-zzztest-0 -o jsonpath='{.metadata.labels.app\.kubernetes\.io/name}') ]] || echo "zzztest"
