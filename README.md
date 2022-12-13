@@ -41,12 +41,13 @@ My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Fedora Serve
 
 ### Core Components
 
-- [projectcalico/calico](https://github.com/projectcalico/calico): Internal Kubernetes networking plugin.
-- [rook/rook](https://github.com/rook/rook): Distributed block storage for peristent storage.
-- [mozilla/sops](https://toolkit.fluxcd.io/guides/mozilla-sops/): Manages secrets for Kubernetes, Ansible and Terraform.
-- [kubernetes-sigs/external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically manages DNS records from my cluster in a cloud DNS provider.
-- [jetstack/cert-manager](https://cert-manager.io/docs/): Creates SSL certificates for services in my Kubernetes cluster.
-- [kubernetes/ingress-nginx](https://github.com/kubernetes/ingress-nginx/): Ingress controller to expose HTTP traffic to pods over DNS.
+- [calico](https://github.com/projectcalico/calico): Internal Kubernetes networking plugin.
+- [rook](https://github.com/rook/rook): Distributed block storage for peristent storage.
+- [sops](https://toolkit.fluxcd.io/guides/mozilla-sops/): Manages secrets for Kubernetes, Ansible and Terraform.
+- [external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically manages DNS records from my cluster in a cloud DNS provider.
+- [cert-manager](https://cert-manager.io/docs/): Creates SSL certificates for services in my Kubernetes cluster.
+- [ingress-nginx](https://github.com/kubernetes/ingress-nginx/): Ingress controller to expose HTTP traffic to pods over DNS.
+- [volsync](https://github.com/backube/volsync): Backup and recovery of persistent volume claims.
 
 ### GitOps
 
@@ -60,9 +61,9 @@ This Git repository contains the following directories (_kustomizatons_) under [
 
 ```sh
 📁 kubernetes      # Kubernetes cluster defined as code
-├─📁 bootstrap     # Manual Flux and Repo installation
+├─📁 bootstrap     # Flux installation
 ├─📁 flux          # Main Flux configuration of repository
-└─📁 apps          # Applications deployed into my cluster
+└─📁 apps          # Applications deployed into my cluster grouped by namespace
 ```
 
 ### Networking
@@ -77,12 +78,6 @@ This Git repository contains the following directories (_kustomizatons_) under [
 
 - HAProxy configured on my `Opnsense` router for the Kubernetes Control Plane Load Balancer.
 - Calico configured with `externalIPs` to expose Kubernetes services with their own IP over BGP (w/ECMP) which is configured on my router.
-
-### Data Backup and Recovery
-
-Rook does not have built in support for backing up PVC data. I am currently leveraging [VolSync](https://github.com/backube/volsync) with the Restic integration to handle backups of persistent data.
-
-🔸 _[Velero](https://github.com/vmware-tanzu/velero), [Benji](https://github.com/elemental-lf/benji), [Gemini](https://github.com/FairwindsOps/gemini), [Kasten K10 by Veeam](https://www.kasten.io/product/), [Stash by AppsCode](https://stash.run/) are some alternatives but have limitations._
 
 ---
 
@@ -140,7 +135,7 @@ My home IP can change at any given time and in order to keep my WAN IP address u
 
 ## 🤝 Gratitude and Thanks
 
-Thanks to all the people who donate their time to the [Kubernetes @Home](https://github.com/k8s-at-home/) community. A lot of inspiration for my cluster comes from the people that have shared their clusters with the [k8s-at-home](https://github.com/topics/k8s-at-home) GitHub topic.
+Thanks to all the people who donate their time to the [Kubernetes @Home](discord.gg/k8s-at-home) Discord community. A lot of inspiration for my cluster comes from the people that have shared their clusters using the [k8s-at-home](https://github.com/topics/k8s-at-home) GitHub topic. Be sure to check out the [Kubernetes @Home search](https://nanne.dev/k8s-at-home-search/) for ideas on how to deploy applications or get ideas on what you can deploy.
 
 ---
 
