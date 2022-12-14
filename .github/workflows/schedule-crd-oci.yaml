@@ -43,6 +43,13 @@ jobs:
         run: |
           bash $GITHUB_WORKSPACE/crd-extractor.sh
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # renovate: tag=v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Setup Flux
         uses: fluxcd/flux2/action@8674f31874b23ec1d03fc51efde27d1280d116db # renovate: tag=v0.37.0
 
@@ -50,5 +57,5 @@ jobs:
         run: |
           flux push artifact oci://ghcr.io/onedr0p/cluster-crds-oci:latest \
               --path="/home/runner/.datree/crdSchemas" \
-              --source="${{ github.repositoryUrl }}"
+              --source="${{ github.repositoryUrl }}" \
               --revision="main"
