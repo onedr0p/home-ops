@@ -7,6 +7,10 @@ on:
       repoName:
         description: "Flux HelmRepository Name"
         required: true
+      repoNamespace:
+        description: "Flux HelmRepository Namespace"
+        default: "flux-system"
+        required: true
   pull_request:
     types: ["labeled"]
 
@@ -48,8 +52,10 @@ jobs:
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_and_modified_files }}; do
             repoName="$(yq eval '.spec.chart.spec.sourceRef.name' "${file}")"
+            repoNamespace="$(yq eval '.spec.chart.spec.sourceRef.namespace' "${file}")"
             flux --kubeconfig ${{ steps.kubeconfig.outputs.filePath }} \
-              reconcile source helm "${repoName}"
+              --namespace "${repoNamespace}" reconcile \
+              source helm "${repoName}"
           done
 
       - name: Sync HelmRepository
@@ -58,4 +64,5 @@ jobs:
           KUBECONFIG: ${{ secrets.KUBECONFIG }}
         run: |
           flux --kubeconfig ${{ steps.kubeconfig.outputs.filePath }} \
-            reconcile source helm ${{ github.event.inputs.repoName }}
+            --namespace ${{ github.event.inputs.repoNamespace }} reconcile \
+            source helm ${{ github.event.inputs.repoName }}
