@@ -9,7 +9,6 @@ metadata:
 spec:
   dependsOn:
     - name: cluster-apps-loki-app
-  interval: 10m
   path: ./kubernetes/apps/monitoring/vector/aggregator
   prune: true
   sourceRef:
@@ -20,7 +19,9 @@ spec:
       kind: HelmRelease
       name: vector-aggregator
       namespace: monitoring
-  timeout: 2m
+  interval: 10m
+  retryInterval: 2m
+  timeout: 1m
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -32,7 +33,6 @@ metadata:
 spec:
   dependsOn:
     - name: cluster-apps-vector-aggregator
-  interval: 10m
   path: ./kubernetes/apps/monitoring/vector/agent
   prune: true
   sourceRef:
@@ -43,4 +43,6 @@ spec:
       kind: HelmRelease
       name: vector-agent
       namespace: monitoring
-  timeout: 2m
+  interval: 10m
+  retryInterval: 2m
+  timeout: 1m

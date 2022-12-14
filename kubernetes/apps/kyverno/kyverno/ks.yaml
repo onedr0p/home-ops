@@ -2,12 +2,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: cluster-apps-kyverno-app
+  name: cluster-apps-kyverno
   namespace: flux-system
   labels:
     substitution.flux.home.arpa/enabled: "true"
 spec:
-  interval: 10m
   path: ./kubernetes/apps/kyverno/kyverno/app
   prune: true
   sourceRef:
@@ -18,7 +17,9 @@ spec:
       kind: HelmRelease
       name: kyverno
       namespace: kyverno
-  timeout: 2m
+  interval: 10m
+  retryInterval: 2m
+  timeout: 1m
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -29,13 +30,13 @@ metadata:
     substitution.flux.home.arpa/enabled: "true"
 spec:
   dependsOn:
-    - name: cluster-apps-kyverno-app
-  interval: 10m
-  timeout: 2m
-  retryInterval: 1m
+    - name: cluster-apps-kyverno
   path: ./kubernetes/apps/kyverno/kyverno/policies
   prune: true
   sourceRef:
     kind: GitRepository
     name: home-ops-kubernetes
   wait: true
+  interval: 10m
+  retryInterval: 2m
+  timeout: 1m
