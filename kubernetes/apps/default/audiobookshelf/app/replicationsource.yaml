@@ -30,10 +30,13 @@ metadata:
 spec:
   sourcePVC: config-audiobookshelf-0
   trigger:
-    schedule: "0 */12 * * *"
+    schedule: "${CRON_DAILY_NIGHT:-0 0 * * *}"
   restic:
     copyMethod: Snapshot
     pruneIntervalDays: 14
     repository: audiobookshelf-restic-secret
     retain:
+      hourly: 6
       daily: 14
+      weekly: 4
+      monthly: 2
