@@ -48,21 +48,19 @@ jobs:
       - name: Sync HelmRepository
         if: ${{ github.event.label.name == 'renovate/helm' }}
         env:
-          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+          KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_and_modified_files }}; do
             repoName="$(yq eval '.spec.chart.spec.sourceRef.name' "${file}")"
             repoNamespace="$(yq eval '.spec.chart.spec.sourceRef.namespace' "${file}")"
-            flux --kubeconfig ${{ steps.kubeconfig.outputs.filePath }} \
-              --namespace "${repoNamespace}" reconcile \
+            flux --namespace "${repoNamespace}" reconcile \
               source helm "${repoName}"
           done
 
       - name: Sync HelmRepository
         if: ${{ github.event.inputs.repoName != '' }}
         env:
-          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+          KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
         run: |
-          flux --kubeconfig ${{ steps.kubeconfig.outputs.filePath }} \
-            --namespace ${{ github.event.inputs.repoNamespace }} reconcile \
+          flux --namespace ${{ github.event.inputs.repoNamespace }} reconcile \
             source helm ${{ github.event.inputs.repoName }}

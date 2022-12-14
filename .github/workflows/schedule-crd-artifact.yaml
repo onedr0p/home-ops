@@ -1,0 +1,54 @@
+---
+name: "Schedule: Upload CRD Artifacts"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  upload-crds:
+    name: Upload CRD Artifacts
+    runs-on: ["self-hosted"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+        with:
+          fetch-depth: 0
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@e1be5e75ed9741a7c467f4832ecb259a83174311 # renovate: tag=v3.1
+
+      - name: Download crd-extractor
+        uses: robinraju/release-downloader@d6de084c58345d09b017e22701dbcf26977cfd14 # renovate: tag=v1.6
+        with:
+          repository: datreeio/CRDs-catalog
+          latest: true
+          fileName: crd-extractor.zip
+          out-file-path: crd-extractor
+
+      - name: Write kubeconfig
+        id: kubeconfig
+        uses: timheuer/base64-to-file@48657ba25c726c2e3dcf02efa3639fff9b3d587e # renovate: tag=v1.2
+        with:
+          encodedString: ${{ secrets.KUBECONFIG }}
+          fileName: kubeconfig
+
+      - name: Run crd-extractor
+        env:
+          KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
+        run: |
+          bash ./crd-extractor/crd-extractor.sh
+          pwd
+          ls -la
+
+      - name: Setup Flux
+        uses: fluxcd/flux2/action@8674f31874b23ec1d03fc51efde27d1280d116db # renovate: tag=v0.37.0
+
+
+      # - name: Publish OCI
+      #   run: |
+      #     flux push artifact oci://ghcr.io/onedr0p/cluster-crds-oci:latest \
+      #         --path="./${{ matrix.project }}" \
+      #         --source="$(git config --get remote.origin.url)" \
+      #         --revision="$(git branch --show-current)/$(git rev-parse HEAD)"
