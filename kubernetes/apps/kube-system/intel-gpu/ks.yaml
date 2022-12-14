@@ -7,6 +7,8 @@ metadata:
   labels:
     substitution.flux.home.arpa/enabled: "true"
 spec:
+  dependsOn:
+    - name: cluster-apps-node-feature-discovery
   interval: 10m
   path: ./kubernetes/apps/kube-system/intel-gpu/plugin
   prune: true
@@ -18,7 +20,8 @@ spec:
       kind: HelmRelease
       name: intel-gpu-plugin
       namespace: kube-system
-  timeout: 2m
+  retryInterval: 2m
+  timeout: 1m
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -41,4 +44,5 @@ spec:
       kind: HelmRelease
       name: intel-gpu-exporter
       namespace: kube-system
-  timeout: 2m
+  retryInterval: 2m
+  timeout: 1m
