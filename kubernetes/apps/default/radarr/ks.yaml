@@ -7,6 +7,9 @@ metadata:
   labels:
     substitution.flux.home.arpa/enabled: "true"
 spec:
+  dependsOn:
+    - name: cluster-apps-rook-ceph-cluster
+    - name: cluster-apps-onepassword-connect-app
   interval: 10m
   path: ./kubernetes/apps/default/radarr/app
   prune: true
@@ -14,8 +17,20 @@ spec:
     kind: GitRepository
     name: home-ops-kubernetes
   healthChecks:
+    - apiVerion: external-secrets.io/v1beta1
+      kind: ExternalSecret
+      name: radarr
+      namespace: default
     - apiVersion: helm.toolkit.fluxcd.io/v2beta1
       kind: HelmRelease
+      name: radarr
+      namespace: default
+    - apiVerion: external-secrets.io/v1beta1
+      kind: ExternalSecret
+      name: radarr-restic
+      namespace: default
+    - apiVerion: volsync.backube/v1alpha1
+      kind: ReplicationSource
       name: radarr
       namespace: default
   timeout: 2m
