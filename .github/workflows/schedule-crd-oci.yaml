@@ -1,5 +1,5 @@
 ---
-name: "Schedule: Upload CRD Artifacts"
+name: "Schedule: Publish Cluster OCI CRDs"
 
 on:
   workflow_dispatch:
@@ -7,8 +7,8 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  upload-crds:
-    name: Upload CRD Artifacts
+  publish-crds:
+    name: Publish Cluster OCI CRDs
     runs-on: ["self-hosted"]
     steps:
       - name: Setup Python
@@ -49,5 +49,5 @@ jobs:
       - name: Publish OCI
         run: |
           flux push artifact oci://ghcr.io/onedr0p/cluster-crds-oci:latest \
-              --path="/home/runner/.datree/crdSchemas" \
+              --path=/home/runner/.datree/crdSchemas \
               --source="${{ github.repositoryUrl }}"
