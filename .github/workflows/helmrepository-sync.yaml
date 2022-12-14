@@ -1,0 +1,39 @@
+---
+name: "HelmRepository Sync"
+
+on:
+  workflow_dispatch:
+    inputs:
+      repoName:
+        description: "Flux HelmRepository Name"
+        required: true
+  pull_request:
+    types: ["labeled"]
+
+jobs:
+  helmrepository-sync:
+    if: ${{ github.event.label.name == 'renovate/helm' }}
+    name: HelmRepository Sync
+    runs-on: ["self-hosted"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+        with:
+          fetch-depth: 0
+
+      - name: Setup Flux
+        uses: fluxcd/flux2/action@8674f31874b23ec1d03fc51efde27d1280d116db # renovate: tag=v0.37.0
+
+      - name: Write kubeconfig
+        id: kubeconfig
+        uses: timheuer/base64-to-file@48657ba25c726c2e3dcf02efa3639fff9b3d587e # renovate: tag=v1.2
+        with:
+          encodedString: ${{ secrets.KUBECONFIG }}
+          fileName: kubeconfig
+
+      - name: Sync HelmRepository
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        run: |
+          flux --kubeconfig ${{ steps.kubeconfig.outputs.filePath }} \
+            reconcile source helm ${{ github.event.inputs.repoName }}
