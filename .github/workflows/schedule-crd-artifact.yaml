@@ -11,11 +11,6 @@ jobs:
     name: Upload CRD Artifacts
     runs-on: ["self-hosted"]
     steps:
-      - name: Checkout
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
-        with:
-          fetch-depth: 0
-
       - name: Setup Python
         uses: actions/setup-python@2c3dd9e7e29afd70cc0950079bde6c979d1f69f9 # renovate: tag=v4.3.1
         with:
@@ -47,17 +42,12 @@ jobs:
           KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
         run: |
           bash $GITHUB_WORKSPACE/crd-extractor.sh
-          pwd
-          ls -la
-          ls -la /home/runner/.datree/crdSchemas
 
       - name: Setup Flux
         uses: fluxcd/flux2/action@8674f31874b23ec1d03fc51efde27d1280d116db # renovate: tag=v0.37.0
 
-
-      # - name: Publish OCI
-      #   run: |
-      #     flux push artifact oci://ghcr.io/onedr0p/cluster-crds-oci:latest \
-      #         --path="./${{ matrix.project }}" \
-      #         --source="$(git config --get remote.origin.url)" \
-      #         --revision="$(git branch --show-current)/$(git rev-parse HEAD)"
+      - name: Publish OCI
+        run: |
+          flux push artifact oci://ghcr.io/onedr0p/cluster-crds-oci:latest \
+              --path="/home/runner/.datree/crdSchemas" \
+              --source="${{ github.repositoryUrl }}"
