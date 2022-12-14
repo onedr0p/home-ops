@@ -22,3 +22,23 @@ spec:
   interval: 10m
   retryInterval: 2m
   timeout: 1m
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-snapscheduler-schedules
+  namespace: flux-system
+  labels:
+    substitution.flux.home.arpa/enabled: "true"
+spec:
+  dependsOn:
+    - name: cluster-apps-snapscheduler
+  path: ./kubernetes/apps/volsync/snapscheduler/schedules
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-ops-kubernetes
+  wait: true
+  interval: 10m
+  retryInterval: 2m
+  timeout: 1m
