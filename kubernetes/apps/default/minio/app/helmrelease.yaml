@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app minio
+  name: minio
   namespace: default
 spec:
   interval: 15m
@@ -59,8 +59,8 @@ spec:
             interval: 1m
             scrapeTimeout: 10s
             bearerTokenSecret:
-              name: minio-prometheus
-              key: token
+              name: minio-secret
+              key: MINIO_PROMETHEUS_TOKEN
     ingress:
       main:
         enabled: true
