@@ -22,13 +22,11 @@ spec:
               envFrom:
                 - secretRef:
                     name: uptimerobot-heartbeat-secret
-              command:
-                - "/bin/bash"
-                - &scriptPath "/app/uptimerobot-heartbeat.sh"
+              command: ["/bin/bash", "/app/uptimerobot-heartbeat.sh"]
               volumeMounts:
                 - name: uptimerobot-heartbeat
-                  mountPath: *scriptPath
-                  subPath: &scriptName uptimerobot-heartbeat.sh
+                  mountPath: /app/uptimerobot-heartbeat.sh
+                  subPath: uptimerobot-heartbeat.sh
                   readOnly: true
           volumes:
             - name: uptimerobot-heartbeat
@@ -38,5 +36,5 @@ spec:
                   - configMap:
                       name: uptimerobot-heartbeat-configmap
                       items:
-                        - key: *scriptName
-                          path: *scriptName
+                        - key: uptimerobot-heartbeat.sh
+                          path: uptimerobot-heartbeat.sh
