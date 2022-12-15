@@ -1,5 +1,5 @@
 ---
-name: "HelmRepository Sync"
+name: "Flux: HelmRepository Sync"
 
 on:
   workflow_dispatch:
@@ -12,14 +12,13 @@ on:
         default: "flux-system"
         required: true
   pull_request:
-    types: ["labeled"]
     branches: ["main"]
     paths: ["kubernetes/**/helmrelease.yaml"]
 
 jobs:
-  helmrepository-sync:
+  sync:
     if: ${{ github.event.label.name == 'renovate/helm' || github.event.inputs.repoName != '' }}
-    name: HelmRepository Sync
+    name: Flux HelmRepository Sync
     runs-on: ["self-hosted"]
     steps:
       - name: Checkout
