@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: &app opnsense-backup
+  name: opnsense-backup
   namespace: kube-system
 spec:
   schedule: "@daily"
@@ -17,7 +17,7 @@ spec:
           automountServiceAccountToken: false
           restartPolicy: Never
           containers:
-            - name: *app
+            - name: opnsense-backup
               image: ghcr.io/onedr0p/kubernetes-kubectl:1.25.3@sha256:c6acda21cdc7a479e25b41660e8c5a955dc036b9234a6747f9912a979a674e57
               env:
                 - name: OPNSENSE_URL
@@ -26,22 +26,20 @@ spec:
                   value: "http://minio.default.svc.cluster.local:9000"
               envFrom:
                 - secretRef:
-                    name: *app
-              command:
-                - "/bin/bash"
-                - &scriptPath "/app/opnsense-backup.sh"
+                    name: opnsense-backup-secret
+              command: ["/bin/bash", "/app/opnsense-backup.sh"]
               volumeMounts:
-                - name: *app
-                  mountPath: *scriptPath
-                  subPath: &scriptName opnsense-backup.sh
+                - name: opnsense-backup
+                  mountPath: /app/opnsense-backup.sh
+                  subPath: opnsense-backup.sh
                   readOnly: true
           volumes:
-            - name: *app
+            - name: opnsense-backup
               projected:
                 defaultMode: 0775
                 sources:
                   - configMap:
-                      name: *app
+                      name: opnsense-backup-configmap
                       items:
-                        - key: *scriptName
-                          path: *scriptName
+                        - key: opnsense-backup.sh
+                          path: opnsense-backup.sh
