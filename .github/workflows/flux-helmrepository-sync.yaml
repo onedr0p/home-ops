@@ -47,13 +47,19 @@ jobs:
             kubernetes/**/helmrelease.yaml
 
       - name: Sync HelmRepository
-        if: ${{ github.event.label.name == 'renovate/helm' }}
         env:
           KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
         run: |
+          declare -a repos=()
           for file in ${{ steps.changed-files.outputs.all_changed_and_modified_files }}; do
             repoName="$(yq eval '.spec.chart.spec.sourceRef.name' "${file}")"
             repoNamespace="$(yq eval '.spec.chart.spec.sourceRef.namespace' "${file}")"
+            repos+=("${repoName}:${repoNamespace}")
+          done
+          repos=($(for r in ${repos[@]}; do echo $r; done | sort -u))
+          for repo in ${repos[@]}; do
+            repoName=$(echo "${repo}" | awk -F: '{print $1}')
+            repoNamespace=$(echo "${repo}" | awk -F: '{print $2}')
             flux --namespace "${repoNamespace}" reconcile \
               source helm "${repoName}"
           done
