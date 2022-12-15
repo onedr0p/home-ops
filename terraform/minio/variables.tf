@@ -46,3 +46,14 @@ variable "volsync_bucket_user" {
 variable "volsync_bucket_secret" {
   type = string
 }
+variable "opnsense_backup_bucket_name" {
+  default = "opnsense-backup"
+  type    = string
+}
+variable "opnsense_backup_bucket_user" {
+  default = "opnsense-backup"
+  type    = string
+}
+variable "opnsense_backup_bucket_secret" {
+  type = string
+}
