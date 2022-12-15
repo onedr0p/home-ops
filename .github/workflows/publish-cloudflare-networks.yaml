@@ -1,5 +1,5 @@
 ---
-name: "Publish Cloudflare Proxied Networks"
+name: "Publish Cloudflare Networks"
 
 on:
   workflow_dispatch:
@@ -7,12 +7,12 @@ on:
     - cron: "0 0 * * *"
 
 env:
-  DEFAULT_CLOUDFLARE_PROXIED_NETWORKS_FILE: |-
+  DEFAULT_CLOUDFLARE_NETWORKS_FILE: |-
     kubernetes/apps/networking/ingress-nginx/app/cloudflare-proxied-networks.txt
 
 jobs:
   cloudflare-proxied-networks:
-    name: Cloudflare Proxied Networks
+    name: Cloudflare Networks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,11 +25,11 @@ jobs:
           app_id: "${{ secrets.BOT_APP_ID }}"
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Cloudflare Proxied Networks
+      - name: Cloudflare Networks
         run: |
           cloudflare_proxied_networks_file=$(find . -name "cloudflare-proxied-networks.txt" -print -quit)
           if [[ ! -f "${cloudflare_proxied_networks_file}" ]]; then
-              bash ./.github/scripts/cloudflare-proxied-networks.sh > ${{ env.DEFAULT_CLOUDFLARE_PROXIED_NETWORKS_FILE }}
+              bash ./.github/scripts/cloudflare-proxied-networks.sh > ${{ env.DEFAULT_CLOUDFLARE_NETWORKS_FILE }}
           else
               bash ./.github/scripts/cloudflare-proxied-networks.sh > "${cloudflare_proxied_networks_file}"
           fi
