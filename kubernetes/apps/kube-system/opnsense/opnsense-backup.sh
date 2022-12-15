@@ -11,7 +11,7 @@ http_request_date=$(date -R)
 http_filepath="opnsense-backup/${config_filename}"
 http_signature=$(
     printf "PUT\n\ntext/xml\n%s\n/%s" "${http_request_date}" "${http_filepath}" \
-        | openssl sha1 -hmac "${AWS_SECRET_ACCESS_KEY}" -binary \
+        | openssl sha1 -hmac "${MINIO_ROOT_PASSWORD}" -binary \
         | base64
 )
 
@@ -27,5 +27,5 @@ curl -fsSL \
     -H "Host: ${http_host}" \
     -H "Date: ${http_request_date}" \
     -H "Content-Type: text/xml" \
-    -H "Authorization: AWS ${AWS_ACCESS_KEY_ID}:${http_signature}" \
+    -H "Authorization: AWS ${MINIO_ROOT_USER}:${http_signature}" \
     "${S3_URL}/${http_filepath}"
