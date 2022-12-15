@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app navidrome
+  name: navidrome
   namespace: default
 spec:
   interval: 15m
@@ -27,6 +27,8 @@ spec:
   values:
     controller:
       type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/onedr0p/navidrome
       tag: 0.48.0@sha256:3960f9878fffcbd8f80703f42a8d61ae4e7aff81e88947c2b4cba21e4a8a1ce2
@@ -43,7 +45,7 @@ spec:
       ND_SCANSCHEDULE: "@every 1h"
     envFrom:
       - secretRef:
-          name: *app
+          name: navidrome-secret
     service:
       main:
         ports:
