@@ -1,0 +1,42 @@
+---
+name: "Kubeconform"
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["kubernetes/**"]
+  pull_request:
+    branches: ["main"]
+    paths: ["kubernetes/**"]
+
+env:
+  KUBERNETES_DIR: ./kubernetes
+  SCHEMA_DIR: "/home/runner/.datree/crdSchemas"
+
+jobs:
+  kubeconform:
+    name: Kubeconform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+
+      - name: Setup Kube Tools
+        uses: yokawasa/action-setup-kube-tools@b91bb02bc122bd84ac7bbea5f25ed6b0f2ec6275 # renovate: tag=v0.9.2
+        with:
+          setup-tools: |
+            kustomize
+            kubeconform
+
+      - name: Setup Flux
+        uses: fluxcd/flux2/action@8674f31874b23ec1d03fc51efde27d1280d116db # renovate: tag=v0.37.0
+
+      - name: Download OCI
+        run: |
+          mkdir -p ${{ env.SCHEMA_DIR }}
+          flux pull artifact oci://ghcr.io/onedr0p/cluster-crds-oci:latest \
+              --output=${{ env.SCHEMA_DIR }}
+
+      - name: Run kubeconform
+        run: |
+          bash ./.github/scripts/kubeconform.sh ${{ env.KUBERNETES_DIR }} ${{ env.SCHEMA_DIR }}

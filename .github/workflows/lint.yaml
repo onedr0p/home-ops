@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: MegaLinter
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,7 +40,6 @@ jobs:
                   [
                     "ACTION_ACTIONLINT",
                     "ANSIBLE_ANSIBLE_LINT",
-                    "KUBERNETES_KUBECONFORM",
                     "REPOSITORY_GIT_DIFF",
                     "REPOSITORY_SECRETLINT",
                     "TERRAFORM_TERRAFORM_FMT",
@@ -50,5 +49,3 @@ jobs:
               )
             }}
           ANSIBLE_DIRECTORY: ansible
-          KUBERNETES_KUBECONFORM_ARGUMENTS: -ignore-missing-schemas
-          KUBERNETES_KUBECONFORM_FILTER_REGEX_INCLUDE: "(cluster)"

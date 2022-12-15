@@ -55,7 +55,28 @@
 
 # [[ -z $(kubectl -n default get persistentvolumeclaim config-zzztest-0 -o jsonpath='{.metadata.labels.app\.kubernetes\.io/name}') ]] || echo "zzztest"
 
-shopt -s dotglob
-find ./kubernetes -type f -name "*.yaml" | while IFS= read -r f; do
-    kubeconform -schema-location default -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" "$f"
-done
+# Say this file changed
+# ./kubernetes/apps/actions-runner-system/actions-runner-controller/app/helmrelease.yaml
+
+# Get the ks.yaml file in
+# ./kubernetes/apps/actions-runner-system/actions-runner-controller/
+
+# Use yq eval-all to extract ks name and path
+# yq eval-all '.metadata.name' kubernetes/apps/cert-manager/cert-manager/ks.yaml
+# yq eval-all '.spec.path' kubernetes/apps/cert-manager/cert-manager/ks.yaml
+
+# Pass the extracted values to flux build
+
+flux build ks cluster-apps --kustomization-file kubernetes/flux/apps.yaml --path kubernetes/apps/ \
+    | kubeconform -kubernetes-version 1.24.8 -schema-location default \
+        -schema-location '/tmp/derp/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            -summary
+
+flux build ks cluster-apps-radarr-app --kustomization-file kubernetes/apps/default/radarr/ks.yaml --path kubernetes/apps/default/radarr/ \
+    | kubeconform -kubernetes-version 1.24.8 -schema-location default \
+        -schema-location '/tmp/derp/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            -summary
+
+flux diff kustomization cluster-apps-radarr-app \
+    --kustomization-file kubernetes/apps/default/radarr/ks.yaml \
+    --path kubernetes/apps/default/radarr/
