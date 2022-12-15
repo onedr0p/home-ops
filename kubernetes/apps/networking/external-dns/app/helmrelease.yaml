@@ -29,28 +29,23 @@ spec:
       - name: CF_API_EMAIL
         valueFrom:
           secretKeyRef:
-            name: external-dns
+            name: externaldns-secret
             key: email
       - name: CF_API_KEY
         valueFrom:
           secretKeyRef:
-            name: external-dns
+            name: externaldns-secret
             key: api-key
     extraArgs:
       - --cloudflare-proxied
       - --annotation-filter=external-dns.home.arpa/enabled in (true)
     policy: sync
-    sources:
-      - ingress
-    txtPrefix: "k8s."
-    txtOwnerId: "default"
+    sources: ["ingress"]
+    txtPrefix: k8s.
+    txtOwnerId: default
     domainFilters:
       - "${SECRET_PUBLIC_DOMAIN}"
     serviceMonitor:
       enabled: true
-    resources:
-      requests:
-        memory: 100Mi
-        cpu: 25m
-      limits:
-        memory: 250Mi
+    podAnnotations:
+      secret.reloader.stakater.com/reload: externaldns-secret

@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: &app cloudflare-ddns
+  name: cloudflare-ddns
   namespace: networking
 spec:
   schedule: "@hourly"
@@ -17,26 +17,24 @@ spec:
           automountServiceAccountToken: false
           restartPolicy: OnFailure
           containers:
-            - name: *app
+            - name: cloudflare-ddns
               image: ghcr.io/onedr0p/kubernetes-kubectl:1.25.4@sha256:0d416e4095a476b900e93c8c818fbb17eda876709e3a00a4a3c7a725e95816ca
               envFrom:
                 - secretRef:
-                    name: *app
-              command:
-                - "/bin/bash"
-                - &scriptPath "/app/cloudflare-ddns.sh"
+                    name: cloudflare-ddns-secret
+              command: ["/bin/bash", "/app/cloudflare-ddns.sh"]
               volumeMounts:
-                - name: *app
-                  mountPath: *scriptPath
-                  subPath: &scriptName cloudflare-ddns.sh
+                - name: cloudflare-ddns
+                  mountPath: /app/cloudflare-ddns.sh
+                  subPath: cloudflare-ddns.sh
                   readOnly: true
           volumes:
-            - name: *app
+            - name: cloudflare-ddns
               projected:
                 defaultMode: 0775
                 sources:
                   - configMap:
-                      name: *app
+                      name: cloudflare-ddns-configmap
                       items:
-                        - key: *scriptName
-                          path: *scriptName
+                        - key: cloudflare-ddns.sh
+                          path: cloudflare-ddns.sh
