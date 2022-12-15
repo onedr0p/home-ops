@@ -58,8 +58,8 @@ jobs:
           done
           repos=($(for r in ${repos[@]}; do echo $r; done | sort -u))
           for repo in ${repos[@]}; do
-            repoName=$(echo "${repo}" | awk -F: '{print $1}')
-            repoNamespace=$(echo "${repo}" | awk -F: '{print $2}')
+            repoName="${repo%%:*}"
+            repoNamespace="${repo##*:}"
             flux --namespace "${repoNamespace}" reconcile \
               source helm "${repoName}"
           done
