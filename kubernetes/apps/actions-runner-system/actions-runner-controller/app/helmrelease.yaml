@@ -26,17 +26,17 @@ spec:
   values:
     authSecret:
       create: false
-      name: &auth-secret arc-auth-secret
+      name: &secret actions-runner-controller-secret
     podAnnotations:
-      secret.reloader.stakater.com/reload: *auth-secret
+      secret.reloader.stakater.com/reload: *secret
     githubWebhookServer:
       enabled: true
       syncPeriod: 10m
       secret:
         create: false
-        name: &webhook-secret arc-webhook-secret
+        name: *secret
       podAnnotations:
-        secret.reloader.stakater.com/reload: *webhook-secret
+        secret.reloader.stakater.com/reload: *secret
       ingress:
         enabled: true
         annotations:
