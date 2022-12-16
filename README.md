@@ -58,13 +58,37 @@ My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Fedora Serve
 
 ### Directories
 
-This Git repository contains the following directories (_kustomizatons_) under [kubernetes](./kubernetes/).
+This Git repository contains the following directories under [kubernetes](./kubernetes/).
 
 ```sh
 📁 kubernetes      # Kubernetes cluster defined as code
 ├─📁 bootstrap     # Flux installation
 ├─📁 flux          # Main Flux configuration of repository
-└─📁 apps          # Applications deployed into my cluster grouped by namespace
+└─📁 apps          # Apps deployed into my cluster grouped by namespace (see below)
+```
+
+### Cluster layout
+
+Below is a a high level look at the layout of how my directory structure with Flux works. In this brief example you are able to see that `authelia` will not be able to run until `glauth` and  `cloudnative-pg` are running. It also shows that the `Cluster` custom resource depends on the `cloudnative-pg` Helm chart. This is needed because `cloudnative-pg` installs the `Cluster` custom resource definition in the Helm chart.
+
+```ruby
+# Key: <Kind>::<Name>
+GitRepository::"home-ops-kubernetes"
+    Kustomization::"cluster"
+        Kustomization::"cluster-apps"
+            Kustomization::"cluster-apps-authelia"
+                DependsOn: Kustomization::"cluster-apps-glauth"
+                DependsOn: Kustomization::"cluster-apps-cloudnative-pg-cluster"
+                HelmRelease::"authelia"
+                    DependsOn: HelmRelease::"cloudnative-pg"
+                    DependsOn: HelmRelease::"glauth"
+            Kustomization::"cluster-apps-glauth"
+                HelmRelease::"glauth"
+            Kustomization::"cluster-apps-cloudnative-pg"
+                HelmRelease::"cloudnative-pg"
+            Kustomization::"cluster-apps-cloudnative-pg-cluster"
+                DependsOn: Kustomization::"cluster-apps-cloudnative-pg"
+                Cluster::"postgres"
 ```
 
 ### Networking
