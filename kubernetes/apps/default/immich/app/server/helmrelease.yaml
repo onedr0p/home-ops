@@ -25,6 +25,12 @@ spec:
     - name: cloudnative-pg
     - name: immich-redis
   values:
+    initContainers:
+      init-db:
+        image: ghcr.io/onedr0p/postgres-initdb:14.6
+        envFrom:
+          - secretRef:
+              name: immich-secret
     controller:
       annotations:
         reloader.stakater.com/auto: "true"
