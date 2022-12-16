@@ -3,6 +3,7 @@ set -o errexit
 
 KUBERNETES_DIR=$1
 SCHEMA_DIR=$2
+KUBE_VERSION="${3:-1.24.8}"
 
 [[ -z "${KUBERNETES_DIR}" ]] && echo "Kubernetes location not specified" && exit 1
 [[ -z "${SCHEMA_DIR}" ]] && echo "Schema location not specified" && exit 1
@@ -12,8 +13,10 @@ kustomize_config="kustomization.yaml"
 kubeconform_args=(
     "-strict"
     "-ignore-missing-schemas"
+    "-kubernetes-version"
+    "${KUBE_VERSION}"
     "-skip"
-    "ReplicationSource,Secret"
+    "Secret"
     "-schema-location"
     "default"
     "-schema-location"
