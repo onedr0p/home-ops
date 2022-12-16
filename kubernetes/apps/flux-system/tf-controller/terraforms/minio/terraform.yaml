@@ -3,7 +3,7 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: OCIRepository
 metadata:
   name: terraform-minio
-  namespace: default
+  namespace: flux-system
 spec:
   interval: 1m
   url: oci://ghcr.io/onedr0p/terraform-minio-oci
@@ -14,7 +14,7 @@ apiVersion: infra.contrib.fluxcd.io/v1alpha1
 kind: Terraform
 metadata:
   name: minio
-  namespace: default
+  namespace: flux-system
 spec:
   approvePlan: auto
   interval: 12h
@@ -22,7 +22,7 @@ spec:
   sourceRef:
     kind: OCIRepository
     name: terraform-minio
-    namespace: default
+    namespace: flux-system
   backendConfig:
     disable: true
   cliConfigSecretRef:

@@ -22,24 +22,3 @@ spec:
   interval: 10m
   retryInterval: 2m
   timeout: 1m
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: cluster-apps-cluster-external-secrets
-  namespace: flux-system
-  labels:
-    substitution.flux.home.arpa/enabled: "true"
-spec:
-  dependsOn:
-    - name: cluster-apps-external-secrets
-    - name: cluster-apps-onepassword-connect
-  path: ./kubernetes/apps/external-secrets/onepassword-connect/secrets
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: home-ops-kubernetes
-  wait: true
-  interval: 10m
-  retryInterval: 2m
-  timeout: 1m
