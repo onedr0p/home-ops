@@ -25,15 +25,21 @@ spec:
     - name: cloudnative-pg
       namespace: default
   values:
+    extraInitContainers:
+      - name: init-db
+        image: ghcr.io/onedr0p/postgres-initdb:14.6
+        envFrom:
+          - secretRef:
+              name: grafana-secret
     replicas: 3
     rbac:
       pspEnabled: false
     testFramework:
       enabled: false
-    admin:
-      existingSecret: grafana-admin
+    # admin:
+    #   existingSecret: grafana-secret
     envFromSecrets:
-      - name: grafana
+      - name: grafana-secret
     grafana.ini:
       auth:
         signout_redirect_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/logout"
