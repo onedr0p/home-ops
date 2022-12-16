@@ -77,17 +77,20 @@ GitRepository :: home-ops-kubernetes
     Kustomization :: cluster
         Kustomization :: cluster-apps
             Kustomization :: cluster-apps-authelia
-                DependsOn: Kustomization :: cluster-apps-glauth
-                DependsOn: Kustomization :: cluster-apps-cloudnative-pg-cluster
+                DependsOn:
+                    Kustomization :: cluster-apps-glauth
+                    Kustomization :: cluster-apps-cloudnative-pg-cluster
                 HelmRelease :: authelia
-                    DependsOn: HelmRelease :: cloudnative-pg
-                    DependsOn: HelmRelease :: glauth
+                    DependsOn:
+                        HelmRelease :: cloudnative-pg
+                        HelmRelease :: glauth
             Kustomization :: cluster-apps-glauth
                 HelmRelease :: glauth
             Kustomization :: cluster-apps-cloudnative-pg
                 HelmRelease :: cloudnative-pg
             Kustomization :: cluster-apps-cloudnative-pg-cluster
-                DependsOn: Kustomization :: cluster-apps-cloudnative-pg
+                DependsOn:
+                    Kustomization :: cluster-apps-cloudnative-pg
                 Cluster :: postgres
 ```
 
