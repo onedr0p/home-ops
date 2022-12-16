@@ -25,6 +25,12 @@ spec:
     - name: cloudnative-pg
     - name: redis
   values:
+    initContainers:
+      init-db:
+        image: ghcr.io/onedr0p/postgres-initdb:14.6
+        envFrom:
+          - secretRef:
+              name: shlink-secret
     controller:
       replicas: 3
       strategy: RollingUpdate
@@ -34,9 +40,6 @@ spec:
       repository: ghcr.io/shlinkio/shlink
       tag: 3.3.2
     env:
-      DB_DRIVER: postgres
-      DB_HOST: postgres-rw.default.svc.cluster.local
-      DB_NAME: shlink
       DEFAULT_DOMAIN: &host "ln.${SECRET_PUBLIC_DOMAIN}"
       DISABLE_TRACKING_FROM: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       ENABLE_PERIODIC_VISIT_LOCATE: "true"
@@ -48,7 +51,7 @@ spec:
       TIMEZONE: "${TIMEZONE}"
     envFrom:
       - secretRef:
-          name: shlink-api-secret
+          name: shlink-secret
     service:
       main:
         ports:
