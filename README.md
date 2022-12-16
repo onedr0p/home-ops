@@ -71,8 +71,8 @@ This Git repository contains the following directories under [kubernetes](./kube
 
 Below is a a high level look at the layout of how my directory structure with Flux works. In this brief example you are able to see that `authelia` will not be able to run until `glauth` and  `cloudnative-pg` are running. It also shows that the `Cluster` custom resource depends on the `cloudnative-pg` Helm chart. This is needed because `cloudnative-pg` installs the `Cluster` custom resource definition in the Helm chart.
 
-```ruby
-# Key: <Kind> :: <Name>
+```python
+# Key: <kind> :: <metadata.name>
 GitRepository :: home-ops-kubernetes
     Kustomization :: cluster
         Kustomization :: cluster-apps
