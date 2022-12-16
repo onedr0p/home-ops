@@ -27,6 +27,12 @@ spec:
       namespace: rook-ceph
     - name: smtp-relay
   values:
+    initContainers:
+      init-db:
+        image: ghcr.io/onedr0p/postgres-initdb:14.6
+        envFrom:
+          - secretRef:
+              name: n8n-secret
     controller:
       type: statefulset
       annotations:
@@ -38,10 +44,6 @@ spec:
       GENERIC_TIMEZONE: "${TIMEZONE}"
       TZ: "${TIMEZONE}"
       N8N_PORT: &port 80
-      DB_TYPE: postgresdb
-      DB_POSTGRESDB_DATABASE: *app
-      DB_POSTGRESDB_HOST: postgres-rw.default.svc.cluster.local
-      DB_POSTGRESDB_PORT: 5432
       N8N_EMAIL_MODE: smtp
       N8N_SMTP_HOST: smtp-relay.default.svc.cluster.local
       N8N_SMTP_PORT: 2525
