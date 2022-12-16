@@ -1,0 +1,51 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: plex-off-deck
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  dependsOn:
+    - name: plex
+  values:
+    controller:
+      type: cronjob
+      cronjob:
+        concurrencyPolicy: Forbid
+        schedule: "@hourly"
+    restartPolicy: OnFailure
+    image:
+      repository: ghcr.io/onedr0p/jbops
+      tag: 1.0.887@sha256:93c5073b30a94cbff6a5a365c706cbf62c0d5c86ec484dff7ec28f7307f424bc
+    command: ["/bin/bash", "/app/plex-off-deck.sh"]
+    env:
+      TZ: "${TIMEZONE}"
+      JBOPS__SCRIPT_PATH: utility/off_deck.py
+    args: ["/entrypoint.sh", "--playlists", "Smart Toons"]
+    service:
+      main:
+        enabled: false
+    persistence:
+      config:
+        enabled: true
+        type: secret
+        name: plex-jbops-secret
+        subPath: config.ini
+        mountPath: /config/config.ini
+        readOnly: true
