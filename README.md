@@ -170,7 +170,7 @@ Thanks to all the people who donate their time to the [Kubernetes @Home](https:/
 
 ## 📜 Changelog
 
-See [commit history](https://github.com/onedr0p/home-ops/commits/main)
+See _awful_ [commit history](https://github.com/onedr0p/home-ops/commits/main)
 
 ---
 
