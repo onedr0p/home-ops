@@ -24,6 +24,12 @@ spec:
   dependsOn:
     - name: cloudnative-pg
   values:
+    initContainers:
+      init-db:
+        image: ghcr.io/onedr0p/postgres-initdb:14.6
+        envFrom:
+          - secretRef:
+              name: miniflux-secret
     controller:
       replicas: 3
       strategy: RollingUpdate
