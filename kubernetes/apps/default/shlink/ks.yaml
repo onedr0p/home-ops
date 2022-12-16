@@ -11,7 +11,6 @@ spec:
     - name: cluster-apps-cloudnative-pg-app
     - name: cluster-apps-onepassword-connect
     - name: cluster-apps-redis-app
-  interval: 10m
   path: ./kubernetes/apps/default/shlink/api
   prune: true
   sourceRef:
@@ -22,7 +21,9 @@ spec:
       kind: HelmRelease
       name: shlink-api
       namespace: default
-  timeout: 2m
+  interval: 10m
+  retryInterval: 2m
+  timeout: 1m
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -34,7 +35,6 @@ metadata:
 spec:
   dependsOn:
     - name: cluster-apps-shlink-api
-  interval: 10m
   path: ./kubernetes/apps/default/shlink/web
   prune: true
   sourceRef:
@@ -45,4 +45,6 @@ spec:
       kind: HelmRelease
       name: shlink-web
       namespace: default
-  timeout: 2m
+  interval: 10m
+  retryInterval: 2m
+  timeout: 1m
