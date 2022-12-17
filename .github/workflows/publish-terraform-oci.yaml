@@ -8,7 +8,7 @@ on:
     paths: ["terraform/**"]
 
 jobs:
-  generate-build-matrix:
+  changed-files:
     name: Generate Build Matrix
     runs-on: ubuntu-latest
     outputs:
@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
 
       - name: Get changed files
-        id: generate-build-matrix
+        id: changed-files
         uses: tj-actions/changed-files@ce4b8e3cba2220de8132ac9721ff754efd6bb7d7 # v34.6.2
         with:
           dir_names: true
@@ -31,17 +31,17 @@ jobs:
 
       - name: List all changed files
         run: |
-          echo '${{ steps.generate-build-matrix.outputs.all_changed_files }}'
+          echo '${{ steps.changed-files.outputs.all_changed_files }}'
 
       - id: set-matrix
-        run: echo "matrix={\"project\":${{ steps.generate-build-matrix.outputs.all_changed_files }}}" >> "${GITHUB_OUTPUT}"
+        run: echo "matrix={\"project\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "${GITHUB_OUTPUT}"
 
   publish-terraform:
     name: Publish OCI
     runs-on: ubuntu-latest
-    needs: [generate-build-matrix]
+    needs: [changed-files]
     strategy:
-      matrix: ${{ fromJSON(needs.generate-build-matrix.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.changed-files.outputs.matrix) }}
     steps:
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
