@@ -1,6 +1,13 @@
+resource "time_sleep" "wait" {
+  depends_on = [kubernetes_stateful_set_v1.nexus]
+  create_duration = "10s"
+}
 resource "nexus_security_realms" "active_realms" {
   provider   = nexus.nas
-  depends_on = [kubernetes_stateful_set_v1.nexus]
+  depends_on = [
+    kubernetes_stateful_set_v1.nexus,
+    time_sleep.wait
+  ]
   active = [
     "NexusAuthenticatingRealm",
     "NexusAuthorizingRealm",
@@ -17,7 +24,10 @@ resource "nexus_security_anonymous" "system" {
 
 resource "nexus_repository_docker_hosted" "container_local" {
   provider   = nexus.nas
-  depends_on = [kubernetes_stateful_set_v1.nexus]
+  depends_on = [
+    kubernetes_stateful_set_v1.nexus,
+    time_sleep.wait
+  ]
   name       = "container-local"
   online     = true
   component {
@@ -37,7 +47,10 @@ resource "nexus_repository_docker_hosted" "container_local" {
 }
 
 module "docker_proxy_docker_mirror" {
-  depends_on = [kubernetes_stateful_set_v1.nexus]
+  depends_on = [
+    kubernetes_stateful_set_v1.nexus,
+    time_sleep.wait
+  ]
   source     = "./modules/docker_proxy"
   providers = {
     nexus = nexus.nas
@@ -48,7 +61,10 @@ module "docker_proxy_docker_mirror" {
 }
 
 module "docker_proxy_ghcr_mirror" {
-  depends_on = [kubernetes_stateful_set_v1.nexus]
+  depends_on = [
+    kubernetes_stateful_set_v1.nexus,
+    time_sleep.wait
+  ]
   source     = "./modules/docker_proxy"
   providers = {
     nexus = nexus.nas
@@ -59,7 +75,10 @@ module "docker_proxy_ghcr_mirror" {
 }
 
 module "docker_proxy_k8s_mirror" {
-  depends_on = [kubernetes_stateful_set_v1.nexus]
+  depends_on = [
+    kubernetes_stateful_set_v1.nexus,
+    time_sleep.wait
+  ]
   source     = "./modules/docker_proxy"
   providers = {
     nexus = nexus.nas
@@ -70,7 +89,10 @@ module "docker_proxy_k8s_mirror" {
 }
 
 module "docker_proxy_quay_mirror" {
-  depends_on = [kubernetes_stateful_set_v1.nexus]
+  depends_on = [
+    kubernetes_stateful_set_v1.nexus,
+    time_sleep.wait
+  ]
   source     = "./modules/docker_proxy"
   providers = {
     nexus = nexus.nas
