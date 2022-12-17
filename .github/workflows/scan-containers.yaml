@@ -11,7 +11,7 @@ jobs:
     name: Detect File Changes
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.set-matrix.outputs.file_matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
@@ -23,16 +23,16 @@ jobs:
           files: |
             kubernetes/**/*.yaml
       - id: set-matrix
-        run: echo "matrix={\"file\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
+        run: echo "file_matrix={\"file\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
 
   extract-containers:
     name: Extract Containers
     runs-on: ubuntu-latest
     needs: [changed-files]
     strategy:
-      matrix: ${{ fromJSON(needs.changed-files.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.changed-files.outputs.file_matrix) }}
     outputs:
-      containers: ${{ steps.set-matrix.outputs.matrix }}
+      containers: ${{ steps.set-matrix.outputs.container_matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
@@ -43,14 +43,14 @@ jobs:
         run: |
           containers=$(bash ./.github/scripts/container-parser.sh --file "${{ matrix.file }}")
           echo "${containers}"
-          echo "matrix=${containers}" >> "${GITHUB_OUTPUT}"
+          echo "container_matrix=${containers}" >> "${GITHUB_OUTPUT}"
 
   scan-containers:
     name: Scan Containers
     runs-on: ubuntu-latest
     needs: [extract-containers]
     strategy:
-      matrix: ${{ fromJSON(needs.extract-containers.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.extract-containers.outputs.container_matrix) }}
     steps:
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
