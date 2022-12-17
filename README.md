@@ -151,10 +151,10 @@ My home IP can change at any given time and in order to keep my WAN IP address u
 
 | Device                    | Count | OS Disk Size | Data Disk Size              | Ram  | Operating System | Purpose             |
 |---------------------------|-------|--------------|-----------------------------|------|------------------|---------------------|
-| Protectli FW6D            | 1     | 500GB mSATA  | -                           | 16GB | Opnsense 22      | Router              |
-| Intel NUC8i3BEK           | 3     | 256GB NVMe   | -                           | 32GB | Fedora 36        | Kubernetes Masters  |
-| Intel NUC8i5BEH           | 3     | 240GB SSD    | 1TB NVMe (rook-ceph)        | 64GB | Fedora 36        | Kubernetes Workers  |
-| PowerEdge T340            | 1     | 2TB SSD      | 8x12TB ZFS (mirrored vdevs) | 64GB | Ubuntu 22.04     | NFS + Backup Server |
+| Protectli FW6D            | 1     | 500GB mSATA  | -                           | 16GB | Opnsense         | Router              |
+| Intel NUC8i3BEK           | 3     | 256GB NVMe   | -                           | 32GB | Fedora           | Kubernetes Masters  |
+| Intel NUC8i5BEH           | 3     | 240GB SSD    | 1TB NVMe (rook-ceph)        | 64GB | Fedora           | Kubernetes Workers  |
+| PowerEdge T340            | 1     | 2TB SSD      | 8x12TB ZFS (mirrored vdevs) | 64GB | Ubuntu           | NFS + Backup Server |
 | Lenovo SA120              | 1     | -            | 6x12TB (+2 hot spares)      | -    | -                | DAS                 |
 | Raspberry Pi              | 1     | 32GB (SD)    | -                           | 4GB  | PiKVM            | Network KVM         |
 | TESmart 8 Port KVM Switch | 1     | -            | -                           | -    | -                | Network KVM (PiKVM) |
