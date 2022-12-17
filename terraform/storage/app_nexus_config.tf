@@ -18,6 +18,10 @@ resource "nexus_security_realms" "active_realms" {
 
 resource "nexus_security_anonymous" "system" {
   provider   = nexus.nas
+  depends_on = [
+    kubernetes_stateful_set_v1.nexus,
+    time_sleep.wait
+  ]
   enabled    = true
   user_id    = "anonymous"
   realm_name = "NexusAuthorizingRealm"
