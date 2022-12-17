@@ -1,4 +1,4 @@
-resource "kubernetes_daemonset" "smartctl_exporter" {
+resource "kubernetes_daemon_set_v1" "smartctl_exporter" {
   metadata {
     name      = "smartctl-exporter"
     namespace = "default"
@@ -20,8 +20,9 @@ resource "kubernetes_daemonset" "smartctl_exporter" {
       }
       spec {
         container {
-          name  = "main"
-          image = "quay.io/prometheuscommunity/smartctl-exporter:v0.9.1"
+          name              = "main"
+          image             = "quay.io/prometheuscommunity/smartctl-exporter:v0.9.1"
+          image_pull_policy = "IfNotPresent"
           args = [
             "--smartctl.path=/usr/sbin/smartctl",
             "--smartctl.interval=120s",

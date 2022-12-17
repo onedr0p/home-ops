@@ -1,4 +1,4 @@
-resource "kubernetes_config_map" "vector_agent" {
+resource "kubernetes_config_map_v1" "vector_agent" {
   metadata {
     name      = "vector-agent"
     namespace = "default"
@@ -7,11 +7,17 @@ resource "kubernetes_config_map" "vector_agent" {
     }
   }
   data = {
-    "vector.yaml" = "${templatefile("${path.module}/templates/vector.yaml.tftpl", { host = var.vector_agent_host, port = var.vector_agent_port })}"
+    "vector.yaml" = "${templatefile(
+      "${path.module}/templates/vector.yaml.tftpl", {
+        host = var.vector_agent_host,
+        port = var.vector_agent_port
+      }
+    )}"
   }
 }
 
-resource "kubernetes_daemonset" "vector_agent" {
+resource "kubernetes_daemon_set_v1" "vector_agent" {
+  depends_on = [kubernetes_config_map_v1.vector_agent]
   metadata {
     name      = "vector-agent"
     namespace = "default"
@@ -33,11 +39,10 @@ resource "kubernetes_daemonset" "vector_agent" {
       }
       spec {
         container {
-          name  = "main"
-          image = "docker.io/timberio/vector:0.26.0-debian"
-          args = [
-            "--config=/etc/vector/vector.yaml"
-          ]
+          name              = "main"
+          image             = "docker.io/timberio/vector:0.26.0-debian"
+          image_pull_policy = "IfNotPresent"
+          args              = ["--config=/etc/vector/vector.yaml"]
           security_context {
             privileged  = true
             run_as_user = 0

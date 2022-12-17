@@ -1,4 +1,4 @@
-resource "kubernetes_daemonset" "node_exporter" {
+resource "kubernetes_daemon_set_v1" "node_exporter" {
   metadata {
     name      = "node-exporter"
     namespace = "default"
@@ -20,8 +20,9 @@ resource "kubernetes_daemonset" "node_exporter" {
       }
       spec {
         container {
-          name  = "main"
-          image = "quay.io/prometheus/node-exporter:v1.5.0"
+          name              = "main"
+          image             = "quay.io/prometheus/node-exporter:v1.5.0"
+          image_pull_policy = "IfNotPresent"
           args = [
             "--path.procfs=/host/proc",
             "--path.rootfs=/rootfs",
