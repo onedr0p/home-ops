@@ -27,8 +27,9 @@ provider "kubernetes" {
 }
 
 provider "nexus" {
+  alias    = "nas"
   insecure = true
-  url      = "http://192.168.1.81:8081"
+  url      = "http://nexus.turbo.ac"
   username = "admin"
   password = "this-is-nothing-important"
 }
