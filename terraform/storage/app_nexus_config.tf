@@ -8,6 +8,13 @@ resource "nexus_security_realms" "active_realms" {
   ]
 }
 
+resource "nexus_security_anonymous" "system" {
+  provider   = nexus.nas
+  enabled    = true
+  user_id    = "anonymous"
+  realm_name = "NexusAuthorizingRealm"
+}
+
 resource "nexus_repository_docker_hosted" "container_local" {
   provider   = nexus.nas
   depends_on = [kubernetes_stateful_set_v1.nexus]

@@ -7,8 +7,8 @@ terraform {
 }
 
 resource "nexus_repository_docker_proxy" "mirror" {
-  name     = var.registry_name
-  online   = true
+  name   = var.registry_name
+  online = true
   docker {
     force_basic_auth = false
     http_port        = 0
