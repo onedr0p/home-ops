@@ -11,7 +11,7 @@ jobs:
     name: Detect File Changes
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.changed-files.outputs.all_changed_files }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
@@ -23,7 +23,7 @@ jobs:
           files: |
             kubernetes/**/*.yaml
       - id: set-matrix
-        run: echo "matrix={\"container\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
+        run: echo "matrix={\"file\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
 
   extract-containers:
     name: Extract Containers
@@ -32,25 +32,25 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(needs.changed-files.outputs.matrix) }}
     outputs:
-      containers: ${{ steps.containers.outputs.containers }}
+      containers: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
       - name: Install Tools
         run: sudo apt-get install jo
       - name: Detect Containers in Files
-        id: containers
+        id: set-matrix
         run: |
           containers=$(bash ./.github/scripts/container-parser.sh --file "${{ matrix.file }}")
           echo "${containers}"
-          echo containers=${containers} >> "${GITHUB_OUTPUT}"
+          echo matrix=${containers} >> "${GITHUB_OUTPUT}"
 
   scan-containers:
     name: Scan Containers
     runs-on: ubuntu-latest
     needs: [extract-containers]
     strategy:
-      matrix: ${{ fromJSON(needs.extract-containers.outputs.containers) }}
+      matrix: ${{ fromJSON(needs.extract-containers.outputs.matrix) }}
       fail-fast: false
     steps:
       - name: Checkout
@@ -58,7 +58,7 @@ jobs:
       - name: Scan Container
         uses: aquasecurity/trivy-action@9ab158e8597f3b310480b9a69402b419bc03dbd5 # 0.8.0
         with:
-          image-ref: ${{ matrix.containers }}
+          image-ref: ${{ matrix.container }}
           vuln-type: os,library
           severity: CRITICAL
           format: sarif
