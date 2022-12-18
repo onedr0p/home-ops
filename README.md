@@ -111,6 +111,28 @@ GitRepository :: home-ops-kubernetes
 
 ---
 
+## ☁️ Cloud Dependencies
+
+While most of my infrastructure and workloads are selfhosted I do rely upon the cloud for certain key parts of my setup.
+
+- [GitHub](https://github.com/) for hosting this repository and continuous integration/deployments.
+- Domain, DNS and proxy management with [Cloudflare](https://www.cloudflare.com/).
+- [1Password](https://1password.com/) paid family plan for the [External Secrets Operator](https://external-secrets.io/).
+- Terraform state is handled using a free [Terraform Cloud](https://www.terraform.io/) account.
+- Offsite application backups are sync to [B2 Storage](https://www.backblaze.com/b2).
+- [UptimeRobot](https://uptimerobot.com/) for monitoring internet connectivity and external facing applications.
+- [GCP](https://cloud.google.com/) for voice interactions with Home Assistant over Google Assistant.
+
+_There are absolutely selfhosted alternatives that I could use for some of these but I find the maintenance burden too high of cost for running alternatives at home._
+
+<details>
+  <summary>Click here to read a bit more of my thoughts on this</summary>
+For example, instead of 1Password you want to deploy HashiCorp Vault to use with the External Secrets Operator. In my opinion that shouldn't run in the same Kubernetes cluster where it is being used because it's a very critical piece of infrastructure. In this scenerio it would probably be best to deploy HC Vault to another computer in your home or use a free Oracle Cloud VM but now you just incurred the cost of maintaining that critical piece of infrastructure elsewhere.
+</details>
+
+
+---
+
 ## 🌐 DNS
 
 ### Ingress Controller
