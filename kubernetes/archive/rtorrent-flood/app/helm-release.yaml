@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: prowlarr
+  name: rtorrent-flood
   namespace: default
 spec:
   interval: 15m
@@ -21,25 +21,21 @@ spec:
   upgrade:
     remediation:
       retries: 3
-  dependsOn:
-    - name: rook-ceph-cluster
-      namespace: rook-ceph
   values:
     controller:
       type: statefulset
       annotations:
         reloader.stakater.com/auto: "true"
     image:
-      repository: ghcr.io/onedr0p/prowlarr-nightly
-      tag: 0.4.11.2114@sha256:65c24aab131fa188265f0660e333f790e94551f044c0c05201e4112aaa27346b
+      repository: ghcr.io/onedr0p/flood
+      tag: 4.7.0@sha256:db34c7d3047289675b0dee4b99a766f7321a5b4129feb0229082f8478ed0eae5
     env:
       TZ: America/New_York
-      PROWLARR__INSTANCE_NAME: Prowlarr
-      PROWLARR__PORT: &port 80
-      PROWLARR__LOG_LEVEL: info
-    envFrom:
-      - secretRef:
-          name: prowlarr-secret
+      FLOOD_OPTION_auth: "none"
+      FLOOD_OPTION_allowedpath: "/config,/sock,/rc,/media"
+      FLOOD_OPTION_rtsocket: "/sock/rtorrent.sock"
+      FLOOD_OPTION_rtconfig: "/rc/rtorrent.rc"
+      FLOOD_OPTION_port: &port 80
     service:
       main:
         ports:
@@ -49,12 +45,6 @@ spec:
       main:
         enabled: true
         ingressClassName: "nginx"
-        annotations:
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/prowlarr/nord.css"></head>';
-            sub_filter_once on;
-          hajimari.io/icon: "movie-search"
         hosts:
           - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
             paths:
@@ -68,17 +58,37 @@ spec:
       runAsGroup: 568
       fsGroup: 568
       fsGroupChangePolicy: "OnRootMismatch"
+      supplementalGroups:
+        - 100
     volumeClaimTemplates:
       - name: config
         mountPath: /config
         accessMode: ReadWriteOnce
-        size: 2Gi
+        size: 1Gi
         storageClass: ceph-block
         labels:
           snapshot.home.arpa/enabled: "true"
+    persistence:
+      rtorrent-rc:
+        enabled: true
+        type: configMap
+        name: rtorrent-flood-configmap
+        subPath: rtorrent.rc
+        mountPath: /rc/rtorrent.rc
+      rtorrent-sock:
+        enabled: true
+        type: emptyDir
+        medium: Memory
+        mountPath: /sock
+      media:
+        enabled: true
+        type: nfs
+        server: expanse.turbo.ac
+        path: /eros/Media
+        mountPath: /media
     resources:
       requests:
         cpu: 10m
         memory: 100Mi
       limits:
-        memory: 500Mi
+        memory: 1200Mi
