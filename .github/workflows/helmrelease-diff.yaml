@@ -92,18 +92,15 @@ jobs:
             --helm-repository-dir ${{ env.HELMREPOSITORY_DIR }})
           echo "file=${manifests}" >> "${GITHUB_OUTPUT}"
 
-      # TODO(helmrelease-diff): `GITHUB_OUTPUT` doesn't work with the hacks below
       - name: Diff
         id: diff
         run: |
           diff=$(dyff between --color off --truecolor off --omit-header \
             ${{ steps.default.outputs.file }} \
             ${{ steps.pull-request.outputs.file }} | tail -n +2)
-          echo "${diff}"
-          diff="${diff//'%'/'%25'}"
-          diff="${diff//$'\n'/'%0A'}"
-          diff="${diff//$'\r'/'%0D'}"
-          echo "::set-output name=diff::$(echo ${diff})"
+          echo "diff<<EOF" >> "${GITHUB_OUTPUT}"
+          echo "${diff}" >> "${GITHUB_OUTPUT}"
+          echo "EOF" >> "${GITHUB_OUTPUT}"
 
       - name: Find Comment
         uses: peter-evans/find-comment@f4499a714d59013c74a08789b48abe4b704364a0 # v2.1.0
