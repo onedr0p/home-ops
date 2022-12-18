@@ -21,6 +21,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@ce4b8e3cba2220de8132ac9721ff754efd6bb7d7 # v34.6.2
@@ -28,6 +29,7 @@ jobs:
           json: true
           files: |
             kubernetes/**/helmrelease.yaml
+
       - id: set-matrix
         run: echo "matrix={\"file\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "${GITHUB_OUTPUT}"
 
@@ -45,11 +47,14 @@ jobs:
             helm
             kustomize
             yq
+
       - name: Setup Dyff
         run: |
-          sudo snap install dyff --classic
+          curl --silent --location https://git.io/JYfAY | bash
+
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+
       - name: Run Noodle On PR Branch
         id: pr
         run: |
@@ -59,11 +64,13 @@ jobs:
             --kustomize-base-dir "$(dirname "${{ matrix.file }}")" \
             --helm-repository-dir ${{ env.HELMREPOSITORY_DIR }})
           echo "file=${manifests}" >> "${GITHUB_OUTPUT}"
+
       - name: Checkout default branch
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
         with:
           ref: "${{ env.DEFAULT_BRANCH }}"
           path: default
+
       - name: Run Noodle On Default Branch
         id: default
         working-directory: default
@@ -74,6 +81,7 @@ jobs:
             --kustomize-base-dir "$(dirname "${{ matrix.file }}")" \
             --helm-repository-dir ${{ env.HELMREPOSITORY_DIR }})
           echo "file=${manifests}" >> "${GITHUB_OUTPUT}"
+
       - name: Dyff
         id: dyff
         run: |
