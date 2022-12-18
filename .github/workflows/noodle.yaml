@@ -95,7 +95,7 @@ jobs:
         run: |
           diff=$(dyff between --color off --truecolor off --omit-header \
             ${{ steps.default.outputs.file }} \
-            ${{ steps.pr.outputs.file }})
+            ${{ steps.pr.outputs.file }} | tail -n +2)
           echo "${diff}"
           diff="${diff//'%'/'%25'}"
           diff="${diff//$'\n'/'%0A'}"
@@ -118,12 +118,8 @@ jobs:
           issue-number: "${{ github.event.pull_request.number }}"
           body: |
             Helm Release: `${{ matrix.file }}`
-
             Diff:
-
             ```
-
             ${{ steps.diff.outputs.diff }}
-
             ```
           edit-mode: replace
