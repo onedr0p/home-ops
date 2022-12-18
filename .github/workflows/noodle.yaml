@@ -93,7 +93,7 @@ jobs:
       - name: Diff
         id: diff
         run: |
-          diff=$(dyff between --color off --truecolor off \
+          diff=$(dyff between --color off --truecolor off --omit-header \
             ${{ steps.default.outputs.file }} \
             ${{ steps.pr.outputs.file }})
           echo "${diff}"
@@ -116,7 +116,7 @@ jobs:
           token: "${{ steps.generate-token.outputs.token }}"
           comment-id: "${{ steps.find-comment.outputs.comment-id }}"
           issue-number: "${{ github.event.pull_request.number }}"
-          body: >
+          body: |
             Helm Release: `${{ matrix.file }}`
 
             Diff:
