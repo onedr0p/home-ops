@@ -1,5 +1,5 @@
 ---
-name: "Noodle"
+name: "Helm Release Diff"
 
 on:
   pull_request:
@@ -72,33 +72,33 @@ jobs:
           brew install homeport/tap/dyff
 
       - name: Run Noodle On PR Branch
-        id: pr
+        id: pull-request
         run: |
           releaseName=$(yq eval '.metadata.name' "${{ matrix.file }}")
-          manifests=$(npx zx ./.github/scripts/noodle.mjs \
+          manifests=$(npx zx ./.github/scripts/helmrelease-diff.mjs \
             --helm-release-name "${releaseName}" \
             --kustomize-base-dir "$(dirname "${{ matrix.file }}")" \
             --helm-repository-dir ${{ env.HELMREPOSITORY_DIR }})
           echo "file=${manifests}" >> "${GITHUB_OUTPUT}"
-
 
       - name: Run Noodle On Default Branch
         id: default
         working-directory: default
         run: |
           releaseName=$(yq eval '.metadata.name' "${{ matrix.file }}")
-          manifests=$(npx zx ../.github/scripts/noodle.mjs \
+          manifests=$(npx zx ../.github/scripts/helmrelease-diff.mjs \
             --helm-release-name "${releaseName}" \
             --kustomize-base-dir "$(dirname "${{ matrix.file }}")" \
             --helm-repository-dir ${{ env.HELMREPOSITORY_DIR }})
           echo "file=${manifests}" >> "${GITHUB_OUTPUT}"
 
+      # TODO(helmrelease-diff): `GITHUB_OUTPUT` doesn't work with the hacks below
       - name: Diff
         id: diff
         run: |
           diff=$(dyff between --color off --truecolor off --omit-header \
             ${{ steps.default.outputs.file }} \
-            ${{ steps.pr.outputs.file }} | tail -n +2)
+            ${{ steps.pull-request.outputs.file }} | tail -n +2)
           echo "${diff}"
           diff="${diff//'%'/'%25'}"
           diff="${diff//$'\n'/'%0A'}"
