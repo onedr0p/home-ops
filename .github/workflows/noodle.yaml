@@ -103,7 +103,7 @@ jobs:
           diff="${diff//'%'/'%25'}"
           diff="${diff//$'\n'/'%0A'}"
           diff="${diff//$'\r'/'%0D'}"
-          echo "diff=${manifests}" >> "${GITHUB_OUTPUT}"
+          echo "diff=${diff}" >> "${GITHUB_OUTPUT}"
 
       - name: Find Comment
         uses: peter-evans/find-comment@f4499a714d59013c74a08789b48abe4b704364a0 # v2.1.0
@@ -120,6 +120,7 @@ jobs:
           comment-id: "${{ steps.find-comment.outputs.comment-id }}"
           issue-number: "${{ github.event.pull_request.number }}"
           body: |
+            Path: `${{ matrix.file }}`
             ```
             ${{ steps.diff.outputs.diff }}
             ```
