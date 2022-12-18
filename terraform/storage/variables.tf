@@ -1,18 +1,19 @@
-# Provider
 variable "kubernetes_host" {
-  default = "https://192.168.1.81:6443"
+  default = "https://expanse.turbo.ac:6443"
   type    = string
 }
-variable "kubernetes_client_certificate" {
-  type = string
+variable "nexus_url" {
+  default = "http://nexus.turbo.ac"
+  type    = string
 }
-variable "kubernetes_client_key" {
-  type = string
+variable "nexus_username" {
+  default = "admin"
+  type    = string
 }
-variable "kubernetes_cluster_ca_certificate" {
-  type = string
+variable "nexus_password" {
+  default = "this-is-nothing-important"
+  type    = string
 }
-# App
 variable "vector_agent_host" {
   default = "192.168.69.111"
   type    = string

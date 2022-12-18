@@ -7,13 +7,17 @@ terraform {
     }
   }
   required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.16.1"
+    }
     nexus = {
       source  = "datadrivers/nexus"
       version = "1.21.2"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "2.16.1"
+    sops = {
+      source  = "carlpett/sops"
+      version = "0.7.1"
     }
     time = {
       source  = "hashicorp/time"
@@ -23,17 +27,6 @@ terraform {
   required_version = ">= 1.3.0"
 }
 
-provider "kubernetes" {
-  host                   = var.kubernetes_host
-  client_certificate     = base64decode(var.kubernetes_client_certificate)
-  client_key             = base64decode(var.kubernetes_client_key)
-  cluster_ca_certificate = base64decode(var.kubernetes_cluster_ca_certificate)
-}
-
-provider "nexus" {
-  alias    = "nas"
-  insecure = true
-  url      = "http://nexus.turbo.ac"
-  username = "admin"
-  password = "this-is-nothing-important"
+data "sops_file" "secrets" {
+  source_file = "secret.sops.yaml"
 }
