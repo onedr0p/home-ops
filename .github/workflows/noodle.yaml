@@ -97,11 +97,10 @@ jobs:
             ${{ steps.default.outputs.file }} \
             ${{ steps.pr.outputs.file }})
           echo "${diff}"
-          diff=$(printf '```\n%s\n```' "$(echo ${diff})")
           diff="${diff//'%'/'%25'}"
           diff="${diff//$'\n'/'%0A'}"
           diff="${diff//$'\r'/'%0D'}"
-          echo "diff=$(echo ${diff})" >> $GITHUB_OUTPUT
+          echo "diff=${diff}" >> "${GITHUB_OUTPUT}"
 
       - name: Find Comment
         uses: peter-evans/find-comment@f4499a714d59013c74a08789b48abe4b704364a0 # v2.1.0
@@ -117,8 +116,14 @@ jobs:
           token: "${{ steps.generate-token.outputs.token }}"
           comment-id: "${{ steps.find-comment.outputs.comment-id }}"
           issue-number: "${{ github.event.pull_request.number }}"
-          body: |
+          body: >
             Helm Release: `${{ matrix.file }}`
+
             Diff:
+
+            ```
+
             ${{ steps.diff.outputs.diff }}
+
+            ```
           edit-mode: replace
