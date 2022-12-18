@@ -41,7 +41,7 @@ async function helmTemplate (releaseName, repositoryName, chartName, chartVersio
   await fs.writeFile(valuesFile.stdout.trim(), values.toString());
 
   const manifestsFile = await $`mktemp`
-  const manifests = await $`helm template --release-name ${releaseName} --skip-crds ${repositoryName}/${chartName} --version ${chartVersion} --values ${valuesFile.stdout.trim()}`
+  const manifests = await $`helm template --kube-version 1.24.8 --release-name ${releaseName} --skip-crds ${repositoryName}/${chartName} --version ${chartVersion} --values ${valuesFile.stdout.trim()}`
   await fs.writeFile(manifestsFile.stdout.trim(), manifests.stdout.trim());
 
   return manifestsFile.stdout.trim()
