@@ -56,20 +56,12 @@ jobs:
           app_id: ${{ secrets.BOT_APP_ID }}
           private_key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
 
-      - name: Setup Kube Tools
-        uses: yokawasa/action-setup-kube-tools@b91bb02bc122bd84ac7bbea5f25ed6b0f2ec6275 # renovate: tag=v0.9.2
-        with:
-          setup-tools: |
-            helm
-            kustomize
-            yq
-
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
-      - name: Setup Dyff
+      - name: Setup Tools
         run: |
-          brew install homeport/tap/dyff
+          brew install helm homeport/tap/dyff kustomize yq
 
       - name: Run Noodle On PR Branch
         id: pull-request

@@ -25,14 +25,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Kube Tools
-        uses: yokawasa/action-setup-kube-tools@b91bb02bc122bd84ac7bbea5f25ed6b0f2ec6275 # renovate: tag=v0.9.2
-        with:
-          setup-tools: |
-            yq
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
 
-      - name: Setup Flux
-        uses: fluxcd/flux2/action@8674f31874b23ec1d03fc51efde27d1280d116db # renovate: tag=v0.37.0
+      - name: Setup Tools
+        run: |
+          brew install fluxcd/tap/flux yq
 
       - name: Write kubeconfig
         id: kubeconfig
