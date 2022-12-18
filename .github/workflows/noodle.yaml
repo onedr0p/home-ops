@@ -25,6 +25,7 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@ce4b8e3cba2220de8132ac9721ff754efd6bb7d7 # v34.6.2
         with:
+          json: true
           files: |
             kubernetes/**/helmrelease.yaml
       - id: set-matrix
@@ -53,7 +54,7 @@ jobs:
         id: pr
         run: |
           releaseName=$(yq eval '.metadata.name' "${{ matrix.file }}")
-          manifests=$(npx zx ./hack/noodle.mjs \
+          manifests=$(npx zx ./.github/scripts/noodle.mjs \
             --helm-release-name "${releaseName}" \
             --kustomize-base-dir "$(dirname "${{ matrix.file }}")" \
             --helm-repository-dir ${{ env.HELMREPOSITORY_DIR }})
@@ -65,11 +66,12 @@ jobs:
           path: default
       - name: Run Noodle On Default Branch
         id: default
+        working-directory: default
         run: |
-          releaseName=$(yq eval '.metadata.name' "default/${{ matrix.file }}")
+          releaseName=$(yq eval '.metadata.name' "${{ matrix.file }}")
           manifests=$(npx zx ./.github/scripts/noodle.mjs \
             --helm-release-name "${releaseName}" \
-            --kustomize-base-dir "$(dirname "default/${{ matrix.file }}")" \
+            --kustomize-base-dir "$(dirname "${{ matrix.file }}")" \
             --helm-repository-dir ${{ env.HELMREPOSITORY_DIR }})
           echo "file=${manifests}" >> "${GITHUB_OUTPUT}"
       - name: Dyff
