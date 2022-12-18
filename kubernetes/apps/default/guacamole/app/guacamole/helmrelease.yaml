@@ -1,0 +1,99 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: guacamole
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  dependsOn:
+    - name: cloudnative-pg
+    - name: guacd
+  values:
+    initContainers:
+      init-db:
+        image: ghcr.io/onedr0p/postgres-initdb:14.6
+        envFrom:
+          - secretRef:
+              name: guacamole-secret
+      init-schema:
+        image: ghcr.io/onedr0p/postgres-initdb:14.6
+        envFrom:
+          - secretRef:
+              name: guacamole-secret
+        command:
+          - /bin/bash
+          - -c
+          - cat /schemas/*.sql | psql -d $(POSTGRES_DATABASE) -f -
+        volumeMounts:
+          - name: create-schema
+            mountPath: /schemas/001-create-schema.sql
+            subPath: 001-create-schema.sql
+          - name: create-admin-user
+            mountPath: /schemas/002-create-admin-user.sql
+            subPath: 002-create-admin-user.sql
+    controller:
+      annotations:
+        reloader.stakater.com/auto: "true"
+    image:
+      repository: docker.io/guacamole/guacamole-dev
+      tag: latest
+    env:
+      GUACD_HOSTNAME: guacd.default.svc.cluster.local
+      GUACD_PORT: "4822"
+    envFrom:
+      - secretRef:
+          name: guacamole-secret
+    service:
+      main:
+        ports:
+          http:
+            port: 8080
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "nginx"
+        annotations:
+          hajimari.io/icon: "mdi:monitor-screenshot"
+        hosts:
+          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    persistence:
+      create-schema:
+        enabled: true
+        type: configMap
+        name: schemas-configmap
+        subPath: 001-create-schema.sql
+        mountPath: /schemas/001-create-schema.sql
+      create-admin-user:
+        enabled: true
+        type: configMap
+        name: schemas-configmap
+        subPath: 002-create-admin-user.sql
+        mountPath: /schemas/002-create-admin-user.sql
+    resources:
+      requests:
+        cpu: 250m
+        memory: 100Mi
+      limits:
+        memory: 750Mi
