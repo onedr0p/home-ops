@@ -40,6 +40,22 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(needs.changed-files.outputs.matrix) }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+
+      - name: Checkout default branch
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+        with:
+          ref: "${{ env.DEFAULT_BRANCH }}"
+          path: default
+
+      - name: Generate Token
+        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # renovate: tag=v1.7.0
+        id: generate-token
+        with:
+          app_id: ${{ secrets.BOT_APP_ID }}
+          private_key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+
       - name: Setup Kube Tools
         uses: yokawasa/action-setup-kube-tools@b91bb02bc122bd84ac7bbea5f25ed6b0f2ec6275 # renovate: tag=v0.9.2
         with:
@@ -52,9 +68,6 @@ jobs:
         run: |
           curl --silent --location https://git.io/JYfAY | bash
 
-      - name: Checkout
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
-
       - name: Run Noodle On PR Branch
         id: pr
         run: |
@@ -65,11 +78,6 @@ jobs:
             --helm-repository-dir ${{ env.HELMREPOSITORY_DIR }})
           echo "file=${manifests}" >> "${GITHUB_OUTPUT}"
 
-      - name: Checkout default branch
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
-        with:
-          ref: "${{ env.DEFAULT_BRANCH }}"
-          path: default
 
       - name: Run Noodle On Default Branch
         id: default
@@ -82,12 +90,37 @@ jobs:
             --helm-repository-dir ${{ env.HELMREPOSITORY_DIR }})
           echo "file=${manifests}" >> "${GITHUB_OUTPUT}"
 
-      - name: Dyff
-        id: dyff
+      - name: Diff
+        id: diff
         run: |
           cat ${{ steps.default.outputs.file }}
-          echo "================"
+          echo "\n=================================\n"
           cat ${{ steps.pr.outputs.file }}
-          dyff between --color off --truecolor off --omit-header \
+          diff=$(dyff between --color off --truecolor off --omit-header \
             ${{ steps.default.outputs.file }} \
-            ${{ steps.pr.outputs.file }}
+            ${{ steps.pr.outputs.file }})
+          echo "${diff}"
+          diff="${diff//'%'/'%25'}"
+          diff="${diff//$'\n'/'%0A'}"
+          diff="${diff//$'\r'/'%0D'}"
+          echo "diff=${manifests}" >> "${GITHUB_OUTPUT}"
+
+      - name: Find Comment
+        uses: peter-evans/find-comment@f4499a714d59013c74a08789b48abe4b704364a0 # v2.1.0
+        id: find-comment
+        with:
+          issue-number: "${{ github.event.pull_request.number }}"
+          comment-author: "${{ env.BOT_USERNAME }}"
+          body-includes: "${{ matrix.file }}"
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@5adcb0bb0f9fb3f95ef05400558bdb3f329ee808 # renovate: tag=v2.1.0
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
+          comment-id: "${{ steps.find-comment.outputs.comment-id }}"
+          issue-number: "${{ github.event.pull_request.number }}"
+          body: |
+            ```
+            ${{ steps.diff.outputs.diff }}
+            ```
+          edit-mode: replace
