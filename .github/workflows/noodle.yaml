@@ -99,7 +99,9 @@ jobs:
           diff=$(dyff between --color off --truecolor off --omit-header \
             ${{ steps.default.outputs.file }} \
             ${{ steps.pr.outputs.file }})
-          echo "${diff}"
+          diff="${diff//'%'/'%25'}"
+          diff="${diff//$'\n'/'%0A'}"
+          diff="${diff//$'\r'/'%0D'}"
           echo "diff=${diff}" >> "${GITHUB_OUTPUT}"
 
       - name: Find Comment
