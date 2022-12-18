@@ -1,9 +1,5 @@
 #!/usr/bin/env zx
 $.verbose = false
-
-// ./hack/noodle.mjs --helm-release-name=guacd --kustomize-base-dir=./kubernetes/archive/guacamole/app --helm-repository-dir=./kubernetes/flux/repositories/helm
-// dyff between --color off --truecolor off --omit-header /var/folders/xk/pzfcng9n1y157g7_yk9n2cv40000gn/T/tmp.ZBKSvGqsRD /var/folders/xk/pzfcng9n1y157g7_yk9n2cv40000gn/T/tmp.XcsrqJ98fS
-
 const HelmReleaseName = argv['helm-release-name']
 const KustomizeBaseDir = argv['kustomize-base-dir']
 const HelmRepositoryDir = argv['helm-repository-dir']
@@ -57,4 +53,4 @@ const manifests = await helmTemplate(
   release.spec.chart.spec.version,
   release.spec.values
 )
-echo(`${manifests}`)
+echo(manifests)
