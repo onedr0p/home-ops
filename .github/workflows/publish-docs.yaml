@@ -1,0 +1,34 @@
+---
+name: "Publish Docs"
+
+on:
+  push:
+    branches: ["main"]
+    # paths: ["docs/**"]
+  pull_request:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Setup mdBook
+        uses: peaceiris/actions-mdbook@adeb05db28a0c0004681db83893d56c0388ea9ea # v1.2.0
+
+      - name: Build docs
+        working-directory: docs
+        run: mdbook build
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@de7ea6f8efb354206b205ef54722213d99067935 # v3.9.0
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
