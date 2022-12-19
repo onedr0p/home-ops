@@ -28,6 +28,10 @@ jobs:
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
+      - name: Ensure Brew is in PATH for self hosted runner
+        run: |
+          echo "/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin" >> "${GITHUB_PATH}"
+
       - name: Setup Tools
         run: |
           brew install fluxcd/tap/flux yq
