@@ -7,8 +7,6 @@ on:
     paths: ["kubernetes/**/helmrelease.yaml"]
 
 env:
-  # Currently no way to detect automatically
-  DEFAULT_BRANCH: main
   BOT_USERNAME: rosey-bot[bot]
   HELMREPOSITORY_DIR: ./kubernetes/flux/repositories/helm
 
@@ -46,7 +44,7 @@ jobs:
       - name: Checkout default branch
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
         with:
-          ref: "${{ env.DEFAULT_BRANCH }}"
+          ref: ${{ github.event.repository.default_branch }}
           path: default
 
       - name: Generate Token
@@ -98,16 +96,16 @@ jobs:
         uses: peter-evans/find-comment@f4499a714d59013c74a08789b48abe4b704364a0 # v2.1.0
         id: find-comment
         with:
-          issue-number: "${{ github.event.pull_request.number }}"
-          comment-author: "${{ env.BOT_USERNAME }}"
-          body-includes: "${{ matrix.file }}"
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: ${{ env.BOT_USERNAME }}
+          body-includes: ${{ matrix.file }}
 
       - name: Create or update comment
         uses: peter-evans/create-or-update-comment@5adcb0bb0f9fb3f95ef05400558bdb3f329ee808 # renovate: tag=v2.1.0
         with:
-          token: "${{ steps.generate-token.outputs.token }}"
-          comment-id: "${{ steps.find-comment.outputs.comment-id }}"
-          issue-number: "${{ github.event.pull_request.number }}"
+          token: ${{ steps.generate-token.outputs.token }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
           body: |
             Helm Release: `${{ matrix.file }}`
 
