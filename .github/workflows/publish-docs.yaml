@@ -4,8 +4,10 @@ name: "Publish Docs"
 on:
   push:
     branches: ["main"]
-    # paths: ["docs/**"]
+    paths: ["docs/**"]
   pull_request:
+    branches: ["main"]
+    paths: ["docs/**"]
 
 jobs:
   publish:
@@ -28,7 +30,9 @@ jobs:
 
       - name: Extract mdbook-admonish
         run: |
-          tar -xvf $GITHUB_WORKSPACE/*-unknown-linux-gnu.tar.gz -C $GITHUB_PATH
+          mkdir -p bin/
+          tar -xvf $GITHUB_WORKSPACE/*-unknown-linux-gnu.tar.gz -C bin/
+          echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
 
       - name: Build docs
         working-directory: docs
@@ -39,4 +43,4 @@ jobs:
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+          publish_dir: ./docs/book
