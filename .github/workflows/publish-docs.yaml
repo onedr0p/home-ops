@@ -19,11 +19,16 @@ jobs:
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@adeb05db28a0c0004681db83893d56c0388ea9ea # v1.2.0
 
-      - name: Setup Rust
-        uses: hecrj/setup-rust-action@50a120e4d34903c2c1383dec0e9b1d349a9cc2b1 # v1.4.1
+      - name: Download mdbook-admonish
+        uses: robinraju/release-downloader@d6de084c58345d09b017e22701dbcf26977cfd14 # renovate: tag=v1.6
+        with:
+          repository: tommilligan/mdbook-admonish
+          fileName: "*-unknown-linux-gnu.tar.gz"
+          latest: true
 
-      - name: Install Plug-ins
-        run: cargo install mdbook-admonish
+      - name: Extract mdbook-admonish
+        run: |
+          tar -xvf $GITHUB_WORKSPACE/*-unknown-linux-gnu.tar.gz -C $GITHUB_WORKSPACE
 
       - name: Build docs
         working-directory: docs
