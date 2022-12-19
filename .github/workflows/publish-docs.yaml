@@ -16,11 +16,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
 
-      - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@adeb05db28a0c0004681db83893d56c0388ea9ea # v1.2.0
+
+      - name: Setup Rust
+        uses: hecrj/setup-rust-action@50a120e4d34903c2c1383dec0e9b1d349a9cc2b1 # v1.4.1
+
+      - name: Install Plug-ins
+        run: cargo install mdbook-admonish
 
       - name: Build docs
         working-directory: docs
