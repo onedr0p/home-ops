@@ -25,8 +25,8 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 
 <div align="center">
 
-<img src="https://grafana.devbu.io/render/d-solo/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster?orgId=1&from=now-1d%2Fd&to=now-1d%2Fd&panelId=1&width=200&height=100&theme=dark" width="200px" alt="cpu"/>
-<img src="https://grafana.devbu.io/render/d-solo/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster?orgId=1&from=now-1d%2Fd&to=now-1d%2Fd&panelId=4&width=200&height=100&theme=light" width="200px" alt="memory"/>
+<img src="https://grafana.devbu.io/render/d-solo/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster?orgId=1&now-1h&to=now&panelId=1&width=200&height=100&theme=dark" width="200px" alt="cpu"/>
+<img src="https://grafana.devbu.io/render/d-solo/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster?orgId=1&now-1h&to=now&panelId=4&width=200&height=100&theme=light" width="200px" alt="memory"/>
 
 </div>
 
