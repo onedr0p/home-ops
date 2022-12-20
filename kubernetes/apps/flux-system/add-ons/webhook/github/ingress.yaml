@@ -8,9 +8,9 @@ metadata:
     external-dns.home.arpa/enabled: "true"
     hajimari.io/enable: "false"
 spec:
-  ingressClassName: "nginx"
+  ingressClassName: nginx
   rules:
-    - host: "flux-webhook.${SECRET_PUBLIC_DOMAIN}"
+    - host: &host flux-webhook.devbu.io
       http:
         paths:
           - path: /hook/
@@ -22,4 +22,4 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - "flux-webhook.${SECRET_PUBLIC_DOMAIN}"
+        - *host

@@ -31,7 +31,7 @@ resource "kubernetes_stateful_set_v1" "nexus" {
           }
           env {
             name  = "NEXUS_SECURITY_INITIAL_PASSWORD"
-            value = "this-is-nothing-important"
+            value = var.nexus_password
           }
           env {
             name  = "NEXUS_SECURITY_RANDOMPASSWORD"

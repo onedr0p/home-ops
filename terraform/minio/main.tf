@@ -16,8 +16,8 @@ terraform {
 }
 
 provider "minio" {
-  minio_server   = var.minio_server
-  minio_region   = var.minio_region
+  minio_server   = "s3.devbu.io"
+  minio_region   = "us-east-1"
   minio_user     = var.minio_access_key
   minio_password = var.minio_secret_key
   minio_ssl      = true
