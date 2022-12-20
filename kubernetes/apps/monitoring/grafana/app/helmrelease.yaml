@@ -42,7 +42,7 @@ spec:
       - name: grafana-secret
     grafana.ini:
       auth:
-        signout_redirect_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/logout"
+        signout_redirect_url: https://auth.devbu.io/logout
         oauth_auto_login: false
       auth.generic_oauth:
         enabled: true
@@ -51,9 +51,9 @@ spec:
         client_secret: "${SECRET_GRAFANA_OAUTH_CLIENT_SECRET}"
         scopes: "openid profile email groups"
         empty_scopes: false
-        auth_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/api/oidc/authorization"
-        token_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/api/oidc/token"
-        api_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/api/oidc/userinfo"
+        auth_url: https://auth.devbu.io/api/oidc/authorization
+        token_url: https://auth.devbu.io/api/oidc/token
+        api_url: https://auth.devbu.io/api/oidc/userinfo
         login_attribute_path: preferred_username
         groups_attribute_path: groups
         name_attribute_path: name
@@ -131,12 +131,12 @@ spec:
       enabled: true
     ingress:
       enabled: true
-      ingressClassName: "nginx"
+      ingressClassName: nginx
       annotations:
         external-dns.home.arpa/enabled: "true"
         hajimari.io/icon: "mdi:chart-arc"
       hosts:
-        - &host "grafana.${SECRET_PUBLIC_DOMAIN}"
+        - &host grafana.devbu.io
       tls:
         - hosts:
             - *host

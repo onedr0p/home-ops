@@ -47,7 +47,7 @@ spec:
       N8N_EMAIL_MODE: smtp
       N8N_SMTP_HOST: smtp-relay.default.svc.cluster.local
       N8N_SMTP_PORT: 2525
-      N8N_SMTP_SENDER: "n8n@${SECRET_EMAIL_DOMAIN}"
+      N8N_SMTP_SENDER: n8n@buhl.casa
       N8N_METRICS: "true"
     envFrom:
       - secretRef:
@@ -60,11 +60,11 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
           hajimari.io/icon: "workflow"
         hosts:
-          - host: &host "n8n.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host n8n.devbu.io
             paths:
               - path: /
                 pathType: Prefix

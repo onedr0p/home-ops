@@ -33,8 +33,8 @@ spec:
       MINIO_UPDATE: "off"
       MINIO_PROMETHEUS_URL: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
       MINIO_PROMETHEUS_JOB_ID: minio
-      MINIO_BROWSER_REDIRECT_URL: "https://minio.${SECRET_PUBLIC_DOMAIN}"
-      MINIO_SERVER_URL: "https://s3.${SECRET_PUBLIC_DOMAIN}"
+      MINIO_BROWSER_REDIRECT_URL: https://minio.devbu.io
+      MINIO_SERVER_URL: https://s3.devbu.io
     envFrom:
       - secretRef:
           name: minio-secret
@@ -44,10 +44,10 @@ spec:
         enabled: true
         ports:
           http:
-            port: &port-console 9001
+            port: &console-port 9001
           api:
             enabled: true
-            port: &port-api 9000
+            port: &api-port 9000
     # https://min.io/docs/minio/linux/reference/minio-mc-admin/mc-admin-prometheus.html
     serviceMonitor:
       main:
@@ -64,22 +64,22 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
           hajimari.io/icon: pail
         hosts:
-          - host: &host-console "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+          - host: &console-host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
                 pathType: Prefix
                 service:
-                  port: *port-console
+                  port: *console-port
         tls:
           - hosts:
-              - *host-console
+              - *console-host
       s3:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
           external-dns.home.arpa/enabled: "true"
           nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
@@ -89,15 +89,15 @@ spec:
             chunked_transfer_encoding off;
           hajimari.io/enable: "false"
         hosts:
-          - host: &host-api "s3.${SECRET_PUBLIC_DOMAIN}"
+          - host: &api-host s3.devbu.io
             paths:
               - path: /
                 pathType: Prefix
                 service:
-                  port: *port-api
+                  port: *api-port
         tls:
           - hosts:
-              - *host-api
+              - *api-host
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568

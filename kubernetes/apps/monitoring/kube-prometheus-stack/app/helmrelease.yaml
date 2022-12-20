@@ -91,12 +91,12 @@ spec:
       ingress:
         enabled: true
         pathType: Prefix
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
           hajimari.io/appName: "Alert Manager"
           hajimari.io/icon: "mdi:alert-decagram-outline"
         hosts:
-          - &host "alert-manager.${SECRET_PUBLIC_DOMAIN}"
+          - &host alert-manager.devbu.io
         tls:
           - hosts:
               - *host
@@ -106,7 +106,7 @@ spec:
         storage:
           volumeClaimTemplate:
             spec:
-              storageClassName: "ceph-block"
+              storageClassName: ceph-block
               resources:
                 requests:
                   storage: 1Gi
@@ -172,13 +172,13 @@ spec:
     prometheus:
       ingress:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
           hajimari.io/appName: "Prometheus"
           hajimari.io/icon: "mdi:fire"
         pathType: Prefix
         hosts:
-          - &host "prometheus.${SECRET_PUBLIC_DOMAIN}"
+          - &host prometheus.devbu.io
         tls:
           - hosts:
               - *host
@@ -189,13 +189,13 @@ spec:
       thanosIngress:
         enabled: true
         pathType: Prefix
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
           nginx.ingress.kubernetes.io/ssl-redirect: "true"
           nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
           hajimari.io/enable: "false"
         hosts:
-          - &host "thanos-sidecar.${SECRET_PUBLIC_DOMAIN}"
+          - &host thanos-sidecar.devbu.io
         tls:
           - hosts:
               - *host
@@ -220,7 +220,7 @@ spec:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: "ceph-block"
+              storageClassName: ceph-block
               resources:
                 requests:
                   storage: 50Gi
@@ -236,38 +236,34 @@ spec:
             scrape_timeout: 10s
             honor_timestamps: true
             static_configs:
-              - targets:
-                  - "opnsense.turbo.ac:8404"
+              - targets: ["opnsense.turbo.ac:8404"]
           - job_name: coredns
             scrape_interval: 1m
             scrape_timeout: 10s
             honor_timestamps: true
             static_configs:
-              - targets:
-                  - "opnsense.turbo.ac:9153"
+              - targets: ["opnsense.turbo.ac:9153"]
           - job_name: frr-exporter
             scrape_interval: 1m
             scrape_timeout: 10s
             honor_timestamps: true
             static_configs:
-              - targets:
-                  - "opnsense.turbo.ac:9342"
+              - targets: ["opnsense.turbo.ac:9342"]
           - job_name: node-exporter
             scrape_interval: 1m
             scrape_timeout: 10s
             honor_timestamps: true
             static_configs:
               - targets:
-                  - "expanse.turbo.ac:9100"
-                  - "opnsense.turbo.ac:9100"
-                  - "pikvm.turbo.ac:9100"
+                  - expanse.turbo.ac:9100
+                  - opnsense.turbo.ac:9100
+                  - pikvm.turbo.ac:9100
           - job_name: smartctl-exporter
             scrape_interval: 1m
             scrape_timeout: 10s
             honor_timestamps: true
             static_configs:
-              - targets:
-                  - "expanse.turbo.ac:9633"
+              - targets: ["expanse.turbo.ac:9633"]
           - job_name: pikvm
             scrape_interval: 1m
             scrape_timeout: 10s
@@ -277,8 +273,7 @@ spec:
               password: "${SECRET_PIKVM_PASSWORD}"
             honor_timestamps: true
             static_configs:
-              - targets:
-                  - "pikvm.turbo.ac"
+              - targets: ["pikvm.turbo.ac"]
   valuesFrom:
     - kind: Secret
       name: alertmanager-secret

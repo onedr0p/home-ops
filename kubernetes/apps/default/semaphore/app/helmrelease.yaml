@@ -39,7 +39,7 @@ spec:
     env:
       SEMAPHORE_LDAP_ACTIVATED: "no"
       SEMAPHORE_PLAYBOOK_PATH: /tmp/semaphore/
-      SEMAPHORE_ADMIN_EMAIL: "devin@${SECRET_EMAIL_DOMAIN}"
+      SEMAPHORE_ADMIN_EMAIL: devin@buhl.casa
     envFrom:
       - secretRef:
           name: semaphore-secret
@@ -51,12 +51,12 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
           external-dns.home.arpa/enabled: "true"
           hajimari.io/icon: "mdi:ansible"
         hosts:
-          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
                 pathType: Prefix
