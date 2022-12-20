@@ -15,9 +15,9 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 [![Renovate](https://img.shields.io/github/actions/workflow/status/onedr0p/home-ops/renovate.yaml?branch=main&label=&logo=renovatebot&style=for-the-badge&color=blue)](https://github.com/onedr0p/home-ops/actions/workflows/renovate.yaml)
 
 [![Home-Internet](https://img.shields.io/uptimerobot/status/m784591389-ddbc4c84041a70eb6f6a3fb4?color=brightgreeen&label=Home%20Internet&style=for-the-badge&logo=opnSense&logoColor=white)](https://uptimerobot.com)
-[![Plex](https://img.shields.io/uptimerobot/status/m784591338-cbf3205bc18109108eb0ea8e?logo=plex&logoColor=white&color=brightgreeen&label=Plex&style=for-the-badge)](https://plex.tv)
-[![Home-Assistant](https://img.shields.io/uptimerobot/status/m786203807-32ce99612d7b2d01b89c4315?logo=homeassistant&logoColor=white&color=brightgreeen&label=Home%20Assistant&style=for-the-badge)](https://www.home-assistant.io/)
-[![Grafana](https://img.shields.io/uptimerobot/status/m792427620-04fcdd7089a84863ec9f398d?logo=grafana&logoColor=white&color=brightgreeen&label=Grafana&style=for-the-badge)](https://www.grafana.com/)
+[![Plex](https://img.shields.io/uptimerobot/status/m784591338-cbf3205bc18109108eb0ea8e?logo=plex&logoColor=white&color=brightgreeen&label=Plex&style=for-the-badge)](https://ln.devbu.io/Fl5ME)
+[![Home-Assistant](https://img.shields.io/uptimerobot/status/m786203807-32ce99612d7b2d01b89c4315?logo=homeassistant&logoColor=white&color=brightgreeen&label=Home%20Assistant&style=for-the-badge)](https://ln.devbu.io/ApwUP)
+[![Grafana](https://img.shields.io/uptimerobot/status/m792427620-04fcdd7089a84863ec9f398d?logo=grafana&logoColor=white&color=brightgreeen&label=Grafana&style=for-the-badge)](https://ln.devbu.io/tu0B6)
 
 </div>
 
@@ -25,9 +25,9 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 
 <div align="center">
 
-<img src="https://grafana.devbu.io/render/d-solo/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster?orgId=1&from=now-1d%2Fd&to=now-1d%2Fd&panelId=1&width=200&height=100&theme=dark" width="200px" alt="cpu"/>
-<img src="https://grafana.devbu.io/render/d-solo/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster?orgId=1&from=now-1d%2Fd&to=now-1d%2Fd&panelId=4&width=200&height=100&theme=light" width="200px" alt="memory"/>
-<img src="https://grafana.devbu.io/render/d-solo/000000012/apc-smart-ups-1500?orgId=1&from=now-1d%2Fd&to=now-1d%2Fd&panelId=2&width=200&height=100&theme=dark" width="200px" alt="power"/>
+[<img src="https://grafana.devbu.io/render/d-solo/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster?orgId=1&from=now-1d%2Fd&to=now-1d%2Fd&panelId=1&width=200&height=100&theme=dark" width="200px" alt="cpu"/>](https://ln.devbu.io/TiTWl)
+[<img src="https://grafana.devbu.io/render/d-solo/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster?orgId=1&from=now-1d%2Fd&to=now-1d%2Fd&panelId=4&width=200&height=100&theme=light" width="200px" alt="memory"/>](https://ln.devbu.io/TiTWl)
+[<img src="https://grafana.devbu.io/render/d-solo/000000012/apc-smart-ups-1500?orgId=1&from=now-1d%2Fd&to=now-1d%2Fd&panelId=2&width=200&height=100&theme=dark" width="200px" alt="power"/>](https://ln.devbu.io/xG72B)
 
 </div>
 
