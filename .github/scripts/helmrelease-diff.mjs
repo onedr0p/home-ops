@@ -40,6 +40,9 @@ async function helmTemplate (releaseName, repositoryName, chartName, chartVersio
   const manifests = await $`helm template --kube-version 1.24.8 --release-name ${releaseName} --skip-crds ${repositoryName}/${chartName} --version ${chartVersion} --values ${valuesFile.stdout.trim()}`
   await fs.writeFile(manifestsFile.stdout.trim(), manifests.stdout.trim());
 
+  //TODO: Refactor in a more javascript way
+  await $`yq --inplace eval-all 'del(.metadata,.spec.template.metadata,.spec.selector)' ${manifestsFile.stdout.trim()}`
+
   return manifestsFile.stdout.trim()
 }
 
