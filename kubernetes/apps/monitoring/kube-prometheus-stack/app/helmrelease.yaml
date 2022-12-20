@@ -35,14 +35,14 @@ spec:
           - name: "null"
           - name: "pushover"
             pushover_configs:
-              - token: "${SECRET_PUSHOVER_ALERT_MANAGER_APIKEY}"
-                user_key: "${SECRET_PUSHOVER_USERKEY}"
+              - url_title: View in Alert Manager
+                # token: set by valuesFrom
+                # user_key: set by valuesFrom
                 send_resolved: true
                 html: true
                 sound: gamelan
                 priority: |-
                   {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
-                url_title: View in Alert Manager
                 title: |-
                   [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
                 message: |-
@@ -279,3 +279,12 @@ spec:
             static_configs:
               - targets:
                   - "pikvm.turbo.ac"
+  valuesFrom:
+    - kind: Secret
+      name: alertmanager-secrets
+      valuesKey: pushover_token
+      targetPath: alertmanager.config.receivers[1].pushover_configs[0].token
+    - kind: Secret
+      name: alertmanager-secrets
+      valuesKey: pushover_user_key
+      targetPath: alertmanager.config.receivers[1].pushover_configs[0].user_key
