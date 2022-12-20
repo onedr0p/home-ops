@@ -37,10 +37,10 @@ async function helmTemplate (releaseName, repositoryName, chartName, chartVersio
   await fs.writeFile(valuesFile.stdout.trim(), values.toString());
 
   const manifestsFile = await $`mktemp`
-  const manifests = await $`helm template --kube-version 1.24.8 --release-name ${releaseName} --skip-crds ${repositoryName}/${chartName} --version ${chartVersion} --values ${valuesFile.stdout.trim()}`
+  const manifests = await $`helm template --kube-version 1.24.8 --release-name ${releaseName} --include-crds=false ${repositoryName}/${chartName} --version ${chartVersion} --values ${valuesFile.stdout.trim()}`
   await fs.writeFile(manifestsFile.stdout.trim(), manifests.stdout.trim());
 
-  //TODO: Refactor in a more javascript way
+  // Delete keys which contain auto generated fields
   await $`yq --inplace eval-all 'del(.metadata,.spec.template.metadata,.spec.selector)' ${manifestsFile.stdout.trim()}`
 
   return manifestsFile.stdout.trim()
