@@ -1,0 +1,63 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-flux-monitoring
+  namespace: flux-system
+  labels:
+    substitution.flux.home.arpa/enabled: "true"
+spec:
+  dependsOn:
+    - name: cluster-apps-external-secrets
+    - name: cluster-apps-onepassword-connect
+  path: ./kubernetes/apps/flux-system/addons/monitoring
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-ops-kubernetes
+  wait: true
+  interval: 30m
+  retryInterval: 1m
+  timeout: 3m
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-flux-notifications
+  namespace: flux-system
+  labels:
+    substitution.flux.home.arpa/enabled: "true"
+spec:
+  dependsOn:
+    - name: cluster-apps-external-secrets
+    - name: cluster-apps-onepassword-connect
+  path: ./kubernetes/apps/flux-system/addons/notifications
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-ops-kubernetes
+  wait: true
+  interval: 30m
+  retryInterval: 1m
+  timeout: 3m
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-flux-webhooks
+  namespace: flux-system
+  labels:
+    substitution.flux.home.arpa/enabled: "true"
+spec:
+  dependsOn:
+    - name: cluster-apps-external-secrets
+    - name: cluster-apps-onepassword-connect
+  path: ./kubernetes/apps/flux-system/addons/webhooks
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-ops-kubernetes
+  wait: true
+  interval: 30m
+  retryInterval: 1m
+  timeout: 3m
