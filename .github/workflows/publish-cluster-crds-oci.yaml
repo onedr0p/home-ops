@@ -11,22 +11,20 @@ jobs:
     name: Publish Cluster OCI CRDs
     runs-on: ["self-hosted"]
     steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Setup Tools
+        run: |
+          brew install fluxcd/tap/flux kubectl
+
       - name: Setup Python
         uses: actions/setup-python@2c3dd9e7e29afd70cc0950079bde6c979d1f69f9 # renovate: tag=v4.3.1
         with:
           python-version: "3.11"
 
-      - name: Setup Kube Tools
-        uses: yokawasa/action-setup-kube-tools@b91bb02bc122bd84ac7bbea5f25ed6b0f2ec6275 # renovate: tag=v0.9.2
-        with:
-          setup-tools: |
-            kubectl
-
-      - name: Setup Flux
-        uses: fluxcd/flux2/action@8674f31874b23ec1d03fc51efde27d1280d116db # renovate: tag=v0.37.0
-
       - name: Download crd-extractor
-        uses: robinraju/release-downloader@d6de084c58345d09b017e22701dbcf26977cfd14 # renovate: tag=v1.6
+        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
         with:
           repository: datreeio/CRDs-catalog
           latest: true

@@ -29,7 +29,7 @@ spec:
       type: statefulset
     image:
       repository: ghcr.io/onedr0p/tautulli
-      tag: 2.10.5@sha256:5d596333a4d57bdfb4a8d4b603ce0493ffd4cbc45616f0a6d59ca2b9e43c4262
+      tag: 2.10.5@sha256:0a69f15bb4483dbff0f1718d20eac9fd62cefdd307e213468eb961e5f78538f6
     env:
       TZ: America/New_York
     service:
@@ -40,16 +40,16 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
           external-dns.home.arpa/enabled: "true"
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/tautulli/nord.css"></head>';
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.devbu.io/css/base/tautulli/nord.css"></head>';
             sub_filter_once on;
           hajimari.io/icon: "mdi:chart-bar"
         hosts:
-          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
                 pathType: Prefix

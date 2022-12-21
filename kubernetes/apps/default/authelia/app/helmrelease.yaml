@@ -39,7 +39,8 @@ spec:
         reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/authelia/authelia
-      tag: 4.37.4
+      tag: feat-config-pre-processor # TODO https://github.com/authelia/authelia/pull/4515
+    args: ["--config", "/config/configuration.yml", "--config.experimental.filters", "expand-env"]
     envFrom:
       - secretRef:
           name: authelia-secret
@@ -64,7 +65,7 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
           external-dns.home.arpa/enabled: "true"
           nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -74,7 +75,7 @@ spec:
             add_header X-XSS-Protection "1; mode=block";
           hajimari.io/icon: "shield-account"
         hosts:
-          - host: &host "auth.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host auth.devbu.io
             paths:
               - path: /
                 pathType: Prefix

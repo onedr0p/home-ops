@@ -42,18 +42,18 @@ spec:
       - name: grafana-secret
     grafana.ini:
       auth:
-        signout_redirect_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/logout"
+        signout_redirect_url: https://auth.devbu.io/logout
         oauth_auto_login: false
       auth.generic_oauth:
         enabled: true
         name: Authelia
-        client_id: grafana
-        client_secret: "${SECRET_GRAFANA_OAUTH_CLIENT_SECRET}"
+        client_id: # Set by env vars
+        client_secret: # Set by env vars secret
+        auth_url: # Set by env vars
+        token_url: # Set by env vars
+        api_url: # Set by env vars
         scopes: "openid profile email groups"
         empty_scopes: false
-        auth_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/api/oidc/authorization"
-        token_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/api/oidc/token"
-        api_url: "https://auth.${SECRET_PUBLIC_DOMAIN}/api/oidc/userinfo"
         login_attribute_path: preferred_username
         groups_attribute_path: groups
         name_attribute_path: name
@@ -131,15 +131,18 @@ spec:
       enabled: true
     ingress:
       enabled: true
-      ingressClassName: "nginx"
+      ingressClassName: nginx
       annotations:
         external-dns.home.arpa/enabled: "true"
         hajimari.io/icon: "mdi:chart-arc"
       hosts:
-        - &host "grafana.${SECRET_PUBLIC_DOMAIN}"
+        - &host grafana.devbu.io
       tls:
         - hosts:
             - *host
+    imageRenderer:
+      enabled: true
+      replicas: 3
     persistence:
       enabled: false
     affinity:

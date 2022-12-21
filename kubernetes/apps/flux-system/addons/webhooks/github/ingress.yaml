@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webhook-receiver
+  namespace: flux-system
+  annotations:
+    external-dns.home.arpa/enabled: "true"
+    hajimari.io/enable: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: &host flux-webhook.devbu.io
+      http:
+        paths:
+          - path: /hook/
+            pathType: Prefix
+            backend:
+              service:
+                name: webhook-receiver
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - *host

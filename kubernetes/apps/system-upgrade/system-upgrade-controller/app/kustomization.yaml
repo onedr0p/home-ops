@@ -1,0 +1,20 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # renovate: datasource=docker image=rancher/system-upgrade-controller
+  - https://github.com/rancher/system-upgrade-controller/releases/download/v0.10.0/crd.yaml
+  - https://github.com/rancher/system-upgrade-controller?ref=v0.10.0
+images:
+  - name: rancher/system-upgrade-controller
+    newTag: v0.10.0
+commonLabels:
+  app.kubernetes.io/name: system-upgrade-controller
+  app.kubernetes.io/instance: system-upgrade-controller
+patchesStrategicMerge:
+  - |
+    $patch: delete
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: system-upgrade

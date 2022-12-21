@@ -1,0 +1,20 @@
+---
+version: "3"
+
+tasks:
+
+  sync:
+    desc: Sync ExternalSecret resources
+    vars:
+      secret: '{{ .secret | default ""}}'
+      namespace: '{{.namespace | default "default"}}'
+    cmds:
+      - |
+        {{if eq .secret ""}}
+          kubectl get externalsecret.external-secrets.io --all-namespaces --no-headers -A | awk '{print $1, $2}' \
+            | xargs --max-procs=4 -l bash -c 'kubectl -n $0 annotate externalsecret.external-secrets.io $1 force-sync=$(date +%s) --overwrite'
+        {{else}}
+          kubectl -n {{.namespace}} annotate externalsecret.external-secrets.io {{.secret}} force-sync=$(date +%s) --overwrite
+        {{end}}
+    preconditions:
+      - kubectl -n {{.namespace}} get es {{.secret}}

@@ -29,7 +29,7 @@ spec:
       type: statefulset
     image:
       repository: ghcr.io/onedr0p/sabnzbd
-      tag: 3.7.1@sha256:4fefba8e59200d2b36c5ae7c790a85694fb7202a42b97e30286587f33629c195
+      tag: 3.7.1@sha256:73d893b97571bbd699a495061b52959fa38b1dc37c54941c4ebfa400ec24c9e7
     env:
       TZ: America/New_York
       SABNZBD__PORT: &port 80
@@ -39,7 +39,7 @@ spec:
         sabnzbd.default.svc,
         sabnzbd.default.svc.cluster,
         sabnzbd.default.svc.cluster.local,
-        sabnzbd.${SECRET_PUBLIC_DOMAIN}
+        sabnzbd.devbu.io
     envFrom:
       - secretRef:
           name: sabnzbd-secret
@@ -51,15 +51,15 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "nginx"
+        ingressClassName: nginx
         annotations:
           nginx.ingress.kubernetes.io/configuration-snippet: |
             proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.${SECRET_PUBLIC_DOMAIN}/css/base/sabnzbd/nord.css"></head>';
+            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.devbu.io/css/base/sabnzbd/nord.css"></head>';
             sub_filter_once on;
           hajimari.io/icon: "download"
         hosts:
-          - host: &host "{{ .Release.Name }}.${SECRET_PUBLIC_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
                 pathType: Prefix

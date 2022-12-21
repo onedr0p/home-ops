@@ -11,28 +11,14 @@ env:
   KUBECONFIG: "{{.ANSIBLE_DIR}}/kubernetes/kubeconfig"
 
 includes:
-  cluster: .taskfiles/ClusterTasks.yml
-  debug: .taskfiles/DebugTasks.yml
-  rook: .taskfiles/RookTasks.yml
-  volsync: .taskfiles/VolSync/Tasks.yml
+  an: .taskfiles/Ansible/Tasks.yml
+  es: .taskfiles/ExternalSecrets/Tasks.yml
+  fx: .taskfiles/Flux/Tasks.yml
+  ku: .taskfiles/Kubernetes/Tasks.yml
+  vs: .taskfiles/VolSync/Tasks.yml
 
 tasks:
-  kubeconfig:
-    desc: Remotely fetch kubeconfig from Kubernetes
-    cmds:
-      - rsync --verbose --progress --partial --rsync-path="sudo rsync" {{.MASTER_USERNAME}}@{{.MASTER_HOST}}:/etc/rancher/k3s/k3s.yaml "${KUBECONFIG}"
-      - sed -i '' 's/127.0.0.1/{{.KUBERNETES_API}}/g' "${KUBECONFIG}"
-      - chmod go-r "${KUBECONFIG}"
-    vars:
-      MASTER_USERNAME: root
-      MASTER_HOST: 192.168.42.10
-      KUBERNETES_API: 192.168.1.1
 
-  ansible:
-    desc: Install/Upgrade Ansible deps
-    dir: "{{.ANSIBLE_DIR}}"
-    cmds:
-      - ansible-galaxy install -r requirements.yml --roles-path ~/.ansible/roles --force
-      - ansible-galaxy collection install -r requirements.yml --collections-path ~/.ansible/collections --force
-    preconditions:
-      - test -f "{{.ANSIBLE_DIR}}/requirements.yml"
+  default:
+    silent: true
+    cmds: ["task -l"]
