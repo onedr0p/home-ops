@@ -20,7 +20,7 @@ const kustomize = await which('kustomize')
 
 async function helmRelease(releaseFile) {
   const helmRelease = await fs.readFile(releaseFile, 'utf8')
-  const doc = YAML.parseAllDocuments(helmRelease).map((item) => item.toJS());
+  const doc = YAML.parseAllDocuments(helmRelease).map((item) => item.toJS())
   const release = doc.filter((item) =>
     item.apiVersion === 'helm.toolkit.fluxcd.io/v2beta1'
       && item.kind === 'HelmRelease'
@@ -29,10 +29,10 @@ async function helmRelease(releaseFile) {
 }
 
 async function helmRepositoryUrl(kubernetesDir, releaseName) {
-  const files = await globby([`${kubernetesDir}/**/*.yaml`]);
+  const files = await globby([`${kubernetesDir}/**/*.yaml`])
   for await (const file of files) {
     const contents = await fs.readFile(file, 'utf8')
-    const doc = YAML.parseAllDocuments(contents).map((item) => item.toJS());
+    const doc = YAML.parseAllDocuments(contents).map((item) => item.toJS())
     if ('apiVersion' in doc[0] && doc[0].apiVersion === 'source.toolkit.fluxcd.io/v1beta2'
         && 'kind' in doc[0] && doc[0].kind === 'HelmRepository'
         && 'metadata' in doc[0] && 'name' in doc[0].metadata && doc[0].metadata.name === releaseName)
@@ -44,7 +44,7 @@ async function helmRepositoryUrl(kubernetesDir, releaseName) {
 
 async function kustomizeBuild(releaseBaseDir, releaseName) {
   const build = await $`${kustomize} build --load-restrictor=LoadRestrictionsNone ${releaseBaseDir}`
-  const docs = YAML.parseAllDocuments(build.stdout).map((item) => item.toJS());
+  const docs = YAML.parseAllDocuments(build.stdout).map((item) => item.toJS())
   const release = docs.filter((item) =>
     item.apiVersion === 'helm.toolkit.fluxcd.io/v2beta1'
       && item.kind === 'HelmRelease'
@@ -58,35 +58,32 @@ async function helmRepoAdd (registryName, registryUrl) {
 }
 
 async function helmTemplate (releaseName, registryName, chartName, chartVersion, chartValues) {
-  const values = new YAML.Document();
-  values.contents = chartValues;
+  const values = new YAML.Document()
+  values.contents = chartValues
   const valuesFile = await $`mktemp`
-  await fs.writeFile(valuesFile.stdout.trim(), values.toString());
+  await fs.writeFile(valuesFile.stdout.trim(), values.toString())
 
   const manifestsFile = await $`mktemp`
   const manifests = await $`${helm} template --kube-version 1.24.8 --release-name ${releaseName} --include-crds=false ${registryName}/${chartName} --version ${chartVersion} --values ${valuesFile.stdout.trim()}`
 
   // Remove docs that are CustomResourceDefinition and keys which contain generated fields
-  let documents = YAML.parseAllDocuments(manifests.stdout.trim());
-  documents = documents.filter(doc => doc.get('kind') !== 'CustomResourceDefinition');
+  let documents = YAML.parseAllDocuments(manifests.stdout.trim())
+  documents = documents.filter(doc => doc.get('kind') !== 'CustomResourceDefinition')
   documents.forEach(doc => {
-    const del = (path) => doc.hasIn(path) ? doc.deleteIn(path) : false;
-    del(['metadata', 'labels', 'app.kubernetes.io/version']);
-    del(['metadata', 'labels', 'chart']);
-    del(['metadata', 'labels', 'helm.sh/chart']);
-    del(['spec', 'template', 'metadata', 'labels', 'app.kubernetes.io/version']);
-    del(['spec', 'template', 'metadata', 'labels', 'chart']);
-    del(['spec', 'template', 'metadata', 'labels', 'helm.sh/chart']);
-  });
+    const del = (path) => doc.hasIn(path) ? doc.deleteIn(path) : false
+    del(['metadata', 'labels'])
+    del(['spec', 'template', 'metadata', 'annotations'])
+    del(['spec', 'template', 'metadata', 'labels'])
+  })
 
-  await fs.writeFile(manifestsFile.stdout.trim(), documents.map(doc => doc.toString({directives: true})).join('\n'));
+  await fs.writeFile(manifestsFile.stdout.trim(), documents.map(doc => doc.toString({directives: true})).join('\n'))
   return manifestsFile.stdout.trim()
 }
 
 // Generate current template from Helm values
 const currentRelease = await helmRelease(CurrentRelease)
 const currentBuild = await kustomizeBuild(path.dirname(CurrentRelease), currentRelease.metadata.name)
-const currentRepositoryUrl = await helmRepositoryUrl(KubernetesDir, currentBuild.spec.chart.spec.sourceRef.name);
+const currentRepositoryUrl = await helmRepositoryUrl(KubernetesDir, currentBuild.spec.chart.spec.sourceRef.name)
 await helmRepoAdd(currentBuild.spec.chart.spec.sourceRef.name, currentRepositoryUrl)
 const currentManifests = await helmTemplate(
   currentBuild.metadata.name,
@@ -99,7 +96,7 @@ const currentManifests = await helmTemplate(
 // Generate incoming template from Helm values
 const incomingRelease = await helmRelease(IncomingRelease)
 const incomingBuild = await kustomizeBuild(path.dirname(IncomingRelease), incomingRelease.metadata.name)
-const incomingRepositoryUrl = await helmRepositoryUrl(KubernetesDir, incomingBuild.spec.chart.spec.sourceRef.name);
+const incomingRepositoryUrl = await helmRepositoryUrl(KubernetesDir, incomingBuild.spec.chart.spec.sourceRef.name)
 await helmRepoAdd(incomingBuild.spec.chart.spec.sourceRef.name, incomingRepositoryUrl)
 const incomingManifests = await helmTemplate(
   incomingBuild.metadata.name,
