@@ -1,12 +1,13 @@
 ---
-name: "Draft Release"
+name: "Release"
 
 on:
-  push:
-    branches: ["main"]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"
 
 jobs:
-  draft:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Generate Token
@@ -16,8 +17,7 @@ jobs:
           app_id: "${{ secrets.BOT_APP_ID }}"
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - uses: release-drafter/release-drafter@6df64e4ba4842c203c604c1f45246c5863410adb # v5.21.1
-        with:
-          config-name: release-drafter.yaml
+      - name: Publish Latest Release
+        uses: ivangabriele/publish-latest-release@df1a4afd8aea9d1f0ba5ebeb89452aeac7bca0a9 # # renovate: tag=v3
         env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
