@@ -1,14 +1,14 @@
 ---
-name: "Link Checker"
+name: "Link Check"
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 * * * *"
 
 jobs:
-  link-checker:
-    name: Link Checker
+  link-check:
+    name: Link Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,11 +21,20 @@ jobs:
           app_id: "${{ secrets.BOT_APP_ID }}"
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
+      - name: Restore lychee cache
+        uses: actions/cache@c17f4bf4666a8001b1a45c09eb7a485c41aa64c3 # v3.2.0
+        with:
+          path: .lycheecache
+          key: cache-lychee-${{ github.sha }}
+          restore-keys: cache-lychee-
+
       - name: Link Checker
         uses: lycheeverse/lychee-action@4dcb8bee2a0a4531cba1a1f392c54e8375d6dd81 # renovate: tag=v1.5.4
         id: lychee
         env:
           GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
+        with:
+          args: "--cache --max-cache-age 1d"
 
       - name: Find Link Checker Issue
         id: link-checker-issue
@@ -38,7 +47,7 @@ jobs:
       - name: Update Issue
         uses: peter-evans/create-issue-from-file@433e51abf769039ee20ba1293a088ca19d573b7f # renovate: tag=v4.0.1
         with:
-          title: Broken links detected in docs 🔗
+          title: Broken links detected 🔗
           issue-number: "${{ steps.link-checker-issue.outputs.issue-number }}"
           content-filepath: ./lychee/out.md
           token: "${{ steps.generate-token.outputs.token }}"
