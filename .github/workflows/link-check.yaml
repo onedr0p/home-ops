@@ -34,7 +34,13 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
         with:
-          args: "--cache --max-cache-age 1d"
+          args: >
+            --cache
+            --max-cache-age 1d
+            --verbose
+            --no-progress
+            --exclude-mail
+            './**/*.md'
 
       - name: Find Link Checker Issue
         id: link-checker-issue
