@@ -1,5 +1,5 @@
 variable "nexus_password" {
-  default = "this-is-nothing-important"
+  default = "1NtERnALOnLYuS3"
   type    = string
 }
 variable "vector_agent_host" {
