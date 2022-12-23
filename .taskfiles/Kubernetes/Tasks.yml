@@ -14,6 +14,14 @@ tasks:
       - sed -i '' 's/127.0.0.1/{{.KUBERNETES_API}}/g' "${KUBECONFIG}"
       - chmod go-r "${KUBECONFIG}"
 
+  schemas:
+    desc: Pull the latest CRD schemas for this cluster
+    cmds:
+      - |
+        mkdir -p {{.CLUSTER_DIR}}/schemas
+        flux pull artifact oci://ghcr.io/onedr0p/cluster-crds-oci:latest \
+            --output={{.CLUSTER_DIR}}/schemas
+
   mount:
     desc: Mount a PersistantVolumeClaim to a pod temporarily
     interactive: true
