@@ -7,12 +7,12 @@
     mc alias set minio https://s3.<domain> <access-key> <secret-key>
     ```
 
-2. Create the outline user and password
+2. Create the postgresql user and password
     ```sh
     mc admin user add minio postgresql <super-secret-password>
     ```
 
-3. Create the outline bucket
+3. Create the postgresql bucket
     ```sh
     mc mb minio/postgresql
     ```

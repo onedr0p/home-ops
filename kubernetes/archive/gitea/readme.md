@@ -9,12 +9,12 @@
     mc alias set minio https://s3.<domain> <access-key> <secret-key>
     ```
 
-2. Create the outline user and password
+2. Create the gitea user and password
     ```sh
     mc admin user add minio gitea <super-secret-password>
     ```
 
-3. Create the outline bucket
+3. Create the gitea bucket
     ```sh
     mc mb minio/gitea
     ```
