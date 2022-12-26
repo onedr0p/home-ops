@@ -39,6 +39,24 @@ resource "kubernetes_stateful_set_v1" "kopia" {
         }
       }
       spec {
+        init_container {
+          name = "config"
+          image = "busybox"
+          command = [
+            "/bin/sh",
+            "-c",
+            "cp /config/repository.config /app/config/repository.config"
+          ]
+          volume_mount {
+            name       = "kopia-config"
+            mount_path = "/app/config"
+          }
+          volume_mount {
+            name       = "kopia-config-tmp"
+            mount_path = "/config"
+            read_only  = true
+          }
+        }
         container {
           name              = "main"
           image             = "docker.io/kopia/kopia:0.12.1"
@@ -125,8 +143,12 @@ resource "kubernetes_stateful_set_v1" "kopia" {
         }
         volume {
           name = "kopia-config"
+          empty_dir {}
+        }
+        volume {
+          name = "kopia-config-tmp"
           projected {
-            default_mode = "0775"
+            default_mode = "0420"
             sources {
               secret {
                 name = "kopia"
