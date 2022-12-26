@@ -1,11 +1,11 @@
 resource "minio_s3_bucket" "opnsense_backup_bucket" {
-  bucket = var.opnsense_backup_bucket_name
+  bucket = "opnsense-backup"
   acl    = "private"
 }
 
 resource "minio_iam_user" "opnsense_backup_user" {
-  name          = var.opnsense_backup_bucket_user
-  secret        = var.opnsense_backup_bucket_secret
+  name          = "opnsense-backup"
+  secret        = data.sops_file.secrets.data["opnsense_backup_bucket_secret"]
   force_destroy = true
 }
 

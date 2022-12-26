@@ -1,11 +1,11 @@
 resource "minio_s3_bucket" "volsync_bucket" {
-  bucket = var.volsync_bucket_name
+  bucket = "volsync"
   acl    = "private"
 }
 
 resource "minio_iam_user" "volsync_user" {
-  name          = var.volsync_bucket_user
-  secret        = var.volsync_bucket_secret
+  name          = "volsync"
+  secret        = data.sops_file.secrets.data["volsync_bucket_secret"]
   force_destroy = true
 }
 

@@ -11,14 +11,14 @@ terraform {
       source  = "aminueza/minio"
       version = "1.10.0"
     }
+    sops = {
+      source  = "carlpett/sops"
+      version = "0.7.1"
+    }
   }
   required_version = ">= 1.3.0"
 }
 
-provider "minio" {
-  minio_server   = "s3.devbu.io"
-  minio_region   = "us-east-1"
-  minio_user     = var.minio_access_key
-  minio_password = var.minio_secret_key
-  minio_ssl      = true
+data "sops_file" "secrets" {
+  source_file = "secret.sops.yaml"
 }

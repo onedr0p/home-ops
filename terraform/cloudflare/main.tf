@@ -15,11 +15,14 @@ terraform {
       source  = "hashicorp/http"
       version = "3.2.1"
     }
+    sops = {
+      source  = "carlpett/sops"
+      version = "0.7.1"
+    }
   }
   required_version = ">= 1.3.0"
 }
 
-provider "cloudflare" {
-  email   = "devin.kray@gmail.com"
-  api_key = var.cloudflare_apikey
+data "sops_file" "secrets" {
+  source_file = "secret.sops.yaml"
 }

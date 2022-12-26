@@ -36,7 +36,7 @@ resource "cloudflare_record" "public_domain_www" {
 }
 
 resource "cloudflare_record" "public_domain_public_cname" {
-  name    = var.cloudflare_unproxied_cname
+  name    = data.sops_file.secrets.data["cloudflare_unproxied_cname"]
   zone_id = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
   value   = "ipv4.devbu.io"
   proxied = false
