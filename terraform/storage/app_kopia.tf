@@ -102,7 +102,6 @@ resource "kubernetes_stateful_set_v1" "kopia" {
           volume_mount {
             name       = "kopia-config"
             mount_path = "/app/config"
-            read_only  = true
           }
           volume_mount {
             name       = "data"
@@ -127,7 +126,7 @@ resource "kubernetes_stateful_set_v1" "kopia" {
         volume {
           name = "kopia-config"
           projected {
-            default_mode = "0420"
+            default_mode = "0775"
             sources {
               secret {
                 name = "kopia"
