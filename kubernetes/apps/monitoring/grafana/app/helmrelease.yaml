@@ -89,6 +89,8 @@ spec:
         deleteDatasources:
           - name: Loki
             orgId: 1
+          - name: Alertmanager
+            orgId: 1
         datasources:
           - name: Prometheus
             type: prometheus
@@ -99,6 +101,12 @@ spec:
             type: loki
             access: proxy
             url: http://loki-gateway.monitoring.svc.cluster.local:80
+          - name: Alertmanager
+            type: alertmanager
+            access: proxy
+            url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
+            jsonData:
+              implementation: prometheus
     dashboards:
       default:
         # Ref: https://grafana.com/grafana/dashboards/7845
