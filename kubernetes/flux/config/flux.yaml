@@ -37,6 +37,24 @@ spec:
         version: v1
         kind: NetworkPolicy
     - patch: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: not-used
+        spec:
+          template:
+            spec:
+              containers:
+                - name: manager
+                  resources:
+                    requests:
+                      memory: 512Mi
+                    limits:
+                      memory: "2Gi"
+      target:
+        kind: Deployment
+        labelSelector: control-plane=controller
+    - patch: |
         - op: add
           path: /spec/template/spec/containers/0/args/-
           value: --concurrent=20
