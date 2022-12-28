@@ -121,11 +121,12 @@ spec:
       node-role.kubernetes.io/worker: "true"
       google.feature.node.kubernetes.io/coral: "true"
       intel.feature.node.kubernetes.io/gpu: "true"
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - topologyKey: kubernetes.io/hostname
-          matchLabels:
-            app.kubernetes.io/name: plex
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            matchLabels:
+              app.kubernetes.io/name: plex
     resources:
       requests:
         cpu: 10m
