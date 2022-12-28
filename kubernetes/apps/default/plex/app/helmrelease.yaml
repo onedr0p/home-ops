@@ -91,15 +91,10 @@ spec:
       node-role.kubernetes.io/worker: "true"
       intel.feature.node.kubernetes.io/gpu: "true"
     podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-                - key: app.kubernetes.io/name
-                  operator: In
-                  values: ["frigate"]
-            topologyKey: kubernetes.io/hostname
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - topologyKey: kubernetes.io/hostname
+          matchLabels:
+            app.kubernetes.io/name: frigate
     resources:
       requests:
         gpu.intel.com/i915: 1
