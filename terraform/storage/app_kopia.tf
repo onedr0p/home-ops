@@ -170,10 +170,6 @@ resource "kubernetes_stateful_set_v1" "kopia" {
     }
     update_strategy {
       type = "RollingUpdate"
-
-      rolling_update {
-        partition = 1
-      }
     }
     volume_claim_template {
       metadata {
