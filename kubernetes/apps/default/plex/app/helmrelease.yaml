@@ -87,6 +87,19 @@ spec:
       transcode:
         enabled: true
         type: emptyDir
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
+      intel.feature.node.kubernetes.io/gpu: "true"
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values: ["frigate"]
+            topologyKey: kubernetes.io/hostname
     resources:
       requests:
         gpu.intel.com/i915: 1

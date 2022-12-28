@@ -118,7 +118,19 @@ spec:
         hostPathType: Directory
         mountPath: /dev/bus/usb
     nodeSelector:
+      node-role.kubernetes.io/worker: "true"
       google.feature.node.kubernetes.io/coral: "true"
+      intel.feature.node.kubernetes.io/gpu: "true"
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values: ["plex"]
+            topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 10m
