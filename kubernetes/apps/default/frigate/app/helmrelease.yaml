@@ -24,9 +24,7 @@ spec:
       retries: 3
   dependsOn:
     - name: emqx
-    - name: intel-gpu-plugin
-      namespace: kube-system
-    - name: node-feature-discovery
+    - name: intel-device-plugin-gpu
       namespace: kube-system
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -119,15 +117,8 @@ spec:
         hostPath: /dev/bus/usb
         hostPathType: Directory
         mountPath: /dev/bus/usb
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: feature.node.kubernetes.io/custom-coral-tpu
-                  operator: In
-                  values:
-                    - "true"
+    nodeSelector:
+      google.feature.node.kubernetes.io/coral: "true"
     resources:
       requests:
         cpu: 10m

@@ -23,9 +23,7 @@ spec:
     remediation:
       retries: 3
   dependsOn:
-    - name: intel-gpu-plugin
-      namespace: kube-system
-    - name: node-feature-discovery
+    - name: intel-device-plugin-gpu
       namespace: kube-system
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -87,15 +85,6 @@ spec:
       transcode:
         enabled: true
         type: emptyDir
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: feature.node.kubernetes.io/custom-intel-gpu
-                  operator: In
-                  values:
-                    - "true"
     resources:
       requests:
         gpu.intel.com/i915: 1
