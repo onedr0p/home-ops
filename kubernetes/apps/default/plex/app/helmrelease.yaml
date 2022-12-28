@@ -93,9 +93,14 @@ spec:
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
-          - topologyKey: kubernetes.io/hostname
-            matchLabels:
-              app.kubernetes.io/name: frigate
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values: ["frigate"]
+              topologyKey: kubernetes.io/hostname
     resources:
       requests:
         gpu.intel.com/i915: 1

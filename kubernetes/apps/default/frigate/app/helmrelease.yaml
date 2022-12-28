@@ -124,9 +124,14 @@ spec:
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
-          - topologyKey: kubernetes.io/hostname
-            matchLabels:
-              app.kubernetes.io/name: plex
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values: ["plex"]
+              topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 10m
