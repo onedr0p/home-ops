@@ -4,12 +4,15 @@ name: "Release"
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * 0"
+    - cron: "0 9 1 * *"
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+
       - name: Generate Token
         uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # renovate: tag=v1.7.0
         id: generate-token
@@ -17,7 +20,8 @@ jobs:
           app_id: "${{ secrets.BOT_APP_ID }}"
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Publish Latest Release
-        uses: ivangabriele/publish-latest-release@df1a4afd8aea9d1f0ba5ebeb89452aeac7bca0a9 # renovate: tag=v3
-        env:
-          GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
+      - uses: cho0o0/calver-release-action@78cb8a7b00b9bd04d2eff65ead668db0d4cbbcb8 # renovate: tag=2022.12.14.1
+        with:
+          timezone: utc
+          generate_release_notes: true
+          api_token: ${{ steps.generate-token.outputs.token }}
