@@ -17,7 +17,7 @@ http_signature=$(
 
 echo "Download Opnsense config file ..."
 curl -fsSL \
-    --user "${OPNSENSE_KEY}:${OPNSENSE_SECRET}" \
+    --user "${OPNSENSE_API_KEY}:${OPNSENSE_API_SECRET_KEY}" \
     --output "/tmp/${config_filename}" \
     "${OPNSENSE_URL}/api/backup/backup/download"
 

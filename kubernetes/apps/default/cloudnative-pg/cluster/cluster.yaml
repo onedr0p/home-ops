@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/cluster_v1.json
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
@@ -14,7 +15,7 @@ spec:
     size: 20Gi
     storageClass: local-path
   superuserSecret:
-    name: cloudnative-pg-superuser-secret
+    name: cloudnative-pg-secret
   bootstrap:
     recovery:
       source: postgres-v1
@@ -35,11 +36,12 @@ spec:
       serverName: postgres-v2
       s3Credentials:
         accessKeyId:
-          name: postgres-minio
-          key: MINIO_ACCESS_KEY
+          name: cloudnative-pg-secret
+          key: aws-access-key-id
         secretAccessKey:
-          name: postgres-minio
-          key: MINIO_SECRET_KEY
+          name: cloudnative-pg-secret
+          key: aws-secret-access-key
+  # externalClusters is needed when recovering from an existing cnpg cluster
   externalClusters:
     - name: postgres-v1
       barmanObjectStore:
@@ -50,8 +52,8 @@ spec:
         endpointURL: http://minio.default.svc.cluster.local:9000
         s3Credentials:
           accessKeyId:
-            name: postgres-minio
-            key: MINIO_ACCESS_KEY
+            name: cloudnative-pg-secret
+            key: aws-access-key-id
           secretAccessKey:
-            name: postgres-minio
-            key: MINIO_SECRET_KEY
+            name: cloudnative-pg-secret
+            key: aws-secret-access-key
