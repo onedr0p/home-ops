@@ -62,6 +62,21 @@ spec:
             bearerTokenSecret:
               name: minio-secret
               key: MINIO_PROMETHEUS_TOKEN
+    probes:
+      liveness: &probes
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /minio/health/live
+            port: *api-port
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 3
+      readiness: *probes
+      startup:
+        enabled: false
     ingress:
       main:
         enabled: true
