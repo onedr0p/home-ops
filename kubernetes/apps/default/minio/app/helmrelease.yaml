@@ -36,7 +36,7 @@ spec:
       MINIO_PROMETHEUS_URL: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
       MINIO_PROMETHEUS_JOB_ID: minio
       MINIO_BROWSER_REDIRECT_URL: https://minio.devbu.io
-      # MINIO_SERVER_URL: https://s3.devbu.io
+      MINIO_SERVER_URL: https://s3.devbu.io
     envFrom:
       - secretRef:
           name: minio-secret
@@ -50,7 +50,6 @@ spec:
           api:
             enabled: true
             port: &api-port 9000
-    # https://min.io/docs/minio/linux/reference/minio-mc-admin/mc-admin-prometheus.html
     serviceMonitor:
       main:
         enabled: true
@@ -84,11 +83,11 @@ spec:
         ingressClassName: nginx
         annotations:
           external-dns.home.arpa/enabled: "true"
-          # nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-          # nginx.ingress.kubernetes.io/proxy-body-size: 5000m
-          # nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
-          # nginx.ingress.kubernetes.io/configuration-snippet: |
-          #   chunked_transfer_encoding off;
+          nginx.ingress.kubernetes.io/proxy-connect-timeout: "180"
+          nginx.ingress.kubernetes.io/proxy-body-size: 1024m
+          nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            chunked_transfer_encoding off;
           hajimari.io/enable: "false"
         hosts:
           - host: &api-host s3.devbu.io
