@@ -3,15 +3,12 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: cluster-apps-actions-runner-controller
+  name: cluster-apps-external-secrets
   namespace: flux-system
   labels:
     substitution.flux.home.arpa/enabled: "true"
 spec:
-  dependsOn:
-    - name: cluster-apps-external-secrets-stores
-    - name: cluster-apps-rook-ceph-cluster
-  path: ./kubernetes/apps/actions-runner-system/actions-runner-controller/app
+  path: ./kubernetes/apps/kube-system/external-secrets/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -19,8 +16,8 @@ spec:
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2beta1
       kind: HelmRelease
-      name: actions-runner-controller
-      namespace: actions-runner-system
+      name: external-secrets
+      namespace: kube-system
   interval: 30m
   retryInterval: 1m
   timeout: 3m
@@ -29,19 +26,23 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: cluster-apps-actions-runner-controller-runners
+  name: cluster-apps-external-secrets-stores
   namespace: flux-system
   labels:
     substitution.flux.home.arpa/enabled: "true"
 spec:
   dependsOn:
-    - name: cluster-apps-actions-runner-controller
-  path: ./kubernetes/apps/actions-runner-system/actions-runner-controller/runners
+    - name: cluster-apps-external-secrets
+  path: ./kubernetes/apps/kube-system/external-secrets/stores
   prune: true
   sourceRef:
     kind: GitRepository
     name: home-ops-kubernetes
-  wait: true
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2beta1
+      kind: HelmRelease
+      name: onepassword-connect
+      namespace: kube-system
   interval: 30m
   retryInterval: 1m
   timeout: 3m
