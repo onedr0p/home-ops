@@ -1,4 +1,4 @@
-# cloudnative-pg
+# opnsense
 
 ## Minio Configuration
 
@@ -9,15 +9,15 @@
 
 2. Create the bucket username and password
     ```sh
-    mc admin user add minio postgresql <super-secret-password>
+    mc admin user add minio opnsense-backup <super-secret-password>
     ```
 
 3. Create the bucket
     ```sh
-    mc mb minio/postgresql
+    mc mb minio/opnsense-backup
     ```
 
-4. Create `/tmp/postgresql-user-policy.json`
+4. Create `/tmp/opnsense-backup-user-policy.json`
     ```json
     {
         "Version": "2012-10-17",
@@ -30,7 +30,7 @@
                     "s3:DeleteObject"
                 ],
                 "Effect": "Allow",
-                "Resource": ["arn:aws:s3:::postgresql/*", "arn:aws:s3:::postgresql"],
+                "Resource": ["arn:aws:s3:::opnsense-backup/*", "arn:aws:s3:::opnsense-backup"],
                 "Sid": ""
             }
         ]
@@ -39,10 +39,10 @@
 
 5. Apply the bucket policies
     ```sh
-    mc admin policy add minio postgresql-private /tmp/postgresql-user-policy.json
+    mc admin policy add minio opnsense-backup-private /tmp/opnsense-backup-user-policy.json
     ```
 
 6. Associate private policy with the user
     ```sh
-    mc admin policy set minio postgresql-private user=postgresql
+    mc admin policy set minio opnsense-backup-private user=opnsense-backup
     ```

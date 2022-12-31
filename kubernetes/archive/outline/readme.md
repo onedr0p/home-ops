@@ -13,19 +13,19 @@
     REDIS_URL: ioredis://eyJkYiI6MTUsInNlbnRpbmVscyI6W3siaG9zdCI6InJlZGlzLW5vZGUtMC5yZWRpcy1oZWFkbGVzcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwicG9ydCI6MjYzNzl9LHsiaG9zdCI6InJlZGlzLW5vZGUtMS5yZWRpcy1oZWFkbGVzcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwicG9ydCI6MjYzNzl9LHsiaG9zdCI6InJlZGlzLW5vZGUtMi5yZWRpcy1oZWFkbGVzcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwicG9ydCI6MjYzNzl9XSwibmFtZSI6InJlZGlzLW1hc3RlciJ9
     ```
 
-## S3 Configuration
+## Minio Configuration
 
 1. Create the Minio CLI configuration file (`~/.mc/config.json`)
     ```sh
     mc alias set minio https://s3.<domain> <access-key> <secret-key>
     ```
 
-2. Create the outline user and password
+2. Create the bucket username and password
     ```sh
     mc admin user add minio outline <super-secret-password>
     ```
 
-3. Create the outline bucket
+3. Create the bucket
     ```sh
     mc mb minio/outline
     ```

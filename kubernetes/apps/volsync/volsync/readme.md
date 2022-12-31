@@ -1,4 +1,4 @@
-# cloudnative-pg
+# volsync
 
 ## Minio Configuration
 
@@ -9,15 +9,15 @@
 
 2. Create the bucket username and password
     ```sh
-    mc admin user add minio postgresql <super-secret-password>
+    mc admin user add minio volsync <super-secret-password>
     ```
 
 3. Create the bucket
     ```sh
-    mc mb minio/postgresql
+    mc mb minio/volsync
     ```
 
-4. Create `/tmp/postgresql-user-policy.json`
+4. Create `/tmp/volsync-user-policy.json`
     ```json
     {
         "Version": "2012-10-17",
@@ -30,7 +30,7 @@
                     "s3:DeleteObject"
                 ],
                 "Effect": "Allow",
-                "Resource": ["arn:aws:s3:::postgresql/*", "arn:aws:s3:::postgresql"],
+                "Resource": ["arn:aws:s3:::volsync/*", "arn:aws:s3:::volsync"],
                 "Sid": ""
             }
         ]
@@ -39,10 +39,10 @@
 
 5. Apply the bucket policies
     ```sh
-    mc admin policy add minio postgresql-private /tmp/postgresql-user-policy.json
+    mc admin policy add minio volsync-private /tmp/volsync-user-policy.json
     ```
 
 6. Associate private policy with the user
     ```sh
-    mc admin policy set minio postgresql-private user=postgresql
+    mc admin policy set minio volsync-private user=volsync
     ```

@@ -2,19 +2,19 @@
 
 ## Gitea
 
-### S3 Configuration
+### Minio Configuration
 
 1. Create the Minio CLI configuration file (`~/.mc/config.json`)
     ```sh
     mc alias set minio https://s3.<domain> <access-key> <secret-key>
     ```
 
-2. Create the gitea user and password
+2. Create the bucket username and password
     ```sh
     mc admin user add minio gitea <super-secret-password>
     ```
 
-3. Create the gitea bucket
+3. Create the bucket
     ```sh
     mc mb minio/gitea
     ```
