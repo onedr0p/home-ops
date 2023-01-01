@@ -17,8 +17,17 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
+      - name: Generate Token
+        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # renovate: tag=v1.7.0
+        id: generate-token
+        with:
+          app_id: "${{ secrets.BOT_APP_ID }}"
+          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
 
       - name: Get changed files
         id: changed-files
@@ -38,21 +47,24 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(needs.changed-files.outputs.matrix) }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
-
-      - name: Checkout default branch
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
-        with:
-          ref: ${{ github.event.repository.default_branch }}
-          path: default
-
       - name: Generate Token
         uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # renovate: tag=v1.7.0
         id: generate-token
         with:
-          app_id: ${{ secrets.BOT_APP_ID }}
-          private_key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+          app_id: "${{ secrets.BOT_APP_ID }}"
+          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Checkout
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
+
+      - name: Checkout default branch
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
+          ref: "${{ github.event.repository.default_branch }}"
+          path: default
 
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
