@@ -24,11 +24,7 @@ ffmpeg:
   hwaccel_args: ["-hwaccel", "vaapi", "-hwaccel_device", "/dev/dri/renderD128", "-hwaccel_output_format", "yuv420p"]
   # https://github.com/blakeblackshear/frigate/issues/3296
   output_args:
-    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -ar 44100 -c:a aac
-    rtmp: -c:v copy -f flv -ar 44100 -c:a aac
-
-rtmp:
-  enabled: true
+    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -map 0:v:0 -map 0:a:0 -c copy
 
 snapshots:
   enabled: true
@@ -48,8 +44,7 @@ record:
       mode: active_objects
 
 objects:
-  track:
-    - person
+  track: ["person"]
   filters:
     person:
       min_area: 5000
@@ -60,10 +55,12 @@ cameras:
   frigate_porch:
     ffmpeg:
       inputs:
+        - path: rtsp://localhost:8554/frigate_porch
+          roles: ["record"]
+        - path: rtsp://192.168.1.2:7447/b8HED7as797Fr8J2
+          roles: ["restream"]
         - path: rtsp://192.168.1.2:7447/AiOhH1gQMPUcsRGC
           roles: ["detect"]
-        - path: rtsp://192.168.1.2:7447/b8HED7as797Fr8J2
-          roles: ["rtmp", "record"]
     detect:
       width: 960
       height: 720
@@ -79,10 +76,12 @@ cameras:
   frigate_driveway:
     ffmpeg:
       inputs:
+        - path: rtsp://localhost:8554/frigate_driveway
+          roles: ["record"]
+        - path: rtsp://192.168.1.2:7447/vixHJ1htwDadpDgE
+          roles: ["restream"]
         - path: rtsp://192.168.1.2:7447/Bbu0H4JuPjzK6zy9
           roles: ["detect"]
-        - path: rtsp://192.168.1.2:7447/vixHJ1htwDadpDgE
-          roles: ["rtmp", "record"]
     detect:
       width: 1280
       height: 720
@@ -96,10 +95,12 @@ cameras:
   frigate_garage:
     ffmpeg:
       inputs:
+        - path: rtsp://localhost:8554/frigate_garage
+          roles: ["record"]
+        - path: rtsp://192.168.1.2:7447/Cpb9YqiSgX16LjsX
+          roles: ["restream"]
         - path: rtsp://192.168.1.2:7447/3mzDU0htPbIcPPFH
           roles: ["detect"]
-        - path: rtsp://192.168.1.2:7447/Cpb9YqiSgX16LjsX
-          roles: ["rtmp", "record"]
     detect:
       width: 1024
       height: 576
@@ -108,10 +109,12 @@ cameras:
   frigate_river:
     ffmpeg:
       inputs:
+        - path: rtsp://localhost:8554/frigate_river
+          roles: ["record"]
+        - path: rtsp://192.168.1.2:7447/b2K0uh13iekTbyA1
+          roles: ["restream"]
         - path: rtsp://192.168.1.2:7447/GtBsJuujvMQwA42n
           roles: ["detect"]
-        - path: rtsp://192.168.1.2:7447/b2K0uh13iekTbyA1
-          roles: ["rtmp", "record"]
     detect:
       width: 1024
       height: 576
@@ -120,10 +123,12 @@ cameras:
   frigate_living_room:
     ffmpeg:
       inputs:
+        - path: rtsp://localhost:8554/frigate_living_room
+          roles: ["record"]
+        - path: rtsp://192.168.1.2:7447/dGFODTTigTod247N
+          roles: ["restream"]
         - path: rtsp://192.168.1.2:7447/PgTHLlRmqRH6Z6wV
           roles: ["detect"]
-        - path: rtsp://192.168.1.2:7447/dGFODTTigTod247N
-          roles: ["rtmp", "record"]
     detect:
       width: 1024
       height: 576
@@ -132,10 +137,12 @@ cameras:
   frigate_basement_1:
     ffmpeg:
       inputs:
+        - path: rtsp://localhost:8554/frigate_basement_1
+          roles: ["record"]
+        - path: rtsp://192.168.1.2:7447/IgCuM7bT4pqFsDQU
+          roles: ["restream"]
         - path: rtsp://192.168.1.2:7447/pBqg5G9dNfdYgwOA
           roles: ["detect"]
-        - path: rtsp://192.168.1.2:7447/IgCuM7bT4pqFsDQU
-          roles: ["rtmp", "record"]
     detect:
       width: 1280
       height: 720

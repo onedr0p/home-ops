@@ -32,10 +32,8 @@ spec:
       annotations:
         reloader.stakater.com/auto: "true"
     image:
-      # TODO Change to GHCR
-      # https://github.com/blakeblackshear/frigate/pkgs/container/frigate/versions?filters%5Bversion_type%5D=tagged
-      repository: docker.io/blakeblackshear/frigate
-      tag: 0.11.1
+      repository: ghcr.io/blakeblackshear/frigate
+      tag: 0.12-beta1
     env:
       TZ: America/New_York
       LIBVA_DRIVER_NAME: i965
@@ -49,9 +47,15 @@ spec:
           name: frigate-secret
     service:
       main:
+        type: LoadBalancer
+        externalIPs: ["${SVC_FRIGATE_ADDR}"]
+        externalTrafficPolicy: Local
         ports:
           http:
             port: &port 5000
+          rtsp:
+            enabled: true
+            port: 8554
     probes:
       liveness: &probes
         enabled: true
