@@ -2,8 +2,8 @@
 # yaml-language-server: $schema=https://frigate.devbu.io/api/config/schema
 logger:
   default: info
-  logs:
-    frigate.record: debug
+  # logs:
+  #   frigate.record: debug
 
 mqtt:
   host: emqx.default.svc.cluster.local
@@ -20,17 +20,8 @@ detectors:
     device: usb
 
 ffmpeg:
-  global_args:
-    - -hide_banner
-    - -loglevel
-    - warning
-  hwaccel_args:
-    - -hwaccel
-    - vaapi
-    - -hwaccel_device
-    - /dev/dri/renderD128
-    - -hwaccel_output_format
-    - yuv420p
+  global_args: ["-hide_banner", "-loglevel", "warning"]
+  hwaccel_args: ["-hwaccel", "vaapi", "-hwaccel_device", "/dev/dri/renderD128", "-hwaccel_output_format", "yuv420p"]
   # https://github.com/blakeblackshear/frigate/issues/3296
   output_args:
     record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -ar 44100 -c:a aac
@@ -70,12 +61,9 @@ cameras:
     ffmpeg:
       inputs:
         - path: rtsp://192.168.1.2:7447/AiOhH1gQMPUcsRGC
-          roles:
-            - detect
+          roles: ["detect"]
         - path: rtsp://192.168.1.2:7447/b8HED7as797Fr8J2
-          roles:
-            - rtmp
-            - record
+          roles: ["rtmp", "record"]
     detect:
       width: 960
       height: 720
@@ -92,12 +80,9 @@ cameras:
     ffmpeg:
       inputs:
         - path: rtsp://192.168.1.2:7447/Bbu0H4JuPjzK6zy9
-          roles:
-            - detect
+          roles: ["detect"]
         - path: rtsp://192.168.1.2:7447/vixHJ1htwDadpDgE
-          roles:
-            - rtmp
-            - record
+          roles: ["rtmp", "record"]
     detect:
       width: 1280
       height: 720
@@ -112,12 +97,9 @@ cameras:
     ffmpeg:
       inputs:
         - path: rtsp://192.168.1.2:7447/3mzDU0htPbIcPPFH
-          roles:
-            - detect
+          roles: ["detect"]
         - path: rtsp://192.168.1.2:7447/Cpb9YqiSgX16LjsX
-          roles:
-            - rtmp
-            - record
+          roles: ["rtmp", "record"]
     detect:
       width: 1024
       height: 576
@@ -127,12 +109,9 @@ cameras:
     ffmpeg:
       inputs:
         - path: rtsp://192.168.1.2:7447/GtBsJuujvMQwA42n
-          roles:
-            - detect
+          roles: ["detect"]
         - path: rtsp://192.168.1.2:7447/b2K0uh13iekTbyA1
-          roles:
-            - rtmp
-            - record
+          roles: ["rtmp", "record"]
     detect:
       width: 1024
       height: 576
@@ -142,12 +121,9 @@ cameras:
     ffmpeg:
       inputs:
         - path: rtsp://192.168.1.2:7447/PgTHLlRmqRH6Z6wV
-          roles:
-            - detect
+          roles: ["detect"]
         - path: rtsp://192.168.1.2:7447/dGFODTTigTod247N
-          roles:
-            - rtmp
-            - record
+          roles: ["rtmp", "record"]
     detect:
       width: 1024
       height: 576
@@ -157,12 +133,9 @@ cameras:
     ffmpeg:
       inputs:
         - path: rtsp://192.168.1.2:7447/pBqg5G9dNfdYgwOA
-          roles:
-            - detect
+          roles: ["detect"]
         - path: rtsp://192.168.1.2:7447/IgCuM7bT4pqFsDQU
-          roles:
-            - rtmp
-            - record
+          roles: ["rtmp", "record"]
     detect:
       width: 1280
       height: 720
