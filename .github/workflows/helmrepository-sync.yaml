@@ -60,10 +60,7 @@ jobs:
           done
           repos=($(for r in ${repos[@]}; do echo $r; done | sort -u))
           for repo in ${repos[@]}; do
-            repoName="${repo%%:*}"
-            repoNamespace="${repo##*:}"
-            flux --namespace "${repoNamespace}" reconcile \
-              source helm "${repoName}"
+            flux --namespace "${repo##*:}" reconcile source helm "${repo%%:*}"
           done
 
       - name: Sync HelmRepository
