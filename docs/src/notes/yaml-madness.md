@@ -4,7 +4,9 @@ YAML aliases, anchors and overrides are a great way to keep your manifests DRY (
 
 ## Anchors and Aliases
 
-> The anchor operator **&** is a way to define a variable and the alias character **\*** is a way to reference the value defined in the anchor.
+```admonish note
+The anchor operator **&** is a way to define a variable and the alias character **\*** is a way to reference the value defined in the anchor.
+```
 
 ```yaml
 apiVersion: v1
@@ -30,7 +32,9 @@ metadata:
 
 ## Overrides
 
-> The **<<** operator allows referencing a block of YAML as many times as needed.
+```admonish note
+The **<<** operator allows referencing a block of YAML as many times as needed.
+```
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1

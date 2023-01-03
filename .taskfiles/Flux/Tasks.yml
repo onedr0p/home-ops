@@ -7,7 +7,7 @@ tasks:
     desc: Sync Flux GitRepositories
     cmds:
       - |
-        kubectl get gitrepositories --all-namespaces --no-headers -A | awk '{print $1, $2}' \
+        kubectl get gitrepositories --all-namespaces --no-headers | awk '{print $1, $2}' \
           | xargs --max-procs=4 -l bash -c \
             'kubectl -n $0 annotate gitrepository/$1 reconcile.fluxcd.io/requestedAt=$(date +%s) --field-manager=flux-client-side-apply --overwrite'
 
@@ -15,7 +15,7 @@ tasks:
     desc: Sync Flux Kustomizations
     cmds:
       - |
-        kubectl get kustomization --all-namespaces --no-headers -A | awk '{print $1, $2}' \
+        kubectl get kustomization --all-namespaces --no-headers | awk '{print $1, $2}' \
           | xargs --max-procs=4 -l bash -c \
             'kubectl -n $0 annotate kustomization/$1 reconcile.fluxcd.io/requestedAt="$(date +%s)" --field-manager=flux-client-side-apply --overwrite'
 
@@ -23,7 +23,7 @@ tasks:
     desc: Sync Flux HelmReleases
     cmds:
       - |
-        kubectl get helmreleases --all-namespaces --no-headers -A | awk '{print $1, $2}' \
+        kubectl get helmreleases --all-namespaces --no-headers | awk '{print $1, $2}' \
           | xargs --max-procs=4 -l bash -c \
             'kubectl -n $0 annotate helmrelease/$1 reconcile.fluxcd.io/requestedAt="$(date +%s)" --overwrite'
 
@@ -31,6 +31,20 @@ tasks:
     desc: Sync Flux Terraforms
     cmds:
       - |
-        kubectl get terraforms --all-namespaces --no-headers -A | awk '{print $1, $2}' \
+        kubectl get terraforms --all-namespaces --no-headers | awk '{print $1, $2}' \
           | xargs --max-procs=4 -l bash -c \
             'kubectl -n $0 annotate terraform/$1 reconcile.fluxcd.io/requestedAt="$(date +%s)" --overwrite'
+
+  hr-suspend:
+    desc: Suspend all Flux HelmReleases
+    cmds:
+      - |
+        flux get helmrelease --all-namespaces --no-header | awk '{print $1, $2}' \
+          | xargs -l bash -c 'flux -n $0 suspend helmrelease $1'
+
+  hr-resume:
+    desc: Suspend all Flux HelmReleases
+    cmds:
+      - |
+        flux get helmrelease --all-namespaces --no-header | awk '{print $1, $2}' \
+          | xargs -l bash -c 'flux -n $0 resume helmrelease $1'
