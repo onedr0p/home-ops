@@ -75,6 +75,21 @@
             block: |
               127.0.0.1 localhost
               127.0.1.1 {{ inventory_hostname }}
+    - name: NFS
+      block:
+        - name: NFS | Update configuration
+          ansible.builtin.blockinfile:
+            path: /etc/nfs.conf.d/local.conf
+            mode: 0644
+            create: true
+            block: |
+              [nfsd]
+              vers2 = n
+              vers3 = n
+              threads = 16
+
+              [mountd]
+              manage-gids = 1
     - name: File System
       block:
         - name: File System | Disable swap
