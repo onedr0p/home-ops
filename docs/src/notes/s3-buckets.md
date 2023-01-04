@@ -49,6 +49,7 @@ This requires installing the Minio `mc` CLI tool
     ```sh
     export BUCKET_NAME="<bucket-name>" # also used for the bucket username
     export BUCKET_PASSWORD="$(openssl rand -hex 20)"
+    echo $BUCKET_PASSWORD
     ```
 
 3. Create the bucket username and password
