@@ -96,6 +96,10 @@ This requires installing the Minio `mc` CLI tool
 
 #### Allow public access to certain objects in the bucket
 
+```admonish info
+This step is optional and not needed unless you want to make certain objects public to the internet
+```
+
 1. Create the bucket policy document and update the folders that should be public
     ```sh
     cat <<EOF > /tmp/bucket-policy.json
