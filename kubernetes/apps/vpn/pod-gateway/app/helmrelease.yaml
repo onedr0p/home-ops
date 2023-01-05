@@ -63,6 +63,25 @@ spec:
         securityContext:
           capabilities:
             add: ["NET_ADMIN"]
+        networkPolicy:
+          enabled: true
+          egress:
+            - to:
+                - ipBlock:
+                    cidr: 0.0.0.0/0
+              ports:
+                - port: 51820
+                  protocol: UDP
+                - port: 51820
+                  protocol: TCP
+                - port: 53
+                  protocol: UDP
+            - to:
+                - ipBlock:
+                    cidr: ${NET_POD_CIDR}
+                - ipBlock:
+                    cidr: ${NET_SVC_CIDR}
+                - namespaceSelector: {}
       netshoot:
         enabled: true
     publicPorts:
@@ -79,6 +98,7 @@ spec:
       VPN_BLOCK_OTHER_TRAFFIC: true
       VPN_INTERFACE: wg0
       VPN_LOCAL_CIDRS: 172.16.0.0/12 10.0.0.0/8 192.168.0.0/16
+      DNS_LOCAL_CIDRS: "local devbu.io turbo.ac"
       VPN_TRAFFIC_PORT: "51820"
       VXLAN_ID: 43
       VXLAN_IP_NETWORK: 172.16.1
