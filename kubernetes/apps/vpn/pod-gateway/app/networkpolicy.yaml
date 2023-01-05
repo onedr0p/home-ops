@@ -1,23 +1,15 @@
 ---
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
 metadata:
-  name: downloads-gateway-pod-gateway
+  name: pod-gateway
   namespace: vpn
-  labels:
-    app.kubernetes.io/instance: downloads-gateway
-    app.kubernetes.io/name: pod-gateway
 spec:
-  endpointSelector:
-    matchLabels:
-      app.kubernetes.io/instance: downloads-gateway
-      app.kubernetes.io/name: pod-gateway
+  selector: app.kubernetes.io/name == 'pod-gateway'
+  types: ["Egress"]
   egress:
-    - toCIDR:
-        - 0.0.0.0/0
-      toPorts:
-        - ports:
-            - port: "51820"
-              protocol: UDP
-    - toEntities:
-        - cluster
+    - action: Allow
+      protocol: UDP
+      destination:
+        nets: ["0.0.0.0/0"]
+        ports: [51820]
