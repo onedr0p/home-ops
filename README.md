@@ -95,9 +95,6 @@ GitRepository :: home-ops-kubernetes
                     Kustomization :: cluster-apps-glauth
                     Kustomization :: cluster-apps-cloudnative-pg-cluster
                 HelmRelease :: authelia
-                    DependsOn:
-                        HelmRelease :: cloudnative-pg
-                        HelmRelease :: glauth
             Kustomization :: cluster-apps-glauth
                 HelmRelease :: glauth
             Kustomization :: cluster-apps-cloudnative-pg
