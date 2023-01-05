@@ -1,0 +1,92 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: pod-gateway
+  namespace: vpn
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: pod-gateway
+      version: 6.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: angelnu
+        namespace: flux-system
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controller:
+      annotations:
+        reloader.stakater.com/auto: "true"
+    image:
+      repository: ghcr.io/angelnu/pod-gateway
+      tag: v1.8.1@sha256:690b6365728fe9012ad4cdfca38334992664596513dca187d1b93d2025205776
+    DNS: 172.16.1.1
+    addons:
+      vpn:
+        enabled: true
+        type: gluetun
+        image:
+          # TODO: Replace with ghcr.io/qdm12/gluetun when a versioned tag is available
+          repository: docker.io/qmcgaw/gluetun
+          tag: v3.32.0@sha256:70e2b9fe66941d6de31419c3207b525293f2e6a92a3788869bb337a17e0e5ec8
+        env:
+          - name: VPN_SERVICE_PROVIDER
+            value: mullvad
+          - name: VPN_TYPE
+            value: wireguard
+          - name: VPN_INTERFACE
+            value: wg0
+          - name: FIREWALL
+            value: "off"
+          - name: DOT
+            value: "off"
+          - name: SERVER_CITIES
+            value: Atlanta GA
+          - name: SERVER_HOSTNAMES
+            value: us167-wireguard
+        envFrom:
+          - secretRef:
+              name: mullvad-secret
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN"]
+      netshoot:
+        enabled: true
+    publicPorts:
+      - IP: 10
+        hostname: qbittorrent-vpn-0
+        ports:
+          - port: 56202
+            type: udp
+          - port: 56202
+            type: tcp
+    routed_namespaces: ["downloads"]
+    settings:
+      VPN_INTERFACE: wg0
+      VXLAN_ID: 43
+      VXLAN_IP_NETWORK: 172.16.1
+      VXLAN_GATEWAY_FIRST_DYNAMIC_IP: 20
+      VPN_BLOCK_OTHER_TRAFFIC: true
+      VPN_TRAFFIC_PORT: "51820"
+      VPN_LOCAL_CIDRS: 10.0.0.0/8 192.168.0.0/16 172.16.0.0/12
+      NOT_ROUTED_TO_GATEWAY_CIDRS: 10.0.0.0/8 192.168.0.0/16 172.16.0.0/12
+    webhook:
+      gatewayDefault: false
+      gatewayAnnotation: setGateway
+      gatewayLabel: setGateway
+      image:
+        repository: ghcr.io/angelnu/gateway-admision-controller
+        tag: v3.7.0@sha256:985eb60fd0017f657d5e66707f7e9b3f764f3337a87a379d26cd15e950bd79ad
