@@ -27,8 +27,8 @@ Instead of using Metallb for L2/L3 load balancer IPs I am using the Kubernetes C
 6. Verify
     1. Routing > Diagnostics | Summary
 
-```admonish info
-Without updating the configuration described in step 4 the routes from a client will only take a single path to your Kubernetes workloads even if they are scaled to more than one.
+```admonish warning
+Without updating the configuration described in **step 4** the routes from a client will only take a **single path to your Kubernetes workloads** even if they are scaled to more than one.
 ```
 
 ## HAProxy
@@ -76,3 +76,40 @@ While kube-vip is very nice for having a API server ready to go and running in y
     2. `Connection Timeout` = `10s`
     3. `Server Timeout` = `4h`
     4. Save
+
+## Receive Side Scaling (RSS)
+
+RSS is used to distribute packets over CPU cores using a hashing function – either with support in the hardware which offloads the hashing for you, or in software. Click <ins>[here](https://forum.opnsense.org/index.php?topic=24409.0)</ins> to learn more about it.
+
+
+1. System > Settings > Tunables
+    1. Add `net.inet.rss.enabled` and set the value to `1`
+    2. Add `net.inet.rss.bits` and set to `2`
+    3. Add `net.isr.dispatch` and set to `hybrid`
+    4. Add `net.isr.bindthreads` and set to `1`
+    5. Add `net.isr.maxthreads` and set to `-1`
+    6. Save
+2. Reboot
+3. Verify with `sudo netstat -Q`
+    ```text
+    Configuration:
+    Setting                        Current        Limit
+    Thread count                         8            8
+    Default queue limit                256        10240
+    Dispatch policy                 hybrid          n/a
+    Threads bound to CPUs          enabled          n/a
+    ```
+
+## Syslog
+
+Firewall logs are being sent to [Vector](https://github.com/vectordotdev/vector) which is running in my Kubernetes cluster. Vector is then shipping the logs to [Loki](https://github.com/grafana/loki) which is also running in my cluster.
+
+1. System > Settings > Logging / targets
+    - Add new logging target
+      1. `Enabled` = `true`
+      2. `Transport` = `UDP(4)`
+      3. `Applications` = `filter (filterlog)`
+      4. `Hostname` = `192.168.69.111` (Loki's Load Balancer IP)
+      5. `Port` = `5140`
+      6. `rfc5424` = `true`
+      7. Save
