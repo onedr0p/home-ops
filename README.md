@@ -112,11 +112,13 @@ GitRepository :: home-ops-kubernetes
 | Management VLAN                               | `192.168.1.0/24`  |
 | Kubernetes Nodes VLAN                         | `192.168.42.0/24` |
 | Kubernetes external services (Calico w/ BGP)  | `192.168.69.0/24` |
-| Kubernetes pods                               | `10.42.0.0/16`    |
-| Kubernetes services                           | `10.43.0.0/16`    |
+| Kubernetes pods (Calico w/ BGP)               | `10.42.0.0/16`    |
+| Kubernetes services (Calico w/ BGP)           | `10.43.0.0/16`    |
 
 - HAProxy configured on my `Opnsense` router for the Kubernetes Control Plane Load Balancer.
 - Calico configured with `externalIPs` to expose Kubernetes services with their own IP over BGP (w/ECMP) which is configured on my router.
+
+🔸 See [here](https://onedr0p.github.io/home-ops/notes/opnsense.html) for how I configured HAProxy and BGP on Opnsense.
 
 ---
 
@@ -147,8 +149,6 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 Over WAN, I have port forwarded ports `80` and `443` to the load balancer IP of my ingress controller that's running in my Kubernetes cluster.
 
 [Cloudflare](https://www.cloudflare.com/) works as a proxy to hide my homes WAN IP and also as a firewall. When not on my home network, all the traffic coming into my ingress controller on port `80` and `443` comes from Cloudflare. In `Opnsense` I block all IPs not originating from the [Cloudflares list of IP ranges](https://www.cloudflare.com/ips/).
-
-🔸 _Cloudflare is also configured to GeoIP block all countries except a few I have whitelisted_
 
 ### Internal DNS
 
