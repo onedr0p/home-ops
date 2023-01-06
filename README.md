@@ -118,7 +118,7 @@ GitRepository :: home-ops-kubernetes
 - HAProxy configured on my `Opnsense` router for the Kubernetes Control Plane Load Balancer.
 - Calico configured with `externalIPs` to expose Kubernetes services with their own IP over BGP (w/ECMP) which is configured on my router.
 
-🔸 See [here](https://onedr0p.github.io/home-ops/notes/opnsense.html) for how I configured HAProxy and BGP on Opnsense.
+🔸 _[Click here](https://onedr0p.github.io/home-ops/notes/opnsense.html) to review how I configured HAProxy and BGP on Opnsense._
 
 ---
 
