@@ -62,6 +62,8 @@ spec:
           storage:
             s3:
               s3: null
+              endpoint: minio.default.svc.cluster.local:9000
+              bucketnames: loki
               insecure: true
               s3forcepathstyle: true
           ring:
@@ -98,6 +100,8 @@ spec:
                 store: memberlist
         analytics:
           reporting_enabled: false
+      podAnnotations:
+        secret.reloader.stakater.com/reload: loki-secret
     gateway:
       enabled: true
       replicas: 3
@@ -157,19 +161,11 @@ spec:
     test:
       enabled: false
   valuesFrom:
-    - targetPath: loki.structuredConfig.common.storage.s3.bucketnames
-      kind: ConfigMap
-      name: loki-chunks-bucket-v1
-      valuesKey: BUCKET_NAME
-    - targetPath: loki.structuredConfig.common.storage.s3.endpoint
-      kind: ConfigMap
-      name: loki-chunks-bucket-v1
-      valuesKey: BUCKET_HOST
     - targetPath: loki.structuredConfig.common.storage.s3.access_key_id
       kind: Secret
-      name: loki-chunks-bucket-v1
+      name: loki-secret
       valuesKey: AWS_ACCESS_KEY_ID
     - targetPath: loki.structuredConfig.common.storage.s3.secret_access_key
       kind: Secret
-      name: loki-chunks-bucket-v1
+      name: loki-secret
       valuesKey: AWS_SECRET_ACCESS_KEY
