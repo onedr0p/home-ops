@@ -3,13 +3,15 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: cluster-apps-thanos-app
+  name: cluster-apps-thanos
   namespace: flux-system
   labels:
     substitution.flux.home.arpa/enabled: "true"
 spec:
   dependsOn:
+    - name: cluster-apps-external-secrets-stores
     - name: cluster-apps-kube-prometheus-stack-app
+    - name: cluster-apps-minio-app
   path: ./kubernetes/apps/monitoring/thanos/app
   prune: true
   sourceRef:

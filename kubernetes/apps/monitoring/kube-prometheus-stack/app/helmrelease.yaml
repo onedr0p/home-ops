@@ -188,19 +188,6 @@ spec:
         enabled: true
       thanosServiceMonitor:
         enabled: true
-      thanosIngress:
-        enabled: true
-        pathType: Prefix
-        ingressClassName: nginx
-        annotations:
-          nginx.ingress.kubernetes.io/ssl-redirect: "true"
-          nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-          hajimari.io/enable: "false"
-        hosts:
-          - &host thanos-sidecar.devbu.io
-        tls:
-          - hosts:
-              - *host
       prometheusSpec:
         replicas: 3
         replicaExternalLabelName: __replica__
@@ -210,13 +197,16 @@ spec:
           image: quay.io/thanos/thanos:v0.30.1
           # renovate: datasource=docker depName=quay.io/thanos/thanos
           version: "v0.30.1"
+          objectStorageConfig:
+            name: thanos-objstore-secret
+            key: objstore.yml
         podAntiAffinity: hard
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false
-        retention: 14d
-        retentionSize: 45GB
+        retention: 2d
+        retentionSize: 6GB
         enableAdminAPI: true
         walCompression: true
         storageSpec:
