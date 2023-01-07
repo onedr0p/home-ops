@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: falco
-      version: 2.0.18
+      version: 2.4.3
       sourceRef:
         kind: HelmRepository
         name: falco-security
@@ -66,9 +66,10 @@ spec:
           tls:
             - hosts:
                 - *host
-        redis:
-          storageClass: ceph-block
-          storageSize: 5Gi
+        externalRedis:
+          enabled: true
+          url: redis-lb.default.svc.cluster.local
+          port: 6379
     # https://securityhub.dev/
     customRules:
       rules-admin-activities.yaml: |
