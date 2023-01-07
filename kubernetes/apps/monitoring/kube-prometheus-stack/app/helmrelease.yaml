@@ -29,13 +29,14 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    cleanPrometheusOperatorObjectNames: true
     alertmanager:
       config:
         global:
           resolve_timeout: 5m
         receivers:
-          - name: "null"
-          - name: "pushover"
+          - name: "null" # quote
+          - name: pushover
             pushover_configs:
               - url_title: View in Alert Manager
                 token: "${SECRET_ALERTMANAGER_PUSHOVER_TOKEN}"
@@ -75,20 +76,16 @@ spec:
           group_wait: 30s
           group_interval: 5m
           repeat_interval: 6h
-          receiver: "pushover"
+          receiver: pushover
           routes:
-            - receiver: "null"
-              matchers:
-                - alertname =~ "InfoInhibitor|Watchdog"
-            - receiver: "pushover"
-              matchers:
-                - severity = "critical"
+            - receiver: "null" # quote
+              matchers: ["alertname =~ 'InfoInhibitor|Watchdog'"]
+            - receiver: pushover
+              matchers: ["severity = 'critical'"]
               continue: true
         inhibit_rules:
-          - source_matchers:
-              - severity = "critical"
-            target_matchers:
-              - severity = "warning"
+          - source_matchers: ["severity = 'critical'"]
+            target_matchers: ["severity = 'warning'"]
             equal: ["alertname", "namespace"]
       ingress:
         enabled: true
@@ -108,13 +105,12 @@ spec:
         storage:
           volumeClaimTemplate:
             spec:
-              storageClassName: ceph-block
+              storageClassName: local-path
               resources:
                 requests:
                   storage: 1Gi
     kube-state-metrics:
-      metricLabelsAllowlist:
-        - "persistentvolumeclaims=[*]"
+      metricLabelsAllowlist: ["persistentvolumeclaims=[*]"]
       prometheus:
         monitor:
           enabled: true
@@ -122,8 +118,7 @@ spec:
             - action: replace
               regex: (.*)
               replacement: $1
-              sourceLabels:
-                - __meta_kubernetes_pod_node_name
+              sourceLabels: ["__meta_kubernetes_pod_node_name"]
               targetLabel: kubernetes_node
     grafana:
       enabled: false
@@ -138,35 +133,22 @@ spec:
       serviceMonitor:
         metricRelabelings:
           - action: replace
-            sourceLabels:
-              - node
+            sourceLabels: ["node"]
             targetLabel: instance
     kubeApiServer:
       enabled: true
     kubeControllerManager:
       enabled: true
-      endpoints:
-        - 192.168.42.10
-        - 192.168.42.11
-        - 192.168.42.12
+      endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
     kubeScheduler:
       enabled: true
-      endpoints:
-        - 192.168.42.10
-        - 192.168.42.11
-        - 192.168.42.12
+      endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
     kubeProxy:
       enabled: true
-      endpoints:
-        - 192.168.42.10
-        - 192.168.42.11
-        - 192.168.42.12
+      endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
     kubeEtcd:
       enabled: true
-      endpoints:
-        - 192.168.42.10
-        - 192.168.42.11
-        - 192.168.42.12
+      endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
       service:
         enabled: true
         port: 2381
@@ -176,7 +158,7 @@ spec:
         enabled: true
         ingressClassName: nginx
         annotations:
-          hajimari.io/appName: "Prometheus"
+          hajimari.io/appName: Prometheus
           hajimari.io/icon: simple-icons:prometheus
         pathType: Prefix
         hosts:
@@ -212,10 +194,10 @@ spec:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: ceph-block
+              storageClassName: local-path
               resources:
                 requests:
-                  storage: 50Gi
+                  storage: 20Gi
         resources:
           requests:
             cpu: 10m
