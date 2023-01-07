@@ -6,18 +6,13 @@ metadata:
 spec:
   capacity:
     storage: 1Mi
-  accessModes:
-    - ReadWriteMany
+  accessModes: ["ReadWriteMany"]
   storageClassName: minio-nfs
   persistentVolumeReclaimPolicy: Retain
   nfs:
     server: expanse.turbo.ac
     path: /eros/Apps/MinIO
-  mountOptions:
-    - nfsvers=4.2
-    - nconnect=8
-    - hard
-    - noatime
+  mountOptions: ["nfsvers=4.2", "nconnect=8", "hard", "noatime"]
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -25,8 +20,7 @@ metadata:
   name: minio-nfs
   namespace: default
 spec:
-  accessModes:
-    - ReadWriteMany
+  accessModes: ["ReadWriteMany"]
   storageClassName: minio-nfs
   resources:
     requests:
