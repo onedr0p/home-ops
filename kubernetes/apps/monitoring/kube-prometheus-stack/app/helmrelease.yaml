@@ -39,38 +39,44 @@ spec:
           - name: pushover
             pushover_configs:
               - url_title: View in Alert Manager
-                token: "${SECRET_ALERTMANAGER_PUSHOVER_TOKEN}"
-                user_key: "${SECRET_ALERTMANAGER_PUSHOVER_USER_KEY}"
+                token: "{{ .Values.alertmanager.secrets.pushover_token }}"
+                user_key: "{{ .Values.alertmanager.secrets.pushover_user_key }}"
                 send_resolved: true
                 html: true
                 sound: gamelan
                 priority: |-
-                  {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
+                  {{`
+                    {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
+                  `}}
                 title: |-
-                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+                  {{`
+                    [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+                  `}}
                 message: |-
-                  {{- range .Alerts }}
-                    {{- if ne .Labels.severity "" }}
-                      <b>Severity:</b> <i>{{ .Labels.severity }}</i>
-                    {{- else }}
-                      <b>Severity:</b> <i>N/A</i>
-                    {{- end }}
-                    {{- if ne .Annotations.description "" }}
-                      <b>Description:</b> <i>{{ .Annotations.description }}</i>
-                    {{- else if ne .Annotations.summary "" }}
-                      <b>Summary:</b> <i>{{ .Annotations.summary }}</i>
-                    {{- else if ne .Annotations.message "" }}
-                      <b>Message:</b> <i>{{ .Annotations.message }}</i>
-                    {{- else }}
-                      <b>Description:</b> <i>N/A</i>
-                    {{- end }}
-                    {{- if gt (len .Labels.SortedPairs) 0 }}
-                      <b>Details:</b>
-                      {{- range .Labels.SortedPairs }}
-                        • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
+                  {{`
+                    {{- range .Alerts }}
+                      {{- if ne .Labels.severity "" }}
+                        <b>Severity:</b> <i>{{ .Labels.severity }}</i>
+                      {{- else }}
+                        <b>Severity:</b> <i>N/A</i>
+                      {{- end }}
+                      {{- if ne .Annotations.description "" }}
+                        <b>Description:</b> <i>{{ .Annotations.description }}</i>
+                      {{- else if ne .Annotations.summary "" }}
+                        <b>Summary:</b> <i>{{ .Annotations.summary }}</i>
+                      {{- else if ne .Annotations.message "" }}
+                        <b>Message:</b> <i>{{ .Annotations.message }}</i>
+                      {{- else }}
+                        <b>Description:</b> <i>N/A</i>
+                      {{- end }}
+                      {{- if gt (len .Labels.SortedPairs) 0 }}
+                        <b>Details:</b>
+                        {{- range .Labels.SortedPairs }}
+                          • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
+                        {{- end }}
                       {{- end }}
                     {{- end }}
-                  {{- end }}
+                  `}}
         route:
           group_by: ["alertname", "job"]
           group_wait: 30s
@@ -257,3 +263,12 @@ spec:
               password: 1NtERnALOnLYuS3
             static_configs:
               - targets: ["nexus.turbo.ac"]
+  valuesFrom:
+    - targetPath: alertmanager.secrets.pushover_user_key
+      kind: Secret
+      name: alertmanager-secret
+      valuesKey: pushover_user_key
+    - targetPath: alertmanager.secrets.pushover_token
+      kind: Secret
+      name: alertmanager-secret
+      valuesKey: pushover_token
