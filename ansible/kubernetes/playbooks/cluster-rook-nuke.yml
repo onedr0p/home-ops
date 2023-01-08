@@ -17,21 +17,19 @@
           ansible.builtin.file:
             state: absent
             path: /var/lib/rook
-        - name: Zap the drives
-          ansible.builtin.shell: |-
-            sgdisk --zap-all {{ item }} || true
+        - name: Zap the disk to a fresh, usable state (zap-all is important, b/c MBR has to be clean)
+          ansible.builtin.command: sgdisk --zap-all "{{ rook_block_device }}" || true
+        - name: Wipe a large portion of the beginning of the disk to remove more LVM metadata that may be present
+          ansible.builtin.command: dd if=/dev/zero of=""{{ rook_block_device }}"" bs=1M count=100 oflag=direct,dsync
+        - name: Wipe the block device with wipefs
+          ansible.builtin.command: wipefs --all --force "{{ rook_block_device }}"
+        - name: SSDs may be better cleaned with blkdiscard instead of dd
+          ansible.builtin.command: blkdiscard "{{ rook_block_device }}"
+        - name: Inform the OS of partition table changes
+          ansible.builtin.command: partprobe "{{ rook_block_device }}"
+        - name: Ceph can leave LVM and device mapper data that can lock the disks
+          ansible.builtin.command: "{{ item }}"
           loop:
-            - "{{ rook_devices | default([]) }}"
-        - name: Remove lvm partitions
-          ansible.builtin.shell: |-
-            {{ item }}
-          loop:
-            - ls /dev/mapper/ceph--* | xargs -I% -- fuser --kill %
-            - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup clear %
-            - ls /dev/mapper/ceph--* | xargs -I% -- dmsetup remove -f %
-            - ls /dev/mapper/ceph--* | xargs -I% -- rm -rf %
-        - name: Wipe the block device
-          ansible.builtin.command: |-
-            wipefs --all --force {{ item }}
-          with_items:
-            - "{{ rook_devices | default([]) }}"
+            - ls /dev/mapper/ceph-* | xargs -I% -- dmsetup remove %
+            - rm -rf /dev/ceph-*
+            - rm -rf /dev/mapper/ceph--*

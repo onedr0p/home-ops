@@ -1,21 +1,20 @@
 ---
-- name: Cluster Prepare
-  hosts:
+- hosts:
     - master
     - worker
   become: true
   gather_facts: true
   any_errors_fatal: true
   pre_tasks:
-    - name: Pausing for 2 seconds...
+    - name: Pausing for 5 seconds...
       ansible.builtin.pause:
-        seconds: 2
+        seconds: 5
   tasks:
     - name: Locale
       block:
         - name: Locale | Set timezone
           community.general.timezone:
-            name: "{{ timezone | default('America/New_York') }}"
+            name: "{{ timezone | default('Etc/UTC') }}"
     - name: Networking
       block:
         - name: Networking | Set hostname to inventory hostname
@@ -28,49 +27,55 @@
               127.0.1.1   {{ inventory_hostname }}
     - name: Packages
       block:
-        - name: Packages | Improve dnf performance
-          ansible.builtin.blockinfile:
-            path: /etc/dnf/dnf.conf
-            block: |
-              defaultyes=True
-              deltarpm=True
-              install_weak_deps=False
-              max_parallel_downloads={{ ansible_processor_vcpus | default('8') }}
         - name: Packages | Install required packages
-          ansible.builtin.dnf:
-            name: "{{ packages | default([]) }}"
+          ansible.builtin.apt:
+            name: "{{ ubuntu.packages | default([]) }}"
             state: present
             update_cache: true
-        - name: Packages | Remove leaf packages
-          ansible.builtin.dnf:
+    - name: Gather installed packages
+      ansible.builtin.package_facts:
+        manager: auto
+    - name: Packages | Uninstall Snap
+      block:
+        - name: Packages | Uninstall Snap | Check if snap is installed
+          ansible.builtin.debug:
+            msg: "snapd is installed"
+          register: snapd_check
+        - name: Packages | Uninstall Snap | Remove snap packages
+          ansible.builtin.command: snap remove {{ item }}
+          loop: ["lxd", "core20", "snapd"]
+          when: snapd_check.failed is defined
+        - name: Packages | Uninstall Snap | Remove snap from packages
+          ansible.builtin.apt:
+            name: snapd
+            state: absent
             autoremove: true
-        - name: Packages | Enable cockpit
-          ansible.builtin.systemd:
-            service: cockpit.socket
-            enabled: true
-            state: started
+      when: "'snapd' in ansible_facts.packages"
     - name: User Configuration
       block:
-        - name: User Configuration | Change shell to fish
-          ansible.builtin.user:
-            name: root
-            shell: /usr/bin/fish
+        - name: Add user to sudoers
+          ansible.builtin.copy:
+            content: "{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
+            dest: "/etc/sudoers.d/{{ ansible_user }}_nopasswd"
+            mode: "0440"
         - name: User Configuration | Add additional SSH public keys
           ansible.posix.authorized_key:
             user: "{{ ansible_user }}"
             key: "{{ item }}"
           loop: "{{ public_ssh_keys | default([]) }}"
+        - name: Silence the login prompt
+          ansible.builtin.file:
+            dest: "/home/{{ ansible_user }}/.hushlogin"
+            state: touch
+            owner: "{{ ansible_user }}"
+            mode: "0775"
+            modification_time: preserve
+            access_time: preserve
     - name: System Configuration (1)
       block:
-        - name: System Configuration (1) | Configure smartd
-          ansible.builtin.copy:
-            dest: /etc/smartd.conf
-            mode: 0644
-            content: DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40
-          notify: Restart smartd
-        - name: System Configuration (1) | Disable firewalld
+        - name: System Configuration (1) | Disable ufw
           ansible.builtin.systemd:
-            service: firewalld.service
+            service: ufw.service
             enabled: false
             masked: true
             state: stopped
@@ -78,20 +83,27 @@
           ansible.builtin.systemd:
             service: fstrim.timer
             enabled: true
+        - name: System Configuration (1) | Disable cloud-init
+          ansible.builtin.file:
+            dest: /etc/cloud/cloud-init.disabled
+            state: touch
+            owner: root
+            mode: "0775"
+            modification_time: preserve
+            access_time: preserve
     - name: System Configuration (2)
-      notify: Reboot
       block:
         - name: System Configuration (2) | Enable kernel modules now
           community.general.modprobe:
             name: "{{ item }}"
             state: present
-          loop: [br_netfilter, overlay, rbd]
+          loop: ["br_netfilter", "overlay", "rbd"]
         - name: System Configuration (2) | Enable kernel modules on boot
           ansible.builtin.copy:
             mode: 0644
             content: "{{ item }}"
             dest: "/etc/modules-load.d/{{ item }}.conf"
-          loop: [br_netfilter, overlay, rbd]
+          loop: ["br_netfilter", "overlay", "rbd"]
         - name: System Configuration (2) | Set sysctls
           ansible.posix.sysctl:
             name: "{{ item.key }}"
@@ -110,13 +122,15 @@
               net.bridge.bridge-nf-call-ip6tables: 1
               fs.inotify.max_user_watches: 524288
               fs.inotify.max_user_instances: 512
-        - name: System Configuration (2) | Disable swap
-          ansible.builtin.dnf:
-            name: zram-generator-defaults
+        - name: System Configuration (2) | Disable swap at runtime
+          ansible.builtin.command: swapoff -a
+          when: ansible_swaptotal_mb > 0
+        - name: System Configuration (2) | Disable swap at boot
+          ansible.posix.mount:
+            name: "{{ item }}"
+            fstype: swap
             state: absent
-        - name: System Configuration (2) | Disable SELinux
-          ansible.posix.selinux:
-            state: disabled
+          loop: ["none", "swap"]
         - name: System Configuration (2) | Disable mitigations
           ansible.builtin.replace:
             path: /etc/default/grub
@@ -125,20 +139,15 @@
           with_dict: "{{ grub_config }}"
           vars:
             grub_config:
+              apparmor: "0"
               mitigations: "off"
           register: grub_status
         - name: System Configuration (2) | Reconfigure grub and initramfs
-          ansible.builtin.command: "{{ item }}"
-          loop:
-            - grub2-mkconfig -o /boot/grub2/grub.cfg
-            - dracut --force --regenerate-all -v
+          ansible.builtin.command: update-grub
           when: grub_status.changed
+  #     notify: Reboot
 
-  handlers:
-    - name: Reboot
-      ansible.builtin.reboot:
-    - name: Restart smartd
-      ansible.builtin.service:
-        name: smartd.service
-        enabled: true
-        state: restarted
+  # handlers:
+  #   - name: Reboot
+  #     ansible.builtin.reboot:
+  #       msg: Rebooting nodes
