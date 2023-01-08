@@ -2,16 +2,17 @@
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
-  name: "${RSRC}-${CLAIM}-${TS}"
-  namespace: "${NAMESPACE}"
+  name: "${rsrc}-${claim}-${ts}"
+  namespace: "${namespace}"
 spec:
   trigger:
     manual: restore-once
   restic:
-    repository: "${RSRC}-restic-secret"
-    destinationPVC: "${CLAIM}"
+    repository: "${rsrc}-restic-secret"
+    destinationPVC: "${claim}"
     copyMethod: Direct
-    previous: 1
+    storageClassName: ceph-block
+    previous: 2
     # IMPORTANT NOTE:
     #   On bootstrap set `restoreAsOf` to the time the old cluster was destroyed.
     #   This will essentially prevent volsync from trying to restore a backup
