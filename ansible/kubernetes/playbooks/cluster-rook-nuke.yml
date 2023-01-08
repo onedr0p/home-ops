@@ -20,7 +20,7 @@
         - name: Zap the disk to a fresh, usable state (zap-all is important, b/c MBR has to be clean)
           ansible.builtin.command: sgdisk --zap-all "{{ rook_block_device }}" || true
         - name: Wipe a large portion of the beginning of the disk to remove more LVM metadata that may be present
-          ansible.builtin.command: dd if=/dev/zero of=""{{ rook_block_device }}"" bs=1M count=100 oflag=direct,dsync
+          ansible.builtin.command: dd if=/dev/zero of="{{ rook_block_device }}" bs=1M count=100 oflag=direct,dsync
         - name: Wipe the block device with wipefs
           ansible.builtin.command: wipefs --all --force "{{ rook_block_device }}"
         - name: SSDs may be better cleaned with blkdiscard instead of dd
