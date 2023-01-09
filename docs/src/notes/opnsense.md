@@ -113,3 +113,26 @@ Firewall logs are being sent to [Vector](https://github.com/vectordotdev/vector)
       5. `Port` = `5140`
       6. `rfc5424` = `true`
       7. Save
+
+## SMTP Relay
+
+To ease the use of application configuration I have a SMTP Relay running on Opnsense using the Postfix plugin. From applications deployed in my Kubernetes cluster, to my nas, to my printer, all use the same configuration for SMTP without authentication.
+
+1. System > Services > Postfix > General
+    1. `SMTP Client Security` = `encrypt`
+    2. `Smart Host` = `[smtp.fastmail.com]:465`
+    3. `Enable SMTP Authentication` = `true`
+    4. `Authentication Username` = `devin@buhl.casa`
+    5. `Authentication Password` = `<app-password>`
+    6. `Permit SASL Authenticated` = `false`
+    7. Save
+2. System > Services > Postfix > Domains
+    - Add new domain
+      1. `Domainname` = `buhl.casa`
+      2. `Destination` = `[smtp.fastmail.com]:465`
+      3. Save
+    - Apply
+3. Verify
+    ```sh
+    swaks --server opnsense.turbo.ac --port 25 --to devin@buhl.casa --from devin@buhl.casa
+    ```
