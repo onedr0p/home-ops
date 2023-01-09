@@ -57,7 +57,7 @@
           ansible.builtin.copy:
             content: "{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
             dest: "/etc/sudoers.d/{{ ansible_user }}_nopasswd"
-            mode: "0440"
+            mode: 0440
         - name: User Configuration | Add additional SSH public keys
           ansible.posix.authorized_key:
             user: "{{ ansible_user }}"
@@ -68,7 +68,7 @@
             dest: "/home/{{ ansible_user }}/.hushlogin"
             state: touch
             owner: "{{ ansible_user }}"
-            mode: "0775"
+            mode: 0775
             modification_time: preserve
             access_time: preserve
     - name: System Configuration (1)
@@ -88,7 +88,7 @@
             dest: /etc/cloud/cloud-init.disabled
             state: touch
             owner: root
-            mode: "0775"
+            mode: 0775
             modification_time: preserve
             access_time: preserve
     - name: System Configuration (2)
@@ -145,9 +145,9 @@
         - name: System Configuration (2) | Reconfigure grub and initramfs
           ansible.builtin.command: update-grub
           when: grub_status.changed
-  #     notify: Reboot
+      notify: Reboot
 
-  # handlers:
-  #   - name: Reboot
-  #     ansible.builtin.reboot:
-  #       msg: Rebooting nodes
+  handlers:
+    - name: Reboot
+      ansible.builtin.reboot:
+        msg: Rebooting nodes

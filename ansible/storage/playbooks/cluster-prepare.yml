@@ -61,7 +61,9 @@
             dest: "/home/{{ create_user.name }}/.hushlogin"
             state: touch
             owner: "{{ create_user.name }}"
-            mode: "0775"
+            mode: 0775
+            modification_time: preserve
+            access_time: preserve
     - name: Network
       block:
         - name: Network | Set hostname to inventory hostname
@@ -116,8 +118,7 @@
           register: grub_status
         - name: System | Run grub-mkconfig
           ansible.builtin.command: update-grub
-          when:
-            - grub_status.changed
+          when: grub_status.changed
     - name: Notifications
       block:
         - name: Notifications | Copy /etc/aliases
