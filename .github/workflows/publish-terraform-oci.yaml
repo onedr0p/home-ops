@@ -7,6 +7,9 @@ on:
     branches: ["main"]
     paths: ["terraform/**"]
 
+env:
+  IMAGE_REGISTRY: ghcr.io
+
 jobs:
   changed-files:
     name: Generate Build Matrix
@@ -70,6 +73,9 @@ jobs:
         run: |
           brew install fluxcd/tap/flux
 
+      - name: Setup Cosign
+        uses: sigstore/cosign-installer@main
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # renovate: tag=v2.1.0
         with:
@@ -77,14 +83,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate OCI tag
+        id: generate-tag
+        run: echo "tag=${{ env.IMAGE_REGISTRY }}/${{ github.repository_owner }}/terraform-$(basename ${{ matrix.project }})-oci:$(git rev-parse --short HEAD)" >> "${GITHUB_OUTPUT}"
+
       - name: Publish OCI
         run: |
-          flux push artifact oci://ghcr.io/onedr0p/terraform-$(basename ${{ matrix.project }})-oci:$(git rev-parse --short HEAD) \
+          flux push artifact oci://${{ steps.generate-tag.outputs.tag }} \
               --path="./${{ matrix.project }}" \
               --source="$(git config --get remote.origin.url)" \
               --revision="$(git branch --show-current)/$(git rev-parse HEAD)"
 
       - name: Tag OCI
-        run: |
-          flux tag artifact oci://ghcr.io/onedr0p/terraform-$(basename ${{ matrix.project }})-oci:$(git rev-parse --short HEAD) \
-              --tag main
+        run: flux tag artifact oci://${{ steps.generate-tag.outputs.tag }} --tag main
+
+      - name: Sign the OCI artifact
+        run: cosign sign ${{ steps.generate-tag.outputs.tag }}
+        env:
+          COSIGN_EXPERIMENTAL: 1
+
+      - name: Verify the pushed tags
+        run: cosign verify ${{ steps.generate-tag.outputs.tag }}
+        env:
+          COSIGN_EXPERIMENTAL: 1
