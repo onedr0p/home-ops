@@ -66,15 +66,12 @@ jobs:
         with:
           token: "${{ steps.generate-token.outputs.token }}"
 
-      - name: Set up Homebrew
+      - name: Setup Homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
       - name: Setup Tools
         run: |
-          brew install fluxcd/tap/flux
-
-      - name: Setup Cosign
-        uses: sigstore/cosign-installer@main
+          brew install cosign fluxcd/tap/flux
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # renovate: tag=v2.1.0
