@@ -1,3 +1,3 @@
 # Terraform Cloudflare
 
-Provision Cloudflare DNS and related Cloudflare settings
+Provisions Cloudflare DNS and related Cloudflare settings for me

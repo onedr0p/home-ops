@@ -1,3 +1,3 @@
 # Terraform Storage
 
-Provision Kubernetes applications on k3s on my NAS
+Provisions Kubernetes applications on k3s on my NAS for me
