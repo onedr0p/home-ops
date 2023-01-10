@@ -25,11 +25,6 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
-  dependsOn:
-    - name: postgres
-      namespace: default
-    - name: redis
-      namespace: default
   values:
     image:
       flavor: fpm-alpine
@@ -39,20 +34,20 @@ spec:
       datadir: /var/www/data
       extraEnv:
         - name: REDIS_HOST
-          value: redis.default.svc.cluster.local
+          value: redis-lb.default.svc.cluster.local
         - name: REDIS_HOST_PORT
-          value: "26379"
+          value: "6379"
       existingSecret:
         enabled: true
         secretName: nextcloud
       host: &host cloud.devbu.io
       mail:
         enabled: true
-        fromAddress: cloud
-        domain: devin@buhl.casa
+        fromAddress: admin
+        domain: buhl.casa
         smtp:
-          host: smtp-relay.default.svc.cluster.local
-          port: 2525
+          host: opnsense.turbo.ac
+          port: 25
           authtype: NONE
           name: ""
           password: ""

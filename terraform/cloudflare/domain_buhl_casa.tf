@@ -63,7 +63,7 @@ resource "cloudflare_record" "email_domain_fastmail_spf" {
 resource "cloudflare_record" "email_domain_fastmail_dmarc" {
   name    = "_dmarc"
   zone_id = lookup(data.cloudflare_zones.email_domain.zones[0], "id")
-  value   = "v=DMARC1; p=none; rua=mailto:devin.kray@gmail.com"
+  value   = "v=DMARC1; p=none; rua=mailto:${data.sops_file.secrets.data["cloudflare_email"]}"
   proxied = false
   type    = "TXT"
   ttl     = 1

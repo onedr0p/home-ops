@@ -13,7 +13,7 @@ spec:
       version: 6.0.3
       sourceRef:
         kind: HelmRepository
-        name: gitea-charts
+        name: gitea
         namespace: flux-system
   maxHistory: 3
   install:
@@ -23,10 +23,10 @@ spec:
   upgrade:
     remediation:
       retries: 5
-  dependsOn:
-    - name: rook-ceph-cluster
-      namespace: rook-ceph
   values:
+    statefulset:
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
       rootless: true
     containerSecurityContext:
@@ -49,13 +49,12 @@ spec:
       enabled: false
     persistence:
       enabled: true
-      accessModes:
-        - ReadWriteOnce
+      accessModes: ["ReadWriteOnce"]
       size: 10Gi
       storageClass: ceph-block
     gitea:
       admin:
-        email: gitea@buhl.casa
+        email: admin@buhl.casa
         username: gitea
       config:
         APP_NAME: Tea, Git, Hot
@@ -75,6 +74,11 @@ spec:
           DEFAULT_PRIVATE: true
         database:
           DB_TYPE: sqlite3
+          # DB_TYPE: postgres
+          # HOST: postgres-rw.default.svc.cluster.local:5432
+          # NAME: gitea
+          # USER: gitea
+          # PASSWD:
         service:
           DISABLE_REGISTRATION: false
           ALLOW_ONLY_EXTERNAL_REGISTRATION: true
@@ -96,23 +100,24 @@ spec:
         mailer:
           ENABLED: true
           MAILER_TYPE: smtp
-          HOST: opnsense.turbo.ac:25
-          FROM: "Gitea <gitea@buhl.casa>"
+          SMTP_ADDR: opnsense.turbo.ac
+          SMTP_PORT: 25
+          FROM: "Admin <admin@buhl.casa>"
         openid:
           ENABLE_OPENID_SIGNIN: false
           ENABLE_OPENID_SIGNUP: true
           WHITELISTED_URIS: auth.devbu.io
       oauth:
         - name: authelia
+          existingSecret: gitea-config-secret
           provider: openidConnect
-          key: gitea
-          secret: "${SECRET_GITEA_OAUTH_CLIENT_SECRET}"
           autoDiscoverUrl: https://auth.devbu.io/.well-known/openid-configuration
           groupClaimName: groups
           adminGroup: admins
           restrictedGroup: people
       # ldap:
       #   - name: glauth
+      #     existingSecret: gitea-config-secret
       #     securityProtocol: unencrypted
       #     host: glauth.default.svc.cluster.local
       #     port: "389"
@@ -126,31 +131,28 @@ spec:
       #     publicSSHKeyAttribute: publicSSHKey
       #     synchronizeUsers: "true"
       #     attributesInBind: "true"
-      #     existingSecret: gitea-config
       metrics:
         enabled: true
         serviceMonitor:
           enabled: true
-      podAnnotations:
-        secret.reloader.stakater.com/reload: gitea-config
   valuesFrom:
     - targetPath: gitea.admin.password
       kind: Secret
-      name: gitea-config
+      name: gitea-config-secret
       valuesKey: adminPassword
     - targetPath: gitea.config.attachment.MINIO_ACCESS_KEY_ID
       kind: Secret
-      name: gitea-config
+      name: gitea-config-secret
       valuesKey: minioAccessKeyId
     - targetPath: gitea.config.attachment.MINIO_SECRET_ACCESS_KEY
       kind: Secret
-      name: gitea-config
+      name: gitea-config-secret
       valuesKey: minioSecretAccessKey
     - targetPath: gitea.config.storage.MINIO_ACCESS_KEY_ID
       kind: Secret
-      name: gitea-config
+      name: gitea-config-secret
       valuesKey: minioAccessKeyId
     - targetPath: gitea.config.storage.MINIO_SECRET_ACCESS_KEY
       kind: Secret
-      name: gitea-config
+      name: gitea-config-secret
       valuesKey: minioSecretAccessKey

@@ -1,4 +1,4 @@
 provider "cloudflare" {
-  email   = "devin.kray@gmail.com"
+  email   = data.sops_file.secrets.data["cloudflare_email"]
   api_key = data.sops_file.secrets.data["cloudflare_apikey"]
 }
