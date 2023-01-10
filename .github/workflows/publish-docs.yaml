@@ -27,36 +27,16 @@ jobs:
         with:
           token: "${{ steps.generate-token.outputs.token }}"
 
-      - name: Setup mdBook
-        uses: peaceiris/actions-mdbook@adeb05db28a0c0004681db83893d56c0388ea9ea # v1.2.0
-
-      - name: Download mdbook-admonish
-        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
-        with:
-          repository: tommilligan/mdbook-admonish
-          fileName: "*-unknown-linux-gnu.tar.gz"
-          latest: true
-
-      - name: Download mdbook-open-on-gh
-        uses: robinraju/release-downloader@768b85c8d69164800db5fc00337ab917daf3ce68 # v1.7
-        with:
-          repository: badboy/mdbook-open-on-gh
-          fileName: "*-unknown-linux-gnu.tar.gz"
-          latest: true
-
-      - name: Extract plug-ins
-        run: |
-          mkdir -p bin/
-          for f in *.tar.gz; do tar xvf "$GITHUB_WORKSPACE/$f" -C bin/; done
-          echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
-
       - name: Build docs
-        working-directory: docs
-        run: mdbook build
+        uses: docker://ghcr.io/bjw-s/mdbook:0.4.25
+        with:
+          args: mdbook build docs
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@64b46b4226a4a12da2239ba3ea5aa73e3163c75b # v3.9.1
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/book
+          github_token: "${{ steps.generate-token.outputs.token }}"
+          publish_dir: ./docs/book/html
+          user_name: "rosey-bot[bot]"
+          user_email: "rosey-bot <98030736+rosey-bot[bot]@users.noreply.github.com>"
