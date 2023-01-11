@@ -89,13 +89,17 @@ spec:
           receiver: pushover
           routes:
             - receiver: "null" # quote
-              matchers: ["alertname =~ 'InfoInhibitor|Watchdog'"]
+              matchers:
+                - alertname =~ "InfoInhibitor|Watchdog"
             - receiver: pushover
-              matchers: ["severity = 'critical'"]
+              matchers:
+                - severity = "critical"
               continue: true
         inhibit_rules:
-          - source_matchers: ["severity = 'critical'"]
-            target_matchers: ["severity = 'warning'"]
+          - source_matchers:
+              - severity = "critical"
+            target_matchers:
+              - severity = "warning"
             equal: ["alertname", "namespace"]
       ingress:
         enabled: true
