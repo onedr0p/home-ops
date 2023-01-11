@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 43.2.1
+      version: 43.3.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
@@ -30,6 +30,9 @@ spec:
     keepHistory: false
   values:
     cleanPrometheusOperatorObjectNames: true
+    prometheusOperator:
+      serviceMonitor:
+        sampleLimit: 0
     alertmanager:
       config:
         global:
@@ -39,8 +42,8 @@ spec:
           - name: pushover
             pushover_configs:
               - url_title: View in Alert Manager
-                token: "{{ .Values.alertmanager.secrets.pushover_api_token }}"
-                user_key: "{{ .Values.alertmanager.secrets.pushover_api_userkey }}"
+                token: "{{ .Values.alertmanager.secrets.pushover_token }}"
+                user_key: "{{ .Values.alertmanager.secrets.pushover_user_key }}"
                 send_resolved: true
                 html: true
                 sound: gamelan
@@ -264,11 +267,11 @@ spec:
             static_configs:
               - targets: ["nexus.turbo.ac"]
   valuesFrom:
-    - targetPath: alertmanager.secrets.pushover_api_userkey
+    - targetPath: alertmanager.secrets.pushover_user_key
       kind: Secret
       name: alertmanager-secret
       valuesKey: pushover_user_key
-    - targetPath: alertmanager.secrets.pushover_api_token
+    - targetPath: alertmanager.secrets.pushover_token
       kind: Secret
       name: alertmanager-secret
       valuesKey: pushover_token
