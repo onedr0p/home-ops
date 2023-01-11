@@ -34,6 +34,7 @@ spec:
       serviceMonitor:
         sampleLimit: 0
     alertmanager:
+      tplConfig: true
       config:
         global:
           resolve_timeout: 5m
@@ -42,8 +43,8 @@ spec:
           - name: pushover
             pushover_configs:
               - url_title: View in Alert Manager
-                token: "${SECRET_ALERTMANAGER_PUSHOVER_TOKEN}"
-                user_key: "${SECRET_ALERTMANAGER_PUSHOVER_USER_KEY}"
+                token: "{{ .Values.alertmanager.secrets.pushover_token }}"
+                user_key: "{{ .Values.alertmanager.secrets.pushover_user_key }}"
                 send_resolved: true
                 html: true
                 sound: gamelan
@@ -266,12 +267,12 @@ spec:
               password: 1NtERnALOnLYuS3
             static_configs:
               - targets: ["nexus.turbo.ac"]
-  # valuesFrom:
-  #   - targetPath: alertmanager.secrets.pushover_user_key
-  #     kind: Secret
-  #     name: alertmanager-secret
-  #     valuesKey: pushover_user_key
-  #   - targetPath: alertmanager.secrets.pushover_token
-  #     kind: Secret
-  #     name: alertmanager-secret
-  #     valuesKey: pushover_token
+  valuesFrom:
+    - targetPath: alertmanager.secrets.pushover_user_key
+      kind: Secret
+      name: alertmanager-secret
+      valuesKey: pushover_user_key
+    - targetPath: alertmanager.secrets.pushover_token
+      kind: Secret
+      name: alertmanager-secret
+      valuesKey: pushover_token
