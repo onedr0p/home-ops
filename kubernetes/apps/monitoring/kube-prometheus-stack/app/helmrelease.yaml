@@ -39,8 +39,8 @@ spec:
           - name: pushover
             pushover_configs:
               - url_title: View in Alert Manager
-                token: "{{ .Values.alertmanager.secrets.pushover_token }}"
-                user_key: "{{ .Values.alertmanager.secrets.pushover_user_key }}"
+                token: "{{ .Values.alertmanager.secrets.pushover_api_token }}"
+                user_key: "{{ .Values.alertmanager.secrets.pushover_api_userkey }}"
                 send_resolved: true
                 html: true
                 sound: gamelan
@@ -264,11 +264,11 @@ spec:
             static_configs:
               - targets: ["nexus.turbo.ac"]
   valuesFrom:
-    - targetPath: alertmanager.secrets.pushover_user_key
+    - targetPath: alertmanager.secrets.pushover_api_userkey
       kind: Secret
       name: alertmanager-secret
       valuesKey: pushover_user_key
-    - targetPath: alertmanager.secrets.pushover_token
+    - targetPath: alertmanager.secrets.pushover_api_token
       kind: Secret
       name: alertmanager-secret
       valuesKey: pushover_token
