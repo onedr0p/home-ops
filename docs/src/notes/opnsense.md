@@ -42,7 +42,7 @@ While kube-vip is very nice for having a API server ready to go and running in y
       3. `FQDN or IP` = `192.168.42.x`
       4. `Port` = `6443`
       5. `Verify SSL Certificate` = `false`
-      6. Save
+      6. Apply/Save
       7. Continue adding servers until all your **master nodes** are present
 2. Services > HAProxy | Rules & Checks > Health Monitors
     1. `Name` = `k8s-apiserver-health`
@@ -51,7 +51,7 @@ While kube-vip is very nice for having a API server ready to go and running in y
     4. `HTTP method` = `GET`
     5. `Request URI` = `/healthz`
     6. `HTTP version` = `HTTP/1.1`
-    7. Save
+    7. Apply/Save
 3. Services > HAProxy | Virtual Services > Backend Pools
     1. `Enabled` = `true`
     2. `Name` = `k8s-apiserver-be`
@@ -60,22 +60,25 @@ While kube-vip is very nice for having a API server ready to go and running in y
     5. `Source address` = `192.168.1.1` (Your Opnsense IP address)
     6. `Enable Health Checking` = `true`
     7. `Health Monitor` = `k8s-apiserver-health`
-    8. Save
-4. Services > HAProxy | Virtual Services > Frontend Pools
+    8. Apply/Save
+4. Services > HAProxy | Virtual Services > Public Services
     1. `Enabled` = `true`
     2. `Name` = `k8s-apiserver-fe`
     3. `Listen Addresses` = `192.168.1.1:6443` (Your Opnsense IP address. Use TAB key to complete typing a listen address)
     4. `Type` = `TCP`
     5. `Default Backend Pool` = `k8s-apiserver-be`
-    6. Save
+    6. Apply/Save
 5. Services > HAProxy | Settings > Service
     1. `Enable HAProxy` = `true`
-    2. Save
-6. Services > HAProxy | Settings > Default Parameters
+    2. Apply/Save
+6. Services > HAProxy | Settings > Global Parameters
+    1. `Verify SSL Server Certificates` = `disable-verify`
+    2. Apply/Save
+7. Services > HAProxy | Settings > Default Parameters
     1. `Client Timeout` = `4h`
     2. `Connection Timeout` = `10s`
     3. `Server Timeout` = `4h`
-    4. Save
+    4. Apply/Save
 
 ## Receive Side Scaling (RSS)
 
