@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: loki
-      version: 3.10.0
+      version: 3.9.0
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -28,9 +28,6 @@ spec:
     keepHistory: false
   values:
     loki:
-      image:
-        repository: grafana/loki
-        tag: main-f5fbfab-amd64
       structuredConfig:
         auth_enabled: false
         server:
@@ -125,12 +122,13 @@ spec:
         tls:
           - hosts:
               - *host
-    backend:
+    write:
       replicas: 3
       persistence:
-        enableStatefulSetAutoDeletePVC: true
         size: 10Gi
         storageClass: local-path
+    read:
+      replicas: 3
       extraVolumeMounts:
         - name: loki-rules
           mountPath: /rules/fake
@@ -146,14 +144,9 @@ spec:
           emptyDir: {}
         - name: loki-tmp
           emptyDir: {}
-    write:
-      replicas: 3
       persistence:
         size: 10Gi
         storageClass: local-path
-    read:
-      legacyReadTarget: false
-      replicas: 3
     monitoring:
       serviceMonitor:
         enabled: false
