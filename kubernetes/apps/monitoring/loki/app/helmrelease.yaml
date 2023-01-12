@@ -131,14 +131,6 @@ spec:
         enableStatefulSetAutoDeletePVC: true
         size: 10Gi
         storageClass: local-path
-    write:
-      replicas: 3
-      persistence:
-        size: 10Gi
-        storageClass: local-path
-    read:
-      legacyReadTarget: false
-      replicas: 3
       extraVolumeMounts:
         - name: loki-rules
           mountPath: /rules/fake
@@ -154,6 +146,14 @@ spec:
           emptyDir: {}
         - name: loki-tmp
           emptyDir: {}
+    write:
+      replicas: 3
+      persistence:
+        size: 10Gi
+        storageClass: local-path
+    read:
+      legacyReadTarget: false
+      replicas: 3
     monitoring:
       serviceMonitor:
         enabled: false
