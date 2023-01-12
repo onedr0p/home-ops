@@ -27,18 +27,28 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    global:
-      # imageRegistry: public.ecr.aws
-      storageClass: local-path
+    # global:
+    #   imageRegistry: public.ecr.aws
     auth:
       enabled: false
       sentinel: false
+    master:
+      persistence:
+        enabled: true
+        storageClass: local-path
+    replica:
+      persistence:
+        enabled: true
+        storageClass: local-path
     sentinel:
       enabled: true
       masterSet: redis-master
       getMasterTimeout: 10
       startupProbe:
         failureThreshold: 2
+      persistence:
+        enabled: true
+        storageClass: local-path
     metrics:
       enabled: true
       serviceMonitor:
