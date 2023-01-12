@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: rook-ceph-cluster
-      version: v1.10.8
+      version: v1.10.9
       sourceRef:
         kind: HelmRepository
         name: rook-ceph
@@ -42,6 +42,8 @@ spec:
         tls:
           - hosts:
               - *host
+    toolbox:
+      enabled: true
     configOverride: |
       [global]
       bdev_enable_discard = true
@@ -51,6 +53,7 @@ spec:
         provider: host
         connections:
           compression:
+            # TODO: Test out enabling this on next cluster rebuild
             enabled: false
       crashCollector:
         disable: false
