@@ -27,18 +27,12 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    controller:
-      annotations:
-        reloader.stakater.com/auto: "true"
     image:
       repository: public.ecr.aws/docker/library/redis
       tag: 7.0.7
     env:
       REDIS_REPLICATION_MODE: master
-    envFrom:
-      - secretRef:
-          name: immich-secret
-    command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
+    command: ["redis-server"]
     service:
       main:
         ports:
