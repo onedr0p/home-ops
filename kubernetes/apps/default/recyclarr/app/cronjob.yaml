@@ -14,41 +14,25 @@ spec:
           automountServiceAccountToken: false
           restartPolicy: OnFailure
           initContainers:
-            - name: render-configs
+            - name: init-config
               image: ghcr.io/onedr0p/alpine:3.17.1
               envFrom:
                 - secretRef:
                     name: radarr-secret
                 - secretRef:
                     name: sonarr-secret
-              command:
-                - "/bin/bash"
-                - -c
-              args:
-                - "envsubst < /config/recyclarr.yml > /shared/recyclarr.yml"
+              command: ["/bin/bash", "-c"]
+              args: ["envsubst < /config/recyclarr.yml > /shared/recyclarr.yml"]
               volumeMounts:
                 - name: config
                   mountPath: /config
                 - name: shared
                   mountPath: /shared
           containers:
-            - name: sonarrs
+            - name: main
               image: ghcr.io/recyclarr/recyclarr:4.2.0
-              command:
-                - /app/recyclarr/recyclarr
-              args:
-                - sonarr
-              volumeMounts:
-                - name: shared
-                  mountPath: /config/recyclarr.yml
-                  subPath: recyclarr.yml
-                  readOnly: true
-            - name: radarrs
-              image: ghcr.io/recyclarr/recyclarr:4.2.0
-              command:
-                - /app/recyclarr/recyclarr
-              args:
-                - radarr
+              command: ["/app/recyclarr/recyclarr"]
+              args: ["sync"]
               volumeMounts:
                 - name: shared
                   mountPath: /config/recyclarr.yml
