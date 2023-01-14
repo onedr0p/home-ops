@@ -138,7 +138,8 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 | [UptimeRobot](https://uptimerobot.com/)      | Monitoring internet connectivity and external facing applications | ~$60/y        |
 | [Pushover](https://pushover.net/)            | Kubernetes Alerts and application notifications                   | Free          |
 | [GCP](https://cloud.google.com/)             | Voice interactions with Home Assistant over Google Assistant      | Free          |
-|                                              |                                                                   | Total: ~$18/m |
+| [NextDNS](https://nextdns.io/)               | My routers DNS server which includes AdBlocking                   | ~20/y         |
+|                                              |                                                                   | Total: ~$19/m |
 
 ---
 
