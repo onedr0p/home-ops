@@ -30,100 +30,6 @@ spec:
     keepHistory: false
   values:
     cleanPrometheusOperatorObjectNames: true
-    alertmanager:
-      config:
-        global:
-          resolve_timeout: 5m
-        receivers:
-          - name: "null" # quote
-          - name: pushover
-            pushover_configs:
-              - url_title: View in Alert Manager
-                token: "${SECRET_ALERTMANAGER_PUSHOVER_TOKEN}"
-                user_key: "${SECRET_ALERTMANAGER_PUSHOVER_USER_KEY}"
-                send_resolved: true
-                html: true
-                sound: gamelan
-                priority: |-
-                  {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
-                title: |-
-                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
-                message: |-
-                  {{- range .Alerts }}
-                    {{- if ne .Labels.severity "" }}
-                      <b>Severity:</b> <i>{{ .Labels.severity }}</i>
-                    {{- else }}
-                      <b>Severity:</b> <i>N/A</i>
-                    {{- end }}
-                    {{- if ne .Annotations.description "" }}
-                      <b>Description:</b> <i>{{ .Annotations.description }}</i>
-                    {{- else if ne .Annotations.summary "" }}
-                      <b>Summary:</b> <i>{{ .Annotations.summary }}</i>
-                    {{- else if ne .Annotations.message "" }}
-                      <b>Message:</b> <i>{{ .Annotations.message }}</i>
-                    {{- else }}
-                      <b>Description:</b> <i>N/A</i>
-                    {{- end }}
-                    {{- if gt (len .Labels.SortedPairs) 0 }}
-                      <b>Details:</b>
-                      {{- range .Labels.SortedPairs }}
-                        • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
-                      {{- end }}
-                    {{- end }}
-                  {{- end }}
-        route:
-          group_by: ["alertname", "job"]
-          group_wait: 30s
-          group_interval: 5m
-          repeat_interval: 6h
-          receiver: pushover
-          routes:
-            - receiver: "null" # quote
-              matchers:
-                - alertname =~ "InfoInhibitor|Watchdog"
-            - receiver: pushover
-              matchers:
-                - severity = "critical"
-              continue: true
-        inhibit_rules:
-          - source_matchers:
-              - severity = "critical"
-            target_matchers:
-              - severity = "warning"
-            equal: ["alertname", "namespace"]
-      ingress:
-        enabled: true
-        pathType: Prefix
-        ingressClassName: nginx
-        annotations:
-          hajimari.io/appName: "Alert Manager"
-          hajimari.io/icon: mdi:alert-decagram-outline
-        hosts:
-          - &host alert-manager.devbu.io
-        tls:
-          - hosts:
-              - *host
-      alertmanagerSpec:
-        replicas: 3
-        podAntiAffinity: hard
-        storage:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: local-path
-              resources:
-                requests:
-                  storage: 1Gi
-    kube-state-metrics:
-      metricLabelsAllowlist: ["persistentvolumeclaims=[*]"]
-      prometheus:
-        monitor:
-          enabled: true
-          relabelings:
-            - action: replace
-              regex: (.*)
-              replacement: $1
-              sourceLabels: ["__meta_kubernetes_pod_node_name"]
-              targetLabel: kubernetes_node
     grafana:
       enabled: false
       forceDeployDashboards: true
@@ -139,6 +45,17 @@ spec:
           - action: replace
             sourceLabels: ["node"]
             targetLabel: instance
+    kube-state-metrics:
+      metricLabelsAllowlist: ["persistentvolumeclaims=[*]"]
+      prometheus:
+        monitor:
+          enabled: true
+          relabelings:
+            - action: replace
+              regex: (.*)
+              replacement: $1
+              sourceLabels: ["__meta_kubernetes_pod_node_name"]
+              targetLabel: kubernetes_node
     kubeApiServer:
       enabled: true
     kubeControllerManager:
@@ -157,107 +74,3 @@ spec:
         enabled: true
         port: 2381
         targetPort: 2381
-    prometheus:
-      ingress:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          hajimari.io/appName: Prometheus
-          hajimari.io/icon: simple-icons:prometheus
-        pathType: Prefix
-        hosts:
-          - &host prometheus.devbu.io
-        tls:
-          - hosts:
-              - *host
-      thanosService:
-        enabled: true
-      thanosServiceMonitor:
-        enabled: true
-      prometheusSpec:
-        replicas: 3
-        replicaExternalLabelName: __replica__
-        externalLabels:
-          cluster: home-ops
-        thanos:
-          image: quay.io/thanos/thanos:v0.30.1
-          # renovate: datasource=docker depName=quay.io/thanos/thanos
-          version: "v0.30.1"
-          objectStorageConfig:
-            name: thanos-objstore-secret
-            key: objstore.yml
-        podAntiAffinity: hard
-        ruleSelectorNilUsesHelmValues: false
-        serviceMonitorSelectorNilUsesHelmValues: false
-        podMonitorSelectorNilUsesHelmValues: false
-        probeSelectorNilUsesHelmValues: false
-        retention: 2d
-        retentionSize: 6GB
-        enableAdminAPI: true
-        walCompression: true
-        storageSpec:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: local-path
-              resources:
-                requests:
-                  storage: 20Gi
-        resources:
-          requests:
-            cpu: 10m
-            memory: 2000Mi
-          limits:
-            memory: 8000Mi
-        additionalScrapeConfigs:
-          - job_name: haproxy
-            scrape_interval: 1m
-            scrape_timeout: 10s
-            honor_timestamps: true
-            static_configs:
-              - targets: ["opnsense.turbo.ac:8404"]
-          - job_name: coredns
-            scrape_interval: 1m
-            scrape_timeout: 10s
-            honor_timestamps: true
-            static_configs:
-              - targets: ["opnsense.turbo.ac:9153"]
-          - job_name: frr-exporter
-            scrape_interval: 1m
-            scrape_timeout: 10s
-            honor_timestamps: true
-            static_configs:
-              - targets: ["opnsense.turbo.ac:9342"]
-          - job_name: node-exporter
-            scrape_interval: 1m
-            scrape_timeout: 10s
-            honor_timestamps: true
-            static_configs:
-              - targets:
-                  - expanse.turbo.ac:9100
-                  - opnsense.turbo.ac:9100
-                  - pikvm.turbo.ac:9100
-          - job_name: smartctl-exporter
-            scrape_interval: 1m
-            scrape_timeout: 10s
-            honor_timestamps: true
-            static_configs:
-              - targets: ["expanse.turbo.ac:9633"]
-          - job_name: pikvm
-            scrape_interval: 1m
-            scrape_timeout: 10s
-            metrics_path: /api/export/prometheus/metrics
-            basic_auth:
-              username: admin
-              password: 1NtERnALOnLYuS3
-            honor_timestamps: true
-            static_configs:
-              - targets: ["pikvm.turbo.ac"]
-          - job_name: nexus
-            scrape_interval: 1m
-            scrape_timeout: 10s
-            metrics_path: /service/metrics/prometheus
-            basic_auth:
-              username: admin
-              password: 1NtERnALOnLYuS3
-            static_configs:
-              - targets: ["nexus.turbo.ac"]
