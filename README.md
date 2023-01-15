@@ -128,19 +128,19 @@ While most of my infrastructure and workloads are selfhosted I do rely upon the 
 
 The alternative solution to these two problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/). However, maintaining another cluster and monitoring another group of workloads is a lot more time and effort than I am willing to put in.
 
-| Service                                      | Use                                                               | Cost          |
-|----------------------------------------------|-------------------------------------------------------------------|---------------|
-| [Fastmail](https://fastmail.com/)            | Email hosting                                                     | ~$90/yr       |
-| [GitHub](https://github.com/)                | Hosting this repository and continuous integration/deployments    | Free          |
-| [Cloudflare](https://www.cloudflare.com/)    | Domain, DNS and proxy management                                  | ~$30/yr       |
-| [1Password](https://1password.com/)          | Secrets with [External Secrets](https://external-secrets.io/)     | ~$65/yr       |
-| [Terraform Cloud](https://www.terraform.io/) | Storing Terraform state                                           | Free          |
-| [B2 Storage](https://www.backblaze.com/b2)   | Offsite application backups                                       | ~$5/mo        |
-| [UptimeRobot](https://uptimerobot.com/)      | Monitoring internet connectivity and external facing applications | ~$60/yr       |
-| [Pushover](https://pushover.net/)            | Kubernetes Alerts and application notifications                   | Free          |
-| [GCP](https://cloud.google.com/)             | Voice interactions with Home Assistant over Google Assistant      | Free          |
-| [NextDNS](https://nextdns.io/)               | My routers DNS server which includes AdBlocking                   | ~20/yr        |
-|                                              |                                                                   | Total: ~$30/m |
+| Service                                      | Use                                                               | Cost           |
+|----------------------------------------------|-------------------------------------------------------------------|----------------|
+| [Fastmail](https://fastmail.com/)            | Email hosting                                                     | ~$90/yr        |
+| [GitHub](https://github.com/)                | Hosting this repository and continuous integration/deployments    | Free           |
+| [Cloudflare](https://www.cloudflare.com/)    | Domain, DNS and proxy management                                  | ~$30/yr        |
+| [1Password](https://1password.com/)          | Secrets with [External Secrets](https://external-secrets.io/)     | ~$65/yr        |
+| [Terraform Cloud](https://www.terraform.io/) | Storing Terraform state                                           | Free           |
+| [B2 Storage](https://www.backblaze.com/b2)   | Offsite application backups                                       | ~$5/mo         |
+| [UptimeRobot](https://uptimerobot.com/)      | Monitoring internet connectivity and external facing applications | ~$60/yr        |
+| [Pushover](https://pushover.net/)            | Kubernetes Alerts and application notifications                   | Free           |
+| [GCP](https://cloud.google.com/)             | Voice interactions with Home Assistant over Google Assistant      | Free           |
+| [NextDNS](https://nextdns.io/)               | My routers DNS server which includes AdBlocking                   | ~20/yr         |
+|                                              |                                                                   | Total: ~$30/mo |
 
 ---
 
