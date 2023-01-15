@@ -126,10 +126,11 @@ GitRepository :: home-ops-kubernetes
 
 While most of my infrastructure and workloads are selfhosted I do rely upon the cloud for certain key parts of my setup. This saves me from having to worry about two things. (1) Dealing with chicken/egg scenarios and (2) services I critically need whether my cluster is online or not.
 
-The alternative solution to these two problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/). However, maintaining another cluster and monitoring another group of workloads is a lot more time and effort than I am willing to put in and only saves me roughly $18/month.
+The alternative solution to these two problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/). However, maintaining another cluster and monitoring another group of workloads is a lot more time and effort than I am willing to put in.
 
 | Service                                      | Use                                                               | Cost          |
 |----------------------------------------------|-------------------------------------------------------------------|---------------|
+| [Fastmail](https://fastmail.com/)            | Email hosting                                                     | ~$90/y        |
 | [GitHub](https://github.com/)                | Hosting this repository and continuous integration/deployments    | Free          |
 | [Cloudflare](https://www.cloudflare.com/)    | Domain, DNS and proxy management                                  | ~$30/y        |
 | [1Password](https://1password.com/)          | Secrets with [External Secrets](https://external-secrets.io/)     | ~$65/y        |
@@ -139,7 +140,7 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 | [Pushover](https://pushover.net/)            | Kubernetes Alerts and application notifications                   | Free          |
 | [GCP](https://cloud.google.com/)             | Voice interactions with Home Assistant over Google Assistant      | Free          |
 | [NextDNS](https://nextdns.io/)               | My routers DNS server which includes AdBlocking                   | ~20/y         |
-|                                              |                                                                   | Total: ~$19/m |
+|                                              |                                                                   | Total: ~$30/m |
 
 ---
 
