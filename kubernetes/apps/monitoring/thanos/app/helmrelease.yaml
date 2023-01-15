@@ -39,7 +39,7 @@ spec:
       enabled: true
       replicaCount: 3
       podAntiAffinityPreset: hard
-      replicaLabel: ["__replica__"]
+      replicaLabel: ["__replica__"] # must match with kube-prometheus-stack value `.prometheus.prometheusSpec.replicaExternalLabelName`
       dnsDiscovery:
         sidecarsService: kube-prometheus-stack-thanos-discovery
         sidecarsNamespace: monitoring
@@ -112,7 +112,7 @@ spec:
       dnsDiscovery:
         enabled: true
       alertmanagers: ["http://kube-prometheus-stack-alertmanager.monitoring:9093"]
-      clusterName: home-ops
+      clusterName: home # must match with kube-prometheus-stack value `.prometheus.prometheusSpec.externalLabels.cluster`
       extraFlags: ["--web.prefix-header=X-Forwarded-Prefix"]
       config: |-
         groups:
