@@ -27,20 +27,16 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    initContainers:
-      init-db:
-        image: ghcr.io/onedr0p/postgres-initdb:14.6
-        envFrom:
-          - secretRef:
-              name: speedtest-go-secret
     controller:
+      type: statefulset
       annotations:
         reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/onedr0p/speedtest-go
       tag: main@sha256:60dbcf330875ed8e35baf1231cace475ec2daa71bba6b617170ec5ac6a94e418
     env:
-      TZ: America/New_York
+      SPEEDTEST_DATABASE_TYPE: bolt
+      SPEEDTEST_DATABASE_FILE: /config/speedtest.db
     envFrom:
       - secretRef:
           name: speedtest-go-secret
@@ -63,6 +59,18 @@ spec:
         tls:
           - hosts:
               - *host
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
+        labels:
+          snapshot.home.arpa/enabled: "true"
     resources:
       requests:
         cpu: 10m
