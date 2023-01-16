@@ -200,9 +200,13 @@ My home IP can change at any given time and in order to keep my WAN IP address u
 
 ---
 
-## Star History
+## ⭐ Stargazers
+
+<div align="center">
 
 [![Star History Chart](https://api.star-history.com/svg?repos=onedr0p/home-ops&type=Date)](https://star-history.com/#onedr0p/home-ops&Date)
+
+</div>
 
 ---
 
