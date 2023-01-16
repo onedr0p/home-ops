@@ -34,12 +34,12 @@ spec:
       - name: CF_API_EMAIL
         valueFrom:
           secretKeyRef:
-            name: externaldns-secret
+            name: external-dns-secret
             key: email
       - name: CF_API_KEY
         valueFrom:
           secretKeyRef:
-            name: externaldns-secret
+            name: external-dns-secret
             key: api-key
     extraArgs:
       - --cloudflare-proxied
@@ -48,9 +48,8 @@ spec:
     sources: ["ingress"]
     txtPrefix: k8s.
     txtOwnerId: default
-    domainFilters:
-      - devbu.io
+    domainFilters: ["devbu.io"]
     serviceMonitor:
       enabled: true
     podAnnotations:
-      secret.reloader.stakater.com/reload: externaldns-secret
+      secret.reloader.stakater.com/reload: external-dns-secret
