@@ -30,8 +30,6 @@ spec:
     controller:
       replicas: 3
       strategy: RollingUpdate
-      annotations:
-        reloader.stakater.com/auto: "true"
     image:
       repository: public.ecr.aws/docker/library/haproxy
       tag: 2.7.1-alpine
@@ -82,7 +80,7 @@ spec:
       config:
         enabled: true
         type: configMap
-        name: redis-lb-configmap
+        name: redis-lb-configmap # overriden by kustomizeconfig
         mountPath: /usr/local/etc/haproxy/haproxy.cfg
         subPath: haproxy.cfg
         readOnly: true
