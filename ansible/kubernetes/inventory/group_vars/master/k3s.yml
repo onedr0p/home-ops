@@ -5,7 +5,7 @@ k3s_server:
   tls-san:
     - "{{ k3s_registration_address }}"
   docker: false
-  flannel-backend: "none"
+  flannel-backend: "none" # quote
   disable:
     - flannel
     - local-storage
@@ -14,6 +14,7 @@ k3s_server:
     - traefik
   disable-network-policy: true
   disable-cloud-controller: true
+  disable-kube-proxy: true # Disable when using eBPF
   cluster-cidr: "10.42.0.0/16"
   service-cidr: "10.43.0.0/16"
   etcd-expose-metrics: true
@@ -26,8 +27,9 @@ k3s_server:
     - "node-monitor-period=4s"
     - "node-monitor-grace-period=16s"
     - "pod-eviction-timeout=20s"
-  kube-proxy-arg:
-    - "metrics-bind-address=0.0.0.0"
+  # Enable when not using eBPF
+  # kube-proxy-arg:
+  #   - "metrics-bind-address=0.0.0.0"
   kube-scheduler-arg:
     - "bind-address=0.0.0.0"
   kube-apiserver-arg:
