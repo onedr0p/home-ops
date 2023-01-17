@@ -8,8 +8,8 @@ metadata:
 spec:
   template:
     spec:
-      image: ghcr.io/actions-runner-controller/actions-runner-controller/actions-runner-dind-rootless:v2.299.1-ubuntu-22.04
-      imagePullPolicy: IfNotPresent
+      image: ghcr.io/actions-runner-controller/actions-runner-controller/actions-runner-dind:ubuntu-22.04@sha256:86dfb6336146d239a34c530e89468effb0c3ec518fa35c350b9dee49bb574736
+      imagePullPolicy: Always
       dockerdWithinRunnerContainer: true
       ephemeral: true
       repository: onedr0p/home-ops
@@ -33,9 +33,11 @@ spec:
     name: home-ops
   scaleUpTriggers:
     - githubEvent:
-        workflowJob: {}
+        checkRun:
+          types: ["created"]
+          status: "queued"
       amount: 1
-      duration: 30m
+      duration: 1m
   minReplicas: 1
   maxReplicas: 3
   metrics:
