@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tigera-operator
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-services-endpoint
+  namespace: tigera-operator
+data:
+  KUBERNETES_SERVICE_HOST: "{{ k3s_registration_address }}"
+  KUBERNETES_SERVICE_PORT: "{{ k3s_server['https-listen-port'] }}"
