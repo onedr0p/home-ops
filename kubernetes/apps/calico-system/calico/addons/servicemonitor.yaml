@@ -1,0 +1,96 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: felix-metrics
+  namespace: calico-system
+  labels:
+    k8s-app: calico-node
+spec:
+  selector:
+    k8s-app: calico-node
+  ports:
+    - name: http-metrics
+      port: 9091
+      targetPort: 9091
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/servicemonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: felix-metrics
+  namespace: calico-system
+  labels:
+    k8s-app: calico-node
+spec:
+  selector:
+    matchLabels:
+      k8s-app: calico-node
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 1m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-controllers-metrics
+  namespace: calico-system
+  labels:
+    k8s-app: calico-kube-controllers
+spec:
+  selector:
+    k8s-app: calico-kube-controllers
+  ports:
+    - name: http-metrics
+      port: 9094
+      targetPort: 9094
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/servicemonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kube-controllers-metrics
+  namespace: calico-system
+  labels:
+    k8s-app: calico-kube-controllers
+spec:
+  selector:
+    matchLabels:
+      k8s-app: calico-kube-controllers
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 1m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: typha-metrics
+  namespace: calico-system
+  labels:
+    k8s-app: calico-typha
+spec:
+  selector:
+    k8s-app: calico-typha
+  ports:
+    - name: http-metrics
+      port: 9093
+      targetPort: 9093
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/servicemonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: typha-metrics
+  namespace: calico-system
+  labels:
+    k8s-app: calico-typha
+spec:
+  selector:
+    matchLabels:
+      k8s-app: calico-typha
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 1m
