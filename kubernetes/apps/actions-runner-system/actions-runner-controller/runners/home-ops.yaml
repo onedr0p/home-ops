@@ -8,7 +8,7 @@ metadata:
 spec:
   template:
     spec:
-      image: ghcr.io/actions-runner-controller/actions-runner-controller/actions-runner-dind:ubuntu-22.04@sha256:86dfb6336146d239a34c530e89468effb0c3ec518fa35c350b9dee49bb574736
+      image: ghcr.io/actions-runner-controller/actions-runner-controller/actions-runner-dind-rootless:v2.299.1-ubuntu-22.04
       imagePullPolicy: Always
       dockerdWithinRunnerContainer: true
       ephemeral: true
@@ -17,8 +17,7 @@ spec:
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
       securityContext:
-        supplementalGroups:
-          - 65542
+        supplementalGroups: [100]
       volumeMounts:
         - name: cache-volume
           mountPath: /cache
@@ -38,14 +37,11 @@ spec:
     name: home-ops
   scaleUpTriggers:
     - githubEvent:
-        workflowJob:
-          types: ["created"]
-          status: "queued"
+        workflowJob: {}
       amount: 1
-      duration: "1m"
+      duration: 30m
   minReplicas: 1
   maxReplicas: 3
   metrics:
     - type: TotalNumberOfQueuedAndInProgressWorkflowRuns
-      repositoryNames:
-        - onedr0p/home-ops
+      repositoryNames: ["onedr0p/home-ops"]
