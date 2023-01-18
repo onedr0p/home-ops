@@ -34,6 +34,7 @@ spec:
     nodePathMap:
       - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
         paths: ["/var/lib/rancher/k3s/storage"]
+    # Note: Using $$ to escape ${absolutePath} due to flux variable substitution
     configmap:
       setup: |-
         #!/bin/sh
@@ -51,8 +52,8 @@ spec:
                 ;;
             esac
         done
-        mkdir -m 0777 -p ${absolutePath}
-        chmod 701 ${absolutePath}/..
+        mkdir -m 0777 -p $${absolutePath}
+        chmod 701 $${absolutePath}/..
       teardown: |-
         #!/bin/sh
         while getopts "m:s:p:" opt
@@ -69,4 +70,4 @@ spec:
                 ;;
             esac
         done
-        rm -rf ${absolutePath}
+        rm -rf $${absolutePath}
