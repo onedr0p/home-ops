@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: loki
-      version: 3.10.0
+      version: 4.0.0
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -98,15 +98,8 @@ spec:
                 store: memberlist
         analytics:
           reporting_enabled: false
-      podAnnotations:
-        secret.reloader.stakater.com/reload: loki-secret
     gateway:
-      enabled: true
       replicas: 3
-      image:
-        registry: ghcr.io
-        repository: nginxinc/nginx-unprivileged
-        tag: 1.23-alpine
       ingress:
         enabled: true
         ingressClassName: nginx
@@ -121,30 +114,39 @@ spec:
           - hosts:
               - *host
     write:
-      replicas: 3
       persistence:
-        size: 10Gi
         storageClass: local-path
     read:
-      replicas: 3
-      extraVolumeMounts:
-        - name: loki-rules
-          mountPath: /rules/fake
-        - name: loki-rules-tmp
-          mountPath: /tmp/scratch
-        - name: loki-tmp
-          mountPath: /tmp/loki-tmp
-      extraVolumes:
-        - name: loki-rules
-          configMap:
-            name: loki-alerting-rules
-        - name: loki-rules-tmp
-          emptyDir: {}
-        - name: loki-tmp
-          emptyDir: {}
       persistence:
-        size: 10Gi
         storageClass: local-path
+      # extraVolumeMounts:
+      #   - name: loki-rules
+      #     mountPath: /rules/fake
+      #   - name: loki-rules-tmp
+      #     mountPath: /tmp/scratch
+      #   - name: loki-tmp
+      #     mountPath: /tmp/loki-tmp
+      # extraVolumes:
+      #   - name: loki-rules
+      #     configMap:
+      #       name: loki-alerting-rules
+      #   - name: loki-rules-tmp
+      #     emptyDir: {}
+      #   - name: loki-tmp
+      #     emptyDir: {}
+    backend:
+      persistence:
+        storageClass: local-path
+      extraVolumeMounts:
+        - name: rules
+          mountPath: /rules
+        - name: scratch
+          mountPath: /tmp/scratch
+      extraVolumes:
+        - name: rules
+          emptyDir: {}
+        - name: scratch
+          emptyDir: {}
     monitoring:
       serviceMonitor:
         enabled: false
