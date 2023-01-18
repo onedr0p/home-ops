@@ -139,12 +139,13 @@ spec:
         storageClass: local-path
       extraVolumeMounts:
         - name: rules
-          mountPath: /rules
+          mountPath: /rules/fake
         - name: scratch
           mountPath: /tmp/scratch
       extraVolumes:
         - name: rules
-          emptyDir: {}
+          configMap:
+            name: loki-alerting-rules
         - name: scratch
           emptyDir: {}
     monitoring:
