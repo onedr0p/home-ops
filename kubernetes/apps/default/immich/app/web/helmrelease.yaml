@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: immich-web
+  name: &app immich-web
   namespace: default
 spec:
   interval: 15m
@@ -30,6 +30,8 @@ spec:
     - name: immich-server
   values:
     controller:
+      replicas: 3
+      strategy: RollingUpdate
       annotations:
         reloader.stakater.com/auto: "true"
     image:
@@ -77,6 +79,13 @@ spec:
         enabled: true
         existingClaim: immich-nfs
         mountPath: /usr/src/app/upload
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app
     resources:
       requests:
         cpu: 100m
