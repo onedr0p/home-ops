@@ -125,7 +125,7 @@ To ease the use of application configuration I have a SMTP Relay running on Opns
     1. `SMTP Client Security` = `encrypt`
     2. `Smart Host` = `[smtp.fastmail.com]:465`
     3. `Enable SMTP Authentication` = `true`
-    4. `Authentication Username` = `<email-address>`
+    4. `Authentication Username` = `devin@<email-domain>`
     5. `Authentication Password` = `<app-password>`
     6. `Permit SASL Authenticated` = `false`
     7. Save
@@ -135,7 +135,13 @@ To ease the use of application configuration I have a SMTP Relay running on Opns
       2. `Destination` = `[smtp.fastmail.com]:465`
       3. Save
     - Apply
-3. Verify
+3. System > Services > Postfix > Senders
+    - Add new sender
+      1. `Enabled` = `true`
+      2. `Sender Address` = `admin@<email-domain>`
+      3. Save
+    - Apply
+4. Verify
     ```sh
     swaks --server opnsense.turbo.ac --port 25 --to <email-address> --from <email-address>
     ```
