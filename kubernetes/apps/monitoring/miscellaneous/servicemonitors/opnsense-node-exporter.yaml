@@ -25,12 +25,14 @@ metadata:
   labels: &labels
     app.kubernetes.io/name: *app
     app.kubernetes.io/instance: *app
+    jobLabel: node-exporter
 spec:
   namespaceSelector:
     matchNames: ["monitoring"]
   selector:
     matchLabels:
       <<: *labels
+  jobLabel: jobLabel
   endpoints:
     - port: metrics
       path: /metrics
