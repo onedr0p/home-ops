@@ -30,6 +30,99 @@ spec:
     keepHistory: false
   values:
     cleanPrometheusOperatorObjectNames: true
+    alertmanager:
+      config:
+        global:
+          resolve_timeout: 5m
+        receivers:
+          - name: heartbeat
+            webhook_configs:
+              - url: "https://heartbeat.uptimerobot.com/${SECRET_ALERTMANAGER_UPTIMEROBOT_HEARTBEAT_TOKEN}"
+                send_resolved: true
+          - name: "null" # quote
+          - name: pushover
+            pushover_configs:
+              - url_title: View in Alert Manager
+                token: "${SECRET_ALERTMANAGER_PUSHOVER_TOKEN}"
+                user_key: "${SECRET_ALERTMANAGER_PUSHOVER_USER_KEY}"
+                send_resolved: true
+                html: true
+                sound: gamelan
+                priority: |-
+                  {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
+                title: |-
+                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+                message: |-
+                  {{- range .Alerts }}
+                    {{- if ne .Labels.severity "" }}
+                      <b>Severity:</b> <i>{{ .Labels.severity }}</i>
+                    {{- else }}
+                      <b>Severity:</b> <i>N/A</i>
+                    {{- end }}
+                    {{- if ne .Annotations.description "" }}
+                      <b>Description:</b> <i>{{ .Annotations.description }}</i>
+                    {{- else if ne .Annotations.summary "" }}
+                      <b>Summary:</b> <i>{{ .Annotations.summary }}</i>
+                    {{- else if ne .Annotations.message "" }}
+                      <b>Message:</b> <i>{{ .Annotations.message }}</i>
+                    {{- else }}
+                      <b>Description:</b> <i>N/A</i>
+                    {{- end }}
+                    {{- if gt (len .Labels.SortedPairs) 0 }}
+                      <b>Details:</b>
+                      {{- range .Labels.SortedPairs }}
+                        • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
+                      {{- end }}
+                    {{- end }}
+                  {{- end }}
+        route:
+          group_by: ["alertname", "job"]
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 12h
+          receiver: pushover
+          routes:
+            - receiver: heartbeat
+              group_wait: 0s
+              group_interval: 2m
+              repeat_interval: 2m
+              matchers:
+                - alertname =~ "Watchdog"
+            - receiver: "null" # quote
+              matchers:
+                - alertname =~ "InfoInhibitor"
+            - receiver: pushover
+              matchers:
+                - severity = "critical"
+              continue: true
+        inhibit_rules:
+          - source_matchers:
+              - severity = "critical"
+            target_matchers:
+              - severity = "warning"
+            equal: ["alertname", "namespace"]
+      ingress:
+        enabled: true
+        pathType: Prefix
+        ingressClassName: nginx
+        annotations:
+          hajimari.io/appName: "Alert Manager"
+          hajimari.io/icon: mdi:alert-decagram-outline
+        hosts:
+          - &host alert-manager.devbu.io
+        tls:
+          - hosts:
+              - *host
+      alertmanagerSpec:
+        replicas: 3
+        podAntiAffinity: hard
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              resources:
+                requests:
+                  storage: 1Gi
     grafana:
       enabled: false
       forceDeployDashboards: true
@@ -74,3 +167,75 @@ spec:
         enabled: true
         port: 2381
         targetPort: 2381
+    prometheus:
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          hajimari.io/appName: Prometheus
+          hajimari.io/icon: simple-icons:prometheus
+        pathType: Prefix
+        hosts:
+          - &host prometheus.devbu.io
+        tls:
+          - hosts:
+              - *host
+      thanosService:
+        enabled: true
+      thanosServiceMonitor:
+        enabled: true
+      prometheusSpec:
+        replicas: 3
+        replicaExternalLabelName: __replica__ # must match with thanos value `.query.replicaLabel[0]`
+        # Breaks any metric that has an existing "cluster" label on a metric
+        # externalLabels:
+        #   cluster: home # must match with thanos value `.ruler.clusterName`
+        thanos:
+          image: quay.io/thanos/thanos:v0.30.1
+          # renovate: datasource=docker depName=quay.io/thanos/thanos
+          version: "v0.30.1"
+          objectStorageConfig:
+            name: thanos-objstore-secret
+            key: objstore.yml
+        podAntiAffinity: hard
+        ruleSelectorNilUsesHelmValues: false
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        retention: 2d
+        retentionSize: 6GB
+        enableAdminAPI: true
+        walCompression: true
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              resources:
+                requests:
+                  storage: 20Gi
+        resources:
+          requests:
+            cpu: 150m
+            memory: 2000Mi
+          limits:
+            memory: 7000Mi
+        additionalScrapeConfigs:
+          - job_name: pikvm
+            scrape_interval: 1m
+            scrape_timeout: 10s
+            metrics_path: /api/export/prometheus/metrics
+            basic_auth:
+              username: admin
+              password: 1NtERnALOnLYuS3
+            honor_timestamps: true
+            static_configs:
+              - targets: ["pikvm.turbo.ac"]
+          - job_name: nexus
+            scrape_interval: 1m
+            scrape_timeout: 10s
+            metrics_path: /service/metrics/prometheus
+            basic_auth:
+              username: admin
+              password: 1NtERnALOnLYuS3
+            static_configs:
+              - targets: ["nexus.turbo.ac"]
