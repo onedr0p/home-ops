@@ -4,6 +4,8 @@ kind: Service
 metadata:
   name: &app postgres
   namespace: default
+  annotations:
+    coredns.io/hostname: postgres.devbu.io
   labels:
     app.kubernetes.io/name: *app
     app.kubernetes.io/instance: *app
@@ -19,30 +21,3 @@ spec:
   selector:
     postgresql: postgres
     role: primary
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: &app postgres
-  namespace: default
-  annotations:
-    hajimari.io/enabled: "false"
-  labels:
-    app.kubernetes.io/name: *app
-    app.kubernetes.io/instance: *app
-spec:
-  ingressClassName: nginx
-  rules:
-    - host: &host postgres.devbu.io
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: *app
-                port:
-                  number: 5432
-  tls:
-    - hosts:
-        - *host
