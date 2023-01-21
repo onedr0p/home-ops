@@ -1,5 +1,21 @@
 ---
 apiVersion: v1
+kind: Endpoints
+metadata:
+  name: &app opnsense-haproxy
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+    jobLabel: haproxy
+subsets:
+  - addresses:
+      - ip: 192.168.1.1
+    ports:
+      - name: metrics
+        port: 8404
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: &app opnsense-haproxy
