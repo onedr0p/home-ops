@@ -4,6 +4,8 @@ kind: Service
 metadata:
   name: &app nas-node-exporter
   namespace: monitoring
+  annotations:
+    prometheus.io/scrape: "true"
   labels:
     app.kubernetes.io/name: *app
     app.kubernetes.io/instance: *app
@@ -26,6 +28,7 @@ metadata:
   labels: &labels
     app.kubernetes.io/name: *app
     app.kubernetes.io/instance: *app
+    jobLabel: node-exporter
 spec:
   namespaceSelector:
     matchNames: ["monitoring"]
