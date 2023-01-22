@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: unpoller
+  name: nextdns-exporter
   namespace: monitoring
 spec:
   interval: 15m
@@ -27,38 +27,32 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    controller:
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
-      repository: ghcr.io/unpoller/unpoller
-      tag: v2.7.10
+      repository: ghcr.io/raylas/nextdns-exporter
+      tag: 0.5.1
     env:
       TZ: America/New_York
-      UP_UNIFI_DEFAULT_ROLE: home-ops
-      UP_UNIFI_DEFAULT_URL: https://unifi.turbo.ac
-      UP_UNIFI_DEFAULT_VERIFY_SSL: false
-      UP_UNIFI_DEFAULT_USER: unifipoller
-      UP_UNIFI_DEFAULT_PASS: 1NtERnALOnLYuS3
-      UP_UNIFI_DEFAULT_SAVE_SITES: true
-      UP_UNIFI_DEFAULT_SAVE_DPI: false
-      UP_INFLUXDB_DISABLE: true
-      UP_PROMETHEUS_DISABLE: false
-      UP_PROMETHEUS_NAMESPACE: unifipoller
+      NEXTDNS_RESULT_WINDOW: -5m
+    envFrom:
+      - secretRef:
+          name: nextdns-secret
     service:
       main:
         ports:
           http:
-            port: 9130
+            enabled: false
+          metrics:
+            enabled: true
+            port: 9948
     serviceMonitor:
       main:
         enabled: true
         endpoints:
-          - port: http
+          - port: metrics
             scheme: http
             path: /metrics
             interval: 5m
             scrapeTimeout: 30s
-    resources:
-      requests:
-        cpu: 10m
-        memory: 100Mi
-      limits:
-        memory: 500Mi
