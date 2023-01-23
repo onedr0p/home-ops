@@ -2,8 +2,8 @@
 
 image="${1}"
 
-for i in {1..105}; do
+for i in {1..3}; do
     echo "==== TEST ${i} ===="
-    docker pull -q "${image}"
-    docker image rm "${image}"
+    docker pull "${image}"
+    docker image rm "${image}" --force
 done
