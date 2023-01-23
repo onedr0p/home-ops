@@ -87,13 +87,9 @@ spec:
         storageClass: ceph-block
         labels:
           snapshot.home.arpa/enabled: "true"
+    # Note: If downloading very large torrents it might be worth using NFS for your download directory.
+    # Beware if you are downloading torrents directly to a ZFS dataset that dataset will accrue fragmentation.
     persistence:
-      downloads:
-        enabled: true
-        type: nfs
-        server: expanse.turbo.ac
-        path: /eros/Downloads
-        mountPath: /downloads
       media:
         enabled: true
         type: nfs
@@ -103,6 +99,14 @@ spec:
       incomplete:
         enabled: true
         type: emptyDir
+      scripts:
+        enabled: true
+        type: configMap
+        name: qbittorrent-configmap
+        subPath: update-permissions.sh
+        mountPath: /scripts/update-permissions.sh
+        defaultMode: 0775
+        readOnly: true
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
     resources:
