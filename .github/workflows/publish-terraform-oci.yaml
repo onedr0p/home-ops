@@ -97,12 +97,13 @@ jobs:
       - name: Tag OCI
         run: flux tag artifact oci://${{ steps.generate-tag.outputs.tag }} --tag main
 
-      - name: Sign the OCI artifact
-        run: cosign sign ${{ steps.generate-tag.outputs.tag }}
-        env:
-          COSIGN_EXPERIMENTAL: 1
+      # Note: This is not ready for primetime
+      # - name: Sign the OCI artifact
+      #   run: cosign sign ${{ steps.generate-tag.outputs.tag }}
+      #   env:
+      #     COSIGN_EXPERIMENTAL: 1
 
-      - name: Verify the pushed tags
-        run: cosign verify ${{ steps.generate-tag.outputs.tag }}
-        env:
-          COSIGN_EXPERIMENTAL: 1
+      # - name: Verify the pushed tags
+      #   run: cosign verify ${{ steps.generate-tag.outputs.tag }}
+      #   env:
+      #     COSIGN_EXPERIMENTAL: 1

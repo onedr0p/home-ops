@@ -73,12 +73,11 @@ resource "kubernetes_stateful_set_v1" "nexus" {
           }
           resources {
             requests = {
-              cpu    = "4"
-              memory = "8Gi"
+              cpu    = "2"
+              memory = "1Gi"
             }
             limits = {
-              cpu    = "4"
-              memory = "8Gi"
+              memory = "4Gi"
             }
           }
         }
