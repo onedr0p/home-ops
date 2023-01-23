@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-chmod -R 750 "%F/"
+# Run external program on torrent finished
+#   /scripts/update-permissions.sh "%F"
+
+chmod -R 750 "${1}"
