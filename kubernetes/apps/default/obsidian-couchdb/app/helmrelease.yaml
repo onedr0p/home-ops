@@ -30,7 +30,7 @@ spec:
     initContainers:
       init-config:
         image: public.ecr.aws/docker/library/busybox:latest
-        command: ["/bin/sh", "-c", "cp /tmp/config/config.ini /default.d/; ls -lrt /default.d;"]
+        command: ["/bin/sh", "-c", "cp /tmp/config/*.ini /default.d/; ls -lrt /default.d;"]
         volumeMounts:
           - name: config
             mountPath: /tmp/config
@@ -79,9 +79,7 @@ spec:
         enabled: true
         type: configMap
         name: obsidian-couchdb-configmap # overriden by kustomizeconfig
-        subPath: config.ini
-        mountPath: /tmp/config/config.ini
-        readOnly: true
+        mountPath: "-"
       config-storage:
         enabled: true
         type: emptyDir
