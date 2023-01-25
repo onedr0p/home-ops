@@ -40,23 +40,16 @@ spec:
         envFrom:
           - secretRef:
               name: guacamole-secret
-        command:
-          - /bin/bash
-          - -c
-          - cat /schemas/*.sql | psql -d $(POSTGRES_DATABASE) -f -
+        command: ["/bin/bash", "-c", "cat /schemas/*.sql | psql -d $(POSTGRES_DATABASE) -f -"]
         volumeMounts:
-          - name: create-schema
-            mountPath: /schemas/001-create-schema.sql
-            subPath: 001-create-schema.sql
-          - name: create-admin-user
-            mountPath: /schemas/002-create-admin-user.sql
-            subPath: 002-create-admin-user.sql
+          - { name: create-schema, mountPath: /schemas/001-create-schema.sql, subPath: 001-create-schema.sql }
+          - { name: create-admin-user, mountPath: /schemas/002-create-admin-user.sql, subPath: 002-create-admin-user.sql }
     controller:
       annotations:
         reloader.stakater.com/auto: "true"
     image:
-      repository: docker.io/guacamole/guacamole
       # TODO Postgres 14 won't work until 1.5.0 is released
+      repository: docker.io/guacamole/guacamole
       tag: 1.4.0
     env:
       GUACD_HOSTNAME: guacd.default.svc.cluster.local

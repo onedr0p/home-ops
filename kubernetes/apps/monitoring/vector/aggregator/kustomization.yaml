@@ -6,11 +6,9 @@ namespace: monitoring
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-patchesStrategicMerge:
-  - ./patches/geoip.yaml
 configMapGenerator:
   - name: vector-aggregator-configmap
     files:
       - vector.yaml=./config/vector.yaml
-generatorOptions:
-  disableNameSuffixHash: true
+configurations:
+  - ./patches/kustomizeconfig.yaml

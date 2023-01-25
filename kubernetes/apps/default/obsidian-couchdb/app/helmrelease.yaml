@@ -32,10 +32,8 @@ spec:
         image: public.ecr.aws/docker/library/busybox:latest
         command: ["/bin/sh", "-c", "cp /tmp/config/*.ini /default.d/; ls -lrt /default.d;"]
         volumeMounts:
-          - name: config
-            mountPath: /tmp/config
-          - name: config-storage
-            mountPath: /default.d
+          - { name: config-file, mountPath: /tmp/config }
+          - { name: config-storage, mountPath: /default.d }
     controller:
       type: statefulset
       annotations:
@@ -75,7 +73,7 @@ spec:
         labels:
           snapshot.home.arpa/enabled: "true"
     persistence:
-      config:
+      config-file:
         enabled: true
         type: configMap
         name: obsidian-couchdb-configmap # overriden by kustomizeconfig
