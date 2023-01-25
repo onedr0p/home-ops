@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: cluster-apps-obsidian-couchdb
+  name: cluster-apps-obsidian-sync
   namespace: flux-system
   labels:
     substitution.flux.home.arpa/enabled: "true"
@@ -11,7 +11,7 @@ spec:
   dependsOn:
     - name: cluster-apps-rook-ceph-cluster
     - name: cluster-apps-volsync
-  path: ./kubernetes/apps/default/obsidian-couchdb/app
+  path: ./kubernetes/apps/default/obsidian-sync/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -19,7 +19,7 @@ spec:
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2beta1
       kind: HelmRelease
-      name: obsidian-couchdb
+      name: obsidian-sync
       namespace: default
   interval: 30m
   retryInterval: 1m
