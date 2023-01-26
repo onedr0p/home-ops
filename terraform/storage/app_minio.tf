@@ -116,6 +116,9 @@ resource "kubernetes_stateful_set_v1" "minio" {
           run_as_group = 568
           fs_group = 568
           fs_group_change_policy = "OnRootMismatch"
+          supplemental_groups = [
+            100
+          ]
         }
         toleration {
           effect   = "NoSchedule"
