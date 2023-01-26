@@ -25,9 +25,10 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 
 <div align="center">
 
-[<img src="https://grafana.devbu.io/render/d-solo/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster?orgId=1&from=now-1d%2Fd&to=now-1d%2Fd&panelId=1&width=200&height=100&theme=dark" width="200px" alt="cpu"/>](https://ln.devbu.io/TiTWl)
-[<img src="https://grafana.devbu.io/render/d-solo/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster?orgId=1&from=now-1d%2Fd&to=now-1d%2Fd&panelId=4&width=200&height=100&theme=light" width="200px" alt="memory"/>](https://ln.devbu.io/TiTWl)
-[<img src="https://grafana.devbu.io/render/d-solo/000000012/apc-smart-ups-1500?orgId=1&from=now-1d%2Fd&to=now-1d%2Fd&panelId=2&width=200&height=100&theme=dark" width="200px" alt="power"/>](https://ln.devbu.io/xG72B)
+[<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=10&width=200&height=100&tz=America%2FNew_York" width="200px" alt="alerts"/>](https://ln.devbu.io/yXelD)
+[<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=6&width=200&height=100&tz=America%2FNew_York" width="200px" alt="cpu"/>](https://ln.devbu.io/TiTWl)
+[<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=8&width=200&height=100&tz=America%2FNew_York" width="200px" alt="memory"/>](https://ln.devbu.io/TiTWl)
+[<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=4&width=200&height=100&tz=America%2FNew_York" width="200px" alt="power"/>](https://ln.devbu.io/xG72B)
 
 </div>
 
