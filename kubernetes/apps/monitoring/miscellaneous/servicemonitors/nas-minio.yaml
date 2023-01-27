@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: &app nas-minio
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+    jobLabel: minio
+subsets:
+  - addresses:
+      - ip: 192.168.1.81
+    ports:
+      - name: metrics
+        port: 9000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: &app nas-minio
+  namespace: monitoring
+  annotations:
+    prometheus.io/scrape: "true"
+  labels:
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+    jobLabel: minio
+spec:
+  type: ExternalName
+  externalName: expanse.turbo.ac.
+  ports:
+    - name: metrics
+      port: &port 9000
+      protocol: TCP
+      targetPort: *port
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/servicemonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: &app nas-minio
+  namespace: monitoring
+  labels: &labels
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+    jobLabel: minio
+spec:
+  namespaceSelector:
+    matchNames: ["monitoring"]
+  selector:
+    matchLabels:
+      <<: *labels
+  jobLabel: jobLabel
+  endpoints:
+    - port: metrics
+      path: /minio/v2/metrics/cluster
+      interval: 1m
+      scrapeTimeout: 10s
+      honorLabels: true

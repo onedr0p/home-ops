@@ -60,6 +60,10 @@ resource "kubernetes_stateful_set_v1" "minio" {
             value = "https://prometheus.devbu.io"
           }
           env {
+            name  = "MINIO_PROMETHEUS_AUTH_TYPE"
+            value = "public"
+          }
+          env {
             name  = "MINIO_SERVER_URL"
             value = "http://s3.turbo.ac"
           }
