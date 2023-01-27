@@ -78,12 +78,19 @@ resource "kubernetes_stateful_set_v1" "kopia" {
             "expanse.turbo.ac",
             "--override-username",
             "devin",
-            "--without-password"
+            "--without-password",
+            "--metrics-listen-addr",
+            "0.0.0.0:51516"
           ]
           port {
             name           = "http"
             container_port = 51515
             host_port      = 51515
+          }
+          port {
+            name           = "metrics"
+            container_port = 51516
+            host_port      = 51516
           }
           liveness_probe {
             http_get {
@@ -123,7 +130,7 @@ resource "kubernetes_stateful_set_v1" "kopia" {
           }
           volume_mount {
             name       = "data"
-            mount_path = "/tycho"
+            mount_path = "/tycho" # tech-debt
             read_only  = true
           }
           resources {
@@ -205,6 +212,12 @@ resource "kubernetes_service_v1" "kopia" {
       name        = "http"
       port        = 51515
       target_port = 51515
+      protocol    = "TCP"
+    }
+    port {
+      name        = "metrics"
+      port        = 51516
+      target_port = 51516
       protocol    = "TCP"
     }
   }
