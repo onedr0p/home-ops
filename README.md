@@ -32,7 +32,6 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 [<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=12&width=200&height=100&tz=America%2FNew_York" width="200px" alt="nodes"/>](https://ln.devbu.io/TiTWl)
 [<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=15&width=200&height=100&tz=America%2FNew_York" width="200px" alt="pods"/>](https://ln.devbu.io/TiTWl)
 
-
 </div>
 
 ---
