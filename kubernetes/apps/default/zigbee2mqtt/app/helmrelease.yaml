@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.2.1
+      version: 1.3.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -34,6 +34,43 @@ spec:
     image:
       repository: ghcr.io/koenkk/zigbee2mqtt
       tag: 1.29.2
+    env:
+      TZ: America/New_York
+      ZIGBEE2MQTT_DATA: /data
+      ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_DISCOVERY_TOPIC: homeassistant
+      ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_LEGACY_ENTITY_ATTRIBUTES: "true"
+      ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_LEGACY_TRIGGERS: "true"
+      ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_STATUS_TOPIC: homeassistant/status
+      ZIGBEE2MQTT_CONFIG_ADVANCED_LAST_SEEN: ISO_8601
+      ZIGBEE2MQTT_CONFIG_ADVANCED_LEGACY_API: "false"
+      ZIGBEE2MQTT_CONFIG_ADVANCED_LEGACY_AVAILABILITY_PAYLOAD: "false"
+      # ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL: info
+      ZIGBEE2MQTT_CONFIG_AVAILABILITY_ACTIVE_TIMEOUT: 60
+      ZIGBEE2MQTT_CONFIG_AVAILABILITY_PASSIVE_TIMEOUT: 2000
+      ZIGBEE2MQTT_CONFIG_DEVICE_OPTIONS_LEGACY: "false"
+      ZIGBEE2MQTT_CONFIG_DEVICE_OPTIONS_RETAIN: "true"
+      ZIGBEE2MQTT_CONFIG_EXPERIMENTAL_NEW_API: "true"
+      ZIGBEE2MQTT_CONFIG_FRONTEND_URL: https://zigbee2mqtt.devbu.io
+      ZIGBEE2MQTT_CONFIG_HOMEASSISTANT: "true"
+      ZIGBEE2MQTT_CONFIG_MQTT_INCLUDE_DEVICE_INFORMATION: "true"
+      ZIGBEE2MQTT_CONFIG_MQTT_KEEPALIVE: 60
+      ZIGBEE2MQTT_CONFIG_MQTT_REJECT_UNAUTHORIZED: "true"
+      ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://emqx.default.svc.cluster.local
+      ZIGBEE2MQTT_CONFIG_MQTT_VERSION: 5
+      ZIGBEE2MQTT_CONFIG_MQTT_USER:
+        valueFrom:
+          secretKeyRef:
+            name: emqx-secret
+            key: user_1_username
+      ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD:
+        valueFrom:
+          secretKeyRef:
+            name: emqx-secret
+            key: user_1_password
+      ZIGBEE2MQTT_CONFIG_SERIAL_PORT: tcp://192.168.1.90:6638
+      ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_OUTPUT: '["console"]'
+      ZIGBEE2MQTT_CONFIG_DEVICES: devices.yaml
+      ZIGBEE2MQTT_CONFIG_GROUPS: groups.yaml
     envFrom:
       - secretRef:
           name: zigbee2mqtt-secret
@@ -87,3 +124,27 @@ spec:
         memory: 100Mi
       limits:
         memory: 500Mi
+    sidecars:
+      exporter:
+        name: exporter
+        image: ghcr.io/kpetremann/mqtt-exporter:1.0.4
+        imagePullPolicy: IfNotPresent
+        env:
+          - { name: LOG_LEVEL, value: DEBUG }
+          - { name: LOG_MQTT_MESSAGE, value: "True" }
+          - { name: MQTT_ADDRESS, value: emqx.default.svc.cluster.local }
+          - { name: MQTT_TOPIC, value: "zigbee2mqtt/#" }
+          - { name: MQTT_V5_PROTOCOL, value: "True" }
+          - { name: PROMETHEUS_PORT, value: "80" }
+          - { name: PROMETHEUS_PREFIX, value: zigbee2mqtt_ }
+          - { name: ZIGBEE2MQTT_AVAILABILITY, value: "True" }
+          - name: MQTT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: emqx-secret
+                key: user_1_username
+          - name: MQTT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: emqx-secret
+                key: user_1_password

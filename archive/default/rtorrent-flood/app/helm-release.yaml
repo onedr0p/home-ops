@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.2.1
+      version: 1.3.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -97,3 +97,18 @@ spec:
         memory: 100Mi
       limits:
         memory: 1200Mi
+    sidecars:
+      rtorrent:
+        name: rtorrent
+        image: ghcr.io/onedr0p/rtorrent:0.9.8-r16@sha256:a1337db01ad5f2ba35ae1283aa458c5f32589a3832981e6c76b83b20ccba3737
+        imagePullPolicy: IfNotPresent
+        env:
+          - { name: RTORRENT__DEFAULT_CONFIG, value: "false" }
+          - { name: RTORRENT__CONFIG_FILE, value: "/rc/rtorrent.rc" }
+          - { name: RTORRENT__SOCKET, value: "/sock/rtorrent.sock" }
+          - { name: RTORRENT__BT_PORT, value: "50415" }
+        volumeMounts:
+          - { name: config, mountPath: /config }
+          - { name: rtorrent-rc, mountPath: /rc/rtorrent.rc, subPath: rtorrent.rc }
+          - { name: rtorrent-sock, mountPath: /sock }
+          - { name: media, mountPath: /media }

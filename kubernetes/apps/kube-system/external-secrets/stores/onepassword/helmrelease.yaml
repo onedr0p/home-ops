@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.2.1
+      version: 1.3.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -99,3 +99,32 @@ spec:
         memory: 10Mi
       limits:
         memory: 100Mi
+    sidecars:
+      sync:
+        name: sync
+        image: docker.io/1password/connect-sync:1.6.0
+        imagePullPolicy: IfNotPresent
+        env:
+          - { name: OP_HTTP_PORT, value: &port 8081 }
+          - { name: OP_BUS_PORT, value: "11221" }
+          - { name: OP_BUS_PEERS, value: "localhost:11220" }
+          - name: OP_SESSION
+            valueFrom:
+              secretKeyRef:
+                name: onepassword-connect-secret
+                key: 1password-credentials.json
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: *port
+          initialDelaySeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /heartbeat
+            port: *port
+          failureThreshold: 3
+          periodSeconds: 30
+          initialDelaySeconds: 15
+        volumeMounts:
+          - name: shared
+            mountPath: /home/opuser/.op/data
