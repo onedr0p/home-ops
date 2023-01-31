@@ -131,19 +131,20 @@ While most of my infrastructure and workloads are selfhosted I do rely upon the 
 
 The alternative solution to these two problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/). However, maintaining another cluster and monitoring another group of workloads is a lot more time and effort than I am willing to put in.
 
-| Service                                      | Use                                                               | Cost           |
-|----------------------------------------------|-------------------------------------------------------------------|----------------|
-| [Fastmail](https://fastmail.com/)            | Email hosting                                                     | ~$90/yr        |
-| [GitHub](https://github.com/)                | Hosting this repository and continuous integration/deployments    | Free           |
-| [Cloudflare](https://www.cloudflare.com/)    | Domain, DNS and proxy management                                  | ~$30/yr        |
-| [1Password](https://1password.com/)          | Secrets with [External Secrets](https://external-secrets.io/)     | ~$65/yr        |
-| [Terraform Cloud](https://www.terraform.io/) | Storing Terraform state                                           | Free           |
-| [B2 Storage](https://www.backblaze.com/b2)   | Offsite application backups                                       | ~$5/mo         |
-| [UptimeRobot](https://uptimerobot.com/)      | Monitoring internet connectivity and external facing applications | ~$60/yr        |
-| [Pushover](https://pushover.net/)            | Kubernetes Alerts and application notifications                   | Free           |
-| [GCP](https://cloud.google.com/)             | Voice interactions with Home Assistant over Google Assistant      | Free           |
-| [NextDNS](https://nextdns.io/)               | My routers DNS server which includes AdBlocking                   | ~20/yr         |
-|                                              |                                                                   | Total: ~$30/mo |
+| Service                                         | Use                                                               | Cost           |
+|-------------------------------------------------|-------------------------------------------------------------------|----------------|
+| [1Password](https://1password.com/)             | Secrets with [External Secrets](https://external-secrets.io/)     | ~$65/yr        |
+| [B2 Storage](https://www.backblaze.com/b2)      | Offsite application backups                                       | ~$5/mo         |
+| [Cloudflare](https://www.cloudflare.com/)       | Domain, DNS and proxy management                                  | ~$30/yr        |
+| [Fastmail](https://fastmail.com/)               | Email hosting                                                     | ~$90/yr        |
+| [GCP](https://cloud.google.com/)                | Voice interactions with Home Assistant over Google Assistant      | Free           |
+| [GitHub](https://github.com/)                   | Hosting this repository and continuous integration/deployments    | Free           |
+| [Newsgroup Ninja](https://www.newsgroup.ninja/) | Usenet access                                                     | ~70/yr         |
+| [NextDNS](https://nextdns.io/)                  | My routers DNS server which includes AdBlocking                   | ~20/yr         |
+| [Pushover](https://pushover.net/)               | Kubernetes Alerts and application notifications                   | Free           |
+| [Terraform Cloud](https://www.terraform.io/)    | Storing Terraform state                                           | Free           |
+| [UptimeRobot](https://uptimerobot.com/)         | Monitoring internet connectivity and external facing applications | ~$60/yr        |
+|                                                 |                                                                   | Total: ~$30/mo |
 
 ---
 
@@ -171,7 +172,7 @@ The upstream server in CoreDNS is set to NextDNS which provides me with AdBlocki
 
 ### External DNS
 
-[external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses `external-dns` looks at to gather DNS records to put in `Cloudflare` are ones that I explicitly set an annotation of `external-dns.home.arpa/enabled: "true"`
+[external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses `external-dns` looks at to gather DNS records to put in `Cloudflare` are ones that have an annotation of `external-dns.alpha.kubernetes.io/target`
 
 🔸 _[Click here](./terraform/cloudflare) to see how else I manage Cloudflare with Terraform._
 
