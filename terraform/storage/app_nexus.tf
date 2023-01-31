@@ -23,7 +23,7 @@ resource "kubernetes_stateful_set_v1" "nexus" {
       spec {
         container {
           name              = "main"
-          image             = "docker.io/sonatype/nexus3:3.45.1"
+          image             = "docker.io/sonatype/nexus3:3.46.0"
           image_pull_policy = "IfNotPresent"
           env {
             name  = "INSTALL4J_ADD_VM_PARAMS"
