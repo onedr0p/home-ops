@@ -27,13 +27,16 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    installCRDs: true
+    crds:
+      install: true
     serviceMonitor:
       enabled: true
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/instance: kyverno
+    backgroundController:
+      serviceMonitor:
+        enabled: true
+    cleanupController:
+      serviceMonitor:
+        enabled: true
+    reportsController:
+      serviceMonitor:
+        enabled: true
