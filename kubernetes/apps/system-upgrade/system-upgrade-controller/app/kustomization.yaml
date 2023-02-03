@@ -9,9 +9,6 @@ resources:
 images:
   - name: rancher/system-upgrade-controller
     newTag: v0.10.0
-commonLabels:
-  app.kubernetes.io/name: system-upgrade-controller
-  app.kubernetes.io/instance: system-upgrade-controller
 patchesStrategicMerge:
   - |
     $patch: delete
@@ -19,3 +16,10 @@ patchesStrategicMerge:
     kind: Namespace
     metadata:
       name: system-upgrade
+labels:
+  - pairs:
+      app.kubernetes.io/name: system-upgrade-controller
+      app.kubernetes.io/instance: system-upgrade-controller
+    includeSelectors: true
+  - pairs:
+      app.kubernetes.io/part-of: system-upgrade-controller
