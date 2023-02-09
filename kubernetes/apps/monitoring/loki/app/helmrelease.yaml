@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: loki
-      version: 4.5.1
+      version: 4.6.0
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -118,6 +118,14 @@ spec:
               - *host
     read:
       replicas: 3
+      persistence:
+        storageClass: local-path
+      extraVolumeMounts:
+        - name: rules
+          mountPath: /rules
+      extraVolumes:
+        - name: rules
+          emptyDir: {}
     write:
       replicas: 3
       persistence:
