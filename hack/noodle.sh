@@ -67,16 +67,52 @@
 
 # Pass the extracted values to flux build
 
-flux build ks cluster-apps --kustomization-file kubernetes/flux/apps.yaml --path kubernetes/apps/ \
-    | kubeconform -kubernetes-version 1.24.8 -schema-location default \
-        -schema-location '/tmp/derp/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-            -summary
+# flux build ks cluster-apps --kustomization-file kubernetes/flux/apps.yaml --path kubernetes/apps/ \
+#     | kubeconform -kubernetes-version 1.24.8 -schema-location default \
+#         -schema-location '/tmp/derp/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+#             -summary
 
-flux build ks cluster-apps-radarr-app --kustomization-file kubernetes/apps/default/radarr/ks.yaml --path kubernetes/apps/default/radarr/ \
-    | kubeconform -kubernetes-version 1.24.8 -schema-location default \
-        -schema-location '/tmp/derp/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-            -summary
+# flux build ks cluster-apps-radarr-app --kustomization-file kubernetes/apps/default/radarr/ks.yaml --path kubernetes/apps/default/radarr/ \
+#     | kubeconform -kubernetes-version 1.24.8 -schema-location default \
+#         -schema-location '/tmp/derp/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+#             -summary
 
-flux diff kustomization cluster-apps-radarr-app \
-    --kustomization-file kubernetes/apps/default/radarr/ks.yaml \
-    --path kubernetes/apps/default/radarr/
+# flux diff kustomization cluster-apps-radarr-app \
+#     --kustomization-file kubernetes/apps/default/radarr/ks.yaml \
+#     --path kubernetes/apps/default/radarr/
+
+
+flux suspend hr -n default bazarr; kubectl scale sts bazarr --replicas 0
+flux suspend hr -n default frigate; kubectl scale sts frigate --replicas 0
+flux suspend hr -n default immich-machine-learning; kubectl scale deploy immich-machine-learning --replicas 0
+flux suspend hr -n default immich-microservices; kubectl scale deploy immich-microservices --replicas 0
+flux suspend hr -n default immich-server; kubectl scale deploy immich-server --replicas 0
+flux suspend hr -n default immich-web; kubectl scale deploy immich-web --replicas 0
+flux suspend hr -n default jellyfin; kubectl scale sts jellyfin --replicas 0
+flux suspend hr -n default lidarr; kubectl scale sts lidarr --replicas 0
+flux suspend hr -n default media-browser; kubectl scale sts media-browser --replicas 0
+flux suspend hr -n default navidrome; kubectl scale sts navidrome --replicas 0
+flux suspend hr -n default plex; kubectl scale sts plex --replicas 0
+flux suspend hr -n default qbittorrent; kubectl scale sts qbittorrent --replicas 0
+flux suspend hr -n default radarr; kubectl scale sts radarr --replicas 0
+flux suspend hr -n default sabnzbd; kubectl scale sts sabnzbd --replicas 0
+flux suspend hr -n default sonarr; kubectl scale sts sonarr --replicas 0
+flux suspend hr -n default unpackerr; kubectl scale deploy unpackerr --replicas 0
+
+flux resume hr -n default bazarr
+flux resume hr -n default frigate
+flux resume hr -n default immich-machine-learning
+flux resume hr -n default immich-microservices
+flux resume hr -n default immich-server
+flux resume hr -n default immich-web
+flux resume hr -n default jellyfin
+flux resume hr -n default lidarr
+flux resume hr -n default media-browser
+flux resume hr -n default navidrome
+flux resume hr -n default plex
+flux resume hr -n default qbittorrent
+flux resume hr -n default radarr
+flux resume hr -n default sabnzbd
+flux resume hr -n default sonarr
+flux resume hr -n default unpackerr
+
