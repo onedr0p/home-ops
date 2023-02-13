@@ -2,33 +2,33 @@
 apiVersion: v1
 kind: Endpoints
 metadata:
-  name: &app opnsense-coredns
+  name: &app router-frr-exporter
   namespace: monitoring
   labels:
     app.kubernetes.io/name: *app
     app.kubernetes.io/instance: *app
-    jobLabel: coredns
+    jobLabel: frr-exporter
 subsets:
   - addresses:
-      - ip: 192.168.1.1
+      - ip: 192.168.0.1
     ports:
       - name: metrics
-        port: 9153
+        port: 9342
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: &app opnsense-coredns
+  name: &app router-frr-exporter
   namespace: monitoring
   labels:
     app.kubernetes.io/name: *app
     app.kubernetes.io/instance: *app
 spec:
   type: ExternalName
-  externalName: opnsense.turbo.ac.
+  externalName: vyos.turbo.ac.
   ports:
     - name: metrics
-      port: &port 9153
+      port: &port 9342
       protocol: TCP
       targetPort: *port
 ---
@@ -36,7 +36,7 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: &app opnsense-coredns
+  name: &app router-frr-exporter
   namespace: monitoring
   labels: &labels
     app.kubernetes.io/name: *app
