@@ -14,7 +14,7 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 [![Kubernetes](https://img.shields.io/badge/v1.26-blue?style=for-the-badge&logo=kubernetes&logoColor=white)](https://k3s.io/)
 [![Renovate](https://img.shields.io/github/actions/workflow/status/onedr0p/home-ops/renovate.yaml?branch=main&label=&logo=renovatebot&style=for-the-badge&color=blue)](https://github.com/onedr0p/home-ops/actions/workflows/renovate.yaml)
 
-[![Home-Internet](https://img.shields.io/uptimerobot/status/m793494864-dfc695db066960233ac70f45?color=brightgreeen&label=Home%20Internet&style=for-the-badge&logo=opnSense&logoColor=white)](https://uptimerobot.com)
+[![Home-Internet](https://img.shields.io/uptimerobot/status/m793494864-dfc695db066960233ac70f45?color=brightgreeen&label=Home%20Internet&style=for-the-badge&logo=v&logoColor=white)](https://uptimerobot.com)
 [![Plex](https://img.shields.io/uptimerobot/status/m784591338-cbf3205bc18109108eb0ea8e?logo=plex&logoColor=white&color=brightgreeen&label=Plex&style=for-the-badge)](https://ln.devbu.io/Fl5ME)
 [![Home-Assistant](https://img.shields.io/uptimerobot/status/m786203807-32ce99612d7b2d01b89c4315?logo=homeassistant&logoColor=white&color=brightgreeen&label=Home%20Assistant&style=for-the-badge)](https://ln.devbu.io/ApwUP)
 [![Grafana](https://img.shields.io/uptimerobot/status/m792427620-04fcdd7089a84863ec9f398d?logo=grafana&logoColor=white&color=brightgreeen&label=Grafana&style=for-the-badge)](https://ln.devbu.io/tu0B6)
@@ -110,6 +110,13 @@ GitRepository :: home-ops-kubernetes
 
 ### Networking
 
+<details>
+  <summary>Click to see a high level network diagram</summary>
+
+  <img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/networks.png" align="center" width="600px" alt="dns"/>
+</details>
+
+
 | Name                                          | CIDR              |
 |-----------------------------------------------|-------------------|
 | Management VLAN                               | `192.168.1.0/24`  |
@@ -118,10 +125,8 @@ GitRepository :: home-ops-kubernetes
 | Kubernetes pods (Calico w/ BGP)               | `10.42.0.0/16`    |
 | Kubernetes services (Calico w/ BGP)           | `10.43.0.0/16`    |
 
-- HAProxy configured on my `Opnsense` router for the Kubernetes Control Plane Load Balancer.
-- Calico configured with `externalIPs` to expose Kubernetes services with their own IP over BGP (w/ECMP) which is configured on my router.
-
-🔸 _[Click here](https://onedr0p.github.io/home-ops/notes/opnsense.html) to review how I configured HAProxy and BGP on Opnsense._
+- HAProxy is configured on my `VyOS` router for the Kubernetes Control Plane Load Balancer.
+- Calico is configured with `externalIPs` to expose Kubernetes services with their own IP over BGP which is configured on my router.
 
 ---
 
@@ -160,11 +165,11 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 
 Over WAN, I have port forwarded ports `80` and `443` to the load balancer IP of my ingress controller that's running in my Kubernetes cluster.
 
-[Cloudflare](https://www.cloudflare.com/) works as a proxy to hide my homes WAN IP and also as a firewall. When not on my home network, all the traffic coming into my ingress controller on port `80` and `443` comes from Cloudflare. In `Opnsense` I block all IPs not originating from the [Cloudflares list of IP ranges](https://www.cloudflare.com/ips/).
+[Cloudflare](https://www.cloudflare.com/) works as a proxy to hide my homes WAN IP and also as a firewall. When not on my home network, all the traffic coming into my ingress controller on port `80` and `443` comes from Cloudflare. In `VyOS` I block all IPs not originating from the [Cloudflares list of IP ranges](https://www.cloudflare.com/ips/).
 
 ### Internal DNS
 
-[CoreDNS](https://github.com/coredns/coredns) is deployed on my `Opnsense` router and listening on `:53`. All DNS queries for _**my**_ domains are forwarded to [k8s_gateway](https://github.com/ori-edge/k8s_gateway) that is running in my cluster. With this setup `k8s_gateway` has direct access to my clusters ingresses and services and serves DNS for them in my internal network. One additional thing is that I have `dnsmasq` running on `Opnsense` on port `5353` to only have it provide a host file for `CoreDNS`, this way I can have DNS for devices on my network.
+[CoreDNS](https://github.com/coredns/coredns) is deployed on my `VyOS` router and listening on `:53`. All DNS queries for _**my**_ domains are forwarded to [k8s_gateway](https://github.com/ori-edge/k8s_gateway) that is running in my cluster. With this setup `k8s_gateway` has direct access to my clusters ingresses and services and serves DNS for them in my internal network.
 
 ### Ad Blocking
 
@@ -192,7 +197,7 @@ My home IP can change at any given time and in order to keep my WAN IP address u
 
 | Device                    | Count | OS Disk Size | Data Disk Size              | Ram  | Operating System | Purpose             |
 |---------------------------|-------|--------------|-----------------------------|------|------------------|---------------------|
-| Protectli FW6D            | 1     | 500GB mSATA  | -                           | 16GB | Opnsense         | Router              |
+| HP EliteDesk 800 G3 SFF   | 1     | 256GB NVMe   | -                           | 8GB  | VyOS             | Router              |
 | Intel NUC8i3BEK           | 3     | 256GB NVMe   | -                           | 32GB | Ubuntu           | Kubernetes Masters  |
 | Intel NUC8i5BEH           | 3     | 240GB SSD    | 1TB NVMe (rook-ceph)        | 64GB | Ubuntu           | Kubernetes Workers  |
 | PowerEdge T340            | 1     | 2TB SSD      | 8x12TB ZFS (mirrored vdevs) | 64GB | Ubuntu           | NFS + Backup Server |
