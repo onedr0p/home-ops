@@ -20,15 +20,8 @@ k3s_server:
   service-cidr: "10.43.0.0/16"
   write-kubeconfig-mode: "0644"
   etcd-expose-metrics: true
-  kubelet-arg:
-    # https://github.com/k3s-io/k3s/issues/1264
-    - "node-status-update-frequency=4s"
   kube-controller-manager-arg:
     - "bind-address=0.0.0.0"
-    # https://github.com/k3s-io/k3s/issues/1264
-    - "node-monitor-period=4s"
-    - "node-monitor-grace-period=16s"
-    - "pod-eviction-timeout=20s"
   # Enable when not using eBPF
   # kube-proxy-arg:
   #   - "metrics-bind-address=0.0.0.0"
@@ -39,6 +32,3 @@ k3s_server:
     - "--audit-policy-file=/var/lib/rancher/k3s/audit-policy.yaml"
     - "--audit-log-maxage=2"
     - "anonymous-auth=true"
-    # https://github.com/k3s-io/k3s/issues/1264
-    - "default-not-ready-toleration-seconds=20"
-    - "default-unreachable-toleration-seconds=20"

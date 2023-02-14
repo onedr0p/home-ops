@@ -1,7 +1,3 @@
-variable "nexus_password" {
-  default = "1nternalUseOnly"
-  type    = string
-}
 variable "vector_agent_host" {
   default = "192.168.69.111"
   type    = string

@@ -11,10 +11,6 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.17.0"
     }
-    nexus = {
-      source  = "datadrivers/nexus"
-      version = "1.21.2"
-    }
     sops = {
       source  = "carlpett/sops"
       version = "0.7.2"
