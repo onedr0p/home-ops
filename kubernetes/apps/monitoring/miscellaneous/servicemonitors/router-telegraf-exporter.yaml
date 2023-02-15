@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: &app router-telegraf-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+    jobLabel: telegraf-exporter
+subsets:
+  - addresses:
+      - ip: 192.168.0.1
+    ports:
+      - name: metrics
+        port: 9273
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: &app router-telegraf-exporter
+  namespace: monitoring
+  annotations:
+    prometheus.io/scrape: "true"
+  labels:
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+    jobLabel: telegraf-exporter
+spec:
+  type: ExternalName
+  externalName: vyos.turbo.ac.
+  ports:
+    - name: metrics
+      port: &port 9273
+      protocol: TCP
+      targetPort: *port
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/servicemonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: &app router-telegraf-exporter
+  namespace: monitoring
+  labels: &labels
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+    jobLabel: telegraf-exporter
+spec:
+  namespaceSelector:
+    matchNames: ["monitoring"]
+  selector:
+    matchLabels:
+      <<: *labels
+  jobLabel: jobLabel
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 1m
+      scrapeTimeout: 10s
+      honorLabels: true
