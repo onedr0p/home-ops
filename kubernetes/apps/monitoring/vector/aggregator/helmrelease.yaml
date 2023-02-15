@@ -54,21 +54,20 @@ spec:
     service:
       main:
         type: LoadBalancer
-        externalIPs: ["${SVC_SYSLOG_ADDR}"]
+        externalIPs: ["${SVC_VECTOR_ADDR}"]
         # externalTrafficPolicy: Local
         ports:
           http:
             port: 8686
-          journald-logs:
+          journald-source:
             enabled: true
             port: 6000
-          kubernetes-logs:
+          kubernetes-source:
             enabled: true
             port: 6010
-          opnsense-logs:
+          vyos-source:
             enabled: true
-            port: 5140
-            protocol: UDP
+            port: 6020
     persistence:
       config:
         enabled: true
