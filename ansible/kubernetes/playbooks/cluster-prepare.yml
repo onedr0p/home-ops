@@ -45,6 +45,7 @@
       ansible.builtin.package_facts:
         manager: auto
     - name: Packages | Uninstall Snap
+      when: "'snapd' in ansible_facts.packages"
       block:
         - name: Packages | Uninstall Snap | Check if snap is installed
           ansible.builtin.debug:
@@ -59,14 +60,13 @@
             name: snapd
             state: absent
             autoremove: true
-      when: "'snapd' in ansible_facts.packages"
     - name: User Configuration
       block:
         - name: User Configuration | Add user to sudoers
           ansible.builtin.copy:
             content: "{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
             dest: "/etc/sudoers.d/{{ ansible_user }}_nopasswd"
-            mode: 0440
+            mode: "0440"
         - name: User Configuration | Add additional SSH public keys
           ansible.posix.authorized_key:
             user: "{{ ansible_user }}"
@@ -81,7 +81,7 @@
             dest: "/home/{{ ansible_user }}/.hushlogin"
             state: touch
             owner: "{{ ansible_user }}"
-            mode: 0775
+            mode: "0775"
             modification_time: preserve
             access_time: preserve
     - name: System Configuration (1)
@@ -101,10 +101,11 @@
             dest: /etc/cloud/cloud-init.disabled
             state: touch
             owner: root
-            mode: 0775
+            mode: "0775"
             modification_time: preserve
             access_time: preserve
     - name: System Configuration (2)
+      notify: Reboot
       block:
         - name: System Configuration (2) | Enable kernel modules now
           community.general.modprobe:
@@ -113,7 +114,7 @@
           loop: ["br_netfilter", "overlay", "rbd"]
         - name: System Configuration (2) | Enable kernel modules on boot
           ansible.builtin.copy:
-            mode: 0644
+            mode: "0644"
             content: "{{ item }}"
             dest: "/etc/modules-load.d/{{ item }}.conf"
           loop: ["br_netfilter", "overlay", "rbd"]
@@ -158,7 +159,6 @@
         - name: System Configuration (2) | Reconfigure grub and initramfs
           ansible.builtin.command: update-grub
           when: grub_status.changed
-      notify: Reboot
 
   handlers:
     - name: Reboot
