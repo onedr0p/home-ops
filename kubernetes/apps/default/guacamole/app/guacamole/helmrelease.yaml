@@ -42,17 +42,24 @@ spec:
         envFrom:
           - secretRef:
               name: guacamole-secret
-        command: ["/bin/sh", "-c", "/opt/guacamole/bin/initdb.sh --postgres > /initdb/migrations.sql"]
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - /opt/guacamole/bin/initdb.sh --postgres > /initdb/migrations.sql
         volumeMounts:
           - { name: initdb, mountPath: /initdb }
-      run-migrations:
+      init-migrations:
         image: ghcr.io/onedr0p/postgres-initdb:14.6
         imagePullPolicy: IfNotPresent
         envFrom:
           - secretRef:
               name: guacamole-secret
-        # Database is most likely already created, so don't fail, just log and move on
-        command: ["/bin/bash", "-c", "psql -d $(POSTGRES_DATABASE) -a -f /initdb/migrations.sql || true"]
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            export PGPASSWORD=$(POSTGRES_PASSWORD)
+            psql -d $(POSTGRES_DATABASE) -U $(POSTGRES_USER) -a -w -f /initdb/migrations.sql || true
         volumeMounts:
           - { name: initdb, mountPath: /initdb }
     controller:
