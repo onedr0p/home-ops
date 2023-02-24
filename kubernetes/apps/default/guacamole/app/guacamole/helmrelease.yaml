@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.2.1
+      version: 1.3.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -36,22 +36,39 @@ spec:
         envFrom:
           - secretRef:
               name: guacamole-secret
-      init-schema:
-        image: ghcr.io/onedr0p/postgres-initdb:14.6
+      create-schema:
+        image: docker.io/guacamole/guacamole:1.5.0
+        imagePullPolicy: IfNotPresent
         envFrom:
           - secretRef:
               name: guacamole-secret
-        command: ["/bin/bash", "-c", "cat /schemas/*.sql | psql -d $(POSTGRES_DATABASE) -f -"]
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            /opt/guacamole/bin/initdb.sh --postgres > /migrations/init.sql
         volumeMounts:
-          - { name: create-schema, mountPath: /schemas/001-create-schema.sql, subPath: 001-create-schema.sql }
-          - { name: create-admin-user, mountPath: /schemas/002-create-admin-user.sql, subPath: 002-create-admin-user.sql }
+          - { name: migrations, mountPath: /migrations }
+      run-migrations:
+        image: ghcr.io/onedr0p/postgres-initdb:14.6
+        imagePullPolicy: IfNotPresent
+        envFrom:
+          - secretRef:
+              name: guacamole-secret
+        command: ["/bin/bash"]
+        args:
+          - -c
+          - |
+            export PGPASSWORD=$(POSTGRES_PASSWORD)
+            psql -h $(POSTGRES_HOSTNAME) -d $(POSTGRES_DATABASE) -U $(POSTGRES_USER) -a -w -f /migrations/init.sql || true
+        volumeMounts:
+          - { name: migrations, mountPath: /migrations }
     controller:
       annotations:
         reloader.stakater.com/auto: "true"
     image:
-      # TODO Postgres 14 won't work until 1.5.0 is released
       repository: docker.io/guacamole/guacamole
-      tag: 1.4.0
+      tag: 1.5.0
     env:
       GUACD_HOSTNAME: guacd.default.svc.cluster.local
       GUACD_PORT: "4822"
@@ -80,18 +97,9 @@ spec:
           - hosts:
               - *host
     persistence:
-      create-schema:
+      migrations:
         enabled: true
-        type: configMap
-        name: schemas-configmap
-        subPath: 001-create-schema.sql
-        mountPath: /schemas/001-create-schema.sql
-      create-admin-user:
-        enabled: true
-        type: configMap
-        name: schemas-configmap
-        subPath: 002-create-admin-user.sql
-        mountPath: /schemas/002-create-admin-user.sql
+        type: emptyDir
     resources:
       requests:
         cpu: 250m
