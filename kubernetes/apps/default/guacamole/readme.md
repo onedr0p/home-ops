@@ -13,5 +13,10 @@
     ```sql
     GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO guacamole;
     GRANT SELECT,USAGE ON ALL SEQUENCES IN SCHEMA public TO guacamole;
-    \q
+    ```
+
+3. Debugging
+    ```sql
+    DROP DATABASE guacamole;
+    DROP ROLE guacamole;
     ```

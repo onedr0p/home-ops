@@ -42,10 +42,7 @@ spec:
         envFrom:
           - secretRef:
               name: guacamole-secret
-        command: ["/bin/sh"]
-        args:
-          - -c
-          - /opt/guacamole/bin/initdb.sh --postgres > /initdb/migrations.sql
+        command: ["/bin/sh", "-c", "/opt/guacamole/bin/initdb.sh --postgres > /initdb/migrations.sql"]
         volumeMounts:
           - { name: initdb, mountPath: /initdb }
       init-migrations:
@@ -54,8 +51,8 @@ spec:
         envFrom:
           - secretRef:
               name: guacamole-secret
-        command: ["/bin/sh"]
-        args:
+        command:
+          - /bin/bash
           - -c
           - |
             export PGPASSWORD=$(POSTGRES_PASSWORD)
