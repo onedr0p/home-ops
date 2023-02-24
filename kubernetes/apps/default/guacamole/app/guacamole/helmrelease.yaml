@@ -42,23 +42,27 @@ spec:
         envFrom:
           - secretRef:
               name: guacamole-secret
-        command: ["/bin/sh", "-c", "/opt/guacamole/bin/initdb.sh --postgres > /initdb/migrations.sql"]
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            /opt/guacamole/bin/initdb.sh --postgres > /migrations/init.sql
         volumeMounts:
-          - { name: initdb, mountPath: /initdb }
+          - { name: migrations, mountPath: /migrations }
       init-migrations:
         image: ghcr.io/onedr0p/postgres-initdb:14.6
         imagePullPolicy: IfNotPresent
         envFrom:
           - secretRef:
               name: guacamole-secret
-        command:
-          - /bin/bash
+        command: ["/bin/bash"]
+        args:
           - -c
           - |
             export PGPASSWORD=$(POSTGRES_PASSWORD)
-            psql -h $(POSTGRES_HOSTNAME) -d $(POSTGRES_DATABASE) -U $(POSTGRES_USER) -a -w -f /initdb/migrations.sql || true
+            psql -h $(POSTGRES_HOSTNAME) -d $(POSTGRES_DATABASE) -U $(POSTGRES_USER) -a -w -f /migrations/init.sql || true
         volumeMounts:
-          - { name: initdb, mountPath: /initdb }
+          - { name: migrations, mountPath: /migrations }
     controller:
       annotations:
         reloader.stakater.com/auto: "true"
@@ -93,7 +97,7 @@ spec:
           - hosts:
               - *host
     persistence:
-      initdb:
+      migrations:
         enabled: true
         type: emptyDir
     resources:
