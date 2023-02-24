@@ -30,13 +30,13 @@ spec:
     - name: guacd
   values:
     initContainers:
-      - name: init-db
+      01-init-db:
         image: ghcr.io/onedr0p/postgres-initdb:14.6
         imagePullPolicy: IfNotPresent
         envFrom:
           - secretRef:
               name: guacamole-secret
-      - name: init-schema
+      02-init-schema:
         image: docker.io/guacamole/guacamole:1.5.0
         imagePullPolicy: IfNotPresent
         envFrom:
@@ -46,7 +46,7 @@ spec:
         args: ["-c", "/opt/guacamole/bin/initdb.sh --postgres > /migrations/init.sql"]
         volumeMounts:
           - { name: migrations, mountPath: /migrations }
-      - name: init-migrations
+      03-init-migrations:
         image: ghcr.io/onedr0p/postgres-initdb:14.6
         imagePullPolicy: IfNotPresent
         envFrom:
