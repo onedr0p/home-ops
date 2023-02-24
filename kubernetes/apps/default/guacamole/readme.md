@@ -6,7 +6,7 @@
     ```sql
     export PGHOST=""
     export PGUSER="postgres"
-    psql -U postgres -d guacamole
+    psql -d guacamole
     ```
 
 2. Update Permissions
