@@ -181,10 +181,6 @@ The upstream server in CoreDNS is set to NextDNS which provides me with AdBlocki
 
 🔸 _[Click here](./terraform/cloudflare) to see how else I manage Cloudflare with Terraform._
 
-### Dynamic DNS
-
-My home IP can change at any given time and in order to keep my WAN IP address up to date on Cloudflare. I have deployed a [CronJob](./kubernetes/apps/networking/cloudflare-ddns) in my cluster, this periodically checks and updates the `A` record `ipv4.domain.tld`.
-
 ---
 
 ## 🔧 Hardware
