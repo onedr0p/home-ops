@@ -52,7 +52,7 @@
           ansible.builtin.copy:
             content: "{{ create_user.name }} ALL=(ALL:ALL) NOPASSWD:ALL"
             dest: "/etc/sudoers.d/{{ create_user.name }}_nopasswd"
-            mode: 0440
+            mode: "0440"
         - name: User | Add additional user SSH public keys
           ansible.posix.authorized_key:
             user: "{{ create_user.name }}"
@@ -63,7 +63,7 @@
             dest: "/home/{{ create_user.name }}/.hushlogin"
             state: touch
             owner: "{{ create_user.name }}"
-            mode: 0775
+            mode: "0775"
             modification_time: preserve
             access_time: preserve
     - name: Network
@@ -74,7 +74,7 @@
         - name: Network | Update /etc/hosts to include hostname
           ansible.builtin.blockinfile:
             path: /etc/hosts
-            mode: 0644
+            mode: "0644"
             create: true
             block: |
               127.0.0.1 localhost
@@ -84,7 +84,7 @@
         - name: NFS | Update configuration
           ansible.builtin.blockinfile:
             path: /etc/nfs.conf.d/local.conf
-            mode: 0644
+            mode: "0644"
             create: true
             block: |
               [nfsd]
@@ -128,25 +128,25 @@
           ansible.builtin.template:
             src: aliases.j2
             dest: /etc/aliases
-            mode: 0644
+            mode: "0644"
         - name: Notifications | Copy /etc/msmtprc
           notify: Restart msmtpd
           ansible.builtin.template:
             src: msmtprc.j2
             dest: /etc/msmtprc
-            mode: 0644
+            mode: "0644"
         - name: Notifications | Copy /etc/smartd.conf
           notify: Restart smartd
           ansible.builtin.template:
             src: smartd.conf.j2
             dest: /etc/smartd.conf
-            mode: 0644
+            mode: "0644"
         - name: Notifications | Copy /etc/zfs/zed.d/zed.rc
           notify: Restart zed
           ansible.builtin.template:
             src: zed.rc.j2
             dest: /etc/zfs/zed.d/zed.rc
-            mode: 0644
+            mode: "0644"
 
   handlers:
     - name: Reboot
