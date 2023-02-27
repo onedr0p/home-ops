@@ -44,25 +44,6 @@
       vars:
         k3s_state: installed
 
-    - name: Copy kubeconfig to provision folder
-      run_once: true
-      ansible.builtin.fetch:
-        src: /etc/rancher/k3s/k3s.yaml
-        dest: "{{ playbook_dir }}/../../../ansible/kubernetes/kubeconfig"
-        flat: true
-      when:
-        - k3s_control_node is defined
-        - k3s_control_node
-
-    - name: Update kubeconfig with the right IPv4 address
-      delegate_to: localhost
-      become: false
-      run_once: true
-      ansible.builtin.replace:
-        path: "{{ playbook_dir }}/../../../ansible/kubernetes/kubeconfig"
-        regexp: "https://127.0.0.1:6443"
-        replace: "https://{{ k3s_registration_address }}:6443"
-
     - name: Resource Readiness Check
       run_once: true
       kubernetes.core.k8s_info:
