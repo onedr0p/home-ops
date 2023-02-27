@@ -3,11 +3,11 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: OCIRepository
 metadata:
-  name: terraform-cloudflare
+  name: storage-apps
   namespace: flux-system
 spec:
   interval: 1m
-  url: oci://ghcr.io/onedr0p/terraform-cloudflare-oci
+  url: oci://ghcr.io/onedr0p/provision-storage-oci
   ref:
     tag: main
   # Note: This is not ready for primetime
@@ -18,23 +18,21 @@ spec:
 apiVersion: infra.contrib.fluxcd.io/v1alpha1
 kind: Terraform
 metadata:
-  name: cloudflare
+  name: storage
   namespace: flux-system
 spec:
   suspend: false
   approvePlan: auto
   interval: 12h
-  path: ./
+  path: ./apps
   sourceRef:
     kind: OCIRepository
-    name: terraform-cloudflare
+    name: storage-apps
     namespace: flux-system
   backendConfig:
     disable: true
   cliConfigSecretRef:
     name: tf-controller-tfrc-secret
-  writeOutputsToSecret:
-    name: cloudflare-outputs
   runnerPodTemplate:
     spec:
       env:
