@@ -7,9 +7,6 @@ on:
     branches: ["main"]
     paths: ["terraform/**"]
 
-env:
-  IMAGE_REGISTRY: ghcr.io
-
 jobs:
   changed-files:
     name: Generate Build Matrix
@@ -38,7 +35,7 @@ jobs:
           dir_names_max_depth: 2
           json: true
           files: |
-            terraform/**
+            provision/**
 
       - name: List all changed files
         run: |
@@ -85,7 +82,7 @@ jobs:
 
       - name: Generate OCI tag
         id: generate-tag
-        run: echo "tag=${{ env.IMAGE_REGISTRY }}/${{ github.repository_owner }}/terraform-$(basename ${{ matrix.project }})-oci:$(git rev-parse --short HEAD)" >> "${GITHUB_OUTPUT}"
+        run: echo "tag=ghcr.io/${{ github.repository_owner }}/provision-$(basename ${{ matrix.project }})-oci:$(git rev-parse --short HEAD)" >> "${GITHUB_OUTPUT}"
 
       - name: Publish OCI
         run: |
