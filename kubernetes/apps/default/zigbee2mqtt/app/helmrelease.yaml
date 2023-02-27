@@ -55,18 +55,18 @@ spec:
       ZIGBEE2MQTT_CONFIG_MQTT_INCLUDE_DEVICE_INFORMATION: "true"
       ZIGBEE2MQTT_CONFIG_MQTT_KEEPALIVE: 60
       ZIGBEE2MQTT_CONFIG_MQTT_REJECT_UNAUTHORIZED: "true"
-      ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://emqx.default.svc.cluster.local
+      ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://mosquitto.default.svc.cluster.local
       ZIGBEE2MQTT_CONFIG_MQTT_VERSION: 5
       ZIGBEE2MQTT_CONFIG_MQTT_USER:
         valueFrom:
           secretKeyRef:
-            name: emqx-secret
-            key: user_1_username
+            name: mosquitto-secret
+            key: USERNAME
       ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD:
         valueFrom:
           secretKeyRef:
-            name: emqx-secret
-            key: user_1_password
+            name: mosquitto-secret
+            key: PASSWORD
       ZIGBEE2MQTT_CONFIG_SERIAL_PORT: tcp://192.168.1.90:6638
       ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_OUTPUT: '["console"]'
       ZIGBEE2MQTT_CONFIG_DEVICES: devices.yaml
@@ -131,7 +131,7 @@ spec:
         env:
           - { name: LOG_LEVEL, value: DEBUG }
           - { name: LOG_MQTT_MESSAGE, value: "True" }
-          - { name: MQTT_ADDRESS, value: emqx.default.svc.cluster.local }
+          - { name: MQTT_ADDRESS, value: mosquitto.default.svc.cluster.local }
           - { name: MQTT_TOPIC, value: "zigbee2mqtt/#" }
           - { name: MQTT_V5_PROTOCOL, value: "True" }
           - { name: PROMETHEUS_PORT, value: "80" }
@@ -140,10 +140,10 @@ spec:
           - name: MQTT_USERNAME
             valueFrom:
               secretKeyRef:
-                name: emqx-secret
-                key: user_1_username
+                name: mosquitto-secret
+                key: USERNAME
           - name: MQTT_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: emqx-secret
-                key: user_1_password
+                name: mosquitto-secret
+                key: PASSWORD
