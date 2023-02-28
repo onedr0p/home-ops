@@ -42,8 +42,9 @@ spec:
         volumeMounts:
           - { name: geoip, mountPath: /usr/share/GeoIP }
     controller:
-      replicas: 2
-      strategy: RollingUpdate
+      type: daemonset
+      # replicas: 2
+      # strategy: RollingUpdate
       annotations:
         reloader.stakater.com/auto: "true"
     image:
@@ -53,21 +54,26 @@ spec:
     args: ["--config", "/etc/vector/vector.yaml"]
     service:
       main:
-        type: LoadBalancer
-        externalIPs: ["${SVC_VECTOR_ADDR}"]
+        type: NodePort
+        # type: LoadBalancer
+        # externalIPs: ["${SVC_VECTOR_ADDR}"]
         # externalTrafficPolicy: Local
         ports:
           http:
             port: 8686
+            nodePort: 30010
           journald:
             enabled: true
             port: 6000
+            nodePort: 30020
           kubernetes:
             enabled: true
             port: 6010
+            nodePort: 30030
           vyos:
             enabled: true
             port: 6020
+            nodePort: 30040
     persistence:
       config:
         enabled: true
