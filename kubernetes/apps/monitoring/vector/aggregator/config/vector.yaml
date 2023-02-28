@@ -51,15 +51,16 @@ transforms:
     type: route
     inputs: ["vyos_source"]
     route:
+      # Match incoming WAN firewall messages only
       firewall: |
-        .facility == "kern" && match!(.message, r'^\[(.*?)\](.*)')
+        .facility == "kern" && match!(.message, r'^\[\d+\.\d+\]\s\[wan-.*\]')
 
   vyos_firewall_remap:
     type: remap
     inputs: ["vyos_firewall_route.firewall"]
     source: |
       # Parse firewall rule message
-      split_message, split_err = parse_regex(.message, r'^\[(?P<rule>.*?)\](?P<fields>.*)')
+      split_message, split_err = parse_regex(.message, r'^\[\d+\.\d+\]\s\[(?P<rule>.*?)\](?P<fields>.*)')
       if split_err != null {
           abort
       }
@@ -72,21 +73,10 @@ transforms:
       if parse_err != null {
           abort
       }
-      # Add more information about the triggered rule
-      .message.RULE, parse_err = parse_regex(split_message.rule, r'^(?P<from_zone>\w+)-(?P<to_zone>\w+)-(?P<id>\w+)-(?P<action>\w+)$')
-      if parse_err != null {
-          abort
-      }
-
-  vyos_firewall_wan_route:
-    type: route
-    inputs: ["vyos_firewall_remap"]
-    route:
-      from_wan: .message.RULE.from_zone == "wan"
 
   vyos_firewall_geoip_remap:
     type: remap
-    inputs: ["vyos_firewall_wan_route.from_wan"]
+    inputs: ["vyos_firewall_remap"]
     source: |
       .geoip = get_enrichment_table_record!(
           "geoip_table", {
