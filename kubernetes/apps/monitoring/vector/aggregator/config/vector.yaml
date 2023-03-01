@@ -46,16 +46,15 @@ transforms:
     type: route
     inputs: ["vyos_source"]
     route:
-      # Match incoming WAN firewall messages only
       firewall: |
-        .facility == "kern" && match!(.message, r'^\[\d+\.\d+\]\s\[wan-.*\]')
+        .facility == "kern" && match!(.message, r'^\[(.*?)\].(.*)')
 
   vyos_firewall_remap:
     type: remap
     inputs: ["vyos_firewall_route.firewall"]
     source: |
       # Parse firewall rule message
-      split_message, split_err = parse_regex(.message, r'^\[\d+\.\d+\]\s\[(?P<rule>.*?)\](?P<fields>.*)')
+      split_message, split_err = parse_regex(.message, r'^\[.*\].\[(?P<rule>.*?)\](?P<fields>.*)')
       if split_err != null {
           abort
       }
@@ -68,17 +67,27 @@ transforms:
       if parse_err != null {
           abort
       }
+      # Add more information about the triggered rule
+      .message.RULE, parse_err = parse_regex(split_message.rule, r'^(?P<from_zone>\w+)-(?P<to_zone>\w+)-(?P<id>\w+)-(?P<action>\w+)$')
+      if parse_err != null {
+          abort
+      }
+
+  vyos_firewall_wan_route:
+    type: route
+    inputs: ["vyos_firewall_remap"]
+    route:
+      from_wan: .message.RULE.from_zone == "wan"
 
   vyos_firewall_geoip_remap:
     type: remap
-    inputs: ["vyos_firewall_remap"]
+    inputs: ["vyos_firewall_wan_route.from_wan"]
     source: |
       .geoip = get_enrichment_table_record!(
           "geoip_table", {
               "ip": .message.SRC
           }
       )
-
 #
 # Sinks
 #
@@ -88,42 +97,38 @@ sinks:
     inputs: ["journald_source"]
     type: loki
     endpoint: http://loki-gateway.monitoring.svc.cluster.local
-    batch:
-      max_bytes: 2049000
     encoding:
       codec: json
-    labels:
-      hostname: '{{ host }}'
     out_of_order_action: accept
     remove_label_fields: true
     remove_timestamp: true
+    labels:
+      hostname: '{{ host }}'
 
   kubernetes:
     inputs: ["kubernetes_remap"]
     type: loki
     endpoint: http://loki-gateway.monitoring.svc.cluster.local
-    batch:
-      max_bytes: 2049000
     encoding:
       codec: json
+    out_of_order_action: accept
+    remove_label_fields: true
+    remove_timestamp: true
     labels:
       app: '{{ custom_app_name }}'
       namespace: '{{ kubernetes.pod_namespace }}'
       node: '{{ kubernetes.pod_node_name }}'
-    out_of_order_action: accept
-    remove_label_fields: true
-    remove_timestamp: true
 
   vyos:
-    inputs: ["vyos_firewall_geoip_remap"]
+    inputs:
+      - vyos_firewall_wan_route._unmatched
+      - vyos_firewall_geoip_remap
     type: loki
     endpoint: http://loki-gateway.monitoring.svc.cluster.local
-    batch:
-      max_bytes: 2049000
     encoding:
       codec: json
-    labels:
-      hostname: vyos
     out_of_order_action: accept
     remove_label_fields: true
     remove_timestamp: true
+    labels:
+      hostname: '{{ host }}'
