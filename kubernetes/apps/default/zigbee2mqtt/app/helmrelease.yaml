@@ -36,20 +36,22 @@ spec:
       tag: 1.30.2
     env:
       TZ: America/New_York
-      ZIGBEE2MQTT_DATA: /data
+      ZIGBEE2MQTT_DATA: /config
       ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_DISCOVERY_TOPIC: homeassistant
-      ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_LEGACY_ENTITY_ATTRIBUTES: "true"
-      ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_LEGACY_TRIGGERS: "true"
+      ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_LEGACY_ENTITY_ATTRIBUTES: "false"
+      ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_LEGACY_TRIGGERS: "false"
       ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_STATUS_TOPIC: homeassistant/status
       ZIGBEE2MQTT_CONFIG_ADVANCED_LAST_SEEN: ISO_8601
       ZIGBEE2MQTT_CONFIG_ADVANCED_LEGACY_API: "false"
       ZIGBEE2MQTT_CONFIG_ADVANCED_LEGACY_AVAILABILITY_PAYLOAD: "false"
-      ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL: debug
+      ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL: info # debug
+      ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_OUTPUT: '["console"]'
       ZIGBEE2MQTT_CONFIG_AVAILABILITY_ACTIVE_TIMEOUT: 60
       ZIGBEE2MQTT_CONFIG_AVAILABILITY_PASSIVE_TIMEOUT: 2000
       ZIGBEE2MQTT_CONFIG_DEVICE_OPTIONS_LEGACY: "false"
       ZIGBEE2MQTT_CONFIG_DEVICE_OPTIONS_RETAIN: "true"
       ZIGBEE2MQTT_CONFIG_EXPERIMENTAL_NEW_API: "true"
+      ZIGBEE2MQTT_CONFIG_FRONTEND_PORT: &port 80
       ZIGBEE2MQTT_CONFIG_FRONTEND_URL: https://zigbee2mqtt.devbu.io
       ZIGBEE2MQTT_CONFIG_HOMEASSISTANT: "true"
       ZIGBEE2MQTT_CONFIG_MQTT_INCLUDE_DEVICE_INFORMATION: "true"
@@ -67,10 +69,10 @@ spec:
           secretKeyRef:
             name: mosquitto-secret
             key: password
+      ZIGBEE2MQTT_CONFIG_PERMIT_JOIN: "false"
+      ZIGBEE2MQTT_CONFIG_SERIAL_BAUDRATE: 115200
+      ZIGBEE2MQTT_CONFIG_SERIAL_DISABLE_LED: "false"
       ZIGBEE2MQTT_CONFIG_SERIAL_PORT: tcp://192.168.1.90:6638
-      ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_OUTPUT: '["console"]'
-      ZIGBEE2MQTT_CONFIG_DEVICES: devices.yaml
-      ZIGBEE2MQTT_CONFIG_GROUPS: groups.yaml
     envFrom:
       - secretRef:
           name: zigbee2mqtt-secret
@@ -78,19 +80,19 @@ spec:
       main:
         ports:
           http:
+            port: *port
+          metrics:
+            enabled: true
             port: 8080
-    #       metrics:
-    #         enabled: true
-    #         port: 80
-    # serviceMonitor:
-    #   main:
-    #     enabled: true
-    #     endpoints:
-    #       - port: metrics
-    #         scheme: http
-    #         path: /metrics
-    #         interval: 1m
-    #         scrapeTimeout: 10s
+    serviceMonitor:
+      main:
+        enabled: true
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
     ingress:
       main:
         enabled: true
@@ -114,7 +116,7 @@ spec:
       fsGroupChangePolicy: OnRootMismatch
     volumeClaimTemplates:
       - name: config
-        mountPath: /data
+        mountPath: /config
         accessMode: ReadWriteOnce
         size: 1Gi
         storageClass: ceph-block
@@ -124,26 +126,26 @@ spec:
         memory: 100Mi
       limits:
         memory: 500Mi
-    # sidecars:
-    #   exporter:
-    #     image: ghcr.io/kpetremann/mqtt-exporter:1.0.4
-    #     imagePullPolicy: IfNotPresent
-    #     env:
-    #       - { name: LOG_LEVEL, value: DEBUG }
-    #       - { name: LOG_MQTT_MESSAGE, value: "True" }
-    #       - { name: MQTT_ADDRESS, value: mosquitto.default.svc.cluster.local }
-    #       - { name: MQTT_TOPIC, value: "zigbee2mqtt/#" }
-    #       - { name: MQTT_V5_PROTOCOL, value: "True" }
-    #       - { name: PROMETHEUS_PORT, value: "80" }
-    #       - { name: PROMETHEUS_PREFIX, value: zigbee2mqtt_ }
-    #       - { name: ZIGBEE2MQTT_AVAILABILITY, value: "True" }
-    #       - name: MQTT_USERNAME
-    #         valueFrom:
-    #           secretKeyRef:
-    #             name: mosquitto-secret
-    #             key: username
-    #       - name: MQTT_PASSWORD
-    #         valueFrom:
-    #           secretKeyRef:
-    #             name: mosquitto-secret
-    #             key: password
+    sidecars:
+      exporter:
+        image: ghcr.io/kpetremann/mqtt-exporter:1.0.5
+        imagePullPolicy: IfNotPresent
+        env:
+          - { name: LOG_LEVEL, value: DEBUG }
+          - { name: LOG_MQTT_MESSAGE, value: "True" }
+          - { name: MQTT_ADDRESS, value: mosquitto.default.svc.cluster.local }
+          - { name: MQTT_TOPIC, value: "zigbee2mqtt/#" }
+          - { name: MQTT_V5_PROTOCOL, value: "True" }
+          - { name: PROMETHEUS_PORT, value: "8080" }
+          - { name: PROMETHEUS_PREFIX, value: zigbee2mqtt_ }
+          - { name: ZIGBEE2MQTT_AVAILABILITY, value: "True" }
+          - name: MQTT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mosquitto-secret
+                key: username
+          - name: MQTT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mosquitto-secret
+                key: password
