@@ -24,25 +24,22 @@ ffmpeg:
   hwaccel_args: ["-hwaccel", "vaapi", "-hwaccel_device", "/dev/dri/renderD128", "-hwaccel_output_format", "yuv420p"]
   output_args:
     record: preset-record-ubiquiti
-  # https://github.com/blakeblackshear/frigate/issues/3296
-  # output_args:
-  #   record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -map 0:v:0 -map 0:a:0 -c copy
 
 snapshots:
   enabled: true
   timestamp: false
   bounding_box: true
   retain:
-    default: 7
+    default: 2
 
 record:
   enabled: true
   retain:
-    days: 3
+    days: 2
     mode: all
   events:
     retain:
-      default: 7
+      default: 2
       mode: active_objects
 
 objects:
@@ -63,6 +60,8 @@ go2rtc:
     frigate_garage_lq: rtspx://unifi-protect.turbo.ac:7441/rfX5a2wiqGcwhkkT
     frigate_river_hq: rtspx://unifi-protect.turbo.ac:7441/4TS1FINEr5tOeF7Q
     frigate_river_lq: rtspx://unifi-protect.turbo.ac:7441/LgRGGzkoV1lelHBE
+    frigate_study_hq: rtspx://unifi-protect.turbo.ac:7441/SViFPpsChGahJTpR
+    frigate_study_lq: rtspx://unifi-protect.turbo.ac:7441/fHV4bNS1KiYJb3nK
     frigate_living_room_hq: rtspx://unifi-protect.turbo.ac:7441/XRuGR7p9aDEg9jdB
     frigate_living_room_lq: rtspx://unifi-protect.turbo.ac:7441/7qEIbCsbYqn4SMEj
     frigate_basement_1_hq: rtspx://unifi-protect.turbo.ac:7441/0MoNwT3jxtK7jU37
@@ -123,6 +122,18 @@ cameras:
         - path: rtsp://localhost:8554/frigate_river_lq
           roles: ["detect"]
         - path: rtsp://localhost:8554/frigate_river_hq
+          roles: ["record"]
+    detect:
+      width: 1280
+      height: 720
+      fps: 10
+
+  frigate_study:
+    ffmpeg:
+      inputs:
+        - path: rtsp://localhost:8554/frigate_study_lq
+          roles: ["detect"]
+        - path: rtsp://localhost:8554/frigate_study_hq
           roles: ["record"]
     detect:
       width: 1280
