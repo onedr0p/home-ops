@@ -8,16 +8,14 @@ spec:
   imagePath: calico
   calicoNetwork:
     bgp: Enabled
-    hostPorts: Disabled
-    linuxDataplane: BPF
     ipPools: # Note: The ipPools section cannot be modified post-install.
       - blockSize: 26
         cidr: "{{ k3s_server['cluster-cidr'] }}"
-        encapsulation: "{{ calico_encapsulation }}"
+        encapsulation: VXLANCrossSubnet # or "None"
         natOutgoing: Enabled
         nodeSelector: all()
     nodeAddressAutodetectionV4:
       cidrs:
-        - "{{ calico_node_cidr }}"
+        - "{{ (ansible_default_ipv4.network + '/' + ansible_default_ipv4.netmask) | ansible.utils.ipaddr('network/prefix') }}"
   nodeMetricsPort: 9091
   typhaMetricsPort: 9093

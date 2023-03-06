@@ -23,20 +23,6 @@
         k3s_server_manifests_urls: []
       when: k3s_check_installed.stat.exists
 
-    - name: Create the k3s data directory
-      ansible.builtin.file:
-        path: /var/lib/rancher/k3s
-        state: directory
-        owner: root
-        group: root
-        mode: "0755"
-
-    - name: Copy audit-policy.yaml
-      ansible.builtin.template:
-        src: audit-policy.yaml.j2
-        dest: /var/lib/rancher/k3s/audit-policy.yaml
-        mode: "0755"
-
     - name: Install Kubernetes
       ansible.builtin.include_role:
         name: xanmanning.k3s

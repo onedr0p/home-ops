@@ -4,7 +4,7 @@ k3s_server:
   node-ip: "{{ ansible_host }}"
   tls-san:
     - "{{ k3s_registration_address }}" # IP to HAProxy on router
-    - k8s-lb.turbo.ac # Hostname to HAProxy on router
+    - k8s-lb.turbo.ac                  # Hostname to HAProxy on router
   https-listen-port: 6443
   docker: false
   flannel-backend: "none" # quote
@@ -16,20 +16,15 @@ k3s_server:
     - traefik
   disable-network-policy: true
   disable-cloud-controller: true
-  disable-kube-proxy: true # Disable when using eBPF
   cluster-cidr: "10.42.0.0/16"
   service-cidr: "10.43.0.0/16"
   write-kubeconfig-mode: "0644"
   etcd-expose-metrics: true
   kube-controller-manager-arg:
     - "bind-address=0.0.0.0"
-  # Enable when not using eBPF
-  # kube-proxy-arg:
-  #   - "metrics-bind-address=0.0.0.0"
+  kube-proxy-arg:
+    - "metrics-bind-address=0.0.0.0"
   kube-scheduler-arg:
     - "bind-address=0.0.0.0"
   kube-apiserver-arg:
-    - "--audit-log-path=/var/lib/rancher/k3s/audit.log"
-    - "--audit-policy-file=/var/lib/rancher/k3s/audit-policy.yaml"
-    - "--audit-log-maxage=2"
     - "anonymous-auth=true"
