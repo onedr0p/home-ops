@@ -50,7 +50,7 @@ There is a template over at [onedr0p/flux-cluster-template](https://github.com/o
 
 My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Ubuntu Server using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.
 
-🔸 _[Click here](./ansible/) to see my Ansible playbooks and roles._
+🔸 _[Click here](./provision/kubernetes/servers/) to see my Ansible playbooks and roles._
 
 ### Core Components
 
@@ -179,7 +179,7 @@ The upstream server in CoreDNS is set to NextDNS which provides me with AdBlocki
 
 [external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses `external-dns` looks at to gather DNS records to put in `Cloudflare` are ones that have an annotation of `external-dns.alpha.kubernetes.io/target`
 
-🔸 _[Click here](./terraform/cloudflare) to see how else I manage Cloudflare with Terraform._
+🔸 _[Click here](./provision/kubernetes/cloudflare) to see how else I manage Cloudflare with Terraform._
 
 ---
 
