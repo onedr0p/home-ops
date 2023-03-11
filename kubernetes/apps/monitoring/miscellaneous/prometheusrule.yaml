@@ -20,3 +20,14 @@ spec:
           for: 15m
           labels:
             severity: critical
+    - name: zfs.rules
+      rules:
+        - alert: ZfsOfflinePool
+          annotations:
+            summary: ZFS zpool {{$labels.zpool}} on {{$labels.instance}}
+              is in a unexpected state {{$labels.state}}
+          expr: |
+            node_zfs_zpool_state{state!="online"} > 0
+          for: 15m
+          labels:
+            severity: critical
