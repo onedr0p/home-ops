@@ -59,7 +59,7 @@ spec:
               - *host
     bucketweb:
       enabled: true
-      replicaCount: 3
+      replicaCount: 2
       podAntiAffinityPreset: hard
       ingress:
         enabled: true
@@ -75,10 +75,10 @@ spec:
               - *host
     compactor:
       enabled: true
-      extraFlags: ["--compact.concurrency", "4"]
-      retentionResolutionRaw: 5d
-      retentionResolution5m: 10d
-      retentionResolution1h: 15d
+      extraFlags: ["--compact.concurrency", "4", "--delete-delay", "30m"]
+      retentionResolutionRaw: 14d
+      retentionResolution5m: 14d
+      retentionResolution1h: 14d
       ingress:
         enabled: true
         ingressClassName: nginx
@@ -97,7 +97,7 @@ spec:
         size: 20Gi
     storegateway:
       enabled: true
-      replicaCount: 3
+      replicaCount: 2
       podAntiAffinityPreset: hard
       ingress:
         enabled: true
@@ -117,7 +117,7 @@ spec:
         size: 20Gi
     ruler:
       enabled: true
-      replicaCount: 3
+      replicaCount: 2
       podAntiAffinityPreset: hard
       dnsDiscovery:
         enabled: true
