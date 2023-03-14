@@ -36,15 +36,26 @@ spec:
       config:
         insecure: true
     queryFrontend:
-      enabled: false
+      enabled: true
+      replicaCount: 2
+      podAntiAffinityPreset: hard
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          nginx.ingress.kubernetes.io/whitelist-source-range: |
+            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+          hajimari.io/enable: "false"
+        hostname: &host thanos-query-frontend.devbu.io
+        tls: true
+        extraTls:
+          - hosts:
+              - *host
     query:
       enabled: true
-      replicaCount: 3
+      replicaCount: 2
       podAntiAffinityPreset: hard
       replicaLabel: ["__replica__"] # must match with kube-prometheus-stack value `.prometheus.prometheusSpec.replicaExternalLabelName`
-      dnsDiscovery:
-        sidecarsService: kube-prometheus-stack-thanos-discovery
-        sidecarsNamespace: monitoring
       ingress:
         enabled: true
         ingressClassName: nginx
@@ -118,6 +129,7 @@ spec:
     ruler:
       enabled: true
       replicaCount: 2
+      replicaLabel: __replica__
       podAntiAffinityPreset: hard
       dnsDiscovery:
         enabled: true
@@ -139,6 +151,27 @@ spec:
             10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
           hajimari.io/enable: "false"
         hostname: &host thanos-ruler.devbu.io
+        tls: true
+        extraTls:
+          - hosts:
+              - *host
+      persistence:
+        enabled: true
+        storageClass: local-path
+        size: 20Gi
+    receive:
+      enabled: true
+      replicaCount: 2
+      replicaLabel: __replica__
+      extraFlags: ["--receive.hashrings-algorithm", "ketama"]
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          nginx.ingress.kubernetes.io/whitelist-source-range: |
+            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+          hajimari.io/enable: "false"
+        hostname: &host thanos-receive.devbu.io
         tls: true
         extraTls:
           - hosts:

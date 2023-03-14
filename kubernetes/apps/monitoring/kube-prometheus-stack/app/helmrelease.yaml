@@ -190,31 +190,14 @@ spec:
         enabled: true
       prometheusSpec:
         replicas: 2
-        replicaExternalLabelName: __replica__ # must match with thanos value `.query.replicaLabel[0]`
-        # Breaks any metric that has an existing "cluster" label on a metric
-        # externalLabels:
-        #   cluster: home # must match with thanos value `.ruler.clusterName`
-        thanos:
-          image: quay.io/thanos/thanos:v0.30.2
-          objectStorageConfig:
-            name: thanos-objstore-secret
-            key: objstore.yml
+        replicaExternalLabelName: __replica__ # must match with all thanos component values for `replicaLabel`
         podAntiAffinity: hard
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false
-        retention: 2d
-        retentionSize: 6GB
-        enableAdminAPI: true
-        walCompression: true
-        storageSpec:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: local-path
-              resources:
-                requests:
-                  storage: 20Gi
+        remoteWrite:
+          - url: http://thanos-receive.monitoring.svc.cluster.local:19291/api/v1/receive
         resources:
           requests:
             cpu: 150m
