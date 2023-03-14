@@ -27,10 +27,6 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    image:
-      registry: quay.io
-      repository: thanos/thanos
-      tag: v0.30.2
     objstoreConfig:
       type: s3
       config:
@@ -39,69 +35,23 @@ spec:
       enabled: true
       replicaCount: 2
       podAntiAffinityPreset: hard
-      ingress:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: |
-            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-          hajimari.io/enable: "false"
-        hostname: &host thanos-query-frontend.devbu.io
-        tls: true
-        extraTls:
-          - hosts:
-              - *host
     query:
       enabled: true
       replicaCount: 2
       podAntiAffinityPreset: hard
       replicaLabel: ["__replica__"] # must match with kube-prometheus-stack value `.prometheus.prometheusSpec.replicaExternalLabelName`
-      ingress:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: |
-            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-          hajimari.io/enable: "false"
-        hostname: &host thanos-query.devbu.io
-        tls: true
-        extraTls:
-          - hosts:
-              - *host
     bucketweb:
       enabled: true
       replicaCount: 2
       podAntiAffinityPreset: hard
-      ingress:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: |
-            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-          hajimari.io/enable: "false"
-        hostname: &host thanos-bucketweb.devbu.io
-        tls: true
-        extraTls:
-          - hosts:
-              - *host
     compactor:
       enabled: true
-      extraFlags: ["--compact.concurrency", "4", "--delete-delay", "30m"]
+      extraFlags:
+        - --compact.concurrency=4
+        - --delete-delay=30m
       retentionResolutionRaw: 14d
       retentionResolution5m: 14d
       retentionResolution1h: 14d
-      ingress:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: |
-            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-          hajimari.io/enable: "false"
-        hostname: &host thanos-compactor.devbu.io
-        tls: true
-        extraTls:
-          - hosts:
-              - *host
       persistence:
         enabled: true
         storageClass: local-path
@@ -110,18 +60,6 @@ spec:
       enabled: true
       replicaCount: 2
       podAntiAffinityPreset: hard
-      ingress:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: |
-            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-          hajimari.io/enable: "false"
-        hostname: &host thanos-storegateway.devbu.io
-        tls: true
-        extraTls:
-          - hosts:
-              - *host
       persistence:
         enabled: true
         storageClass: local-path
@@ -143,18 +81,6 @@ spec:
             rules:
               - alert: "PrometheusDown"
                 expr: absent(up{job="kube-prometheus-stack-prometheus"})
-      ingress:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: |
-            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-          hajimari.io/enable: "false"
-        hostname: &host thanos-ruler.devbu.io
-        tls: true
-        extraTls:
-          - hosts:
-              - *host
       persistence:
         enabled: true
         storageClass: local-path
@@ -163,19 +89,10 @@ spec:
       enabled: true
       replicaCount: 2
       replicaLabel: __replica__
-      extraFlags: ["--receive.hashrings-algorithm", "ketama"]
-      ingress:
-        enabled: true
-        ingressClassName: nginx
-        annotations:
-          nginx.ingress.kubernetes.io/whitelist-source-range: |
-            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-          hajimari.io/enable: "false"
-        hostname: &host thanos-receive.devbu.io
-        tls: true
-        extraTls:
-          - hosts:
-              - *host
+      extraFlags:
+        - --receive.hashrings-algorithm=ketama
+        - --tsdb.retention=2d
+        - --tsdb.wal-compression
       persistence:
         enabled: true
         storageClass: local-path
