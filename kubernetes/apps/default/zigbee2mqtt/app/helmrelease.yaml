@@ -81,18 +81,6 @@ spec:
         ports:
           http:
             port: *port
-          metrics:
-            enabled: true
-            port: 8080
-    serviceMonitor:
-      main:
-        enabled: true
-        endpoints:
-          - port: metrics
-            scheme: http
-            path: /metrics
-            interval: 1m
-            scrapeTimeout: 10s
     ingress:
       main:
         enabled: true
@@ -126,26 +114,3 @@ spec:
         memory: 100Mi
       limits:
         memory: 500Mi
-    sidecars:
-      exporter:
-        image: ghcr.io/kpetremann/mqtt-exporter:1.0.5
-        imagePullPolicy: IfNotPresent
-        env:
-          - { name: LOG_LEVEL, value: DEBUG }
-          - { name: LOG_MQTT_MESSAGE, value: "True" }
-          - { name: MQTT_ADDRESS, value: mosquitto.default.svc.cluster.local }
-          - { name: MQTT_TOPIC, value: "zigbee2mqtt/#" }
-          - { name: MQTT_V5_PROTOCOL, value: "True" }
-          - { name: PROMETHEUS_PORT, value: "8080" }
-          - { name: PROMETHEUS_PREFIX, value: zigbee2mqtt_ }
-          - { name: ZIGBEE2MQTT_AVAILABILITY, value: "True" }
-          - name: MQTT_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: mosquitto-secret
-                key: username
-          - name: MQTT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: mosquitto-secret
-                key: password
