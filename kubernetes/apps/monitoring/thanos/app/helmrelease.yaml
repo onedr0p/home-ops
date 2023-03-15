@@ -90,18 +90,20 @@ spec:
         enabled: true
         storageClass: local-path
         size: 20Gi
-    receiveDistributor:
-      enabled: true
-      replicaCount: 3
-      replicaLabel: __replica__
-      extraFlags: ["--receive.hashrings-algorithm=ketama"]
+    # receiveDistributor:
+    #   enabled: true
+    #   replicaCount: 3
+    #   replicaLabel: __replica__
+    #   extraFlags: ["--receive.hashrings-algorithm=ketama"]
     receive:
       enabled: true
       replicaCount: 3
-      mode: dual-mode
+      mode: standalone # dual-mode
       replicaLabel: __replica__
       tsdbRetention: 2d
-      extraFlags: ["--tsdb.wal-compression"]
+      extraFlags:
+        - --tsdb.wal-compression
+        - --receive.hashrings-algorithm=ketama
       persistence:
         enabled: true
         storageClass: local-path
