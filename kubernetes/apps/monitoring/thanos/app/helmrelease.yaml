@@ -34,7 +34,6 @@ spec:
     queryFrontend:
       enabled: true
       replicaCount: 2
-      podAntiAffinityPreset: hard
       ingress:
         enabled: true
         ingressClassName: nginx
@@ -52,14 +51,12 @@ spec:
     query:
       enabled: true
       replicaCount: 2
-      podAntiAffinityPreset: hard
       replicaLabel: ["__replica__"]
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
     bucketweb:
       enabled: true
       replicaCount: 2
-      podAntiAffinityPreset: hard
       nodeSelector:
         node-role.kubernetes.io/worker: "true"
     compactor:
@@ -79,7 +76,6 @@ spec:
     storegateway:
       enabled: true
       replicaCount: 2
-      podAntiAffinityPreset: hard
       persistence:
         enabled: true
         storageClass: local-path
@@ -90,7 +86,6 @@ spec:
       enabled: true
       replicaCount: 2
       replicaLabel: __replica__
-      podAntiAffinityPreset: hard
       dnsDiscovery:
         enabled: true
       alertmanagers: ["http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093"]
