@@ -51,7 +51,7 @@ spec:
       enabled: true
       replicaCount: 2
       podAntiAffinityPreset: hard
-      replicaLabel: ["__replica__"] # must match with kube-prometheus-stack value `.prometheus.prometheusSpec.replicaExternalLabelName`
+      replicaLabel: ["__replica__"]
     bucketweb:
       enabled: true
       replicaCount: 2
@@ -79,7 +79,7 @@ spec:
     ruler:
       enabled: true
       replicaCount: 2
-      replicaLabel: __replica__ # must match with kube-prometheus-stack value `.prometheus.prometheusSpec.replicaExternalLabelName`
+      replicaLabel: __replica__
       podAntiAffinityPreset: hard
       dnsDiscovery:
         enabled: true
@@ -95,14 +95,18 @@ spec:
         enabled: true
         storageClass: local-path
         size: 20Gi
+    receiveDistributor:
+      enabled: true
+      replicaCount: 2
+      replicaLabel: __replica__
+      extraFlags: ["--receive.hashrings-algorithm=ketama"]
     receive:
       enabled: true
       replicaCount: 2
-      replicaLabel: __replica__ # must match with kube-prometheus-stack value `.prometheus.prometheusSpec.replicaExternalLabelName`
+      mode: dual-mode
+      replicaLabel: __replica__
       tsdbRetention: 2d
-      extraFlags:
-        - --receive.hashrings-algorithm=ketama
-        - --tsdb.wal-compression
+      extraFlags: ["--tsdb.wal-compression"]
       persistence:
         enabled: true
         storageClass: local-path
