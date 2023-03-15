@@ -33,7 +33,7 @@ spec:
         insecure: true
     queryFrontend:
       enabled: true
-      replicaCount: 2
+      replicaCount: 3
       ingress:
         enabled: true
         ingressClassName: nginx
@@ -46,19 +46,13 @@ spec:
         extraTls:
           - hosts:
               - *host
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
     query:
       enabled: true
-      replicaCount: 2
+      replicaCount: 3
       replicaLabel: ["__replica__"]
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
     bucketweb:
       enabled: true
-      replicaCount: 2
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
+      replicaCount: 3
     compactor:
       enabled: true
       extraFlags:
@@ -71,20 +65,16 @@ spec:
         enabled: true
         storageClass: local-path
         size: 20Gi
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
     storegateway:
       enabled: true
-      replicaCount: 2
+      replicaCount: 3
       persistence:
         enabled: true
         storageClass: local-path
         size: 20Gi
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
     ruler:
       enabled: true
-      replicaCount: 2
+      replicaCount: 3
       replicaLabel: __replica__
       dnsDiscovery:
         enabled: true
@@ -100,18 +90,14 @@ spec:
         enabled: true
         storageClass: local-path
         size: 20Gi
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
     receiveDistributor:
       enabled: true
-      replicaCount: 2
+      replicaCount: 3
       replicaLabel: __replica__
       extraFlags: ["--receive.hashrings-algorithm=ketama"]
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
     receive:
       enabled: true
-      replicaCount: 2
+      replicaCount: 3
       mode: dual-mode
       replicaLabel: __replica__
       tsdbRetention: 2d
@@ -120,8 +106,6 @@ spec:
         enabled: true
         storageClass: local-path
         size: 20Gi
-      nodeSelector:
-        node-role.kubernetes.io/worker: "true"
     metrics:
       enabled: true
       serviceMonitor:
