@@ -159,15 +159,11 @@ spec:
       enabled: true
       endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
     kubeProxy:
-      enabled: false # Enable if not using eBPF
-      # endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
+      enabled: false # Disabled because eBPF
+      endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
     kubeEtcd:
       enabled: true
       endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
-      service:
-        enabled: true
-        port: 2381
-        targetPort: 2381
     prometheus:
       ingress:
         enabled: true
@@ -183,6 +179,10 @@ spec:
         tls:
           - hosts:
               - *host
+      thanosService:
+        enabled: true
+      thanosServiceMonitor:
+        enabled: true
       prometheusSpec:
         replicas: 3
         replicaExternalLabelName: __replica__
@@ -193,9 +193,20 @@ spec:
         probeSelectorNilUsesHelmValues: false
         enableAdminAPI: true
         walCompression: true
-        remoteWrite:
-          - url: http://thanos-receive.monitoring.svc.cluster.local:19291/api/v1/receive
-        remoteWriteDashboards: true
+        thanos:
+          image: quay.io/thanos/thanos:v0.30.2
+          objectStorageConfig:
+            name: thanos-objstore-secret
+            key: objstore.yml
+        retention: 2d
+        retentionSize: 15GB
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              resources:
+                requests:
+                  storage: 20Gi
         additionalScrapeConfigs:
           - job_name: coredns
             scrape_interval: 1m
@@ -267,7 +278,7 @@ spec:
             scrape_timeout: 10s
             honor_timestamps: true
             static_configs:
-              - targets: ["192.168.254.4:8080"]  # router
+              - targets: ["192.168.254.4:8080"] # router
           - job_name: vnstat
             scrape_interval: 1m
             scrape_timeout: 10s
