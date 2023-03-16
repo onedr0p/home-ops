@@ -85,21 +85,19 @@ spec:
           - name: PrometheusWatcher
             rules:
               - alert: PrometheusDown
+                annotations:
+                  summary: A Prometheus has disappeared from Prometheus target discovery   
                 expr: absent(up{job="kube-prometheus-stack-prometheus"})
                 for: 15m
+                labels:
+                  severity: critical 
       persistence:
         enabled: true
         storageClass: local-path
         size: 20Gi
-    # receiveDistributor:
-    #   enabled: true
-    #   replicaCount: 3
-    #   replicaLabel: __replica__
-    #   extraFlags: ["--receive.hashrings-algorithm=ketama"]
     receive:
       enabled: true
       replicaCount: 3
-      mode: standalone # dual-mode
       replicaLabel: __replica__
       tsdbRetention: 2d
       extraFlags:
