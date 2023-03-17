@@ -62,7 +62,7 @@ if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
         "${sonarr_episodefile_episodenumbers:-"20"}" \
         "${sonarr_episodefile_episodetitles:-"Space Mutiny"}" \
         "${sonarr_episodefile_quality:-"DVD"}"
-    printf -v PUSHOVER_MESSAGE "%s" "${sonarr_release_episodeoverviews:-"Episode overview not available"}"
+    printf -v PUSHOVER_MESSAGE "%s" "${sonarr_release_episodeoverviews:-"Episode plot summary not available"}"
     printf -v PUSHOVER_URL "https://%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug:-""}"
     printf -v PUSHOVER_URL_TITLE "View series in %s" "${sonarr_instancename:-Sonarr}"
 fi
