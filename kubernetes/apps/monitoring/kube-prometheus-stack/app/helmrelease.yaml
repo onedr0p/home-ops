@@ -42,10 +42,10 @@ spec:
           - name: "null" # quote
           - name: pushover
             pushover_configs:
-              - url_title: View in Alert Manager
+              - url_title: View in Alertmanager
                 token: "${SECRET_ALERTMANAGER_PUSHOVER_TOKEN}"
                 user_key: "${SECRET_ALERTMANAGER_PUSHOVER_USER_KEY}"
-                send_resolved: true
+                send_resolved: false
                 html: true
                 sound: gamelan
                 priority: |-
@@ -77,7 +77,7 @@ spec:
                   {{- end }}
         route:
           group_by: ["alertname", "job"]
-          group_wait: 45s
+          group_wait: 1m
           group_interval: 10m
           repeat_interval: 12h
           receiver: pushover
