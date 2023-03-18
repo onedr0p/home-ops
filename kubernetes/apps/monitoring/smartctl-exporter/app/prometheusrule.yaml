@@ -11,8 +11,7 @@ spec:
       rules:
         - alert: SmartDeviceHighTemperature
           annotations:
-            summary: >-
-              Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+            summary: Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
               has a temperature higher than 50°C.
           expr: smartctl_device_temperature > 50
           for: 15m
@@ -20,8 +19,7 @@ spec:
             severity: critical
         - alert: SmartDeviceTestFailed
           annotations:
-            summary: >-
-              Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+            summary: Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
               did not pass its SMART test.
           expr: |
             (
@@ -34,8 +32,7 @@ spec:
             severity: critical
         - alert: SmartDeviceCriticalWarning
           annotations:
-            summary: >-
-              Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+            summary: Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
               is in a critical state.
           expr: smartctl_device_critical_warning != 0
           for: 15m
@@ -46,8 +43,7 @@ spec:
         #
         - alert: SmartDeviceMediaErrors
           annotations:
-            summary: >-
-              Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+            summary: Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
               has media errors.
           expr: smartctl_device_media_errors != 0
           for: 15m
@@ -55,8 +51,7 @@ spec:
             severity: critical
         - alert: SmartDeviceAvailableSpareUnderThreadhold
           annotations:
-            summary: >-
-              Device {{ $labels.device }} on instance {{ $labels.instance }}
+            summary: Device {{ $labels.device }} on instance {{ $labels.instance }}
               is under available spare threashold.
           expr: smartctl_device_available_spare_threshold > smartctl_device_available_spare
           for: 15m
@@ -64,8 +59,7 @@ spec:
             severity: critical
         - alert: SmartDeviceInterfaceSlow
           annotations:
-            summary: >-
-              Device {{ $labels.device }} on instance {{ $labels.instance }}
+            summary: Device {{ $labels.device }} on instance {{ $labels.instance }}
               interface is slower then it should be.
           expr: |
             smartctl_device_interface_speed{speed_type="current"} != on(device, instance, namespace, pod) smartctl_device_interface_speed{speed_type="max"}
