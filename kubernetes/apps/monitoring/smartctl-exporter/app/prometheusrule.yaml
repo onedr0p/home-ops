@@ -1,0 +1,45 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: smartctl-exporter-rules
+  namespace: monitoring
+spec:
+  groups:
+    - name: smartctl-exporter.rules
+      rules:
+        - alert: SmartDeviceHighTemperature
+          annotations:
+            summary: >-
+              Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+              has a temperature higher than 50°C
+          expr: |
+            smartctl_device_temperature > 50
+          for: 15m
+          labels:
+            severity: critical
+        - alert: SmartDeviceTestFailed
+          annotations:
+            summary: >-
+              Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+              did not pass its SMART test
+          expr: |
+            (
+              smartctl_device_smart_status != 1
+            or
+              smartctl_device_status != 1
+            )
+          for: 15m
+          labels:
+            severity: critical
+        - alert: SmartDeviceCriticalWarning
+          annotations:
+            summary: >-
+              Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+              is in a critical state
+          expr: |
+            smartctl_device_critical_warning != 0
+          for: 15m
+          labels:
+            severity: critical
