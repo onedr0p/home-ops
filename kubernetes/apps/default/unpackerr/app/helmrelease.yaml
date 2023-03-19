@@ -27,6 +27,10 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/onedr0p/unpackerr
       tag: 0.11.1@sha256:abd5d66d1404eb6814937fb2d2051b7d6dbb83e8ae46040ef330f99231cd487e
@@ -34,25 +38,13 @@ spec:
       TZ: America/New_York
       UN_SONARR_0_URL: http://sonarr.default.svc.cluster.local
       UN_SONARR_0_PATHS_0: /complete/sonarr
-      UN_SONARR_0_API_KEY:
-        valueFrom:
-          secretKeyRef:
-            name: sonarr-secret
-            key: SONARR__API_KEY
       UN_RADARR_0_URL: http://radarr.default.svc.cluster.local
       UN_RADARR_0_PATHS_0: /complete/radarr
-      UN_RADARR_0_API_KEY:
-        valueFrom:
-          secretKeyRef:
-            name: radarr-secret
-            key: RADARR__API_KEY
       UN_LIDARR_0_URL: http://lidarr.default.svc.cluster.local
       UN_LIDARR_0_PATHS_0: /complete/lidarr
-      UN_LIDARR_0_API_KEY:
-        valueFrom:
-          secretKeyRef:
-            name: lidarr-secret
-            key: LIDARR__API_KEY
+    envFrom:
+      - secretRef:
+          name: unpackerr-secret
     service:
       main:
         enabled: false
@@ -62,9 +54,6 @@ spec:
       fsGroup: 568
       fsGroupChangePolicy: OnRootMismatch
       supplementalGroups: [10000]
-    podAnnotations:
-      secret.reloader.stakater.com/reload: |-
-        lidarr-secret,radarr-secret,sonarr-secret
     persistence:
       complete:
         enabled: true
