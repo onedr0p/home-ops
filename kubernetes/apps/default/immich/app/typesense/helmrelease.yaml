@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app immich-server
+  name: immich-typesense
   namespace: default
 spec:
   interval: 15m
@@ -26,28 +26,14 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
-  dependsOn:
-    - name: immich-redis
-    - name: immich-typesense
   values:
-    initContainers:
-      01-init-db:
-        image: ghcr.io/onedr0p/postgres-initdb:14.7
-        imagePullPolicy: IfNotPresent
-        envFrom:
-          - secretRef:
-              name: immich-secret
     controller:
-      replicas: 2
-      strategy: RollingUpdate
+      type: statefulset
       annotations:
         reloader.stakater.com/auto: "true"
     image:
-      repository: ghcr.io/immich-app/immich-server
-      tag: v1.51.0
-    command: /bin/sh
-    args:
-      - ./start-server.sh
+      repository: docker.io/typesense/typesense
+      tag: 0.24.0
     envFrom:
       - secretRef:
           name: immich-secret
@@ -57,19 +43,13 @@ spec:
       main:
         ports:
           http:
-            port: 3001
-    persistence:
-      library:
-        enabled: true
-        existingClaim: immich-nfs
-        mountPath: /usr/src/app/upload
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: *app
+            port: 8108
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
     resources:
       requests:
         cpu: 100m
