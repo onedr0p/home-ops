@@ -1,6 +1,6 @@
 # NAS
 
-Outside of using [Ansible](https://github.com/ansible/ansible) for configuring the OS, there are some manual steps I did to set it up.
+Outside of using [Ansible](https://github.com/ansible/ansible) for configuring the OS, there are some manual steps I did to set up ZFS on Ubuntu.
 
 ## ZFS
 
@@ -55,24 +55,38 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
 
 ### Snapshots
 
-1. Add or replace the file `/etc/sanoid/sanoid.conf`
-    ```ini
-    [eros/Media]
-    use_template = media
+1. Add or replace the file `/etc/zrepl/zrepl.yml`
+    ```yaml
+    global:
+      logging:
+        - type: syslog
+          format: human
+          level: warn
+      monitoring:
+        - type: prometheus
+          listen: :9811
+          listen_freebind: true
 
-    [template_media]
-    frequently = 0
-    hourly = 0
-    daily = 7
-    monthly = 0
-    yearly = 0
-    autosnap = yes
-    autoprune = yes
+    jobs:
+      - name: daily
+        type: snap
+        filesystems:
+          "eros<": true
+        snapshotting:
+          type: cron
+          cron: "0 3 * * *"
+          prefix: zrepl_daily_
+          timestamp_format: dense
+        pruning:
+          keep:
+            - type: last_n
+              count: 7
+              regex: "^zrepl_daily_.*$"
     ```
 
-2. Start and enable sanoid
+2. Start and enable zrepl
     ```sh
-    sudo systemctl enable --now sanoid.timer
+    sudo systemctl enable --now zrepl.service
     ```
 
 3. Give a local user access to a specific datasets snapshots
@@ -82,7 +96,7 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
 
 ## NFS
 
-### Local NFS Shares
+### Non ZFS NFS Shares
 
 1. Add or replace file `/etc/exports.d/local.exports`
     ```text
