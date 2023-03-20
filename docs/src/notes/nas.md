@@ -55,6 +55,8 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
 
 ### Snapshots
 
+Install zrepl by following [these](https://zrepl.github.io/installation/apt-repos.html) instructions.
+
 1. Add or replace the file `/etc/zrepl/zrepl.yml`
     ```yaml
     global:
@@ -129,4 +131,4 @@ sudo badblocks -b 4096 -wsv /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZJV01MC5
 
 ### Lenovo SA120
 
-Due to the loudness of the fans, they can be adjusted by using <ins>[AndrewX192/lenovo-sa120-fanspeed-utility](https://github.com/AndrewX192/lenovo-sa120-fanspeed-utility.git)</ins>.
+Due to the loudness of the fans, they can be adjusted by using [AndrewX192/lenovo-sa120-fanspeed-utility](https://github.com/AndrewX192/lenovo-sa120-fanspeed-utility.git).

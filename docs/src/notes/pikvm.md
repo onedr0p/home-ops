@@ -213,7 +213,7 @@ systemctl enable --now prometheus-node-exporter
       disable: true
 
     client:
-      url: "https://loki.$domain/loki/api/v1/push"
+      url: "https://loki.devbu.io/loki/api/v1/push"
 
     positions:
       filename: /tmp/positions.yaml

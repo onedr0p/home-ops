@@ -1,5 +1,9 @@
 # Opnsense
 
+```admonish warning
+I am no longer use Opnsense therefor this document will likely not be updated anymore.
+```
+
 ## BGP
 
 Instead of using Metallb for L2/L3 load balancer IPs I am using the Kubernetes Calico CNI with BGP which allows me to advertise load balancer IPs directly over BGP. This has some benefits like having equal cost multipath (ECMP) for scaled workloads in my cluster.
@@ -82,7 +86,7 @@ While kube-vip is very nice for having a API server ready to go and running in y
 
 ## Receive Side Scaling (RSS)
 
-RSS is used to distribute packets over CPU cores using a hashing function – either with support in the hardware which offloads the hashing for you, or in software. Click <ins>[here](https://forum.opnsense.org/index.php?topic=24409.0)</ins> to learn more about it.
+RSS is used to distribute packets over CPU cores using a hashing function – either with support in the hardware which offloads the hashing for you, or in software. Click [here](https://forum.opnsense.org/index.php?topic=24409.0) to learn more about it.
 
 
 1. System > Settings > Tunables

@@ -10,7 +10,7 @@ This requires installing the Backblaze `b2` CLI tool
 
 ### Creating a bucket
 
-1. Create master `key-id` and `key` on <ins>[Account > App Keys](https://secure.backblaze.com/app_keys.htm)</ins>
+1. Create master `key-id` and `key` on [Account > App Keys](https://secure.backblaze.com/app_keys.htm)
 
 2. Export settings
     ```sh

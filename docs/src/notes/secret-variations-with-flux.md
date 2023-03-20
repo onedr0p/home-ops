@@ -1,8 +1,8 @@
 # Secret variations with Flux
 
-There are several different ways to utilize Kubernetes secrets when using <ins>[Flux](https://fluxcd.io/)</ins> and <ins>[SOPS](https://github.com/mozilla/sops)</ins>, here’s a breakdown of some common methods.
+There are several different ways to utilize Kubernetes secrets when using [Flux](https://fluxcd.io/) and [SOPS](https://github.com/mozilla/sops), here’s a breakdown of some common methods.
 
-_I will not be covering how to integrate SOPS into Flux for that be sure to check out the <ins>[Flux documentation on integrating SOPS](https://fluxcd.io/docs/guides/mozilla-sops/)</ins>_
+_I will not be covering how to integrate SOPS into Flux for that be sure to check out the [Flux documentation on integrating SOPS](https://fluxcd.io/docs/guides/mozilla-sops/)_
 
 ## Example Secret
 
@@ -31,7 +31,7 @@ envFrom:
 ```
 
 ```admonish example
-View example <ins>[Helm Release](https://ln.devbu.io/ngLju)</ins> and corresponding <ins>[Secret](https://ln.devbu.io/ULgnl)</ins>.
+View example [Helm Release](https://ln.devbu.io/ngLju) and corresponding [Secret](https://ln.devbu.io/ULgnl).
 ```
 
 ### Method 2: `env.valueFrom`
@@ -48,7 +48,7 @@ env:
 ```
 
 ```admonish example
-View example <ins>[Helm Release](https://ln.devbu.io/0lbMT)</ins> and corresponding <ins>[Secret](https://ln.devbu.io/KYjhP)</ins>.
+View example [Helm Release](https://ln.devbu.io/0lbMT) and corresponding [Secret](https://ln.devbu.io/KYjhP).
 ```
 
 ### Method 3: `spec.valuesFrom`
@@ -66,12 +66,12 @@ valuesFrom:
 ```
 
 ```admonish example
-View example <ins>[Helm Release](https://ln.devbu.io/ARdun)</ins> and corresponding <ins>[Secret](https://ln.devbu.io/hNef8)</ins>.
+View example [Helm Release](https://ln.devbu.io/ARdun) and corresponding [Secret](https://ln.devbu.io/hNef8).
 ```
 
 ### Method 4: Variable Substitution with Flux
 
-> _Flux variable substitution can inject secrets into any YAML manifest. This requires the <ins>[Flux Kustomization](https://fluxcd.io/docs/components/kustomize/kustomization/)</ins> configured to enable <ins>[variable substitution](https://fluxcd.io/docs/components/kustomize/kustomization/#variable-substitution)</ins>. Correctly configured this allows you to use `${GLOBAL_AWESOME_SECRET}` in any YAML manifest._
+> _Flux variable substitution can inject secrets into any YAML manifest. This requires the [Flux Kustomization](https://fluxcd.io/docs/components/kustomize/kustomization/) configured to enable [variable substitution](https://fluxcd.io/docs/components/kustomize/kustomization/#variable-substitution). Correctly configured this allows you to use `${GLOBAL_AWESOME_SECRET}` in any YAML manifest._
 
 ```yaml
 apiVersion: v1
@@ -100,12 +100,12 @@ spec:
 ```
 
 ```admonish example
-View example <ins>[Fluxtomization](https://ln.devbu.io/ZMbfI)</ins>, <ins>[Helm Release](https://ln.devbu.io/y6DJS)</ins>, and corresponding <ins>[Secret](https://ln.devbu.io/kRoHj)</ins>.
+View example [Fluxtomization](https://ln.devbu.io/ZMbfI), [Helm Release](https://ln.devbu.io/y6DJS), and corresponding [Secret](https://ln.devbu.io/kRoHj).
 ```
 
 ## Final Thoughts
 
-* For the first **three methods** consider using a tool like <ins>[stakater/reloader](https://github.com/stakater/Reloader)</ins> to restart the pod when the secret changes.
+* For the first **three methods** consider using a tool like [stakater/reloader](https://github.com/stakater/Reloader) to restart the pod when the secret changes.
 
 * Using reloader on a pod using a secret provided by Flux Variable Substitution will lead to pods being restarted during any change to the secret while related to the pod or not.
 
