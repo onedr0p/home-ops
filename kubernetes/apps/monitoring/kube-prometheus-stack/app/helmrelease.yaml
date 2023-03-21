@@ -45,33 +45,29 @@ spec:
               - url_title: View in Alertmanager
                 token: "${SECRET_ALERTMANAGER_PUSHOVER_TOKEN}"
                 user_key: "${SECRET_ALERTMANAGER_PUSHOVER_USER_KEY}"
-                send_resolved: false
+                send_resolved: true
                 html: true
                 sound: gamelan
                 priority: |-
                   {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
                 title: |-
-                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+                   {{ .CommonLabels.alertname }} [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}]
                 message: |-
                   {{- range .Alerts }}
-                    {{- if ne .Labels.severity "" }}
-                      <b>Severity:</b> <i>{{ .Labels.severity }}</i>
-                    {{- else }}
-                      <b>Severity:</b> <i>N/A</i>
-                    {{- end }}
+                    <b>Severity:</b> {{ or .Labels.severity "N/A" }}
                     {{- if ne .Annotations.description "" }}
-                      <b>Description:</b> <i>{{ .Annotations.description }}</i>
+                      <b>Description:</b> {{ .Annotations.description }}
                     {{- else if ne .Annotations.summary "" }}
-                      <b>Summary:</b> <i>{{ .Annotations.summary }}</i>
+                      <b>Description:</b> {{ .Annotations.summary }}
                     {{- else if ne .Annotations.message "" }}
-                      <b>Message:</b> <i>{{ .Annotations.message }}</i>
+                      <b>Description:</b> {{ .Annotations.message }}
                     {{- else }}
-                      <b>Description:</b> <i>N/A</i>
+                      <b>Description:</b> N/A
                     {{- end }}
+
                     {{- if gt (len .Labels.SortedPairs) 0 }}
-                      <b>Details:</b>
                       {{- range .Labels.SortedPairs }}
-                        • <b>{{ .Name }}:</b> <i>{{ .Value }}</i>
+                        <small><b>{{ .Name }}:</b> {{ .Value }}</small>
                       {{- end }}
                     {{- end }}
                   {{- end }}
