@@ -56,13 +56,15 @@ fi
 # Send notification on Download or Upgrade
 #
 if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
-    printf -v PUSHOVER_TITLE "%s - S%02dE%02d - %s [%s]" \
+    printf -v PUSHOVER_TITLE "New Episode %s" "${sonarr_eventtype:-Download}"
+    printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n\n<b>Title:</b> %s</small><small>\n<b>Quality:</b> %s</small><small>\n<b>Client:</b> %s</small><small>\n<b>Upgrade:</b> %s</small>" \
         "${sonarr_series_title:-"Mystery Science Theater 3000"}" \
         "${sonarr_episodefile_seasonnumber:-"8"}" \
         "${sonarr_episodefile_episodenumbers:-"20"}" \
         "${sonarr_episodefile_episodetitles:-"Space Mutiny"}" \
-        "${sonarr_episodefile_quality:-"DVD"}"
-    printf -v PUSHOVER_MESSAGE "%s" "${sonarr_release_episodeoverviews:-"Episode plot summary not available"}"
+        "${sonarr_episodefile_quality:-"DVD"}" \
+        "${sonarr_download_client:-"qbittorrent"}" \
+        "${sonarr_isupgrade:-"No"}"
     printf -v PUSHOVER_URL "https://%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug:-""}"
     printf -v PUSHOVER_URL_TITLE "View series in %s" "${sonarr_instancename:-Sonarr}"
 fi
@@ -77,7 +79,8 @@ notification=$(jq -n \
     --arg priority "${PUSHOVER_PRIORITY}" \
     --arg sound "${PUSHOVER_SOUND}" \
     --arg device "${PUSHOVER_DEVICE}" \
-    '{token: $token, user: $user, title: $title, message: $message, url: $url, url_title: $url_title, priority: $priority, sound: $sound, device: $device}' \
+    --arg html "1" \
+    '{token: $token, user: $user, title: $title, message: $message, url: $url, url_title: $url_title, priority: $priority, sound: $sound, device: $device, html: $html}' \
 )
 
 status_code=$(curl \

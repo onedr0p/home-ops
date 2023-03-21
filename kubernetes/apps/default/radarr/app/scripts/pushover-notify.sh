@@ -56,11 +56,13 @@ fi
 # Send notification on Download or Upgrade
 #
 if [[ "${radarr_eventtype:-}" == "Download" ]]; then
-    printf -v PUSHOVER_TITLE "%s (%s) [%s]" \
+    printf -v PUSHOVER_TITLE "New Movie %s" "${radarr_eventtype:-Download}"
+    printf -v PUSHOVER_MESSAGE "<b>%s (%s)</b><small>\n\n<b>Quality:</b> %s</small><small>\n<b>Client:</b> %s</small><small>\n<b>Upgrade:</b> %s</small>" \
         "${radarr_movie_title:-"The Lord of the Rings: The Return of the King"}" \
         "${radarr_movie_year:-"2003"}" \
-        "${radarr_moviefile_quality:-"Bluray-1080p"}"
-    printf -v PUSHOVER_MESSAGE "%s" "${radarr_movie_overview:-"Movie plot summary not available"}"
+        "${radarr_moviefile_quality:-"Bluray-1080p"}" \
+        "${radarr_download_client:-"qbittorrent"}" \
+        "${radarr_isupgrade:-"No"}"
     printf -v PUSHOVER_URL "https://%s/movie/%s" "${radarr_applicationurl:-localhost}" "${radarr_movie_tmdbid:-"122"}"
     printf -v PUSHOVER_URL_TITLE "View movie in %s" "${radarr_instancename:-Radarr}"
 fi
@@ -75,7 +77,8 @@ notification=$(jq -n \
     --arg priority "${PUSHOVER_PRIORITY}" \
     --arg sound "${PUSHOVER_SOUND}" \
     --arg device "${PUSHOVER_DEVICE}" \
-    '{token: $token, user: $user, title: $title, message: $message, url: $url, url_title: $url_title, priority: $priority, sound: $sound, device: $device}' \
+    --arg html "1" \
+    '{token: $token, user: $user, title: $title, message: $message, url: $url, url_title: $url_title, priority: $priority, sound: $sound, device: $device, html: $html}' \
 )
 
 status_code=$(curl \
