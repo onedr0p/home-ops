@@ -3,7 +3,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - github.com/fluxcd/flux2/manifests/install?ref=v0.41.1
+  - github.com/fluxcd/flux2/manifests/install?ref=v0.41.2
 patches:
   - patch: |
       $patch: delete
@@ -15,45 +15,3 @@ patches:
       group: networking.k8s.io
       version: v1
       kind: NetworkPolicy
-  - patch: |
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: not-used
-      spec:
-        template:
-          spec:
-            containers:
-              - name: manager
-                resources:
-                  requests:
-                    memory: 512Mi
-                  limits:
-                    memory: "2Gi"
-    target:
-      kind: Deployment
-      labelSelector: control-plane=controller
-  - patch: |
-      - op: add
-        path: /spec/versions/0/schema/openAPIV3Schema/properties/spec/properties/eventSources/items/properties/kind/enum/-
-        value: Terraform
-    target:
-      kind: CustomResourceDefinition
-      name: alerts.notification.toolkit.fluxcd.io
-  - patch: |
-      - op: add
-        path: /spec/versions/0/schema/openAPIV3Schema/properties/spec/properties/resources/items/properties/kind/enum/-
-        value: Terraform
-    target:
-      kind: CustomResourceDefinition
-      name: receivers.notification.toolkit.fluxcd.io
-  - patch: |
-      - op: add
-        path: /rules/-
-        value:
-          apiGroups: ["infra.contrib.fluxcd.io"]
-          resources: ["*"]
-          verbs: ["*"]
-    target:
-      kind: ClusterRole
-      name: crd-controller-flux-system
