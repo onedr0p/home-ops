@@ -57,14 +57,14 @@ fi
 #
 if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
     printf -v PUSHOVER_TITLE "New Episode %s" "${sonarr_eventtype:-Download}"
-    printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n\n<b>Title:</b> %s</small><small>\n<b>Quality:</b> %s</small><small>\n<b>Client:</b> %s</small><small>\n<b>Upgrade:</b> %s</small>" \
+    printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Quality:</b> %s</small><small>\n<b>Client:</b> %s</small><small>\n<b>Upgrade:</b> %s</small>" \
         "${sonarr_series_title:-"Mystery Science Theater 3000"}" \
         "${sonarr_episodefile_seasonnumber:-"8"}" \
         "${sonarr_episodefile_episodenumbers:-"20"}" \
         "${sonarr_episodefile_episodetitles:-"Space Mutiny"}" \
         "${sonarr_episodefile_quality:-"DVD"}" \
         "${sonarr_download_client:-"qbittorrent"}" \
-        "${sonarr_isupgrade:-"No"}"
+        "${sonarr_isupgrade:-"False"}"
     printf -v PUSHOVER_URL "https://%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug:-""}"
     printf -v PUSHOVER_URL_TITLE "View series in %s" "${sonarr_instancename:-Sonarr}"
 fi

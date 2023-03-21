@@ -57,12 +57,13 @@ fi
 #
 if [[ "${radarr_eventtype:-}" == "Download" ]]; then
     printf -v PUSHOVER_TITLE "New Movie %s" "${radarr_eventtype:-Download}"
-    printf -v PUSHOVER_MESSAGE "<b>%s (%s)</b><small>\n\n<b>Quality:</b> %s</small><small>\n<b>Client:</b> %s</small><small>\n<b>Upgrade:</b> %s</small>" \
+    printf -v PUSHOVER_MESSAGE "<b>%s (%s)</b><small>\n%s</small><small>\n\n<b>Quality:</b> %s</small><small>\n<b>Client:</b> %s</small><small>\n<b>Upgrade:</b> %s</small>" \
         "${radarr_movie_title:-"The Lord of the Rings: The Return of the King"}" \
         "${radarr_movie_year:-"2003"}" \
+        "${radarr_movie_overview:-"Movie plot summary not available"}" \
         "${radarr_moviefile_quality:-"Bluray-1080p"}" \
         "${radarr_download_client:-"qbittorrent"}" \
-        "${radarr_isupgrade:-"No"}"
+        "${radarr_isupgrade:-"False"}"
     printf -v PUSHOVER_URL "https://%s/movie/%s" "${radarr_applicationurl:-localhost}" "${radarr_movie_tmdbid:-"122"}"
     printf -v PUSHOVER_URL_TITLE "View movie in %s" "${radarr_instancename:-Radarr}"
 fi
