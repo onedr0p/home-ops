@@ -55,23 +55,40 @@ resource "cloudflare_record" "public_domain_uptimerobot" {
 
 resource "cloudflare_page_rule" "public_domain_plex_bypass" {
   zone_id  = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
-  target   = "plex.devbu.io/*"
+  target   = "https://plex.devbu.io./*"
   status   = "active"
   priority = 1
 
   actions {
-    cache_level = "bypass"
+    cache_level              = "bypass"
+    rocket_loader            = "off"
+    automatic_https_rewrites = "on"
   }
 }
 
 resource "cloudflare_page_rule" "public_domain_home_assistant_bypass" {
   zone_id  = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
-  target   = "hass.devbu.io/*"
+  target   = "https://hass.devbu.io./*"
   status   = "active"
   priority = 2
 
   actions {
-    cache_level = "bypass"
+    cache_level              = "bypass"
+    rocket_loader            = "off"
+    automatic_https_rewrites = "on"
+  }
+}
+
+resource "cloudflare_page_rule" "public_domain_photos_bypass" {
+  zone_id  = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
+  target   = "https://photos.devbu.io./*"
+  status   = "active"
+  priority = 3
+
+  actions {
+    cache_level              = "bypass"
+    rocket_loader            = "off"
+    automatic_https_rewrites = "on"
   }
 }
 
