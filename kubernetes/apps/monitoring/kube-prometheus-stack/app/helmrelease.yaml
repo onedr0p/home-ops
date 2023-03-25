@@ -54,21 +54,21 @@ spec:
                    {{ .CommonLabels.alertname }} [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}]
                 message: |-
                   {{- range .Alerts }}
-                    <b>Severity:</b> {{ or .Labels.severity "N/A" }}
                     {{- if ne .Annotations.description "" }}
-                      <b>Description:</b> {{ .Annotations.description }}
+                      {{ .Annotations.description }}
                     {{- else if ne .Annotations.summary "" }}
-                      <b>Description:</b> {{ .Annotations.summary }}
+                      {{ .Annotations.summary }}
                     {{- else if ne .Annotations.message "" }}
-                      <b>Description:</b> {{ .Annotations.message }}
+                      {{ .Annotations.message }}
                     {{- else }}
-                      <b>Description:</b> N/A
+                      Alert description not available
                     {{- end }}
-
                     {{- if gt (len .Labels.SortedPairs) 0 }}
+                      <small>
                       {{- range .Labels.SortedPairs }}
-                        <small><b>{{ .Name }}:</b> {{ .Value }}</small>
+                        <b>{{ .Name }}:</b> {{ .Value }}
                       {{- end }}
+                      </small>
                     {{- end }}
                   {{- end }}
         route:
