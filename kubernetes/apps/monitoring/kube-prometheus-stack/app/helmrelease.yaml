@@ -128,13 +128,6 @@ spec:
           multicluster:
             etcd:
               enabled: true
-    kubelet:
-      enabled: true
-      serviceMonitor:
-        metricRelabelings:
-          - action: replace
-            sourceLabels: ["node"]
-            targetLabel: instance
     kube-state-metrics:
       metricLabelsAllowlist: ["persistentvolumeclaims=[*]"]
       prometheus:
@@ -146,25 +139,35 @@ spec:
               replacement: $1
               sourceLabels: ["__meta_kubernetes_pod_node_name"]
               targetLabel: kubernetes_node
+    kubelet:
+      enabled: true
+      serviceMonitor:
+        metricRelabelings:
+          - sourceLabels: ["__name__"]
+            regex: "(apiserver|authentication|cadvisor|container|csi|disabled|get|go|hidden|kubelet|kubernetes|machine|node|plugin|prober|process|registered|rest|scrape|storage|volume|workqueue)_(.+)"
+            action: keep
+          - sourceLabels: ["node"]
+            targetLabel: instance
+            action: replace
     kubeApiServer:
       enabled: true
+      serviceMonitor:
+        metricRelabelings:
+          - sourceLabels: ["__name__"]
+            regex: "(aggregator|apiextensions|apiserver|authenticated|authentication|disabled|etcd|field|get|go|grpc|hidden|kube|kubernetes|node|pod|process|registered|rest|scrape|serviceaccount|watch|workqueue)_(.+)"
+            action: keep
     kubeControllerManager:
       enabled: true
       endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
-    kubeScheduler:
+    kubeEtcd:
       enabled: true
       endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
     kubeProxy:
       enabled: false # Disabled because eBPF
       endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
-    kubeEtcd:
+    kubeScheduler:
       enabled: true
       endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
-      serviceMonitor:
-        metricRelabelings:
-          - sourceLabels: [__name__]
-            regex: "etcd_(.+)"
-            action: keep
     prometheus:
       ingress:
         enabled: true
