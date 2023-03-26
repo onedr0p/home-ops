@@ -64,7 +64,7 @@ if [[ "${radarr_eventtype:-}" == "Download" ]]; then
         "${radarr_moviefile_quality:-"Bluray-1080p"}" \
         "${radarr_download_client:-"qbittorrent"}" \
         "${radarr_isupgrade:-"False"}"
-    printf -v PUSHOVER_URL "https://%s/movie/%s" "${radarr_applicationurl:-localhost}" "${radarr_movie_tmdbid:-"122"}"
+    printf -v PUSHOVER_URL "%s/movie/%s" "${radarr_applicationurl:-localhost}" "${radarr_movie_tmdbid:-"122"}"
     printf -v PUSHOVER_URL_TITLE "View movie in %s" "${radarr_instancename:-Radarr}"
 fi
 
