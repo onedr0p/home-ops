@@ -65,7 +65,7 @@ if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
         "${sonarr_episodefile_quality:-"DVD"}" \
         "${sonarr_download_client:-"qbittorrent"}" \
         "${sonarr_isupgrade:-"False"}"
-    printf -v PUSHOVER_URL "https://%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug:-""}"
+    printf -v PUSHOVER_URL "%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug:-""}"
     printf -v PUSHOVER_URL_TITLE "View series in %s" "${sonarr_instancename:-Sonarr}"
 fi
 
