@@ -129,7 +129,6 @@ spec:
             etcd:
               enabled: true
     kube-state-metrics:
-      # Do not alert on CephFS 'out of inodes'
       metricLabelsAllowlist: ["persistentvolumeclaims=[*]"]
       prometheus:
         monitor:
@@ -159,7 +158,7 @@ spec:
           - sourceLabels: ["__name__"]
             regex: "(aggregator_openapi|aggregator_unavailable|apiextensions_openapi|apiserver_admission|apiserver_audit|apiserver_cache|apiserver_cel|apiserver_client|apiserver_crd|apiserver_current|apiserver_envelope|apiserver_flowcontrol|apiserver_init|apiserver_kube|apiserver_longrunning|apiserver_request|apiserver_requested|apiserver_response|apiserver_selfrequest|apiserver_storage|apiserver_terminated|apiserver_tls|apiserver_watch|apiserver_webhooks|authenticated_user|authentication|disabled_metric|etcd_bookmark|etcd_lease|etcd_request|field_validation|get_token|go|grpc_client|hidden_metric|kube_apiserver|kubernetes_build|kubernetes_feature|node_authorizer|pod_security|process_cpu|process_max|process_open|process_resident|process_start|process_virtual|registered_metric|rest_client|scrape_duration|scrape_samples|scrape_series|serviceaccount_legacy|serviceaccount_stale|serviceaccount_valid|watch_cache|workqueue)_(.+)"
             action: keep
-          # Drop high cardinality metrics
+          # Remove high cardinality metrics
           - sourceLabels: ["__name__"]
             regex: (apiserver|etcd|rest_client)_request(|_sli|_slo)_duration_seconds_bucket
             action: drop
@@ -219,9 +218,20 @@ spec:
         probeSelectorNilUsesHelmValues: false
         enableAdminAPI: true
         walCompression: true
-        remoteWrite:
-          - url: http://thanos-receive.monitoring.svc.cluster.local:19291/api/v1/receive
-        remoteWriteDashboards: true
+        thanos:
+          image: quay.io/thanos/thanos:v0.31.0
+          objectStorageConfig:
+            name: thanos-objstore-secret
+            key: objstore.yml
+        retention: 2d
+        retentionSize: 15GB
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              resources:
+                requests:
+                  storage: 20Gi
         additionalScrapeConfigs:
           - job_name: coredns
             scrape_interval: 1m
