@@ -34,9 +34,11 @@ spec:
       tag: 10.8.9@sha256:01a6497a1290b73f63251aebe6d01327c15b3413c3e1013c2a396ffe116ced4d
     env:
       TZ: America/New_York
-      JELLYFIN_PublishedServerUrl: https://jellyfin.devbu.io
     service:
       main:
+        type: LoadBalancer
+        externalIPs: ["192.168.69.105"]
+        externalTrafficPolicy: Local
         ports:
           http:
             port: &port 8096
@@ -107,4 +109,4 @@ spec:
         memory: 1000Mi
       limits:
         gpu.intel.com/i915: 1
-        memory: 6000Mi
+        memory: 4000Mi
