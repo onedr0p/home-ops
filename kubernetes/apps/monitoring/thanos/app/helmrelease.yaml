@@ -92,7 +92,12 @@ spec:
         - --web.prefix-header=X-Forwarded-Prefix
       alertmanagersConfig:
         value: |-
-          alertmanagers: ["http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093"]
+          alertmanagers:
+            - api_version: v2
+              scheme: http
+              timeout: 10s
+              static_configs:
+                - kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
       rules:
         value: |-
           groups:
