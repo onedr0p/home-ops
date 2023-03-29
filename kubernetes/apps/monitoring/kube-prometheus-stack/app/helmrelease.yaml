@@ -204,10 +204,10 @@ spec:
         tls:
           - hosts:
               - *host
-      thanosService:
-        enabled: true
-      thanosServiceMonitor:
-        enabled: true
+      # thanosService:
+      #   enabled: true
+      # thanosServiceMonitor:
+      #   enabled: true
       prometheusSpec:
         replicas: 3
         replicaExternalLabelName: __replica__
@@ -218,22 +218,22 @@ spec:
         probeSelectorNilUsesHelmValues: false
         enableAdminAPI: true
         walCompression: true
-        # remoteWrite:
-        #   - url: http://thanos-receive-router.monitoring.svc.cluster.local:19291/api/v1/receive
-        thanos:
-          image: quay.io/thanos/thanos:v0.31.0
-          objectStorageConfig:
-            name: thanos-objstore-secret
-            key: objstore.yml
-        retention: 2d
-        retentionSize: 15GB
-        storageSpec:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: local-path
-              resources:
-                requests:
-                  storage: 20Gi
+        remoteWrite:
+          - url: http://thanos-receive-router.monitoring.svc.cluster.local:19291/api/v1/receive
+        # thanos:
+        #   image: quay.io/thanos/thanos:v0.31.0
+        #   objectStorageConfig:
+        #     name: thanos-objstore-secret
+        #     key: objstore.yml
+        # retention: 2d
+        # retentionSize: 15GB
+        # storageSpec:
+        #   volumeClaimTemplate:
+        #     spec:
+        #       storageClassName: local-path
+        #       resources:
+        #         requests:
+        #           storage: 20Gi
         additionalScrapeConfigs:
           - job_name: coredns
             scrape_interval: 1m

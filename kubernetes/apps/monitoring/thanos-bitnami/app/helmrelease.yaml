@@ -1,0 +1,127 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: thanos
+  namespace: monitoring
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: thanos
+      version: 12.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: flux-system
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    image:
+      registry: quay.io
+      repository: thanos/thanos
+      tag: v0.31.0
+    objstoreConfig:
+      type: s3
+      config:
+        insecure: true
+    queryFrontend:
+      enabled: true
+      replicaCount: 3
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          nginx.ingress.kubernetes.io/whitelist-source-range: |
+            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+          hajimari.io/enable: "false"
+        hostname: &host thanos-query-frontend.devbu.io
+        tls: true
+        extraTls:
+          - hosts:
+              - *host
+    query:
+      enabled: true
+      replicaCount: 3
+      replicaLabel: ["__replica__"]
+      dnsDiscovery:
+        sidecarsService: kube-prometheus-stack-thanos-discovery
+        sidecarsNamespace: monitoring
+    bucketweb:
+      enabled: true
+      replicaCount: 3
+    compactor:
+      enabled: true
+      extraFlags:
+        - --compact.concurrency=4
+        - --delete-delay=30m
+      retentionResolutionRaw: 14d
+      retentionResolution5m: 14d
+      retentionResolution1h: 14d
+      persistence:
+        enabled: true
+        storageClass: local-path
+        size: 20Gi
+    storegateway:
+      enabled: true
+      replicaCount: 3
+      persistence:
+        enabled: true
+        storageClass: local-path
+        size: 20Gi
+    ruler:
+      enabled: true
+      replicaCount: 3
+      replicaLabel: __replica__
+      alertmanagers: ["http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093"]
+      extraFlags: ["--web.prefix-header=X-Forwarded-Prefix"]
+      config: |-
+        groups:
+          - name: PrometheusWatcher
+            rules:
+              - alert: PrometheusDown
+                annotations:
+                  summary: A Prometheus has disappeared from Prometheus target discovery
+                expr: absent(up{job="kube-prometheus-stack-prometheus"})
+                for: 5m
+                labels:
+                  severity: critical
+      persistence:
+        enabled: true
+        storageClass: local-path
+        size: 20Gi
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+  valuesFrom:
+    - targetPath: objstoreConfig.config.bucket
+      kind: ConfigMap
+      name: thanos-bucket-v1
+      valuesKey: BUCKET_NAME
+    - targetPath: objstoreConfig.config.endpoint
+      kind: ConfigMap
+      name: thanos-bucket-v1
+      valuesKey: BUCKET_HOST
+    - targetPath: objstoreConfig.config.region
+      kind: ConfigMap
+      name: thanos-bucket-v1
+      valuesKey: BUCKET_REGION
+    - targetPath: objstoreConfig.config.access_key
+      kind: Secret
+      name: thanos-bucket-v1
+      valuesKey: AWS_ACCESS_KEY_ID
+    - targetPath: objstoreConfig.config.secret_key
+      kind: Secret
+      name: thanos-bucket-v1
+      valuesKey: AWS_SECRET_ACCESS_KEY
