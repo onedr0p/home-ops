@@ -2,15 +2,13 @@ data "http" "ipv4" {
   url = "http://ipv4.icanhazip.com"
 }
 
-data "cloudflare_zones" "public_domain" {
-  filter {
-    name = "devbu.io"
-  }
+data "cloudflare_zone" "public_domain" {
+  name = "devbu.io"
 }
 
 resource "cloudflare_record" "public_domain_apex" {
   name    = "ipv4"
-  zone_id = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
+  zone_id = data.cloudflare_zone.public_domain.id
   value   = chomp(data.http.ipv4.response_body)
   proxied = true
   type    = "A"
@@ -19,7 +17,7 @@ resource "cloudflare_record" "public_domain_apex" {
 
 resource "cloudflare_record" "public_domain_root" {
   name    = "devbu.io"
-  zone_id = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
+  zone_id = data.cloudflare_zone.public_domain.id
   value   = "ipv4.devbu.io"
   proxied = true
   type    = "CNAME"
@@ -28,7 +26,7 @@ resource "cloudflare_record" "public_domain_root" {
 
 resource "cloudflare_record" "public_domain_www" {
   name    = "www"
-  zone_id = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
+  zone_id = data.cloudflare_zone.public_domain.id
   value   = "ipv4.devbu.io"
   proxied = true
   type    = "CNAME"
@@ -37,7 +35,7 @@ resource "cloudflare_record" "public_domain_www" {
 
 resource "cloudflare_record" "public_domain_public_cname" {
   name    = data.sops_file.secrets.data["cloudflare_unproxied_cname"]
-  zone_id = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
+  zone_id = data.cloudflare_zone.public_domain.id
   value   = "ipv4.devbu.io"
   proxied = false
   type    = "CNAME"
@@ -46,7 +44,7 @@ resource "cloudflare_record" "public_domain_public_cname" {
 
 resource "cloudflare_record" "public_domain_uptimerobot" {
   name    = "status"
-  zone_id = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
+  zone_id = data.cloudflare_zone.public_domain.id
   value   = "stats.uptimerobot.com"
   proxied = false
   type    = "CNAME"
@@ -54,7 +52,7 @@ resource "cloudflare_record" "public_domain_uptimerobot" {
 }
 
 resource "cloudflare_page_rule" "public_domain_plex_bypass" {
-  zone_id  = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
+  zone_id  = data.cloudflare_zone.public_domain.id
   target   = "https://plex.devbu.io./*"
   status   = "active"
   priority = 1
@@ -67,7 +65,7 @@ resource "cloudflare_page_rule" "public_domain_plex_bypass" {
 }
 
 resource "cloudflare_page_rule" "public_domain_home_assistant_bypass" {
-  zone_id  = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
+  zone_id  = data.cloudflare_zone.public_domain.id
   target   = "https://hass.devbu.io./*"
   status   = "active"
   priority = 2
@@ -80,7 +78,7 @@ resource "cloudflare_page_rule" "public_domain_home_assistant_bypass" {
 }
 
 resource "cloudflare_page_rule" "public_domain_photos_bypass" {
-  zone_id  = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
+  zone_id  = data.cloudflare_zone.public_domain.id
   target   = "https://photos.devbu.io./*"
   status   = "active"
   priority = 3
@@ -93,7 +91,7 @@ resource "cloudflare_page_rule" "public_domain_photos_bypass" {
 }
 
 resource "cloudflare_zone_settings_override" "public_domain_settings" {
-  zone_id = lookup(data.cloudflare_zones.public_domain.zones[0], "id")
+  zone_id = data.cloudflare_zone.public_domain.id
   settings {
     ssl                      = "strict"
     always_use_https         = "on"
