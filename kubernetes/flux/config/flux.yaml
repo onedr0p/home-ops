@@ -53,6 +53,16 @@ spec:
         kind: Deployment
         name: "(kustomize-controller|helm-controller|source-controller)"
     - patch: |
+        - op: add
+          path: /spec/template/spec/containers/0/args/-
+          value: --feature-gates=DetectDrift=true,CorrectDrift=false
+        - op: add
+          path: /spec/template/spec/containers/0/args/-
+          value: --log-level=debug
+      target:
+        kind: Deployment
+        name: helm-controller
+    - patch: |
         apiVersion: apps/v1
         kind: Deployment
         metadata:
@@ -68,7 +78,7 @@ spec:
                       memory: 2Gi
       target:
         kind: Deployment
-        name: "(kustomize-controller|helm-controller|source-controller)"
+        name: (kustomize-controller|helm-controller|source-controller)
     - patch: |
         - op: add
           path: /spec/versions/1/schema/openAPIV3Schema/properties/spec/properties/eventSources/items/properties/kind/enum/-
