@@ -1,0 +1,80 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: descheduler
+  namespace: kube-system
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: descheduler
+      version: 0.26.0
+      sourceRef:
+        kind: HelmRepository
+        name: descheduler
+        namespace: flux-system
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    kind: Deployment
+    deschedulerPolicy:
+      strategies:
+        RemoveDuplicates:
+          enabled: true
+        RemovePodsViolatingNodeTaints:
+          enabled: true
+        RemovePodsViolatingNodeAffinity:
+          enabled: true
+          params:
+            nodeAffinityType: ["requiredDuringSchedulingIgnoredDuringExecution"]
+        RemovePodsViolatingTopologySpreadConstraint:
+          enabled: true
+          params:
+            includeSoftConstraints: true
+        RemovePodsViolatingInterPodAntiAffinity:
+          enabled: true
+          params:
+            nodeFit: true
+        LowNodeUtilization:
+          enabled: false
+        RemoveFailedPods:
+          enabled: true
+          params:
+            failedPods:
+              includingInitContainers: true
+              excludeOwnerKinds: ["Job"]
+              minPodLifetimeSeconds: 3600
+        RemovePodsHavingTooManyRestarts:
+          enabled: true
+          params:
+            podsHavingTooManyRestarts:
+              podRestartThreshold: 100
+              includingInitContainers: true
+    service:
+      enabled: true
+    serviceMonitor:
+      enabled: true
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "descheduler"
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values: ["descheduler"]
+              topologyKey: kubernetes.io/hostname

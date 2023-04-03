@@ -1,0 +1,86 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: lldap
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.3.2
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    initContainers:
+      01-init-db:
+        image: ghcr.io/onedr0p/postgres-initdb:14.7
+        imagePullPolicy: IfNotPresent
+        envFrom:
+          - secretRef:
+              name: lldap-secret
+    controller:
+      replicas: 1
+      strategy: RollingUpdate
+      annotations:
+        reloader.stakater.com/auto: "true"
+    image:
+      repository: docker.io/nitnelave/lldap
+      tag: v0.4.2-alpine
+    env:
+      TZ: America/New_York
+      LLDAP_HTTP_PORT: &http-port 80
+      LLDAP_HTTP_URL: https://lldap.devbu.io
+      LLDAP_LDAP_PORT: &ldap-port 389
+      LLDAP_LDAP_BASE_DN: dc=home,dc=arpa
+    envFrom:
+      - secretRef:
+          name: lldap-secret
+    service:
+      main:
+        ports:
+          http:
+            port: *http-port
+          ldap:
+            enabled: true
+            port: *ldap-port
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          nginx.ingress.kubernetes.io/whitelist-source-range: |
+            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+        hosts:
+          - host: &host "{{ .Release.Name }}.devbu.io"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    persistence:
+      data:
+        enabled: true
+        type: emptyDir
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        memory: 500Mi

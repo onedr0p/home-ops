@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/kustomization_v1beta2.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-audiobookshelf
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-apps-rook-ceph-cluster
+    - name: cluster-apps-volsync
+  path: ./kubernetes/apps/default/audiobookshelf/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-ops-kubernetes
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2beta1
+      kind: HelmRelease
+      name: audiobookshelf
+      namespace: default
+  interval: 30m
+  retryInterval: 1m
+  timeout: 3m

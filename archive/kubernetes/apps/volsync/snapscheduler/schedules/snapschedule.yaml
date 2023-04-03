@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/snapshotschedule_v1.json
+apiVersion: snapscheduler.backube/v1
+kind: SnapshotSchedule
+metadata:
+  name: main
+  namespace: default
+spec:
+  disabled: false
+  claimSelector:
+    matchLabels:
+      snapshot.home.arpa/enabled: "true"
+  retention:
+    expires: 48h
+  schedule: "@daily"
+  snapshotTemplate:
+    snapshotClassName: csi-ceph-blockpool

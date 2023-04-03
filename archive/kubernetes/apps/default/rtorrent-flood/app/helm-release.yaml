@@ -1,0 +1,113 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: rtorrent-flood
+  namespace: default
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.3.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+    image:
+      repository: ghcr.io/onedr0p/flood
+      tag: 4.7.0@sha256:6e7c784f64a0f533b876e3291034a5d5f47708f389bc5d9080949a2bb54169cc
+    env:
+      TZ: America/New_York
+      FLOOD_OPTION_auth: "none"
+      FLOOD_OPTION_allowedpath: "/config,/sock,/rc,/media"
+      FLOOD_OPTION_rtsocket: "/sock/rtorrent.sock"
+      FLOOD_OPTION_rtconfig: "/rc/rtorrent.rc"
+      FLOOD_OPTION_port: &port 80
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          nginx.ingress.kubernetes.io/whitelist-source-range: |
+            10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+        hosts:
+          - host: &host "{{ .Release.Name }}.devbu.io"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: OnRootMismatch
+      supplementalGroups: [10000]
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
+    persistence:
+      rtorrent-rc:
+        enabled: true
+        type: configMap
+        name: rtorrent-flood-configmap
+        subPath: rtorrent.rc
+        mountPath: /rc/rtorrent.rc
+      rtorrent-sock:
+        enabled: true
+        type: emptyDir
+        medium: Memory
+        mountPath: /sock
+      media:
+        enabled: true
+        type: nfs
+        server: expanse.turbo.ac
+        path: /eros/Media
+        mountPath: /media
+    resources:
+      requests:
+        cpu: 10m
+        memory: 100Mi
+      limits:
+        memory: 1200Mi
+    sidecars:
+      rtorrent:
+        image: ghcr.io/onedr0p/rtorrent:0.9.8-r16@sha256:a1337db01ad5f2ba35ae1283aa458c5f32589a3832981e6c76b83b20ccba3737
+        imagePullPolicy: IfNotPresent
+        env:
+          - { name: RTORRENT__DEFAULT_CONFIG, value: "false" }
+          - { name: RTORRENT__CONFIG_FILE, value: "/rc/rtorrent.rc" }
+          - { name: RTORRENT__SOCKET, value: "/sock/rtorrent.sock" }
+          - { name: RTORRENT__BT_PORT, value: "50415" }
+        volumeMounts:
+          - { name: config, mountPath: /config }
+          - { name: rtorrent-rc, mountPath: /rc/rtorrent.rc, subPath: rtorrent.rc }
+          - { name: rtorrent-sock, mountPath: /sock }
+          - { name: media, mountPath: /media }

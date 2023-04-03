@@ -1,0 +1,69 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/kustomization_v1beta2.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-intel-device-plugin-operator
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-apps-node-feature-discovery
+  path: ./kubernetes/apps/kube-system/intel-device-plugin/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-ops-kubernetes
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2beta1
+      kind: HelmRelease
+      name: intel-device-plugin-operator
+      namespace: kube-system
+  interval: 30m
+  retryInterval: 1m
+  timeout: 3m
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/kustomization_v1beta2.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-intel-device-plugin-gpu
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-apps-intel-device-plugin-operator
+  path: ./kubernetes/apps/kube-system/intel-device-plugin/gpu
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-ops-kubernetes
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2beta1
+      kind: HelmRelease
+      name: intel-device-plugin-gpu
+      namespace: kube-system
+  interval: 30m
+  retryInterval: 1m
+  timeout: 3m
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/kustomization_v1beta2.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: cluster-apps-intel-device-plugin-gpu-exporter
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-apps-intel-device-plugin-gpu
+  path: ./kubernetes/apps/kube-system/intel-device-plugin/exporter
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-ops-kubernetes
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2beta1
+      kind: HelmRelease
+      name: intel-gpu-exporter
+      namespace: kube-system
+  interval: 30m
+  retryInterval: 1m
+  timeout: 3m

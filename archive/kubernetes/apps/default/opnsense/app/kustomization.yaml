@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: default
+resources:
+  - ./externalsecret.yaml
+  - ./helmrelease.yaml
+configMapGenerator:
+  - name: opnsense-backup-configmap
+    files:
+      - ./opnsense-backup.sh
+  - name: opnsense-dashboard
+    files:
+      - opnsense-dashboard.json=./dashboard.json
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+  labels:
+    grafana_dashboard: "true"
