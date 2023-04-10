@@ -41,7 +41,7 @@ resource "kubernetes_daemon_set_v1" "vector_agent" {
         container {
           name              = "main"
           # https://github.com/vectordotdev/vector/issues/6715
-          image             = "ghcr.io/onedr0p/vector:0.28.1-debian"
+          image             = "ghcr.io/onedr0p/vector:0.28.2-debian"
           image_pull_policy = "IfNotPresent"
           args              = ["--config=/etc/vector/vector.yaml"]
           security_context {
