@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: lldap
+  name: &app lldap
   namespace: default
 spec:
   interval: 15m
@@ -35,7 +35,7 @@ spec:
           - secretRef:
               name: lldap-secret
     controller:
-      replicas: 3
+      replicas: 2
       strategy: RollingUpdate
       annotations:
         reloader.stakater.com/auto: "true"
@@ -79,6 +79,13 @@ spec:
       data:
         enabled: true
         type: emptyDir
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app
     resources:
       requests:
         cpu: 100m
