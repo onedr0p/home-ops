@@ -35,13 +35,14 @@ spec:
           - secretRef:
               name: lldap-secret
     controller:
-      replicas: 1
+      replicas: 3
       strategy: RollingUpdate
       annotations:
         reloader.stakater.com/auto: "true"
     image:
-      repository: docker.io/nitnelave/lldap
-      tag: v0.4.2-alpine
+      repository: ghcr.io/lldap/lldap
+      # TODO: Switch to release tag on next release
+      tag: latest-alpine
     env:
       TZ: America/New_York
       LLDAP_HTTP_PORT: &http-port 80
