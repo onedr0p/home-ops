@@ -26,7 +26,7 @@ spec:
     kind: OCIRepository
     name: flux-manifests
   patches:
-    # Remove the network policy which doesn't work with k3s
+    # Remove the network policies that does not work with k3s
     - patch: |
         $patch: delete
         apiVersion: networking.k8s.io/v1
@@ -35,7 +35,6 @@ spec:
           name: not-used
       target:
         group: networking.k8s.io
-        version: v1
         kind: NetworkPolicy
     # Increase the number of reconciliations that can be performed in parallel and bump the resources limits
     # https://fluxcd.io/flux/cheatsheets/bootstrap/#increase-the-number-of-workers
@@ -72,32 +71,6 @@ spec:
       target:
         kind: Deployment
         name: (kustomize-controller|helm-controller|source-controller)
-    # Enable notifications for 3rd party Flux controllers such as tf-controller
-    # https://fluxcd.io/flux/cheatsheets/bootstrap/#enable-notifications-for-third-party-controllers
-    - patch: |
-        - op: add
-          path: /spec/versions/1/schema/openAPIV3Schema/properties/spec/properties/eventSources/items/properties/kind/enum/-
-          value: Terraform
-      target:
-        kind: CustomResourceDefinition
-        name: alerts.notification.toolkit.fluxcd.io
-    - patch: |
-        - op: add
-          path: /spec/versions/0/schema/openAPIV3Schema/properties/spec/properties/resources/items/properties/kind/enum/-
-          value: Terraform
-      target:
-        kind: CustomResourceDefinition
-        name: receivers.notification.toolkit.fluxcd.io
-    - patch: |
-        - op: add
-          path: /rules/-
-          value:
-            apiGroups: ["infra.contrib.fluxcd.io"]
-            resources: ["*"]
-            verbs: ["*"]
-      target:
-        kind: ClusterRole
-        name: crd-controller-flux-system
     # Enable drift detection for HelmReleases and set the log level to debug
     # https://fluxcd.io/flux/components/helm/helmreleases/#drift-detection
     - patch: |
@@ -125,3 +98,29 @@ spec:
       target:
         kind: Deployment
         name: helm-controller
+    # Enable notifications for 3rd party Flux controllers such as tf-controller
+    # https://fluxcd.io/flux/cheatsheets/bootstrap/#enable-notifications-for-third-party-controllers
+    - patch: |
+        - op: add
+          path: /spec/versions/1/schema/openAPIV3Schema/properties/spec/properties/eventSources/items/properties/kind/enum/-
+          value: Terraform
+      target:
+        kind: CustomResourceDefinition
+        name: alerts.notification.toolkit.fluxcd.io
+    - patch: |
+        - op: add
+          path: /spec/versions/0/schema/openAPIV3Schema/properties/spec/properties/resources/items/properties/kind/enum/-
+          value: Terraform
+      target:
+        kind: CustomResourceDefinition
+        name: receivers.notification.toolkit.fluxcd.io
+    - patch: |
+        - op: add
+          path: /rules/-
+          value:
+            apiGroups: ["infra.contrib.fluxcd.io"]
+            resources: ["*"]
+            verbs: ["*"]
+      target:
+        kind: ClusterRole
+        name: crd-controller-flux-system
