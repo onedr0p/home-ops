@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: paperless-nfs
+spec:
+  storageClassName: paperless-nfs
+  capacity:
+    storage: 1Mi # Size does not matter
+  accessModes: ["ReadWriteMany"]
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: expanse.turbo.ac
+    path: /eros/Apps/Paperless
+  # Note: The first two options are strictly for NFSv4.2
+  mountOptions: ["nfsvers=4.2", "nconnect=8", "hard", "noatime"]
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-nfs
+  namespace: default
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: paperless-nfs
+  resources:
+    requests:
+      storage: 1Mi # Size does not matter
