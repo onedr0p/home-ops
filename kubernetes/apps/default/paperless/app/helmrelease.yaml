@@ -56,10 +56,9 @@ spec:
       PAPERLESS_OCR_LANGUAGE: eng
       PAPERLESS_PORT: &port 80
       PAPERLESS_REDIS: redis://paperless-redis.default.svc.cluster.local:6379
-      PAPERLESS_TASK_WORKERS: 4
+      PAPERLESS_TASK_WORKERS: 2
       PAPERLESS_TIME_ZONE: America/New_York
       PAPERLESS_URL: https://paperless.devbu.io
-      PAPERLESS_WEBSERVER_WORKERS: 2
       USERMAP_UID: 568
       USERMAP_GID: 568
     envFrom:
@@ -91,6 +90,11 @@ spec:
         tls:
           - hosts:
               - *host
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: OnRootMismatch
     persistence:
       library:
         enabled: true
