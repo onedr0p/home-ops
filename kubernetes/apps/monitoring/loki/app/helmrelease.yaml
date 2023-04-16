@@ -49,7 +49,7 @@ spec:
             enabled: true
         schema_config:
           configs:
-            - from: "2022-01-11"
+            - from: "2022-01-11" # quote
               store: boltdb-shipper
               object_store: s3
               schema: v12
@@ -99,8 +99,8 @@ spec:
         analytics:
           reporting_enabled: false
     gateway:
-      replicas: 3
-      # TODO: https://github.com/grafana/loki/pull/8187
+      autoscaling:
+        enabled: true
       ingress:
         enabled: true
         ingressClassName: nginx
@@ -158,17 +158,17 @@ spec:
   valuesFrom:
     - targetPath: loki.structuredConfig.common.storage.s3.bucketnames
       kind: ConfigMap
-      name: loki-bucket-v1
+      name: loki-bucket-v2
       valuesKey: BUCKET_NAME
     - targetPath: loki.structuredConfig.common.storage.s3.endpoint
       kind: ConfigMap
-      name: loki-bucket-v1
+      name: loki-bucket-v2
       valuesKey: BUCKET_HOST
     - targetPath: loki.structuredConfig.common.storage.s3.access_key_id
       kind: Secret
-      name: loki-bucket-v1
+      name: loki-bucket-v2
       valuesKey: AWS_ACCESS_KEY_ID
     - targetPath: loki.structuredConfig.common.storage.s3.secret_access_key
       kind: Secret
-      name: loki-bucket-v1
+      name: loki-bucket-v2
       valuesKey: AWS_SECRET_ACCESS_KEY
