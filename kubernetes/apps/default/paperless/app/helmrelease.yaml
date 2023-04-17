@@ -55,8 +55,11 @@ spec:
       PAPERLESS_MEDIA_ROOT: /library/media
       PAPERLESS_OCR_LANGUAGE: eng
       PAPERLESS_PORT: &port 80
-      PAPERLESS_REDIS: redis://paperless-redis.default.svc.cluster.local:6379
+      PAPERLESS_REDIS: redis://localhost:6379
       PAPERLESS_TASK_WORKERS: 2
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://localhost:3000
+      PAPERLESS_TIKA_ENDPOINT: http://localhost:9998
       PAPERLESS_TIME_ZONE: America/New_York
       PAPERLESS_URL: https://paperless.devbu.io
       USERMAP_UID: 568
@@ -101,3 +104,15 @@ spec:
         memory: 1000Mi
       limits:
         memory: 5000Mi
+    sidecars:
+      gotenburg:
+        image: thecodingmachine/gotenberg:7.8.2
+        imagePullPolicy: IfNotPresent
+        env:
+          - { name: DISABLE_GOOGLE_CHROME, value: "1" }
+      redis:
+        image: public.ecr.aws/docker/library/redis:7.0.10
+        imagePullPolicy: IfNotPresent
+      tika:
+        image: ghcr.io/paperless-ngx/tika:2.7.0-full
+        imagePullPolicy: IfNotPresent
