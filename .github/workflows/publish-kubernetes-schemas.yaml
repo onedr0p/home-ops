@@ -42,10 +42,6 @@ jobs:
           latest: true
           fileName: crd-extractor.zip
 
-      - name: Extract crd-extractor
-        run: |
-          unzip -j $GITHUB_WORKSPACE/crd-extractor.zip -d $GITHUB_WORKSPACE
-
       - name: Write kubeconfig
         id: kubeconfig
         uses: timheuer/base64-to-file@48657ba25c726c2e3dcf02efa3639fff9b3d587e # renovate: tag=v1.2
@@ -57,6 +53,7 @@ jobs:
         env:
           KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
         run: |
+          unzip -j $GITHUB_WORKSPACE/crd-extractor.zip -d $GITHUB_WORKSPACE
           bash $GITHUB_WORKSPACE/crd-extractor.sh
 
       - name: Publish schemas as OCI
