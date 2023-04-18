@@ -14,14 +14,14 @@ jobs:
     name: Publish Kubernetes Schemas
     runs-on: ["self-hosted"]
     steps:
+      - name: Setup Flux
+        uses: fluxcd/flux2/action@dbda8fbdb8b58ed1ee69343025a6091eae0d1828 # v0.41.2
+
       - name: Setup Kube Tools
         uses: yokawasa/action-setup-kube-tools@af4ebb1af1efd30c5bd84a2e9773355ad6362a33 # v0.9.3
         with:
           setup-tools: |
             kubectl
-
-      - name: Setup Flux
-        uses: fluxcd/flux2/action@dbda8fbdb8b58ed1ee69343025a6091eae0d1828 # v0.41.2
 
       - name: Setup Python
         uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4.5.0
