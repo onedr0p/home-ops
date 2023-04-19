@@ -28,7 +28,7 @@ spec:
     keepHistory: false
   values:
     controller:
-      kind: DaemonSet
+      replicaCount: 2
       service:
         externalIPs: ["192.168.69.101"]
         externalTrafficPolicy: Local
@@ -59,6 +59,14 @@ spec:
         default-ssl-certificate: networking/devbu-io-tls
       podAnnotations:
         configmap.reloader.stakater.com/reload: cloudflare-proxied-networks
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+              app.kubernetes.io/component: controller
       resources:
         requests:
           cpu: 100m
