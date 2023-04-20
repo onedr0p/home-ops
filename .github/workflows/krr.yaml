@@ -1,0 +1,37 @@
+---
+name: "krr"
+
+on:
+  workflow_dispatch:
+
+env:
+  PROMETHEUS_URL: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
+
+jobs:
+  krr:
+    name: Run krr
+    runs-on: ["self-hosted"]
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4.5.0
+        with:
+          python-version: 3.x
+
+      - name: Setup krr
+        run: |
+          git clone https://github.com/robusta-dev/krr
+          cd krr
+          pip install -r requirements.txt
+
+      - name: Write kubeconfig
+        id: kubeconfig
+        uses: timheuer/base64-to-file@48657ba25c726c2e3dcf02efa3639fff9b3d587e # renovate: tag=v1.2
+        with:
+          encodedString: ${{ secrets.KUBECONFIG }}
+          fileName: kubeconfig
+
+      - name: Run krr
+        env:
+          KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
+        run: |
+          python ./krr/krr.py simple --prometheus-url ${{ env.PROMETHEUS_URL }}
