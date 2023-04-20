@@ -79,9 +79,9 @@ spec:
       auth.basic:
         enabled: false
       auth.anonymous:
-        enabled: true
-        org_id: 1
-        org_role: Viewer
+        enabled: false
+        # org_id: 1
+        # org_role: Viewer
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
@@ -98,8 +98,8 @@ spec:
       datasources.yaml:
         apiVersion: 1
         deleteDatasources:
-          # - name: Loki
-          #   orgId: 1
+          - name: Loki
+            orgId: 1
           - name: Alertmanager
             orgId: 1
         datasources:
@@ -108,12 +108,12 @@ spec:
             access: proxy
             url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
             isDefault: true
-          # - name: Loki
-          #   type: loki
-          #   access: proxy
-          #   url: http://loki-gateway.monitoring.svc.cluster.local
-          #   jsonData:
-          #     maxLines: 250
+          - name: Loki
+            type: loki
+            access: proxy
+            url: http://loki-gateway.monitoring.svc.cluster.local
+            jsonData:
+              maxLines: 250
           - name: Alertmanager
             type: alertmanager
             access: proxy
