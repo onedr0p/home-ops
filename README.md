@@ -23,19 +23,6 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 
 ---
 
-<div align="center">
-
-[<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=10&width=200&height=100&tz=America%2FNew_York" width="200px" alt="alerts"/>](https://ln.devbu.io/TiTWl)
-[<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=6&width=200&height=100&tz=America%2FNew_York" width="200px" alt="cpu"/>](https://ln.devbu.io/TiTWl)
-[<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=8&width=200&height=100&tz=America%2FNew_York" width="200px" alt="memory"/>](https://ln.devbu.io/TiTWl)
-[<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=4&width=200&height=100&tz=America%2FNew_York" width="200px" alt="power"/>](https://ln.devbu.io/TiTWl)
-[<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=12&width=200&height=100&tz=America%2FNew_York" width="200px" alt="nodes"/>](https://ln.devbu.io/TiTWl)
-[<img src="https://grafana.devbu.io/render/d-solo/XjFJGUoVz/github-readme?orgId=1&theme=dark&panelId=15&width=200&height=100&tz=America%2FNew_York" width="200px" alt="pods"/>](https://ln.devbu.io/TiTWl)
-
-</div>
-
----
-
 ## 📖 Overview
 
 This is a mono repository for my home infrastructure and Kubernetes cluster. I try to adhere to Infrastructure as Code (IaC) and GitOps practices using the tools like [Ansible](https://www.ansible.com/), [Terraform](https://www.terraform.io/), [Kubernetes](https://kubernetes.io/), [Flux](https://github.com/fluxcd/flux2), [Renovate](https://github.com/renovatebot/renovate) and [GitHub Actions](https://github.com/features/actions).
