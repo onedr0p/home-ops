@@ -129,7 +129,10 @@ spec:
             etcd:
               enabled: true
     kube-state-metrics:
-      metricLabelsAllowlist: ["persistentvolumeclaims=[*]"]
+      metricLabelsAllowlist:
+        - "pods=[*]"
+        - "deployments=[*]"
+        - "persistentvolumeclaims=[*]"
       prometheus:
         monitor:
           enabled: true
@@ -167,7 +170,10 @@ spec:
             action: drop
     kubeControllerManager:
       enabled: true
-      endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
+      endpoints: &cp
+        - 192.168.42.10
+        - 192.168.42.11
+        - 192.168.42.12
       serviceMonitor:
         metricRelabelings:
           # Remove duplicate metrics
@@ -176,13 +182,13 @@ spec:
             action: keep
     kubeEtcd:
       enabled: true
-      endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
+      endpoints: *cp
     kubeProxy:
       enabled: false # Disabled because eBPF
-      endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
+      endpoints: *cp
     kubeScheduler:
       enabled: true
-      endpoints: ["192.168.42.10", "192.168.42.11", "192.168.42.12"]
+      endpoints: *cp
       serviceMonitor:
         metricRelabelings:
           # Remove duplicate metrics
