@@ -73,9 +73,14 @@ spec:
           memory: 250Mi
         limits:
           memory: 500Mi
-    # Note: obsidian-livesync does not work with a default backend enabled
     defaultBackend:
-      enabled: false
+      enabled: true
+      image:
+        repository: ghcr.io/tarampampam/error-pages
+        tag: 2.24.0
+      extraEnvs:
+        - { name: TEMPLATE_NAME, value: lost-in-space }
+        - { name: SHOW_DETAILS, value: "false" }
   valuesFrom:
     # Cloudflare Networks
     # https://www.cloudflare.com/ips/
