@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: external-dns
+  name: external-dns-cloudflare
   namespace: networking
 spec:
   interval: 15m
@@ -27,29 +27,27 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    interval: 2m
-    # logLevel: debug
     provider: cloudflare
     env:
       - name: CF_API_EMAIL
         valueFrom:
           secretKeyRef:
-            name: external-dns-secret
+            name: external-dns-cloudflare-secret
             key: email
       - name: CF_API_KEY
         valueFrom:
           secretKeyRef:
-            name: external-dns-secret
+            name: external-dns-cloudflare-secret
             key: api-key
     extraArgs:
       - --cloudflare-proxied
       - --annotation-filter=external-dns.alpha.kubernetes.io/target
     policy: sync
     sources: ["ingress"]
-    txtPrefix: k8s.
     txtOwnerId: default
+    txtPrefix: k8s.
     domainFilters: ["devbu.io"]
     serviceMonitor:
       enabled: true
     podAnnotations:
-      secret.reloader.stakater.com/reload: external-dns-secret
+      secret.reloader.stakater.com/reload: external-dns-cloudflare-secret
