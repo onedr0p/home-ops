@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app external-dns-rfc2136
+  name: &app external-dns-bind
   namespace: networking
 spec:
   interval: 15m
@@ -43,12 +43,12 @@ spec:
       - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET_ALG
         valueFrom:
           secretKeyRef:
-            name: external-dns-rfc2136-secret
+            name: external-dns-bind-secret
             key: rndc-algorithm
       - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
         valueFrom:
           secretKeyRef:
-            name: external-dns-rfc2136-secret
+            name: external-dns-bind-secret
             key: rndc-secret
     policy: sync
     sources: ["ingress", "service"]
@@ -58,15 +58,4 @@ spec:
     serviceMonitor:
       enabled: true
     podAnnotations:
-      secret.reloader.stakater.com/reload: external-dns-rfc2136-secret
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              version: v1
-              kind: Deployment
-              name: *app
-            patch: |
-              - op: add
-                path: /spec/template/spec/enableServiceLinks
-                value: false
+      secret.reloader.stakater.com/reload: external-dns-bind-secret
