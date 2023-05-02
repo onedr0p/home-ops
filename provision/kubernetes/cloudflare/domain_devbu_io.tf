@@ -33,6 +33,15 @@ resource "cloudflare_record" "public_domain_www" {
   ttl     = 1
 }
 
+resource "cloudflare_record" "public_domain_ingress" {
+  name    = "ingress"
+  zone_id = data.cloudflare_zone.public_domain.id
+  value   = "ipv4.devbu.io"
+  proxied = true
+  type    = "CNAME"
+  ttl     = 1
+}
+
 resource "cloudflare_record" "public_domain_public_cname" {
   name    = data.sops_file.secrets.data["cloudflare_unproxied_cname"]
   zone_id = data.cloudflare_zone.public_domain.id
