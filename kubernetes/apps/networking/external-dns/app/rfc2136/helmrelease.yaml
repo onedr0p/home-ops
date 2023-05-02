@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: external-dns-rfc2136
+  name: &app external-dns-rfc2136
   namespace: networking
 spec:
   interval: 15m
@@ -27,7 +27,7 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    fullnameOverride: external-dns-rfc2136
+    fullnameOverride: *app
     provider: rfc2136
     env:
       - name: EXTERNAL_DNS_RFC2136_HOST
@@ -65,7 +65,7 @@ spec:
           - target:
               version: v1
               kind: Deployment
-              name: external-dns-rfc2136
+              name: *app
             patch: |
               - op: add
                 path: /spec/template/spec/enableServiceLinks
