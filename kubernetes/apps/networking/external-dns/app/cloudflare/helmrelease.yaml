@@ -27,7 +27,7 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    fullnameOverride: external-dns-cloudflare
+    nameOverride: external-dns-cloudflare
     provider: cloudflare
     env:
       - name: CF_API_EMAIL
@@ -52,14 +52,14 @@ spec:
       enabled: true
     podAnnotations:
       secret.reloader.stakater.com/reload: external-dns-cloudflare-secret
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              version: v1
-              kind: Deployment
-              name: external-dns-cloudflare
-            patch: |
-              - op: add
-                path: /spec/template/spec/enableServiceLinks
-                value: false
+  # postRenderers:
+  #   - kustomize:
+  #       patches:
+  #         - target:
+  #             version: v1
+  #             kind: Deployment
+  #             name: external-dns-cloudflare
+  #           patch: |
+  #             - op: add
+  #               path: /spec/template/spec/enableServiceLinks
+  #               value: false
