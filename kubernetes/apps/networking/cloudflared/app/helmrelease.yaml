@@ -36,7 +36,11 @@ spec:
       repository: docker.io/cloudflare/cloudflared
       tag: 2023.5.0
     env:
-      CLOUDFLARE_TUNNELID:
+      NO_AUTOUPDATE: "true"
+      TUNNEL_CRED_FILE: /etc/cloudflared/creds/credentials.json
+      TUNNEL_METRICS: 0.0.0.0:8080
+      TUNNEL_TRANSPORT_PROTOCOL: auto
+      TUNNEL_ID:
         valueFrom:
           secretKeyRef:
             name: cloudflared-tunnel-secret
@@ -46,7 +50,7 @@ spec:
       - --config
       - /etc/cloudflared/config/config.yaml
       - run
-      - "$(CLOUDFLARE_TUNNELID)"
+      - "$(TUNNEL_ID)"
     service:
       main:
         ports:
