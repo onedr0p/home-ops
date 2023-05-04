@@ -42,14 +42,12 @@ spec:
         client-header-timeout: 120
         enable-brotli: "true"
         enable-real-ip: "true"
-        forwarded-for-header: CF-Connecting-IP
         hsts-max-age: 31449600
         keep-alive-requests: 10000
         keep-alive: 120
         proxy-body-size: 0
         proxy-buffer-size: 16k
         ssl-protocols: TLSv1.3 TLSv1.2
-        use-forwarded-headers: "true"
       metrics:
         enabled: true
         serviceMonitor:
@@ -59,8 +57,6 @@ spec:
             any: true
       extraArgs:
         default-ssl-certificate: networking/devbu-io-tls
-      podAnnotations:
-        configmap.reloader.stakater.com/reload: cloudflare-proxied-networks
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
@@ -83,10 +79,3 @@ spec:
       extraEnvs:
         - { name: TEMPLATE_NAME, value: lost-in-space }
         - { name: SHOW_DETAILS, value: "false" }
-  valuesFrom:
-    # Cloudflare Networks
-    # https://www.cloudflare.com/ips/
-    - targetPath: controller.config.proxy-real-ip-cidr
-      kind: ConfigMap
-      name: cloudflare-networks
-      valuesKey: cloudflare-networks.txt
