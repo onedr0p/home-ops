@@ -24,15 +24,6 @@ resource "cloudflare_record" "public_domain_root" {
   ttl     = 1
 }
 
-resource "cloudflare_record" "public_domain_www" {
-  name    = "www"
-  zone_id = data.cloudflare_zone.public_domain.id
-  value   = "ipv4.devbu.io"
-  proxied = true
-  type    = "CNAME"
-  ttl     = 1
-}
-
 resource "cloudflare_record" "public_domain_public_cname" {
   name    = data.sops_file.secrets.data["cloudflare_unproxied_cname"]
   zone_id = data.cloudflare_zone.public_domain.id
@@ -49,45 +40,6 @@ resource "cloudflare_record" "public_domain_uptimerobot" {
   proxied = false
   type    = "CNAME"
   ttl     = 1
-}
-
-resource "cloudflare_page_rule" "public_domain_plex_bypass" {
-  zone_id  = data.cloudflare_zone.public_domain.id
-  target   = "https://plex.devbu.io./*"
-  status   = "active"
-  priority = 1
-
-  actions {
-    cache_level              = "bypass"
-    rocket_loader            = "off"
-    automatic_https_rewrites = "on"
-  }
-}
-
-resource "cloudflare_page_rule" "public_domain_home_assistant_bypass" {
-  zone_id  = data.cloudflare_zone.public_domain.id
-  target   = "https://hass.devbu.io./*"
-  status   = "active"
-  priority = 2
-
-  actions {
-    cache_level              = "bypass"
-    rocket_loader            = "off"
-    automatic_https_rewrites = "on"
-  }
-}
-
-resource "cloudflare_page_rule" "public_domain_photos_bypass" {
-  zone_id  = data.cloudflare_zone.public_domain.id
-  target   = "https://photos.devbu.io./*"
-  status   = "active"
-  priority = 3
-
-  actions {
-    cache_level              = "bypass"
-    rocket_loader            = "off"
-    automatic_https_rewrites = "on"
-  }
 }
 
 resource "cloudflare_zone_settings_override" "public_domain_settings" {
