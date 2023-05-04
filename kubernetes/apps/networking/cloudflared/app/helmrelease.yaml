@@ -35,11 +35,18 @@ spec:
     image:
       repository: docker.io/cloudflare/cloudflared
       tag: 2023.5.0
+    env:
+      CLOUDFLARE_TUNNELID:
+        valueFrom:
+          secretKeyRef:
+            name: cloudflared-tunnel-secret
+            key: TunnelID
     args:
       - tunnel
       - --config
       - /etc/cloudflared/config/config.yaml
       - run
+      - $(CLOUDFLARE_TUNNELID)
     service:
       main:
         ports:
