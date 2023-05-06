@@ -71,6 +71,7 @@ resource "kubernetes_stateful_set_v1" "kopia" {
           }
           args = [
             "server",
+            "start",
             "--insecure",
             "--address",
             "0.0.0.0:51515",
