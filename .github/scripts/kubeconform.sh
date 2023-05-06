@@ -20,7 +20,7 @@ kubeconform_args=(
     "-schema-location"
     "default"
     "-schema-location"
-    "${SCHEMA_DIR}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
+    "${SCHEMA_DIR}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
     "-verbose"
 )
 
