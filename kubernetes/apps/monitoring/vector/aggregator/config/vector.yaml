@@ -122,7 +122,7 @@ sinks:
       namespace: '{{ kubernetes.pod_namespace }}'
       node: '{{ kubernetes.pod_node_name }}'
 
-  vyos:
+  vyos_firewall:
     inputs: ["vyos_firewall_geoip_remap"]
     type: loki
     endpoint: http://loki-gateway.monitoring.svc.cluster.local
@@ -132,4 +132,16 @@ sinks:
     remove_label_fields: true
     remove_timestamp: true
     labels:
-      hostname: '{{ host }}'
+      hostname: '{{ host }}-firewall'
+
+  vyos:
+    inputs: ["vyos_firewall_route._unmatched"]
+    type: loki
+    endpoint: http://loki-gateway.monitoring.svc.cluster.local
+    encoding:
+      codec: json
+    out_of_order_action: accept
+    remove_label_fields: true
+    remove_timestamp: true
+    labels:
+      node: '{{ host }}'
