@@ -40,17 +40,12 @@ spec:
       TUNNEL_CRED_FILE: /etc/cloudflared/creds/credentials.json
       TUNNEL_METRICS: 0.0.0.0:8080
       TUNNEL_TRANSPORT_PROTOCOL: auto
-      TUNNEL_ID:
-        valueFrom:
-          secretKeyRef:
-            name: cloudflared-tunnel-secret
-            key: tunnel-id
     args:
       - tunnel
       - --config
       - /etc/cloudflared/config/config.yaml
       - run
-      - "$(TUNNEL_ID)"
+      - "${CLUSTER_CLOUDFLARE_TUNNEL_ID}"
     service:
       main:
         ports:
