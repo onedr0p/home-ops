@@ -15,7 +15,11 @@ spec:
   sourceRef:
     kind: GitRepository
     name: home-ops-kubernetes
-  wait: true
-  interval: 30m
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2beta1
+      kind: HelmRelease
+      name: cloudflared
+      namespace: networking
+  interval: 15m
   retryInterval: 1m
-  timeout: 1m
+  timeout: 30s
