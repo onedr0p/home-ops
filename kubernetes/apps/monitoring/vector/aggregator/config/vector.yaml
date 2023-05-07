@@ -100,8 +100,7 @@ sinks:
     inputs: ["journald_source"]
     type: loki
     endpoint: http://loki-gateway.monitoring.svc.cluster.local
-    encoding:
-      codec: json
+    encoding: { codec: json }
     out_of_order_action: accept
     remove_label_fields: true
     remove_timestamp: true
@@ -112,8 +111,7 @@ sinks:
     inputs: ["kubernetes_remap"]
     type: loki
     endpoint: http://loki-gateway.monitoring.svc.cluster.local
-    encoding:
-      codec: json
+    encoding: { codec: json }
     out_of_order_action: accept
     remove_label_fields: true
     remove_timestamp: true
@@ -126,8 +124,7 @@ sinks:
     inputs: ["vyos_firewall_geoip_remap"]
     type: loki
     endpoint: http://loki-gateway.monitoring.svc.cluster.local
-    encoding:
-      codec: json
+    encoding: { codec: json }
     out_of_order_action: accept
     remove_label_fields: true
     remove_timestamp: true
@@ -135,11 +132,10 @@ sinks:
       hostname: '{{ host }}-firewall'
 
   vyos:
-    inputs: ["vyos_firewall_route._unmatched"]
+    inputs: ["vyos_firewall_remap._unmatched"]
     type: loki
     endpoint: http://loki-gateway.monitoring.svc.cluster.local
-    encoding:
-      codec: json
+    encoding: { codec: json }
     out_of_order_action: accept
     remove_label_fields: true
     remove_timestamp: true
