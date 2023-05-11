@@ -1,13 +1,13 @@
 # Block Countries
-resource "cloudflare_filter" "countries" {
+resource "cloudflare_filter" "block_countries" {
   zone_id     = data.cloudflare_zone.domain.id
-  description = "Expression to block all countries except US, CA, PH and AU"
-  expression  = "(ip.geoip.country ne \"US\" and ip.geoip.country ne \"CA\" and ip.geoip.country ne \"AU\" and ip.geoip.country ne \"PH\")"
+  description = "Expression to block countries"
+  expression  = "(ip.geoip.country in {\"CN\" \"IN\" \"RU\"})"
 }
-resource "cloudflare_firewall_rule" "countries" {
+resource "cloudflare_firewall_rule" "block_countries" {
   zone_id     = data.cloudflare_zone.domain.id
-  description = "Firewall rule to block all countries except US, CA, PH, and AU"
-  filter_id   = cloudflare_filter.countries.id
+  description = "Firewall rule to block countries"
+  filter_id   = cloudflare_filter.block_countries.id
   action      = "block"
 }
 
