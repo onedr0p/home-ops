@@ -5,32 +5,55 @@
   become: true
   gather_facts: true
   any_errors_fatal: true
+  vars_prompt:
+    - name: nuke
+      prompt: |-
+        Are you sure you want to nuke this all rook data/drives?
+        Type YES I WANT TO DESTROY ALL ROOK DATA to proceed
+      default: "n"
+      private: false
   pre_tasks:
+    - name: Check for confirmation
+      ansible.builtin.fail:
+        msg: Aborted nuking the rook data
+      when: nuke != 'YES I WANT TO DESTROY ALL ROOK DATA'
     - name: Pausing for 5 seconds...
       ansible.builtin.pause:
         seconds: 2
   tasks:
-    - # https://rook.io/docs/rook/v1.10/Getting-Started/ceph-teardown/
-      name: Reset Rook Ceph
+    - name: Reset disks
       ignore_errors: true
       block:
         - name: Remove /var/lib/rook
           ansible.builtin.file:
             state: absent
             path: /var/lib/rook
-        - name: Zap the disk to a fresh, usable state (zap-all is important, b/c MBR has to be clean)
-          ansible.builtin.command: sgdisk --zap-all "{{ rook_block_device }}" || true
-        - name: Wipe a large portion of the beginning of the disk to remove more LVM metadata that may be present
-          ansible.builtin.command: dd if=/dev/zero of="{{ rook_block_device }}" bs=1M count=100 oflag=direct,dsync
-        - name: Wipe the block device with wipefs
-          ansible.builtin.command: wipefs --all --force "{{ rook_block_device }}"
-        - name: SSDs may be better cleaned with blkdiscard instead of dd
-          ansible.builtin.command: blkdiscard "{{ rook_block_device }}"
-        - name: Inform the OS of partition table changes
-          ansible.builtin.command: partprobe "{{ rook_block_device }}"
-        - name: Ceph can leave LVM and device mapper data that can lock the disks
-          ansible.builtin.command: "{{ item }}"
+          when: rook_block_devices is defined and rook_block_devices | length > 0
+
+        - name: Zap the drives
+          ansible.builtin.shell: |-
+            sgdisk --zap-all {{ item.0 }} || true
           loop:
-            - ls /dev/mapper/ceph-* | xargs -I% -- dmsetup remove %
-            - rm -rf /dev/ceph-*
-            - rm -rf /dev/mapper/ceph--*
+            - "{{ rook_block_devices | default([]) }}"
+          when: rook_block_devices is defined and rook_block_devices | length > 0
+
+        - name: Wipe a large portion of the beginning of the disk to remove more LVM metadata that may be present
+          ansible.builtin.shell: |-
+            dd if=/dev/zero of={{ item.0 }} bs=1M count=100 oflag=direct,dsync
+          loop:
+            - "{{ rook_block_devices | default([]) }}"
+          when: rook_block_devices is defined and rook_block_devices | length > 0
+
+        - name: Clean SSDs with blkdiscard instead of dd
+          ansible.builtin.command: |-
+            blkdiscard {{ item }}
+          with_items:
+            - "{{ rook_block_devices | default([]) }}"
+          when: rook_block_devices is defined and rook_block_devices | length > 0
+
+        - name: Clean SSDs with blkdiscard instead of dd
+          ansible.builtin.command: |-
+            partprobe {{ item.0 }}
+          with_items:
+            - "{{ rook_block_devices | default([]) }}"
+          when: rook_block_devices is defined and rook_block_devices | length > 0
