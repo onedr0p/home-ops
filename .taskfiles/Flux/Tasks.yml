@@ -51,9 +51,8 @@ tasks:
 
   hr-fix:
     cmds:
-      - |
-        kubectl -n {{.namespace}} delete secret -l owner=helm,name={{.release}},status=pending-upgrade
-        flux -n {{.namespace}} reconcile hr {{.release}}
+      - kubectl -n {{.namespace}} delete secret -l owner=helm,name={{.release}},status=pending-upgrade
+      - flux -n {{.namespace}} reconcile hr {{.release}}
     vars:
       release: '{{ or .release (fail "HelmRelease `release` is required") }}'
       namespace: '{{.namespace | default "default"}}'

@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: bazarr
+  name: autobrr
   namespace: default
 spec:
   interval: 15m
@@ -27,39 +27,25 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    # initContainers:
-    #   01-init-db:
-    #     image: ghcr.io/onedr0p/postgres-initdb:14.7
-    #     imagePullPolicy: IfNotPresent
-    #     envFrom:
-    #       - secretRef:
-    #           name: bazarr-secret
     controller:
       type: statefulset
       annotations:
         reloader.stakater.com/auto: "true"
     image:
-      repository: ghcr.io/onedr0p/bazarr
-      tag: 1.2.1@sha256:70a27cdd489f69d0ab08212482459a19214dc0d1a70428dd89083215aa4c1b95
+      repository: ghcr.io/autobrr/autobrr
+      tag: v1.25.0
     env:
       TZ: America/New_York
-    # envFrom:
-    #   - secretRef:
-    #       name: bazarr-secret
     service:
       main:
         ports:
           http:
-            port: 6767
+            port: 80
     ingress:
       main:
         enabled: true
         ingressClassName: nginx
         annotations:
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.devbu.io/css/base/bazarr/nord.css"></head>';
-            sub_filter_once on;
           hajimari.io/icon: mdi:subtitles-outline
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
@@ -82,31 +68,16 @@ spec:
         size: 1Gi
         storageClass: ceph-block
     persistence:
-      media:
+      config-file:
         enabled: true
-        type: nfs
-        server: expanse.turbo.ac
-        path: /eros/Media
-        mountPath: /media
-      add-ons:
-        enabled: true
-        type: emptyDir
-        mountPath: /add-ons
+        type: configMap
+        name: autobrr-configmap
+        subPath: config.toml
+        mountPath: /config/config.toml
+        readOnly: true
     resources:
       requests:
-        cpu: 10m
         memory: 250Mi
+        cpu: 10m
       limits:
-        memory: 2000Mi
-    sidecars:
-      subcleaner:
-        image: registry.k8s.io/git-sync/git-sync:v3.6.6
-        imagePullPolicy: IfNotPresent
-        args:
-          - --repo=https://github.com/KBlixt/subcleaner.git
-          - --branch=master
-          - --depth=1
-          - --wait=21600 # 6 hours
-          - --root=/add-ons/subcleaner
-        volumeMounts:
-          - { name: add-ons, mountPath: /add-ons }
+        memory: 500Mi
