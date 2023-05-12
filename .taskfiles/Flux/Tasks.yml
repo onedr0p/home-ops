@@ -48,3 +48,12 @@ tasks:
       - |
         flux get helmrelease --all-namespaces --no-header | awk '{print $1, $2}' \
           | xargs -l bash -c 'flux -n $0 resume helmrelease $1'
+
+  hr-fix:
+    cmds:
+      - |
+        kubectl -n {{.namespace}} delete secret -l owner=helm,name={{.release}},status=pending-upgrade
+        flux -n {{.namespace}} reconcile hr {{.release}}
+    vars:
+      release: '{{ or .release (fail "HelmRelease `release` is required") }}'
+      namespace: '{{.namespace | default "default"}}'
