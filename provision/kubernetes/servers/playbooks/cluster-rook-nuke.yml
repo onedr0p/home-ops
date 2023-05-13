@@ -5,19 +5,8 @@
   become: true
   gather_facts: true
   any_errors_fatal: true
-  vars_prompt:
-    - name: nuke
-      prompt: |-
-        Are you sure you want to nuke this all rook data/drives?
-        Type YES I WANT TO DESTROY ALL ROOK DATA to proceed
-      default: "n"
-      private: false
   pre_tasks:
-    - name: Check for confirmation
-      ansible.builtin.fail:
-        msg: Aborted nuking the rook data
-      when: nuke != 'YES I WANT TO DESTROY ALL ROOK DATA'
-    - name: Pausing for 5 seconds...
+    - name: Pausing for 2 seconds...
       ansible.builtin.pause:
         seconds: 2
   tasks:
