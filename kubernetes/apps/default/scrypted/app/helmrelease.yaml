@@ -36,12 +36,14 @@ spec:
       TZ: America/New_York
     service:
       main:
-        type: LoadBalancer
-        externalIPs: ["192.168.69.112"]
-        externalTrafficPolicy: Local
         ports:
           http:
-            port: 11080
+            port: &web-port 11080
+      cloud:
+        enabled: true
+        ports:
+          http:
+            port: &cloud-port 11081
     ingress:
       main:
         enabled: true
@@ -51,9 +53,26 @@ spec:
             paths:
               - path: /
                 pathType: Prefix
+                service:
+                  port: *web-port
         tls:
           - hosts:
               - *host
+      cloud:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          external-dns.alpha.kubernetes.io/target: ingress.devbu.io
+        hosts:
+          - host: &cloud-host "{{ .Release.Name }}-cloud.devbu.io"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  port: *cloud-port
+        tls:
+          - hosts:
+              - *cloud-host
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
