@@ -39,10 +39,7 @@ spec:
         ports:
           http:
             port: &web-port 11080
-      cloud:
-        enabled: true
-        ports:
-          http:
+          cloud:
             port: &cloud-port 11081
     ingress:
       main:
@@ -54,7 +51,6 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: scrypted
                   port: *web-port
         tls:
           - hosts:
@@ -70,7 +66,6 @@ spec:
               - path: /
                 pathType: Prefix
                 service:
-                  name: scrypted-cloud
                   port: *cloud-port
         tls:
           - hosts:
