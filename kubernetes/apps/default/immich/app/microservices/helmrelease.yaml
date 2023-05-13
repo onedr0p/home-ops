@@ -33,7 +33,8 @@ spec:
       replicas: 2
       strategy: RollingUpdate
       annotations:
-        reloader.stakater.com/auto: "true"
+        configmap.reloader.stakater.com/reload: &configmap immich-configmap
+        secret.reloader.stakater.com/reload: &secret immich-secret
     image:
       repository: ghcr.io/immich-app/immich-server
       tag: v1.55.1
@@ -41,10 +42,10 @@ spec:
     args:
       - ./start-microservices.sh
     envFrom:
-      - secretRef:
-          name: immich-secret
       - configMapRef:
-          name: immich-configmap
+          name: *configmap
+      - secretRef:
+          name: *secret
     service:
       main:
         enabled: false

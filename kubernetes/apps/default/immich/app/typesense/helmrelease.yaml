@@ -30,15 +30,16 @@ spec:
     controller:
       type: statefulset
       annotations:
-        reloader.stakater.com/auto: "true"
+        configmap.reloader.stakater.com/reload: &configmap immich-configmap
+        secret.reloader.stakater.com/reload: &secret immich-secret
     image:
       repository: docker.io/typesense/typesense
       tag: 0.24.1
     envFrom:
-      - secretRef:
-          name: immich-secret
       - configMapRef:
-          name: immich-configmap
+          name: *configmap
+      - secretRef:
+          name: *secret
     service:
       main:
         ports:
