@@ -39,8 +39,6 @@ spec:
         ports:
           http:
             port: &web-port 11080
-          # cloud:
-          #   port: &cloud-port 443
     ingress:
       main:
         enabled: true
@@ -50,32 +48,15 @@ spec:
             paths:
               - path: /
                 pathType: Prefix
-                # service:
-                #   port: *web-port
         tls:
           - hosts:
               - *host
-      # cloud:
-      #   enabled: true
-      #   ingressClassName: nginx
-      #   annotations:
-      #     external-dns.alpha.kubernetes.io/target: ingress.devbu.io
-      #   hosts:
-      #     - host: &cloud-host "{{ .Release.Name }}-cloud.devbu.io"
-      #       paths:
-      #         - path: /
-      #           pathType: Prefix
-      #           service:
-      #             port: *cloud-port
-      #   tls:
-      #     - hosts:
-      #         - *cloud-host
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
       fsGroup: 568
       fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups: [44, 109, 10000]
+      supplementalGroups: [44, 109]
     persistence:
       cache:
         enabled: true
