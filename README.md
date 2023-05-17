@@ -146,7 +146,7 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 
 [Bind9](https://github.com/isc-projects/bind9) and [dnsdist](https://dnsdist.org/) are deployed on Vyos as containers. In my cluster [external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed with the RFC2136 provider that populates Bind9 with all my ingresses DNS records.
 
-dnsdist has some downstream DNS servers configured such as Bind9 (above) and [NextDNS](https://nextdns.io/) profiles. All my clients use dnsdist as the upstream DNS server, this allows for more granularity with configuring DNS across my networks. For example giving each of my VLANs a specific NextDNS profile or having all requests for my domain forward to Bind9 on certain networks.
+dnsdist has some downstream DNS servers configured such as Bind9 (above) and [NextDNS](https://nextdns.io/) profiles. All my clients use dnsdist as the upstream DNS server, this allows for more granularity with configuring DNS across my networks. These could be things like giving each of my VLANs a specific NextDNS profile, or having all requests for my domain forward to Bind9 on certain networks, or only using 1.1.1.1 instead of NextDNS on certain networks where adblocking isn't needed.
 
 ### External DNS
 
