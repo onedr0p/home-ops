@@ -142,31 +142,15 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 
 ## 🌐 DNS
 
-<details>
-  <summary>Click to see a diagram of how I conquer DNS!</summary>
-
-  <img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/dns.png" align="center" width="600px" alt="dns"/>
-</details>
-
-### Ingress Controller
-
-Over WAN, I have port forwarded ports `80` and `443` to the load balancer IP of my ingress controller that's running in my Kubernetes cluster.
-
-[Cloudflare](https://www.cloudflare.com/) works as a proxy to hide my homes WAN IP and also as a firewall. When not on my home network, all the traffic coming into my ingress controller on port `80` and `443` comes from Cloudflare. In `VyOS` I block all IPs not originating from the [Cloudflares list of IP ranges](https://www.cloudflare.com/ips/).
-
 ### Internal DNS
 
-[CoreDNS](https://github.com/coredns/coredns) is deployed on my `VyOS` router and listening on `:53`. All DNS queries for _**my**_ domains are forwarded to [k8s_gateway](https://github.com/ori-edge/k8s_gateway) that is running in my cluster. With this setup `k8s_gateway` has direct access to my clusters ingresses and services and serves DNS for them in my internal network.
+[Bind9](https://github.com/isc-projects/bind9) and [dnsdist](https://dnsdist.org/) are deployed on Vyos as containers. In my cluster [external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed with the RFC2136 provider that populates Bind9 with all my ingresses DNS records.
 
-### Ad Blocking
-
-The upstream server in CoreDNS is set to NextDNS which provides me with AdBlocking for all devices on my network.
+dnsdist has some downstream DNS servers configured such as Bind9 (above) and [NextDNS](https://nextdns.io/) profiles. All my clients use dnsdist as the upstream DNS server, this allows for more granularity with configuring DNS across my networks. For example giving each of my VLANs a specific NextDNS profile or having all requests for my domain forward to Bind9 on certain networks.
 
 ### External DNS
 
-[external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses `external-dns` looks at to gather DNS records to put in `Cloudflare` are ones that have an annotation of `external-dns.alpha.kubernetes.io/target`
-
-🔸 _[Click here](./provision/kubernetes/cloudflare) to see how else I manage Cloudflare with Terraform._
+Another `external-dns` instance is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses this `external-dns` instance looks at to gather DNS records to put in `Cloudflare` are ones that have an annotation of `external-dns.alpha.kubernetes.io/target`.
 
 ---
 
