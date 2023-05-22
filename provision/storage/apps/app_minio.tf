@@ -23,7 +23,7 @@ resource "kubernetes_stateful_set_v1" "minio" {
       spec {
         container {
           name              = "main"
-          image             = "quay.io/minio/minio:RELEASE.2023-05-04T21-44-30Z"
+          image             = "quay.io/minio/minio:RELEASE.2023-05-18T00-05-36Z"
           image_pull_policy = "IfNotPresent"
           args = [
             "server",
