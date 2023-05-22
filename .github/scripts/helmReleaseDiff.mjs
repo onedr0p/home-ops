@@ -64,12 +64,9 @@ async function helmTemplate (release, repository) {
   // Template out our helm values into Kubernetes manifests
   let manifests
   if ('type' in repository.spec && repository.spec.type == 'oci') {
-    console.log(`${helm} template --kube-version 1.27.1 --release-name ${release.metadata.name} --include-crds=false ${repository.spec.url}/${release.spec.chart.spec.chart} --version ${release.spec.chart.spec.version} --values ${valuesFile.stdout.trim()}`)
     manifests = await $`${helm} template --kube-version 1.27.1 --release-name ${release.metadata.name} --include-crds=false ${repository.spec.url}/${release.spec.chart.spec.chart} --version ${release.spec.chart.spec.version} --values ${valuesFile.stdout.trim()}`
   } else {
-    console.log(`${helm} repo add ${release.spec.chart.spec.sourceRef.name} ${repository.spec.url}`)
     await $`${helm} repo add ${release.spec.chart.spec.sourceRef.name} ${repository.spec.url}`
-    console.log(`${helm} template --kube-version 1.27.1 --release-name ${release.metadata.name} --include-crds=false ${release.spec.chart.spec.sourceRef.name}/${release.spec.chart.spec.chart} --version ${release.spec.chart.spec.version} --values ${valuesFile.stdout.trim()}`)
     manifests = await $`${helm} template --kube-version 1.27.1 --release-name ${release.metadata.name} --include-crds=false ${release.spec.chart.spec.sourceRef.name}/${release.spec.chart.spec.chart} --version ${release.spec.chart.spec.version} --values ${valuesFile.stdout.trim()}`
   }
 
