@@ -1,0 +1,65 @@
+---
+name: "Flux Diff"
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths: ["**.yaml"]
+
+env:
+  BOT_USERNAME: rosey-bot[bot]
+  KUBERNETES_DIR: kubernetes/
+
+jobs:
+  diff:
+    name: Diff on Helm Releases
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Token
+        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92 # v1.8.0
+        id: generate-token
+        with:
+          app_id: "${{ secrets.BOT_APP_ID }}"
+          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      # - name: Setup Homebrew
+      #   uses: Homebrew/actions/setup-homebrew@master
+
+      # - name: Setup Tools
+      #   run: |
+      #     brew install helm homeport/tap/dyff kustomize yq
+
+      - name: Run Diff
+        uses: allenporter/flux-local-action/diff@v2
+        id: diff
+        with:
+          path: ${{ env.KUBERNETES_DIR }}
+          resource: helmrelease
+
+      - name: Output Diff
+        run: |
+          echo ${{ steps.diff.outputs.diff }}
+
+      # - name: Find Comment
+      #   if: ${{ always() && steps.diff.outputs.diff != '' }}
+      #   uses: peter-evans/find-comment@a54c31d7fa095754bfef525c0c8e5e5674c4b4b1 # v2.4.0
+      #   id: find-comment
+      #   with:
+      #     issue-number: ${{ github.event.pull_request.number }}
+      #     comment-author: ${{ env.BOT_USERNAME }}
+      #     body-includes: ${{ matrix.file }}
+
+      # - name: Create or update comment
+      #   if: ${{ always() && steps.diff.outputs.diff != '' }}
+      #   uses: peter-evans/create-or-update-comment@ca08ebd5dc95aa0cd97021e9708fcd6b87138c9b # v3.0.1
+      #   with:
+      #     token: ${{ steps.generate-token.outputs.token }}
+      #     comment-id: ${{ steps.find-comment.outputs.comment-id }}
+      #     issue-number: ${{ github.event.pull_request.number }}
+      #     body: |
+      #       Helm Release: `${{ matrix.file }}`
+
+      #       ```diff
+      #       ${{ steps.diff.outputs.diff }}
+      #       ```
+      #     edit-mode: replace
