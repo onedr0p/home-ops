@@ -63,6 +63,10 @@ spec:
       runAsGroup: 568
       fsGroup: 568
       fsGroupChangePolicy: OnRootMismatch
+    persistence:
+      add-ons:
+        enabled: true
+        type: emptyDir
     volumeClaimTemplates:
       - name: config
         mountPath: /config
@@ -75,3 +79,15 @@ spec:
         memory: 250Mi
       limits:
         memory: 500Mi
+    sidecars:
+      jbops:
+        image: registry.k8s.io/git-sync/git-sync:v3.6.6
+        imagePullPolicy: IfNotPresent
+        args:
+          - --repo=https://github.com/blacktwin/JBOPS.git
+          - --branch=master
+          - --depth=1
+          - --wait=21600 # 6 hours
+          - --root=/add-ons/jbops
+        volumeMounts:
+          - { name: add-ons, mountPath: /add-ons }
