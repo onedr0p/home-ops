@@ -58,7 +58,7 @@ jobs:
 
       - name: Publish schemas as OCI
         run: |
-          flux push artifact oci://ghcr.io/${{ github.repository_owner }}/kubernetes-schemas-oci:$(git rev-parse --short HEAD) \
+          flux push artifact oci://ghcr.io/${{ github.repository_owner }}/manifests/kubernetes-schemas:$(git rev-parse --short HEAD) \
               --path="/home/runner/.datree/crdSchemas" \
               --source="${{ github.repositoryUrl }}" \
               --revision="${{ github.ref_name }}@sha1:$(git rev-parse HEAD)"
@@ -87,7 +87,7 @@ jobs:
       - name: Pull schemas as OCI
         run: |
           mkdir -p /home/runner/crdSchemas
-          flux pull artifact oci://ghcr.io/${{ github.repository_owner }}/kubernetes-schemas-oci:$(git rev-parse --short HEAD) --output /home/runner/crdSchemas
+          flux pull artifact oci://ghcr.io/${{ github.repository_owner }}/manifests/kubernetes-schemas:$(git rev-parse --short HEAD) --output /home/runner/crdSchemas
 
       - name: Write nginx-unprivileged Dockerfile
         run: |
@@ -105,7 +105,7 @@ jobs:
           file: /home/runner/crdSchemas/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/kubernetes-schemas-web:latest
+            ghcr.io/${{ github.repository_owner }}/kubernetes-schemas:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
           labels: |
