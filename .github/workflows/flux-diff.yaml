@@ -6,15 +6,14 @@ on:
     branches: ["main"]
     paths: ["**.yaml"]
 
-env:
-  BOT_USERNAME: rosey-bot[bot]
-  KUBERNETES_DIR: kubernetes/
-  conf_live_branch: main
-
 jobs:
   diff:
-    name: Diff on Helm Releases
+    name: Diff on Helm Release or Kustomization
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cluster_path: ["kubernetes"]
+        resource: ["helmrelease", "kustomization"]
     steps:
       - name: Generate Token
         uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92 # v1.8.0
@@ -23,14 +22,21 @@ jobs:
           app_id: "${{ secrets.BOT_APP_ID }}"
           private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Run Diff
+      - name: Diff Resources
         uses: allenporter/flux-local/action/diff@main
         id: diff
         with:
           path: ${{ env.KUBERNETES_DIR }}
-          resource: helmrelease
-          debug: true
+          resource: ${{ matrix.resource }}
 
-      - name: Output Diff
-        run: |
-          echo ${{ steps.diff.outputs.diff }}
+      - name: Add comment
+        uses: mshick/add-pr-comment@v2
+        if: ${{ steps.diff.outputs.diff != '' }}
+        with:
+          repo-token: ${{ steps.generate-token.outputs.token }}
+          message-id: ${{ matrix.cluster_path }}/${{ matrix.resource }}
+          message-failure: Diff was not successful
+          message: |
+            ```diff
+            ${{ steps.diff.outputs.diff }}
+            ```
