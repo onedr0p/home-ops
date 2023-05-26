@@ -8,7 +8,7 @@ on:
 
 jobs:
   diff:
-    name: Diff on Helm Release or Kustomization
+    name: Compute diff
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -34,7 +34,7 @@ jobs:
         if: ${{ steps.diff.outputs.diff != '' }}
         with:
           repo-token: ${{ steps.generate-token.outputs.token }}
-          message-id: ${{ matrix.cluster_path }}/${{ matrix.resource }}
+          message-id: ${{ matrix.path }}/${{ matrix.resource }}
           message-failure: Diff was not successful
           message: |
             ```diff
