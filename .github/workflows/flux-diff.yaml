@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cluster_path: ["kubernetes"]
+        path: ["kubernetes"]
         resource: ["helmrelease", "kustomization"]
     steps:
       - name: Generate Token
@@ -26,7 +26,7 @@ jobs:
         uses: allenporter/flux-local/action/diff@main
         id: diff
         with:
-          path: ${{ env.KUBERNETES_DIR }}
+          path: ${{ matrix.path }}
           resource: ${{ matrix.resource }}
 
       - name: Add comment
