@@ -56,14 +56,22 @@ jobs:
           unzip -j $GITHUB_WORKSPACE/crd-extractor.zip -d $GITHUB_WORKSPACE
           bash $GITHUB_WORKSPACE/crd-extractor.sh
 
-      - name: Publish schemas
+      - name: Generate tag
+        id: generate-tag
+        run: echo "tag=ghcr.io/${{ github.repository_owner }}/manifests/kubernetes-schemas:$(git rev-parse --short HEAD)" >> "${GITHUB_OUTPUT}"
+
+      - name: Publish manifests
         run: |
-          flux push artifact oci://ghcr.io/${{ github.repository_owner }}/manifests/kubernetes-schemas:$(git rev-parse --short HEAD) \
+          flux push artifact oci://${{ steps.generate-tag.outputs.tag }} \
               --path="/home/runner/.datree/crdSchemas" \
               --source="${{ github.repositoryUrl }}" \
               --revision="${{ github.ref_name }}@sha1:$(git rev-parse HEAD)"
 
+      - name: Tag manifests
+        run: flux tag artifact oci://${{ steps.generate-tag.outputs.tag }} --tag main
+
   publish-web:
+    name: Publish Web
     runs-on: ubuntu-latest
     needs: ["publish-manifests"]
     steps:
@@ -84,7 +92,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull schemas
+      - name: Pull manifests
         run: |
           mkdir -p /home/runner/crdSchemas
           flux pull artifact oci://ghcr.io/${{ github.repository_owner }}/manifests/kubernetes-schemas:$(git rev-parse --short HEAD) --output /home/runner/crdSchemas
@@ -97,7 +105,7 @@ jobs:
           USER nginx
           EOF
 
-      - name: Publish schemas as web container
+      - name: Publish web container
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671 # v4.0.0
         with:
           context: /home/runner/crdSchemas
