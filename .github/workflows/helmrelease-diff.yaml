@@ -84,26 +84,14 @@ jobs:
           echo "${diff}" >> "${GITHUB_OUTPUT}"
           echo "EOF" >> "${GITHUB_OUTPUT}"
 
-      - name: Find Comment
-        if: ${{ always() && steps.diff.outputs.diff != '' }}
-        uses: peter-evans/find-comment@a54c31d7fa095754bfef525c0c8e5e5674c4b4b1 # v2.4.0
-        id: find-comment
+      - name: Add or update comment
+        uses: mshick/add-pr-comment@7c0890544fb33b0bdd2e59467fbacb62e028a096 # v2
+        if: ${{ steps.diff.outputs.diff != '' }}
         with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: ${{ env.BOT_USERNAME }}
-          body-includes: ${{ matrix.file }}
-
-      - name: Create or update comment
-        if: ${{ always() && steps.diff.outputs.diff != '' }}
-        uses: peter-evans/create-or-update-comment@ca08ebd5dc95aa0cd97021e9708fcd6b87138c9b # v3.0.1
-        with:
-          token: ${{ steps.generate-token.outputs.token }}
-          comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            Helm Release: `${{ matrix.file }}`
-
+          repo-token: ${{ steps.generate-token.outputs.token }}
+          message-id: ${{ matrix.file }}
+          message-failure: Diff was not successful
+          message: |
             ```
             ${{ steps.diff.outputs.diff }}
             ```
-          edit-mode: replace
