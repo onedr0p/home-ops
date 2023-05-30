@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/kyverno.io/clusterpolicy_v1.json
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
@@ -21,6 +22,9 @@ spec:
               kinds:
                 - Pod
       mutate:
+        targets:
+          - kind: Pod
+            namespace: "{{ request.object.metadata.namespace }}"
         foreach:
           - list: "request.object.spec.containers"
             patchesJson6902: |-
@@ -38,6 +42,9 @@ spec:
             operator: GreaterThanOrEquals
             value: 1
       mutate:
+        targets:
+          - kind: Pod
+            namespace: "{{ request.object.metadata.namespace }}"
         foreach:
           - list: "request.object.spec.initContainers"
             patchesJson6902: |-
