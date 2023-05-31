@@ -73,26 +73,28 @@ This Git repository contains the following directories under [kubernetes](./kube
 
 ### Cluster layout
 
-Below is a a high level look at the layout of how my directory structure with Flux works. In this brief example you are able to see that `authelia` will not be able to run until `glauth` and  `cloudnative-pg` are running. It also shows that the `Cluster` custom resource depends on the `cloudnative-pg` Helm chart. This is needed because `cloudnative-pg` installs the `Cluster` custom resource definition in the Helm chart.
+Below is a a high level look at the layout of how my directory structure with Flux works. In this brief example you are able to see that `authelia` will not be able to run until `lldap` and  `cloudnative-pg` are running. It also shows that the `Cluster` custom resource depends on the `cloudnative-pg` Helm chart. This is needed because `cloudnative-pg` installs the `Cluster` custom resource definition in the Helm chart.
 
 ```python
 # Key: <kind> :: <metadata.name>
 GitRepository :: home-ops-kubernetes
     Kustomization :: cluster
         Kustomization :: cluster-apps
-            Kustomization :: cluster-apps-authelia
-                DependsOn:
-                    Kustomization :: cluster-apps-glauth
-                    Kustomization :: cluster-apps-cloudnative-pg-cluster
-                HelmRelease :: authelia
-            Kustomization :: cluster-apps-glauth
-                HelmRelease :: glauth
             Kustomization :: cluster-apps-cloudnative-pg
                 HelmRelease :: cloudnative-pg
             Kustomization :: cluster-apps-cloudnative-pg-cluster
                 DependsOn:
                     Kustomization :: cluster-apps-cloudnative-pg
                 Cluster :: postgres
+            Kustomization :: cluster-apps-lldap
+                HelmRelease :: lldap
+                DependsOn:
+                    Kustomization :: cluster-apps-cloudnative-pg-cluster
+            Kustomization :: cluster-apps-authelia
+                DependsOn:
+                    Kustomization :: cluster-apps-lldap
+                    Kustomization :: cluster-apps-cloudnative-pg-cluster
+                HelmRelease :: authelia
 ```
 
 ### Networking
