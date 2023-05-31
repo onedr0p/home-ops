@@ -36,6 +36,13 @@ spec:
     backgroundController:
       serviceMonitor:
         enabled: true
+      rbac:
+        clusterRole:
+          extraResources:
+            - apiGroups:
+                - ""
+              resources:
+                - pods
     cleanupController:
       serviceMonitor:
         enabled: true
@@ -46,6 +53,17 @@ spec:
       replicas: 3
       serviceMonitor:
         enabled: true
+      rbac:
+        clusterRole:
+          extraResources:
+            - apiGroups:
+                - ""
+              resources:
+                - pods
+              verbs:
+                - create
+                - update
+                - delete
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
