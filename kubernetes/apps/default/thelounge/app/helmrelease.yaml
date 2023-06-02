@@ -32,8 +32,6 @@ spec:
     image:
       repository: ghcr.io/thelounge/thelounge
       tag: 4.4.0
-    command: ["/bin/sh"] # Overwrite stupid entrypoint
-    args: ["-c", "thelounge start"]
     env:
       THELOUNGE_HOME: /config
     service:
@@ -55,11 +53,6 @@ spec:
         tls:
           - hosts:
               - *host
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
     volumeClaimTemplates:
       - name: config
         mountPath: /config
