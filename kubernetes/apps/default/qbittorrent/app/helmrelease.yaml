@@ -99,6 +99,9 @@ spec:
       incomplete:
         enabled: true
         type: emptyDir
+      add-ons:
+        enabled: true
+        type: emptyDir
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
     resources:
@@ -107,3 +110,14 @@ spec:
         memory: 250Mi
       limits:
         memory: 6000Mi
+    sidecars:
+      vuetorrent:
+        image: registry.k8s.io/git-sync/git-sync:v3.6.6
+        imagePullPolicy: IfNotPresent
+        args:
+          - --repo=https://github.com/WDaan/VueTorrent
+          - --branch=latest-release
+          - --wait=86400 # 1 day
+          - --root=/add-ons
+        volumeMounts:
+          - { name: add-ons, mountPath: /add-ons }
