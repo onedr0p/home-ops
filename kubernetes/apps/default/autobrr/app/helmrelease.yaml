@@ -70,10 +70,16 @@ spec:
       runAsGroup: 568
       fsGroup: 568
       fsGroupChangePolicy: OnRootMismatch
-    persistence:
-      config:
-        enabled: true
-        type: emptyDir
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
+    # persistence:
+    #   config:
+    #     enabled: true
+    #     type: emptyDir
     resources:
       requests:
         memory: 250Mi
