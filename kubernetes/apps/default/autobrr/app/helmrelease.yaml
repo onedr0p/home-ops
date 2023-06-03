@@ -46,7 +46,7 @@ spec:
       AUTOBRR__CHECKFORUPDATES: "false"
       AUTOBRR__HOST: 0.0.0.0
       AUTOBRR__PORT: &port 80
-      AUTOBRR__LOGLEVEL: INFO
+      AUTOBRR__LOGLEVEL: TRACE
     envFrom: *envFrom
     service:
       main:
@@ -70,16 +70,17 @@ spec:
       runAsGroup: 568
       fsGroup: 568
       fsGroupChangePolicy: OnRootMismatch
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
-    # persistence:
-    #   config:
-    #     enabled: true
-    #     type: emptyDir
+    persistence:
+      config:
+        enabled: true
+        type: emptyDir
+      config-file:
+        enabled: true
+        type: configMap
+        name: autobrr-configmap
+        subPath: config.toml
+        mountPath: /config/config.toml
+        readOnly: true
     resources:
       requests:
         memory: 250Mi
