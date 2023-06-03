@@ -14,7 +14,11 @@ spec:
   sourceRef:
     kind: GitRepository
     name: home-ops-kubernetes
-  wait: false # no flux ks dependents
+  healthChecks:
+    - name: authelia
+      kind: ExternalSecret
+    - name: authelia-configmap
+      kind: ConfigMap
   interval: 30m
   retryInterval: 1m
   timeout: 5m
