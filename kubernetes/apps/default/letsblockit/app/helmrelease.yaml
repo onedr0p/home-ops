@@ -31,7 +31,7 @@ spec:
       01-init-db:
         image: ghcr.io/onedr0p/postgres-init:14.8
         imagePullPolicy: IfNotPresent
-        envFrom:
+        envFrom: &envFrom
           - secretRef:
               name: letsblockit-secret
     controller:
@@ -46,9 +46,7 @@ spec:
       TZ: America/New_York
       LETSBLOCKIT_AUTH_METHOD: proxy
       LETSBLOCKIT_AUTH_PROXY_HEADER_NAME: Remote-User
-    envFrom:
-      - secretRef:
-          name: letsblockit-secret
+    envFrom: *envFrom
     service:
       main:
         ports:

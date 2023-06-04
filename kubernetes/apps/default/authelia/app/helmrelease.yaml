@@ -36,7 +36,7 @@ spec:
       01-init-db:
         image: ghcr.io/onedr0p/postgres-init:14.8
         imagePullPolicy: IfNotPresent
-        envFrom:
+        envFrom: &envFrom
           - secretRef:
               name: authelia-secret
     controller:
@@ -84,9 +84,7 @@ spec:
       AUTHELIA_THEME: dark
       AUTHELIA_TOTP_ISSUER: authelia.com
       AUTHELIA_WEBAUTHN_DISABLE: "true"
-    envFrom:
-      - secretRef:
-          name: authelia-secret
+    envFrom: *envFrom
     enableServiceLinks: false
     service:
       main:

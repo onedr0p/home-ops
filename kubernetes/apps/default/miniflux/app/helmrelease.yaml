@@ -31,7 +31,7 @@ spec:
       01-init-db:
         image: ghcr.io/onedr0p/postgres-init:14.8
         imagePullPolicy: IfNotPresent
-        envFrom:
+        envFrom: &envFrom
           - secretRef:
               name: miniflux-secret
     controller:
@@ -57,9 +57,7 @@ spec:
       POLLING_SCHEDULER: entry_frequency
       POLLING_FREQUENCY: "15"
       RUN_MIGRATIONS: "1"
-    envFrom:
-      - secretRef:
-          name: miniflux-secret
+    envFrom: *envFrom
     service:
       main:
         ports:

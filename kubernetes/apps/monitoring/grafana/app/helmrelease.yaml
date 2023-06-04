@@ -33,7 +33,7 @@ spec:
         imagePullPolicy: IfNotPresent
         envFrom:
           - secretRef:
-              name: grafana-secret
+              name: &secret grafana-secret
     replicas: 3
     env:
       GF_AUTH_GENERIC_OAUTH_API_URL: https://auth.devbu.io/api/oidc/userinfo
@@ -47,7 +47,7 @@ spec:
       GF_SECURITY_COOKIE_SAMESITE: grafana
       GF_SERVER_ROOT_URL: https://grafana.devbu.io
     envFromSecrets:
-      - name: grafana-secret
+      - name: *secret
     grafana.ini:
       analytics:
         check_for_updates: false

@@ -34,7 +34,7 @@ spec:
       01-init-db:
         image: ghcr.io/onedr0p/postgres-init:14.8
         imagePullPolicy: IfNotPresent
-        envFrom:
+        envFrom: &envFrom
           - secretRef:
               name: shlink-secret
     controller:
@@ -55,9 +55,7 @@ spec:
       REDIS_SENTINEL_SERVICE: redis-master
       REDIS_SERVERS: redis-node-0.redis-headless.database.svc.cluster.local:26379,redis-node-1.redis-headless.database.svc.cluster.local:26379,redis-node-2.redis-headless.database.svc.cluster.local:26379
       TIMEZONE: America/New_York
-    envFrom:
-      - secretRef:
-          name: shlink-secret
+    envFrom: *envFrom
     service:
       main:
         ports:

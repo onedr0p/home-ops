@@ -36,24 +36,22 @@ spec:
       01-init-db:
         image: ghcr.io/onedr0p/postgres-init:14.8
         imagePullPolicy: IfNotPresent
-        envFrom:
+        envFrom: &envFrom
+          - configMapRef:
+              name: &configMap immich-configmap
           - secretRef:
-              name: immich-secret
+              name: &secret immich-secret
     controller:
       replicas: 2
       strategy: RollingUpdate
       annotations:
-        configmap.reloader.stakater.com/reload: &configmap immich-configmap
-        secret.reloader.stakater.com/reload: &secret immich-secret
+        configmap.reloader.stakater.com/reload: *configMap
+        secret.reloader.stakater.com/reload: *secret
     image:
       repository: ghcr.io/immich-app/immich-server
       tag: v1.60.0
     args: ["start-server.sh"]
-    envFrom:
-      - configMapRef:
-          name: *configmap
-      - secretRef:
-          name: *secret
+    envFrom: *envFrom
     service:
       main:
         ports:

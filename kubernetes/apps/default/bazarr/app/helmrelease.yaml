@@ -39,7 +39,7 @@ spec:
       01-init-db:
         image: ghcr.io/onedr0p/postgres-init:14.8
         imagePullPolicy: IfNotPresent
-        envFrom:
+        envFrom: &envFrom
           - secretRef:
               name: bazarr-secret
     controller:
@@ -51,9 +51,7 @@ spec:
       tag: 1.2.1@sha256:70a27cdd489f69d0ab08212482459a19214dc0d1a70428dd89083215aa4c1b95
     env:
       TZ: America/New_York
-    envFrom:
-      - secretRef:
-          name: bazarr-secret
+    envFrom: *envFrom
     service:
       main:
         ports:

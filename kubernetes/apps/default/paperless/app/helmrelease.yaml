@@ -31,7 +31,7 @@ spec:
       01-init-db:
         image: ghcr.io/onedr0p/postgres-init:14.8
         imagePullPolicy: IfNotPresent
-        envFrom:
+        envFrom: &envFrom
           - secretRef:
               name: paperless-secret
     controller:
@@ -62,9 +62,7 @@ spec:
       PAPERLESS_URL: https://paperless.devbu.io
       USERMAP_UID: 568
       USERMAP_GID: 568
-    envFrom:
-      - secretRef:
-          name: paperless-secret
+    envFrom: *envFrom
     service:
       main:
         ports:

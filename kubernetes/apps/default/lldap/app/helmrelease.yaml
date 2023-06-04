@@ -31,7 +31,7 @@ spec:
       01-init-db:
         image: ghcr.io/onedr0p/postgres-init:14.8
         imagePullPolicy: IfNotPresent
-        envFrom:
+        envFrom: &envFrom
           - secretRef:
               name: lldap-secret
     controller:
@@ -45,21 +45,19 @@ spec:
       tag: latest-alpine@sha256:a6a8215f8bb286ae9ce6e4f6ef303a543094a954d0091da9a62aee2b391ed023
     env:
       TZ: America/New_York
-      LLDAP_HTTP_PORT: &http-port 80
+      LLDAP_HTTP_PORT: &port 80
       LLDAP_HTTP_URL: https://lldap.devbu.io
-      LLDAP_LDAP_PORT: &ldap-port 389
+      LLDAP_LDAP_PORT: &ldapPort 389
       LLDAP_LDAP_BASE_DN: dc=home,dc=arpa
-    envFrom:
-      - secretRef:
-          name: lldap-secret
+    envFrom: *envFrom
     service:
       main:
         ports:
           http:
-            port: *http-port
+            port: *port
           ldap:
             enabled: true
-            port: *ldap-port
+            port: *ldapPort
     ingress:
       main:
         enabled: true
