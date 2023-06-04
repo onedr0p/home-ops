@@ -56,3 +56,19 @@ tasks:
     vars:
       release: '{{ or .release (fail "HelmRelease `release` is required") }}'
       namespace: '{{.namespace | default "default"}}'
+
+  toggle-postgres:
+    cmds:
+      - |
+        flux get helmrelease --all-namespaces --no-header --label-selector "app.home.arpa/postgres" \
+            | awk '{print $1, $2, $4}' \
+            | xargs -l bash -c '
+                if [ "$2" == "True" ]; then
+                    flux -n $0 resume helmrelease $1;
+                else
+                    flux -n $0 suspend helmrelease $1;
+                    kubectl get deployment,statefulset --all-namespaces --no-headers --selector "helm.toolkit.fluxcd.io/name=$1" \
+                        | awk '\''{print $1, $2}'\'' \
+                        | xargs -l bash -c '\''kubectl -n $0 scale $1 --replicas 0'\''
+                fi
+              '

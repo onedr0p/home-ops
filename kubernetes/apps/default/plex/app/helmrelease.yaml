@@ -105,3 +105,13 @@ spec:
       limits:
         gpu.intel.com/i915: 1
         memory: 10000Mi
+    sidecars:
+      auto-languages:
+        image: docker.io/remirigal/plex-auto-languages:v1.2.1
+        imagePullPolicy: IfNotPresent
+        env:
+          - { name: PLEX_URL, value: localhost:32400 }
+          - { name: REFRESH_LIBRARY_ON_SCAN, value: "false" }
+        envFrom:
+          - secretRef:
+              name: plex-auto-languages-secret
