@@ -87,6 +87,10 @@ spec:
       transcode:
         enabled: true
         type: emptyDir
+      local:
+        enabled: true
+        type: emptyDir
+        mountPath: /.local
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
       intel.feature.node.kubernetes.io/gpu: "true"
@@ -117,3 +121,5 @@ spec:
         envFrom:
           - secretRef:
               name: plex-auto-languages-secret
+        volumeMounts:
+          - { name: local, mountPath: /.local }
