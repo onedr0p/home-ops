@@ -3,8 +3,8 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app lldap
-  namespace: default
+  name: gatus
+  namespace: monitoring
 spec:
   interval: 30m
   chart:
@@ -33,31 +33,23 @@ spec:
         imagePullPolicy: IfNotPresent
         envFrom: &envFrom
           - secretRef:
-              name: lldap-secret
+              name: gatus-secret
     controller:
-      replicas: 2
-      strategy: RollingUpdate
       annotations:
         reloader.stakater.com/auto: "true"
     image:
-      repository: ghcr.io/lldap/lldap
-      # TODO: Switch to release tag on next release
-      tag: latest-alpine@sha256:a6a8215f8bb286ae9ce6e4f6ef303a543094a954d0091da9a62aee2b391ed023
+      repository: ghcr.io/twin/gatus
+      tag: v5.4.0
     env:
       TZ: America/New_York
-      LLDAP_HTTP_PORT: &port 80
-      LLDAP_HTTP_URL: https://lldap.devbu.io
-      LLDAP_LDAP_PORT: &ldapPort 389
-      LLDAP_LDAP_BASE_DN: dc=home,dc=arpa
+      GATUS_CONFIG_PATH: /config
+      CUSTOM_WEB_PORT: &port 80
     envFrom: *envFrom
     service:
       main:
         ports:
           http:
             port: *port
-          ldap:
-            enabled: true
-            port: *ldapPort
     ingress:
       main:
         enabled: true
@@ -70,20 +62,39 @@ spec:
         tls:
           - hosts:
               - *host
+    serviceAccount:
+      create: true
+      name: gatus
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: OnRootMismatch
     persistence:
-      data:
+      config:
         enabled: true
         type: emptyDir
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: *app
+      config-file:
+        enabled: true
+        type: configMap
+        name: gatus-configmap
+        mountPath: /config/config.yaml
+        subPath: config.yaml
+        readOnly: true
     resources:
       requests:
         cpu: 100m
         memory: 100Mi
       limits:
         memory: 500Mi
+    sidecars:
+      config-sync:
+        image: ghcr.io/kiwigrid/k8s-sidecar:1.24.4
+        imagePullPolicy: IfNotPresent
+        env:
+          - { name: FOLDER, value: /config }
+          - { name: LABEL, value: gatus.io/enabled }
+          - { name: NAMESPACE, value: ALL }
+          - { name: RESOURCE, value: both }
+        volumeMounts:
+          - { name: config, mountPath: /config }

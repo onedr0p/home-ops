@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-gatus-ep
+  namespace: monitoring
+  labels:
+    gatus.io/enabled: "true"
+data:
+  grafana.yaml: |
+    endpoints:
+      - name: grafana
+        url: https://grafana.devbu.io
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
