@@ -22,12 +22,13 @@ connectivity:
   checker:
     target: 1.1.1.1:53
     interval: 1m
-externalClient: &externalClient
-  dns-resolver: tcp://1.1.1.1:53
 endpoints:
   - name: status
     url: https://status.devbu.io
-    client: *externalClient
     interval: 1m
-    conditions: ["[STATUS] == 200"]
-    alerts: [{ type: pushover }]
+    client:
+      dns-resolver: tcp://1.1.1.1:53
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: pushover
