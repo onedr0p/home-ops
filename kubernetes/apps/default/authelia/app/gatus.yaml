@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authelia-gatus-ep
+  namespace: default
+  labels:
+    gatus.io/enabled: "true"
+data:
+  authelia.yaml: |
+    endpoints:
+      - name: authelia
+        url: https://auth.devbu.io
+        interval: 1m
+        conditions: ["[STATUS] == 200"]
+        alerts: [{ type: pushover }]
