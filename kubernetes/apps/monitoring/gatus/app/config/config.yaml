@@ -8,8 +8,24 @@ metrics: true
 ui:
   title: Status | Gatus
   header: Status
+alerting:
+  pushover:
+    application-token: ${CUSTOM_PUSHOVER_APP_TOKEN}
+    user-key: ${CUSTOM_PUSHOVER_USER_KEY}
+    default-alert:
+      description: healthcheck failed
+      send-on-resolved: true
+      failure-threshold: 3
+      success-threshold: 5
+connectivity:
+  checker:
+    target: 1.1.1.1:53
+    interval: 1m
+client:
+  dns-resolver: tcp://1.1.1.1:53
 endpoints:
-  - name: gatus
-    url: https://gatus.devbu.io
-    interval: 30s
+  - name: status
+    url: https://status.devbu.io
+    interval: 1m
     conditions: ["[STATUS] == 200"]
+    alerts: [{ type: pushover }]
