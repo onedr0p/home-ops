@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tautulli-gatus-ep
+  namespace: default
+  labels:
+    gatus.io/enabled: "true"
+data:
+  config.yaml: |
+    endpoints:
+      - name: tautulli
+        url: https://tautulli.devbu.io
+        interval: 1m
+        conditions: ["[STATUS] == 200"]
+        alerts: [{ type: pushover }]

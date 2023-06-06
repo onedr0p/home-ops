@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: miniflux-gatus-ep
+  namespace: default
+  labels:
+    gatus.io/enabled: "true"
+data:
+  config.yaml: |
+    endpoints:
+      - name: miniflux
+        url: https://miniflux.devbu.io/healthcheck
+        interval: 1m
+        conditions:
+          - "[STATUS] == 200"
+          - "[BODY] == OK"
+        alerts: [{ type: pushover }]
