@@ -12,7 +12,10 @@ data:
       - name: miniflux
         url: https://miniflux.devbu.io/healthcheck
         interval: 1m
+        client:
+          dns-resolver: tcp://1.1.1.1:53
         conditions:
           - "[STATUS] == 200"
           - "[BODY] == OK"
-        alerts: [{ type: pushover }]
+        alerts:
+          - type: pushover
