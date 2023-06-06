@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: home-assistant-gatus-ep
+  namespace: default
+  labels:
+    gatus.io/enabled: "true"
+data:
+  config.yaml: |
+    endpoints:
+      - name: home-assitant
+        url: https://hass.devbu.io
+        interval: 1m
+        conditions: ["[STATUS] == 200"]
+        alerts: [{ type: pushover }]
