@@ -43,8 +43,6 @@ spec:
       TZ: America/New_York
       QBITTORRENT__PORT: &port 80
       QBITTORRENT__BT_PORT: &bittorrentPort 50413
-      QBT_Preferences__WebUI__AlternativeUIEnabled: "true"
-      QBT_Preferences__WebUI__RootFolder: /add-ons/VueTorrent
     service:
       main:
         ports:
@@ -115,13 +113,3 @@ spec:
         image: ghcr.io/buroa/qbittools:latest@sha256:3bcd40b89732fb72e50fd4d4deb2129048210eb7ed84705e555fa9bb04e85130
         imagePullPolicy: IfNotPresent
         args: ["reannounce", "-s", "localhost", "-p", "80"]
-      vuetorrent:
-        image: registry.k8s.io/git-sync/git-sync:v3.6.6
-        imagePullPolicy: IfNotPresent
-        args:
-          - --repo=https://github.com/WDaan/VueTorrent
-          - --branch=latest-release
-          - --wait=86400 # 1 day
-          - --root=/add-ons
-        volumeMounts:
-          - { name: add-ons, mountPath: /add-ons }
