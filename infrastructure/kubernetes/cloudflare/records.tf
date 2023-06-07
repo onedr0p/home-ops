@@ -24,12 +24,3 @@ resource "cloudflare_record" "home_cname" {
   type    = "CNAME"
   ttl     = 1
 }
-
-resource "cloudflare_record" "uptimerobot_status" {
-  name    = "status"
-  zone_id = data.cloudflare_zone.domain.id
-  value   = "stats.uptimerobot.com"
-  proxied = false
-  type    = "CNAME"
-  ttl     = 1
-}
