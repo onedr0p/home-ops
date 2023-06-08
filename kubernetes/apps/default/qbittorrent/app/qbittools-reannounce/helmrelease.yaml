@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: qbittorrent-tag-tracker-errors
+  name: qbittools-reannounce
   namespace: default
 spec:
   interval: 30m
@@ -28,20 +28,26 @@ spec:
     keepHistory: false
   dependsOn:
     - name: qbittorrent
+      namespace: default
   values:
-    controller:
-      type: cronjob
-      cronjob:
-        concurrencyPolicy: Forbid
-        schedule: "@hourly"
-    restartPolicy: OnFailure
     image:
-      repository: ghcr.io/onedr0p/qbittorrent-scripts
-      tag: v1.0.3@sha256:96232a288c6d3a84f63b09ed49c6a2a01f48ffcc2bd17ee353583bf2f9495099
-      env:
-        QB_HOST: http://qbittorrent:80
-        QB_TAG: "Tracker Errors"
-      args: ["/app/tag-tracker-errors.py"]
+      repository: ghcr.io/buroa/qbittools
+      tag: latest@sha256:3bcd40b89732fb72e50fd4d4deb2129048210eb7ed84705e555fa9bb04e85130
+    args:
+      - reannounce
+      - -s
+      - qbittorrent.default.svc.cluster.local
+      - -p
+      - "80"
     service:
       main:
         enabled: false
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 25m
+      limits:
+        memory: 500Mi
