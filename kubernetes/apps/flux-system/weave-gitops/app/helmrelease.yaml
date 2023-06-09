@@ -29,12 +29,8 @@ spec:
   values:
     adminUser:
       create: true
+      createSecret: false
       username: admin
-    # oidcSecret:
-    #   create: true
-    #   clientID: weave-gitops
-    #   issuerURL: https://auth.devbu.io
-    #   redirectURL: https://gitops.devbu.io/oauth2/callback
     ingress:
       enabled: true
       className: nginx
@@ -60,13 +56,4 @@ spec:
           resources: ["terraforms"]
           verbs: ["get", "list", "patch"]
     podAnnotations:
-      secret.reloader.stakater.com/reload: weave-gitops-secret
-  valuesFrom:
-    - kind: Secret
-      name: weave-gitops-secret
-      valuesKey: adminPassword
-      targetPath: adminUser.passwordHash
-    # - kind: Secret
-    #   name: weave-gitops-secret
-    #   valuesKey: WEAVEGITOPS_OAUTH_CLIENT_SECRET
-    #   targetPath: oidcSecret.clientSecret
+      secret.reloader.stakater.com/reload: cluster-user-auth
