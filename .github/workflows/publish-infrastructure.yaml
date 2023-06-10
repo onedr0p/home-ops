@@ -31,21 +31,23 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@master
 
       - name: Setup Tools
-        run: |
-          brew install cosign fluxcd/tap/flux
+        shell: bash
+        run: brew install cosign fluxcd/tap/flux
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: "${{ github.actor }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Generate tag
         id: generate-tag
+        shell: bash
         run: echo "tag=ghcr.io/${{ github.repository_owner }}/manifests/infrastructure:$(git rev-parse --short HEAD)" >> "${GITHUB_OUTPUT}"
 
       - name: Publish manifests
+        shell: bash
         run: |
           flux push artifact oci://${{ steps.generate-tag.outputs.tag }} \
               --path="./infrastructure" \
@@ -53,4 +55,5 @@ jobs:
               --revision="$(git branch --show-current)/$(git rev-parse HEAD)"
 
       - name: Tag manifests
+        shell: bash
         run: flux tag artifact oci://${{ steps.generate-tag.outputs.tag }} --tag main

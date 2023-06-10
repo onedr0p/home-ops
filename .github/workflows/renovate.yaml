@@ -5,12 +5,12 @@ on:
   workflow_dispatch:
     inputs:
       dryRun:
-        description: "Dry-Run"
+        description: Dry-Run
         default: "false"
         required: false
       logLevel:
-        description: "Log-Level"
-        default: "debug"
+        description: Log-Level
+        default: debug
         required: false
   schedule:
     - cron: "0 * * * *"
@@ -44,6 +44,7 @@ jobs:
           token: "${{ steps.generate-token.outputs.token }}"
 
       - name: Override default config from dispatch variables
+        shell: bash
         run: |
           echo "RENOVATE_DRY_RUN=${{ github.event.inputs.dryRun || env.RENOVATE_DRY_RUN }}" >> "${GITHUB_ENV}"
           echo "LOG_LEVEL=${{ github.event.inputs.logLevel || env.LOG_LEVEL }}" >> "${GITHUB_ENV}"

@@ -20,8 +20,7 @@ jobs:
       - name: Setup Kube Tools
         uses: yokawasa/action-setup-kube-tools@af4ebb1af1efd30c5bd84a2e9773355ad6362a33 # v0.9.3
         with:
-          setup-tools: |
-            kubectl
+          setup-tools: kubectl
 
       - name: Setup Python
         uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
@@ -32,8 +31,8 @@ jobs:
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: "${{ github.actor }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Setup crd-extractor
         uses: robinraju/release-downloader@efa4cd07bd0195e6cc65e9e30c251b49ce4d3e51 # v1.8
@@ -52,15 +51,18 @@ jobs:
       - name: Run crd-extractor
         env:
           KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
+        shell: bash
         run: |
           unzip -j $GITHUB_WORKSPACE/crd-extractor.zip -d $GITHUB_WORKSPACE
           bash $GITHUB_WORKSPACE/crd-extractor.sh
 
       - name: Generate tag
         id: generate-tag
+        shell: bash
         run: echo "tag=ghcr.io/${{ github.repository_owner }}/manifests/kubernetes-schemas:$(git rev-parse --short HEAD)" >> "${GITHUB_OUTPUT}"
 
       - name: Publish manifests
+        shell: bash
         run: |
           flux push artifact oci://${{ steps.generate-tag.outputs.tag }} \
               --path="/home/runner/.datree/crdSchemas" \
@@ -68,6 +70,7 @@ jobs:
               --revision="${{ github.ref_name }}@sha1:$(git rev-parse HEAD)"
 
       - name: Tag manifests
+        shell: bash
         run: flux tag artifact oci://${{ steps.generate-tag.outputs.tag }} --tag main
 
   publish-web:
@@ -89,15 +92,17 @@ jobs:
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: "${{ github.actor }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Pull manifests
+        shell: bash
         run: |
           mkdir -p /home/runner/crdSchemas
           flux pull artifact oci://ghcr.io/${{ github.repository_owner }}/manifests/kubernetes-schemas:$(git rev-parse --short HEAD) --output /home/runner/crdSchemas
 
       - name: Write nginx-unprivileged Dockerfile
+        shell: bash
         run: |
           cat <<EOF > /home/runner/crdSchemas/Dockerfile
           FROM docker.io/nginxinc/nginx-unprivileged:latest
