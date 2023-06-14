@@ -18,7 +18,7 @@ module.exports = {
   includeEpisodes: true,
   includeNonVideos: true,
   duplicateCategories: true,
-  outputDir: "/config/cross-seed",
+  outputDir: "/config/cross-seeds",
   torrentDir: "/config/qBittorrent/BT_backup",
   qbittorrentUrl: "http://localhost",
   rssCadence: "15 minutes", // autobrr doesnt get every announcement
