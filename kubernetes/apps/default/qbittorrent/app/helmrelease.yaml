@@ -35,7 +35,8 @@ spec:
     controller:
       type: statefulset
       annotations:
-        reloader.stakater.com/auto: "true"
+        configmap.reloader.stakater.com/reload: qbittorrent-scripts
+        secret.reloader.stakater.com/reload: cross-seed-secret
     image:
       repository: ghcr.io/onedr0p/qbittorrent
       tag: 4.5.3@sha256:5f97e1e998a498cc27ba08abcdad5be61bd396f833157c6b6c1f3d672915f2fa
@@ -50,6 +51,8 @@ spec:
         ports:
           http:
             port: *port
+          cross-seed:
+            port: 2468
       bittorrent:
         enabled: true
         type: LoadBalancer
@@ -106,6 +109,21 @@ spec:
       incomplete:
         enabled: true
         type: emptyDir
+      completed-script:
+        enabled: true
+        type: configMap
+        name: qbittorrent-scripts
+        mountPath: /scripts/completed.sh
+        subPath: completed.sh
+        defaultMode: 0775
+        readOnly: true
+      cross-seed-config:
+        enabled: true
+        type: secret
+        name: cross-seed-secret
+        mountPath: /config/config.js
+        subPath: config.js
+        readOnly: true
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
     resources:
@@ -114,3 +132,11 @@ spec:
         memory: 250Mi
       limits:
         memory: 6000Mi
+    sidecars:
+      cross-seed:
+        image: ghcr.io/cross-seed/cross-seed:version-5.2.0
+        imagePullPolicy: IfNotPresent
+        args: ["daemon"]
+        volumeMounts:
+          - { name: config, mountPath: /config }
+          - { name: cross-seed-config, mountPath: /config/config.js, subPath: config.js, readOnly: true }
