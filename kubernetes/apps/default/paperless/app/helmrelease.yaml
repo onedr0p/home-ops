@@ -42,6 +42,7 @@ spec:
       repository: ghcr.io/paperless-ngx/paperless-ngx
       tag: 1.15.1
     env:
+      PAPERLESS_ALLOWED_HOSTS: paperless.devbu.io
       PAPERLESS_CONSUMER_POLLING: 60
       PAPERLESS_CONSUMER_RECURSIVE: "true"
       PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
@@ -59,6 +60,7 @@ spec:
       PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://localhost:3000
       PAPERLESS_TIKA_ENDPOINT: http://localhost:9998
       PAPERLESS_TIME_ZONE: America/New_York
+      PAPERLESS_TRUSTED_PROXIES: 10.42.0.0/16,192.168.42.0/24,192.168.69.0/24
       PAPERLESS_URL: https://paperless.devbu.io
       USERMAP_UID: 568
       USERMAP_GID: 568
@@ -73,6 +75,7 @@ spec:
         enabled: true
         ingressClassName: nginx
         annotations:
+          # external-dns.alpha.kubernetes.io/target: ingress.devbu.io
           nginx.ingress.kubernetes.io/auth-method: GET
           nginx.ingress.kubernetes.io/auth-url: http://authelia.default.svc.cluster.local/api/verify
           nginx.ingress.kubernetes.io/auth-signin: https://auth.devbu.io?rm=$request_method
