@@ -132,13 +132,15 @@ spec:
       limits:
         memory: 16Gi
     sidecars:
-      cross-seed:
-        image: ghcr.io/cross-seed/cross-seed:version-5.2.0
-        imagePullPolicy: IfNotPresent
-        args: ["daemon"]
-        volumeMounts:
-          - { name: config, mountPath: /config }
-          - { name: cross-seed-config, mountPath: /config/config.js, subPath: config.js, readOnly: true }
+      # TODO: cross-seed doesn't work with qBittorrent & SQLite
+      # https://github.com/cross-seed/cross-seed/issues/365
+      # cross-seed:
+      #   image: ghcr.io/cross-seed/cross-seed:version-5.2.0
+      #   imagePullPolicy: IfNotPresent
+      #   args: ["daemon"]
+      #   volumeMounts:
+      #     - { name: config, mountPath: /config }
+      #     - { name: cross-seed-config, mountPath: /config/config.js, subPath: config.js, readOnly: true }
       reannounce:
         image: ghcr.io/buroa/qbittools:v0.1.0
         imagePullPolicy: IfNotPresent
