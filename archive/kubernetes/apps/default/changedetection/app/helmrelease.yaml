@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: midarr
+  name: changedetection
   namespace: default
 spec:
   interval: 30m
@@ -26,39 +26,32 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync
   values:
-    initContainers:
-      01-init-db:
-        image: ghcr.io/onedr0p/postgres-init:14.8
-        imagePullPolicy: IfNotPresent
-        envFrom: &envFrom
-          - secretRef:
-              name: midarr-secret
     controller:
-      replicas: 2
-      strategy: RollingUpdate
-      annotations:
-        reloader.stakater.com/auto: "true"
+      type: statefulset
     image:
-      repository: ghcr.io/midarrlabs/midarr-server
-      tag: v3.1.0-beta.2
+      repository: ghcr.io/dgtlmoon/changedetection.io
+      tag: "0.42.3"
     env:
       TZ: America/New_York
-      APP_URL: http://midarr.default.svc.cluster.local:4000
-      RADARR_BASE_URL: radarr.default.svc.cluster.local
-      SONARR_BASE_URL: sonarr.default.svc.cluster.local
-    envFrom: *envFrom
+      PORT: &port 5000
+      PUID: 568
+      PGID: 568
+      BASE_URL: https://changedetection.devbu.io
     service:
       main:
         ports:
           http:
-            port: 4000
+            port: *port
     ingress:
       main:
         enabled: true
         ingressClassName: nginx
-        annotations:
-          hajimari.io/icon: mdi:play-circle-outline
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
@@ -67,17 +60,20 @@ spec:
         tls:
           - hosts:
               - *host
-    persistence:
-      media:
-        enabled: true
-        type: nfs
-        server: expanse.turbo.ac
-        path: /eros/Media
-        mountPath: /media
-        readOnly: true
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: OnRootMismatch
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /datastore
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
     resources:
       requests:
-        cpu: 100m
-        memory: 250Mi
+        cpu: 10m
+        memory: 100Mi
       limits:
-        memory: 1000Mi
+        memory: 500Mi

@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: libreddit
+  name: midarr
   namespace: default
 spec:
   interval: 30m
@@ -27,51 +27,55 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    initContainers:
+      01-init-db:
+        image: ghcr.io/onedr0p/postgres-init:14.8
+        imagePullPolicy: IfNotPresent
+        envFrom: &envFrom
+          - secretRef:
+              name: midarr-secret
     controller:
+      replicas: 2
       strategy: RollingUpdate
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
-      repository: ghcr.io/auricom/libreddit
-      tag: 0.30.1
+      repository: ghcr.io/midarrlabs/midarr-server
+      tag: v3.1.0-beta.2
     env:
-      LIBREDDIT_DEFAULT_SHOW_NSFW: "true"
+      TZ: America/New_York
+      APP_URL: http://midarr.default.svc.cluster.local:4000
+      RADARR_BASE_URL: radarr.default.svc.cluster.local
+      SONARR_BASE_URL: sonarr.default.svc.cluster.local
+    envFrom: *envFrom
     service:
       main:
         ports:
           http:
-            port: &port 8080
-    probes:
-      liveness: &probes
-        enabled: true
-        custom: true
-        spec:
-          httpGet:
-            path: /settings
-            port: *port
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
-      readiness: *probes
-      startup:
-        enabled: false
+            port: 4000
     ingress:
       main:
         enabled: true
         ingressClassName: nginx
-        annotations:
-          external-dns.alpha.kubernetes.io/target: ingress.devbu.io
-          hajimari.io/icon: simple-icons:reddit
         hosts:
-          - host: &host fuckspez.devbu.io
+          - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
               - *host
+    persistence:
+      media:
+        enabled: true
+        type: nfs
+        server: expanse.turbo.ac
+        path: /eros/Media
+        mountPath: /media
+        readOnly: true
     resources:
       requests:
-        cpu: 5m
-        memory: 50Mi
-      limits:
+        cpu: 100m
         memory: 250Mi
+      limits:
+        memory: 1000Mi

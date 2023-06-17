@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: changedetection
+  name: libreddit
   namespace: default
 spec:
   interval: 30m
@@ -26,56 +26,51 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
-  dependsOn:
-    - name: rook-ceph-cluster
-      namespace: rook-ceph
-    - name: volsync
-      namespace: volsync
   values:
     controller:
-      type: statefulset
+      strategy: RollingUpdate
     image:
-      repository: ghcr.io/dgtlmoon/changedetection.io
-      tag: "0.42.3"
+      repository: ghcr.io/auricom/libreddit
+      tag: 0.30.1
     env:
-      TZ: America/New_York
-      PORT: &port 5000
-      PUID: 568
-      PGID: 568
-      BASE_URL: https://changedetection.devbu.io
+      LIBREDDIT_DEFAULT_SHOW_NSFW: "true"
     service:
       main:
         ports:
           http:
+            port: &port 8080
+    probes:
+      liveness: &probes
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /settings
             port: *port
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 3
+      readiness: *probes
+      startup:
+        enabled: false
     ingress:
       main:
         enabled: true
         ingressClassName: nginx
         annotations:
-          hajimari.io/icon: mdi:web-sync
+          external-dns.alpha.kubernetes.io/target: ingress.devbu.io
         hosts:
-          - host: &host "{{ .Release.Name }}.devbu.io"
+          - host: &host fuckspez.devbu.io
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
               - *host
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /datastore
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
     resources:
       requests:
-        cpu: 10m
-        memory: 100Mi
+        cpu: 5m
+        memory: 50Mi
       limits:
-        memory: 500Mi
+        memory: 250Mi
