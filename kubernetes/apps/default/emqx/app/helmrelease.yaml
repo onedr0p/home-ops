@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: emqx
-      version: 5.0.21
+      version: 5.1.0
       sourceRef:
         kind: HelmRepository
         name: emqx
@@ -26,9 +26,10 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
+  dependsOn:
+    - name: local-path-provisioner
+      namespace: kube-system
   values:
-    replicaCount: 3
-    # recreatePods: true
     emqxConfig:
       EMQX_ALLOW_ANONYMOUS: "false"
       EMQX_AUTH__MNESIA__PASSWORD_HASH: plain
@@ -36,7 +37,7 @@ spec:
     service:
       type: LoadBalancer
       annotations:
-        coredns.io/hostname: emqx.devbu.io
+        external-dns.alpha.kubernetes.io/hostname: emqx.devbu.io
       externalIPs: ["192.168.69.250"]
       externalTrafficPolicy: Local
     ingress:
@@ -64,12 +65,12 @@ spec:
         preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 100
             podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
               labelSelector:
                 matchExpressions:
                   - key: app.kubernetes.io/name
                     operator: In
                     values: ["emqx"]
-              topologyKey: kubernetes.io/hostname
   valuesFrom:
     - targetPath: emqxConfig.EMQX_DASHBOARD__DEFAULT_PASSWORD
       kind: Secret
