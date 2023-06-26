@@ -107,11 +107,11 @@ resource "kubernetes_stateful_set_v1" "minio" {
           }
           resources {
             requests = {
-              cpu    = "100m"
-              memory = "100Mi"
+              cpu    = "1"
+              memory = "2Gi"
             }
             limits = {
-              memory = "1Gi"
+              memory = "4Gi"
             }
           }
         }
