@@ -136,12 +136,11 @@ resource "kubernetes_stateful_set_v1" "kopia" {
           }
           resources {
             requests = {
-              cpu    = "4"
-              memory = "8Gi"
+              cpu    = "1"
+              memory = "2Gi"
             }
             limits = {
-              cpu    = "4"
-              memory = "8Gi"
+              memory = "12Gi"
             }
           }
         }
