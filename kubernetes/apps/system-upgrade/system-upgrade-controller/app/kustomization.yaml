@@ -1,23 +1,22 @@
----
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  # renovate: datasource=github-releases depName=rancher/system-upgrade-controller
+  # renovate: datasource=docker image=rancher/system-upgrade-controller
   - https://github.com/rancher/system-upgrade-controller/releases/download/v0.12.0/crd.yaml
   - https://github.com/rancher/system-upgrade-controller?ref=v0.12.0
 images:
   - name: rancher/system-upgrade-controller
-    newTag: v0.11.0
-patchesStrategicMerge:
-  - |
-    $patch: delete
-    apiVersion: v1
-    kind: Namespace
-    metadata:
-      name: system-upgrade
+    newTag: v0.12.0
+patches:
+  - patch: |
+      $patch: delete
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: system-upgrade
 labels:
-  - pairs:
-      app.kubernetes.io/name: system-upgrade-controller
+  - includeSelectors: true
+    pairs:
       app.kubernetes.io/instance: system-upgrade-controller
-    includeSelectors: true
+      app.kubernetes.io/name: system-upgrade-controller
