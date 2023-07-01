@@ -1,8 +1,6 @@
 ---
 - name: Cluster Nuke
-  hosts:
-    - master
-    - worker
+  hosts: all
   become: true
   gather_facts: true
   any_errors_fatal: true
@@ -44,6 +42,21 @@
         public: true
       vars:
         k3s_state: uninstalled
+
+    - name: Stale containers
+      block:
+        - name: Stale containers | Stop the systemd timer
+          ansible.builtin.systemd:
+            name: stale-containers.timer
+            state: stopped
+        - name: Stale containers | Delete systemd unit
+          ansible.builtin.blockinfile:
+            path: /etc/systemd/system/stale-containers.service
+            state: absent
+        - name: Stale containers | Delete systemd timer
+          ansible.builtin.blockinfile:
+            path: /etc/systemd/system/stale-containers.timer
+            state: absent
 
     - name: Reboot
       ansible.builtin.reboot:
