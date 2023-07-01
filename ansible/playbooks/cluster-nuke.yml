@@ -1,0 +1,51 @@
+---
+- name: Cluster Nuke
+  hosts:
+    - master
+    - worker
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+  tasks:
+    - name: Stop Kubernetes
+      ansible.builtin.include_role:
+        name: xanmanning.k3s
+        public: true
+      vars:
+        k3s_state: stopped
+
+    # https://github.com/k3s-io/docs/blob/main/docs/installation/network-options.md
+    - name: Networking
+      block:
+        - name: Networking | Delete Cilium links
+          ansible.builtin.command:
+            cmd: "ip link delete {{ item }}"
+            removes: "/sys/class/net/{{ item }}"
+          loop: ["cilium_host", "cilium_net", "cilium_vxlan"]
+        - name: Networking | Flush iptables
+          ansible.builtin.iptables:
+            table: "{{ item }}"
+            flush: true
+          loop: ["filter", "nat", "mangle", "raw"]
+        - name: Networking | Flush ip6tables
+          ansible.builtin.iptables:
+            table: "{{ item }}"
+            flush: true
+            ip_version: ipv6
+          loop: ["filter", "nat", "mangle", "raw"]
+        - name: Networking | Delete CNI directory
+          ansible.builtin.file:
+            path: /etc/cni/net.d
+            state: absent
+
+    - name: Uninstall Kubernetes
+      ansible.builtin.include_role:
+        name: xanmanning.k3s
+        public: true
+      vars:
+        k3s_state: uninstalled
+
+    - name: Reboot
+      ansible.builtin.reboot:
+        msg: Rebooting nodes
+        reboot_timeout: 3600

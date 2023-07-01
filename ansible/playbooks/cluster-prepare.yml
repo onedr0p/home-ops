@@ -1,0 +1,106 @@
+---
+- name: Prepare OS
+  hosts:
+    - master
+    - worker
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+  tasks:
+    - name: Packages
+      block:
+        - name: Packages | Install
+          ansible.builtin.apt:
+            name: "{{ packages_install | default([]) }}"
+            install_recommends: false
+        - name: Packages | Remove
+          ansible.builtin.apt:
+            name: "{{ packages_remove | default([]) }}"
+            state: absent
+            autoremove: true
+
+    - name: User Configuration
+      block:
+        - name: User Configuration | SSH keys
+          ansible.posix.authorized_key:
+            user: "{{ ansible_user }}"
+            key: "{{ item }}"
+          loop: "{{ public_ssh_keys | default([]) }}"
+        - name: User Configuration | Silence login prompt
+          ansible.builtin.file:
+            dest: /root/.hushlogin
+            state: touch
+            owner: "{{ ansible_user }}"
+            mode: "0644"
+            modification_time: preserve
+            access_time: preserve
+
+    - name: Network Configuration
+      notify: Restart systemd-networkd
+      block:
+        # https://github.com/cilium/cilium/issues/18706
+        - name: Network Configuration | Cilium (1)
+          ansible.builtin.lineinfile:
+            dest: /etc/systemd/networkd.conf
+            regexp: ManageForeignRoutingPolicyRules
+            line: ManageForeignRoutingPolicyRules=no
+        - name: Network Configuration | Cilium (2)
+          ansible.builtin.lineinfile:
+            dest: /etc/systemd/networkd.conf
+            regexp: ManageForeignRoutes
+            line: ManageForeignRoutes=no
+
+    - name: System Configuration
+      notify: Reboot
+      block:
+        - name: System Configuration | Neofetch
+          ansible.builtin.copy:
+            dest: /etc/profile.d/neofetch.sh
+            mode: "0755"
+            content: neofetch --config none
+        - name: System Configuration | Kernel modules (1)
+          community.general.modprobe:
+            name: "{{ item }}"
+            state: present
+          loop: ["br_netfilter", "ip_vs", "ip_vs_rr", "overlay", "rbd"]
+        - name: System Configuration | Kernel modules (2)
+          ansible.builtin.copy:
+            dest: "/etc/modules-load.d/{{ item }}.conf"
+            mode: "0644"
+            content: "{{ item }}"
+          loop: ["br_netfilter", "ip_vs", "ip_vs_rr", "overlay", "rbd"]
+        - name: System Configuration | Sysctl
+          ansible.posix.sysctl:
+            name: "{{ item.key }}"
+            value: "{{ item.value }}"
+            sysctl_file: /etc/sysctl.d/99-kubernetes.conf
+            reload: true
+          with_dict: "{{ sysctl_config }}"
+          vars:
+            sysctl_config:
+              fs.inotify.max_user_watches: 524288
+              fs.inotify.max_user_instances: 512
+        - name: System Configuration | Grub (1)
+          ansible.builtin.replace:
+            path: /etc/default/grub
+            regexp: '^(GRUB_CMDLINE_LINUX=(?:(?![" ]{{ item.key | regex_escape }}=).)*)(?:[" ]{{ item.key | regex_escape }}=\S+)?(.*")$'
+            replace: '\1 {{ item.key }}={{ item.value }}\2'
+          with_dict: "{{ grub_config }}"
+          vars:
+            grub_config:
+              apparmor: "0"
+              mitigations: "off"
+          register: grub_status
+        - name: System Configuration | Grub (2) # noqa: no-changed-when no-handler
+          ansible.builtin.command: update-grub
+          when: grub_status.changed
+
+  handlers:
+    - name: Restart systemd-networkd
+      ansible.builtin.systemd:
+        service: systemd-networkd
+        state: restarted
+    - name: Reboot
+      ansible.builtin.reboot:
+        msg: Rebooting nodes
+        reboot_timeout: 3600

@@ -1,0 +1,48 @@
+---
+- name: Cluster Rook-Ceph
+  hosts:
+    - worker
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+  pre_tasks:
+    - name: Pausing for 2 seconds...
+      ansible.builtin.pause:
+        seconds: 2
+  tasks:
+    - name: Reset disks
+      ignore_errors: true
+      block:
+        - name: Remove /var/lib/rook
+          ansible.builtin.file:
+            state: absent
+            path: /var/lib/rook
+          when: rook_block_devices is defined and rook_block_devices | length > 0
+
+        - name: Zap the drives
+          ansible.builtin.shell: |-
+            sgdisk --zap-all {{ item.0 }} || true
+          loop:
+            - "{{ rook_block_devices | default([]) }}"
+          when: rook_block_devices is defined and rook_block_devices | length > 0
+
+        - name: Wipe a large portion of the beginning of the disk to remove more LVM metadata that may be present
+          ansible.builtin.shell: |-
+            dd if=/dev/zero of={{ item.0 }} bs=1M count=100 oflag=direct,dsync
+          loop:
+            - "{{ rook_block_devices | default([]) }}"
+          when: rook_block_devices is defined and rook_block_devices | length > 0
+
+        - name: Clean SSDs with blkdiscard instead of dd
+          ansible.builtin.command: |-
+            blkdiscard {{ item }}
+          with_items:
+            - "{{ rook_block_devices | default([]) }}"
+          when: rook_block_devices is defined and rook_block_devices | length > 0
+
+        - name: Clean SSDs with blkdiscard instead of dd
+          ansible.builtin.command: |-
+            partprobe {{ item.0 }}
+          with_items:
+            - "{{ rook_block_devices | default([]) }}"
+          when: rook_block_devices is defined and rook_block_devices | length > 0
