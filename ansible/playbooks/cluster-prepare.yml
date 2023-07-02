@@ -7,6 +7,16 @@
   tasks:
     - name: Packages
       block:
+        - name: Packages | Add fish key
+          ansible.builtin.get_url:
+            url: https://download.opensuse.org/repositories/shells:fish:release:3/Debian_12/Release.key
+            dest: /etc/apt/trusted.gpg.d/fish.asc
+            mode: "0644"
+        - name: Packages | Add fish repository
+          ansible.builtin.apt_repository:
+            repo: deb [signed-by=/etc/apt/trusted.gpg.d/fish.asc] http://download.opensuse.org/repositories/shells:/fish:/release:/3/Debian_12/ /
+            filename: fish
+            update_cache: true
         - name: Packages | Install
           ansible.builtin.apt:
             name: "{{ packages_install | default([]) }}"
@@ -31,6 +41,28 @@
             mode: "0644"
             modification_time: preserve
             access_time: preserve
+        - name: User Configuration | Fish shell (1)
+          ansible.builtin.user:
+            name: "{{ ansible_user }}"
+            shell: /usr/bin/fish
+        - name: User Configuration | Fish shell (2)
+          ansible.builtin.file:
+            path: /root/.config/fish/functions
+            recurse: true
+            state: directory
+        - name: User Configuration | Fish shell (3)
+          ansible.builtin.copy:
+            dest: /root/.config/fish/functions/fish_greeting.fish
+            mode: "0755"
+            content: neofetch --config none
+        - name: User Configuration | Fish shell (3)
+          ansible.builtin.copy:
+            dest: /root/.config/fish/functions/k.fish
+            mode: "0755"
+            content: |
+              function k --wraps=kubectl --description 'kubectl shorthand'
+                  kubectl $argv
+              end
 
     - name: Network Configuration
       notify: Restart systemd-networkd

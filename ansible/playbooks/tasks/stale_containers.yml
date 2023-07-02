@@ -1,0 +1,36 @@
+---
+# https://github.com/k3s-io/k3s/issues/1900
+- name: Stale containers
+  block:
+    - name: Stale containers | Create systemd unit
+      ansible.builtin.blockinfile:
+        path: /etc/systemd/system/stale-containers.service
+        create: true
+        mode: "0644"
+        block: |
+          [Unit]
+          Description=Clean up stale containers
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/bin/k3s crictl rmi --prune > /dev/null 2>&1
+    - name: Stale containers | Create systemd timer
+      ansible.builtin.blockinfile:
+        path: /etc/systemd/system/stale-containers.timer
+        create: true
+        mode: "0644"
+        block: |
+          [Unit]
+          Description=Clean up stale containers
+          [Timer]
+          OnCalendar=weekly
+          AccuracySec=1h
+          Persistent=true
+          RandomizedDelaySec=6000
+          [Install]
+          WantedBy=timers.target
+    - name: Stale containers | Start the systemd timer
+      ansible.builtin.systemd:
+        name: stale-containers.timer
+        enabled: true
+        daemon_reload: true
+        state: started

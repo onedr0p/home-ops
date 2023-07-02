@@ -13,10 +13,10 @@
       check_mode: false
       ansible.builtin.stat:
         path: /etc/rancher/k3s/config.yaml
-      register: k3s_check_installed
+      register: k3s_installed
 
     - name: Ignore manifests templates and urls if the cluster is already installed
-      when: k3s_check_installed.stat.exists
+      when: k3s_installed.stat.exists
       ansible.builtin.set_fact:
         k3s_server_manifests_templates: []
         k3s_server_manifests_urls: []
@@ -28,148 +28,45 @@
       vars:
         k3s_state: installed
 
-    - name: Custom manifests (1)
+    - name: Wait for custom manifests to rollout
       when:
         - k3s_primary_control_node
         - (k3s_server_manifests_templates | length > 0
             or k3s_server_manifests_urls | length > 0)
-      block:
-        - name: Custom manifests (1) | Wait for custom manifests to rollout
-          kubernetes.core.k8s_info:
-            kubeconfig: /etc/rancher/k3s/k3s.yaml
-            kind: "{{ item.kind }}"
-            name: "{{ item.name }}"
-            namespace: "{{ item.namespace | default('') }}"
-            wait: true
-            wait_sleep: 10
-            wait_timeout: 360
-          loop:
-            - name: cilium
-              kind: HelmChart
-              namespace: kube-system
-            - name: policy
-              kind: CiliumL2AnnouncementPolicy
-            - name: pool
-              kind: CiliumLoadBalancerIPPool
-            - name: podmonitors.monitoring.coreos.com
-              kind: CustomResourceDefinition
-            - name: prometheusrules.monitoring.coreos.com
-              kind: CustomResourceDefinition
-            - name: servicemonitors.monitoring.coreos.com
-              kind: CustomResourceDefinition
-        - name: Custom manifests (1) | Wait for Cilium to rollout
-          kubernetes.core.k8s_info:
-            kubeconfig: /etc/rancher/k3s/k3s.yaml
-            kind: Job
-            name: helm-install-cilium
-            namespace: kube-system
-            wait: true
-            wait_condition:
-              type: Complete
-              status: true
-            wait_timeout: 360
-        # Unmanage and remove the Cilium HelmChart in-order for
-        # flux to take over managing the lifecycle of Cilium
-        - name: Custom manifests (1) | Patch the Cilium HelmChart to unmanage it
-          kubernetes.core.k8s_json_patch:
-            kubeconfig: /etc/rancher/k3s/k3s.yaml
-            name: cilium
-            kind: HelmChart
-            namespace: kube-system
-            patch:
-              - op: add
-                path: /metadata/annotations/helmcharts.helm.cattle.io~1unmanaged
-                value: "true"
-        - name: Custom manifests (1) | Delete the Cilium HelmChart CR
-          kubernetes.core.k8s:
-            kubeconfig: /etc/rancher/k3s/k3s.yaml
-            name: cilium
-            kind: HelmChart
-            namespace: kube-system
-            state: absent
-        - name: Custom manifests (1) | Check if Cilium HelmChart was deleted
-          kubernetes.core.k8s_info:
-            kubeconfig: /etc/rancher/k3s/k3s.yaml
-            name: cilium
-            kind: HelmChart
-            namespace: kube-system
-          register: cilium_helmchart
-        - name: Custom manifests (1) | Force delete the Cilium HelmChart
-          when: cilium_helmchart.resources | count > 0
-          kubernetes.core.k8s:
-            kubeconfig: /etc/rancher/k3s/k3s.yaml
-            name: cilium
-            kind: HelmChart
-            namespace: kube-system
-            state: patched
-            definition:
-              metadata:
-                finalizers: []
+      kubernetes.core.k8s_info:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        kind: "{{ item.kind }}"
+        name: "{{ item.name }}"
+        namespace: "{{ item.namespace | default('') }}"
+        wait: true
+        wait_sleep: 10
+        wait_timeout: 360
+      loop:
+        - { name: cilium, kind: HelmChart, namespace: kube-system }
+        - { name: coredns, kind: HelmChart, namespace: kube-system }
+        - { name: policy, kind: CiliumL2AnnouncementPolicy }
+        - { name: pool, kind: CiliumLoadBalancerIPPool }
+        - { name: podmonitors.monitoring.coreos.com, kind: CustomResourceDefinition }
+        - { name: prometheusrules.monitoring.coreos.com, kind: CustomResourceDefinition }
+        - { name: servicemonitors.monitoring.coreos.com, kind: CustomResourceDefinition }
 
-    # Cleaning up certain manifests from the /var/lib/rancher/k3s/server/manifests directory
-    # is needed because k3s has an awesome "feature" to always re-deploy them when the k3s
-    # service is restarted. Removing them does not uninstall the manifests from your cluster.
-    - name: Custom manifests (2)
+    - name: Coredns
+      when:
+        - k3s_primary_control_node
+        - (k3s_server_manifests_templates | length > 0
+            or k3s_server_manifests_urls | length > 0)
+      ansible.builtin.include_tasks: tasks/coredns.yml
+
+    - name: Cilium
+      when:
+        - k3s_primary_control_node
+        - (k3s_server_manifests_templates | length > 0
+            or k3s_server_manifests_urls | length > 0)
+      ansible.builtin.include_tasks: tasks/cilium.yml
+
+    - name: Cruft
       when: k3s_primary_control_node
-      block:
-        - name: Custom manifests (2) | Get list of custom mantifests
-          ansible.builtin.find:
-            paths: "{{ k3s_server_manifests_dir }}"
-            file_type: file
-            use_regex: true
-            patterns: ["^custom-.*"]
-          register: custom_manifest
-        - name: Custom manifests (2) | Delete custom mantifests
-          ansible.builtin.file:
-            path: "{{ item.path }}"
-            state: absent
-          loop: "{{ custom_manifest.files }}"
-        - name: Custom manifests (2) | Get list of custom addons
-          kubernetes.core.k8s_info:
-            kubeconfig: /etc/rancher/k3s/k3s.yaml
-            kind: Addon
-          register: addons_list
-        - name: Custom manifests (2) | Delete addons
-          kubernetes.core.k8s:
-            kubeconfig: /etc/rancher/k3s/k3s.yaml
-            name: "{{ item.metadata.name }}"
-            kind: Addon
-            namespace: kube-system
-            state: absent
-          loop: "{{ addons_list.resources | selectattr('metadata.name', 'match', '^custom-.*') | list }}"
+      ansible.builtin.include_tasks: tasks/cruft.yml
 
-    # https://github.com/k3s-io/k3s/issues/1900
-    - name: Stale containers
-      block:
-        - name: Stale containers | Create systemd unit
-          ansible.builtin.blockinfile:
-            path: /etc/systemd/system/stale-containers.service
-            create: true
-            mode: "0644"
-            block: |
-              [Unit]
-              Description=Clean up stale containers
-              [Service]
-              Type=oneshot
-              ExecStart=/usr/local/bin/k3s crictl rmi --prune > /dev/null 2>&1
-        - name: Stale containers | Create systemd timer
-          ansible.builtin.blockinfile:
-            path: /etc/systemd/system/stale-containers.timer
-            create: true
-            mode: "0644"
-            block: |
-              [Unit]
-              Description=Clean up stale containers
-              [Timer]
-              OnCalendar=weekly
-              AccuracySec=1h
-              Persistent=true
-              RandomizedDelaySec=6000
-              [Install]
-              WantedBy=timers.target
-        - name: Stale containers | Start the systemd timer
-          ansible.builtin.systemd:
-            name: stale-containers.timer
-            enabled: true
-            daemon_reload: true
-            state: started
+    - name: Stale Containers
+      ansible.builtin.include_tasks: tasks/stale_containers.yml
