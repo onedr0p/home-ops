@@ -1,0 +1,98 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: cilium
+  namespace: kube-system
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: cilium
+      version: 1.14.0-rc.0
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    autoDirectNodeRoutes: true
+    bpf:
+      masquerade: true
+    bgp:
+      enabled: false
+    cluster:
+      name: home-ops
+      id: 1
+    containerRuntime:
+      integration: containerd
+      socketPath: /var/run/k3s/containerd/containerd.sock
+    endpointRoutes:
+      enabled: true
+    hubble:
+      enabled: true
+      metrics:
+        enabled:
+          - dns:query
+          - drop
+          - tcp
+          - flow
+          - port-distribution
+          - icmp
+          - http
+        serviceMonitor:
+          enabled: true
+      relay:
+        enabled: true
+        rollOutPods: true
+        prometheus:
+          serviceMonitor:
+            enabled: true
+      ui:
+        enabled: true
+        rollOutPods: true
+        ingress:
+          enabled: true
+          className: nginx
+          hosts:
+            - &host hubble.devbu.io
+          tls:
+            - hosts:
+                - *host
+    ipam:
+      mode: kubernetes
+    k8sServiceHost: #TODO: Fill out k8sServiceHost
+    k8sServicePort: 6443
+    ipv4NativeRoutingCIDR: #TODO: Fill out ipv4NativeRoutingCIDR
+    kubeProxyReplacement: strict
+    kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
+    operator:
+      rollOutPods: true
+      prometheus:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+    rollOutCiliumPods: true
+    l2announcements:
+      enabled: true
+    loadBalancer:
+      algorithm: maglev
+      mode: dsr
+    securityContext:
+      privileged: true
+    tunnel: disabled
