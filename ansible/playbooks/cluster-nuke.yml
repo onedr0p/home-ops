@@ -5,12 +5,15 @@
   gather_facts: true
   any_errors_fatal: true
   tasks:
-    - name: Stop Kubernetes
-      ansible.builtin.include_role:
-        name: xanmanning.k3s
-        public: true
-      vars:
-        k3s_state: stopped
+    - name: Stop Kubernetes # noqa: ignore-errors
+      ignore_errors: true
+      block:
+        - name: Stop Kubernetes
+          ansible.builtin.include_role:
+            name: xanmanning.k3s
+            public: true
+          vars:
+            k3s_state: stopped
 
     # https://github.com/k3s-io/docs/blob/main/docs/installation/network-options.md
     - name: Networking
@@ -46,7 +49,7 @@
     - name: Stale Containers
       ansible.builtin.include_tasks: tasks/stale_containers.yml
       vars:
-        stale_containers_state: uninstalled
+        stale_containers_state: disabled
 
     - name: Reboot
       ansible.builtin.reboot:
