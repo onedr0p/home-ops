@@ -37,14 +37,14 @@ spec:
       02-config-sync:
         image: ghcr.io/kiwigrid/k8s-sidecar:1.24.4
         imagePullPolicy: IfNotPresent
-        env: &k8sSidecarEnv
+        env:
           - { name: FOLDER, value: /config }
           - { name: LABEL, value: gatus.io/enabled }
           - { name: NAMESPACE, value: ALL }
           - { name: RESOURCE, value: both }
           - { name: UNIQUE_FILENAMES, value: "true" }
-          - { name: METHOD, value: WATCH }
-        volumeMounts: &k8sSidecarVols
+          - { name: METHOD, value: LIST }
+        volumeMounts:
           - { name: config, mountPath: /config }
     controller:
       annotations:
@@ -114,5 +114,12 @@ spec:
       config-sync:
         image: ghcr.io/kiwigrid/k8s-sidecar:1.24.4
         imagePullPolicy: IfNotPresent
-        env: *k8sSidecarEnv
-        volumeMounts: *k8sSidecarVols
+        env:
+          - { name: FOLDER, value: /config }
+          - { name: LABEL, value: gatus.io/enabled }
+          - { name: NAMESPACE, value: ALL }
+          - { name: RESOURCE, value: both }
+          - { name: UNIQUE_FILENAMES, value: "true" }
+          - { name: METHOD, value: WATCH }
+        volumeMounts:
+          - { name: config, mountPath: /config }
