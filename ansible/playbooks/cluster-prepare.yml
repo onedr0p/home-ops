@@ -19,12 +19,16 @@
             update_cache: true
         - name: Packages | Install
           ansible.builtin.apt:
-            name: "{{ packages_install | default([]) }}"
+            name: apt-transport-https,ca-certificates,conntrack,curl,dirmngr,fish,gdisk,gnupg,
+              htop,intel-gpu-tools,iptables,iputils-ping,ipvsadm,libseccomp2,lm-sensors,neofetch,
+              net-tools,nfs-common,nvme-cli,parted,psmisc,python3-apt,python3-kubernetes,python3-yaml,
+              smartmontools,socat,software-properties-common,unzip
             install_recommends: false
         - name: Packages | Remove
           ansible.builtin.apt:
-            name: "{{ packages_remove | default([]) }}"
+            name: apparmor
             state: absent
+            purge: true
             autoremove: true
 
     - name: User Configuration
@@ -91,13 +95,13 @@
           community.general.modprobe:
             name: "{{ item }}"
             state: present
-          loop: ["br_netfilter", "ip_vs", "ip_vs_rr", "overlay", "rbd"]
+          loop: ["br_netfilter", "ceph", "ip_vs", "ip_vs_rr", "nbd", "overlay", "rbd"]
         - name: System Configuration | Kernel modules (2)
           ansible.builtin.copy:
             dest: "/etc/modules-load.d/{{ item }}.conf"
             mode: "0644"
             content: "{{ item }}"
-          loop: ["br_netfilter", "ip_vs", "ip_vs_rr", "overlay", "rbd"]
+          loop: ["br_netfilter", "ceph", "ip_vs", "ip_vs_rr", "nbd", "overlay", "rbd"]
         - name: System Configuration | Sysctl
           ansible.posix.sysctl:
             name: "{{ item.key }}"
@@ -107,8 +111,9 @@
           with_dict: "{{ sysctl_config }}"
           vars:
             sysctl_config:
+              fs.inotify.max_queued_events: 65536
               fs.inotify.max_user_watches: 524288
-              fs.inotify.max_user_instances: 512
+              fs.inotify.max_user_instances: 8192
         - name: System Configuration | Grub (1)
           ansible.builtin.replace:
             path: /etc/default/grub
