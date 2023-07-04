@@ -1,0 +1,72 @@
+---
+# https://github.com/kevincoakley/ansible-role-k8s-rolling-update
+- name: Cluster update rollout
+  hosts: all
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+  serial: 1
+  tasks:
+    - name: Get the node's details
+      ansible.builtin.command: |
+        kubectl get node {{ inventory_hostname }} -o json
+      register: kubectl_get_node
+      delegate_to: "{{ groups['master'][0] }}"
+      failed_when: false
+      changed_when: false
+
+    - name: Update node
+      when:
+        # When status.conditions[x].type == Ready then check stats.conditions[x].status for True|False
+        - kubectl_get_node['stdout'] | from_json | json_query("status.conditions[?type == 'Ready'].status")
+        # If spec.unschedulable is defined then the node is cordoned
+        - not (kubectl_get_node['stdout'] | from_json).spec.unschedulable is defined
+      block:
+        - name: Cordon node
+          ansible.builtin.command: |
+            kubectl cordon {{ inventory_hostname }}
+          delegate_to: "{{ groups['master'][0] }}"
+          changed_when: false
+
+        - name: Wait for node to cordon
+          ansible.builtin.command: |
+            kubectl get node {{ inventory_hostname }} -o json
+          register: wait_for_cordon
+          retries: 10
+          delay: 10
+          delegate_to: "{{ groups['master'][0] }}"
+          changed_when: false
+          until: (wait_for_cordon['stdout'] | from_json).spec.unschedulable
+
+        - name: Cordon & drain node
+          ansible.builtin.command: |
+            kubectl drain --ignore-daemonsets --delete-emptydir-data --force {{ inventory_hostname }}
+          delegate_to: "{{ groups['master'][0] }}"
+          changed_when: false
+
+        - name: Update all packages
+          ansible.builtin.apt:
+            upgrade: dist
+            update_cache: true
+
+        - name: Reboot
+          ansible.builtin.reboot:
+            msg: Rebooting node
+            post_reboot_delay: 60
+            reboot_timeout: 3600
+
+        - name: Uncordon node
+          ansible.builtin.command: |
+            kubectl uncordon {{ inventory_hostname }}
+          delegate_to: "{{ groups['master'][0] }}"
+          changed_when: false
+
+        - name: Wait for node to uncordon
+          ansible.builtin.command: |
+            kubectl get node {{ inventory_hostname }} -o json
+          register: wait_for_uncordon
+          retries: 10
+          delay: 10
+          delegate_to: "{{ groups['master'][0] }}"
+          changed_when: false
+          until: not (kubectl_get_node['stdout'] | from_json).spec.unschedulable is defined

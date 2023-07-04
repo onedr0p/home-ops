@@ -17,10 +17,9 @@ tasks:
   schemas:
     desc: Pull the latest CRD schemas for this cluster
     cmds:
-      - |
-        mkdir -p {{.CLUSTER_DIR}}/schemas
-        flux pull artifact oci://ghcr.io/onedr0p/kubernetes-schemas-oci:latest \
-            --output={{.CLUSTER_DIR}}/schemas
+      - mkdir -p {{.CLUSTER_DIR}}/schemas
+      - flux pull artifact oci://ghcr.io/onedr0p/kubernetes-schemas-oci:latest \
+          --output={{.CLUSTER_DIR}}/schemas
 
   mount:
     desc: Mount a PersistentVolumeClaim to a pod temporarily
@@ -28,40 +27,39 @@ tasks:
     vars:
       claim: '{{ or .claim (fail "PersistentVolumeClaim `claim` is required") }}'
       namespace: '{{.namespace | default "default"}}'
-    cmds:
-      - |
-        kubectl run -n {{.namespace}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
-          {
-            "apiVersion": "v1",
-            "spec": {
-              "containers": [
-                {
-                  "name": "debug",
-                  "image": "ghcr.io/onedr0p/alpine:rolling",
-                  "command": [
-                    "/bin/bash"
-                  ],
-                  "stdin": true,
-                  "stdinOnce": true,
-                  "tty": true,
-                  "volumeMounts": [
-                    {
-                      "name": "config",
-                      "mountPath": "/data/config"
-                    }
-                  ]
-                }
-              ],
-              "volumes": [
-                {
-                  "name": "config",
-                  "persistentVolumeClaim": {
-                    "claimName": "{{.claim}}"
+    cmd: |
+      kubectl run -n {{.namespace}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
+        {
+          "apiVersion": "v1",
+          "spec": {
+            "containers": [
+              {
+                "name": "debug",
+                "image": "ghcr.io/onedr0p/alpine:rolling",
+                "command": [
+                  "/bin/bash"
+                ],
+                "stdin": true,
+                "stdinOnce": true,
+                "tty": true,
+                "volumeMounts": [
+                  {
+                    "name": "config",
+                    "mountPath": "/data/config"
                   }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "persistentVolumeClaim": {
+                  "claimName": "{{.claim}}"
                 }
-              ],
-              "restartPolicy": "Never"
-            }
-          }'
+              }
+            ],
+            "restartPolicy": "Never"
+          }
+        }'
     preconditions:
       - kubectl -n {{.namespace}} get pvc {{.claim}}
