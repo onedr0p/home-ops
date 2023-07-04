@@ -46,29 +46,29 @@
         - { name: coredns, kind: HelmChart, namespace: kube-system }
         - { name: policy, kind: CiliumL2AnnouncementPolicy }
         - { name: pool, kind: CiliumLoadBalancerIPPool }
-        - { name: podmonitors, kind: CustomResourceDefinition }
-        - { name: prometheusrules, kind: CustomResourceDefinition }
-        - { name: servicemonitors, kind: CustomResourceDefinition }
+        - { name: podmonitors.monitoring.coreos.com, kind: CustomResourceDefinition }
+        - { name: prometheusrules.monitoring.coreos.com, kind: CustomResourceDefinition }
+        - { name: servicemonitors.monitoring.coreos.com, kind: CustomResourceDefinition }
 
     - name: Coredns
       when:
         - k3s_primary_control_node
         - (k3s_server_manifests_templates | length > 0
             or k3s_server_manifests_urls | length > 0)
-      ansible.builtin.include_tasks: tasks/coredns.yml
+      ansible.builtin.include_tasks: tasks/coredns.yaml
 
     - name: Cilium
       when:
         - k3s_primary_control_node
         - (k3s_server_manifests_templates | length > 0
             or k3s_server_manifests_urls | length > 0)
-      ansible.builtin.include_tasks: tasks/cilium.yml
+      ansible.builtin.include_tasks: tasks/cilium.yaml
 
     - name: Cruft
       when: k3s_primary_control_node
-      ansible.builtin.include_tasks: tasks/cruft.yml
+      ansible.builtin.include_tasks: tasks/cruft.yaml
 
     - name: Stale Containers
-      ansible.builtin.include_tasks: tasks/stale_containers.yml
+      ansible.builtin.include_tasks: tasks/stale_containers.yaml
       vars:
         stale_containers_state: enabled
