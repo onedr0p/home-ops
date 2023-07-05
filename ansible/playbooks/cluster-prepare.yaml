@@ -5,6 +5,12 @@
   gather_facts: true
   any_errors_fatal: true
   tasks:
+    - name: Locale
+      block:
+        - name: Locale | Set timezone
+          community.general.timezone:
+            name: "{{ timezone | default('Etc/UTC') }}"
+
     - name: Packages
       block:
         - name: Packages | Add fish key
@@ -19,17 +25,11 @@
             update_cache: true
         - name: Packages | Install
           ansible.builtin.apt:
-            name: apt-transport-https,ca-certificates,conntrack,curl,dirmngr,fish,gdisk,gnupg,
-              htop,intel-gpu-tools,iptables,iputils-ping,ipvsadm,libseccomp2,lm-sensors,neofetch,
-              net-tools,nfs-common,nvme-cli,parted,psmisc,python3-apt,python3-kubernetes,python3-yaml,
-              smartmontools,socat,software-properties-common,unzip
+            name: apt-transport-https,ca-certificates,conntrack,curl,dirmngr,fish,gdisk,gnupg,htop,
+              intel-gpu-tools,iptables,iputils-ping,ipvsadm,libseccomp2,lm-sensors,neofetch,net-tools,
+              nfs-common,nvme-cli,open-iscsi,parted,psmisc,python3,python3-apt,python3-kubernetes,
+              python3-yaml,smartmontools,socat,software-properties-common,unzip,util-linux
             install_recommends: false
-        - name: Packages | Remove
-          ansible.builtin.apt:
-            name: apparmor
-            state: absent
-            purge: true
-            autoremove: true
 
     - name: User Configuration
       block:
@@ -69,8 +69,23 @@
               end
 
     - name: Network Configuration
-      notify: Restart systemd-networkd
+      notify: Reboot
       block:
+        - name: Network Configuration | Set hostname
+          ansible.builtin.hostname:
+            name: "{{ inventory_hostname }}"
+        - name: Network Configuration | Update hosts
+          ansible.builtin.copy:
+            content: |
+              127.0.0.1 localhost
+              127.0.1.1 {{ inventory_hostname }}
+
+              # The following lines are desirable for IPv6 capable hosts
+              ::1     localhost ip6-localhost ip6-loopback
+              ff02::1 ip6-allnodes
+              ff02::2 ip6-allrouters
+            dest: /etc/hosts
+            mode: preserve
         # https://github.com/cilium/cilium/issues/18706
         - name: Network Configuration | Cilium (1)
           ansible.builtin.lineinfile:
@@ -91,6 +106,17 @@
             dest: /etc/profile.d/neofetch.sh
             mode: "0755"
             content: neofetch --config none
+        - name: System Configuration | Disable apparmor
+          ansible.builtin.systemd:
+            name: apparmor
+            state: stopped
+            masked: true
+        - name: System Configuration | Disable swap
+          ansible.posix.mount:
+            name: "{{ item }}"
+            fstype: swap
+            state: absent
+          loop: ["none", "swap"]
         - name: System Configuration | Kernel modules (1)
           community.general.modprobe:
             name: "{{ item }}"
@@ -130,10 +156,6 @@
           when: grub_status.changed
 
   handlers:
-    - name: Restart systemd-networkd
-      ansible.builtin.systemd:
-        service: systemd-networkd
-        state: restarted
     - name: Reboot
       ansible.builtin.reboot:
         msg: Rebooting nodes
