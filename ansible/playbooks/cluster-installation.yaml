@@ -51,17 +51,11 @@
         - { name: servicemonitors.monitoring.coreos.com, kind: CustomResourceDefinition }
 
     - name: Coredns
-      when:
-        - k3s_primary_control_node
-        - (k3s_server_manifests_templates | length > 0
-            or k3s_server_manifests_urls | length > 0)
+      when: k3s_primary_control_node
       ansible.builtin.include_tasks: tasks/coredns.yaml
 
     - name: Cilium
-      when:
-        - k3s_primary_control_node
-        - (k3s_server_manifests_templates | length > 0
-            or k3s_server_manifests_urls | length > 0)
+      when: k3s_primary_control_node
       ansible.builtin.include_tasks: tasks/cilium.yaml
 
     - name: Cruft

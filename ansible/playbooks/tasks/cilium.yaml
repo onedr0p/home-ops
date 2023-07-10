@@ -1,7 +1,16 @@
 ---
 - name: Cilium
   block:
+    - name: Cilium | Check if Cilium HelmChart exists
+      kubernetes.core.k8s_info:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        name: cilium
+        kind: HelmChart
+        namespace: kube-system
+      register: cilium_helmchart
+
     - name: Cilium | Wait for Cilium to rollout
+      when: cilium_helmchart.resources | count > 0
       kubernetes.core.k8s_info:
         kubeconfig: /etc/rancher/k3s/k3s.yaml
         name: helm-install-cilium
@@ -14,6 +23,7 @@
         wait_timeout: 360
 
     - name: Cilium | Patch the Cilium HelmChart to unmanage it
+      when: cilium_helmchart.resources | count > 0
       kubernetes.core.k8s_json_patch:
         kubeconfig: /etc/rancher/k3s/k3s.yaml
         name: cilium
@@ -25,20 +35,13 @@
             value: "true"
 
     - name: Cilium | Delete the Cilium HelmChart CR
+      when: cilium_helmchart.resources | count > 0
       kubernetes.core.k8s:
         kubeconfig: /etc/rancher/k3s/k3s.yaml
         name: cilium
         kind: HelmChart
         namespace: kube-system
         state: absent
-
-    - name: Cilium | Check if Cilium HelmChart was deleted
-      kubernetes.core.k8s_info:
-        kubeconfig: /etc/rancher/k3s/k3s.yaml
-        name: cilium
-        kind: HelmChart
-        namespace: kube-system
-      register: cilium_helmchart
 
     - name: Cilium | Force delete the Cilium HelmChart
       when: cilium_helmchart.resources | count > 0
