@@ -33,7 +33,7 @@ spec:
     bgp:
       enabled: false
     cluster:
-      name: home-ops
+      name: kubernetes
       id: 1
     containerRuntime:
       integration: containerd
@@ -72,11 +72,20 @@ spec:
                 - *host
     ipam:
       mode: kubernetes
+    ipv4NativeRoutingCIDR: 10.32.0.0/16
     k8sServiceHost: 192.168.42.254
     k8sServicePort: 6443
-    ipv4NativeRoutingCIDR: 10.32.0.0/16
     kubeProxyReplacement: strict
     kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
+    l2announcements:
+      enabled: true
+      leaseDuration: 120s
+      leaseRenewDeadline: 60s
+      leaseRetryPeriod: 1s
+    loadBalancer:
+      algorithm: maglev
+      mode: dsr
+    localRedirectPolicy: true
     operator:
       rollOutPods: true
       prometheus:
@@ -88,11 +97,6 @@ spec:
       serviceMonitor:
         enabled: true
     rollOutCiliumPods: true
-    l2announcements:
-      enabled: true
-    loadBalancer:
-      algorithm: maglev
-      mode: dsr
     securityContext:
       privileged: true
     tunnel: disabled
