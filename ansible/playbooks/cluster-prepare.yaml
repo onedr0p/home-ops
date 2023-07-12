@@ -29,7 +29,7 @@
             update_cache: true
         - name: Packages | Install
           ansible.builtin.apt:
-            name: apt-transport-https,ca-certificates,conntrack,curl,dirmngr,fish,gdisk,gnupg,htop,
+            name: apt-transport-https,ca-certificates,conntrack,curl,dirmngr,fish,gdisk,gnupg,hdparm,htop,
               intel-gpu-tools,iptables,iputils-ping,ipvsadm,libseccomp2,lm-sensors,neofetch,net-tools,
               nfs-common,nvme-cli,open-iscsi,parted,psmisc,python3,python3-apt,python3-kubernetes,
               python3-yaml,smartmontools,socat,software-properties-common,unzip,util-linux
@@ -43,9 +43,10 @@
             key: "https://github.com/{{ github_username }}.keys"
         - name: User Configuration | Silence login
           ansible.builtin.file:
-            dest: /root/.hushlogin
+            dest: "{{ '/home/' + ansible_user if ansible_user != 'root' else '/root' }}/.hushlogin"
             state: touch
             owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
             mode: "0644"
             modification_time: preserve
             access_time: preserve
@@ -55,17 +56,23 @@
             shell: /usr/bin/fish
         - name: User Configuration | Fish shell (2)
           ansible.builtin.file:
-            path: /root/.config/fish/functions
-            recurse: true
+            path: "{{ '/home/' + ansible_user if ansible_user != 'root' else '/root' }}/.config/fish/functions"
             state: directory
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
+            recurse: true
         - name: User Configuration | Fish shell (3)
           ansible.builtin.copy:
-            dest: /root/.config/fish/functions/fish_greeting.fish
+            dest: "{{ '/home/' + ansible_user if ansible_user != 'root' else '/root' }}/.config/fish/functions/fish_greeting.fish"
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
             mode: "0755"
             content: neofetch --config none
         - name: User Configuration | Fish shell (3)
           ansible.builtin.copy:
-            dest: /root/.config/fish/functions/k.fish
+            dest: "{{ '/home/' + ansible_user if ansible_user != 'root' else '/root' }}/.config/fish/functions/k.fish"
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
             mode: "0755"
             content: |
               function k --wraps=kubectl --description 'kubectl shorthand'
