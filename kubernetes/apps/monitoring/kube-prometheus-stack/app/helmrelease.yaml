@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 47.6.1
+      version: 48.0.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
@@ -19,12 +19,10 @@ spec:
   maxHistory: 2
   install:
     createNamespace: true
-    crds: CreateReplace
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
-    crds: CreateReplace
     remediation:
       retries: 3
   uninstall:
@@ -37,6 +35,8 @@ spec:
     - name: thanos
       namespace: monitoring
   values:
+    crds:
+      enabled: true
     cleanPrometheusOperatorObjectNames: true
     alertmanager:
       config:
