@@ -27,12 +27,18 @@
             repo: deb [signed-by=/etc/apt/trusted.gpg.d/fish.asc] http://download.opensuse.org/repositories/shells:/fish:/release:/3/Debian_12/ /
             filename: fish
             update_cache: true
+        - name: Packages | Add non-free repository
+          ansible.builtin.apt_repository:
+            repo: deb http://deb.debian.org/debian/ stable main contrib non-free
+            filename: non-free
+            update_cache: true
         - name: Packages | Install
           ansible.builtin.apt:
-            name: apt-transport-https,ca-certificates,conntrack,curl,dirmngr,fish,gdisk,gnupg,hdparm,htop,
-              intel-gpu-tools,iptables,iputils-ping,ipvsadm,libseccomp2,lm-sensors,neofetch,net-tools,
-              nfs-common,nvme-cli,open-iscsi,parted,psmisc,python3,python3-apt,python3-kubernetes,
-              python3-yaml,smartmontools,socat,software-properties-common,unzip,util-linux
+            name: i965-va-driver-shaders,apt-transport-https,ca-certificates,conntrack,curl,dirmngr,fish,gdisk,
+              gnupg,hdparm,htop,intel-gpu-tools,intel-media-va-driver-non-free,iptables,iputils-ping,ipvsadm,
+              libseccomp2,lm-sensors,neofetch,net-tools,nfs-common,nvme-cli,open-iscsi,parted,psmisc,python3,
+              python3-apt,python3-kubernetes,python3-yaml,smartmontools,socat,software-properties-common,unzip,
+              util-linux
             install_recommends: false
 
     - name: User Configuration
