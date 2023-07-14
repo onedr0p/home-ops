@@ -36,14 +36,14 @@ There is a template over at [onedr0p/flux-cluster-template](https://github.com/o
 
 My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Ubuntu Server using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.
 
-🔸 _[Click here](./infrastructure/kubernetes/servers/) to see my Ansible playbooks and roles._
+🔸 _[Click here](./ansible/) to see my Ansible playbooks and roles._
 
 ### Core Components
 
 - [actions-runner-controller](https://github.com/actions/actions-runner-controller): Self-hosted Github runners.
-- [calico](https://github.com/projectcalico/calico): Internal Kubernetes networking plugin.
+- [cilium](https://github.com/cilium/cilium): Internal Kubernetes networking plugin.
 - [cert-manager](https://cert-manager.io/docs/): Creates SSL certificates for services in my Kubernetes cluster.
-- [external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically manages DNS records from my cluster in a cloud DNS provider.
+- [external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically syncs DNS records from my cluster ingresses to a DNS provider.
 - [external-secrets](https://github.com/external-secrets/external-secrets/): Managed Kubernetes secrets using [1Password Connect](https://github.com/1Password/connect).
 - [ingress-nginx](https://github.com/kubernetes/ingress-nginx/): Ingress controller to expose HTTP traffic to pods over DNS.
 - [rook](https://github.com/rook/rook): Distributed block storage for peristent storage.
@@ -104,17 +104,11 @@ GitRepository :: home-kubernetes
   <img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/networks.png" align="center" width="600px" alt="dns"/>
 </details>
 
-
-| Name                                          | CIDR              |
-|-----------------------------------------------|-------------------|
-| Management VLAN                               | `192.168.1.0/24`  |
-| Kubernetes Nodes VLAN                         | `192.168.42.0/24` |
-| Kubernetes external services (Calico w/ BGP)  | `192.168.69.0/24` |
-| Kubernetes pods (Calico w/ BGP)               | `10.42.0.0/16`    |
-| Kubernetes services (Calico w/ BGP)           | `10.43.0.0/16`    |
-
-- HAProxy is configured on my `VyOS` router for the Kubernetes Control Plane Load Balancer.
-- Calico is configured with `externalIPs` to expose Kubernetes services with their own IP over BGP which is configured on my router.
+| Name                  | CIDR              |
+|-----------------------|-------------------|
+| Server VLAN           | `192.168.42.0/24` |
+| Kubernetes pods       | `10.32.0.0/16`    |
+| Kubernetes services   | `10.33.0.0/16`    |
 
 ---
 
@@ -173,8 +167,8 @@ Another `external-dns` instance is deployed in my cluster and configure to sync 
 | HP EliteDesk 800 G3 SFF     | 1     | 256GB NVMe   | -                           | 8GB  | Vyos (Debian)    | Router              |
 | Unifi US-16-XG              | 1     | -            | -                           | -    | -                | 10Gb Core Switch    |
 | Unifi USW-Enterprise-24-PoE | 1     | -            | -                           | -    | -                | 2.5Gb PoE Switch    |
-| APC SMT1500RM2U w/ NIC      | 1     | -            | -                           | -    | -                | UPS                 |
 | Unifi USP PDU Pro           | 1     | -            | -                           | -    | -                | PDU                 |
+| APC SMT1500RM2U w/ NIC      | 1     | -            | -                           | -    | -                | UPS                 |
 
 ---
 
