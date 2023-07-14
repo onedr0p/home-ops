@@ -21,6 +21,8 @@
           ansible.builtin.get_url:
             url: https://download.opensuse.org/repositories/shells:fish:release:3/Debian_12/Release.key
             dest: /etc/apt/trusted.gpg.d/fish.asc
+            owner: root
+            group: root
             mode: "0644"
         - name: Packages | Add fish repository
           ansible.builtin.apt_repository:
@@ -93,6 +95,7 @@
             name: "{{ inventory_hostname }}"
         - name: Network Configuration | Update hosts
           ansible.builtin.copy:
+            dest: /etc/hosts
             content: |
               127.0.0.1 localhost
               127.0.1.1 {{ inventory_hostname }}
@@ -101,7 +104,6 @@
               ::1     localhost ip6-localhost ip6-loopback
               ff02::1 ip6-allnodes
               ff02::2 ip6-allrouters
-            dest: /etc/hosts
             mode: preserve
         # https://github.com/cilium/cilium/issues/18706
         - name: Network Configuration | Cilium (1)
@@ -114,6 +116,17 @@
             dest: /etc/systemd/networkd.conf
             regexp: ManageForeignRoutes
             line: ManageForeignRoutes=no
+        - name: Network Configuration | Set NIC
+          ansible.builtin.copy:
+            dest: /etc/network/interfaces.d/enp7s0
+            content: |
+              auto enp7s0
+              allow-hotplug enp7s0
+              iface enp7s0 inet dhcp
+                  post-up ifconfig enp7s0 mtu 9000
+            owner: root
+            group: root
+            mode: "0644"
 
     - name: System Configuration
       notify: Reboot

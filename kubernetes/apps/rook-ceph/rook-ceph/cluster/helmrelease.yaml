@@ -41,7 +41,7 @@ spec:
           - hosts:
               - *host
     toolbox:
-      enabled: true
+      enabled: false
     configOverride: |
       [global]
       bdev_enable_discard = true
@@ -52,8 +52,7 @@ spec:
         provider: host
         connections:
           compression:
-            # TODO: Test out enabling this on next cluster rebuild
-            enabled: false
+            enabled: true
       crashCollector:
         disable: false
       dashboard:
@@ -66,21 +65,30 @@ spec:
         config:
           osdsPerDevice: "1"
         nodes:
+          - name: k8s-0
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NJ0TB03807K
+          - name: k8s-1
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NS0W223961P
+          - name: k8s-2
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NS0W224436E
           - name: k8s-3
             devices:
-              - name: /dev/disk/by-id/nvme-WDC_WDS100T2B0C-00PXH0_194688900123
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NS0TC01391F
           - name: k8s-4
             devices:
-              - name: /dev/disk/by-id/nvme-WDC_WDS100T2B0C-00PXH0_2014HD454202
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S59ANM0W417201H
           - name: k8s-5
             devices:
-              - name: /dev/disk/by-id/nvme-WDC_WDS100T2B0C-00PXH0_2014HD455903
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NJ0T813624W
     cephBlockPools:
       - name: ceph-blockpool
         spec:
           failureDomain: host
           replicated:
-            size: 3
+            size: 6
         storageClass:
           enabled: true
           name: ceph-block
@@ -102,11 +110,11 @@ spec:
         spec:
           metadataPool:
             replicated:
-              size: 3
+              size: 6
           dataPools:
             - failureDomain: host
               replicated:
-                size: 3
+                size: 6
               name: data0
           metadataServer:
             activeCount: 1
@@ -138,12 +146,12 @@ spec:
           metadataPool:
             failureDomain: host
             replicated:
-              size: 3
+              size: 6
           dataPool:
             failureDomain: host
             erasureCoded:
-              dataChunks: 2
-              codingChunks: 1
+              dataChunks: 4
+              codingChunks: 2
           preservePoolsOnDelete: true
           gateway:
             port: 80

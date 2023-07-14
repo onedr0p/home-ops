@@ -44,8 +44,10 @@ spec:
     service:
       main:
         type: LoadBalancer
-        externalIPs: ["192.168.69.105"]
-        externalTrafficPolicy: Local
+        annotations:
+          io.cilium/lb-ipam-ips: 192.168.42.204
+        externalTrafficPolicy: Cluster
+        # externalIPs: ["192.168.69.105"]
         ports:
           http:
             port: &port 8096
@@ -84,7 +86,7 @@ spec:
       runAsGroup: 568
       fsGroup: 568
       fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups: [44, 109, 10000]
+      supplementalGroups: [44, 105, 10000]
     volumeClaimTemplates:
       - name: config
         mountPath: /config
