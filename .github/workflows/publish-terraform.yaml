@@ -1,0 +1,59 @@
+---
+name: "Publish Terraform"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths: ["terraform/**"]
+
+jobs:
+  publish-terraform:
+    name: Publish Terraform
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      id-token: write
+    steps:
+      - name: Generate Token
+        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92 # v1.8.0
+        id: generate-token
+        with:
+          app_id: "${{ secrets.BOT_APP_ID }}"
+          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Checkout
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
+
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Setup Tools
+        shell: bash
+        run: brew install cosign fluxcd/tap/flux
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
+        with:
+          registry: ghcr.io
+          username: "${{ github.actor }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Generate tag
+        id: generate-tag
+        shell: bash
+        run: echo "tag=ghcr.io/${{ github.repository_owner }}/manifests/terraform:$(git rev-parse --short HEAD)" >> "${GITHUB_OUTPUT}"
+
+      - name: Publish manifests
+        shell: bash
+        run: |
+          flux push artifact oci://${{ steps.generate-tag.outputs.tag }} \
+              --path="./terraform" \
+              --source="$(git config --get remote.origin.url)" \
+              --revision="$(git branch --show-current)/$(git rev-parse HEAD)"
+
+      - name: Tag manifests
+        shell: bash
+        run: flux tag artifact oci://${{ steps.generate-tag.outputs.tag }} --tag main
