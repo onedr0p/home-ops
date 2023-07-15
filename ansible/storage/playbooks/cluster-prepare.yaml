@@ -15,14 +15,15 @@
       block:
         - name: Locale | Set timezone
           community.general.timezone:
-            name: "{{ timezone | default('America/New_York') }}"
+            name: "{{ timezone | default('Etc/UTC') }}"
+
     - name: Packages
       block:
-        - name: Packages | Add apt repositories
+        - name: Packages | Add fish repository
           ansible.builtin.apt_repository:
             repo: ppa:fish-shell/release-3
             update_cache: true
-        - name: Packages | Install common packages
+        - name: Packages | Install
           ansible.builtin.apt:
             name: apt-transport-https,ca-certificates,containernetworking-plugins,curl,ffmpeg,
               figlet,fish,fzf,gettext,git,htop,ifenslave,iputils-ping,net-tools,lolcat,mailutils,
@@ -30,19 +31,20 @@
               tmux,tree,uidmap,unzip,zfs-zed,zfsutils-linux,dmraid,gdisk,hdparm,lvm2,nfs-common,
               nfs-kernel-server,nvme-cli,open-iscsi,samba,smartmontools,socat
             install_recommends: false
-        - name: Packages | Remove packages
+        - name: Packages | Remove
           ansible.builtin.apt:
             name: apparmor,ufw,unattended-upgrades
             state: absent
             autoremove: true
-    - name: User
+
+    - name: User Configuration
       block:
-        - name: User | Create group
+        - name: User Configuration | Create group
           ansible.builtin.group:
             gid: "{{ create_group.id }}"
             name: "{{ create_group.name }}"
             state: present
-        - name: User | Create user
+        - name: User Configuration | Create user
           ansible.builtin.user:
             uid: "{{ create_user.id }}"
             name: "{{ create_user.name }}"
@@ -50,66 +52,80 @@
             group: "{{ create_group.name }}"
             groups: "{{ create_user.additional_groups }}"
             append: true
-        - name: User | Add user to sudoers
+        - name: User Configuration | Add user to sudoers
+          when: ansible_user != 'root'
           ansible.builtin.copy:
             content: "{{ create_user.name }} ALL=(ALL:ALL) NOPASSWD:ALL"
-            dest: "/etc/sudoers.d/{{ create_user.name }}_nopasswd"
+            dest: "/etc/sudoers.d/{{ create_user.name }}"
+            owner: root
+            group: root
             mode: "0440"
-        - name: User | Add additional user SSH public keys
+        - name: User Configuration | SSH keys
           ansible.posix.authorized_key:
             user: "{{ create_user.name }}"
-            key: "{{ item }}"
-          loop: "{{ ssh_authorized_keys | default([]) }}"
-        - name: User | Silence the login prompt
+            key: "https://github.com/{{ github_username }}.keys"
+        - name: User Configuration | Silence login
           ansible.builtin.file:
             dest: "/home/{{ create_user.name }}/.hushlogin"
             state: touch
             owner: "{{ create_user.name }}"
+            group: "{{ create_user.name }}"
             mode: "0775"
             modification_time: preserve
             access_time: preserve
-    - name: Network
+        - name: User Configuration | Fish shell
+          ansible.builtin.user:
+            name: "{{ create_user.name }}"
+            shell: /usr/bin/fish
+
+    - name: Network Configuration
       block:
-        - name: Network | Set hostname to inventory hostname
+        - name: Network Configuration | Set hostname
           ansible.builtin.hostname:
             name: "{{ inventory_hostname }}"
-        - name: Network | Update /etc/hosts to include hostname
-          ansible.builtin.blockinfile:
-            path: /etc/hosts
-            mode: "0644"
-            create: true
-            block: |
+        - name: Network Configuration | Update hosts
+          ansible.builtin.copy:
+            dest: /etc/hosts
+            content: |
               127.0.0.1 localhost
               127.0.1.1 {{ inventory_hostname }}
-    - name: NFS
-      block:
-        - name: NFS | Update configuration
-          ansible.builtin.blockinfile:
-            path: /etc/nfs.conf.d/local.conf
-            mode: "0644"
-            create: true
-            block: |
-              [nfsd]
-              vers2 = n
-              vers3 = n
-              threads = 16
 
-              [mountd]
-              manage-gids = 1
-    - name: File System
+              # The following lines are desirable for IPv6 capable hosts
+              ::1     localhost ip6-localhost ip6-loopback
+              ff02::1 ip6-allnodes
+              ff02::2 ip6-allrouters
+            mode: preserve
+
+    - name: NFS Configuration
       block:
-        - name: File System | Disable swap
-          ansible.builtin.command: swapoff -a
-          when: ansible_swaptotal_mb > 0
-        - name: File System | Disable swap on boot
+        - name: NFS Configuration | Copy /etc/nfs.conf.d/local.conf
+          notify: Restart nfs
+          ansible.builtin.template:
+            src: templates/local.conf.j2
+            dest: /etc/nfs.conf.d/local.conf
+            owner: root
+            group: root
+            mode: "0644"
+
+    - name: System Configuration
+      block:
+        - name: System Configuration | Neofetch
+          ansible.builtin.copy:
+            dest: /etc/profile.d/neofetch.sh
+            mode: "0755"
+            content: neofetch --config none
+        - name: System Configuration | Disable apparmor
+          ansible.builtin.systemd:
+            name: apparmor
+            state: stopped
+            masked: true
+        - name: System Configuration | Disable swap
           ansible.posix.mount:
             name: "{{ item }}"
             fstype: swap
             state: absent
           loop: ["swap", "none"]
-    - name: System
-      block:
-        - name: System | Disable apparmor and mitigations in grub
+        - name: System Configuration | Grub (1)
           ansible.builtin.replace:
             path: /etc/default/grub
             regexp: '^(GRUB_CMDLINE_LINUX=(?:(?![" ]{{ item.key | regex_escape }}=).)*)(?:[" ]{{ item.key | regex_escape }}=\S+)?(.*")$'
@@ -120,34 +136,43 @@
               apparmor: "0"
               mitigations: "off"
           register: grub_status
-        - name: System | Run grub-mkconfig
+        - name: System Configuration | Grub (2) # noqa: no-changed-when no-handler
           ansible.builtin.command: update-grub
           when: grub_status.changed
-    - name: Notifications
+
+    - name: Notification Configuration
       block:
-        - name: Notifications | Copy /etc/aliases
+        - name: Notification Configuration | Copy /etc/aliases
           notify: Restart msmtpd
           ansible.builtin.template:
-            src: aliases.j2
+            src: templates/aliases.j2
             dest: /etc/aliases
+            owner: root
+            group: root
             mode: "0644"
-        - name: Notifications | Copy /etc/msmtprc
+        - name: Notification Configuration | Copy /etc/msmtprc
           notify: Restart msmtpd
           ansible.builtin.template:
-            src: msmtprc.j2
+            src: templates/msmtprc.j2
             dest: /etc/msmtprc
+            owner: root
+            group: root
             mode: "0644"
-        - name: Notifications | Copy /etc/smartd.conf
+        - name: Notification Configuration | Copy /etc/smartd.conf
           notify: Restart smartd
           ansible.builtin.template:
-            src: smartd.conf.j2
+            src: templates/smartd.conf.j2
             dest: /etc/smartd.conf
+            owner: root
+            group: root
             mode: "0644"
-        - name: Notifications | Copy /etc/zfs/zed.d/zed.rc
+        - name: Notification Configuration | Copy /etc/zfs/zed.d/zed.rc
           notify: Restart zed
           ansible.builtin.template:
-            src: zed.rc.j2
+            src: templates/zed.rc.j2
             dest: /etc/zfs/zed.d/zed.rc
+            owner: root
+            group: root
             mode: "0644"
 
   handlers:
@@ -158,6 +183,11 @@
     - name: Restart msmtpd
       ansible.builtin.service:
         name: msmtpd.service
+        enabled: true
+        state: restarted
+    - name: Restart nfs
+      ansible.builtin.service:
+        name: nfs-kernel-server.service
         enabled: true
         state: restarted
     - name: Restart smartd

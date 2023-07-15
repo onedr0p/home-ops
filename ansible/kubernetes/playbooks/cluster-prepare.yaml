@@ -58,6 +58,14 @@
             mode: "0644"
             modification_time: preserve
             access_time: preserve
+        - name: User Configuration | Add user to sudoers
+          when: ansible_user != 'root'
+          ansible.builtin.copy:
+            content: "{{ ansible_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
+            dest: "/etc/sudoers.d/{{ ansible_user }}"
+            owner: root
+            group: root
+            mode: "0440"
         - name: User Configuration | Fish shell (1)
           ansible.builtin.user:
             name: "{{ ansible_user }}"
