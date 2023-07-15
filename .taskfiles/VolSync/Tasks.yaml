@@ -8,6 +8,7 @@ x-task-vars: &task-vars
   claim: '{{.claim}}'
   ts: '{{.ts}}'
   kustomization: '{{.kustomization}}'
+  previous: '{{.previous}}'
 
 vars:
   destinationTemplate: "{{.ROOT_DIR}}/.taskfiles/VolSync/ReplicationDestination.tmpl.yaml"
@@ -109,6 +110,7 @@ tasks:
           else
             echo "statefulset.apps/$app"
           fi
+      previous: "{{.previous | default 2}}"
     env: *task-vars
     preconditions:
       - sh: test -f {{.wipeJobTemplate}}

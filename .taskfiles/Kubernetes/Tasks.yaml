@@ -8,7 +8,7 @@ tasks:
     vars:
       MASTER_USERNAME: '{{.MASTER_USERNAME | default "root"}}'
       MASTER_HOST: '{{.MASTER_HOST | default "192.168.42.10"}}'
-      KUBERNETES_API: '{{.KUBERNETES_API | default "192.168.1.1"}}'
+      KUBERNETES_API: '{{.KUBERNETES_API | default "192.168.42.254"}}'
     cmds:
       - rsync --verbose --progress --partial --rsync-path="sudo rsync" {{.MASTER_USERNAME}}@{{.MASTER_HOST}}:/etc/rancher/k3s/k3s.yaml "${KUBECONFIG}"
       - sed -i '' 's/127.0.0.1/{{.KUBERNETES_API}}/g' "${KUBECONFIG}"
@@ -18,7 +18,7 @@ tasks:
     desc: Pull the latest CRD schemas for this cluster
     cmds:
       - mkdir -p {{.CLUSTER_DIR}}/schemas
-      - flux pull artifact oci://ghcr.io/onedr0p/kubernetes-schemas-oci:latest \
+      - flux pull artifact oci://ghcr.io/onedr0p/manifests/kubernetes-schemas:latest \
           --output={{.CLUSTER_DIR}}/schemas
 
   mount:
