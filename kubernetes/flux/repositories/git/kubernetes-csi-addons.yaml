@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/source.toolkit.fluxcd.io/gitrepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: kubernetes-csi-addons
+  namespace: flux-system
+spec:
+  interval: 30m
+  url: https://github.com/csi-addons/kubernetes-csi-addons
+  ref:
+    tag: v0.7.0
+  ignore: |
+    # exclude all
+    /*
+    # include files
+    !/deploy/controller/crds.yaml
+    !/deploy/controller/rbac.yaml
+    !/deploy/controller/setup-controller.yaml
