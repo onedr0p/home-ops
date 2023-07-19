@@ -11,30 +11,27 @@
       ansible.builtin.pause:
         seconds: 2
   tasks:
-    - name: Get the node's details
-      ansible.builtin.command: |
-        kubectl get node {{ inventory_hostname }} -o json
+    - name: Details
+      ansible.builtin.command: "kubectl get node {{ inventory_hostname }} -o json"
       register: kubectl_get_node
       delegate_to: "{{ groups['master'][0] }}"
       failed_when: false
       changed_when: false
 
-    - name: Update node
+    - name: Update
       when:
         # When status.conditions[x].type == Ready then check stats.conditions[x].status for True|False
         - kubectl_get_node['stdout'] | from_json | json_query("status.conditions[?type == 'Ready'].status")
         # If spec.unschedulable is defined then the node is cordoned
         - not (kubectl_get_node['stdout'] | from_json).spec.unschedulable is defined
       block:
-        - name: Cordon node
-          ansible.builtin.command: |
-            kubectl cordon {{ inventory_hostname }}
+        - name: Cordon
+          ansible.builtin.command: "kubectl cordon {{ inventory_hostname }}"
           delegate_to: "{{ groups['master'][0] }}"
           changed_when: false
 
-        - name: Wait for node to cordon
-          ansible.builtin.command: |
-            kubectl get node {{ inventory_hostname }} -o json
+        - name: Wait to cordon
+          ansible.builtin.command: "kubectl get node {{ inventory_hostname }} -o json"
           register: wait_for_cordon
           retries: 10
           delay: 10
@@ -42,33 +39,35 @@
           changed_when: false
           until: (wait_for_cordon['stdout'] | from_json).spec.unschedulable
 
-        - name: Cordon & drain node
-          ansible.builtin.command: |
-            kubectl drain --ignore-daemonsets --delete-emptydir-data --force {{ inventory_hostname }}
+        - name: Drain
+          ansible.builtin.command: "kubectl drain --ignore-daemonsets --delete-emptydir-data --force {{ inventory_hostname }}"
           delegate_to: "{{ groups['master'][0] }}"
           changed_when: false
 
-        - name: Update all packages
+        - name: Update
           ansible.builtin.apt:
             upgrade: dist
             update_cache: true
 
+        - name: Check if reboot is required
+          ansible.builtin.stat:
+            path: /var/run/reboot-required
+          register: reboot_required
+
         - name: Reboot
+          when: reboot_required.stat.exists
           ansible.builtin.reboot:
             msg: Rebooting node
             post_reboot_delay: 60
             reboot_timeout: 3600
 
-        - name: Uncordon node
-          ansible.builtin.command: |
-            kubectl uncordon {{ inventory_hostname }}
+        - name: Uncordon
+          ansible.builtin.command: "kubectl uncordon {{ inventory_hostname }}"
           delegate_to: "{{ groups['master'][0] }}"
           changed_when: false
 
-        - name: Wait for node to uncordon
-          ansible.builtin.command: |
-            kubectl get node {{ inventory_hostname }} -o json
-          register: wait_for_uncordon
+        - name: Wait to uncordon
+          ansible.builtin.command: "kubectl get node {{ inventory_hostname }} -o json"
           retries: 10
           delay: 10
           delegate_to: "{{ groups['master'][0] }}"
