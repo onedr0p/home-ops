@@ -1,0 +1,189 @@
+---
+groups:
+  #
+  # SMART Failures
+  #
+  - name: smart-failure
+    rules:
+      - alert: SmartFailures
+        expr: |
+          sum by (hostname) (count_over_time({hostname=~".+"} | json | _SYSTEMD_UNIT = "smartmontools.service" !~ "(?i)previous self-test completed without error" !~ "(?i)Prefailure" |~ "(?i)(error|fail)"[2m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          hostname: "{{ $labels.hostname }}"
+          summary: "{{ $labels.hostname }} has reported SMART failures"
+
+  #
+  # zigbee2mqtt
+  #
+  - name: zigbee2mqtt
+    rules:
+      - alert: ZigbeeUnableToReachMQTT
+        expr: |
+          sum(count_over_time({app="zigbee2mqtt"} |~ "(?i)not connected to mqtt server"[2m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} is unable to reach mqtt"
+
+  #
+  # zwavejs2mqtt
+  #
+  - name: zwavejs2mqtt
+    rules:
+      - alert: ZwaveUnableToReachMQTT
+        expr: |
+          sum(count_over_time({app="zwavejs2mqtt"} |~ "(?i)error while connecting mqtt"[2m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} is unable to reach MQTT"
+
+  #
+  # frigate
+  #
+  - name: frigate
+    rules:
+      - alert: FrigateUnableToReachMQTT
+        expr: |
+          sum(count_over_time({app="frigate"} |~ "(?i)unable to connect to mqtt server"[2m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} is unable to reach MQTT"
+
+  #
+  # *arr
+  #
+  - name: arr
+    rules:
+      - alert: ArrDatabaseIsLocked
+        expr: |
+          sum by (app) (count_over_time({app=~".*arr"} |~ "(?i)database is locked"[2m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} is experiencing locked database issues"
+
+      - alert: ArrDatabaseIsMalformed
+        expr: |
+          sum by (app) (count_over_time({app=~".*arr"} |~ "(?i)database disk image is malformed"[2m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} is experiencing malformed database disk image issues"
+
+      - alert: ArrFailedToAddTorrent
+        expr: |
+          avg by (app, message) (count_over_time({app=~".*arr"} |~ "(?i)Couldn't add report to download queue" | json [30m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+          category: logs
+        annotations:
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.message }}"
+
+      - alert: ArrNetworkIsUnhealthy
+        expr: |
+          sum by (app) (count_over_time({app="autobrr"} |~ "(?i)network unhealthy"[15m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+          category: logs
+        annotations:
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} has a unhealthy network"
+
+      - alert: ArrJobRaisedException
+        expr: |
+          sum by (app) (count_over_time({app="bazarr"} |~ "(?i)Job(.+)Update(.+)from(.+)raised an exception"[1h])) > 0
+        for: 2m
+        labels:
+          severity: warning
+          category: logs
+        annotations:
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} is raising job exceptions"
+
+  #
+  # plex
+  #
+  - name: plex
+    rules:
+      - alert: PlexDatabaseIsBusy
+        expr: |
+          sum by (app) (count_over_time({app="plex"} |~ "(?i)retry busy DB"[2m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} is experiencing database issues"
+
+  #
+  # home-assistant
+  #
+  - name: home-assistant
+    rules:
+      - alert: HomeAssistantUnableToReachPostgresql
+        expr: |
+          sum by (app) (count_over_time({app="home-assistant"} |~ "(?i)error in database connectivity"[2m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} is unable to connect to postgresql"
+
+  #
+  # valetudo
+  #
+  - name: valetudo
+    rules:
+      - alert: ValetudoUnableToReachMQTT
+        expr: |
+          sum by (hostname) (count_over_time({hostname="valetudo"} |~ "(?i).*error.*mqtt.*"[2m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          hostname: "{{ $labels.hostname }}"
+          summary: "{{ $labels.hostname }} is unable to connect to mqtt"
+
+  #
+  # node-red
+  #
+  - name: node-red
+    rules:
+      - alert: NodeRedUnableToReachHomeAssistant
+        expr: |
+          sum by (app) (count_over_time({app="node-red"} |~ "(?i)home assistant.*connecting to undefined"[2m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} is unable to connect to home assistant"
