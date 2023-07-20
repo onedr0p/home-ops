@@ -199,6 +199,7 @@ spec:
             regex: "(apiserver_audit|apiserver_client|apiserver_delegated|apiserver_envelope|apiserver_storage|apiserver_webhooks|authenticated_user|authentication|disabled_metric|go|hidden_metric|kubernetes_build|kubernetes_feature|leader_election|process_cpu|process_max|process_open|process_resident|process_start|process_virtual|registered_metric|rest_client|scheduler|scrape_duration|scrape_samples|scrape_series|workqueue)_(.+)"
             action: keep
     prometheus:
+      agentMode: true
       ingress:
         enabled: true
         ingressClassName: internal
@@ -208,10 +209,6 @@ spec:
         tls:
           - hosts:
               - *host
-      thanosService:
-        enabled: true
-      thanosServiceMonitor:
-        enabled: true
       prometheusSpec:
         replicas: 3
         replicaExternalLabelName: __replica__
@@ -221,27 +218,13 @@ spec:
         probeSelectorNilUsesHelmValues: false
         enableAdminAPI: true
         walCompression: true
-        thanos:
-          image: quay.io/thanos/thanos:v0.31.0
-          objectStorageConfig:
-            name: thanos-objstore-secret
-            key: objstore.yml
-        retention: 2d
-        retentionSize: 15GB
-        storageSpec:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: local-path
-              resources:
-                requests:
-                  storage: 20Gi
+        remoteWrite:
+          - url: http://thanos-receive-router.monitoring.svc.cluster.local:19291/api/v1/receive
+        remoteWriteDashboards: true
         additionalScrapeConfigs:
           # - job_name: bind-exporter
           #   static_configs:
           #     - targets: ["192.168.254.9:9119"] # router
-          # - job_name: frr-exporter
-          #   static_configs:
-          #     - targets: ["vyos.turbo.ac:9342"]
           - job_name: gatus
             static_configs:
               - targets: ["status.turbo.ac"] # router
