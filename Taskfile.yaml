@@ -2,21 +2,89 @@
 version: "3"
 
 vars:
+  PYTHON_BIN: python3
   CLUSTER_DIR: "{{.ROOT_DIR}}/kubernetes"
   ANSIBLE_DIR: "{{.ROOT_DIR}}/ansible"
 
 env:
-  KUBECONFIG: ./kubeconfig
+  KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
+  SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
+  PATH: "{{.ROOT_DIR}}/.venv/bin:$PATH"
+  VIRTUAL_ENV: "{{.ROOT_DIR}}/.venv"
+  ANSIBLE_COLLECTIONS_PATH: "{{.ROOT_DIR}}/.venv/galaxy"
+  ANSIBLE_ROLES_PATH: "{{.ROOT_DIR}}/.venv/galaxy/ansible_roles"
+  ANSIBLE_VARS_ENABLED: "host_group_vars,community.sops.sops"
+  K8S_AUTH_KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
 
 includes:
-  an: .taskfiles/Ansible/Tasks.yaml
-  es: .taskfiles/ExternalSecrets/Tasks.yaml
-  fx: .taskfiles/Flux/Tasks.yaml
-  ku: .taskfiles/Kubernetes/Tasks.yaml
-  vs: .taskfiles/VolSync/Tasks.yaml
+  volsync: .taskfiles/VolSync/Tasks.yaml
 
 tasks:
 
   default:
     silent: true
     cmds: ["task -l"]
+
+  configure-venv:
+    desc: Install or upgrade the Python virtual env
+    cmds:
+      - "{{.PYTHON_BIN}} -m venv {{.ROOT_DIR}}/.venv"
+      - .venv/bin/python3 -m pip install --upgrade pip setuptools wheel
+      - .venv/bin/python3 -m pip install --upgrade --requirement "{{.ROOT_DIR}}/requirements.txt"
+      - .venv/bin/ansible-galaxy install --role-file "{{.ROOT_DIR}}/requirements.yaml" --force
+
+  sync-secrets:
+    desc: Sync ExternalSecret resources
+    vars:
+      secret: '{{ .secret | default ""}}'
+      namespace: '{{.namespace | default "default"}}'
+    cmd: |
+      {{if eq .secret ""}}
+        kubectl get externalsecret.external-secrets.io --all-namespaces --no-headers -A | awk '{print $1, $2}' \
+          | xargs --max-procs=4 -l bash -c 'kubectl -n $0 annotate externalsecret.external-secrets.io $1 force-sync=$(date +%s) --overwrite'
+      {{else}}
+        kubectl -n {{.namespace}} annotate externalsecret.external-secrets.io {{.secret}} force-sync=$(date +%s) --overwrite
+      {{end}}
+    preconditions:
+      - kubectl -n {{.namespace}} get externalsecret {{.secret}}
+
+  mount-volume:
+    desc: Mount a PersistentVolumeClaim to a pod temporarily
+    interactive: true
+    vars:
+      claim: '{{ or .claim (fail "PersistentVolumeClaim `claim` is required") }}'
+      namespace: '{{.namespace | default "default"}}'
+    cmd: |
+      kubectl run -n {{.namespace}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
+        {
+          "apiVersion": "v1",
+          "spec": {
+            "containers": [
+              {
+                "name": "debug",
+                "image": "ghcr.io/onedr0p/alpine:rolling",
+                "command": ["/bin/bash"],
+                "stdin": true,
+                "stdinOnce": true,
+                "tty": true,
+                "volumeMounts": [
+                  {
+                    "name": "config",
+                    "mountPath": "/config"
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "persistentVolumeClaim": {
+                  "claimName": "{{.claim}}"
+                }
+              }
+            ],
+            "restartPolicy": "Never"
+          }
+        }'
+    preconditions:
+      - kubectl -n {{.namespace}} get pvc {{.claim}}

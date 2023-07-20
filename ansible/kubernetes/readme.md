@@ -11,7 +11,6 @@ There is a decent guide [here](https://www.linuxtechi.com/how-to-install-debian-
     - Choose "All files in one partition"
     - Delete Swap partition
     - Uncheck all Debian desktop environment options
-    - Keep ssh server checked
     ```
 
 2. [Post install] Remove CD/DVD as apt source
@@ -29,7 +28,7 @@ There is a decent guide [here](https://www.linuxtechi.com/how-to-install-debian-
     su -
     apt install sudo
     usermod -aG sudo ${username}
-    echo "${username}  ALL=(ALL) NOPASSWD:ALL" | tee /etc/sudoers.d/${username}
+    echo "${username} ALL=(ALL) NOPASSWD:ALL" | tee /etc/sudoers.d/${username}
     exit
     newgrp sudo
     sudo apt update
