@@ -99,18 +99,18 @@ spec:
               timeout: 30s
               static_configs:
                 - kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
-      rules:
-        value: |-
-          groups:
-            - name: PrometheusWatcher
-              rules:
-                - alert: PrometheusDown
-                  annotations:
-                    summary: A Prometheus has disappeared from Prometheus target discovery
-                  expr: absent(up{job="kube-prometheus-stack-prometheus"})
-                  for: 10m
-                  labels:
-                    severity: critical
+      # rules:
+      #   value: |-
+      #     groups:
+      #       - name: PrometheusAgentWatcher
+      #         rules:
+      #           - alert: PrometheusAgentDown
+      #             annotations:
+      #               summary: A Prometheus agent has disappeared from Prometheus target discovery
+      #             expr: absent(up{job="kube-prometheus-stack-prometheus"})
+      #             for: 10m
+      #             labels:
+      #               severity: critical
       persistence:
         enabled: true
         storageClass: local-path
