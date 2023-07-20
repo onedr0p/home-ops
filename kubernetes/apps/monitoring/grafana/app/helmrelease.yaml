@@ -105,18 +105,21 @@ spec:
             url: http://thanos-query-frontend.monitoring.svc.cluster.local:10902 # thanos-receive
             # url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090 # thanos-sidecar
             isDefault: true
+            uid: prometheus
           - name: Loki
             type: loki
             access: proxy
             url: http://loki-gateway.monitoring.svc.cluster.local
             jsonData:
               maxLines: 250
+            uid: loki
           - name: Alertmanager
             type: alertmanager
             access: proxy
             url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
             jsonData:
               implementation: prometheus
+            uid: alertmanager
     dashboards:
       default:
         # Ref: https://grafana.com/grafana/dashboards/2842-ceph-cluster/
@@ -215,36 +218,6 @@ spec:
           datasource: Prometheus
         kubernetes-pods:
           url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
-          datasource: Prometheus
-        loki-chunks:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-chunks.json
-          datasource: Prometheus
-        loki-deletion:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-deletion.json
-          datasource: Prometheus
-        loki-logs:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-logs.json
-          datasource: Prometheus
-        loki-mixin-recording-rules:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-mixin-recording-rules.json
-          datasource: Prometheus
-        loki-operational:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-operational.json
-          datasource: Prometheus
-        loki-reads-resources:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-reads-resources.json
-          datasource: Prometheus
-        loki-reads:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-reads.json
-          datasource: Prometheus
-        loki-retention:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-retention.json
-          datasource: Prometheus
-        loki-writes-resources:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-writes-resources.json
-          datasource: Prometheus
-        loki-writes:
-          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-writes.json
           datasource: Prometheus
         miniflux:
           url: https://raw.githubusercontent.com/miniflux/v2/main/contrib/grafana/dashboard.json
