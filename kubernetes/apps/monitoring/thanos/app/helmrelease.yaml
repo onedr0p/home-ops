@@ -117,6 +117,21 @@ spec:
         size: 20Gi
     serviceMonitor:
       enabled: true
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - apiVersion: apps/v1
+            kind: Statefulset
+            metadata:
+              name: thanos-compact
+            spec:
+              template:
+                spec:
+                  containers:
+                    - name: thanos-compact
+                      args:
+                        - --deduplication.replica-label=__replica__
+                        - --deduplication.func=penalty
   valuesFrom:
     - targetPath: objstoreConfig.value.config.bucket
       kind: ConfigMap
