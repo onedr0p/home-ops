@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: thanos
-      version: 1.13.0
+      version: 1.13.1
       sourceRef:
         kind: HelmRepository
         name: stevehipwell
@@ -42,6 +42,7 @@ spec:
           insecure: true
     compact:
       enabled: true
+      replicas: 3
       extraArgs:
         - --compact.concurrency=4
         - --delete-delay=30m
@@ -138,19 +139,3 @@ spec:
       kind: Secret
       name: thanos-bucket-v2
       valuesKey: AWS_SECRET_ACCESS_KEY
-  # postRenderers:
-  #   - kustomize:
-  #       patchesStrategicMerge:
-  #         - apiVersion: apps/v1
-  #           kind: Statefulset
-  #           metadata:
-  #             name: thanos-compact
-  #             namespace: monitoring
-  #           spec:
-  #             template:
-  #               spec:
-  #                 containers:
-  #                   - name: thanos-compact
-  #                     args:
-  #                       - --deduplication.replica-label=__replica__
-  #                       - --deduplication.func=penalty
