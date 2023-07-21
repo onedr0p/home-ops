@@ -113,8 +113,8 @@ spec:
           #   url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
           #   jsonData:
           #     prometheusType: Thanos
-          #   isDefault: true
           #   uid: prometheus
+          #   isDefault: true
           - name: Loki
             type: loki
             access: proxy
@@ -125,14 +125,17 @@ spec:
           - name: Alertmanager
             type: alertmanager
             access: proxy
-            url: http://alertmanager-operated.monitoring.svc.cluster.local:9093
+            url: http://vmalertmanager-victoria-metrics.monitoring.svc.cluster.local:9093
             jsonData:
               implementation: prometheus
             uid: alertmanager
-          # - name: VictoraMetrics
-          #   type: prometheus
+          # - name: Alertmanager
+          #   type: alertmanager
           #   access: proxy
-          #   url: http://vmselect-cluster:8481/select/0/prometheus
+          #   url: http://alertmanager-operated.monitoring.svc.cluster.local:9093
+          #   jsonData:
+          #     implementation: prometheus
+          #   uid: alertmanager
     dashboards:
       default:
         # Ref: https://grafana.com/grafana/dashboards/2842-ceph-cluster/
