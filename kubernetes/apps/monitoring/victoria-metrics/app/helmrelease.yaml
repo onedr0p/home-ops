@@ -139,6 +139,9 @@ spec:
         - 192.168.42.11
         - 192.168.42.12
       spec:
+        endpoints:
+          - port: 10257
+            scheme: http
         metricRelabelConfigs:
           # Remove duplicate labels provided by k3s
           - sourceLabels: ["__name__"]
@@ -148,6 +151,9 @@ spec:
       enabled: true
       endpoints: *cp
       spec:
+        endpoints:
+          - port: 10251
+            scheme: http
         metricRelabelConfigs:
           # Remove duplicate labels provided by k3s
           - sourceLabels: ["__name__"]
@@ -156,6 +162,10 @@ spec:
     kubeEtcd:
       enabled: true
       endpoints: *cp
+      spec:
+        endpoints:
+          - port: 2379
+            scheme: http
     kube-state-metrics:
       enabled: true
     prometheus-node-exporter:
