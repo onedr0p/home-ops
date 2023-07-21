@@ -52,17 +52,6 @@ spec:
           storage: *volumeClaimTemplate
         vminsert:
           replicaCount: 3
-    alertmanager:
-      enabled: true
-      configSecret: alertmanager-secret
-      ingress:
-        enabled: true
-        ingressClassName: internal
-        hosts:
-          - &host alertmanager.devbu.io
-        tls:
-          - hosts:
-              - *host
     vmalert:
       enabled: true
       ingress:
@@ -80,6 +69,17 @@ spec:
         ingressClassName: internal
         hosts:
           - &host vmagent.devbu.io
+        tls:
+          - hosts:
+              - *host
+    alertmanager:
+      enabled: true
+      configSecret: alertmanager-secret
+      ingress:
+        enabled: true
+        ingressClassName: internal
+        hosts:
+          - &host alertmanager.devbu.io
         tls:
           - hosts:
               - *host
