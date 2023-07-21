@@ -1,0 +1,25 @@
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+  name: vmagent
+  namespace: monitoring
+spec:
+  remoteWrite:
+    - url: http://vminsert-cluster:8480/insert/0/prometheus
+  selectAllByDefault: true
+  replicaCount: 1
+  serviceScrapeNamespaceSelector: {}
+  podScrapeNamespaceSelector: {}
+  podScrapeSelector: {}
+  serviceScrapeSelector: {}
+  nodeScrapeSelector: {}
+  nodeScrapeNamespaceSelector: {}
+  staticScrapeSelector: {}
+  staticScrapeNamespaceSelector: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 400Mi
+    limits:
+      memory: 2Gi
