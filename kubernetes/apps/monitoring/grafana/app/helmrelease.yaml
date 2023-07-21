@@ -102,11 +102,19 @@ spec:
           - name: Prometheus
             type: prometheus
             access: proxy
-            url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
+            url: http://vmselect-victoria-metrics:8481/select/0/prometheus
             jsonData:
-              prometheusType: Thanos
-            isDefault: true
+              prometheusType: Prometheus
             uid: prometheus
+            isDefault: true
+          # - name: Prometheus
+          #   type: prometheus
+          #   access: proxy
+          #   url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
+          #   jsonData:
+          #     prometheusType: Thanos
+          #   isDefault: true
+          #   uid: prometheus
           - name: Loki
             type: loki
             access: proxy
@@ -121,10 +129,10 @@ spec:
             jsonData:
               implementation: prometheus
             uid: alertmanager
-          - name: VictoraMetrics
-            type: prometheus
-            access: proxy
-            url: http://vmselect-cluster:8481/select/0/prometheus
+          # - name: VictoraMetrics
+          #   type: prometheus
+          #   access: proxy
+          #   url: http://vmselect-cluster:8481/select/0/prometheus
     dashboards:
       default:
         # Ref: https://grafana.com/grafana/dashboards/2842-ceph-cluster/
