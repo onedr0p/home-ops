@@ -138,6 +138,10 @@ spec:
         - 192.168.42.10
         - 192.168.42.11
         - 192.168.42.12
+      service:
+        enabled: true
+        port: 10252
+        targetPort: 10252
       spec:
         endpoints:
           - port: http-metrics
@@ -150,6 +154,10 @@ spec:
     kubeScheduler:
       enabled: true
       endpoints: *cp
+      service:
+        enabled: true
+        port: 10251
+        targetPort: 10251
       spec:
         endpoints:
           - port: http-metrics
@@ -162,10 +170,6 @@ spec:
     kubeEtcd:
       enabled: true
       endpoints: *cp
-      spec:
-        endpoints:
-          - port: http-metrics
-            scheme: http
     kube-state-metrics:
       enabled: true
     prometheus-node-exporter:
