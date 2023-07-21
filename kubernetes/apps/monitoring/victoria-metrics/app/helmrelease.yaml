@@ -41,7 +41,7 @@ spec:
         replicationFactor: 3
         vmstorage:
           replicaCount: 3
-          storage: &volumeClaimTemplate
+          storage:
             volumeClaimTemplate:
               spec:
                 storageClassName: local-path
@@ -49,7 +49,10 @@ spec:
           replicaCount: 3
           cacheMountPath: "/select-cache"
           extraArgs: {}
-          storage: *volumeClaimTemplate
+          storage:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: local-path
         vminsert:
           replicaCount: 3
     vmalert:
@@ -77,6 +80,10 @@ spec:
       spec:
         replicaCount: 3
         configSecret: alertmanager-secret
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
       ingress:
         enabled: true
         ingressClassName: internal
