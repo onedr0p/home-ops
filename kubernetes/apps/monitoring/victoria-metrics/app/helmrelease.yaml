@@ -32,8 +32,6 @@ spec:
       enabled: true
       operator:
         disable_prometheus_converter: false
-    vmsingle:
-      enabled: false
     vmcluster:
       enabled: true
       spec:
@@ -45,14 +43,20 @@ spec:
             volumeClaimTemplate:
               spec:
                 storageClassName: local-path
+                resources:
+                  requests:
+                    storage: 10Gi
         vmselect:
           replicaCount: 3
-          cacheMountPath: "/select-cache"
+          cacheMountPath: /select-cache
           extraArgs: {}
           storage:
             volumeClaimTemplate:
               spec:
                 storageClassName: local-path
+                resources:
+                  requests:
+                    storage: 2Gi
         vminsert:
           replicaCount: 3
     vmalert:
@@ -75,6 +79,8 @@ spec:
         tls:
           - hosts:
               - *host
+    vmsingle:
+      enabled: false
     alertmanager:
       enabled: true
       spec:
@@ -84,6 +90,9 @@ spec:
           volumeClaimTemplate:
             spec:
               storageClassName: local-path
+              resources:
+                requests:
+                  storage: 2Gi
       ingress:
         enabled: true
         ingressClassName: internal
