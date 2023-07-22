@@ -301,11 +301,11 @@ My NAS configuation as documentation currently using Ubuntu 22.04
 
 ## Notifications
 
-1. Add or replace file `/etc/aliases`
+```admonish info
+Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
+```
 
-    ```admonish info
-    Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
-    ```
+1. Add or replace file `/etc/aliases`
 
     ```text
     mailer-daemon: postmaster@
@@ -323,11 +323,11 @@ My NAS configuation as documentation currently using Ubuntu 22.04
     root: expanse@buhl.casa
     ```
 
-2. Add or replace file `/etc/msmtprc`
+```admonish info
+Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
+```
 
-    ```admonish info
-    Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
-    ```
+2. Add or replace file `/etc/msmtprc`
 
     ```text
     defaults
@@ -347,21 +347,21 @@ My NAS configuation as documentation currently using Ubuntu 22.04
     aliases /etc/aliases
     ```
 
-3. Add or replace file `/etc/smartd.conf`
+```admonish info
+Restart smartd after changing: `sudo systemctl restart smartd.service`
+```
 
-    ```admonish info
-    Restart smartd after changing: `sudo systemctl restart smartd.service`
-    ```
+3. Add or replace file `/etc/smartd.conf`
 
     ```text
     DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40 -m devin+alerts@buhl.casa
     ```
 
-4. Add or replace file `/etc/zfs/zed.d/zed.rc`
+```admonish info
+Restart zed after changing: `sudo systemctl restart zed.service`
+```
 
-    ```admonish info
-    Restart zed after changing: `sudo systemctl restart zed.service`
-    ```
+4. Add or replace file `/etc/zfs/zed.d/zed.rc`
 
     ```text
     ZED_DEBUG_LOG="/var/log/zed.debug.log"
