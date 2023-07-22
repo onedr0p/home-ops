@@ -1,6 +1,55 @@
 # NAS
 
-Outside of using [Ansible](https://github.com/ansible/ansible) for configuring the OS, there are some manual steps I did to set up ZFS on Ubuntu.
+My NAS configuation as documentation currently using Ubuntu 22.04
+
+## Packages
+
+1. Add Fish PPA
+
+    ```sh
+    sudo apt-add-repository ppa:fish-shell/release-3
+    ```
+
+2. Install Packages
+
+    ```sh
+    sudo apt install -y apt-transport-https ca-certificates containernetworking-plugins curl ffmpeg figlet fish fzf gettext git htop ifenslave iputils-ping net-tools lolcat mailutils msmtp msmtp-mta nano neofetch ntpdate podman psmisc rclone software-properties-common tmux tree uidmap unzip zfs-zed zfsutils-linux dmraid gdisk hdparm lvm2 nfs-common nfs-kernel-server nvme-cli open-iscsi samba samba-vfs-modules smartmontools socat
+    ```
+
+## Networking
+
+1. Add or replace file `/etc/netplan/00-installer-config.yaml`
+
+    ```yaml
+    network:
+      version: 2
+      bonds:
+        bond0:
+          interfaces: [eports]
+          mtu: 9000
+          dhcp4: true
+          parameters:
+            mode: 802.3ad
+            lacp-rate: fast
+            transmit-hash-policy: layer2+3
+            mii-monitor-interval: 100
+      ethernets:
+        eports:
+        mtu: 9000
+        match:
+          name: "enp6*"
+        optional: true
+    ```
+
+2. Add or replace file `/etc/modules-load.d/modules.conf`
+
+    ```text
+    # /etc/modules: kernel modules to load at boot time.
+    #
+    # This file contains the names of kernel modules that should be loaded
+    # at boot time, one per line. Lines beginning with "#" are ignored.
+    bonding
+    ```
 
 ## ZFS
 
@@ -37,7 +86,7 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
 
     ```sh
     sudo zfs create eros/Apps
-    sudo zfs create eros/Apps/MinIO
+    sudo zfs create eros/Apps/Frigate
     sudo zfs create eros/Media
     ```
 
@@ -49,7 +98,7 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
         eros/Media
     sudo zfs set \
         sharenfs="no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24" \
-        eros/Apps/MinIO
+        eros/Apps/Frigate
     ```
 
 3. Dataset Permissions
@@ -61,9 +110,9 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
 
 ### Snapshots
 
-Install zrepl by following [these](https://zrepl.github.io/installation/apt-repos.html) instructions.
+1. Install zrepl by following [these](https://zrepl.github.io/installation/apt-repos.html) instructions.
 
-1. Add or replace the file `/etc/zrepl/zrepl.yml`
+2. Add or replace the file `/etc/zrepl/zrepl.yml`
 
     ```yaml
     global:
@@ -93,19 +142,33 @@ Install zrepl by following [these](https://zrepl.github.io/installation/apt-repo
               regex: "^zrepl_daily_.*$"
     ```
 
-2. Start and enable zrepl
+3. Start and enable zrepl
 
     ```sh
     sudo systemctl enable --now zrepl.service
     ```
 
-3. Give a local user access to a specific datasets snapshots
+4. Give a local user access to a specific datasets snapshots
 
     ```sh
     sudo zfs allow -u jeff send,snapshot,hold eros/Media
     ```
 
 ## NFS
+
+### Force NFS 4 and update threads
+
+1. Add or replace file `/etc/nfs.conf.d/local.conf`
+
+    ```text
+    [nfsd]
+    vers2 = n
+    vers3 = n
+    threads = 16
+
+    [mountd]
+    manage-gids = 1
+    ```
 
 ### Non ZFS NFS Shares
 
@@ -140,6 +203,7 @@ Install zrepl by following [these](https://zrepl.github.io/installation/apt-repo
 2. Create ZFS datasets and update permissions
 
     ```sh
+    sudo zfs create eros/TimeMachine
     sudo zfs create eros/TimeMachine/devin
     sudo zfs create eros/TimeMachine/louie
     sudo chown -R devin:users /eros/TimeMachine
@@ -152,10 +216,9 @@ Install zrepl by following [these](https://zrepl.github.io/installation/apt-repo
     sudo smbpasswd -a devin
     ```
 
-4. Update samba config
+4. Add or replace file `/etc/samba/smb.conf`
 
-    ```txt
-    # /etc/samba/smb.conf
+    ```text
     [global]
     min protocol = SMB2
     ea support = yes
@@ -202,13 +265,112 @@ Install zrepl by following [these](https://zrepl.github.io/installation/apt-repo
 5. Restart samba
 
     ```sh
-    sudo systemctl status smbd.service
+    sudo systemctl restart smbd.service
     ```
 
 6. Set up Time Machine on MacOS
 
     ```sh
     sudo tmutil setdestination -a smb://devin:${smbpasswd}@expanse.turbo.ac/devin
+    ```
+
+## System
+
+1. Disable apparmor
+
+    ```sh
+    sudo systemctl stop apparmor
+    sudo systemctl mask apparmor
+    ```
+
+2. Disable mitigations and apparmor in grub
+
+    ```sh
+    sudo nano /etc/default/grub
+    # GRUB_CMDLINE_LINUX="apparmor=0 mitigations=off"
+    sudo update-grub
+    sudo reboot
+    ```
+
+3. Disable swap
+
+    ```sh
+    sudo swapoff -a
+    sudo sed -i '/ swap / s/^/#/' /etc/fstab
+    ```
+
+## Notifications
+
+1. Add or replace file `/etc/aliases`
+
+    ```admonish info
+    Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
+    ```
+
+    ```text
+    mailer-daemon: postmaster@
+    postmaster: root@
+    nobody: root@
+    hostmaster: root@
+    usenet: root@
+    news: root@
+    webmaster: root@
+    www: root@
+    ftp: root@
+    abuse: root@
+    noc: root@
+    security: root@
+    root: expanse@buhl.casa
+    ```
+
+2. Add or replace file `/etc/msmtprc`
+
+    ```admonish info
+    Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
+    ```
+
+    ```text
+    defaults
+    auth off
+    tls  off
+    tls_trust_file /etc/ssl/certs/ca-certificates.crt
+    logfile /var/log/msmtp
+
+    account        maddy
+    host           smtp-relay.turbo.ac
+    port           25
+    from           expanse@buhl.casa
+    tls_starttls   off
+
+    account default: maddy
+
+    aliases /etc/aliases
+    ```
+
+3. Add or replace file `/etc/smartd.conf`
+
+    ```admonish info
+    Restart smartd after changing: `sudo systemctl restart smartd.service`
+    ```
+
+    ```text
+    DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40 -m devin+alerts@buhl.casa
+    ```
+
+4. Add or replace file `/etc/zfs/zed.d/zed.rc`
+
+    ```admonish info
+    Restart zed after changing: `sudo systemctl restart zed.service`
+    ```
+
+    ```text
+    ZED_DEBUG_LOG="/var/log/zed.debug.log"
+    ZED_EMAIL_ADDR="expanse@buhl.casa"
+    ZED_EMAIL_PROG="mail"
+    ZED_EMAIL_OPTS="-s '@SUBJECT@' @ADDRESS@ -r devin+alerts@buhl.casa"
+    ZED_NOTIFY_VERBOSE=1
+    ZED_NOTIFY_DATA=1
+    ZED_USE_ENCLOSURE_LEDS=1
     ```
 
 ## Misc
