@@ -320,7 +320,7 @@ Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
     abuse: root@
     noc: root@
     security: root@
-    root: expanse@buhl.casa
+    root: devin@buhl.casa
     ```
 
 ```admonish info
@@ -339,7 +339,7 @@ Restart msmtpd after changing: `sudo systemctl restart msmtpd.service`
     account        maddy
     host           smtp-relay.turbo.ac
     port           25
-    from           expanse@buhl.casa
+    from           devin@buhl.casa
     tls_starttls   off
 
     account default: maddy
@@ -365,7 +365,7 @@ Restart zed after changing: `sudo systemctl restart zed.service`
 
     ```text
     ZED_DEBUG_LOG="/var/log/zed.debug.log"
-    ZED_EMAIL_ADDR="expanse@buhl.casa"
+    ZED_EMAIL_ADDR="devin@buhl.casa"
     ZED_EMAIL_PROG="mail"
     ZED_EMAIL_OPTS="-s '@SUBJECT@' @ADDRESS@ -r devin+alerts@buhl.casa"
     ZED_NOTIFY_VERBOSE=1
