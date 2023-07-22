@@ -7,6 +7,7 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
 ### Mirrored Zpool
 
 1. Create initial pool and set configuration
+
     ```sh
     sudo zpool create -o ashift=12 -f eros mirror \
         /dev/disk/by-id/scsi-SATA_WDC_WD120EDGZ-11_9LHWA5KG \
@@ -16,6 +17,7 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
     ```
 
 2. Attach more mirrors
+
     ```sh
     sudo zpool add eros mirror \
         /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0B3D2 \
@@ -23,6 +25,7 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
     ```
 
 3. Add spares
+
     ```sh
     sudo zpool add -f eros spare \
         /dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_QGGETR5T
@@ -31,6 +34,7 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
 ### Datasets
 
 1. Create datasets
+
     ```sh
     sudo zfs create eros/Apps
     sudo zfs create eros/Apps/MinIO
@@ -38,6 +42,7 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
     ```
 
 2. Share dataset over NFS
+
     ```sh
     sudo zfs set \
         sharenfs="no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24,ro=192.168.150.21,ro=192.168.150.28" \
@@ -48,6 +53,7 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
     ```
 
 3. Dataset Permissions
+
     ```sh
     sudo chmod 770 /eros/Media
     sudo chown -R devin:users /eros/Media
@@ -58,6 +64,7 @@ Outside of using [Ansible](https://github.com/ansible/ansible) for configuring t
 Install zrepl by following [these](https://zrepl.github.io/installation/apt-repos.html) instructions.
 
 1. Add or replace the file `/etc/zrepl/zrepl.yml`
+
     ```yaml
     global:
       logging:
@@ -87,11 +94,13 @@ Install zrepl by following [these](https://zrepl.github.io/installation/apt-repo
     ```
 
 2. Start and enable zrepl
+
     ```sh
     sudo systemctl enable --now zrepl.service
     ```
 
 3. Give a local user access to a specific datasets snapshots
+
     ```sh
     sudo zfs allow -u jeff send,snapshot,hold eros/Media
     ```
@@ -101,20 +110,105 @@ Install zrepl by following [these](https://zrepl.github.io/installation/apt-repo
 ### Non ZFS NFS Shares
 
 1. Add or replace file `/etc/exports.d/local.exports`
+
     ```text
     /share/PVCs 192.168.1.0/24(sec=sys,rw,no_subtree_check,all_squash,anonuid=568,anongid=100)
     /share/PVCs 192.168.42.0/24(sec=sys,rw,no_subtree_check,all_squash,anonuid=568,anongid=100)
     ```
 
 2. Dataset Permissions
+
     ```sh
     sudo chmod 770 /share/PVCs
     sudo chown -R devin:users /share/PVCs
     ```
 
 3. Reload exports
+
     ```sh
     sudo exportfs -arv
+    ```
+
+## Time Machine
+
+1. Install required tools
+
+    ```sh
+    sudo apt install samba samba-vfs-modules
+    ```
+
+2. Create ZFS datasets and update permissions
+
+    ```sh
+    sudo zfs create eros/TimeMachine/devin
+    sudo zfs create eros/TimeMachine/louie
+    sudo chown -R devin:users /eros/TimeMachine
+    sudo chmod -R 770 /eros/TimeMachine
+    ```
+
+3. Set a smb password for user
+
+    ```sh
+    sudo smbpasswd -a devin
+    ```
+
+4. Update samba config
+
+    ```txt
+    # /etc/samba/smb.conf
+    [global]
+    min protocol = SMB2
+    ea support = yes
+    vfs objects = fruit streams_xattr
+    fruit:aapl = yes
+    fruit:metadata = stream
+    fruit:model = MacSamba
+    fruit:posix_rename = yes
+    fruit:veto_appledouble = no
+    fruit:nfs_aces = no
+    fruit:wipe_intentionally_left_blank_rfork = yes
+    fruit:delete_empty_adfiles = yes
+    spotlight = no
+
+    [devin]
+    comment = Devin's Time Machine
+    fruit:time machine = yes
+    fruit:time machine max size = 1050G
+    path = /eros/TimeMachine/devin
+    browseable = yes
+    write list = devin
+    create mask = 0600
+    directory mask = 0700
+    case sensitive = true
+    default case = lower
+    preserve case = no
+    short preserve case = no
+
+    [louie]
+    comment = Louie's Time Machine
+    fruit:time machine = yes
+    fruit:time machine max size = 1050G
+    path = /eros/TimeMachine/louie
+    browseable = yes
+    write list = devin
+    create mask = 0600
+    directory mask = 0700
+    case sensitive = true
+    default case = lower
+    preserve case = no
+    short preserve case = no
+    ```
+
+5. Restart samba
+
+    ```sh
+    sudo systemctl status smbd.service
+    ```
+
+6. Set up Time Machine on MacOS
+
+    ```sh
+    sudo tmutil setdestination -a smb://devin:${smbpasswd}@expanse.turbo.ac/devin
     ```
 
 ## Misc
