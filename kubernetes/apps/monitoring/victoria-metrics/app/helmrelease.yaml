@@ -34,7 +34,7 @@ spec:
     vmcluster:
       enabled: true
       spec:
-        retentionPeriod: "14"
+        retentionPeriod: "1"
         replicationFactor: 3
         vmstorage:
           replicaCount: 3
@@ -91,7 +91,7 @@ spec:
               storageClassName: local-path
               resources:
                 requests:
-                  storage: 2Gi
+                  storage: 1Gi
       ingress:
         enabled: true
         ingressClassName: internal
@@ -139,12 +139,16 @@ spec:
         - 192.168.42.12
       service:
         enabled: true
-        port: 10252
-        targetPort: 10252
+        port: 10257
+        targetPort: 10257
       spec:
         endpoints:
-          - port: http-metrics
-            scheme: http
+          - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+            port: http-metrics
+            scheme: https
+            tlsConfig:
+              caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              insecureSkipVerify: true
         metricRelabelConfigs:
           # Remove duplicate labels provided by k3s
           - sourceLabels: ["__name__"]
@@ -155,12 +159,16 @@ spec:
       endpoints: *cp
       service:
         enabled: true
-        port: 10251
-        targetPort: 10251
+        port: 10259
+        targetPort: 10259
       spec:
         endpoints:
-          - port: http-metrics
-            scheme: http
+          - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+            port: http-metrics
+            scheme: https
+            tlsConfig:
+              caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              insecureSkipVerify: true
         metricRelabelConfigs:
           # Remove duplicate labels provided by k3s
           - sourceLabels: ["__name__"]
@@ -169,10 +177,14 @@ spec:
     kubeEtcd:
       enabled: true
       endpoints: *cp
+      service:
+        enabled: true
+        port: 2381
+        targetPort: 2381
     kube-state-metrics:
-      enabled: true
+      enabled: false
     prometheus-node-exporter:
-      enabled: true
+      enabled: false
     grafana:
       enabled: false
       forceDeployDashboards: true

@@ -102,22 +102,22 @@ spec:
           - name: Alertmanager
             orgId: 1
         datasources:
-          # - name: Prometheus
-          #   type: prometheus
-          #   access: proxy
-          #   url: http://vmselect-victoria-metrics:8481/select/0/prometheus
-          #   jsonData:
-          #     prometheusType: Prometheus
-          #   uid: prometheus
-          #   isDefault: true
           - name: Prometheus
             type: prometheus
             access: proxy
-            url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
+            url: http://vmselect-victoria-metrics.monitoring.svc.cluster.local:8481/select/0/prometheus
             jsonData:
-              prometheusType: Thanos
+              prometheusType: Prometheus
             uid: prometheus
             isDefault: true
+          # - name: Prometheus
+          #   type: prometheus
+          #   access: proxy
+          #   url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
+          #   jsonData:
+          #     prometheusType: Thanos
+          #   uid: prometheus
+          #   isDefault: true
           - name: Loki
             type: loki
             access: proxy
@@ -125,20 +125,20 @@ spec:
             jsonData:
               maxLines: 250
             uid: loki
-          # - name: Alertmanager
-          #   type: alertmanager
-          #   access: proxy
-          #   url: http://vmalertmanager-victoria-metrics.monitoring.svc.cluster.local:9093
-          #   jsonData:
-          #     implementation: prometheus
-          #   uid: alertmanager
           - name: Alertmanager
             type: alertmanager
             access: proxy
-            url: http://alertmanager-operated.monitoring.svc.cluster.local:9093
+            url: http://vmalertmanager-victoria-metrics.monitoring.svc.cluster.local:9093
             jsonData:
               implementation: prometheus
             uid: alertmanager
+          # - name: Alertmanager
+          #   type: alertmanager
+          #   access: proxy
+          #   url: http://alertmanager-operated.monitoring.svc.cluster.local:9093
+          #   jsonData:
+          #     implementation: prometheus
+          #   uid: alertmanager
     dashboards:
       default:
         # Ref: https://grafana.com/grafana/dashboards/2842-ceph-cluster/
