@@ -90,6 +90,13 @@ spec:
         externalURL: https://alertmanager.devbu.io
         replicaCount: 3
         configSecret: alertmanager-secret
+        notifiers:
+          - selector:
+              namespaceSelector:
+                matchNames: ["monitoring"]
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: victoria-metrics-k8s-stack
         storage:
           volumeClaimTemplate:
             spec:
