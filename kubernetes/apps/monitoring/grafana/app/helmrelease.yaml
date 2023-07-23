@@ -121,14 +121,14 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/nginx
-          # - name: thanos
-          #   orgId: 1
-          #   folder: Thanos
-          #   type: file
-          #   disableDeletion: false
-          #   editable: true
-          #   options:
-          #     path: /var/lib/grafana/dashboards/thanos
+          - name: thanos
+            orgId: 1
+            folder: Thanos
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/thanos
           - name: unifi
             orgId: 1
             folder: Unifi
@@ -137,14 +137,6 @@ spec:
             editable: true
             options:
               path: /var/lib/grafana/dashboards/unifi
-          - name: victoria-metrics
-            orgId: 1
-            folder: Victoria-Metrics
-            type: file
-            disableDeletion: false
-            editable: true
-            options:
-              path: /var/lib/grafana/dashboards/victoria-metrics
     datasources:
       datasources.yaml:
         apiVersion: 1
@@ -155,41 +147,28 @@ spec:
         datasources:
           - name: Prometheus
             type: prometheus
-            access: proxy
-            url: http://vmselect-victoria-metrics.monitoring.svc.cluster.local:8481/select/0/prometheus
-            jsonData:
-              prometheusType: Prometheus
             uid: prometheus
+            access: proxy
+            url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
+            # url: http://vmselect-victoria-metrics.monitoring.svc.cluster.local:8481/select/0/prometheus
+            jsonData:
+              prometheusType: Thanos # Prometheus for victoria-metrics
             isDefault: true
-          # - name: Prometheus
-          #   type: prometheus
-          #   access: proxy
-          #   url: http://thanos-query-frontend.monitoring.svc.cluster.local:9090
-          #   jsonData:
-          #     prometheusType: Thanos
-          #   uid: prometheus
-          #   isDefault: true
           - name: Loki
             type: loki
+            uid: loki
             access: proxy
             url: http://loki-gateway.monitoring.svc.cluster.local
             jsonData:
               maxLines: 250
-            uid: loki
           - name: Alertmanager
             type: alertmanager
+            uid: alertmanager
             access: proxy
-            url: http://vmalertmanager-victoria-metrics.monitoring.svc.cluster.local:9093
+            url: http://alertmanager-operated.monitoring.svc.cluster.local:9093
+            # url: http://vmalertmanager-victoria-metrics.monitoring.svc.cluster.local:9093
             jsonData:
               implementation: prometheus
-            uid: alertmanager
-          # - name: Alertmanager
-          #   type: alertmanager
-          #   access: proxy
-          #   url: http://alertmanager-operated.monitoring.svc.cluster.local:9093
-          #   jsonData:
-          #     implementation: prometheus
-          #   uid: alertmanager
     dashboards:
       default:
         minio:
@@ -273,34 +252,34 @@ spec:
         nginx-request-handling-performance:
           url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/request-handling-performance.json
           datasource: Prometheus
-      # thanos:
-      #   thanos-bucket-replicate:
-      #     url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/bucket-replicate.json
-      #     datasource: Prometheus
-      #   thanos-compact:
-      #     url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/compact.json
-      #     datasource: Prometheus
-      #   thanos-overview:
-      #     url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/overview.json
-      #     datasource: Prometheus
-      #   thanos-query:
-      #     url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/query.json
-      #     datasource: Prometheus
-      #   thanos-query-frontend:
-      #     url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/query-frontend.json
-      #     datasource: Prometheus
-      #   thanos-receieve:
-      #     url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/receive.json
-      #     datasource: Prometheus
-      #   thanos-rule:
-      #     url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/rule.json
-      #     datasource: Prometheus
-      #   thanos-sidecar:
-      #     url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/sidecar.json
-      #     datasource: Prometheus
-      #   thanos-store:
-      #     url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/store.json
-      #     datasource: Prometheus
+      thanos:
+        thanos-bucket-replicate:
+          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/bucket-replicate.json
+          datasource: Prometheus
+        thanos-compact:
+          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/compact.json
+          datasource: Prometheus
+        thanos-overview:
+          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/overview.json
+          datasource: Prometheus
+        thanos-query:
+          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/query.json
+          datasource: Prometheus
+        thanos-query-frontend:
+          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/query-frontend.json
+          datasource: Prometheus
+        thanos-receieve:
+          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/receive.json
+          datasource: Prometheus
+        thanos-rule:
+          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/rule.json
+          datasource: Prometheus
+        thanos-sidecar:
+          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/sidecar.json
+          datasource: Prometheus
+        thanos-store:
+          url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/thanos/dashboards/store.json
+          datasource: Prometheus
       unifi:
         unifi-insights:
           gnetId: 11315 # https://grafana.com/grafana/dashboards/11315?tab=revisions
@@ -317,23 +296,6 @@ spec:
         unifi-usw:
           gnetId: 11312 # https://grafana.com/grafana/dashboards/11312?tab=revisions
           revision: 9
-          datasource: Prometheus
-      victoria-metrics:
-        victoria-metrics-vmagent:
-          gnetId: 12683 # https://grafana.com/grafana/dashboards/12683?tab=revisions
-          revision: 11
-          datasource: Prometheus
-        victoria-metrics-vmalert:
-          gnetId: 14950 # https://grafana.com/grafana/dashboards/14950?tab=revisions
-          revision: 5
-          datasource: Prometheus
-        victoria-metrics-vmcluster:
-          gnetId: 11176 # https://grafana.com/grafana/dashboards/11176?tab=revisions
-          revision: 30
-          datasource: Prometheus
-        victoria-metrics-vmoperator:
-          gnetId: 17869 # https://grafana.com/grafana/dashboards/17869?tab=revisions
-          revision: 1
           datasource: Prometheus
     sidecar:
       dashboards:
