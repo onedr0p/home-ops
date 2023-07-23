@@ -34,10 +34,12 @@ spec:
     vmcluster:
       enabled: true
       spec:
-        retentionPeriod: "1"
+        retentionPeriod: "2"
         replicationFactor: 3
         vmstorage:
           replicaCount: 3
+          extraArgs:
+            dedup.minScrapeInterval: 60s
           storage:
             volumeClaimTemplate:
               spec:
@@ -50,7 +52,8 @@ spec:
         vmselect:
           replicaCount: 3
           cacheMountPath: /select-cache
-          extraArgs: {}
+          extraArgs:
+            dedup.minScrapeInterval: 60s
           storage:
             volumeClaimTemplate:
               spec:
