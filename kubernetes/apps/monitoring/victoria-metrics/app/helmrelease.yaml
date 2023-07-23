@@ -64,6 +64,14 @@ spec:
             maxLabelsPerTimeseries: "90"
     vmalert:
       enabled: true
+      spec:
+        notifiers:
+          - selector:
+              namespaceSelector:
+                matchNames: ["monitoring"]
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: victoria-metrics-k8s-stack
       ingress:
         enabled: true
         ingressClassName: internal
@@ -90,13 +98,6 @@ spec:
         externalURL: https://alertmanager.devbu.io
         replicaCount: 3
         configSecret: alertmanager-secret
-        notifiers:
-          - selector:
-              namespaceSelector:
-                matchNames: ["monitoring"]
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: victoria-metrics-k8s-stack
         storage:
           volumeClaimTemplate:
             spec:
