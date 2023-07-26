@@ -65,7 +65,7 @@ spec:
                 period: 24h
         common:
           path_prefix: /var/loki
-          replication_factor: 3
+          replication_factor: 2
           storage:
             s3:
               s3: null
@@ -107,7 +107,7 @@ spec:
         analytics:
           reporting_enabled: false
     gateway:
-      replicas: 3
+      replicas: 2
       image:
         registry: ghcr.io
       ingress:
@@ -122,6 +122,7 @@ spec:
           - hosts:
               - *host
     read:
+      replicas: 2
       persistence:
         storageClass: local-path
       extraVolumeMounts:
@@ -131,9 +132,11 @@ spec:
         - name: rules
           emptyDir: {}
     write:
+      replicas: 2
       persistence:
         storageClass: local-path
     backend:
+      replicas: 2
       persistence:
         storageClass: local-path
       extraVolumeMounts:
