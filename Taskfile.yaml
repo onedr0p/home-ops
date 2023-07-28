@@ -103,3 +103,12 @@ tasks:
         }'
     preconditions:
       - kubectl -n {{.namespace}} get pvc {{.claim}}
+
+  # https://github.com/fluxcd/helm-controller/issues/644
+  "644":
+    cmds:
+      - kubectl -n {{.namespace}} delete secret -l owner=helm,name={{.release}},status=pending-upgrade
+      - flux -n {{.namespace}} reconcile hr {{.release}}
+    vars:
+      release: '{{ or .release (fail "HelmRelease `release` is required") }}'
+      namespace: '{{.namespace | default "default"}}'
