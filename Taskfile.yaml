@@ -112,3 +112,5 @@ tasks:
     vars:
       release: '{{ or .release (fail "HelmRelease `release` is required") }}'
       namespace: '{{.namespace | default "default"}}'
+    preconditions:
+      - flux -n {{.namespace}} get hr {{.release}}
