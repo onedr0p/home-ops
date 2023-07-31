@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-gatus-ep
+  namespace: monitoring
+  labels:
+    gatus.io/enabled: "true"
+data:
+  config.yaml: |
+    endpoints:
+      - name: alertmanager
+        group: guarded
+        url: 1.1.1.1
+        interval: 1m
+        dns:
+          query-name: alertmanager.devbu.io
+          query-type: A
+        conditions:
+          - "len([BODY]) == 0"
+        alerts:
+          - type: pushover
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-gatus-ep
+  namespace: monitoring
+  labels:
+    gatus.io/enabled: "true"
+data:
+  config.yaml: |
+    endpoints:
+      - name: prometheus
+        group: guarded
+        url: 1.1.1.1
+        interval: 1m
+        dns:
+          query-name: prometheus.devbu.io
+          query-type: A
+        conditions:
+          - "len([BODY]) == 0"
+        alerts:
+          - type: pushover
