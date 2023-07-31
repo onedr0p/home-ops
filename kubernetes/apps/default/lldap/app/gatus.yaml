@@ -10,12 +10,13 @@ data:
   config.yaml: |
     endpoints:
       - name: lldap
-        group: external
-        url: https://lldap.devbu.io
+        group: guarded
+        url: 1.1.1.1
         interval: 1m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
+        dns:
+          query-name: lldap.devbu.io
+          query-type: A
         conditions:
-          - "[STATUS] == 200"
+          - "len([BODY]) == 0"
         alerts:
           - type: pushover
