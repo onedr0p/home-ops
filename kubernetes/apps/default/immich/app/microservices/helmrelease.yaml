@@ -32,14 +32,13 @@ spec:
       namespace: database
   values:
     controller:
-      replicas: 2
       strategy: RollingUpdate
       annotations:
         configmap.reloader.stakater.com/reload: &configMap immich-configmap
         secret.reloader.stakater.com/reload: &secret immich-secret
     image:
       repository: ghcr.io/immich-app/immich-server
-      tag: v1.71.0
+      tag: v1.72.0
     args: ["start-microservices.sh"]
     envFrom:
       - configMapRef:
@@ -49,11 +48,19 @@ spec:
     service:
       main:
         enabled: false
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: OnRootMismatch
+      supplementalGroups: [44, 105]
     persistence:
       library:
         enabled: true
         existingClaim: immich-nfs
         mountPath: /usr/src/app/upload
+    nodeSelector:
+      intel.feature.node.kubernetes.io/gpu: "true"
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
@@ -63,5 +70,9 @@ spec:
             app.kubernetes.io/name: *app
     resources:
       requests:
+        gpu.intel.com/i915: 1
         cpu: 100m
         memory: 250Mi
+      limits:
+        gpu.intel.com/i915: 1
+        memory: 1500Mi

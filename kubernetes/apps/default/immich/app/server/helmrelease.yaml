@@ -41,14 +41,13 @@ spec:
           - secretRef:
               name: &secret immich-secret
     controller:
-      replicas: 2
       strategy: RollingUpdate
       annotations:
         configmap.reloader.stakater.com/reload: *configMap
         secret.reloader.stakater.com/reload: *secret
     image:
       repository: ghcr.io/immich-app/immich-server
-      tag: v1.71.0
+      tag: v1.72.0
     args: ["start-server.sh"]
     envFrom: *envFrom
     service:
@@ -56,6 +55,11 @@ spec:
         ports:
           http:
             port: 3001
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: OnRootMismatch
     persistence:
       library:
         enabled: true
