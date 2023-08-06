@@ -35,8 +35,6 @@ spec:
   values:
     controller:
       type: statefulset
-      annotations:
-        reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/onedr0p/plex-beta
       tag: 1.32.6.7371-b6a09ad81@sha256:437685fa85bee0731f36610b473b807aad436ca2408815018002206f9abf6fe6
@@ -85,12 +83,7 @@ spec:
       transcode:
         enabled: true
         type: emptyDir
-      local:
-        enabled: true
-        type: emptyDir
-        mountPath: /.local
     nodeSelector:
-      node-role.kubernetes.io/worker: "true"
       intel.feature.node.kubernetes.io/gpu: "true"
     affinity:
       podAntiAffinity:
@@ -109,15 +102,3 @@ spec:
       limits:
         gpu.intel.com/i915: 1
         memory: 10000Mi
-    sidecars:
-      auto-languages:
-        image: docker.io/remirigal/plex-auto-languages:v1.2.2
-        imagePullPolicy: IfNotPresent
-        env:
-          - { name: PLEX_URL, value: http://localhost:32400 }
-          - { name: REFRESH_LIBRARY_ON_SCAN, value: "false" }
-        envFrom:
-          - secretRef:
-              name: plex-auto-languages-secret
-        volumeMounts:
-          - { name: local, mountPath: /.local }
