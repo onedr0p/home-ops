@@ -44,6 +44,7 @@ spec:
       SONARR__INSTANCE_NAME: Sonarr
       SONARR__PORT: &port 80
       SONARR__LOG_LEVEL: info
+      SONARR__THEME: dark
     envFrom:
       - secretRef:
           name: sonarr-secret
@@ -71,11 +72,6 @@ spec:
       main:
         enabled: true
         ingressClassName: internal
-        annotations:
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.devbu.io/css/base/sonarr/nord.css"></head>';
-            sub_filter_once on;
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:

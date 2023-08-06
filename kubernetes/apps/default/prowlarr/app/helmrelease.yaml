@@ -51,6 +51,7 @@ spec:
       PROWLARR__PORT: &port 80
       PROWLARR__LOG_LEVEL: info
       PROWLARR__AUTHENTICATION_METHOD: External
+      PROWLARR__THEME: dark
     envFrom: *envFrom
     service:
       main:
@@ -76,11 +77,6 @@ spec:
       main:
         enabled: true
         ingressClassName: internal
-        annotations:
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            proxy_set_header Accept-Encoding "";
-            sub_filter '</head>' '<link rel="stylesheet" type="text/css" href="https://theme-park.devbu.io/css/base/prowlarr/nord.css"></head>';
-            sub_filter_once on;
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
