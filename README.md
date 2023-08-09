@@ -122,15 +122,15 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 |-------------------------------------------------|-------------------------------------------------------------------|----------------|
 | [1Password](https://1password.com/)             | Secrets with [External Secrets](https://external-secrets.io/)     | ~$65/yr        |
 | [Cloudflare](https://www.cloudflare.com/)       | Domain and R2                                                     | ~$30/yr        |
-| [Migadu](https://migadu.com/)                   | Email hosting                                                     | ~$20/yr        |
+| [Frugal](https://frugalusenet.com/)             | Usenet access                                                     | ~$35/yr        |
 | [GCP](https://cloud.google.com/)                | Voice interactions with Home Assistant over Google Assistant      | Free           |
 | [GitHub](https://github.com/)                   | Hosting this repository and continuous integration/deployments    | Free           |
-| [Newsgroup Ninja](https://www.newsgroup.ninja/) | Usenet access                                                     | ~$70/yr        |
+| [Migadu](https://migadu.com/)                   | Email hosting                                                     | ~$20/yr        |
 | [NextDNS](https://nextdns.io/)                  | My routers DNS server which includes AdBlocking                   | ~$20/yr        |
 | [Pushover](https://pushover.net/)               | Kubernetes Alerts and application notifications                   | Free           |
 | [Terraform Cloud](https://www.terraform.io/)    | Storing Terraform state                                           | Free           |
 | [UptimeRobot](https://uptimerobot.com/)         | Monitoring internet connectivity and external facing applications | ~$60/yr        |
-|                                                 |                                                                   | Total: ~$27/mo |
+|                                                 |                                                                   | Total: ~$20/mo |
 
 ---
 
