@@ -35,7 +35,6 @@ spec:
       type: statefulset
       annotations:
         configmap.reloader.stakater.com/reload: qbittorrent-scripts
-        secret.reloader.stakater.com/reload: cross-seed-secret
     image:
       repository: ghcr.io/onedr0p/qbittorrent
       tag: 4.5.4@sha256:f0a74313d750bc437ba2ad34f3412de5ab9a978f3f5b74227a1bda69271fef3e
@@ -43,7 +42,6 @@ spec:
       TZ: America/New_York
       QBITTORRENT__PORT: &port 80
       QBITTORRENT__BT_PORT: &bittorrentPort 50413
-      QBT_Application__MemoryWorkingSetLimit: 12000
     service:
       main:
         ports:
@@ -107,32 +105,20 @@ spec:
         subPath: completed.sh
         defaultMode: 0775
         readOnly: true
-      cross-seed-config:
-        enabled: true
-        type: secret
-        name: cross-seed-secret
-        mountPath: /config/config.js
-        subPath: config.js
-        readOnly: true
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values: ["sabnzbd"]
+            topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 10m
         memory: 250Mi
       limits:
         memory: 16Gi
-    sidecars:
-      # TODO: cross-seed doesn't work with qBittorrent & SQLite
-      # https://github.com/cross-seed/cross-seed/issues/365
-      # cross-seed:
-      #   image: ghcr.io/cross-seed/cross-seed:version-5.2.0
-      #   imagePullPolicy: IfNotPresent
-      #   args: ["daemon"]
-      #   volumeMounts:
-      #     - { name: config, mountPath: /config }
-      #     - { name: cross-seed-config, mountPath: /config/config.js, subPath: config.js, readOnly: true }
-      reannounce:
-        image: ghcr.io/buroa/qbittools:v0.1.1
-        imagePullPolicy: IfNotPresent
-        args: ["reannounce", "-s", "localhost", "-p", "80"]
