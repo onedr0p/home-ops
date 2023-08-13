@@ -28,8 +28,6 @@ spec:
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
-    - name: volsync
-      namespace: volsync
   values:
     initContainers:
       01-init-db:
@@ -39,7 +37,6 @@ spec:
           - secretRef:
               name: radarr-secret
     controller:
-      type: statefulset
       annotations:
         reloader.stakater.com/auto: "true"
     image:
@@ -93,13 +90,10 @@ spec:
       fsGroup: 568
       fsGroupChangePolicy: OnRootMismatch
       supplementalGroups: [10000]
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 15Gi
-        storageClass: ceph-block
     persistence:
+      config:
+        enabled: true
+        existingClaim: radarr-config
       media:
         enabled: true
         type: nfs

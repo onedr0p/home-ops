@@ -28,8 +28,6 @@ spec:
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
-    - name: volsync
-      namespace: volsync
   values:
     initContainers:
       01-init-db:
@@ -39,7 +37,6 @@ spec:
           - secretRef:
               name: sonarr-secret
     controller:
-      type: statefulset
       annotations:
         reloader.stakater.com/auto: "true"
     image:
@@ -53,8 +50,6 @@ spec:
       SONARR__LOG_LEVEL: info
       SONARR__THEME: dark
     envFrom: *envFrom
-      # - secretRef:
-      #     name: sonarr-secret
     service:
       main:
         ports:
@@ -93,13 +88,10 @@ spec:
       fsGroup: 568
       fsGroupChangePolicy: OnRootMismatch
       supplementalGroups: [10000]
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        storageClass: ceph-block
     persistence:
+      config:
+        enabled: true
+        existingClaim: sonarr-config
       media:
         enabled: true
         type: nfs
