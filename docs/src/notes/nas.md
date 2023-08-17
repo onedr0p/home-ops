@@ -69,7 +69,7 @@ My NAS configuation as documentation currently using Ubuntu 22.04
 
     ```sh
     sudo zpool add eros mirror \
-        /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0B3D2 \
+        /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0F1CH \
         /dev/disk/by-id/scsi-SATA_WDC_WD120EMFZ-11_X1G3B01L
     ```
 
@@ -375,14 +375,41 @@ Restart zed after changing: `sudo systemctl restart zed.service`
 
 ## Misc
 
+### Replace a Drive
+
+```admonish info
+Enable autoexpand on the pool with `sudo zpool set autoexpand=on eros`
+```
+
+```sh
+sudo zpool offline eros /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0F1CH
+sudo zpool replace eros /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0F1CH /dev/disk/by-id/scsi-SATA_ST22000NM001E-3H_ZX201HJC
+```
+
+When resilvering is complete detach the drive...
+
+```sh
+sudo zpool detach eros /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZCH0F1CH
+```
+
 ### Badblocks
 
 ```admonish warning
-This command is **very destructive** and should only be used to check for bad sectors
+This command is **very destructive** and should only be used to check for bad sectors, this also take ashile so be sure to start it in a `screen`
 ```
 
 ```sh
 sudo badblocks -b 4096 -wsv /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZJV01MC5
+```
+
+### Shred
+
+```admonish warning
+This command is **very destructive** and should only be used to completely wipe the drive, this also take ashile so be sure to start it in a `screen`
+```
+
+```sh
+sudo shred -vfz -n 4 /dev/disk/by-id/scsi-SATA_ST12000VN0007-2G_ZJV01MC5
 ```
 
 ### Lenovo SA120
