@@ -1,0 +1,67 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: windmill
+  namespace: default
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: windmill
+      version: 1.6.63
+      sourceRef:
+        kind: HelmRepository
+        name: windmill
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    app:
+      annotations:
+        secret.reloader.stakater.com/reload: &secret windmill-secret
+    windmill:
+      baseDomain: &host windmill.devbu.io
+      baseProtocol: https
+      appReplicas: 1
+      workerReplicas: 1
+      lspReplicas: 1
+      multiplayerReplicas: 1
+    ingress:
+      enabled: true
+      className: internal
+      tls:
+        - hosts:
+            - *host
+    postgresql:
+      enabled: false
+  valuesFrom:
+    - kind: Secret
+      name: *secret
+      valuesKey: WINDMILL_POSTGRES_URL
+      targetPath: windmill.databaseUrl
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - kind: Deployment
+            apiVersion: apps/v1
+            metadata:
+              name: windmill-app
+            spec:
+              template:
+                spec:
+                  initContainers:
+                    - name: 01-init-db
+                      image: ghcr.io/onedr0p/postgres-init:14.8
+                      envFrom:
+                        - secretRef:
+                            name: *secret

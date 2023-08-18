@@ -12,6 +12,9 @@ reboot
 1. Add or replace the file `/etc/kvmd/override.yaml`
     ```yaml
     kvmd:
+        prometheus:
+            auth:
+                enabled: false
         gpio:
             drivers:
                 tes:
