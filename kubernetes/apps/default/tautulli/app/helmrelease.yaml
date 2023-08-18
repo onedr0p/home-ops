@@ -78,12 +78,12 @@ spec:
         memory: 500Mi
     sidecars:
       jbops:
-        image: registry.k8s.io/git-sync/git-sync:v3.6.9
+        image: registry.k8s.io/git-sync/git-sync:v4.0.0
         imagePullPolicy: IfNotPresent
         args:
           - --repo=https://github.com/blacktwin/JBOPS
-          - --branch=master
-          - --wait=86400 # 1 day
+          - --ref=master
+          - --period=1d
           - --root=/add-ons
         volumeMounts:
           - { name: add-ons, mountPath: /add-ons }
