@@ -1,5 +1,5 @@
 module.exports = {
-  delay: 15,
+  delay: 20,
   qbittorrentUrl: "http://localhost",
   torznab: [
     "http://prowlarr.default.svc.cluster.local/1/api?apikey={{ .PROWLARR__API_KEY }}",  // fl
@@ -14,6 +14,7 @@ module.exports = {
     "http://prowlarr.default.svc.cluster.local/39/api?apikey={{ .PROWLARR__API_KEY }}", // hds
     "http://prowlarr.default.svc.cluster.local/40/api?apikey={{ .PROWLARR__API_KEY }}", // uhdb
     "http://prowlarr.default.svc.cluster.local/41/api?apikey={{ .PROWLARR__API_KEY }}", // ts
+    "http://prowlarr.default.svc.cluster.local/42/api?apikey={{ .PROWLARR__API_KEY }}", // phd
   ],
   action: "inject",
   includeEpisodes: true,
