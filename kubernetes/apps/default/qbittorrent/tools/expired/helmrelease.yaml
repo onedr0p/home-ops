@@ -1,0 +1,74 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: qbittorrent-expired
+  namespace: default
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  dependsOn:
+    - name: qbittorrent
+      namespace: default
+  values:
+    controller:
+      type: cronjob
+      cronjob:
+        schedule: "@daily"
+    image:
+      repository: ghcr.io/buroa/qbittools
+      tag: master@sha256:4db30579e2ed527df7c79bb7c4a072e650cd485c0fcd3a60dd40f75f1cd535a3
+    args:
+      - expired
+      - --indexer
+      - filelist
+      - --indexer
+      - torrentleech
+      - --indexer
+      - hd-torrents
+      - --indexer
+      - hd-space
+      - --indexer
+      - scenetime
+      - --indexer
+      - iptorrents
+      - --indexer
+      - torrentseeds
+      - --dry-run
+      - -s
+      - qbittorrent.default.svc.cluster.local
+      - -p
+      - "80"
+    service:
+      main:
+        enabled: false
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: OnRootMismatch
+      supplementalGroups: [10000]
+    resources:
+      requests:
+        memory: 250Mi
+        cpu: 25m
+      limits:
+        memory: 500Mi
