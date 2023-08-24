@@ -17,6 +17,7 @@ module.exports = {
     "http://prowlarr.default.svc.cluster.local/42/api?apikey={{ .PROWLARR__API_KEY }}", // phd
     "http://prowlarr.default.svc.cluster.local/44/api?apikey={{ .PROWLARR__API_KEY }}", // hdt
     "http://prowlarr.default.svc.cluster.local/45/api?apikey={{ .PROWLARR__API_KEY }}", // bhd
+    "http://prowlarr.default.svc.cluster.local/46/api?apikey={{ .PROWLARR__API_KEY }}", // td
   ],
   action: "inject",
   includeEpisodes: true,
