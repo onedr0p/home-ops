@@ -13,7 +13,6 @@ module.exports = {
     "http://prowlarr.default.svc.cluster.local/38/api?apikey={{ .PROWLARR__API_KEY }}", // ipt
     "http://prowlarr.default.svc.cluster.local/39/api?apikey={{ .PROWLARR__API_KEY }}", // hds
     "http://prowlarr.default.svc.cluster.local/40/api?apikey={{ .PROWLARR__API_KEY }}", // uhdb
-    "http://prowlarr.default.svc.cluster.local/41/api?apikey={{ .PROWLARR__API_KEY }}", // ts
     "http://prowlarr.default.svc.cluster.local/42/api?apikey={{ .PROWLARR__API_KEY }}", // phd
     "http://prowlarr.default.svc.cluster.local/44/api?apikey={{ .PROWLARR__API_KEY }}", // hdt
     "http://prowlarr.default.svc.cluster.local/45/api?apikey={{ .PROWLARR__API_KEY }}", // bhd
