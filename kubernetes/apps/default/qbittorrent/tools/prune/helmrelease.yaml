@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: qbittorrent-expired
+  name: qbittorrent-prune
   namespace: default
 spec:
   interval: 30m
@@ -32,19 +32,23 @@ spec:
     controller:
       type: cronjob
       cronjob:
-        schedule: "0 0 2-30/2 * *" # even days of the month
+        schedule: "0 2 2-30/2 * *" # even days of the month
     image:
       repository: ghcr.io/buroa/qbittools
-      tag: v0.7.0
-    args:
-      - expired
-      - --ignore-category
-      - manual
-      - --dry-run
-      - -s
-      - qbittorrent.default.svc.cluster.local
-      - -p
-      - "80"
+      tag: v0.8.0
+    args: [
+      "prune",
+      "--exclude-category", "manual",
+      "--include-tag", "expired",
+      "--include-tag", "added:30d",
+      "--exclude-tag", "site:beyond-hd",
+      "--exclude-tag", "site:broadcasthenet",
+      "--exclude-tag", "site:passthepopcorn",
+      "--exclude-tag", "site:uhdbits",
+      "--dry-run",
+      "-s", "qbittorrent.default.svc.cluster.local",
+      "-p", "80"
+    ]
     service:
       main:
         enabled: false

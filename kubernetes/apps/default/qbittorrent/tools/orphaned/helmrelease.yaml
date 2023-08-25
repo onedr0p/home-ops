@@ -32,21 +32,18 @@ spec:
     controller:
       type: cronjob
       cronjob:
-        schedule: "0 0 1-31/2 * *" # odd days of the month
+        schedule: "0 2 1-31/2 * *" # odd days of the month
     image:
       repository: ghcr.io/buroa/qbittools
-      tag: v0.7.0
-    args:
-      - orphaned
-      - --ignore-pattern
-      - "*_unpackerred"
-      - --ignore-pattern
-      - "*/manual/*"
-      - --dry-run
-      - -s
-      - qbittorrent.default.svc.cluster.local
-      - -p
-      - "80"
+      tag: v0.8.0
+    args: [
+      "orphaned",
+      "--exclude-pattern", "*/manual/*",
+      "--exclude-pattern", "*_unpackerred",
+      "--dry-run",
+      "-s", "qbittorrent.default.svc.cluster.local",
+      "-p", "80"
+    ]
     service:
       main:
         enabled: false
