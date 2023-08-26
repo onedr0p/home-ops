@@ -32,10 +32,8 @@ spec:
       namespace: volsync
   values:
     controller:
-      type: statefulset
       annotations:
         configmap.reloader.stakater.com/reload: qbittorrent-scripts
-        secret.reloader.stakater.com/reload: cross-seed-secret
     image:
       repository: ghcr.io/onedr0p/qbittorrent
       tag: 4.5.4@sha256:f0a74313d750bc437ba2ad34f3412de5ab9a978f3f5b74227a1bda69271fef3e
@@ -48,8 +46,6 @@ spec:
         ports:
           http:
             port: *port
-          cross-seed:
-            port: 2468
       bittorrent:
         enabled: true
         type: LoadBalancer
@@ -80,21 +76,12 @@ spec:
       fsGroup: 568
       fsGroupChangePolicy: OnRootMismatch
       supplementalGroups: [10000]
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
-    # Note: If downloading very large torrents it might be worth using NFS for your download directory.
+    # Note: If downloading very large torrents it might be worth using NFS for your incomplete directory.
     # Beware if you are downloading torrents directly to a ZFS dataset that dataset will accrue fragmentation.
     persistence:
-      media:
+      config:
         enabled: true
-        type: nfs
-        server: expanse.turbo.ac
-        path: /eros/Media
-        mountPath: /media
+        existingClaim: qbittorrent-config
       incomplete:
         enabled: true
         type: emptyDir
@@ -106,13 +93,12 @@ spec:
         subPath: completed.sh
         defaultMode: 0775
         readOnly: true
-      cross-seed-config:
+      media:
         enabled: true
-        type: secret
-        name: cross-seed-secret
-        mountPath: /config/config.js
-        subPath: config.js
-        readOnly: true
+        type: nfs
+        server: expanse.turbo.ac
+        path: /eros/Media
+        mountPath: /media
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
     affinity:
@@ -130,12 +116,3 @@ spec:
         memory: 250Mi
       limits:
         memory: 16Gi
-    sidecars:
-      cross-seed:
-        image: ghcr.io/cross-seed/cross-seed:5.4.0
-        imagePullPolicy: IfNotPresent
-        args: ["daemon"]
-        volumeMounts:
-          - { name: config, mountPath: /config }
-          - { name: cross-seed-config, mountPath: /config/config.js, subPath: config.js, readOnly: true }
-          - { name: media, mountPath: /media }
