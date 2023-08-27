@@ -43,8 +43,9 @@ spec:
       "--last-activity",
       "--sites",
       "--unregistered",
-      "-s", "qbittorrent.default.svc.cluster.local",
-      "-p", "80"
+      "--server", "qbittorrent.default.svc.cluster.local",
+      "--port", "80",
+      "--config", "/config/config.yaml"
     ]
     service:
       main:
@@ -52,6 +53,14 @@ spec:
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
+    persistence:
+      config-file:
+        enabled: true
+        type: configMap
+        name: qbittorrent-tools-configmap # overriden by kustomizeconfig
+        mountPath: /config/config.yaml
+        subPath: config.yaml
+        readOnly: true
     resources:
       requests:
         memory: 250Mi
