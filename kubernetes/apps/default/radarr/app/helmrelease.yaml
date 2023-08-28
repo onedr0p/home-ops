@@ -45,10 +45,8 @@ spec:
     env:
       TZ: America/New_York
       PUSHOVER_DEBUG: "false"
-      PUSHOVER_APP_URL: &host "{{ .Release.Name }}.devbu.io"
       RADARR__INSTANCE_NAME: Radarr
       RADARR__PORT: &port 80
-      RADARR__APPLICATION_URL: "https://{{ .Release.Name }}.devbu.io"
       RADARR__LOG_LEVEL: info
       RADARR__THEME: dark
     envFrom: *envFrom
@@ -77,7 +75,7 @@ spec:
         enabled: true
         ingressClassName: internal
         hosts:
-          - host: *host
+          - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
                 pathType: Prefix
