@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: qbittorrent-prune
+  name: qbittorrent-unregistered
   namespace: default
 spec:
   interval: 30m
@@ -32,22 +32,16 @@ spec:
     controller:
       type: cronjob
       cronjob:
-        schedule: "0 2 2-30/2 * *" # even days of the month
+        schedule: "30 * * * *"
     image:
       repository: ghcr.io/buroa/qbittools
       tag: v0.9.0
     args: [
       "prune",
       "--exclude-category", "manual",
-      "--include-tag", "expired",
-      "--include-tag", "added:30d",
-      "--exclude-tag", "site:aither",
-      "--exclude-tag", "site:alpharatio",
-      "--exclude-tag", "site:anthelion",
-      "--exclude-tag", "site:beyond-hd",
-      "--exclude-tag", "site:pixelhd",
-      "--exclude-tag", "site:uhdbits",
-      "--dry-run",
+      "--include-tag", "unregistered",
+      "--exclude-tag", "expired",
+      # "--dry-run",
       "--server", "qbittorrent.default.svc.cluster.local",
       "--port", "80"
     ]

@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: qbittorrent-orphaned
+  name: qbittorrent-expired
   namespace: default
 spec:
   interval: 30m
@@ -32,14 +32,23 @@ spec:
     controller:
       type: cronjob
       cronjob:
-        schedule: "@daily"
+        schedule: "30 * * * *"
     image:
       repository: ghcr.io/buroa/qbittools
       tag: v0.9.0
     args: [
-      "orphaned",
-      "--exclude-pattern", "*/manual/*",
-      "--exclude-pattern", "*_unpackerred",
+      "prune",
+      "--exclude-category", "manual",
+      "--include-tag", "expired",
+      "--exclude-tag", "site:aither",
+      "--exclude-tag", "site:alpharatio",
+      "--exclude-tag", "site:anthelion",
+      "--exclude-tag", "site:beyond-hd",
+      "--exclude-tag", "site:broadcasthenet",
+      "--exclude-tag", "site:myspleen",
+      "--exclude-tag", "site:passthepopcorn",
+      "--exclude-tag", "site:pixelhd",
+      "--exclude-tag", "site:uhdbits",
       # "--dry-run",
       "--server", "qbittorrent.default.svc.cluster.local",
       "--port", "80"
@@ -50,16 +59,6 @@ spec:
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups: [10000]
-    persistence:
-      media:
-        enabled: true
-        type: nfs
-        server: expanse.turbo.ac
-        path: /eros/Media
-        mountPath: /media
     resources:
       requests:
         memory: 250Mi
