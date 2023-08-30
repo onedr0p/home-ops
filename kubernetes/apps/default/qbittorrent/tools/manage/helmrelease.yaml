@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: qbittorrent-expired
+  name: qbittorrent-manage
   namespace: default
 spec:
   interval: 30m
@@ -32,7 +32,35 @@ spec:
     controller:
       type: cronjob
       cronjob:
-        schedule: "30 * * * *"
+        schedule: "@hourly"
+    initContainers:
+      01-tag:
+        image: ghcr.io/buroa/qbittools:v0.9.0
+        imagePullPolicy: IfNotPresent
+        args: [
+          "tagging",
+          "--added-on",
+          "--expired",
+          "--last-activity",
+          "--sites",
+          "--unregistered",
+          "--server", "qbittorrent.default.svc.cluster.local",
+          "--port", "80",
+          "--config", "/config/config.yaml"
+        ]
+        volumeMounts:
+          - { name: config-file, mountPath: /config/config.yaml, subPath: config.yaml }
+      02-unregistered:
+        image: ghcr.io/buroa/qbittools:v0.9.0
+        imagePullPolicy: IfNotPresent
+        args: [
+          "prune",
+          "--exclude-category", "manual",
+          "--include-tag", "unregistered",
+          # "--dry-run",
+          "--server", "qbittorrent.default.svc.cluster.local",
+          "--port", "80"
+        ]
     image:
       repository: ghcr.io/buroa/qbittools
       tag: v0.9.0
@@ -55,6 +83,14 @@ spec:
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
+    persistence:
+      config-file:
+        enabled: true
+        type: configMap
+        name: qbittorrent-tools-configmap # overriden by kustomizeconfig
+        mountPath: /config/config.yaml
+        subPath: config.yaml
+        readOnly: true
     resources:
       requests:
         memory: 250Mi
