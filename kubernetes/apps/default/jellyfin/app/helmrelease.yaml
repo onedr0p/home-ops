@@ -96,16 +96,13 @@ spec:
         size: 50Gi
         storageClass: ceph-block
     persistence:
-      media:
-        enabled: true
-        type: nfs
-        server: expanse.turbo.ac
-        path: /eros/Media
-        mountPath: /media
-        readOnly: true
       transcode:
         enabled: true
         type: emptyDir
+      media:
+        enabled: true
+        existingClaim: media
+        readOnly: true
     nodeSelector:
       intel.feature.node.kubernetes.io/gpu: "true"
     resources:

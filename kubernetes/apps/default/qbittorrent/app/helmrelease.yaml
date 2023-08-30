@@ -76,15 +76,10 @@ spec:
       fsGroup: 568
       fsGroupChangePolicy: OnRootMismatch
       supplementalGroups: [10000]
-    # Note: If downloading very large torrents it might be worth using NFS for your incomplete directory.
-    # Beware if you are downloading torrents directly to a ZFS dataset that dataset will accrue fragmentation.
     persistence:
       config:
         enabled: true
         existingClaim: qbittorrent-config
-      incomplete:
-        enabled: true
-        type: emptyDir
       completed-script:
         enabled: true
         type: configMap
@@ -95,21 +90,9 @@ spec:
         readOnly: true
       media:
         enabled: true
-        type: nfs
-        server: expanse.turbo.ac
-        path: /eros/Media
-        mountPath: /media
+        existingClaim: media
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
-    affinity:
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-                - key: app.kubernetes.io/name
-                  operator: In
-                  values: ["sabnzbd"]
-            topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 10m

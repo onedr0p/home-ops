@@ -36,9 +36,9 @@ spec:
       TZ: America/New_York
       UN_WEBSERVER_METRICS: "true"
       UN_SONARR_0_URL: http://sonarr.default.svc.cluster.local
-      UN_SONARR_0_PATHS_0: /complete/sonarr
+      UN_SONARR_0_PATHS_0: /media/Downloads/qbittorrent/complete/sonarr
       UN_RADARR_0_URL: http://radarr.default.svc.cluster.local
-      UN_RADARR_0_PATHS_0: /complete/radarr
+      UN_RADARR_0_PATHS_0: /media/Downloads/qbittorrent/complete/radarr
     envFrom:
       - secretRef:
           name: unpackerr-secret
@@ -57,12 +57,9 @@ spec:
       fsGroupChangePolicy: OnRootMismatch
       supplementalGroups: [10000]
     persistence:
-      complete:
+      media:
         enabled: true
-        type: nfs
-        server: expanse.turbo.ac
-        path: /eros/Media/Downloads/qbittorrent/complete
-        mountPath: /complete
+        existingClaim: media
     resources:
       requests:
         cpu: 10m

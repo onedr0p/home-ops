@@ -2,7 +2,7 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: immich-nfs
+  name: frigate
 provisioner: nfs
 parameters:
   archiveOnDelete: "false"
@@ -10,16 +10,16 @@ parameters:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: immich-nfs
+  name: frigate
 spec:
-  storageClassName: immich-nfs
+  storageClassName: frigate
   capacity:
-    storage: 1Mi # Size does not matter
+    storage: 1Mi # Size does not matter ...twss
   accessModes: ["ReadWriteMany"]
   persistentVolumeReclaimPolicy: Retain
   nfs:
     server: expanse.turbo.ac
-    path: /eros/Apps/Immich
+    path: /eros/Apps/Frigate
   mountOptions:
     - nfsvers=4.2
     - nconnect=8
@@ -31,11 +31,11 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: immich-nfs
+  name: frigate
   namespace: default
 spec:
   accessModes: ["ReadWriteMany"]
-  storageClassName: immich-nfs
+  storageClassName: frigate
   resources:
     requests:
-      storage: 1Mi # Size does not matter
+      storage: 1Mi # Size does not matter ...twss

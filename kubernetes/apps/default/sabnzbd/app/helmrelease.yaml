@@ -95,28 +95,12 @@ spec:
         accessMode: ReadWriteOnce
         size: 1Gi
         storageClass: ceph-block
-    # Note: If downloading very large nzbs it might be worth using NFS for your download directory.
     persistence:
       media:
         enabled: true
-        type: nfs
-        server: expanse.turbo.ac
-        path: /eros/Media
-        mountPath: /media
-      incomplete:
-        enabled: true
-        type: emptyDir
+        existingClaim: media
     nodeSelector:
       node-role.kubernetes.io/worker: "true"
-    affinity:
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-                - key: app.kubernetes.io/name
-                  operator: In
-                  values: ["qbittorrent"]
-            topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 10m
