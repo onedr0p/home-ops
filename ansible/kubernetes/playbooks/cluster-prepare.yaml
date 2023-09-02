@@ -159,13 +159,21 @@
           community.general.modprobe:
             name: "{{ item }}"
             state: present
-          loop: ["br_netfilter", "ceph", "ip_vs", "ip_vs_rr", "nbd", "overlay", "rbd"]
+          loop: [
+            "br_netfilter", "ceph", "ip_vs",
+            "ip_vs_rr", "nbd", "overlay",
+            "rbd", "tcp_bbr"
+          ]
         - name: System Configuration | Kernel modules (2)
           ansible.builtin.copy:
             dest: "/etc/modules-load.d/{{ item }}.conf"
             mode: "0644"
             content: "{{ item }}"
-          loop: ["br_netfilter", "ceph", "ip_vs", "ip_vs_rr", "nbd", "overlay", "rbd"]
+          loop: [
+            "br_netfilter", "ceph", "ip_vs",
+            "ip_vs_rr", "nbd", "overlay",
+            "rbd", "tcp_bbr"
+          ]
         - name: System Configuration | Sysctl
           ansible.posix.sysctl:
             name: "{{ item.key }}"
