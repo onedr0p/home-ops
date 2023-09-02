@@ -51,33 +51,17 @@ spec:
         ]
         volumeMounts:
           - { name: config-file, mountPath: /config/config.yaml, subPath: config.yaml }
-      02-unregistered:
-        image: ghcr.io/buroa/qbittools:v0.9.1
-        imagePullPolicy: IfNotPresent
-        args: [
-          "prune",
-          "--exclude-category", "manual",
-          "--include-tag", "unregistered",
-          # "--dry-run",
-          "--server", "qbittorrent.default.svc.cluster.local",
-          "--port", "80"
-        ]
     image:
       repository: ghcr.io/buroa/qbittools
       tag: v0.9.1
-    args: [
-      "prune",
-      "--exclude-category", "manual",
-      "--include-tag", "expired",
-      "--exclude-tag", "activity:24h",
-      "--exclude-tag", "site:beyond-hd",
-      "--exclude-tag", "site:myspleen",
-      "--exclude-tag", "site:passthepopcorn",
-      "--exclude-tag", "site:pixelhd",
-      # "--dry-run",
-      "--server", "qbittorrent.default.svc.cluster.local",
-      "--port", "80"
-    ]
+      args: [
+        "prune",
+        "--exclude-category", "manual",
+        "--include-tag", "unregistered",
+        # "--dry-run",
+        "--server", "qbittorrent.default.svc.cluster.local",
+        "--port", "80"
+      ]
     service:
       main:
         enabled: false
