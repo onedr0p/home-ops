@@ -49,8 +49,8 @@ spec:
       SLSKD_NO_AUTH: true
       SLSKD_METRICS: true
       SLSKD_METRICS_NO_AUTH: true
-      # SLSKD_DOWNLOADS_DIR:
-      # SLSKD_INCOMPLETE_DIR:
+      SLSKD_DOWNLOADS_DIR: /downloads/Soulseek/complete
+      SLSKD_INCOMPLETE_DIR: /downloads/Soulseek/incomplete
     envFrom:
       - secretRef:
           name: slskd-secret
@@ -83,13 +83,6 @@ spec:
         tls:
           - hosts:
               - *host
-    # probes:
-    #   liveness:
-    #     enabled: false
-    #   readiness:
-    #     enabled: false
-    #   startup:
-    #     enabled: false
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
@@ -107,6 +100,12 @@ spec:
         enabled: true
         existingClaim: media
         readOnly: true
+      downloads:
+        enabled: true
+        type: nfs
+        server: expanse.turbo.ac
+        path: /eros/Downloads
+        mountPath: /downloads
     resources:
       requests:
         cpu: 10m
