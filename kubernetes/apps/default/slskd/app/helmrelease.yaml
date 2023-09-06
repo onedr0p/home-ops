@@ -33,22 +33,44 @@ spec:
   values:
     controller:
       type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
     image:
       repository: ghcr.io/slskd/slskd
       tag: 0.18.2
     env:
       TZ: America/New_York
-      SLSKD_HTTP_PORT: &port 5030
-      SLSKD_HTTPS_PORT: 5031
-      SLSKD_SLSK_LISTEN_PORT: 50300
+      SLSKD_HTTP_PORT: &port 80
+      SLSKD_NO_HTTPS: true
+      SLSKD_SLSK_LISTEN_PORT: &soulseekPort 50300
       SLSKD_APP_DIR: /config
       SLSKD_REMOTE_CONFIGURATION: true
       SLSKD_SHARED_DIR: /media/Library/Music
+      SLSKD_NO_AUTH: true
+      SLSKD_METRICS: true
+      SLSKD_METRICS_NO_AUTH: true
+      # SLSKD_DOWNLOADS_DIR:
+      # SLSKD_INCOMPLETE_DIR:
+    envFrom:
+      - secretRef:
+          name: slskd-secret
     service:
       main:
         ports:
           http:
             port: *port
+      soulseek:
+        enabled: true
+        type: LoadBalancer
+        annotations:
+          io.cilium/lb-ipam-ips: 192.168.42.207
+        ports:
+          soulseek:
+            enabled: true
+            port: *soulseekPort
+            protocol: TCP
+            targetPort: *soulseekPort
+        externalTrafficPolicy: Cluster
     ingress:
       main:
         enabled: true
@@ -61,6 +83,13 @@ spec:
         tls:
           - hosts:
               - *host
+    # probes:
+    #   liveness:
+    #     enabled: false
+    #   readiness:
+    #     enabled: false
+    #   startup:
+    #     enabled: false
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
