@@ -10,12 +10,16 @@ data:
   config.yaml: |
     endpoints:
       - name: slskd
-        group: external
-        url: https://slskd.devbu.io
+        group: guarded
+        url: 1.1.1.1
         interval: 1m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
+        ui:
+          hide-hostname: true
+          hide-url: true
+        dns:
+          query-name: slskd.devbu.io
+          query-type: A
         conditions:
-          - "[STATUS] == 200"
+          - "len([BODY]) == 0"
         alerts:
           - type: pushover
