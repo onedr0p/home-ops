@@ -45,12 +45,12 @@ spec:
       SLSKD_SLSK_LISTEN_PORT: &soulseekPort 50300
       SLSKD_APP_DIR: /config
       SLSKD_REMOTE_CONFIGURATION: true
-      SLSKD_SHARED_DIR: /media/Library/Music
+      SLSKD_SHARED_DIR: /media/shared
       SLSKD_NO_AUTH: true
       SLSKD_METRICS: true
       SLSKD_METRICS_NO_AUTH: true
-      SLSKD_DOWNLOADS_DIR: /downloads/Soulseek/complete
-      SLSKD_INCOMPLETE_DIR: /downloads/Soulseek/incomplete
+      SLSKD_DOWNLOADS_DIR: /media/complete
+      SLSKD_INCOMPLETE_DIR: /media/incomplete
       SLSKD_SHARE_FILTER: Thumbs.db$;\.DS_Store$
     envFrom:
       - secretRef:
@@ -99,14 +99,8 @@ spec:
     persistence:
       media:
         enabled: true
-        existingClaim: media
-        readOnly: true
-      downloads:
-        enabled: true
-        type: nfs
-        server: expanse.turbo.ac
-        path: /eros/Downloads
-        mountPath: /downloads
+        existingClaim: slskd
+        mountPath: /media
     resources:
       requests:
         cpu: 10m
