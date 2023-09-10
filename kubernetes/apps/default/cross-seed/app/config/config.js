@@ -1,9 +1,6 @@
 module.exports = {
   delay: 20,
   qbittorrentUrl: "http://qbittorrent.default.svc.cluster.local",
-  // prowlarrUrl: "http://prowlarr.default.svc.cluster.local",
-  // prowlarrApiKey: "{{ .PROWLARR__API_KEY }}",
-  // prowlarrTag: "cross-seed",
   torznab: [
     "http://prowlarr.default.svc.cluster.local/1/api?apikey={{ .PROWLARR__API_KEY }}",  // fl
     "http://prowlarr.default.svc.cluster.local/2/api?apikey={{ .PROWLARR__API_KEY }}",  // avz
