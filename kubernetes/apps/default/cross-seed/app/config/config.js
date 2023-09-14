@@ -29,7 +29,7 @@ module.exports = {
     "/media/Downloads/qbittorrent/complete/radarr",
     "/media/Downloads/qbittorrent/complete/sonarr",
   ],
-  maxDataDepth: 0,
+  maxDataDepth: 1,
   outputDir: "/config/xseeds",
   torrentDir: "/config/qBittorrent/BT_backup",
 };
