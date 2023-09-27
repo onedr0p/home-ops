@@ -40,7 +40,7 @@ resource "kubernetes_daemon_set_v1" "vector_agent" {
       spec {
         container {
           name              = "main"
-          image             = "docker.io/timberio/vector:0.32.2-debian"
+          image             = "docker.io/timberio/vector:0.33.0-debian"
           image_pull_policy = "IfNotPresent"
           args              = ["--config=/etc/vector/vector.yaml"]
           security_context {
