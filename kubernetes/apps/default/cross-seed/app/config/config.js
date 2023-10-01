@@ -17,7 +17,8 @@ module.exports = {
     "http://prowlarr.default.svc.cluster.local/49/api?apikey={{ .PROWLARR__API_KEY }}", // athr
   ],
   action: "inject",
-  includeEpisodes: true,
+  includeEpisodes: false,
+  includeSingleEpisodes: true,
   includeNonVideos: true,
   duplicateCategories: true,
   matchMode: "safe",
