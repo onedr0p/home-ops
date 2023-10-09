@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
+    "config:recommended",
     "docker:enableMajor",
     ":disableRateLimiting",
     ":dependencyDashboard",
@@ -35,8 +35,9 @@
       "(^|/)kubernetes/.+\\.ya?ml(\\.j2)?$"
     ]
   },
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "description": "Process Tekton dependencies",
       "fileMatch": [
         "(^|/)kubernetes/.+\\.ya?ml(\\.j2)?$"
@@ -47,6 +48,7 @@
       "datasourceTemplate": "github-releases"
     },
     {
+      "customType": "regex",
       "description": "Process custom dependencies",
       "fileMatch": [
         "(^|/)ansible/.+\\.ya?ml(\\.j2)?$",
@@ -67,6 +69,7 @@
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     },
     {
+      "customType": "regex",
       "description": "Process CloudnativePG Postgresql version",
       "fileMatch": [
         "(^|/)kubernetes/.+\\.ya?ml(\\.j2)?$"
