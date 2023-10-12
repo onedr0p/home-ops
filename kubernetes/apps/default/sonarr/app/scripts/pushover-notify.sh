@@ -11,12 +11,6 @@ CONFIG_FILE="/config/config.xml" && [[ "${PUSHOVER_DEBUG}" == "true" ]] && CONFI
 ERRORS=()
 
 #
-# Discoverable variables
-#
-# shellcheck disable=SC2086
-PUSHOVER_STARR_APIKEY="$(xmlstarlet sel -t -v "//ApiKey" -nl ${CONFIG_FILE})" && [[ -z "${PUSHOVER_STARR_APIKEY}" ]] && ERRORS+=("PUSHOVER_STARR_APIKEY not defined")
-
-#
 # Configurable variables
 #
 # Required
@@ -56,15 +50,17 @@ fi
 # Send notification on Download or Upgrade
 #
 if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
-    printf -v PUSHOVER_TITLE "New Episode %s" "${sonarr_eventtype:-Download}"
-    printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Quality:</b> %s</small><small>\n<b>Client:</b> %s</small><small>\n<b>Upgrade:</b> %s</small>" \
+    pushover_title="New Episode Downloaded"
+    if [[ "${sonarr_isupgrade:-"False"}" == "True" ]]; then
+        pushover_title="Existing Episode Upgraded"
+    fi
+    printf -v PUSHOVER_TITLE "%s" "${pushover_title}"
+    printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Quality:</b> %s</small>" \
         "${sonarr_series_title:-"Mystery Science Theater 3000"}" \
         "${sonarr_episodefile_seasonnumber:-"8"}" \
         "${sonarr_episodefile_episodenumbers:-"20"}" \
         "${sonarr_episodefile_episodetitles:-"Space Mutiny"}" \
-        "${sonarr_episodefile_quality:-"DVD"}" \
-        "${sonarr_download_client:-"qbittorrent"}" \
-        "${sonarr_isupgrade:-"False"}"
+        "${sonarr_episodefile_quality:-"DVD"}"
     printf -v PUSHOVER_URL "%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug:-""}"
     printf -v PUSHOVER_URL_TITLE "View series in %s" "${sonarr_instancename:-Sonarr}"
 fi
