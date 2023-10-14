@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154
 
 PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"true"}"
 # kubectl port-forward service/sonarr -n default 8989:80
@@ -50,18 +51,16 @@ fi
 # Send notification on Download or Upgrade
 #
 if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
-    pushover_title="New Episode Downloaded"
-    if [[ "${sonarr_isupgrade:-"False"}" == "True" ]]; then
-        pushover_title="Existing Episode Upgraded"
-    fi
-    printf -v PUSHOVER_TITLE "%s" "${pushover_title}"
-    printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Quality:</b> %s</small>" \
-        "${sonarr_series_title:-"Mystery Science Theater 3000"}" \
-        "${sonarr_episodefile_seasonnumber:-"8"}" \
-        "${sonarr_episodefile_episodenumbers:-"20"}" \
-        "${sonarr_episodefile_episodetitles:-"Space Mutiny"}" \
-        "${sonarr_episodefile_quality:-"DVD"}"
-    printf -v PUSHOVER_URL "%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug:-""}"
+    if [[ "${sonarr_isupgrade}" == "True" ]]; then pushover_title="Upgraded"; else pushover_title="Downloaded"; fi
+    printf -v PUSHOVER_TITLE "Episode %s" "${pushover_title}"
+    printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small><small>\n<b>Quality:</b> %s</small>" \
+        "${sonarr_series_title}" \
+        "${sonarr_episodefile_seasonnumber}" \
+        "${sonarr_episodefile_episodenumbers}" \
+        "${sonarr_episodefile_episodetitles}" \
+        "${sonarr_download_client}" \
+        "${sonarr_episodefile_quality}"
+    printf -v PUSHOVER_URL "%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug}"
     printf -v PUSHOVER_URL_TITLE "View series in %s" "${sonarr_instancename:-Sonarr}"
 fi
 

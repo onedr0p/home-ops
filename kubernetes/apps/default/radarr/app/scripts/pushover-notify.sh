@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154
 
 PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"true"}"
 # kubectl port-forward service/radarr -n default 7878:80
@@ -50,18 +51,16 @@ fi
 # Send notification on Download or Upgrade
 #
 if [[ "${radarr_eventtype:-}" == "Download" ]]; then
-    pushover_title="New Movie Downloaded"
-    if [[ "${radarr_isupgrade:-"False"}" == "True" ]]; then
-        pushover_title="Existing Movie Upgraded"
-    fi
-    printf -v PUSHOVER_TITLE "%s" "${pushover_title}"
-    printf -v PUSHOVER_MESSAGE "<b>%s (%s)</b><small>\n%s</small><small>\n\n<b>Title:</b> %s</small><small>\n<b>Size:</b> %s</small>" \
-        "${radarr_movie_title:-"The Lord of the Rings: The Return of the King"}" \
-        "${radarr_movie_year:-"2003"}" \
-        "${radarr_movie_overview:-"Frodo, Sam and Gollum are making their final way toward Mount Doom to destroy the One Ring."}" \
-        "${radarr_release_title:-"The.Return.Of.The.King.2003.mkv"}" \
-        "${radarr_release_size:-"69.420 GB"}"
-    printf -v PUSHOVER_URL "%s/movie/%s" "${radarr_applicationurl:-localhost}" "${radarr_movie_tmdbid:-"122"}"
+    if [[ "${radarr_isupgrade}" == "True" ]]; then pushover_title="Upgraded"; else pushover_title="Downloaded"; fi
+    printf -v PUSHOVER_TITLE "Movie %s" "${pushover_title}"
+    printf -v PUSHOVER_MESSAGE "<b>%s (%s)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small><small>\n<b>Quality:</b> %s</small><small>\n<b>Size:</b> %s</small>" \
+        "${radarr_movie_title}" \
+        "${radarr_movie_year}" \
+        "${radarr_movie_overview}" \
+        "${radarr_download_client}" \
+        "${radarr_moviefile_quality}" \
+        "$(numfmt --to iec --format "%8.2f" "${radarr_release_size}")"
+    printf -v PUSHOVER_URL "%s/movie/%s" "${radarr_applicationurl:-localhost}" "${radarr_movie_tmdbid}"
     printf -v PUSHOVER_URL_TITLE "View movie in %s" "${radarr_instancename:-Radarr}"
 fi
 
