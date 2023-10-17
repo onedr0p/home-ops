@@ -11,8 +11,11 @@
     "github>onedr0p/home-ops//.github/renovate/allowedVersions.json5",
     "github>onedr0p/home-ops//.github/renovate/autoMerge.json5",
     "github>onedr0p/home-ops//.github/renovate/commitMessage.json5",
+    "github>onedr0p/home-ops//.github/renovate/customDatasources.json5",
+    "github>onedr0p/home-ops//.github/renovate/customManagers.json5",
     "github>onedr0p/home-ops//.github/renovate/groups.json5",
     "github>onedr0p/home-ops//.github/renovate/labels.json5",
+    "github>onedr0p/home-ops//.github/renovate/packageRules.json5",
     "github>onedr0p/home-ops//.github/renovate/semanticCommits.json5",
     "helpers:pinGitHubActionDigests"
   ],
@@ -34,65 +37,5 @@
       "(^|/)ansible/.+\\.ya?ml(\\.j2)?$",
       "(^|/)kubernetes/.+\\.ya?ml(\\.j2)?$"
     ]
-  },
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "Process Tekton dependencies",
-      "fileMatch": [
-        "(^|/)kubernetes/.+\\.ya?ml(\\.j2)?$"
-      ],
-      "matchStrings": [
-        "depName=(?<depName>\\S+)?\n.*?(?<currentValue>v\\d+\\.\\d+\\.\\d+)"
-      ],
-      "datasourceTemplate": "github-releases"
-    },
-    {
-      "customType": "regex",
-      "description": "Process custom dependencies",
-      "fileMatch": [
-        "(^|/)ansible/.+\\.ya?ml(\\.j2)?$",
-        "(^|/)kubernetes/.+\\.ya?ml(\\.j2)?$"
-      ],
-      "matchStrings": [
-        // Example: `k3s_release_version: "v1.27.3+k3s1"`
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( versioning=(?<versioning>\\S+))?\n.*?\"(?<currentValue>.*)\"\n",
-        // Example: `- https://github.com/rancher/system-upgrade-controller/releases/download/v0.11.0/crd.yaml`
-        //          `- https://github.com/argoproj/argo-cd/raw/v2.7.10/manifests/install.yaml`
-        //          `- https://github.com/argoproj/argo-cd/raw/v2.7.10/manifests/ha/install.yaml`
-        //          `- https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/21.1.1/kubernetes/kubernetes.yml`
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( versioning=(?<versioning>\\S+))?\n.*?-\\s(.*?)\/(?<currentValue>(v|\\d)[^/]+)\/\\S+\n",
-        // Example: apiVersion=helm.cattle.io/v1 kind=HelmChart
-        "datasource=(?<datasource>\\S+)\n.*?repo: (?<registryUrl>\\S+)\n.*?chart: (?<depName>\\S+)\n.*?version: (?<currentValue>\\S+)\n"
-      ],
-      "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
-    },
-    {
-      "customType": "regex",
-      "description": "Process CloudnativePG Postgresql version",
-      "fileMatch": [
-        "(^|/)kubernetes/.+\\.ya?ml(\\.j2)?$"
-      ],
-      "matchStrings": [
-        "imageName: (?<depName>\\S+):(?<currentValue>.*\\-.*)"
-      ],
-      "datasourceTemplate": "docker",
-      "versioningTemplate": "redhat"
-    }
-  ],
-  "packageRules": [
-    {
-      "description": "Loose versioning for non-semver packages",
-      "matchDatasources": ["docker"],
-      "versioning": "loose",
-      "matchPackagePatterns": ["changedetection", "plex", "qbittorrent"]
-    },
-    {
-      "description": "Use custom versioning for Minio",
-      "matchDatasources": ["docker"],
-      "versioning": "regex:^RELEASE\\.(?<major>\\d+)-(?<minor>\\d+)-(?<patch>\\d+)T.*Z$",
-      "matchPackagePatterns": ["minio"]
-    }
-  ]
+  }
 }
