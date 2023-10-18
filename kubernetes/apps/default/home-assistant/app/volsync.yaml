@@ -30,7 +30,7 @@ metadata:
   name: home-assistant
   namespace: default
 spec:
-  sourcePVC: config-home-assistant-0
+  sourcePVC: home-assistant-config
   trigger:
     schedule: "0 7 * * *"
   restic:
@@ -39,8 +39,8 @@ spec:
     repository: home-assistant-restic-secret
     cacheCapacity: 8Gi
     cacheStorageClassName: local-path
-    volumeSnapshotClassName: csi-ceph-blockpool
-    storageClassName: ceph-block
+    volumeSnapshotClassName: csi-ceph-filesystem
+    storageClassName: ceph-filesystem
     moverSecurityContext:
       runAsUser: 568
       runAsGroup: 568
