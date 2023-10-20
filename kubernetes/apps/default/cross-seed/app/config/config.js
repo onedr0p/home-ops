@@ -14,6 +14,7 @@ module.exports = {
     "http://prowlarr.default.svc.cluster.local/47/api?apikey={{ .PROWLARR__API_KEY }}", // ar
     "http://prowlarr.default.svc.cluster.local/48/api?apikey={{ .PROWLARR__API_KEY }}", // ant
     "http://prowlarr.default.svc.cluster.local/49/api?apikey={{ .PROWLARR__API_KEY }}", // athr
+    "http://prowlarr.default.svc.cluster.local/84/api?apikey={{ .PROWLARR__API_KEY }}", // nbl
   ],
   action: "inject",
   includeEpisodes: false,
