@@ -4,7 +4,7 @@
 
 ### My home operations repository :octocat:
 
-_... managed with Flux, Renovate and GitHub Actions_ 🤖
+_... managed with Flux, Renovate, and GitHub Actions_ 🤖
 
 </div>
 
@@ -24,17 +24,17 @@ _... managed with Flux, Renovate and GitHub Actions_ 🤖
 
 ## 📖 Overview
 
-This is a mono repository for my home infrastructure and Kubernetes cluster. I try to adhere to Infrastructure as Code (IaC) and GitOps practices using the tools like [Ansible](https://www.ansible.com/), [Terraform](https://www.terraform.io/), [Kubernetes](https://kubernetes.io/), [Flux](https://github.com/fluxcd/flux2), [Renovate](https://github.com/renovatebot/renovate) and [GitHub Actions](https://github.com/features/actions).
+This is a mono repository for my home infrastructure and Kubernetes cluster. I try to adhere to Infrastructure as Code (IaC) and GitOps practices using tools like [Ansible](https://www.ansible.com/), [Terraform](https://www.terraform.io/), [Kubernetes](https://kubernetes.io/), [Flux](https://github.com/fluxcd/flux2), [Renovate](https://github.com/renovatebot/renovate), and [GitHub Actions](https://github.com/features/actions).
 
 ---
 
 ## ⛵ Kubernetes
 
-There is a template over at [onedr0p/flux-cluster-template](https://github.com/onedr0p/flux-cluster-template) if you wanted to try and follow along with some of the practices I use here.
+There is a template over at [onedr0p/flux-cluster-template](https://github.com/onedr0p/flux-cluster-template) if you want to try and follow along with some of the practices I use here.
 
 ### Installation
 
-My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Debian using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.
+My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Debian using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi-hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.
 
 🔸 _[Click here](./ansible/) to see my Ansible playbooks and roles._
 
@@ -47,7 +47,7 @@ My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Debian using
 - [external-secrets](https://github.com/external-secrets/external-secrets/): managed Kubernetes secrets using [1Password Connect](https://github.com/1Password/connect).
 - [ingress-nginx](https://github.com/kubernetes/ingress-nginx/): ingress controller for Kubernetes using NGINX as a reverse proxy and load balancer
 - [rook](https://github.com/rook/rook): distributed block storage for persistent storage
-- [sops](https://toolkit.fluxcd.io/guides/mozilla-sops/): managed secrets for Kubernetes, Ansible and Terraform which are commited to Git
+- [sops](https://toolkit.fluxcd.io/guides/mozilla-sops/): managed secrets for Kubernetes, Ansible, and Terraform which are committed to Git
 - [tf-controller](https://github.com/weaveworks/tf-controller): additional Flux component used to run Terraform from within a Kubernetes cluster.
 - [volsync](https://github.com/backube/volsync) and [snapscheduler](https://github.com/backube/snapscheduler): backup and recovery of persistent volume claims
 
@@ -61,18 +61,18 @@ The way Flux works for me here is it will recursively search the [kubernetes/app
 
 ### Directories
 
-This Git repository contains the following directories under [kubernetes](./kubernetes/).
+This Git repository contains the following directories under [Kubernetes](./kubernetes/).
 
 ```sh
-📁 kubernetes      # Kubernetes cluster defined as code
+📁 Kubernetes      # Kubernetes cluster defined as code
 ├─📁 bootstrap     # Flux installation
-├─📁 flux          # Main Flux configuration of repository
+├─📁 flux          # Main Flux configuration of the repository
 └─📁 apps          # Apps deployed into my cluster grouped by namespace (see below)
 ```
 
-### Cluster layout
+### Cluster Layout
 
-Below is a a high level look at the layout of how my directory structure with Flux works. In this brief example you are able to see that `authelia` will not be able to run until `lldap` and  `cloudnative-pg` are running. It also shows that the `Cluster` custom resource depends on the `cloudnative-pg` Helm chart. This is needed because `cloudnative-pg` installs the `Cluster` custom resource definition in the Helm chart.
+Below is a high-level look at the layout of how my directory structure with Flux works. In this brief example, you are able to see that `authelia` will not be able to run until `lldap` and  `cloudnative-pg` are running. It also shows that the `Cluster` custom resource depends on the `cloudnative-pg` Helm chart. This is needed because `cloudnative-pg` installs the `Cluster` custom resource definition in the Helm chart.
 
 ```python
 # Key: <kind> :: <metadata.name>
@@ -99,7 +99,7 @@ GitRepository :: home-kubernetes
 ### Networking
 
 <details>
-  <summary>Click to see a high level network diagram</summary>
+  <summary>Click to see a high-level network diagram</summary>
 
   <img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/networks.png" align="center" width="600px" alt="dns"/>
 </details>
@@ -114,7 +114,7 @@ GitRepository :: home-kubernetes
 
 ## ☁️ Cloud Dependencies
 
-While most of my infrastructure and workloads are selfhosted I do rely upon the cloud for certain key parts of my setup. This saves me from having to worry about two things. (1) Dealing with chicken/egg scenarios and (2) services I critically need whether my cluster is online or not.
+While most of my infrastructure and workloads are self-hosted I do rely upon the cloud for certain key parts of my setup. This saves me from having to worry about two things. (1) Dealing with chicken/egg scenarios and (2) services I critically need whether my cluster is online or not.
 
 The alternative solution to these two problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/). However, maintaining another cluster and monitoring another group of workloads is a lot more time and effort than I am willing to put in.
 
@@ -126,7 +126,7 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 | [GCP](https://cloud.google.com/)                | Voice interactions with Home Assistant over Google Assistant      | Free           |
 | [GitHub](https://github.com/)                   | Hosting this repository and continuous integration/deployments    | Free           |
 | [Migadu](https://migadu.com/)                   | Email hosting                                                     | ~$20/yr        |
-| [NextDNS](https://nextdns.io/)                  | My routers DNS server which includes AdBlocking                   | ~$20/yr        |
+| [NextDNS](https://nextdns.io/)                  | My router DNS server which includes AdBlocking                   | ~$20/yr        |
 | [Pushover](https://pushover.net/)               | Kubernetes Alerts and application notifications                   | Free           |
 | [Terraform Cloud](https://www.terraform.io/)    | Storing Terraform state                                           | Free           |
 | [UptimeRobot](https://uptimerobot.com/)         | Monitoring internet connectivity and external facing applications | ~$60/yr        |
@@ -144,14 +144,14 @@ Downstream DNS servers configured in `dnsdist` such as `bind9` (above) and [Next
 
 ### Public DNS
 
-Outside the `external-dns` instance mentioned above another instance is deployed in my cluster and configure to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingresses this `external-dns` instance looks at to gather DNS records to put in `Cloudflare` are ones that have an ingress class name of `external` and an ingress annotation of `external-dns.alpha.kubernetes.io/target`.
+Outside the `external-dns` instance mentioned above another instance is deployed in my cluster and configured to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingress this `external-dns` instance looks at to gather DNS records to put in `Cloudflare` are ones that have an ingress class name of `external` and an ingress annotation of `external-dns.alpha.kubernetes.io/target`.
 
 ---
 
 ## 🔧 Hardware
 
 <details>
-  <summary>Click to see da rack!</summary>
+  <summary>Click to see the rack!</summary>
 
   <img src="https://user-images.githubusercontent.com/213795/172947261-65a82dcd-3274-45bd-aabf-140d60a04aa9.png" align="center" width="200px" alt="rack"/>
 </details>
@@ -184,7 +184,7 @@ Outside the `external-dns` instance mentioned above another instance is deployed
 
 ## 🤝 Gratitude and Thanks
 
-Thanks to all the people who donate their time to the [Kubernetes @Home](https://discord.gg/k8s-at-home) Discord community. A lot of inspiration for my cluster comes from the people that have shared their clusters using the [k8s-at-home](https://github.com/topics/k8s-at-home) GitHub topic. Be sure to check out the [Kubernetes @Home search](https://nanne.dev/k8s-at-home-search/) for ideas on how to deploy applications or get ideas on what you can deploy.
+Thanks to all the people who donate their time to the [Kubernetes @Home](https://discord.gg/k8s-at-home) Discord community. A lot of inspiration for my cluster comes from the people who have shared their clusters using the [k8s-at-home](https://github.com/topics/k8s-at-home) GitHub topic. Be sure to check out the [Kubernetes @Home search](https://nanne.dev/k8s-at-home-search/) for ideas on how to deploy applications or get ideas on what you can deploy.
 
 ---
 
