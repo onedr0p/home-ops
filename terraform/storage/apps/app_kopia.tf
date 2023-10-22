@@ -59,7 +59,7 @@ resource "kubernetes_stateful_set_v1" "kopia" {
         }
         container {
           name              = "main"
-          image             = "docker.io/kopia/kopia:0.14.1"
+          image             = "docker.io/kopia/kopia:0.15.0"
           image_pull_policy = "IfNotPresent"
           env {
             name  = "KOPIA_PASSWORD"
