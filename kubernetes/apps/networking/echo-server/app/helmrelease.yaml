@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -26,56 +26,67 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    controller:
-      replicas: 2
-      strategy: RollingUpdate
-    image:
-      repository: docker.io/jmalloc/echo-server
-      tag: 0.3.5
+    controllers:
+      main:
+        replicas: 2
+        strategy: RollingUpdate
+        containers:
+          main:
+            image:
+              repository: docker.io/jmalloc/echo-server
+              tag: 0.3.5
+            env:
+              PORT: &port 8080
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 5m
+                memory: 10M
+              limits:
+                memory: 64M
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: *app
     service:
       main:
         ports:
           http:
-            port: &port 8080
-    probes:
-      liveness: &probes
-        enabled: true
-        custom: true
-        spec:
-          httpGet:
-            path: /health
             port: *port
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
-      readiness: *probes
-      startup:
-        enabled: false
     ingress:
       main:
         enabled: true
-        ingressClassName: external
+        className: external
         annotations:
           external-dns.alpha.kubernetes.io/target: external.devbu.io
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: *app
-    resources:
-      requests:
-        cpu: 5m
-        memory: 10Mi
-      limits:
-        memory: 50Mi
