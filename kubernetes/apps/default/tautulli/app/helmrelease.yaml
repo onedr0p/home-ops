@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -31,13 +31,53 @@ spec:
     - name: volsync
       namespace: volsync
   values:
-    controller:
-      type: statefulset
-    image:
-      repository: ghcr.io/onedr0p/tautulli
-      tag: 2.13.1@sha256:525209414d149214584819313b0ec7507a3259dfa5f8d618692c34b54f172db9
-    env:
-      TZ: America/New_York
+    controllers:
+      main:
+        type: statefulset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/tautulli
+              tag: 2.13.1@sha256:525209414d149214584819313b0ec7507a3259dfa5f8d618692c34b54f172db9
+            env:
+              TZ: America/New_York
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+          jbops:
+            image:
+              repository: registry.k8s.io/git-sync/git-sync
+              tag: v4.1.0
+            env:
+              GITSYNC_REPO: https://github.com/blacktwin/JBOPS
+              GITSYNC_REF: master
+              GITSYNC_PERIOD: 24h
+              GITSYNC_ROOT: /add-ons
+            resources:
+              requests:
+                cpu: 10m
+                memory: 10M
+              limits:
+                memory: 128M
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 5Gi
+              storageClass: ceph-block
+              globalMounts:
+                - path: /config
     service:
       main:
         ports:
@@ -46,44 +86,17 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: internal
+        className: internal
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
     persistence:
       add-ons:
-        enabled: true
         type: emptyDir
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 5Gi
-        storageClass: ceph-block
-    resources:
-      requests:
-        cpu: 10m
-        memory: 250Mi
-      limits:
-        memory: 500Mi
-    sidecars:
-      jbops:
-        image: registry.k8s.io/git-sync/git-sync:v4.1.0
-        imagePullPolicy: IfNotPresent
-        args:
-          - --repo=https://github.com/blacktwin/JBOPS
-          - --ref=master
-          - --period=24h
-          - --root=/add-ons
-        volumeMounts:
-          - { name: add-ons, mountPath: /add-ons }
