@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -29,27 +29,30 @@ spec:
     - name: plex
       namespace: default
   values:
-    controller:
-      type: cronjob
-      cronjob:
-        concurrencyPolicy: Forbid
-        schedule: "@hourly"
-    restartPolicy: OnFailure
-    image:
-      repository: ghcr.io/onedr0p/jbops
-      tag: 1.0.893@sha256:69a5d956dc6fb006e9ebc897fa6cf9576dc7cc4985aab34ccbca04da90a481dc
-    args: ["/entrypoint.sh", "--playlists", "Smart Toons"]
-    env:
-      TZ: America/New_York
-      JBOPS__SCRIPT_PATH: utility/off_deck.py
+    controllers:
+      main:
+        type: cronjob
+        annotations:
+          reloader.stakater.com/auto: "true"
+        cronjob:
+          schedule: "@hourly"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/jbops
+              tag: 1.0.893@sha256:69a5d956dc6fb006e9ebc897fa6cf9576dc7cc4985aab34ccbca04da90a481dc
+            env:
+              TZ: America/New_York
+              JBOPS__SCRIPT_PATH: utility/off_deck.py
+            args: ["/entrypoint.sh", "--playlists", "Smart Toons"]
     service:
       main:
         enabled: false
     persistence:
-      config:
-        enabled: true
+      secret-file:
         type: secret
         name: plex-off-deck-secret
-        subPath: config.ini
-        mountPath: /config/config.ini
-        readOnly: true
+        globalMounts:
+          - path: /config/config.ini
+            subPath: config.ini
+            readOnly: true
