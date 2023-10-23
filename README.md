@@ -64,7 +64,7 @@ The way Flux works for me here is it will recursively search the [kubernetes/app
 This Git repository contains the following directories under [Kubernetes](./kubernetes/).
 
 ```sh
-📁 Kubernetes      # Kubernetes cluster defined as code
+📁 kubernetes      # Kubernetes cluster defined as code
 ├─📁 bootstrap     # Flux installation
 ├─📁 flux          # Main Flux configuration of the repository
 └─📁 apps          # Apps deployed into my cluster grouped by namespace (see below)
