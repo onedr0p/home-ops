@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -26,84 +26,92 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    initContainers:
-      01-init-db:
-        image: ghcr.io/onedr0p/postgres-init:14.8
-        imagePullPolicy: IfNotPresent
-        envFrom: &envFrom
-          - secretRef:
-              name: miniflux-secret
-    controller:
-      replicas: 2
-      strategy: RollingUpdate
-      annotations:
-        reloader.stakater.com/auto: "true"
-    image:
-      repository: ghcr.io/miniflux/miniflux
-      tag: 2.0.49
-    env:
-      BASE_URL: https://miniflux.devbu.io
-      CREATE_ADMIN: "1"
-      DEBUG: "1"
-      LOG_DATE_TIME: "1"
-      METRICS_ALLOWED_NETWORKS: "10.32.0.0/16"
-      METRICS_COLLECTOR: "1"
-      OAUTH2_CLIENT_ID: miniflux
-      OAUTH2_USER_CREATION: "1"
-      OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://auth.devbu.io
-      OAUTH2_PROVIDER: oidc
-      OAUTH2_REDIRECT_URL: https://miniflux.devbu.io/oauth2/oidc/callback
-      POLLING_SCHEDULER: entry_frequency
-      POLLING_FREQUENCY: "15"
-      RUN_MIGRATIONS: "1"
-    envFrom: *envFrom
+    controllers:
+      main:
+        replicas: 2
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          01-init-db:
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 14.9
+            envFrom: &envFrom
+              - secretRef:
+                  name: miniflux-secret
+        containers:
+          main:
+            image:
+              repository: ghcr.io/miniflux/miniflux
+              tag: 2.0.49
+            env:
+              BASE_URL: https://miniflux.devbu.io
+              CREATE_ADMIN: "1"
+              DEBUG: "1"
+              LOG_DATE_TIME: "1"
+              METRICS_ALLOWED_NETWORKS: "10.32.0.0/16"
+              METRICS_COLLECTOR: "1"
+              OAUTH2_CLIENT_ID: miniflux
+              OAUTH2_USER_CREATION: "1"
+              OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://auth.devbu.io
+              OAUTH2_PROVIDER: oidc
+              OAUTH2_REDIRECT_URL: https://miniflux.devbu.io/oauth2/oidc/callback
+              POLLING_SCHEDULER: entry_frequency
+              POLLING_FREQUENCY: "15"
+              PORT: &port 80
+              RUN_MIGRATIONS: "1"
+            envFrom: *envFrom
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthcheck
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+        pod:
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: *app
     service:
       main:
         ports:
           http:
-            port: &port 8080
+            port: *port
     serviceMonitor:
       main:
         enabled: true
     ingress:
       main:
         enabled: true
-        ingressClassName: external
+        className: external
         annotations:
           external-dns.alpha.kubernetes.io/target: external.devbu.io
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-    probes:
-      liveness: &probes
-        enabled: true
-        custom: true
-        spec:
-          httpGet:
-            path: /healthcheck
-            port: *port
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
-      readiness: *probes
-      startup:
-        enabled: false
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: *app
-    resources:
-      requests:
-        cpu: 10m
-        memory: 100Mi
-      limits:
-        memory: 750Mi
