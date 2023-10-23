@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -26,22 +26,38 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    controller:
-      annotations:
-        reloader.stakater.com/auto: "true"
-    image:
-      repository: docker.io/golift/unpackerr
-      tag: 0.12.0
-    env:
-      TZ: America/New_York
-      UN_WEBSERVER_METRICS: "true"
-      UN_SONARR_0_URL: http://sonarr.default.svc.cluster.local
-      UN_SONARR_0_PATHS_0: /media/Downloads/qbittorrent/complete/sonarr
-      UN_RADARR_0_URL: http://radarr.default.svc.cluster.local
-      UN_RADARR_0_PATHS_0: /media/Downloads/qbittorrent/complete/radarr
-    envFrom:
-      - secretRef:
-          name: unpackerr-secret
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: docker.io/golift/unpackerr
+              tag: 0.12.0
+            env:
+              TZ: America/New_York
+              UN_WEBSERVER_METRICS: "true"
+              UN_SONARR_0_URL: http://sonarr.default.svc.cluster.local
+              UN_SONARR_0_PATHS_0: /media/Downloads/qbittorrent/complete/sonarr
+              UN_RADARR_0_URL: http://radarr.default.svc.cluster.local
+              UN_RADARR_0_PATHS_0: /media/Downloads/qbittorrent/complete/radarr
+            envFrom:
+              - secretRef:
+                  name: unpackerr-secret
+            resources:
+              requests:
+                cpu: 10m
+                memory: 1Gi
+              limits:
+                memory: 4Gi
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
     service:
       main:
         ports:
@@ -50,19 +66,6 @@ spec:
     serviceMonitor:
       main:
         enabled: true
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups: [10000]
     persistence:
       media:
-        enabled: true
         existingClaim: media
-    resources:
-      requests:
-        cpu: 10m
-        memory: 250Mi
-      limits:
-        memory: 2000Mi

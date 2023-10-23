@@ -38,24 +38,6 @@ spec:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
-        statefulset:
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 50Gi
-              storageClass: ceph-block
-              globalMounts:
-                - path: /config
-        pod:
-          enableServiceLinks: false
-          nodeSelector:
-            intel.feature.node.kubernetes.io/gpu: "true"
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            fsGroup: 568
-            fsGroupChangePolicy: OnRootMismatch
-            supplementalGroups: [44, 105, 10000]
         containers:
           main:
             image:
@@ -86,10 +68,28 @@ spec:
               requests:
                 gpu.intel.com/i915: 1
                 cpu: 100m
-                memory: 1000Mi
+                memory: 512Mi
               limits:
                 gpu.intel.com/i915: 1
-                memory: 4000Mi
+                memory: 4Gi
+        pod:
+          enableServiceLinks: false
+          nodeSelector:
+            intel.feature.node.kubernetes.io/gpu: "true"
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [44, 105, 10000]
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 50Gi
+              storageClass: ceph-block
+              globalMounts:
+                - path: /config
     service:
       main:
         type: LoadBalancer

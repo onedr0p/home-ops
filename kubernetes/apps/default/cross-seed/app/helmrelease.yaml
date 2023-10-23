@@ -33,13 +33,6 @@ spec:
       main:
         annotations:
           secret.reloader.stakater.com/reload: cross-seed-secret
-        pod:
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            fsGroup: 568
-            fsGroupChangePolicy: OnRootMismatch
-            supplementalGroups: [10000]
         containers:
           main:
             image:
@@ -53,7 +46,14 @@ spec:
                 cpu: 10m
                 memory: 128Mi
               limits:
-                memory: 256Mi
+                memory: 512Mi
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
     service:
       main:
         ports:
