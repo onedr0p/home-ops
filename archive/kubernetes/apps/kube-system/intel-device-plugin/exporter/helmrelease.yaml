@@ -3,14 +3,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: intel-gpu-exporter
+  name: intel-device-plugin-exporter
   namespace: kube-system
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 1.3.2
+      version: 1.5.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -25,12 +25,15 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
+  dependsOn:
+    - name: intel-device-plugin-gpu
+      namespace: kube-system
   values:
     controller:
       type: daemonset
     image:
       repository: ghcr.io/onedr0p/intel-gpu-exporter
-      tag: rolling@sha256:de268763b0ecf6b596d54cfdb81cd8d51778fe5898b7f41011fa1ac0d7d8e487
+      tag: rolling@sha256:7dda018289407e3d14a926a64d4d82c0b8e0d7f7572c6c1b60f5e81d6477b264
     service:
       main:
         ports:
@@ -54,9 +57,9 @@ spec:
       intel.feature.node.kubernetes.io/gpu: "true"
     resources:
       requests:
-        gpu.intel.com/i915: 1
+        gpu.intel.com/i915_monitoring: 1
         cpu: 100m
         memory: 100Mi
       limits:
-        gpu.intel.com/i915: 1
+        gpu.intel.com/i915_monitoring: 1
         memory: 500Mi
