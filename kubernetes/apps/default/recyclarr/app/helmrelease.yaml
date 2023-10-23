@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -31,43 +31,49 @@ spec:
     - name: volsync
       namespace: volsync
   values:
-    controller:
-      type: statefulset
-      annotations:
-        reloader.stakater.com/auto: "true"
-    image:
-      repository: ghcr.io/recyclarr/recyclarr
-      tag: 6.0.2
-    env:
-      TZ: America/New_York
-    envFrom:
-      - secretRef:
-          name: recyclarr-secret
+    controllers:
+      main:
+        type: statefulset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/recyclarr/recyclarr
+              tag: 6.0.2
+            env:
+              TZ: America/New_York
+            envFrom:
+              - secretRef:
+                  name: recyclarr-secret
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64M
+              limits:
+                memory: 128M
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 1Gi
+              storageClass: ceph-block
+              globalMounts:
+                - path: /config
     service:
       main:
         enabled: false
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
     persistence:
       config-file:
-        enabled: true
         type: configMap
         name: recyclarr-configmap
-        subPath: recyclarr.yml
-        mountPath: /config/recyclarr.yml
-        readOnly: true
-    resources:
-      requests:
-        cpu: 10m
-        memory: 50Mi
-      limits:
-        memory: 200Mi
+        globalMounts:
+          - path: /config/recyclarr.yml
+            subPath: recyclarr.yml
+            readOnly: true
