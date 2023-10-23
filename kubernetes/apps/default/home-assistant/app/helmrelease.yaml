@@ -44,6 +44,12 @@ spec:
             envFrom: &envFrom
               - secretRef:
                   name: home-assistant-secret
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
         containers:
           main:
             image:
@@ -67,12 +73,6 @@ spec:
                 memory: 100Mi
               limits:
                 memory: 750Mi
-        pod:
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            fsGroup: 568
-            fsGroupChangePolicy: OnRootMismatch
     service:
       main:
         ports:
