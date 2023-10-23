@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -26,17 +26,31 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    image:
-      repository: ghcr.io/unpoller/unpoller
-      tag: v2.9.2
-    env:
-      TZ: America/New_York
-      UP_UNIFI_DEFAULT_ROLE: home-ops
-      UP_UNIFI_DEFAULT_URL: https://unifi-network.turbo.ac
-      UP_UNIFI_DEFAULT_VERIFY_SSL: false
-      UP_UNIFI_DEFAULT_USER: unifipoller
-      UP_UNIFI_DEFAULT_PASS: 1nternalUseOnly
-      UP_INFLUXDB_DISABLE: true
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              repository: ghcr.io/unpoller/unpoller
+              tag: v2.9.2
+            env:
+              TZ: America/New_York
+              UP_UNIFI_DEFAULT_ROLE: home-ops
+              UP_UNIFI_DEFAULT_URL: https://unifi-network.turbo.ac
+              UP_UNIFI_DEFAULT_VERIFY_SSL: false
+              UP_UNIFI_DEFAULT_USER: unifipoller
+              UP_UNIFI_DEFAULT_PASS: 1nternalUseOnly
+              UP_INFLUXDB_DISABLE: true
+            resources:
+              requests:
+                cpu: 5m
+                memory: 36M
+              limits:
+                memory: 128M
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
     service:
       main:
         ports:
@@ -50,10 +64,4 @@ spec:
             scheme: http
             path: /metrics
             interval: 2m # Unifi API only polls at 2m intervals
-            scrapeTimeout: 5s
-    resources:
-      requests:
-        cpu: 10m
-        memory: 100Mi
-      limits:
-        memory: 500Mi
+            scrapeTimeout: 10s
