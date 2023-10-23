@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -31,79 +31,86 @@ spec:
     - name: volsync
       namespace: volsync
   values:
-    controller:
-      type: statefulset
-      annotations:
-        reloader.stakater.com/auto: "true"
-    image:
-      repository: ghcr.io/onedr0p/sabnzbd
-      tag: 4.1.0@sha256:91f3cd6b9f1c9988af5447f464b299630706eb7f691dee857eab1487d4bb626e
-    env:
-      TZ: America/New_York
-      SABNZBD__PORT: &port 80
-      SABNZBD__HOST_WHITELIST_ENTRIES: >-
-        sabnzbd,
-        sabnzbd.default,
-        sabnzbd.default.svc,
-        sabnzbd.default.svc.cluster,
-        sabnzbd.default.svc.cluster.local,
-        sabnzbd.devbu.io
-    envFrom:
-      - secretRef:
-          name: sabnzbd-secret
+    controllers:
+      main:
+        type: statefulset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/sabnzbd
+              tag: 4.1.0@sha256:91f3cd6b9f1c9988af5447f464b299630706eb7f691dee857eab1487d4bb626e
+            env:
+              TZ: America/New_York
+              SABNZBD__PORT: &port 80
+              SABNZBD__HOST_WHITELIST_ENTRIES: >-
+                sabnzbd,
+                sabnzbd.default,
+                sabnzbd.default.svc,
+                sabnzbd.default.svc.cluster,
+                sabnzbd.default.svc.cluster.local,
+                sabnzbd.devbu.io
+            envFrom:
+              - secretRef:
+                  name: sabnzbd-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api?mode=version
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 100m
+                memory: 2Gi
+              limits:
+                memory: 8Gi
+        pod:
+          nodeSelector:
+            node-role.kubernetes.io/worker: "true"
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 1Gi
+              storageClass: ceph-block
+              globalMounts:
+                - path: /config
     service:
       main:
         ports:
           http:
             port: *port
-    probes:
-      liveness: &probes
-        enabled: true
-        custom: true
-        spec:
-          httpGet:
-            path: /api?mode=version
-            port: *port
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
-      readiness: *probes
-      startup:
-        enabled: false
     ingress:
       main:
         enabled: true
-        ingressClassName: internal
+        className: internal
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups: [10000]
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
     persistence:
       media:
-        enabled: true
         existingClaim: media
-    nodeSelector:
-      node-role.kubernetes.io/worker: "true"
-    resources:
-      requests:
-        cpu: 10m
-        memory: 250Mi
-      limits:
-        memory: 8000Mi
