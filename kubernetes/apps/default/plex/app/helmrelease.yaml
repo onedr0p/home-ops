@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -33,13 +33,52 @@ spec:
     - name: volsync
       namespace: volsync
   values:
-    controller:
-      type: statefulset
-    image:
-      repository: ghcr.io/onedr0p/plex
-      tag: 1.32.6.7557-1cf77d501@sha256:6f87b0811df009af1defc9afad6afa383b9d821a7fcaddc968df41ba445d321e
-    env:
-      TZ: America/New_York
+    controllers:
+      main:
+        type: statefulset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/plex
+              tag: 1.32.6.7557-1cf77d501@sha256:6f87b0811df009af1defc9afad6afa383b9d821a7fcaddc968df41ba445d321e
+            env:
+              TZ: America/New_York
+            resources:
+              requests:
+                gpu.intel.com/i915: 1
+                cpu: 100m
+                memory: 2Gi
+              limits:
+                gpu.intel.com/i915: 1
+                memory: 10Gi
+        pod:
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values: ["frigate"]
+                  topologyKey: kubernetes.io/hostname
+          nodeSelector:
+            intel.feature.node.kubernetes.io/gpu: "true"
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [44, 105, 10000]
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 100Gi
+              storageClass: ceph-block
+              globalMounts:
+                - path: /config
     service:
       main:
         ports:
@@ -48,7 +87,7 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: external
+        className: external
         annotations:
           external-dns.alpha.kubernetes.io/target: external.devbu.io
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
@@ -56,46 +95,16 @@ spec:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups: [44, 105, 10000]
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 100Gi
-        storageClass: ceph-block
     persistence:
       transcode:
-        enabled: true
         type: emptyDir
       media:
-        enabled: true
         existingClaim: media
-        readOnly: true
-    nodeSelector:
-      intel.feature.node.kubernetes.io/gpu: "true"
-    affinity:
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-                - key: app.kubernetes.io/name
-                  operator: In
-                  values: ["frigate"]
-            topologyKey: kubernetes.io/hostname
-    resources:
-      requests:
-        gpu.intel.com/i915: 1
-        cpu: 100m
-        memory: 2000Mi
-      limits:
-        gpu.intel.com/i915: 1
-        memory: 10000Mi
+        globalMounts:
+          - readOnly: true
