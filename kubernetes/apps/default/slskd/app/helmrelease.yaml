@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -31,37 +31,61 @@ spec:
     - name: volsync
       namespace: volsync
   values:
-    controller:
-      type: statefulset
-      annotations:
-        reloader.stakater.com/auto: "true"
-    image:
-      repository: ghcr.io/slskd/slskd
-      tag: 0.18.3
-    env:
-      TZ: America/New_York
-      SLSKD_HTTP_PORT: &port 80
-      SLSKD_NO_HTTPS: true
-      SLSKD_SLSK_LISTEN_PORT: &soulseekPort 50300
-      SLSKD_APP_DIR: /config
-      SLSKD_REMOTE_CONFIGURATION: true
-      SLSKD_SHARED_DIR: /media/shared
-      SLSKD_NO_AUTH: true
-      SLSKD_METRICS: true
-      SLSKD_METRICS_NO_AUTH: true
-      SLSKD_DOWNLOADS_DIR: /media/complete
-      SLSKD_INCOMPLETE_DIR: /media/incomplete
-      SLSKD_SHARE_FILTER: Thumbs.db$;\.DS_Store$
-    envFrom:
-      - secretRef:
-          name: slskd-secret
+    controllers:
+      main:
+        type: statefulset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/slskd/slskd
+              tag: 0.18.3
+            env:
+              TZ: America/New_York
+              SLSKD_HTTP_PORT: &port 80
+              SLSKD_NO_HTTPS: true
+              SLSKD_SLSK_LISTEN_PORT: &soulseekPort 50300
+              SLSKD_APP_DIR: /config
+              SLSKD_REMOTE_CONFIGURATION: true
+              SLSKD_SHARED_DIR: /media/shared
+              SLSKD_NO_AUTH: true
+              SLSKD_METRICS: true
+              SLSKD_METRICS_NO_AUTH: true
+              SLSKD_DOWNLOADS_DIR: /media/complete
+              SLSKD_INCOMPLETE_DIR: /media/incomplete
+              SLSKD_SHARE_FILTER: Thumbs.db$;\.DS_Store$
+            envFrom:
+              - secretRef:
+                  name: slskd-secret
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 1Gi
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 1Gi
+              storageClass: ceph-block
+              globalMounts:
+                - path: /config
     service:
       main:
         ports:
           http:
             port: *port
       soulseek:
-        enabled: true
+        controller: main
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: 192.168.42.207
@@ -70,40 +94,21 @@ spec:
             enabled: true
             port: *soulseekPort
             protocol: TCP
-            targetPort: *soulseekPort
-        externalTrafficPolicy: Cluster
     ingress:
       main:
         enabled: true
-        ingressClassName: internal
+        className: internal
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups: [10000]
-    volumeClaimTemplates:
-      - name: config
-        mountPath: /config
-        accessMode: ReadWriteOnce
-        size: 1Gi
-        storageClass: ceph-block
     persistence:
       media:
-        enabled: true
         existingClaim: slskd
         mountPath: /media
-    resources:
-      requests:
-        cpu: 10m
-        memory: 250Mi
-      limits:
-        memory: 1500Mi
