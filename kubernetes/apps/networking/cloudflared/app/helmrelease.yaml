@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -29,80 +29,82 @@ spec:
     - name: nginx-external
       namespace: networking
   values:
-    controller:
-      replicas: 2
-      strategy: RollingUpdate
-      annotations:
-        reloader.stakater.com/auto: "true"
-    image:
-      repository: docker.io/cloudflare/cloudflared
-      tag: 2023.8.2
-    env:
-      NO_AUTOUPDATE: "true"
-      TUNNEL_CRED_FILE: /etc/cloudflared/creds/credentials.json
-      TUNNEL_METRICS: 0.0.0.0:8080
-      TUNNEL_TRANSPORT_PROTOCOL: quic
-      TUNNEL_POST_QUANTUM: true
-    args:
-      - tunnel
-      - --config
-      - /etc/cloudflared/config/config.yaml
-      - run
-      - "${CLUSTER_CLOUDFLARE_TUNNEL_ID}"
+    controllers:
+      main:
+        replicas: 2
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: docker.io/cloudflare/cloudflared
+              tag: 2023.8.2
+            env:
+              NO_AUTOUPDATE: "true"
+              TUNNEL_CRED_FILE: /etc/cloudflared/creds/credentials.json
+              TUNNEL_METRICS: 0.0.0.0:8080
+              TUNNEL_TRANSPORT_PROTOCOL: quic
+              TUNNEL_POST_QUANTUM: true
+            args:
+              - tunnel
+              - --config
+              - /etc/cloudflared/config/config.yaml
+              - run
+              - "${CLUSTER_CLOUDFLARE_TUNNEL_ID}"
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /ready
+                    port: &port 8080
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 5m
+                memory: 128M
+              limits:
+                memory: 256M
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: *app
     service:
       main:
         ports:
           http:
-            port: 8080
+            port: *port
     serviceMonitor:
       main:
         enabled: true
-        endpoints:
-          - port: http
-            scheme: http
-            path: /metrics
-            interval: 1m
-            scrapeTimeout: 30s
-    probes:
-      liveness: &probes
-        enabled: true
-        custom: true
-        spec:
-          httpGet:
-            path: /ready
-            port: http
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          failureThreshold: 3
-      readiness: *probes
-      startup:
-        enabled: false
     persistence:
       config:
         enabled: true
         type: configMap
         name: cloudflared-configmap # overriden by kustomizeconfig
-        subPath: config.yaml
-        mountPath: /etc/cloudflared/config/config.yaml
-        readOnly: true
+        globalMounts:
+          - path: /etc/cloudflared/config/config.yaml
+            subPath: config.yaml
+            readOnly: true
       creds:
-        enabled: true
         type: secret
-        name: cloudflared-tunnel-secret
-        subPath: credentials.json
-        mountPath: /etc/cloudflared/creds/credentials.json
-        readOnly: true
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: *app
-    resources:
-      requests:
-        cpu: 5m
-        memory: 10Mi
-      limits:
-        memory: 256Mi
+        name: cloudflared-secret
+        globalMounts:
+          - path: /etc/cloudflared/creds/credentials.json
+            subPath: credentials.json
+            readOnly: true
