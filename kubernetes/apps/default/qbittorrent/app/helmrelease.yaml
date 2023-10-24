@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -31,33 +31,60 @@ spec:
     - name: volsync
       namespace: volsync
   values:
-    controller:
-      annotations:
-        configmap.reloader.stakater.com/reload: qbittorrent-scripts
-    image:
-      repository: ghcr.io/onedr0p/qbittorrent
-      tag: 4.5.5@sha256:f4a1a5eece13beed61e579172d2a54b1fc2e7ff2bbdbd7ef22a4d9f6fc36e198
-    env:
-      TZ: America/New_York
-      QBITTORRENT__PORT: &port 80
-      QBITTORRENT__BT_PORT: &bittorrentPort 50413
-      QBT_Preferences__WebUI__AlternativeUIEnabled: false
-      QBT_Preferences__WebUI__AuthSubnetWhitelistEnabled: true
-      QBT_Preferences__WebUI__AuthSubnetWhitelist: 10.32.0.0/16
-      QBT_Preferences__WebUI__LocalHostAuth: false
-      QBT_BitTorrent__Session__Interface: eth0
-      QBT_BitTorrent__Session__InterfaceAddress:
-        valueFrom:
-          fieldRef:
-            fieldPath: status.podIP
-      QBT_BitTorrent__Session__InterfaceName: eth0
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/qbittorrent
+              tag: 4.5.5@sha256:f4a1a5eece13beed61e579172d2a54b1fc2e7ff2bbdbd7ef22a4d9f6fc36e198
+            env:
+              TZ: America/New_York
+              QBITTORRENT__PORT: &port 80
+              QBITTORRENT__BT_PORT: &bittorrentPort 50413
+              QBT_Preferences__WebUI__AlternativeUIEnabled: false
+              QBT_Preferences__WebUI__AuthSubnetWhitelistEnabled: true
+              QBT_Preferences__WebUI__AuthSubnetWhitelist: 10.32.0.0/16
+              QBT_Preferences__WebUI__LocalHostAuth: false
+              QBT_BitTorrent__Session__Interface: eth0
+              QBT_BitTorrent__Session__InterfaceAddress:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+              QBT_BitTorrent__Session__InterfaceName: eth0
+            resources:
+              requests:
+                cpu: 200m
+                memory: 2Gi
+              limits:
+                memory: 8Gi
+        pod:
+          nodeSelector:
+            node-role.kubernetes.io/worker: "true"
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values: ["sabnzbd"]
+                  topologyKey: kubernetes.io/hostname
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
     service:
       main:
         ports:
           http:
             port: *port
       bittorrent:
-        enabled: true
+        controller: main
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: 192.168.42.202
@@ -66,46 +93,31 @@ spec:
             enabled: true
             port: *bittorrentPort
             protocol: TCP
-            targetPort: *bittorrentPort
-        externalTrafficPolicy: Cluster
     ingress:
       main:
         enabled: true
-        ingressClassName: internal
+        className: internal
         hosts:
           - host: &host qb.devbu.io
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups: [10000]
     persistence:
       config:
         enabled: true
         existingClaim: qbittorrent-config
       completed-script:
-        enabled: true
         type: configMap
         name: qbittorrent-scripts
-        mountPath: /scripts/completed.sh
-        subPath: completed.sh
         defaultMode: 0775
-        readOnly: true
+        globalMounts:
+          - path: /scripts/completed.sh
+            subPath: completed.sh
+            readOnly: true
       media:
-        enabled: true
         existingClaim: media
-    nodeSelector:
-      node-role.kubernetes.io/worker: "true"
-    resources:
-      requests:
-        cpu: 10m
-        memory: 250Mi
-      limits:
-        memory: 16Gi
