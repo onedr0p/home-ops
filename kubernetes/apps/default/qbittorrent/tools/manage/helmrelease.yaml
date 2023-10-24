@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -29,72 +29,74 @@ spec:
     - name: qbittorrent
       namespace: default
   values:
-    controller:
-      type: cronjob
-      cronjob:
-        schedule: "@hourly"
-    initContainers:
-      01-tag:
-        image: ghcr.io/buroa/qbtools:v0.10.0
-        imagePullPolicy: IfNotPresent
-        args: [
-          "tagging",
-          "--added-on",
-          "--expired",
-          "--last-activity",
-          "--sites",
-          "--unregistered",
-          "--server", "qbittorrent.default.svc.cluster.local",
-          "--port", "80",
-          "--config", "/config/config.yaml"
-        ]
-        volumeMounts:
-          - { name: config-file, mountPath: /config/config.yaml, subPath: config.yaml }
-      02-unregistered:
-        image: ghcr.io/buroa/qbtools:v0.10.0
-        imagePullPolicy: IfNotPresent
-        args: [
-          "prune",
-          "--exclude-category", "manual",
-          "--exclude-category", "music.collection",
-          "--exclude-category", "music.import",
-          "--include-tag", "unregistered",
-          # "--dry-run",
-          "--server", "qbittorrent.default.svc.cluster.local",
-          "--port", "80"
-        ]
-    image:
-      repository: ghcr.io/buroa/qbtools
-      tag: v0.10.0
-    args: [
-      "prune",
-      "--exclude-category", "manual",
-      "--exclude-category", "music.collection",
-      "--exclude-category", "music.import",
-      "--exclude-category", "overlord",
-      "--include-tag", "expired", # defined in config.yaml
-      "--exclude-tag", "activity:24h",
-      # "--dry-run",
-      "--server", "qbittorrent.default.svc.cluster.local",
-      "--port", "80"
-    ]
+    controllers:
+      main:
+        type: cronjob
+        cronjob:
+          schedule: "@hourly"
+        initContainers:
+          01-tag:
+            image: &image
+              repository: ghcr.io/buroa/qbtools
+              tag: v0.10.0
+            args: [
+              "tagging",
+              "--added-on",
+              "--expired",
+              "--last-activity",
+              "--sites",
+              "--unregistered",
+              "--server", "qbittorrent.default.svc.cluster.local",
+              "--port", "80",
+              "--config", "/config/config.yaml"
+            ]
+            resources: &resources
+              requests:
+                cpu: 5m
+                memory: 64M
+              limits:
+                memory: 128M
+          02-unregistered:
+            image: *image
+            args: [
+              "prune",
+              "--exclude-category", "manual",
+              "--exclude-category", "music.collection",
+              "--exclude-category", "music.import",
+              "--include-tag", "unregistered",
+              # "--dry-run",
+              "--server", "qbittorrent.default.svc.cluster.local",
+              "--port", "80"
+            ]
+            resources: *resources
+        containers:
+          main:
+            image: *image
+            args: [
+              "prune",
+              "--exclude-category", "manual",
+              "--exclude-category", "music.collection",
+              "--exclude-category", "music.import",
+              "--exclude-category", "overlord",
+              "--include-tag", "expired", # defined in config.yaml
+              "--exclude-tag", "activity:24h",
+              # "--dry-run",
+              "--server", "qbittorrent.default.svc.cluster.local",
+              "--port", "80"
+            ]
+            resources: *resources
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
     service:
       main:
         enabled: false
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
     persistence:
       config-file:
-        enabled: true
         type: configMap
         name: qbittorrent-tools-configmap # overriden by kustomizeconfig
-        mountPath: /config/config.yaml
-        subPath: config.yaml
-        readOnly: true
-    resources:
-      requests:
-        memory: 250Mi
-        cpu: 25m
-      limits:
-        memory: 500Mi
+        globalMounts:
+          - path: /config/config.yaml
+            subPath: config.yaml
+            readOnly: true

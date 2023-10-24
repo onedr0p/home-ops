@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.0.3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -29,38 +29,41 @@ spec:
     - name: qbittorrent
       namespace: default
   values:
-    controller:
-      type: cronjob
-      cronjob:
-        schedule: "@daily"
-    image:
-      repository: ghcr.io/buroa/qbtools
-      tag: v0.10.0
-    args: [
-      "orphaned",
-      "--exclude-pattern", "*_unpackerred",
-      "--exclude-pattern", "*/manual/*",
-      "--exclude-pattern", "*/music.import/*",
-      # "--dry-run",
-      "--server", "qbittorrent.default.svc.cluster.local",
-      "--port", "80"
-    ]
+    controllers:
+      main:
+        type: cronjob
+        cronjob:
+          schedule: "@daily"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/buroa/qbtools
+              tag: v0.10.0
+            args: [
+              "orphaned",
+              "--exclude-pattern", "*_unpackerred",
+              "--exclude-pattern", "*/manual/*",
+              "--exclude-pattern", "*/music.import/*",
+              # "--dry-run",
+              "--server", "qbittorrent.default.svc.cluster.local",
+              "--port", "80"
+            ]
+            resources:
+              requests:
+                cpu: 5m
+                memory: 64M
+              limits:
+                memory: 128M
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [10000]
     service:
       main:
         enabled: false
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-      supplementalGroups: [10000]
     persistence:
       media:
-        enabled: true
         existingClaim: media
-    resources:
-      requests:
-        memory: 250Mi
-        cpu: 25m
-      limits:
-        memory: 500Mi
