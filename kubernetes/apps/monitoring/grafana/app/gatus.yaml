@@ -10,12 +10,16 @@ data:
   config.yaml: |
     endpoints:
       - name: grafana
-        group: external
-        url: https://grafana.devbu.io/api/health
+        group: guarded
+        url: 1.1.1.1
         interval: 1m
-        client:
-          dns-resolver: tcp://1.1.1.1:53
+        ui:
+          hide-hostname: true
+          hide-url: true
+        dns:
+          query-name: grafana.devbu.io
+          query-type: A
         conditions:
-          - "[STATUS] == 200"
+          - "len([BODY]) == 0"
         alerts:
           - type: pushover
