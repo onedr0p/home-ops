@@ -198,7 +198,7 @@ See my _awful_ [commit history](https://github.com/onedr0p/home-ops/commits/main
 
 See [LICENSE](./LICENSE)
 
- - # Contribution guidelines 
+## Contribution guidelines 
 
 Welcome to [home-ops]! We're thrilled that you'd like to contribute. Your help is essential for making it better.
 
