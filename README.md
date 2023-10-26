@@ -202,7 +202,7 @@ See [LICENSE](./LICENSE)
 
 Welcome to [home-ops]! We're thrilled that you'd like to contribute. Your help is essential for making it better.
 
-## Getting Started
+### Getting Started
 
 Before you start contributing, please make sure you have read and understood our [Code of Conduct].
 
