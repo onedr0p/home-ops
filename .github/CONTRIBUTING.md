@@ -6,31 +6,39 @@ Welcome to [home-ops]! We're thrilled that you'd like to contribute. Your help i
 
 Before you start contributing, please make sure you have read and understood our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-### Fork the Repository
+1. Fork the Repository
 
 First, fork the [repository](https://github.com/onedr0p/home-ops) to your own GitHub account. This will create a copy of the project under your account.
 
+2. Clone the Repository
 
-### Clone the Repository
-```
-git clone https://github.com/onedr0p/home-ops
-```
-### Navigate to the project directory 📁
-```
-cd home-ops
-```
-Create a new branch for your feature or bug fix:
-```
- git checkout -b feature-branch
- ```
+    ```sh
+    git clone https://github.com/onedr0p/home-ops
+    ```
 
-Make your changes and commit them:
-```
-git add .
-git commit -m "Description of your changes"
-```
-Push your changes to your fork:
-```
-git push origin feature-branch
-```
-Finally Click on Create Pull request to contribute on this repository.
+3. Navigate to the project directory 📁
+
+    ```sh
+    cd home-ops
+    ```
+
+4. Create a new branch for your feature or bug fix:
+
+    ```sh
+    git checkout -b feature-branch
+    ```
+
+5. Make your changes and commit them:
+
+    ```sh
+    git add .
+    git commit -m "Description of your changes"
+    ```
+
+6. Push your changes to your fork:
+
+    ```sh
+    git push origin feature-branch
+    ```
+
+7. Finally Click on Create Pull request to contribute on this repository.
