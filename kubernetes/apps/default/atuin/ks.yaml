@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-apps-atuin
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cluster-apps-cloudnative-pg-cluster
+    - name: cluster-apps-external-secrets-stores
+  path: ./kubernetes/apps/default/atuin/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-kubernetes
+  wait: false
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
