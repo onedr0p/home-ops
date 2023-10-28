@@ -33,7 +33,7 @@ jobs:
 
       - name: Setup Tools
         shell: bash
-        run: brew install fluxcd/tap/flux kubeconform kustomize
+        run: brew install kubeconform kustomize
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
@@ -48,6 +48,7 @@ jobs:
           mkdir -p ${{ env.SCHEMA_DIR }}
           docker run --rm \
               -v ${{ env.SCHEMA_DIR }}:/crds \
+              -u $(id -u) \
               --entrypoint /bin/sh \
               ghcr.io/onedr0p/kubernetes-schemas:latest \
               -c "cp -r /usr/share/nginx/html/* /crds"
