@@ -1,6 +1,41 @@
 ---
+authentication_backend:
+  password_reset:
+    disable: true
+  refresh_interval: 1m
+  ldap:
+    address: ldap://lldap.default.svc.cluster.local:389
+    implementation: custom
+    timeout: 5s
+    start_tls: false
+    base_dn: dc=home,dc=arpa
+    additional_users_dn: ou=people
+    users_filter: (&({username_attribute}={input})(objectClass=person))
+    additional_groups_dn: ou=groups
+    groups_filter: (member={dn})
+    group_search_mode: filter
+    user: uid=admin,ou=people,dc=home,dc=arpa
+    password: password
+    attributes:
+      username: uid
+      display_name: displayName
+      mail: mail
+      member_of: memberOf
+      group_name: cn
+
 session:
+  same_site: lax
+  inactivity: 5m
+  expiration: 1h
+  remember_me: 1M
+  cookies:
+    - name: devbu_session
+      domain: devbu.io
+      authelia_url: https://auth.devbu.io
+      default_redirection_url: https://auth.devbu.io
   redis:
+    host: redis.database.svc.cluster.local
+    database_index: 14
     high_availability:
       sentinel_name: redis-master
       nodes:
@@ -10,6 +45,23 @@ session:
           port: 26379
         - host: redis-node-2.redis-headless.database.svc.cluster.local
           port: 26379
+
+notifier:
+  disable_startup_check: true
+  smtp:
+    address: smtp-relay.turbo.ac:25
+    sender: Authelia <authelia@buhl.casa>
+    disable_require_tls: true
+
+totp:
+  disable: false
+  issuer: authelia.com
+
+webauthn:
+  disable: true
+
+duo_api:
+  disable: true
 
 access_control:
   default_policy: two_factor
