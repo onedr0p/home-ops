@@ -50,7 +50,7 @@ spec:
           main:
             image:
               repository: ghcr.io/authelia/authelia
-              tag: v4.38.0-beta3@sha256:a51a8ea5b2c4b7d469dd4154aa60208ab0d6922dba8235d4a598566a2a2169b7
+              tag: master@sha256:a3647c3dd136402745c7639e446944004145630c822f27e22f999c414c234d2f
             env:
               AUTHELIA_AUTHENTICATION_BACKEND_LDAP_ADDITIONAL_GROUPS_DN: ou=groups
               AUTHELIA_AUTHENTICATION_BACKEND_LDAP_ADDITIONAL_USERS_DN: ou=people
@@ -77,7 +77,7 @@ spec:
               AUTHELIA_NOTIFIER_SMTP_PORT: 25
               AUTHELIA_NOTIFIER_SMTP_SENDER: Authelia <authelia@buhl.casa>
               AUTHELIA_SERVER_DISABLE_HEALTHCHECK: "true"
-              AUTHELIA_SERVER_ADDRESS: tcp4://0.0.0.0:80
+              AUTHELIA_SERVER_PORT: &port 80
               AUTHELIA_SESSION_DOMAIN: devbu.io
               AUTHELIA_SESSION_NAME: authelia-home-ops
               AUTHELIA_SESSION_REDIS_DATABASE_INDEX: 14
@@ -96,7 +96,7 @@ spec:
                 spec:
                   httpGet:
                     path: /api/health
-                    port: &port 80
+                    port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
