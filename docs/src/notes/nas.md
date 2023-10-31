@@ -1,6 +1,6 @@
 # NAS
 
-My NAS configuation as documentation currently using Ubuntu 22.04
+My NAS configuration as documentation currently using Ubuntu 22.04
 
 ## Packages
 
