@@ -1,6 +1,6 @@
 # Proxmox Considerations
 
-I am using bare metal nodes but here's some considerations when using Kubernetes on Proxmox. These are just my opinions gathered from experiance I've witnessed first or second hand. I will always **advocate for bare metal Kubernetes** due to the overhead of VMs and disk concerns, however following along below will net you a very stable Kubernetes cluster on PVE.
+I am using bare metal nodes but here's some considerations when using Kubernetes on Proxmox. These are just my opinions gathered from experience I've witnessed first or second hand. I will always **advocate for bare metal Kubernetes** due to the overhead of VMs and disk concerns, however following along below will net you a very stable Kubernetes cluster on PVE.
 
 ```admonish warning
 Preface: etcd **needs 3 master/control plane nodes for quorum** also it is really read/write intensive and requires low iops/latency. With using the same disk for all master nodes and due to the way etcd works anytime a commit happens to etcd (which is probably hundreds of times per second), it will flood the same filesystem with 3x the amount of reads and writes
