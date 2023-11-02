@@ -23,6 +23,7 @@ module.exports = {
     "http://prowlarr.default.svc.cluster.local/20/api?apikey={{ .PROWLARR__API_KEY }}", // tl
     "http://prowlarr.default.svc.cluster.local/40/api?apikey={{ .PROWLARR__API_KEY }}", // uhdb
   ],
+  port: 80,
   action: "inject",
   includeEpisodes: false,
   includeSingleEpisodes: true,
