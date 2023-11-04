@@ -45,13 +45,15 @@ jobs:
           encodedString: "${{ secrets.KUBECONFIG }}"
           fileName: kubeconfig
 
-      - name: Get changed files
+      - if: ${{ github.event.inputs.repoNamespace == '' && github.event.inputs.repoName == '' }}
+        name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@18c8a4ecebe93d32ed8a88e1d0c098f5f68c221b # v40.1.0
         with:
           files: kubernetes/**/helmrelease.yaml
 
-      - name: Sync HelmRepository
+      - if: ${{ github.event.inputs.repoNamespace == '' && github.event.inputs.repoName == '' }}
+        name: Sync HelmRepository
         env:
           KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
@@ -67,7 +69,7 @@ jobs:
             flux --namespace "${repo##*:}" reconcile source helm "${repo%%:*}"
           done
 
-      - if: ${{ github.event.inputs.repoName != '' }}
+      - if: ${{ github.event.inputs.repoNamespace != '' && github.event.inputs.repoName != '' }}
         name: Sync HelmRepository
         env:
           KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
