@@ -31,7 +31,7 @@ tasks:
       - kubectl -n {{.ns}} delete job list-{{.rsrc}}-{{.ts}}
     vars:
       rsrc: '{{ or .rsrc (fail "ReplicationSource `rsrc` is required") }}'
-      namespace: '{{.ns | default "default"}}'
+      ns: '{{.ns | default "default"}}'
     env: *task-vars
     preconditions:
       - sh: test -f {{.waitForJobScript}}
@@ -48,7 +48,7 @@ tasks:
       - kubectl -n {{.ns}} delete job unlock-{{.rsrc}}-{{.ts}}
     vars:
       rsrc: '{{ or .rsrc (fail "ReplicationSource `rsrc` is required") }}'
-      namespace: '{{.ns | default "default"}}'
+      ns: '{{.ns | default "default"}}'
     env: *task-vars
     preconditions:
       - sh: test -f {{.waitForJobScript}}
@@ -68,7 +68,7 @@ tasks:
       # - kubectl -n {{.ns}} logs job/volsync-src-{{.rsrc}}
     vars:
       rsrc: '{{ or .rsrc (fail "ReplicationSource `rsrc` is required") }}'
-      namespace: '{{.ns | default "default"}}'
+      ns: '{{.ns | default "default"}}'
     env: *task-vars
     preconditions:
       - sh: test -f {{.waitForJobScript}}
@@ -91,7 +91,7 @@ tasks:
         vars: *task-vars
     vars:
       rsrc: '{{ or .rsrc (fail "Variable `rsrc` is required") }}'
-      namespace: '{{.ns | default "default"}}'
+      ns: '{{.ns | default "default"}}'
       # 1) Query to find the Flux Kustomization associated with the ReplicationSource (rsrc)
       kustomization:
         sh: |
