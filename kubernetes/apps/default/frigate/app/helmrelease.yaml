@@ -108,6 +108,11 @@ spec:
       main:
         enabled: true
         className: internal
+        annotations:
+          nginx.ingress.kubernetes.io/auth-url: |
+            http://authelia.default.svc.cluster.local/api/authz/auth-request
+          nginx.ingress.kubernetes.io/auth-response-headers: |
+            Remote-User,Remote-Name,Remote-Groups,Remote-Email
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
