@@ -109,13 +109,13 @@ spec:
         enabled: true
         className: internal
         annotations:
-          nginx.ingress.kubernetes.io/auth-url: |
+          nginx.ingress.kubernetes.io/auth-url: |-
             http://authelia.default.svc.cluster.local/api/authz/auth-request
-          nginx.ingress.kubernetes.io/auth-response-headers: |
+          nginx.ingress.kubernetes.io/auth-response-headers: |-
             Remote-User,Remote-Name,Remote-Groups,Remote-Email
-          nginx.ingress.kubernetes.io/auth-snippet: |
-            auth_request_set $redirection_url $upstream_http_location;
-            error_page 401 =302 $redirection_url;
+          # nginx.ingress.kubernetes.io/auth-snippet: |
+          #   auth_request_set $redirection_url $upstream_http_location;
+          #   error_page 401 =302 $redirection_url;
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
