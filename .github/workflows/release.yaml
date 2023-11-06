@@ -28,10 +28,24 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ steps.generate-token.outputs.token }}"
         run: |
-          month_week_number="$((($(date +%-d)-1)/7+1))"
-          month="$(date +'%-m')"
-          tag="$(date +'%Y.')${month}.${month_week_number}"
-          gh release create "${tag}" \
+          # Retrieve previous release tag
+          previous_tag="$(gh release list --limit 1 | awk '{ print $1 }')"
+          previous_major="${previous_tag%%\.*}"
+          previous_minor="${previous_tag#*.}"
+          previous_minor="${previous_minor%.*}"
+          previous_patch="${previous_tag##*.}"
+          # Determine next release tag
+          next_major_minor="$(date +'%Y').$(date +'%-m')"
+          if [[ "${previous_major}.${previous_minor}" == "${next_major_minor}" ]]; then
+              echo "Month release already exists for year, incrementing patch number by 1"
+              next_patch="$((previous_patch + 1))"
+          else
+              echo "Month release does not exist for year, setting patch number to 0"
+              next_patch="0"
+          fi
+          # Create release
+          release_tag="${next_major_minor}.${next_patch}"
+          gh release create "${release_tag}" \
               --repo="${GITHUB_REPOSITORY}" \
-              --title="${tag}" \
+              --title="${release_tag}" \
               --generate-notes
