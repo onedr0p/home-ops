@@ -33,7 +33,7 @@ jobs:
       - name: Setup Tools
         shell: bash
         run: |
-          sudo apt-get -qq update && \
+          sudo apt-get -qq update
           sudo apt-get -qq install --no-install-recommends -y curl git
 
       - name: Setup Kube Tools
@@ -66,13 +66,13 @@ jobs:
         run: |
           declare -a repos=()
           for file in ${{ steps.changed-files.outputs.all_changed_and_modified_files }}; do
-            repoName="$(yq eval '.spec.chart.spec.sourceRef.name' "${file}")"
-            repoNamespace="$(yq eval '.spec.chart.spec.sourceRef.namespace' "${file}")"
-            repos+=("${repoName}:${repoNamespace}")
+              repoName="$(yq eval '.spec.chart.spec.sourceRef.name' "${file}")"
+              repoNamespace="$(yq eval '.spec.chart.spec.sourceRef.namespace' "${file}")"
+              repos+=("${repoName}:${repoNamespace}")
           done
           repos=($(for r in ${repos[@]}; do echo $r; done | sort -u))
           for repo in ${repos[@]}; do
-            flux --namespace "${repo##*:}" reconcile source helm "${repo%%:*}"
+              flux --namespace "${repo##*:}" reconcile source helm "${repo%%:*}"
           done
 
       - if: ${{ github.event.inputs.repoNamespace != '' && github.event.inputs.repoName != '' }}
@@ -82,4 +82,4 @@ jobs:
         shell: bash
         run: |
           flux --namespace ${{ github.event.inputs.repoNamespace }} reconcile \
-            source helm ${{ github.event.inputs.repoName }}
+              source helm ${{ github.event.inputs.repoName }}
