@@ -7,7 +7,7 @@ metadata:
   namespace: database
 spec:
   replicas: 3
-  image: public.ecr.aws/docker/library/rabbitmq:3.12.8
+  image: public.ecr.aws/docker/library/rabbitmq:3.12.8 # 3.13.0-rc.2
   rabbitmq:
     additionalPlugins:
       - rabbitmq_mqtt
@@ -30,6 +30,9 @@ spec:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: rabbitmq.devbu.io
       io.cilium/lb-ipam-ips: 192.168.42.208
+  secretBackend:
+    externalSecret:
+      name: rabbitmq-default-user
   persistence:
     storageClassName: local-path
     storage: 5Gi
