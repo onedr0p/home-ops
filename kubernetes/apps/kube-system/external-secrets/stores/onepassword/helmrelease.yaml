@@ -37,9 +37,10 @@ spec:
               repository: docker.io/1password/connect-api
               tag: 1.7.2
             env:
+              XDG_DATA_HOME: &configDir /config
+              OP_HTTP_PORT: &apiPort 80
               OP_BUS_PORT: 11220
               OP_BUS_PEERS: localhost:11221
-              OP_HTTP_PORT: &apiPort 80
               OP_SESSION:
                 valueFrom:
                   secretKeyRef:
@@ -77,6 +78,7 @@ spec:
               repository: docker.io/1password/connect-sync
               tag: 1.7.2
             env:
+              XDG_DATA_HOME: *configDir
               OP_HTTP_PORT: &syncPort 8081
               OP_BUS_PORT: 11221
               OP_BUS_PEERS: localhost:11220
@@ -131,7 +133,7 @@ spec:
       shared:
         type: emptyDir
         globalMounts:
-          - path: /home/opuser/.op/data
+          - path: *configDir
     service:
       main:
         ports:
