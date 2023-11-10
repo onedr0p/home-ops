@@ -1,0 +1,40 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/rabbitmq.com/rabbitmqcluster_v1beta1.json
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+  namespace: database
+spec:
+  replicas: 3
+  rabbitmq:
+    additionalPlugins:
+      - rabbitmq_mqtt
+      - rabbitmq_shovel
+      - rabbitmq_shovel_management
+    additionalConfig: |
+      mqtt.allow_anonymous  = true
+      mqtt.default_user     = mqtt
+      mqtt.default_pass     = mqtt
+      mqtt.vhost            = /
+      mqtt.exchange         = amq.topic
+      mqtt.subscription_ttl = 86400000
+      mqtt.prefetch         = 10
+      log.file              = false
+      log.console           = true
+      log.console.level     = info
+      log.console.formatter = json
+  service:
+    type: LoadBalancer
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: rabbitmq.devbu.io
+      io.cilium/lb-ipam-ips: 192.168.42.208
+  persistence:
+    storageClassName: local-path
+    storage: 5Gi
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 1Gi
+    limits:
+      memory: 2Gi
