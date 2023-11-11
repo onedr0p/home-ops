@@ -3,7 +3,7 @@ set -o errexit
 
 KUBERNETES_DIR=$1
 SCHEMA_DIR=$2
-KUBE_VERSION="${3:-1.27.0}"
+KUBE_VERSION="${3:-1.28.0}"
 
 [[ -z "${KUBERNETES_DIR}" ]] && echo "Kubernetes location not specified" && exit 1
 [[ -z "${SCHEMA_DIR}" ]] && echo "Schema location not specified" && exit 1
