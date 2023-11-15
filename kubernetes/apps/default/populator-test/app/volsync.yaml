@@ -4,9 +4,6 @@ kind: PersistentVolumeClaim
 metadata:
   name: populator-test-config
   namespace: default
-  annotations:
-    # kustomize.toolkit.fluxcd.io/prune: Disabled
-    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
 spec:
   accessModes: ["ReadWriteOnce"]
   dataSourceRef:
@@ -74,12 +71,17 @@ kind: ReplicationDestination
 metadata:
   name: populator-test-dst
   namespace: default
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
 spec:
   trigger:
     manual: restore-once
   restic:
     repository: populator-test-restic-secret
     copyMethod: Snapshot
-    storageClassName: ceph-block
     accessModes: ["ReadWriteOnce"]
+    capacity: 1Gi
+    cacheCapacity: 8Gi
+    cacheStorageClassName: local-path
     volumeSnapshotClassName: csi-ceph-blockpool
+    storageClassName: ceph-block
