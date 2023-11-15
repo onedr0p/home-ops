@@ -1,20 +1,4 @@
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: populator-test-config
-  namespace: default
-spec:
-  accessModes: ["ReadWriteOnce"]
-  dataSourceRef:
-    kind: ReplicationDestination
-    apiGroup: volsync.backube
-    name: populator-test-dst
-  resources:
-    requests:
-      storage: 2Gi
-  storageClassName: ceph-block
----
 # yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/external-secrets.io/externalsecret_v1beta1.json
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
@@ -39,6 +23,43 @@ spec:
     - extract:
         key: volsync-restic-template
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: populator-test
+  namespace: default
+spec:
+  accessModes: ["ReadWriteOnce"]
+  dataSourceRef:
+    kind: ReplicationDestination
+    apiGroup: volsync.backube
+    name: populator-test-rdst
+  resources:
+    requests:
+      storage: 2Gi # must match the ReplicationDestination `.spec.capacity` below
+  storageClassName: ceph-block
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationdestination_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: populator-test-rdst
+  namespace: default
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
+spec:
+  trigger:
+    manual: restore-once
+  restic:
+    repository: populator-test-restic-secret
+    copyMethod: Snapshot
+    accessModes: ["ReadWriteOnce"]
+    cacheCapacity: 8Gi
+    cacheStorageClassName: local-path
+    volumeSnapshotClassName: csi-ceph-blockpool
+    storageClassName: ceph-block
+    capacity: 2Gi # must match the PersistentVolumeClaim `.resources.requests.storage` size above
+---
 # yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationsource_v1alpha1.json
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
@@ -46,7 +67,7 @@ metadata:
   name: populator-test-rsrc
   namespace: default
 spec:
-  sourcePVC: populator-test-config
+  sourcePVC: populator-test
   trigger:
     schedule: "0 7 * * *"
   restic:
@@ -64,24 +85,3 @@ spec:
     retain:
       daily: 7
       within: 3d
----
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationdestination_v1alpha1.json
-apiVersion: volsync.backube/v1alpha1
-kind: ReplicationDestination
-metadata:
-  name: populator-test-dst
-  namespace: default
-  annotations:
-    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
-spec:
-  trigger:
-    manual: restore-once
-  restic:
-    repository: populator-test-restic-secret
-    copyMethod: Snapshot
-    accessModes: ["ReadWriteOnce"]
-    capacity: 2Gi
-    cacheCapacity: 8Gi
-    cacheStorageClassName: local-path
-    volumeSnapshotClassName: csi-ceph-blockpool
-    storageClassName: ceph-block

@@ -33,7 +33,6 @@ spec:
   values:
     controllers:
       main:
-        type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -59,14 +58,6 @@ spec:
             runAsGroup: 568
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
-        # statefulset:
-        #   volumeClaimTemplates:
-        #     - name: config
-        #       accessMode: ReadWriteOnce
-        #       size: 1Gi
-        #       storageClass: ceph-block
-        #       globalMounts:
-        #         - path: /config
     service:
       main:
         ports:
@@ -89,7 +80,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: populator-test-config
+        existingClaim: populator-test
       cache:
         type: emptyDir
         globalMounts:
