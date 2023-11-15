@@ -5,13 +5,13 @@ kind: Kustomization
 metadata:
   name: &appName populator-test
   namespace: flux-system
-  labels: &appLabel
+  labels: &appLabels
     app.kubernetes.io/name: *appName
 spec:
   dependsOn:
     - name: cluster-apps-external-secrets-stores
   path: ./kubernetes/apps/default/populator-test/app
-  prune: true
+  prune: false
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
@@ -20,4 +20,4 @@ spec:
   retryInterval: 1m
   timeout: 5m
   commonMetadata:
-    labels: *appLabel
+    labels: *appLabels
