@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-nginx-certificates
+  name: nginx-certificates
   namespace: flux-system
 spec:
   dependsOn:
@@ -22,12 +22,12 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-nginx-external
+  name: nginx-external
   namespace: flux-system
 spec:
   dependsOn:
     - name: cluster-apps-external-secrets-stores
-    - name: cluster-apps-nginx-certificates
+    - name: nginx-certificates
   path: ./kubernetes/apps/networking/nginx/external
   prune: false
   sourceRef:
@@ -42,11 +42,11 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-nginx-internal
+  name: nginx-internal
   namespace: flux-system
 spec:
   dependsOn:
-    - name: cluster-apps-nginx-certificates
+    - name: nginx-certificates
   path: ./kubernetes/apps/networking/nginx/internal
   prune: false
   sourceRef:
