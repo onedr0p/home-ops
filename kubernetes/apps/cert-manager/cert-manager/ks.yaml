@@ -3,11 +3,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-cert-manager
+  name: cert-manager
   namespace: flux-system
 spec:
   path: ./kubernetes/apps/cert-manager/cert-manager/app
-  prune: false
+  prune: true
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
@@ -20,14 +20,14 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster-apps-cert-manager-issuers
+  name: cert-manager-issuers
   namespace: flux-system
 spec:
   dependsOn:
-    - name: cluster-apps-cert-manager
+    - name: cert-manager
     - name: cluster-apps-external-secrets-stores
   path: ./kubernetes/apps/cert-manager/cert-manager/issuers
-  prune: false
+  prune: true
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
