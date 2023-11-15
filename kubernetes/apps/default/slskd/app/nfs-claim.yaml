@@ -2,7 +2,7 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: slskd
+  name: slskd-nfs
 provisioner: nfs
 parameters:
   archiveOnDelete: "false"
@@ -10,9 +10,9 @@ parameters:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: slskd
+  name: slskd-nfs
 spec:
-  storageClassName: slskd
+  storageClassName: slskd-nfs
   capacity:
     storage: 1Mi # Size does not matter ...twss
   accessModes: ["ReadWriteMany"]
@@ -31,11 +31,11 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: slskd
+  name: slskd-nfs
   namespace: default
 spec:
   accessModes: ["ReadWriteMany"]
-  storageClassName: slskd
+  storageClassName: slskd-nfs
   resources:
     requests:
       storage: 1Mi # Size does not matter ...twss
