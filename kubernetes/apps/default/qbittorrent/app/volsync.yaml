@@ -53,11 +53,12 @@ spec:
   restic:
     repository: qbittorrent-restic-secret
     copyMethod: Snapshot
-    accessModes: ["ReadWriteMany"]
-    cacheCapacity: 8Gi
     cacheStorageClassName: local-path
+    cacheAccessModes: ["ReadWriteOnce"]
+    cacheCapacity: 8Gi
     volumeSnapshotClassName: csi-ceph-filesystem
     storageClassName: ceph-filesystem
+    accessModes: ["ReadWriteMany"]
     capacity: 2Gi # must match the PersistentVolumeClaim `.resources.requests.storage` size above
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationsource_v1alpha1.json
