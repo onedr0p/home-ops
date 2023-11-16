@@ -31,7 +31,6 @@ spec:
   values:
     controllers:
       main:
-        type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -66,14 +65,6 @@ spec:
                 memory: 64Mi
               limits:
                 memory: 512Mi
-        statefulset:
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 1Gi
-              storageClass: ceph-block
-              globalMounts:
-                - path: /config
     service:
       main:
         ports:
@@ -94,5 +85,8 @@ spec:
           - hosts:
               - *host
     persistence:
+      config:
+        enabled: true
+        existingClaim: media-browser
       media:
         existingClaim: media
