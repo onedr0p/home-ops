@@ -3,19 +3,19 @@
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: populator-test-restic
+  name: audiobookshelf-restic
   namespace: default
 spec:
   secretStoreRef:
     kind: ClusterSecretStore
     name: onepassword-connect
   target:
-    name: populator-test-restic-secret
+    name: audiobookshelf-restic-secret
     creationPolicy: Owner
     template:
       engineVersion: v2
       data:
-        RESTIC_REPOSITORY: '{{ .REPOSITORY_TEMPLATE }}/populator-test'
+        RESTIC_REPOSITORY: '{{ .REPOSITORY_TEMPLATE }}/audiobookshelf'
         RESTIC_PASSWORD: '{{ .RESTIC_PASSWORD }}'
         AWS_ACCESS_KEY_ID: '{{ .AWS_ACCESS_KEY_ID }}'
         AWS_SECRET_ACCESS_KEY: '{{ .AWS_SECRET_ACCESS_KEY }}'
@@ -26,14 +26,14 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: populator-test
+  name: audiobookshelf
   namespace: default
 spec:
   accessModes: ["ReadWriteOnce"]
   dataSourceRef:
     kind: ReplicationDestination
     apiGroup: volsync.backube
-    name: populator-test-rdst
+    name: audiobookshelf-rdst
   resources:
     requests:
       storage: 2Gi # must match the ReplicationDestination `.spec.capacity` below
@@ -43,7 +43,7 @@ spec:
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
-  name: populator-test-rdst
+  name: audiobookshelf-rdst
   namespace: default
   annotations:
     kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
@@ -51,7 +51,7 @@ spec:
   trigger:
     manual: restore-once
   restic:
-    repository: populator-test-restic-secret
+    repository: audiobookshelf-restic-secret
     copyMethod: Snapshot
     volumeSnapshotClassName: csi-ceph-blockpool
     cacheStorageClassName: local-path
@@ -65,16 +65,16 @@ spec:
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationSource
 metadata:
-  name: populator-test-rsrc
+  name: audiobookshelf-rsrc
   namespace: default
 spec:
-  sourcePVC: populator-test
+  sourcePVC: audiobookshelf
   trigger:
     schedule: "0 7 * * *"
   restic:
     copyMethod: Snapshot
     pruneIntervalDays: 7
-    repository: populator-test-restic-secret
+    repository: audiobookshelf-restic-secret
     volumeSnapshotClassName: csi-ceph-blockpool
     cacheCapacity: 8Gi
     cacheStorageClassName: local-path
