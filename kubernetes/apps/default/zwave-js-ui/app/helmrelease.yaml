@@ -33,7 +33,6 @@ spec:
   values:
     controllers:
       main:
-        type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -69,14 +68,6 @@ spec:
         pod:
           nodeSelector:
             aeotec.feature.node.kubernetes.io/zwave: "true"
-        statefulset:
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 1Gi
-              storageClass: ceph-block
-              globalMounts:
-                - path: /usr/src/app/store
     service:
       main:
         ports:
@@ -102,6 +93,11 @@ spec:
           - hosts:
               - *host
     persistence:
+      config:
+        enabled: true
+        existingClaim: zwave-js-ui
+        globalMounts:
+          - path: /usr/src/app/store
       usb:
         type: hostPath
         hostPath: /dev/serial/by-id/usb-0658_0200-if00
