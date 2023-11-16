@@ -105,15 +105,6 @@ resource "kubernetes_stateful_set_v1" "minio" {
             name       = "config"
             mount_path = "/data"
           }
-          resources {
-            requests = {
-              cpu    = "1"
-              memory = "2Gi"
-            }
-            limits = {
-              memory = "4Gi"
-            }
-          }
         }
         security_context {
           run_as_user = 568

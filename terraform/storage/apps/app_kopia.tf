@@ -8,7 +8,7 @@ resource "kubernetes_secret_v1" "kopia" {
   }
   data = {
     "repository.config" = "${templatefile(
-      "${path.module}/templates/repository.config.tftpl", {
+      "${path.module}/templates/kopia.config.tftpl", {
         b2_app_key    = data.sops_file.secrets.data["kopia_b2_app_key"],
         b2_app_key_id = data.sops_file.secrets.data["kopia_b2_app_key_id"]
       }
@@ -133,15 +133,6 @@ resource "kubernetes_stateful_set_v1" "kopia" {
             name       = "data"
             mount_path = "/tycho" # tech-debt
             read_only  = true
-          }
-          resources {
-            requests = {
-              cpu    = "1"
-              memory = "2Gi"
-            }
-            limits = {
-              memory = "12Gi"
-            }
           }
         }
         volume {
