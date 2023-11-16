@@ -35,7 +35,6 @@ spec:
   values:
     controllers:
       main:
-        type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -86,14 +85,6 @@ spec:
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
             supplementalGroups: [44, 105, 10000]
-        statefulset:
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 100Gi
-              storageClass: ceph-block
-              globalMounts:
-                - path: /config
     service:
       main:
         type: LoadBalancer
@@ -120,6 +111,9 @@ spec:
           - hosts:
               - *host
     persistence:
+      config:
+        enabled: true
+        existingClaim: plex
       transcode:
         type: emptyDir
       media:

@@ -23,14 +23,52 @@ spec:
     - extract:
         key: volsync-restic-template
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationsource_v1alpha1.json
-apiVersion: volsync.backube/v1alpha1
-kind: ReplicationSource
+apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
   name: plex
   namespace: default
 spec:
-  sourcePVC: config-plex-0
+  accessModes: ["ReadWriteOnce"]
+  dataSourceRef:
+    kind: ReplicationDestination
+    apiGroup: volsync.backube
+    name: plex-rdst
+  resources:
+    requests:
+      storage: 100Gi # must match the ReplicationDestination `.spec.capacity` below
+  storageClassName: ceph-block
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationdestination_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: plex-rdst
+  namespace: default
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
+spec:
+  trigger:
+    manual: restore-once
+  restic:
+    repository: plex-restic-secret
+    copyMethod: Snapshot
+    volumeSnapshotClassName: csi-ceph-blockpool
+    cacheStorageClassName: local-path
+    cacheAccessModes: ["ReadWriteOnce"]
+    cacheCapacity: 8Gi
+    storageClassName: ceph-block
+    accessModes: ["ReadWriteOnce"]
+    capacity: 100Gi # must match the PersistentVolumeClaim `.resources.requests.storage` size above
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationsource_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: plex-rsrc
+  namespace: default
+spec:
+  sourcePVC: plex
   trigger:
     schedule: "0 7 * * *"
   restic:
