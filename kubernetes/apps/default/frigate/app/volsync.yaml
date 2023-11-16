@@ -53,11 +53,12 @@ spec:
   restic:
     repository: frigate-restic-secret
     copyMethod: Snapshot
-    accessModes: ["ReadWriteOnce"]
-    cacheCapacity: 8Gi
-    cacheStorageClassName: local-path
     volumeSnapshotClassName: csi-ceph-blockpool
+    cacheStorageClassName: local-path
+    cacheAccessModes: ["ReadWriteOnce"]
+    cacheCapacity: 8Gi
     storageClassName: ceph-block
+    accessModes: ["ReadWriteOnce"]
     capacity: 5Gi # must match the PersistentVolumeClaim `.resources.requests.storage` size above
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationsource_v1alpha1.json
@@ -74,10 +75,12 @@ spec:
     copyMethod: Snapshot
     pruneIntervalDays: 7
     repository: frigate-restic-secret
+    volumeSnapshotClassName: csi-ceph-blockpool
     cacheCapacity: 8Gi
     cacheStorageClassName: local-path
-    volumeSnapshotClassName: csi-ceph-blockpool
+    cacheAccessModes: ["ReadWriteOnce"]
     storageClassName: ceph-block
+    accessModes: ["ReadWriteOnce"]
     moverSecurityContext:
       runAsUser: 568
       runAsGroup: 568
