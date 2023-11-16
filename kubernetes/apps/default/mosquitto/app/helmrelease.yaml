@@ -31,7 +31,6 @@ spec:
   values:
     controllers:
       main:
-        type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -59,14 +58,6 @@ spec:
             runAsGroup: 568
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
-        statefulset:
-          volumeClaimTemplates:
-            - name: data
-              accessMode: ReadWriteOnce
-              size: 512Mi
-              storageClass: ceph-block
-              globalMounts:
-                - path: /data
     service:
       main:
         type: LoadBalancer
@@ -77,6 +68,11 @@ spec:
           http:
             port: 1883
     persistence:
+      config:
+        enabled: true
+        existingClaim: mosquitto
+        globalMounts:
+          - path: /data
       config-file:
         type: configMap
         name: mosquitto-configmap # overriden by kustomizeconfig
