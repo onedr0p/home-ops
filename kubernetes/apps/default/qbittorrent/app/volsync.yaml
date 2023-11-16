@@ -23,14 +23,51 @@ spec:
     - extract:
         key: volsync-restic-template
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationsource_v1alpha1.json
-apiVersion: volsync.backube/v1alpha1
-kind: ReplicationSource
+apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
   name: qbittorrent
   namespace: default
 spec:
-  sourcePVC: qbittorrent-config
+  accessModes: ["ReadWriteMany"]
+  dataSourceRef:
+    kind: ReplicationDestination
+    apiGroup: volsync.backube
+    name: qbittorrent-rdst
+  resources:
+    requests:
+      storage: 2Gi # must match the ReplicationDestination `.spec.capacity` below
+  storageClassName: ceph-filesystem
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationdestination_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: qbittorrent-rdst
+  namespace: default
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
+spec:
+  trigger:
+    manual: restore-once
+  restic:
+    repository: qbittorrent-restic-secret
+    copyMethod: Snapshot
+    accessModes: ["ReadWriteMany"]
+    cacheCapacity: 8Gi
+    cacheStorageClassName: local-path
+    volumeSnapshotClassName: csi-ceph-filesystem
+    storageClassName: ceph-filesystem
+    capacity: 2Gi # must match the PersistentVolumeClaim `.resources.requests.storage` size above
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationsource_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: qbittorrent-rsrc
+  namespace: default
+spec:
+  sourcePVC: qbittorrent
   trigger:
     schedule: "0 7 * * *"
   restic:
@@ -39,7 +76,6 @@ spec:
     repository: qbittorrent-restic-secret
     cacheCapacity: 8Gi
     cacheStorageClassName: local-path
-    cacheAccessModes: ["ReadWriteOnce"]
     volumeSnapshotClassName: csi-ceph-filesystem
     storageClassName: ceph-filesystem
     moverSecurityContext:
