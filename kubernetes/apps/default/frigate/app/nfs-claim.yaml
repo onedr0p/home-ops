@@ -2,7 +2,7 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: frigate
+  name: frigate-nfs
 provisioner: nfs
 parameters:
   archiveOnDelete: "false"
@@ -10,9 +10,9 @@ parameters:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: frigate
+  name: frigate-nfs
 spec:
-  storageClassName: frigate
+  storageClassName: frigate-nfs
   capacity:
     storage: 1Mi # Size does not matter ...twss
   accessModes: ["ReadWriteMany"]
@@ -31,11 +31,11 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: frigate
+  name: frigate-nfs
   namespace: default
 spec:
   accessModes: ["ReadWriteMany"]
-  storageClassName: frigate
+  storageClassName: frigate-nfs
   resources:
     requests:
       storage: 1Mi # Size does not matter ...twss

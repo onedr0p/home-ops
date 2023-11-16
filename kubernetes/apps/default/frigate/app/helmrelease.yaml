@@ -37,7 +37,6 @@ spec:
   values:
     controllers:
       main:
-        type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -89,14 +88,6 @@ spec:
           nodeSelector:
             google.feature.node.kubernetes.io/coral: "true"
             intel.feature.node.kubernetes.io/gpu: "true"
-        statefulset:
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 5Gi
-              storageClass: ceph-block
-              globalMounts:
-                - path: /data
     service:
       main:
         ports:
@@ -108,14 +99,6 @@ spec:
       main:
         enabled: true
         className: internal
-        # annotations:
-        #   nginx.ingress.kubernetes.io/auth-url: |-
-        #     http://authelia.default.svc.cluster.local/api/authz/auth-request
-        #   nginx.ingress.kubernetes.io/auth-response-headers: |-
-        #     Remote-User,Remote-Name,Remote-Groups,Remote-Email
-        #   nginx.ingress.kubernetes.io/auth-snippet: |-
-        #     auth_request_set $redirection_url $upstream_http_location;
-        #     error_page 401 =302 $redirection_url;
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
@@ -127,6 +110,11 @@ spec:
           - hosts:
               - *host
     persistence:
+      config:
+        enabled: true
+        existingClaim: frigate
+        globalMounts:
+          - path: /data
       config-file:
         type: configMap
         name: frigate-configmap
@@ -149,4 +137,4 @@ spec:
         globalMounts:
           - path: /dev/bus/usb
       media:
-        existingClaim: frigate
+        existingClaim: frigate-nfs
