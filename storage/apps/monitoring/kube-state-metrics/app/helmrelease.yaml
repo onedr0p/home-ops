@@ -1,0 +1,44 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kube-state-metrics
+  namespace: monitoring
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: kube-state-metrics
+      version: 5.15.2
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    fullnameOverride: kube-state-metrics
+    releaseLabel: true # disable for victoria-metrics
+    metricLabelsAllowlist:
+      - deployments=[*]
+      - persistentvolumeclaims=[*]
+      - pods=[*]
+    prometheus:
+      monitor:
+        enabled: true
+        honorLabels: true
+        relabelings:
+          - action: replace
+            regex: ^(.*)$
+            replacement: $1
+            sourceLabels: ["__meta_kubernetes_pod_node_name"]
+            targetLabel: kubernetes_node
