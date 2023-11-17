@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: minio
+  name: kopia
   namespace: default
 spec:
   interval: 30m
@@ -33,32 +33,34 @@ spec:
         containers:
           main:
             image:
-              repository: quay.io/minio/minio
-              tag: RELEASE.2023-11-15T20-43-25Z
+              repository: docker.io/kopia/kopia
+              tag: 0.15.0
             env:
-              MINIO_API_CORS_ALLOW_ORIGIN: http://minio.turbo.ac,http://s3.turbo.ac
-              MINIO_BROWSER_REDIRECT_URL: http://minio.turbo.ac
-              MINIO_PROMETHEUS_JOB_ID: minio
-              MINIO_PROMETHEUS_URL: https://prometheus.devbu.io
-              MINIO_PROMETHEUS_AUTH_TYPE: public
-              MINIO_SERVER_URL: http://s3.turbo.ac
-              MINIO_UPDATE: "off"
+              TZ: America/New_York
             envFrom:
               - secretRef:
-                  name: minio-secret
+                  name: kopia-secret
             args:
               - server
-              - /data
-              - --console-address
-              - :9001
+              - start
+              - --insecure
+              - --address
+              - 0.0.0.0:80
+              - --override-hostname
+              - expanse.turbo.ac
+              - --override-username
+              - devin
+              - --without-password
+              - --metrics-listen-addr
+              - 0.0.0.0:8080
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /minio/health/live
-                    port: 9000
+                    path: /
+                    port: 80
                   initialDelaySeconds: 30
                   periodSeconds: 30
                   timeoutSeconds: 10
@@ -67,44 +69,48 @@ spec:
               startup:
                 enabled: false
             securityContext:
-              runAsUser: 568
-              runAsGroup: 568
-              fsGroup: 568
-              fsGroupChangePolicy: OnRootMismatch
-              supplementalGroups: [100]
+              privileged: true
+              runAsUser: 0
     service:
       main:
         ports:
           http:
-            port: 9001
-          s3:
-            port: 9000
+            port: 80
+          metrics:
+            port: 8080
     ingress:
       main:
         enabled: true
         className: internal
         hosts:
-          - host: &consoleHost minio.turbo.ac
+          - host: &host kopia.turbo.ac
             paths:
               - path: /
                 service:
                   name: main
                   port: http
-          - host: &s3Host s3.turbo.ac
-            paths:
-              - path: /
-                service:
-                  name: main
-                  port: s3
         tls:
           - hosts:
-              - *consoleHost
-              - *s3Host
+              - *host
     persistence:
-      config:
-        enabled: true
+      config-file:
+        type: secret
+        name: kopia-repository-secret
+        globalMounts:
+          - path: /app/config/repository.config
+            subPath: repository.config
+            readOnly: true
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /app/cache
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /app/logs
+      media:
         type: hostPath
-        hostPath: /eros/Minio
+        hostPath: /eros
         hostPathType: Directory
         globalMounts:
-          - path: /data
+          - path: /tycho # tech debt
