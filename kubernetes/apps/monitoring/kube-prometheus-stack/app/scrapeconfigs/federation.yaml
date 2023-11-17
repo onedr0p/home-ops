@@ -3,12 +3,15 @@
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
-  name: node-exporter
+  name: federation
   namespace: monitoring
 spec:
+  honorLabels: true
+  scrapeInterval: 30s
+  scheme: HTTPS
   staticConfigs:
-    - targets:
-        # - expanse.turbo.ac:9100
-        - pikvm.turbo.ac:9100
-        - vyos.turbo.ac:9100
-  metricsPath: /metrics
+    - targets: ["prometheus.turbo.ac"]
+  metricsPath: /federate
+  params:
+    "match[]":
+      - '{job="smartctl-exporter"}'
