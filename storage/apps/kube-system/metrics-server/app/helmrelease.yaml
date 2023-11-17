@@ -3,17 +3,17 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: reloader
-  namespace: &namespace default
+  name: metrics-server
+  namespace: kube-system
 spec:
   interval: 30m
   chart:
     spec:
-      chart: reloader
-      version: 1.0.52
+      chart: metrics-server
+      version: 3.11.0
       sourceRef:
         kind: HelmRepository
-        name: stakater
+        name: metrics-server
         namespace: flux-system
   maxHistory: 2
   install:
@@ -26,8 +26,12 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    fullnameOverride: reloader
-    reloader:
-      podMonitor:
-        enabled: false
-        namespace: *namespace
+    args:
+      - --kubelet-insecure-tls
+      - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+      - --kubelet-use-node-status-port
+      - --metric-resolution=15s
+    metrics:
+      enabled: false
+    serviceMonitor:
+      enabled: false
