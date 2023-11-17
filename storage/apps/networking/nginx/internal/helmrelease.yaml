@@ -4,7 +4,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: nginx-internal
-  namespace: default
+  namespace: networking
 spec:
   interval: 30m
   chart:
@@ -71,11 +71,11 @@ spec:
         enabled: false
         serviceMonitor:
           enabled: false
-          namespace: default
+          namespace: networking
           namespaceSelector:
             any: true
       extraArgs:
-        default-ssl-certificate: default/turbo-ac-tls
+        default-ssl-certificate: networking/turbo-ac-tls
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname

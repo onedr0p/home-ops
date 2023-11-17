@@ -4,7 +4,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: &app external-dns-bind
-  namespace: default
+  namespace: networking
 spec:
   interval: 30m
   chart:
@@ -48,7 +48,7 @@ spec:
             key: rndc-secret
     policy: sync
     sources: ["ingress", "service"]
-    txtOwnerId: default
+    txtOwnerId: networking
     txtPrefix: k8s.
     domainFilters: ["turbo.ac"]
     serviceMonitor:

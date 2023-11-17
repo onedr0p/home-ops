@@ -3,13 +3,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: nginx-certificates
+  name: external-secrets
   namespace: flux-system
 spec:
-  dependsOn:
-    - name: cert-manager-issuers
-  path: ./storage/apps/default/nginx/certificates
-  prune: false
+  path: ./storage/apps/kube-system/external-secrets/app
+  prune: true
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
@@ -22,17 +20,17 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: nginx-internal
+  name: external-secrets-stores
   namespace: flux-system
 spec:
   dependsOn:
-    - name: nginx-certificates
-  path: ./storage/apps/default/nginx/internal
-  prune: false
+    - name: external-secrets
+  path: ./storage/apps/kube-system/external-secrets/stores
+  prune: true
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
-  wait: false
+  wait: true
   interval: 30m
   retryInterval: 1m
   timeout: 5m
