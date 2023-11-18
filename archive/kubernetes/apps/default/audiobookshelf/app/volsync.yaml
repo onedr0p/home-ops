@@ -17,11 +17,13 @@ spec:
       data:
         RESTIC_REPOSITORY: '{{ .REPOSITORY_TEMPLATE }}/audiobookshelf'
         RESTIC_PASSWORD: '{{ .RESTIC_PASSWORD }}'
-        AWS_ACCESS_KEY_ID: '{{ .AWS_ACCESS_KEY_ID }}'
-        AWS_SECRET_ACCESS_KEY: '{{ .AWS_SECRET_ACCESS_KEY }}'
+        AWS_ACCESS_KEY_ID: '{{ .MINIO_ROOT_USER }}'
+        AWS_SECRET_ACCESS_KEY: '{{ .MINIO_ROOT_PASSWORD }}'
   dataFrom:
     - extract:
-        key: volsync-restic-template
+        key: minio
+    - extract:
+        key: volsync-restic-template-rclone
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -36,7 +38,7 @@ spec:
     name: audiobookshelf-rdst
   resources:
     requests:
-      storage: 2Gi # must match the ReplicationDestination `.spec.capacity` below
+      storage: 1Gi # must match the ReplicationDestination `.spec.capacity` below
   storageClassName: ceph-block
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationdestination_v1alpha1.json
@@ -59,7 +61,7 @@ spec:
     cacheCapacity: 8Gi
     storageClassName: ceph-block
     accessModes: ["ReadWriteOnce"]
-    capacity: 2Gi # must match the PersistentVolumeClaim `.resources.requests.storage` size above
+    capacity: 1Gi # must match the PersistentVolumeClaim `.resources.requests.storage` size above
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/volsync.backube/replicationsource_v1alpha1.json
 apiVersion: volsync.backube/v1alpha1
@@ -70,7 +72,7 @@ metadata:
 spec:
   sourcePVC: audiobookshelf
   trigger:
-    schedule: "0 7 * * *"
+    schedule: "15 */8 * * *"
   restic:
     copyMethod: Snapshot
     pruneIntervalDays: 7
