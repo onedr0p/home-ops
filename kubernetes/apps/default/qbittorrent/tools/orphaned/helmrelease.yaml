@@ -34,12 +34,14 @@ spec:
         type: cronjob
         cronjob:
           schedule: "@daily"
-          timeZone: America/New_York
+          timeZone: &timeZone America/New_York
         containers:
           main:
             image:
               repository: ghcr.io/buroa/qbtools
               tag: v0.10.0
+            env:
+              TZ: *timeZone
             args: [
               "orphaned",
               "--exclude-pattern", "*_unpackerred",

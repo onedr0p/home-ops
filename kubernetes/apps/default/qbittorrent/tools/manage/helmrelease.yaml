@@ -34,13 +34,15 @@ spec:
         type: cronjob
         cronjob:
           schedule: "@hourly"
-          timeZone: America/New_York
+          timeZone: &timeZone America/New_York
         initContainers:
           tag:
             order: 1
             image: &image
               repository: ghcr.io/buroa/qbtools
               tag: v0.10.0
+            env: &env
+              TZ: *timeZone
             args: [
               "tagging",
               "--added-on",
@@ -61,6 +63,7 @@ spec:
           unregistered:
             order: 2
             image: *image
+            env: *env
             args: [
               "prune",
               "--exclude-category", "manual",
@@ -75,6 +78,7 @@ spec:
         containers:
           main:
             image: *image
+            env: *env
             args: [
               "prune",
               "--exclude-category", "manual",
