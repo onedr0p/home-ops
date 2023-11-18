@@ -29,28 +29,33 @@ spec:
     controllers:
       main:
         type: cronjob
-        annotations:
-          reloader.stakater.com/auto: "true"
         cronjob:
           schedule: "@hourly"
-          timeZone: America/New_York
+          timeZone: &timeZone America/New_York
         containers:
           main:
             image:
-              repository: docker.io/rclone/rclone
-              tag: 1.64.2
-            args:
-              - sync
-              - --verbose
-              - --create-empty-src-dirs
-              - --transfers
-              - "8"
-              - minio:/volsync
-              - cloudflare:/volsync
+              repository: ghcr.io/onedr0p/volsync
+              tag: rolling@sha256:7745256cef16d0c44d387d5bdd75292844dd312bd399ebf81208491c644be2b6
+            env:
+              TZ: *timeZone
+              XDG_CONFIG_HOME: /config
+            envFrom:
+              - secretRef:
+                  name: restic-secret
+            command: ["/backup.sh"]
     service:
       main:
         enabled: false
     persistence:
+      backup-script:
+        type: configMap
+        name: backup-configmap
+        defaultMode: 0775
+        globalMounts:
+          - path: /backup.sh
+            subPath: backup.sh
+            readOnly: true
       rclone-config:
         type: secret
         name: rclone-secret

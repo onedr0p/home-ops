@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -o errexit
 
-# Script that uses rclone to sync the contents of a volume to a remote and then runs restci check
+# Sync from MinIO to Cloudflare
+rclone sync --verbose --create-empty-src-dirs --transfers 10 \
+    minio:/volsync \
+    cloudflare:/volsync
 
-# rclone sync --verbose --create-empty-src-dirs minio:volsync cloudflare:volsync
-
-# restic --repository-file /config/volsync-repo check
+# Verify sync was successful
+for app in $(rclone lsf --dirs-only cloudflare:/volsync); do
+    export RESTIC_REPOSITORY="${RESTIC_REPOSITORY_TEMPLATE}/${app}"
+    restic check
+done
