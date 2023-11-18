@@ -3,25 +3,27 @@
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: zigbee2mqtt-restic
+  name: zigbee2mqtt-volsync
   namespace: default
 spec:
   secretStoreRef:
     kind: ClusterSecretStore
     name: onepassword-connect
   target:
-    name: zigbee2mqtt-restic-secret
+    name: zigbee2mqtt-volsync-secret
     creationPolicy: Owner
     template:
       engineVersion: v2
       data:
         RESTIC_REPOSITORY: '{{ .REPOSITORY_TEMPLATE }}/zigbee2mqtt'
         RESTIC_PASSWORD: '{{ .RESTIC_PASSWORD }}'
-        AWS_ACCESS_KEY_ID: '{{ .AWS_ACCESS_KEY_ID }}'
-        AWS_SECRET_ACCESS_KEY: '{{ .AWS_SECRET_ACCESS_KEY }}'
+        AWS_ACCESS_KEY_ID: '{{ .MINIO_ROOT_USER }}'
+        AWS_SECRET_ACCESS_KEY: '{{ .MINIO_ROOT_PASSWORD }}'
   dataFrom:
     - extract:
-        key: volsync-restic-template
+        key: volsync-minio-template
+    - extract:
+        key: minio
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -51,7 +53,7 @@ spec:
   trigger:
     manual: restore-once
   restic:
-    repository: zigbee2mqtt-restic-secret
+    repository: zigbee2mqtt-volsync-secret
     copyMethod: Snapshot
     volumeSnapshotClassName: csi-ceph-blockpool
     cacheStorageClassName: local-path
@@ -74,7 +76,7 @@ spec:
   restic:
     copyMethod: Snapshot
     pruneIntervalDays: 7
-    repository: zigbee2mqtt-restic-secret
+    repository: zigbee2mqtt-volsync-secret
     volumeSnapshotClassName: csi-ceph-blockpool
     cacheCapacity: 8Gi
     cacheStorageClassName: local-path
