@@ -3,10 +3,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: rook-ceph
+  name: &app rook-ceph
   namespace: flux-system
 spec:
   targetNamespace: rook-ceph
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   path: ./kubernetes/apps/rook-ceph/rook-ceph/app
   prune: false
   sourceRef:
@@ -21,10 +24,13 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: rook-ceph-cluster
+  name: &app rook-ceph-cluster
   namespace: flux-system
 spec:
   targetNamespace: rook-ceph
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   dependsOn:
     - name: rook-ceph
   path: ./kubernetes/apps/rook-ceph/rook-ceph/cluster
