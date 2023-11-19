@@ -3,10 +3,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: tf-controller
+  name: &app tf-controller
   namespace: flux-system
 spec:
   targetNamespace: flux-system
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
   path: ./kubernetes/apps/flux-system/tf-controller/app
@@ -23,10 +26,13 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: tf-controller-terraforms
+  name: &app tf-controller-terraforms
   namespace: flux-system
 spec:
   targetNamespace: flux-system
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
     - name: tf-controller
