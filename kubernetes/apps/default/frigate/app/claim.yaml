@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: frigate
+  namespace: default
+spec:
+  accessModes: ["ReadWriteOnce"]
+  dataSourceRef:
+    kind: ReplicationDestination
+    apiGroup: volsync.backube
+    name: frigate-minio-dst
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ceph-block
