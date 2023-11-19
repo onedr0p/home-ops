@@ -1,1 +1,0 @@
-# cloudnative-pg
