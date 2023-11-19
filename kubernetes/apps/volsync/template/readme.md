@@ -1,5 +1,10 @@
----
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# VolSync Template
+
+## Flux Kustomization
+
+This requires `postBuild` configured on the Flux Kustomization
+
+```yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -7,9 +12,6 @@ metadata:
   namespace: flux-system
 spec:
   targetNamespace: default
-  dependsOn:
-    - name: external-secrets-stores
-    - name: node-feature-discovery-rules
   path: ./kubernetes/apps/default/frigate/app
   prune: true
   sourceRef:
@@ -23,3 +25,13 @@ spec:
     substitute:
       APP: frigate
       VOLSYNC_CAPACITY: 5Gi
+```
+
+## Required `postBuild` vars:
+
+- `APP`: The application name
+- `VOLSYNC_CAPACITY`: The PVC size
+
+## Optional `postBuild` vars:
+
+- TBD
