@@ -3,10 +3,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: frigate
+  name: &app frigate
   namespace: flux-system
 spec:
   targetNamespace: default
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
     - name: node-feature-discovery-rules
@@ -21,5 +24,5 @@ spec:
   timeout: 5m
   postBuild:
     substitute:
-      APP: frigate
+      APP: *app
       VOLSYNC_CAPACITY: 5Gi

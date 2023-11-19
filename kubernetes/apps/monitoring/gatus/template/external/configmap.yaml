@@ -2,21 +2,19 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: miniflux-gatus-ep
-  namespace: default
+  name: "${APP}-gatus-ep"
   labels:
     gatus.io/enabled: "true"
 data:
   config.yaml: |
     endpoints:
-      - name: miniflux
+      - name: "${APP}"
         group: external
-        url: https://miniflux.devbu.io/healthcheck
+        url: "https://${APP}.devbu.io${GATUS_URL_PATH:-/}"
         interval: 1m
         client:
           dns-resolver: tcp://1.1.1.1:53
         conditions:
           - "[STATUS] == 200"
-          - "[BODY] == OK"
         alerts:
           - type: pushover
