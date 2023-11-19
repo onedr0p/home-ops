@@ -3,10 +3,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: node-feature-discovery
+  name: &app node-feature-discovery
   namespace: flux-system
 spec:
   targetNamespace: kube-system
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   path: ./kubernetes/apps/kube-system/node-feature-discovery/app
   prune: true
   sourceRef:
@@ -21,10 +24,13 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: node-feature-discovery-rules
+  name: &app node-feature-discovery-rules
   namespace: flux-system
 spec:
   targetNamespace: kube-system
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   dependsOn:
     - name: node-feature-discovery
   path: ./kubernetes/apps/kube-system/node-feature-discovery/rules
