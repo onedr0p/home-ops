@@ -3,10 +3,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: qbittorrent
+  name: &app qbittorrent
   namespace: flux-system
 spec:
   targetNamespace: default
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   path: ./kubernetes/apps/default/qbittorrent/app
   prune: true
   sourceRef:
@@ -16,15 +19,21 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
+  postBuild:
+    substitute:
+      APP: *app
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: qbittorrent-tools
+  name: &app qbittorrent-tools
   namespace: flux-system
 spec:
   targetNamespace: default
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   path: ./kubernetes/apps/default/qbittorrent/tools
   prune: true
   sourceRef:

@@ -7,6 +7,9 @@ metadata:
   namespace: flux-system
 spec:
   targetNamespace: default
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
   path: ./kubernetes/apps/default/cross-seed/app
@@ -18,3 +21,6 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
+  postBuild:
+    substitute:
+      APP: *app

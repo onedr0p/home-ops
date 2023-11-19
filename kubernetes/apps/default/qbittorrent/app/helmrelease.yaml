@@ -87,7 +87,13 @@ spec:
         enabled: true
         className: internal
         hosts:
-          - host: &host qb.devbu.io
+          - host: &host "{{ .Release.Name }}.devbu.io"
+            paths:
+              - path: /
+                service:
+                  name: main
+                  port: http
+          - host: &customHost qb.devbu.io
             paths:
               - path: /
                 service:
@@ -96,6 +102,7 @@ spec:
         tls:
           - hosts:
               - *host
+              - *customHost
     persistence:
       config:
         enabled: true

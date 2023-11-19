@@ -49,7 +49,8 @@ spec:
                 sabnzbd.default.svc,
                 sabnzbd.default.svc.cluster,
                 sabnzbd.default.svc.cluster.local,
-                sab.devbu.io
+                sab.devbu.io,
+                sabnzbd.devbu.io
             envFrom:
               - secretRef:
                   name: sabnzbd-secret
@@ -91,7 +92,13 @@ spec:
         enabled: true
         className: internal
         hosts:
-          - host: &host sab.devbu.io
+          - host: &host "{{ .Release.Name }}.devbu.io"
+            paths:
+              - path: /
+                service:
+                  name: main
+                  port: http
+          - host: &customHost sab.devbu.io
             paths:
               - path: /
                 service:
@@ -100,6 +107,7 @@ spec:
         tls:
           - hosts:
               - *host
+              - *customHost
     persistence:
       config:
         enabled: true
