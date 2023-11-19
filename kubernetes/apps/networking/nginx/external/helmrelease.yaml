@@ -4,7 +4,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: nginx-external
-  namespace: networking
+  namespace: &namespace networking
 spec:
   interval: 30m
   chart:
@@ -72,7 +72,7 @@ spec:
         enabled: true
         serviceMonitor:
           enabled: true
-          namespace: networking
+          namespace: *namespace
           namespaceSelector:
             any: true
       extraArgs:

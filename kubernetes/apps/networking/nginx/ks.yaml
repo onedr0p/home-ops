@@ -3,10 +3,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: nginx-certificates
+  name: &app nginx-certificates
   namespace: flux-system
 spec:
   targetNamespace: networking
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   dependsOn:
     - name: cert-manager-issuers
   path: ./kubernetes/apps/networking/nginx/certificates
@@ -23,10 +26,13 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: nginx-external
+  name: &app nginx-external
   namespace: flux-system
 spec:
   targetNamespace: networking
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
     - name: nginx-certificates
@@ -44,10 +50,13 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: nginx-internal
+  name: &app nginx-internal
   namespace: flux-system
 spec:
   targetNamespace: networking
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   dependsOn:
     - name: nginx-certificates
   path: ./kubernetes/apps/networking/nginx/internal

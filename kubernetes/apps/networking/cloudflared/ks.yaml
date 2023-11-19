@@ -3,12 +3,15 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cloudflared
+  name: &app cloudflared
   namespace: flux-system
   labels:
     substitution.flux.home.arpa/enabled: "true"
 spec:
   targetNamespace: networking
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
   path: ./kubernetes/apps/networking/cloudflared/app
