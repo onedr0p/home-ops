@@ -3,10 +3,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: volsync
+  name: &app volsync
   namespace: flux-system
 spec:
   targetNamespace: volsync
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
   path: ./kubernetes/apps/volsync/volsync/app
   prune: true
   sourceRef:
