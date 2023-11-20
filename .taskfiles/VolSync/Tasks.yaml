@@ -61,13 +61,13 @@ tasks:
   snapshot:
     desc: Trigger a Restic ReplicationSource snapshot (ex. task volsync:snapshot app=plex [ns=default])
     cmds:
-      # TODO: Only suspend when a arg is passed to the task
-      - task: suspend-task
-        vars: *task-vars
+      # # TODO: Only suspend when a arg is passed to the task
+      # - task: suspend-task
+      #   vars: *task-vars
       - kubectl -n {{.ns}} patch replicationsources {{.app}} --type merge -p '{"spec":{"trigger":{"manual":"{{.ts}}"}}}'
       - bash {{.scriptsDir}}/wait.sh volsync-src-{{.app}} {{.ns}}
       - kubectl -n {{.ns}} wait job/volsync-src-{{.app}} --for condition=complete --timeout=120m
-      # TODO: Find a way to output logs
+      # # TODO: Find a way to output logs
       # Error from server (NotFound): jobs.batch "volsync-src-zzztest" not found
       # - kubectl -n {{.ns}} logs job/volsync-src-{{.app}}
     vars:
