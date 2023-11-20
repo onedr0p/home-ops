@@ -16,7 +16,7 @@ kubeconform_args=(
     "-kubernetes-version"
     "${KUBE_VERSION}"
     "-skip"
-    "Secret"
+    "ReplicationSource,ReplicationDestination,Secret"
     "-schema-location"
     "default"
     "-schema-location"
