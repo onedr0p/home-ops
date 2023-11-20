@@ -35,19 +35,8 @@ spec:
     cleanPrometheusOperatorObjectNames: true
     crds:
       enabled: true
-    nodeExporter:
-      enabled: true
-    kubeStateMetrics:
-      enabled: true
-    kube-state-metrics:
-      prometheus:
-        monitor:
-          relabelings:
-            - action: replace
-              regex: ^(.*)$
-              replacement: $1
-              sourceLabels: ["__meta_kubernetes_pod_node_name"]
-              targetLabel: kubernetes_node
+    alertmanager:
+      enabled: false
     kubelet:
       enabled: true
       serviceMonitor:
@@ -139,7 +128,37 @@ spec:
               resources:
                 requests:
                   storage: 20Gi
-    alertmanager:
-      enabled: false
+    nodeExporter:
+      enabled: true
+    prometheus-node-exporter:
+      fullnameOverride: node-exporter
+      prometheus:
+        monitor:
+          enabled: true
+          relabelings:
+            - action: replace
+              regex: (.*)
+              replacement: $1
+              sourceLabels:
+                - __meta_kubernetes_pod_node_name
+              targetLabel: kubernetes_node
+    kubeStateMetrics:
+      enabled: true
+    kube-state-metrics:
+      fullnameOverride: kube-state-metrics
+      metricLabelsAllowlist:
+        - pods=[*]
+        - deployments=[*]
+        - persistentvolumeclaims=[*]
+      prometheus:
+        monitor:
+          enabled: true
+          relabelings:
+            - action: replace
+              regex: (.*)
+              replacement: $1
+              sourceLabels:
+                - __meta_kubernetes_pod_node_name
+              targetLabel: kubernetes_node
     grafana:
       enabled: false
