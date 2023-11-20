@@ -8,23 +8,24 @@ This requires `postBuild` configured on the Flux Kustomization
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: frigate
+  name: &app plex
   namespace: flux-system
 spec:
-  targetNamespace: default
-  path: ./kubernetes/apps/default/frigate/app
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: home-kubernetes
-  wait: false
-  interval: 30m
-  retryInterval: 1m
-  timeout: 5m
+  # ...
   postBuild:
     substitute:
-      APP: frigate
+      APP: *app
       VOLSYNC_CAPACITY: 5Gi
+```
+
+and then call the template in your applications `kustomization.yaml`
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # ...
+  - ../../../../templates/volsync
 ```
 
 ## Required `postBuild` vars:
