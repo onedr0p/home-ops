@@ -22,8 +22,8 @@ vars:
 
 tasks:
   list:
-    desc: List all snapshots taken by restic for a given app (ex. task volsync:list app=plex [ns=default])
-    silent: true
+    desc: List all snapshots
+    summary: task {{.TASK}} app=plex [ns=default]
     cmds:
       - envsubst < <(cat {{.templatesDir}}/list.tmpl.yaml) | kubectl apply -f -
       - bash {{.scriptsDir}}/wait.sh list-{{.app}}-{{.ts}} {{.ns}}
@@ -37,10 +37,11 @@ tasks:
     preconditions:
       - sh: test -f {{.scriptsDir}}/wait.sh
       - sh: test -f {{.templatesDir}}/list.tmpl.yaml
+    silent: true
 
   unlock:
-    desc: Unlocks restic repository for a given app (ex. task volsync:unlock app=plex [ns=default])
-    silent: true
+    desc: Unlock a Restic repository
+    summary: task {{.TASK}} app=plex [ns=default]
     cmds:
       - envsubst < <(cat {{.templatesDir}}/unlock.tmpl.yaml) | kubectl apply -f -
       - bash {{.scriptsDir}}/wait.sh unlock-{{.app}}-{{.ts}} {{.ns}}
@@ -54,22 +55,21 @@ tasks:
     preconditions:
       - sh: test -f {{.scriptsDir}}/wait.sh
       - sh: test -f {{.templatesDir}}/unlock.tmpl.yaml
+    silent: true
 
   # To run backup jobs in parallel for all replicationsources:
   #  - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:snapshot app=$0 ns=$1'
-  #
   snapshot:
-    desc: Trigger a Restic ReplicationSource snapshot (ex. task volsync:snapshot app=plex [ns=default])
+    desc: Trigger a Restic ReplicationSource snapshot
+    summary: task {{.TASK}} app=plex [ns=default]
     cmds:
       # # TODO: Only suspend when a arg is passed to the task
+      # # https://github.com/go-task/task/issues/608
       # - task: suspend-task
       #   vars: *task-vars
       - kubectl -n {{.ns}} patch replicationsources {{.app}} --type merge -p '{"spec":{"trigger":{"manual":"{{.ts}}"}}}'
       - bash {{.scriptsDir}}/wait.sh volsync-src-{{.app}} {{.ns}}
       - kubectl -n {{.ns}} wait job/volsync-src-{{.app}} --for condition=complete --timeout=120m
-      # # TODO: Find a way to output logs
-      # Error from server (NotFound): jobs.batch "volsync-src-zzztest" not found
-      # - kubectl -n {{.ns}} logs job/volsync-src-{{.app}}
     vars:
       app: '{{ or .app (fail "Argument (app) is required") }}'
       ns: '{{.ns | default "default"}}'
@@ -88,10 +88,10 @@ tasks:
         msg: "ReplicationSource '{{.app}}' not found in namespace '{{.ns}}'"
 
   # To run restore jobs in parallel for all replicationdestinations:
-  #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=2 -l bash -c 'task volsync:restore app=$0 ns=$1'
-  #
+  #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore app=$0 ns=$1'
   restore:
-    desc: Trigger a Restic ReplicationSource restore (ex. task volsync:restore app=plex [ns=default previous=2])
+    desc: Trigger a Restic ReplicationSource restore
+    summary: task {{.TASK}} app=plex [ns=default] [previous=2]
     cmds:
       - task: suspend-task
         vars: *task-vars
@@ -134,10 +134,10 @@ tasks:
     internal: true
     cmds:
       - envsubst < <(cat {{.templatesDir}}/wipe.tmpl.yaml) | kubectl apply -f -
-      - bash {{.scriptsDir}}/wait.sh wipe-{{.app}}-{{.app}}-{{.ts}} {{.ns}}
-      - kubectl -n {{.ns}} wait job/wipe-{{.app}}-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
-      - kubectl -n {{.ns}} logs job/wipe-{{.app}}-{{.app}}-{{.ts}} --container wipe
-      - kubectl -n {{.ns}} delete job wipe-{{.app}}-{{.app}}-{{.ts}}
+      - bash {{.scriptsDir}}/wait.sh wipe-{{.app}}-{{.ts}} {{.ns}}
+      - kubectl -n {{.ns}} wait job/wipe-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
+      - kubectl -n {{.ns}} logs job/wipe-{{.app}}-{{.ts}} --container wipe
+      - kubectl -n {{.ns}} delete job wipe-{{.app}}-{{.ts}}
     env: *task-vars
 
   # Create VolSync replicationdestination CR to restore data
@@ -145,9 +145,9 @@ tasks:
     internal: true
     cmds:
       - envsubst < <(cat {{.templatesDir}}/replicationdestination.tmpl.yaml) | kubectl apply -f -
-      - bash {{.scriptsDir}}/wait.sh volsync-dst-{{.app}}-{{.app}}-{{.ts}} {{.ns}}
-      - kubectl -n {{.ns}} wait job/volsync-dst-{{.app}}-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
-      - kubectl -n {{.ns}} delete replicationdestination {{.app}}-{{.app}}-{{.ts}}
+      - bash {{.scriptsDir}}/wait.sh volsync-dst-{{.app}}-{{.ts}} {{.ns}}
+      - kubectl -n {{.ns}} wait job/volsync-dst-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
+      - kubectl -n {{.ns}} delete replicationdestination {{.app}}-{{.ts}}
     env: *task-vars
 
   # Resume Flux ks and hr
