@@ -52,13 +52,6 @@ spec:
               SLSKD_NO_SHARE_SCAN: true
               SLSKD_NO_VERSION_CHECK: true
               SLSKD_REMOTE_CONFIGURATION: true
-              SLSKD_RETENTION_LOGS: 60
-              SLSKD_RETENTION_TRANSFERS_UPLOAD_SUCCEEDED: 20160
-              SLSKD_RETENTION_TRANSFERS_UPLOAD_ERRORED: 1440
-              SLSKD_RETENTION_TRANSFERS_UPLOAD_CANCELLED: 5
-              SLSKD_RETENTION_TRANSFERS_DOWNLOAD_SUCCEEDED: 20160
-              SLSKD_RETENTION_TRANSFERS_DOWNLOAD_ERRORED: 1440
-              SLSKD_RETENTION_TRANSFERS_DOWNLOAD_CANCELLED: 5
               SLSKD_SHARED_DIR: /media/shared
               SLSKD_SHARE_FILTER: Thumbs.db$;\.DS_Store$
               SLSKD_SLSK_LISTEN_PORT: &soulseekPort 50300
@@ -114,5 +107,10 @@ spec:
       config:
         enabled: true
         existingClaim: slskd
-      media:
-        existingClaim: slskd-nfs
+      config-file:
+        type: configMap
+        name: slskd-configmap
+        globalMounts:
+          - path: /config/slskd.yml
+            subPath: slskd.yml
+            readOnly: true
