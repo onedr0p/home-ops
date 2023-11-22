@@ -4,13 +4,12 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: thelounge
-  namespace: default
 spec:
   interval: 30m
   chart:
     spec:
       chart: app-template
-      version: 2.0.3
+      version: 2.3.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -33,7 +32,6 @@ spec:
   values:
     controllers:
       main:
-        type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -42,7 +40,8 @@ spec:
               repository: ghcr.io/thelounge/thelounge
               tag: 4.4.1
             env:
-              THELOUNGE_HOME: /config
+              # https://github.com/thelounge/thelounge/issues/2656
+              THELOUNGE_HOME: &configDir /config/thelounge
             resources:
               requests:
                 cpu: 10m
@@ -55,14 +54,6 @@ spec:
             runAsGroup: 568
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
-        statefulset:
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 1Gi
-              storageClass: ceph-block
-              globalMounts:
-                - path: /config
     service:
       main:
         ports:
@@ -82,3 +73,9 @@ spec:
         tls:
           - hosts:
               - *host
+    persistence:
+      config:
+        enabled: true
+        existingClaim: thelounge
+        globalMounts:
+          - path: *configDir
