@@ -38,7 +38,7 @@ spec:
           main:
             image:
               repository: ghcr.io/onedr0p/qbittorrent
-              tag: 4.6.0@sha256:cb6259df3be61a5108bc4f85b09a523fc4b250589ca9b315ef927cbdf779afb6
+              tag: 4.6.1@sha256:796f135bcb572a3fb3138b0c65034535c0a7b1dcb83940fe12e00cad1b47fcbb
             env:
               TZ: America/New_York
               QBITTORRENT__PORT: &port 80
@@ -53,12 +53,27 @@ spec:
                   fieldRef:
                     fieldPath: status.podIP
               QBT_BitTorrent__Session__InterfaceName: eth0
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/v2/app/version
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: false
             resources:
               requests:
                 cpu: 200m
                 memory: 2Gi
               limits:
-                memory: 12Gi
+                memory: 16Gi
         pod:
           securityContext:
             runAsUser: 568

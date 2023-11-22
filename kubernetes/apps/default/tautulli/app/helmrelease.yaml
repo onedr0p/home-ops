@@ -41,6 +41,21 @@ spec:
               tag: 2.13.2@sha256:960fef79051c992dcbb077dcf196f81afad9c5753cb04462910b59dbac3f21f6
             env:
               TZ: America/New_York
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: &port 8181
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: false
             resources:
               requests:
                 cpu: 100m
@@ -72,7 +87,7 @@ spec:
       main:
         ports:
           http:
-            port: 8181
+            port: *port
     ingress:
       main:
         enabled: true
