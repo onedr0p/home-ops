@@ -11,6 +11,9 @@ version: "3"
 x-task-vars: &task-vars
   app: '{{.app}}'
   controller: '{{.controller}}'
+  claim: '{{.claim}}'
+  puid: '{{.puid}}'
+  pgid: '{{.pgid}}'
   ns: '{{.ns}}'
   previous: '{{.previous}}'
   ts: '{{.ts}}'
@@ -73,16 +76,11 @@ tasks:
     vars:
       app: '{{ or .app (fail "Argument (app) is required") }}'
       ns: '{{.ns | default "default"}}'
-      # Query to find the controller associated with the app
       controller:
-        sh: |
-          if kubectl -n {{.ns}} get deployment.apps/{{.app}} >/dev/null 2>&1 ; then
-            echo "deployment.apps/{{.app}}"
-          else
-            echo "statefulset.apps/{{.app}}"
-          fi
+        sh: "{{.scriptsDir}}/controller.sh {{.ns}} {{.app}}"
     env: *task-vars
     preconditions:
+      - sh: test -f {{.scriptsDir}}/controller.sh
       - sh: test -f {{.scriptsDir}}/wait.sh
       - sh: kubectl -n {{.ns}} get replicationsources {{.app}}
         msg: "ReplicationSource '{{.app}}' not found in namespace '{{.ns}}'"
@@ -105,19 +103,20 @@ tasks:
       app: '{{ or .app (fail "Argument (app) is required") }}'
       ns: '{{.ns | default "default"}}'
       previous: '{{.previous | default 2}}'
-      # Query to find the controller associated with the app
       controller:
-        sh: |
-          if kubectl -n {{.ns}} get deployment.apps/{{.app}} >/dev/null 2>&1 ; then
-            echo "deployment.apps/{{.app}}"
-          else
-            echo "statefulset.apps/{{.app}}"
-          fi
+        sh: "{{.scriptsDir}}/controller.sh {{.ns}} {{.app}}"
+      claim:
+        sh: kubectl -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.sourcePVC}"
+      puid:
+        sh: kubectl -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsUser}"
+      pgid:
+        sh: kubectl -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
     env: *task-vars
     preconditions:
-      - sh: test -f {{.templatesDir}}/wipe.tmpl.yaml
-      - sh: test -f {{.templatesDir}}/replicationdestination.tmpl.yaml
+      - sh: test -f {{.scriptsDir}}/controller.sh
       - sh: test -f {{.scriptsDir}}/wait.sh
+      - sh: test -f {{.templatesDir}}/replicationdestination.tmpl.yaml
+      - sh: test -f {{.templatesDir}}/wipe.tmpl.yaml
 
   # Suspend the Flux ks and hr
   suspend-task:
