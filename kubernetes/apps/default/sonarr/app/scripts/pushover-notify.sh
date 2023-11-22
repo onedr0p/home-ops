@@ -64,6 +64,23 @@ if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
     printf -v PUSHOVER_URL_TITLE "View series in %s" "${sonarr_instancename:-Sonarr}"
 fi
 
+#
+# Send notification on Manual Interaction Required
+#
+if [[ "${sonarr_eventtype:-}" == "ManualInteractionRequired" ]]; then
+    PUSHOVER_PRIORITY="${PUSHOVER_PRIORITY:-"1"}"
+    printf -v PUSHOVER_TITLE "Episode requires manual interaction"
+    printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small><small>\n<b>Quality:</b> %s</small>" \
+        "${sonarr_series_title}" \
+        "${sonarr_episodefile_seasonnumber}" \
+        "${sonarr_episodefile_episodenumbers}" \
+        "${sonarr_episodefile_episodetitles}" \
+        "${sonarr_download_client}" \
+        "${sonarr_episodefile_quality}"
+    printf -v PUSHOVER_URL "%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug}"
+    printf -v PUSHOVER_URL_TITLE "View series in %s" "${sonarr_instancename:-Sonarr}"
+fi
+
 notification=$(jq -n \
     --arg token "${PUSHOVER_TOKEN}" \
     --arg user "${PUSHOVER_USER_KEY}" \
