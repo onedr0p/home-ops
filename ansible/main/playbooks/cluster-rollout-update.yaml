@@ -26,23 +26,24 @@
         - not (kubectl_get_node['stdout'] | from_json).spec.unschedulable is defined
       block:
         - name: Cordon
-          ansible.builtin.command: "kubectl cordon {{ inventory_hostname }}"
+          kubernetes.core.k8s_drain:
+            name: "{{ inventory_hostname }}"
+            kubeconfig: /etc/rancher/k3s/k3s.yaml
+            state: cordon
           delegate_to: "{{ groups['master'][0] }}"
-          changed_when: false
-
-        - name: Wait to cordon
-          ansible.builtin.command: "kubectl get node {{ inventory_hostname }} -o json"
-          register: wait_for_cordon
-          retries: 10
-          delay: 10
-          delegate_to: "{{ groups['master'][0] }}"
-          changed_when: false
-          until: (wait_for_cordon['stdout'] | from_json).spec.unschedulable
 
         - name: Drain
-          ansible.builtin.command: "kubectl drain --ignore-daemonsets --delete-emptydir-data --force {{ inventory_hostname }}"
+          kubernetes.core.k8s_drain:
+            kubeconfig: /etc/rancher/k3s/k3s.yaml
+            state: drain
+            delete_options:
+              delete_emptydir_data: true
+              ignore_daemonsets: true
+              terminate_grace_period: 600
+              wait_timeout: 900
+            pod_selectors:
+             - app!=rook-ceph-osd
           delegate_to: "{{ groups['master'][0] }}"
-          changed_when: false
 
         - name: Update
           ansible.builtin.apt:
@@ -62,14 +63,8 @@
             reboot_timeout: 3600
 
         - name: Uncordon
-          ansible.builtin.command: "kubectl uncordon {{ inventory_hostname }}"
+          kubernetes.core.k8s_drain:
+            name: "{{ inventory_hostname }}"
+            kubeconfig: /etc/rancher/k3s/k3s.yaml
+            state: uncordon
           delegate_to: "{{ groups['master'][0] }}"
-          changed_when: false
-
-        - name: Wait to uncordon
-          ansible.builtin.command: "kubectl get node {{ inventory_hostname }} -o json"
-          retries: 10
-          delay: 10
-          delegate_to: "{{ groups['master'][0] }}"
-          changed_when: false
-          until: not (kubectl_get_node['stdout'] | from_json).spec.unschedulable is defined
