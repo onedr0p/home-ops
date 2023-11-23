@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: system-upgrade-controller
+  name: &app system-upgrade-controller
 spec:
   interval: 30m
   chart:
@@ -45,10 +45,7 @@ spec:
               SYSTEM_UPGRADE_JOB_PRIVILEGED: true
               SYSTEM_UPGRADE_JOB_TTL_SECONDS_AFTER_FINISH: 900
               SYSTEM_UPGRADE_PLAN_POLLING_INTERVAL: 15m
-              SYSTEM_UPGRADE_CONTROLLER_NAME:
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.labels['upgrade.cattle.io/controller']
+              SYSTEM_UPGRADE_CONTROLLER_NAME: *app
               SYSTEM_UPGRADE_CONTROLLER_NAMESPACE:
                 valueFrom:
                   fieldRef:
@@ -108,18 +105,3 @@ spec:
         globalMounts:
           - path: /etc/ca-certificates
             readOnly: true
-  postRenderers:
-    - kustomize:
-        patchesStrategicMerge:
-          - apiVersion: apps/v1
-            kind: Deployment
-            metadata:
-              name: system-upgrade-controller
-            spec:
-              selector:
-                matchLabels:
-                  upgrade.cattle.io/controller: system-upgrade-controller
-              template:
-                metadata:
-                  labels:
-                    upgrade.cattle.io/controller: system-upgrade-controller # necessary to avoid draining the node
