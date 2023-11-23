@@ -30,8 +30,6 @@ spec:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
-        labels:
-          upgrade.cattle.io/controller: system-upgrade-controller
         containers:
           main:
             image:
@@ -110,3 +108,18 @@ spec:
         globalMounts:
           - path: /etc/ca-certificates
             readOnly: true
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: system-upgrade-controller
+            spec:
+              selector:
+                matchLabels:
+                  upgrade.cattle.io/controller: system-upgrade-controller
+              template:
+                metadata:
+                  labels:
+                    upgrade.cattle.io/controller: system-upgrade-controller # necessary to avoid draining the node
