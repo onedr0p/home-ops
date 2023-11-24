@@ -3,11 +3,6 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: system-upgrade
-  labels:
-    app.kubernetes.io/managed-by: Helm
-  annotations:
-    meta.helm.sh/release-name: system-upgrade-controller
-    meta.helm.sh/release-namespace: system-upgrade
 secrets:
   - name: system-upgrade
 ---
@@ -16,22 +11,13 @@ kind: Secret
 type: kubernetes.io/service-account-token
 metadata:
   name: system-upgrade
-  labels:
-    app.kubernetes.io/managed-by: Helm
   annotations:
-    meta.helm.sh/release-name: system-upgrade-controller
-    meta.helm.sh/release-namespace: system-upgrade
     kubernetes.io/service-account.name: system-upgrade
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name:  system-upgrade
-  labels:
-    app.kubernetes.io/managed-by: Helm
-  annotations:
-    meta.helm.sh/release-name: system-upgrade-controller
-    meta.helm.sh/release-namespace: system-upgrade
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -39,4 +25,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: system-upgrade
-    namespace: system-upgrade
+    namespace: kube-system
