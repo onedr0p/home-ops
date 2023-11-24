@@ -17,16 +17,16 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
       - name: Generate Token
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
-        id: generate-token
+        uses: actions/create-github-app-token@e995b4e40ace2eb5bf13137d9abe242c98f3aab6 # v1.6.0
+        id: app-token
         with:
-          app_id: "${{ secrets.BOT_APP_ID }}"
-          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
-          token: "${{ steps.generate-token.outputs.token }}"
+          token: "${{ steps.app-token.outputs.token }}"
 
       - name: Build docs
         uses: docker://ghcr.io/bjw-s/mdbook:0.4.35@sha256:7bb285c1f8edd91fa9848b65ead4f2835703fbdb906d9be15ad87045327b2f51
@@ -37,7 +37,7 @@ jobs:
         name: Deploy
         uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3.9.3
         with:
-          github_token: "${{ steps.generate-token.outputs.token }}"
+          github_token: "${{ steps.app-token.outputs.token }}"
           publish_dir: ./docs/book
           user_name: bot-ross[bot]
           user_email: bot-ross <98030736+bot-ross[bot]@users.noreply.github.com>
