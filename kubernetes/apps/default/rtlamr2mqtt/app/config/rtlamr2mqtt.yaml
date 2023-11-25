@@ -1,0 +1,28 @@
+general:
+  sleep_for: 0
+  verbosity: debug
+  tickle_rtl_tcp: false
+  device_id: 0bda:2838
+
+mqtt:
+  host: mosquitto.default.svc.cluster.local
+  port: 1883
+  tls_enabled: false
+  user: "{{ .MQTT_USERNAME }}"
+  password: "{{ .MQTT_PASSWORD }}"
+  ha_autodiscovery: true
+  ha_autodiscovery_topic: homeassistant
+  base_topic: rtlamr
+
+custom_parameters:
+  rtltcp: -s 2048000
+  rtlamr: -unique=true -symbollength=32
+
+meters:
+  - id: "{{ .METER_ID }}"
+    protocol: scm+
+    name: energy_meter
+    format: "######.###"
+    unit_of_measurement: "\u33A5"
+    icon: mdi:gauge
+    device_class: energy
