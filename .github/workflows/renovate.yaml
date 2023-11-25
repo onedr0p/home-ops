@@ -17,16 +17,18 @@ on:
   push:
     branches: ["main"]
     paths:
-      - .github/renovate-bot.json5
       - .github/renovate.json5
       - .github/renovate/**.json5
 
+# Retrieve BOT_USER_ID via `curl -s 'https://api.github.com/users/$(BOT_USERNAME)%5Bbot%5D' | yq .id`
 env:
   LOG_LEVEL: debug
+  RENOVATE_ONBOARDING_CONFIG_FILE_NAME: .github/renovate.json5
   RENOVATE_DRY_RUN: false
-  RENOVATE_CONFIG_FILE: .github/renovate-bot.json5
   RENOVATE_AUTODISCOVER: true
   RENOVATE_AUTODISCOVER_FILTER: "${{ github.repository }}"
+  RENOVATE_USERNAME: "${{ secrets.BOT_USERNAME }}[bot]"
+  RENOVATE_GIT_AUTHOR: "${{ secrets.BOT_USERNAME }} <${{ secrets.BOT_USER_ID }}+${{ secrets.BOT_USERNAME }}[bot]@users.noreply.github.com>"
 
 jobs:
   renovate:
