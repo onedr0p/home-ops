@@ -68,7 +68,7 @@ fi
 # Send notification on Manual Interaction Required
 #
 if [[ "${sonarr_eventtype:-}" == "ManualInteractionRequired" ]]; then
-    PUSHOVER_PRIORITY="${PUSHOVER_PRIORITY:-"1"}"
+    PUSHOVER_PRIORITY="1"
     printf -v PUSHOVER_TITLE "Episode requires manual interaction"
     printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small><small>\n<b>Quality:</b> %s</small>" \
         "${sonarr_series_title}" \
