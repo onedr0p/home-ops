@@ -64,16 +64,16 @@ The way Flux works for me here is it will recursively search the `kubernetes/${c
 This Git repository contains the following directories under [Kubernetes](./kubernetes/).
 
 ```sh
- kubernetes
-├──  main            # main cluster
-│   ├──  apps           # applications
-│   ├──  bootstrap      # bootstrap procedures
-│   ├──  flux           # core flux configuration
-│   └──  templates      # re-useable components
-└──  storage         # storage cluster
-    ├──  apps           # applications
-    ├──  bootstrap      # bootstrap procedures
-    └──  flux           # core flux configuration
+📁 kubernetes
+├── 📁 main            # main cluster
+│   ├── 📁 apps           # applications
+│   ├── 📁 bootstrap      # bootstrap procedures
+│   ├── 📁 flux           # core flux configuration
+│   └── 📁 templates      # re-useable components
+└── 📁 storage         # storage cluster
+    ├── 📁 apps           # applications
+    ├── 📁 bootstrap      # bootstrap procedures
+    └── 📁 flux           # core flux configuration
 ```
 
 ### Cluster Layout
