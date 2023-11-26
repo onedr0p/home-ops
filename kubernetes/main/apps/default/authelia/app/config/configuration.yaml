@@ -1,0 +1,96 @@
+---
+authentication_backend:
+  password_reset:
+    disable: true
+  refresh_interval: 1m
+  ldap:
+    address: ldap://lldap.default.svc.cluster.local:389
+    implementation: custom
+    timeout: 5s
+    start_tls: false
+    base_dn: dc=home,dc=arpa
+    additional_users_dn: ou=people
+    users_filter: (&({username_attribute}={input})(objectClass=person))
+    additional_groups_dn: ou=groups
+    groups_filter: (member={dn})
+    group_search_mode: filter
+    user: uid=admin,ou=people,dc=home,dc=arpa
+    password: password
+    attributes:
+      username: uid
+      display_name: displayName
+      mail: mail
+      member_of: memberOf
+      group_name: cn
+
+session:
+  same_site: lax
+  inactivity: 5m
+  expiration: 1h
+  remember_me: 1M
+  cookies:
+    - name: devbu_session
+      domain: devbu.io
+      authelia_url: https://auth.devbu.io
+      default_redirection_url: https://devbu.io
+  redis:
+    host: redis.database.svc.cluster.local
+    database_index: 14
+    high_availability:
+      sentinel_name: redis-master
+      nodes:
+        - host: redis-node-0.redis-headless.database.svc.cluster.local
+          port: 26379
+        - host: redis-node-1.redis-headless.database.svc.cluster.local
+          port: 26379
+        - host: redis-node-2.redis-headless.database.svc.cluster.local
+          port: 26379
+
+notifier:
+  disable_startup_check: true
+  smtp:
+    address: smtp-relay.default.svc.cluster.local:25
+    sender: Authelia <authelia@buhl.casa>
+    disable_require_tls: true
+
+totp:
+  disable: false
+  issuer: authelia.com
+
+webauthn:
+  disable: true
+
+duo_api:
+  disable: true
+
+access_control:
+  default_policy: two_factor
+  networks:
+    - name: internal
+      networks: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+  rules: []
+
+identity_providers:
+  oidc:
+    cors:
+      endpoints: ["authorization", "token", "revocation", "introspection"]
+      allowed_origins_from_client_redirect_uris: true
+    clients:
+      - id: grafana
+        description: Grafana
+        secret: "${GRAFANA_OAUTH_CLIENT_SECRET}"
+        public: false
+        authorization_policy: two_factor
+        pre_configured_consent_duration: 1y
+        scopes: ["openid", "profile", "groups", "email"]
+        redirect_uris: ["https://grafana.devbu.io/login/generic_oauth"]
+        userinfo_signed_response_alg: none
+      - id: miniflux
+        description: Miniflux
+        secret: "${MINIFLUX_OAUTH_CLIENT_SECRET}"
+        public: false
+        authorization_policy: two_factor
+        pre_configured_consent_duration: 1y
+        scopes: ["openid", "profile", "groups", "email"]
+        redirect_uris: ["https://miniflux.devbu.io/oauth2/oidc/callback"]
+        userinfo_signed_response_alg: none

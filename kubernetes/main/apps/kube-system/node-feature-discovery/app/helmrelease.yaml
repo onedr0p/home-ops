@@ -1,0 +1,39 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: node-feature-discovery
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: node-feature-discovery
+      version: 0.14.3
+      sourceRef:
+        kind: HelmRepository
+        name: node-feature-discovery
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    worker:
+      config:
+        core:
+          sources: ["custom", "pci", "usb"]
+        sources:
+          usb:
+            deviceClassWhitelist: ["02", "03", "0e", "ef", "fe", "ff"]
+            deviceLabelFields: ["class", "vendor", "device"]
+    prometheus:
+      enable: true

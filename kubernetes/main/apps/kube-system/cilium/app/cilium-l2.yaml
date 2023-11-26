@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/cilium.io/ciliuml2announcementpolicy_v2alpha1.json
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: policy
+spec:
+  loadBalancerIPs: true
+  interfaces:
+    - ^enp.*
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/cilium.io/ciliumloadbalancerippool_v2alpha1.json
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: pool
+spec:
+  cidrs:
+    - cidr: 192.168.42.0/24

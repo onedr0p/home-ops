@@ -1,0 +1,66 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: unpoller
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.3.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              repository: ghcr.io/unpoller/unpoller
+              tag: v2.9.4
+            env:
+              TZ: America/New_York
+              UP_UNIFI_DEFAULT_ROLE: home-ops
+              UP_UNIFI_DEFAULT_URL: https://unifi-network.turbo.ac
+              UP_UNIFI_DEFAULT_VERIFY_SSL: false
+              UP_UNIFI_DEFAULT_USER: unifipoller
+              UP_UNIFI_DEFAULT_PASS: 1nternalUseOnly
+              UP_INFLUXDB_DISABLE: true
+            resources:
+              requests:
+                cpu: 5m
+                memory: 36M
+              limits:
+                memory: 128M
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+    service:
+      main:
+        ports:
+          http:
+            port: 9130
+    serviceMonitor:
+      main:
+        enabled: true
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 2m # Unifi API only polls at 2m intervals
+            scrapeTimeout: 10s

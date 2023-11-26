@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: snmp-exporter-apc-ups-rules
+spec:
+  groups:
+    - name: snmp-exporter-apc-ups.rules
+      rules:
+        - alert: UPSOnBattery
+          annotations:
+            summary: ZPM {{$labels.instance}} is running on batteries
+              and has less than 20 minutes of battery left
+          expr: |
+            (
+              upsAdvBatteryRunTimeRemaining/60/100 <= 20
+            and
+              upsBasicBatteryTimeOnBattery > 0
+            )
+          for: 1m
+          labels:
+            severity: critical

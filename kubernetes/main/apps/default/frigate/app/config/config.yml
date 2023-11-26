@@ -1,0 +1,165 @@
+---
+# yaml-language-server: $schema=https://frigate.devbu.io/api/config/schema.json
+logger:
+  default: info
+  # logs:
+  #   frigate.record: debug
+
+mqtt:
+  host: mosquitto.default.svc.cluster.local
+  topic_prefix: frigate
+  user: "{FRIGATE_MQTT_USERNAME}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
+
+database:
+  path: /data/frigate.db
+
+detectors:
+  coral:
+    type: edgetpu
+    device: usb
+
+ffmpeg:
+  global_args: ["-hide_banner", "-loglevel", "warning"]
+  hwaccel_args: ["-hwaccel", "vaapi", "-hwaccel_device", "/dev/dri/renderD128", "-hwaccel_output_format", "yuv420p"]
+  output_args:
+    record: preset-record-ubiquiti
+
+snapshots:
+  enabled: true
+  timestamp: false
+  bounding_box: true
+  retain:
+    default: 2
+
+record:
+  enabled: true
+  retain:
+    days: 2
+    mode: all
+  events:
+    retain:
+      default: 2
+      mode: active_objects
+
+objects:
+  track: ["person"]
+  filters:
+    person:
+      min_area: 5000
+      max_area: 100000
+      threshold: 0.7
+
+go2rtc:
+  streams:
+    frigate_porch_hq: rtspx://unifi-protect.turbo.ac:7441/j0GwJJkeqgWeDict
+    frigate_porch_lq: rtspx://unifi-protect.turbo.ac:7441/vXHPHzP9FVRJfDuY
+    frigate_driveway_hq: rtspx://unifi-protect.turbo.ac:7441/Ccg9H1IizE1vs1uY
+    frigate_driveway_lq: rtspx://unifi-protect.turbo.ac:7441/yTDnSmMVDs6C8Zn2
+    frigate_garage_hq: rtspx://unifi-protect.turbo.ac:7441/m5oOVxjEFf0a7An8
+    frigate_garage_lq: rtspx://unifi-protect.turbo.ac:7441/rfX5a2wiqGcwhkkT
+    frigate_river_hq: rtspx://unifi-protect.turbo.ac:7441/4TS1FINEr5tOeF7Q
+    frigate_river_lq: rtspx://unifi-protect.turbo.ac:7441/LgRGGzkoV1lelHBE
+    frigate_study_hq: rtspx://unifi-protect.turbo.ac:7441/SViFPpsChGahJTpR
+    frigate_study_lq: rtspx://unifi-protect.turbo.ac:7441/fHV4bNS1KiYJb3nK
+    frigate_living_room_hq: rtspx://unifi-protect.turbo.ac:7441/XRuGR7p9aDEg9jdB
+    frigate_living_room_lq: rtspx://unifi-protect.turbo.ac:7441/7qEIbCsbYqn4SMEj
+    frigate_basement_1_hq: rtspx://unifi-protect.turbo.ac:7441/0MoNwT3jxtK7jU37
+    frigate_basement_1_lq: rtspx://unifi-protect.turbo.ac:7441/M5bhAT4dLAKZfmTD
+
+cameras:
+  frigate_porch:
+    ffmpeg:
+      inputs:
+        - path: rtsp://localhost:8554/frigate_porch_lq
+          roles: ["detect"]
+        - path: rtsp://localhost:8554/frigate_porch_hq
+          roles: ["record"]
+    detect:
+      width: 960
+      height: 720
+      fps: 10
+    objects:
+      filters:
+        person:
+          mask:
+            - 39,445,199,427,198,263,36,228
+            - 304,218,304,408,198,434,198,262
+            - 305,411,485,382,615,393,612,335,578,321,574,233,549,118,308,209
+
+  frigate_driveway:
+    ffmpeg:
+      inputs:
+        - path: rtsp://localhost:8554/frigate_driveway_lq
+          roles: ["detect"]
+        - path: rtsp://localhost:8554/frigate_driveway_hq
+          roles: ["record"]
+    detect:
+      width: 1280
+      height: 720
+      fps: 10
+    objects:
+      filters:
+        person:
+          mask:
+            - 822,204,1280,360,1280,0,0,0,0,313
+
+  frigate_garage:
+    ffmpeg:
+      inputs:
+        - path: rtsp://localhost:8554/frigate_garage_lq
+          roles: ["detect"]
+        - path: rtsp://localhost:8554/frigate_garage_hq
+          roles: ["record"]
+    detect:
+      width: 1024
+      height: 576
+      fps: 10
+
+  frigate_river:
+    ffmpeg:
+      inputs:
+        - path: rtsp://localhost:8554/frigate_river_lq
+          roles: ["detect"]
+        - path: rtsp://localhost:8554/frigate_river_hq
+          roles: ["record"]
+    detect:
+      width: 1280
+      height: 720
+      fps: 10
+
+  frigate_study:
+    ffmpeg:
+      inputs:
+        - path: rtsp://localhost:8554/frigate_study_lq
+          roles: ["detect"]
+        - path: rtsp://localhost:8554/frigate_study_hq
+          roles: ["record"]
+    detect:
+      width: 1280
+      height: 720
+      fps: 10
+
+  frigate_living_room:
+    ffmpeg:
+      inputs:
+        - path: rtsp://localhost:8554/frigate_living_room_lq
+          roles: ["detect"]
+        - path: rtsp://localhost:8554/frigate_living_room_hq
+          roles: ["record"]
+    detect:
+      width: 1024
+      height: 576
+      fps: 10
+
+  frigate_basement_1:
+    ffmpeg:
+      inputs:
+        - path: rtsp://localhost:8554/frigate_basement_1_lq
+          roles: ["detect"]
+        - path: rtsp://localhost:8554/frigate_basement_1_hq
+          roles: ["record"]
+    detect:
+      width: 1280
+      height: 720
+      fps: 10

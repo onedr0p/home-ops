@@ -1,0 +1,55 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: arc-home-ops
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: gha-runner-scale-set
+      version: 0.7.0
+      sourceRef:
+        kind: HelmRepository
+        name: actions-runner-controller
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    runnerScaleSetName: arc-runner-set-home-ops
+    githubConfigUrl: https://github.com/onedr0p/home-ops
+    minRunners: 1
+    maxRunners: 3
+    containerMode:
+      type: dind
+    template:
+      spec:
+        containers:
+          - name: runner
+            image: ghcr.io/actions/actions-runner:2.311.0
+            command: ["/home/runner/run.sh"]
+    controllerServiceAccount:
+      name: actions-runner-controller-gha-rs-controller
+      namespace: actions-runner-system
+  valuesFrom:
+    - kind: Secret
+      name: actions-runner-controller-auth-secret
+      valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_APP_ID
+      targetPath: githubConfigSecret.github_app_id
+    - kind: Secret
+      name: actions-runner-controller-auth-secret
+      valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_INSTALLATION_ID
+      targetPath: githubConfigSecret.github_app_installation_id
+    - kind: Secret
+      name: actions-runner-controller-auth-secret
+      valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_PRIVATE_KEY
+      targetPath: githubConfigSecret.github_app_private_key

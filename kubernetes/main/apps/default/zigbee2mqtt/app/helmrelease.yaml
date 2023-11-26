@@ -1,0 +1,117 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: zigbee2mqtt
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.3.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  dependsOn:
+    - name: mosquitto
+      namespace: default
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync
+  values:
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/koenkk/zigbee2mqtt
+              tag: 1.33.2
+            env:
+              TZ: America/New_York
+              ZIGBEE2MQTT_DATA: /config
+              ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_DISCOVERY_TOPIC: homeassistant
+              ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_LEGACY_ENTITY_ATTRIBUTES: "false"
+              ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_LEGACY_TRIGGERS: "false"
+              ZIGBEE2MQTT_CONFIG_ADVANCED_HOMEASSISTANT_STATUS_TOPIC: homeassistant/status
+              ZIGBEE2MQTT_CONFIG_ADVANCED_LAST_SEEN: ISO_8601
+              ZIGBEE2MQTT_CONFIG_ADVANCED_LEGACY_API: "false"
+              ZIGBEE2MQTT_CONFIG_ADVANCED_LEGACY_AVAILABILITY_PAYLOAD: "false"
+              ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL: info # debug
+              ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_OUTPUT: '["console"]'
+              ZIGBEE2MQTT_CONFIG_AVAILABILITY_ACTIVE_TIMEOUT: 60
+              ZIGBEE2MQTT_CONFIG_AVAILABILITY_PASSIVE_TIMEOUT: 2000
+              ZIGBEE2MQTT_CONFIG_DEVICE_OPTIONS_LEGACY: "false"
+              ZIGBEE2MQTT_CONFIG_DEVICE_OPTIONS_RETAIN: "true"
+              ZIGBEE2MQTT_CONFIG_EXPERIMENTAL_NEW_API: "true"
+              ZIGBEE2MQTT_CONFIG_FRONTEND_PORT: &port 80
+              ZIGBEE2MQTT_CONFIG_FRONTEND_URL: https://zigbee.devbu.io
+              ZIGBEE2MQTT_CONFIG_HOMEASSISTANT: "true"
+              ZIGBEE2MQTT_CONFIG_MQTT_INCLUDE_DEVICE_INFORMATION: "true"
+              ZIGBEE2MQTT_CONFIG_MQTT_KEEPALIVE: 60
+              ZIGBEE2MQTT_CONFIG_MQTT_REJECT_UNAUTHORIZED: "true"
+              ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://mosquitto.default.svc.cluster.local
+              ZIGBEE2MQTT_CONFIG_MQTT_VERSION: 5
+              ZIGBEE2MQTT_CONFIG_PERMIT_JOIN: "false"
+              ZIGBEE2MQTT_CONFIG_SERIAL_BAUDRATE: 115200
+              ZIGBEE2MQTT_CONFIG_SERIAL_DISABLE_LED: "false"
+              ZIGBEE2MQTT_CONFIG_SERIAL_PORT: tcp://192.168.1.90:6638
+            envFrom:
+              - secretRef:
+                  name: zigbee2mqtt-secret
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+    ingress:
+      main:
+        enabled: true
+        className: internal
+        hosts:
+          - host: &host "{{ .Release.Name }}.devbu.io"
+            paths:
+              - path: /
+                service:
+                  name: main
+                  port: http
+          - host: &customHost "zigbee.devbu.io"
+            paths:
+              - path: /
+                service:
+                  name: main
+                  port: http
+        tls:
+          - hosts:
+              - *host
+              - *customHost
+    persistence:
+      config:
+        enabled: true
+        existingClaim: zigbee2mqtt

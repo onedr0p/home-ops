@@ -1,0 +1,116 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: cilium
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: cilium
+      version: 1.14.4
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    autoDirectNodeRoutes: true
+    bandwidthManager:
+      enabled: true
+      bbr: true
+    bpf:
+      masquerade: true
+    bgp:
+      enabled: false
+    cluster:
+      name: kubernetes
+      id: 1
+    containerRuntime:
+      integration: containerd
+      socketPath: /var/run/k3s/containerd/containerd.sock
+    endpointRoutes:
+      enabled: true
+    hubble:
+      enabled: true
+      metrics:
+        enabled:
+          - dns:query
+          - drop
+          - tcp
+          - flow
+          - port-distribution
+          - icmp
+          - http
+        serviceMonitor:
+          enabled: true
+        dashboards:
+          enabled: true
+          annotations:
+            grafana_folder: Cilium
+      relay:
+        enabled: true
+        rollOutPods: true
+        prometheus:
+          serviceMonitor:
+            enabled: true
+      ui:
+        enabled: true
+        rollOutPods: true
+        ingress:
+          enabled: true
+          className: internal
+          hosts:
+            - &host hubble.devbu.io
+          tls:
+            - hosts:
+                - *host
+    ipam:
+      mode: kubernetes
+    ipv4NativeRoutingCIDR: 10.32.0.0/16
+    k8sServiceHost: 192.168.42.254
+    k8sServicePort: 6443
+    kubeProxyReplacement: true
+    kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
+    l2announcements:
+      enabled: true
+      leaseDuration: 120s
+      leaseRenewDeadline: 60s
+      leaseRetryPeriod: 1s
+    loadBalancer:
+      algorithm: maglev
+      mode: dsr
+    localRedirectPolicy: true
+    operator:
+      rollOutPods: true
+      prometheus:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+      dashboards:
+        enabled: true
+        annotations:
+          grafana_folder: Cilium
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        trustCRDsExist: true
+    dashboards:
+      enabled: true
+      annotations:
+        grafana_folder: Cilium
+    rollOutCiliumPods: true
+    securityContext:
+      privileged: true
+    tunnel: disabled

@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./objectbucketclaim.yaml
+  - ./helmrelease.yaml
+configMapGenerator:
+  - name: loki-alerting-rules
+    files:
+      - loki-alerting-rules.yaml=./rules/loki-alerting-rules.yaml
+generatorOptions:
+  disableNameSuffixHash: true

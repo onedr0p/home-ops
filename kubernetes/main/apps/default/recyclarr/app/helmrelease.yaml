@@ -1,0 +1,72 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: recyclarr
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.3.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync
+  values:
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/recyclarr/recyclarr
+              tag: 6.0.2
+            env:
+              TZ: America/New_York
+            envFrom:
+              - secretRef:
+                  name: recyclarr-secret
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64M
+              limits:
+                memory: 128M
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+    service:
+      main:
+        enabled: false
+    persistence:
+      config:
+        enabled: true
+        existingClaim: recyclarr
+      config-file:
+        type: configMap
+        name: recyclarr-configmap
+        globalMounts:
+          - path: /config/recyclarr.yml
+            subPath: recyclarr.yml
+            readOnly: true

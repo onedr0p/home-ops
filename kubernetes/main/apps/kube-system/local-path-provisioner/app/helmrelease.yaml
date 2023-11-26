@@ -1,0 +1,72 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: local-path-provisioner
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: ./deploy/chart/local-path-provisioner
+      sourceRef:
+        kind: GitRepository
+        name: local-path-provisioner
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    replicaCount: 2
+    helperImage:
+      repository: public.ecr.aws/docker/library/busybox
+      tag: latest
+    storageClass:
+      defaultClass: false
+    nodePathMap:
+      - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+        paths: ["/var/lib/rancher/k3s/storage"]
+    # Note: Do not enable Flux variable substitution on this HelmRelease
+    configmap:
+      setup: |-
+        #!/bin/sh
+        while getopts "m:s:p:" opt
+        do
+            case $opt in
+                p)
+                absolutePath=$OPTARG
+                ;;
+                s)
+                sizeInBytes=$OPTARG
+                ;;
+                m)
+                volMode=$OPTARG
+                ;;
+            esac
+        done
+        mkdir -m 0777 -p ${absolutePath}
+        chmod 701 ${absolutePath}/..
+      teardown: |-
+        #!/bin/sh
+        while getopts "m:s:p:" opt
+        do
+            case $opt in
+                p)
+                absolutePath=$OPTARG
+                ;;
+                s)
+                sizeInBytes=$OPTARG
+                ;;
+                m)
+                volMode=$OPTARG
+                ;;
+            esac
+        done
+        rm -rf ${absolutePath}

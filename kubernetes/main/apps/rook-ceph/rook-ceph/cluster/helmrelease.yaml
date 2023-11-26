@@ -1,0 +1,205 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: rook-ceph-cluster
+spec:
+  interval: 30m
+  timeout: 15m
+  chart:
+    spec:
+      chart: rook-ceph-cluster
+      version: v1.12.8
+      sourceRef:
+        kind: HelmRepository
+        name: rook-ceph
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  dependsOn:
+    - name: snapshot-controller
+      namespace: kube-system
+  values:
+    monitoring:
+      enabled: true
+      createPrometheusRules: true
+    ingress:
+      dashboard:
+        ingressClassName: internal
+        host:
+          name: &host rook.devbu.io
+          path: /
+        tls:
+          - hosts:
+              - *host
+    toolbox:
+      enabled: true
+    configOverride: |
+      [global]
+      bdev_enable_discard = true
+      bdev_async_discard = true
+      osd_class_update_on_start = false
+    cephClusterSpec:
+      network:
+        provider: host
+        connections:
+          requireMsgr2: true
+      crashCollector:
+        disable: false
+      dashboard:
+        enabled: true
+        urlPrefix: /
+        ssl: false
+      storage:
+        useAllNodes: false
+        useAllDevices: false
+        config:
+          osdsPerDevice: "1"
+        nodes:
+          - name: k8s-0
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NJ0TB03807K
+          - name: k8s-1
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NS0W223961P
+          - name: k8s-2
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NS0W224436E
+          - name: k8s-3
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NS0TC01391F
+          - name: k8s-4
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S59ANM0W417201H
+          - name: k8s-5
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NJ0T813624W
+      resources:
+        mgr:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+        mon:
+          requests:
+            cpu: 1000m
+            memory: 1Gi
+          limits:
+            cpu: 4000m
+            memory: 4Gi
+        osd:
+          requests:
+            cpu: 1000m
+            memory: 4Gi
+          limits:
+            cpu: 4000m
+            memory: 8Gi
+    cephBlockPools:
+      - name: ceph-blockpool
+        spec:
+          failureDomain: host
+          replicated:
+            size: 6
+        storageClass:
+          enabled: true
+          name: ceph-block
+          isDefault: true
+          reclaimPolicy: Delete
+          allowVolumeExpansion: true
+          parameters:
+            imageFormat: "2"
+            imageFeatures: layering
+            csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+            csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
+            csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+            csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+            csi.storage.k8s.io/fstype: ext4
+    cephBlockPoolsVolumeSnapshotClass:
+      enabled: true
+      name: csi-ceph-blockpool
+      isDefault: false
+      deletionPolicy: Delete
+    cephFileSystems:
+      - name: ceph-filesystem
+        spec:
+          metadataPool:
+            replicated:
+              size: 6
+          dataPools:
+            - failureDomain: host
+              replicated:
+                size: 6
+              name: data0
+          metadataServer:
+            activeCount: 1
+            activeStandby: true
+            resources:
+              requests:
+                cpu: 1000m
+                memory: 4Gi
+              limits:
+                memory: 4Gi
+        storageClass:
+          enabled: true
+          isDefault: false
+          name: ceph-filesystem
+          pool: data0
+          reclaimPolicy: Delete
+          allowVolumeExpansion: true
+          parameters:
+            csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+            csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+            csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+            csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
+            csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+            csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+            csi.storage.k8s.io/fstype: ext4
+    cephFileSystemVolumeSnapshotClass:
+      enabled: true
+      name: csi-ceph-filesystem
+      isDefault: false
+      deletionPolicy: Delete
+    cephObjectStores:
+      - name: ceph-objectstore
+        spec:
+          metadataPool:
+            failureDomain: host
+            replicated:
+              size: 6
+          dataPool:
+            failureDomain: host
+            erasureCoded:
+              dataChunks: 4
+              codingChunks: 2
+          preservePoolsOnDelete: true
+          gateway:
+            port: 80
+            resources:
+              requests:
+                cpu: 1000m
+                memory: 1Gi
+              limits:
+                memory: 2Gi
+            instances: 2
+          healthCheck:
+            bucket:
+              interval: 60s
+        storageClass:
+          enabled: true
+          name: ceph-bucket
+          reclaimPolicy: Delete
+          parameters:
+            region: us-east-1

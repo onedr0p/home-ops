@@ -1,0 +1,138 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: gatus
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.3.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            order: 1
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 14
+              pullPolicy: IfNotPresent
+            envFrom: &envFrom
+              - secretRef:
+                  name: gatus-secret
+          # TODO: Convert this to a proper 'sidecar' container someday
+          init-config:
+            order: 2
+            image: &configSyncImage
+              repository: ghcr.io/kiwigrid/k8s-sidecar
+              tag: 1.25.2
+              pullPolicy: IfNotPresent
+            env:
+              FOLDER: /config
+              LABEL: gatus.io/enabled
+              NAMESPACE: ALL
+              RESOURCE: both
+              UNIQUE_FILENAMES: true
+              METHOD: LIST
+            resources: &configSyncResources
+              requests:
+                cpu: 10m
+                memory: 10Mi
+              limits:
+                memory: 128Mi
+        containers:
+          main:
+            image:
+              repository: ghcr.io/twin/gatus
+              tag: v5.7.0
+            env:
+              TZ: America/New_York
+              GATUS_CONFIG_PATH: /config
+              CUSTOM_WEB_PORT: &port 80
+            envFrom: *envFrom
+            resources:
+              requests:
+                cpu: 10m
+                memory: 256M
+              limits:
+                memory: 512M
+          config-sync:
+            image: *configSyncImage
+            env:
+              FOLDER: /config
+              LABEL: gatus.io/enabled
+              NAMESPACE: ALL
+              RESOURCE: both
+              UNIQUE_FILENAMES: true
+              METHOD: WATCH
+            resources: *configSyncResources
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+    serviceMonitor:
+      main:
+        enabled: true
+    ingress:
+      main:
+        enabled: true
+        className: external
+        annotations:
+          external-dns.alpha.kubernetes.io/target: external.devbu.io
+        hosts:
+          - host: &host "{{ .Release.Name }}.devbu.io"
+            paths:
+              - path: /
+                service:
+                  name: main
+                  port: http
+          - host: &customHost status.devbu.io
+            paths:
+              - path: /
+                service:
+                  name: main
+                  port: http
+        tls:
+          - hosts:
+              - *host
+              - *customHost
+    serviceAccount:
+      create: true
+      name: gatus
+    persistence:
+      config:
+        enabled: true
+        type: emptyDir
+      config-file:
+        type: configMap
+        name: gatus-configmap
+        globalMounts:
+          - path: /config/config.yaml
+            subPath: config.yaml
+            readOnly: true

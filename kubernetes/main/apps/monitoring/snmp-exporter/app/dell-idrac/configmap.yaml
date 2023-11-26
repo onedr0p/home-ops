@@ -1,0 +1,3106 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snmp-exporter-dell-idrac
+data:
+  snmp.yaml: |
+    dell:
+      retries: 5
+      timeout: 60s
+      walk:
+      - 1.3.6.1.4.1.674.10892.5.2
+      - 1.3.6.1.4.1.674.10892.5.4.1100.30
+      - 1.3.6.1.4.1.674.10892.5.4.1100.50.1.14
+      - 1.3.6.1.4.1.674.10892.5.4.200
+      - 1.3.6.1.4.1.674.10892.5.4.600.12.1
+      - 1.3.6.1.4.1.674.10892.5.4.600.30.1.6
+      - 1.3.6.1.4.1.674.10892.5.4.700.20.1
+      - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.11
+      - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.24
+      - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.55
+      - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.6
+      - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.7
+      get:
+      - 1.3.6.1.2.1.1.3.0
+      - 1.3.6.1.4.1.674.10892.5.4.300.50.1.5.1.1
+      metrics:
+      - name: sysUpTime
+        oid: 1.3.6.1.2.1.1.3
+        type: gauge
+        help: The time (in hundredths of a second) since the network management portion
+          of the system was last re-initialized. - 1.3.6.1.2.1.1.3
+      - name: globalSystemStatus
+        oid: 1.3.6.1.4.1.674.10892.5.2.1
+        type: gauge
+        help: This attribute defines the overall rollup status of all components in the
+          system being monitored by the remote access card - 1.3.6.1.4.1.674.10892.5.2.1
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemLCDStatus
+        oid: 1.3.6.1.4.1.674.10892.5.2.2
+        type: gauge
+        help: This attribute defines the system status as it is reflected by the LCD front
+          panel - 1.3.6.1.4.1.674.10892.5.2.2
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: globalStorageStatus
+        oid: 1.3.6.1.4.1.674.10892.5.2.3
+        type: gauge
+        help: This attribute defines the overall storage status being monitored by the
+          remote access card. - 1.3.6.1.4.1.674.10892.5.2.3
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemPowerState
+        oid: 1.3.6.1.4.1.674.10892.5.2.4
+        type: gauge
+        help: This attribute defines the power state of the system. - 1.3.6.1.4.1.674.10892.5.2.4
+        enum_values:
+          1: other
+          2: unknown
+          3: "off"
+          4: "on"
+      - name: systemPowerUpTime
+        oid: 1.3.6.1.4.1.674.10892.5.2.5
+        type: gauge
+        help: This attribute defines the power-up time of the system in seconds. - 1.3.6.1.4.1.674.10892.5.2.5
+      - name: processorDevicechassisIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.1
+        type: gauge
+        help: 1100.0030.0001.0001 This attribute defines the index (one based) of the
+          associated system chassis. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.1
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.2
+        type: gauge
+        help: 1100.0030.0001.0002 This attribute defines the index (one based) of the
+          processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.2
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceStateCapabilities
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.3
+        type: gauge
+        help: 1100.0030.0001.0003 This attribute defines the state capabilities of the
+          processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.3
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: unknownCapabilities
+          2: enableCapable
+          4: notReadyCapable
+          6: enableAndNotReadyCapable
+      - name: processorDeviceStateSettings
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.4
+        type: gauge
+        help: 1100.0030.0001.0004 This attribute defines the state settings of the processor
+          device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.4
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: unknown
+          2: enabled
+          4: notReady
+          6: enabledAndNotReady
+      - name: processorDeviceStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.5
+        type: gauge
+        help: 1100.0030.0001.0005 This attribute defines the status of the processor device.
+          - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.5
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: processorDeviceType
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.7
+        type: gauge
+        help: 1100.0030.0001.0007 This attribute defines the type of the processor device.
+          - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.7
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: deviceTypeIsOther
+          2: deviceTypeIsUnknown
+          3: deviceTypeIsCPU
+          4: deviceTypeIsMathProcessor
+          5: deviceTypeIsDSP
+          6: deviceTypeIsAVideoProcessor
+      - name: processorDeviceManufacturerName
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.8
+        type: OctetString
+        help: 1100.0030.0001.0008 This attribute defines the name of the manufacturer
+          of the processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.8
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceStatusState
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.9
+        type: gauge
+        help: 1100.0030.0001.0009 This attribute defines the status state of the processor
+          device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.9
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: enabled
+          4: userDisabled
+          5: biosDisabled
+          6: idle
+      - name: processorDeviceFamily
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.10
+        type: gauge
+        help: 1100.0030.0001.0010 This attribute defines the family of the processor device.
+          - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.10
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: deviceFamilyIsOther
+          2: deviceFamilyIsUnknown
+          3: deviceFamilyIs8086
+          4: deviceFamilyIs80286
+          5: deviceFamilyIsIntel386
+          6: deviceFamilyIsIntel486
+          7: deviceFamilyIs8087
+          8: deviceFamilyIs80287
+          9: deviceFamilyIs80387
+          10: deviceFamilyIs80487
+          11: deviceFamilyIsPentium
+          12: deviceFamilyIsPentiumPro
+          13: deviceFamilyIsPentiumII
+          14: deviceFamilyIsPentiumMMX
+          15: deviceFamilyIsCeleron
+          16: deviceFamilyIsPentiumIIXeon
+          17: deviceFamilyIsPentiumIII
+          18: deviceFamilyIsPentiumIIIXeon
+          19: deviceFamilyIsPentiumIIISpeedStep
+          20: deviceFamilyIsItanium
+          21: deviceFamilyIsIntelXeon
+          22: deviceFamilyIsPentium4
+          23: deviceFamilyIsIntelXeonMP
+          24: deviceFamilyIsIntelItanium2
+          25: deviceFamilyIsK5
+          26: deviceFamilyIsK6
+          27: deviceFamilyIsK6Dash2
+          28: deviceFamilyIsK6Dash3
+          29: deviceFamilyIsAMDAthlon
+          30: deviceFamilyIsAMD2900
+          31: deviceFamilyIsK6Dash2Plus
+          32: deviceFamilyIsPowerPC
+          33: deviceFamilyIsPowerPC601
+          34: deviceFamilyIsPowerPC603
+          35: deviceFamilyIsPowerPC603Plus
+          36: deviceFamilyIsPowerPC604
+          37: deviceFamilyIsPowerPC620
+          38: deviceFamilyIsPowerPCx704
+          39: deviceFamilyIsPowerPC750
+          40: deviceFamilyIsIntelCoreDuo
+          41: deviceFamilyIsIntelCoreDuoMobile
+          42: deviceFamilyIsIntelCoreSoloMobile
+          43: deviceFamilyIsIntelAtom
+          48: deviceFamilyIsAlpha
+          49: deviceFamilyIsAlpha21064
+          50: deviceFamilyIsAlpha21066
+          51: deviceFamilyIsAlpha21164
+          52: deviceFamilyIsAlpha21164PC
+          53: deviceFamilyIsAlpha21164a
+          54: deviceFamilyIsAlpha21264
+          55: deviceFamilyIsAlpha21364
+          56: deviceFamilyIsAMDTurionIIUltraDualMobileM
+          57: deviceFamilyIsAMDTurionIIDualMobileM
+          58: deviceFamilyIsAMDAthlonIIDualMobileM
+          59: deviceFamilyIsAMDOpteron6100
+          60: deviceFamilyIsAMDOpteron4100
+          61: deviceFamilyIsAMDOpteron6200
+          62: deviceFamilyIsAMDOpteron4200
+          64: deviceFamilyIsMIPS
+          65: deviceFamilyIsMIPSR4000
+          66: deviceFamilyIsMIPSR4200
+          67: deviceFamilyIsMIPSR4400
+          68: deviceFamilyIsMIPSR4600
+          69: deviceFamilyIsMIPSR10000
+          80: deviceFamilyIsSPARC
+          81: deviceFamilyIsSuperSPARC
+          82: deviceFamilyIsmicroSPARCII
+          83: deviceFamilyIsmicroSPARCIIep
+          84: deviceFamilyIsUltraSPARC
+          85: deviceFamilyIsUltraSPARCII
+          86: deviceFamilyIsUltraSPARCIIi
+          87: deviceFamilyIsUltraSPARCIII
+          88: deviceFamilyIsUltraSPARCIIIi
+          96: deviceFamilyIs68040
+          97: deviceFamilyIs68xxx
+          98: deviceFamilyIs68000
+          99: deviceFamilyIs68010
+          100: deviceFamilyIs68020
+          101: deviceFamilyIs68030
+          107: deviceFamilyIsAMDZen
+          112: deviceFamilyIsHobbit
+          120: deviceFamilyIsCrusoeTM5000
+          121: deviceFamilyIsCrusoeTM3000
+          122: deviceFamilyIsEfficeonTM8000
+          128: deviceFamilyIsWeitek
+          130: deviceFamilyIsIntelCeleronM
+          131: deviceFamilyIsAMDAthlon64
+          132: deviceFamilyIsAMDOpteron
+          133: deviceFamilyIsAMDSempron
+          134: deviceFamilyIsAMDTurion64Mobile
+          135: deviceFamilyIsDualCoreAMDOpteron
+          136: deviceFamilyIsAMDAthlon64X2DualCore
+          137: deviceFamilyIsAMDTurion64X2Mobile
+          138: deviceFamilyIsQuadCoreAMDOpteron
+          139: deviceFamilyIsThirdGenerationAMDOpteron
+          140: deviceFamilyIsAMDPhenomFXQuadCore
+          141: deviceFamilyIsAMDPhenomX4QuadCore
+          142: deviceFamilyIsAMDPhenomX2DualCore
+          143: deviceFamilyIsAMDAthlonX2DualCore
+          144: deviceFamilyIsPARISC
+          145: deviceFamilyIsPARISC8500
+          146: deviceFamilyIsPARISC8000
+          147: deviceFamilyIsPARISC7300LC
+          148: deviceFamilyIsPARISC7200
+          149: deviceFamilyIsPARISC7100LC
+          150: deviceFamilyIsPARISC7100
+          160: deviceFamilyIsV30
+          161: deviceFamilyIsQuadCoreIntelXeon3200
+          162: deviceFamilyIsDualCoreIntelXeon3000
+          163: deviceFamilyIsQuadCoreIntelXeon5300
+          164: deviceFamilyIsDualCoreIntelXeon5100
+          165: deviceFamilyIsDualCoreIntelXeon5000
+          166: deviceFamilyIsDualCoreIntelXeonLV
+          167: deviceFamilyIsDualCoreIntelXeonULV
+          168: deviceFamilyIsDualCoreIntelXeon7100
+          169: deviceFamilyIsQuadCoreIntelXeon5400
+          170: deviceFamilyIsQuadCoreIntelXeon
+          171: deviceFamilyIsDualCoreIntelXeon5200
+          172: deviceFamilyIsDualCoreIntelXeon7200
+          173: deviceFamilyIsQuadCoreIntelXeon7300
+          174: deviceFamilyIsQuadCoreIntelXeon7400
+          175: deviceFamilyIsMultiCoreIntelXeon7400
+          176: deviceFamilyIsM1
+          177: deviceFamilyIsM2
+          179: deviceFamilyIsIntelPentium4HT
+          180: deviceFamilyIsAS400
+          182: deviceFamilyIsAMDAthlonXP
+          183: deviceFamilyIsAMDAthlonMP
+          184: deviceFamilyIsAMDDuron
+          185: deviceFamilyIsIntelPentiumM
+          186: deviceFamilyIsIntelCeleronD
+          187: deviceFamilyIsIntelPentiumD
+          188: deviceFamilyIsIntelPentiumExtreme
+          189: deviceFamilyIsIntelCoreSolo
+          190: deviceFamilyIsIntelCore2
+          191: deviceFamilyIsIntelCore2Duo
+          192: deviceFamilyIsIntelCore2Solo
+          193: deviceFamilyIsIntelCore2Extreme
+          194: deviceFamilyIsIntelCore2Quad
+          195: deviceFamilyIsIntelCore2ExtremeMobile
+          196: deviceFamilyIsIntelCore2DuoMobile
+          197: deviceFamilyIsIntelCore2SoloMobile
+          198: deviceFamilyIsIntelCorei7
+          199: deviceFamilyIsDualCoreIntelCeleron
+          200: deviceFamilyIsIBM390
+          201: deviceFamilyIsG4
+          202: deviceFamilyIsG5
+          203: deviceFamilyIsESA390G6
+          204: deviceFamilyIszArchitectur
+          205: deviceFamilyIsIntelCorei5
+          206: deviceFamilyIsIntelCorei3
+          210: deviceFamilyIsVIAC7M
+          211: deviceFamilyIsVIAC7D
+          212: deviceFamilyIsVIAC7
+          213: deviceFamilyIsVIAEden
+          214: deviceFamilyIsMultiCoreIntelXeon
+          215: deviceFamilyIsDualCoreIntelXeon3xxx
+          216: deviceFamilyIsQuadCoreIntelXeon3xxx
+          217: deviceFamilyIsVIANano
+          218: deviceFamilyIsDualCoreIntelXeon5xxx
+          219: deviceFamilyIsQuadCoreIntelXeon5xxx
+          221: deviceFamilyIsDualCoreIntelXeon7xxx
+          222: deviceFamilyIsQuadCoreIntelXeon7xxx
+          223: deviceFamilyIsMultiCoreIntelXeon7xxx
+          224: deviceFamilyIsMultiCoreIntelXeon3400
+          230: deviceFamilyIsEmbeddedAMDOpertonQuadCore
+          231: deviceFamilyIsAMDPhenomTripleCore
+          232: deviceFamilyIsAMDTurionUltraDualCoreMobile
+          233: deviceFamilyIsAMDTurionDualCoreMobile
+          234: deviceFamilyIsAMDAthlonDualCore
+          235: deviceFamilyIsAMDSempronSI
+          236: deviceFamilyIsAMDPhenomII
+          237: deviceFamilyIsAMDAthlonII
+          238: deviceFamilyIsSixCoreAMDOpteron
+          239: deviceFamilyIsAMDSempronM
+          250: deviceFamilyIsi860
+          251: deviceFamilyIsi960
+      - name: processorDeviceMaximumSpeed
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.11
+        type: gauge
+        help: 1100.0030.0001.0011 This attribute defines the maximum speed of the processor
+          device in MHz - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.11
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceCurrentSpeed
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.12
+        type: gauge
+        help: 1100.0030.0001.0012 This attribute defines the current speed of the processor
+          device in MHz - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.12
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceExternalClockSpeed
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.13
+        type: gauge
+        help: 1100.0030.0001.0013 This attribute defines the speed of the external clock
+          for the processor device in MHz - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.13
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceVoltage
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.14
+        type: gauge
+        help: 1100.0030.0001.0014 This attribute defines the voltage powering the processor
+          device in millivolts - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.14
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceVersionName
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.16
+        type: OctetString
+        help: 1100.0030.0001.0016 This attribute defines the version of the processor
+          device - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.16
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceCoreCount
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.17
+        type: gauge
+        help: 1100.0030.0001.0017 This attribute defines the number of processor cores
+          detected for the processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.17
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceCoreEnabledCount
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.18
+        type: gauge
+        help: 1100.0030.0001.0018 This attribute defines the number of processor cores
+          enabled for the processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.18
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceThreadCount
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.19
+        type: gauge
+        help: 1100.0030.0001.0019 This attribute defines the number of processor threads
+          detected for the processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.19
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceCharacteristics
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.20
+        type: gauge
+        help: 1100.0030.0001.0020 This attribute defines characteristics of the processor
+          device - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.20
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceExtendedCapabilities
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.21
+        type: gauge
+        help: 1100.0030.0001.0021 This attribute defines extended capabilities of the
+          processor device - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.21
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceExtendedSettings
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.22
+        type: gauge
+        help: 1100.0030.0001.0022 This attribute defines extended settings of the processor
+          device - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.22
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceBrandName
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.23
+        type: OctetString
+        help: 1100.0030.0001.0023 This attribute defines the brand of the processor device.
+          - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.23
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceFQDD
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.26
+        type: OctetString
+        help: 1100.0030.0001.0026 Fully qualified device descriptor (FQDD) of the processor
+          device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.26
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: memoryDeviceSize
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.50.1.14
+        type: gauge
+        help: 1100.0050.0001.0014 This attribute defines the size in KBytes of the memory
+          device - 1.3.6.1.4.1.674.10892.5.4.1100.50.1.14
+        indexes:
+        - labelname: memoryDevicechassisIndex
+          type: gauge
+        - labelname: memoryDeviceIndex
+          type: gauge
+      - name: systemStatechassisIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.1
+        type: gauge
+        help: 0200.0010.0001.0001 This attribute defines the index (one based) of this
+          system chassis. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.1
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateGlobalSystemStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.2
+        type: gauge
+        help: 0200.0010.0001.0002 This attribute defines the global system status of all
+          system chassis being monitored by the systems management software. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.2
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateChassisState
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.3
+        type: gauge
+        help: 0200.0010.0001.0003 This attribute defines the state settings of this system
+          chassis. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.3
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: unknown
+          2: enabled
+          4: notReady
+          6: enabledAndNotReady
+      - name: systemStateChassisStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.4
+        type: gauge
+        help: 0200.0010.0001.0004 This attribute defines the status of this system chassis.
+          - 1.3.6.1.4.1.674.10892.5.4.200.10.1.4
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStatePowerUnitStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.5
+        type: OctetString
+        help: 0200.0010.0001.0005 This attribute lists the state settings of each power
+          unit of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.5
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStatePowerUnitStatusRedundancy
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.6
+        type: gauge
+        help: 0200.0010.0001.0006 This attribute defines the combined redundancy status
+          of all power units of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.6
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: full
+          4: degraded
+          5: lost
+          6: notRedundant
+          7: redundancyOffline
+      - name: systemStatePowerUnitStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.7
+        type: OctetString
+        help: 0200.0010.0001.0007 This attribute lists the redundancy status of each power
+          unit of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.7
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStatePowerSupplyStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.8
+        type: OctetString
+        help: 0200.0010.0001.0008 This attribute lists the state settings of each power
+          supply of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.8
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStatePowerSupplyStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.9
+        type: gauge
+        help: 0200.0010.0001.0009 This attribute defines the combined status of all power
+          supplies of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.9
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStatePowerSupplyStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.10
+        type: OctetString
+        help: 0200.0010.0001.0010 This attribute lists the status of each power supply
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.10
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateVoltageStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.11
+        type: OctetString
+        help: 0200.0010.0001.0011 This attribute lists the state settings of each voltage
+          probe of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.11
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateVoltageStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.12
+        type: gauge
+        help: 0200.0010.0001.0012 This attribute defines the combined status of all voltage
+          probes of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.12
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateVoltageStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.13
+        type: OctetString
+        help: 0200.0010.0001.0013 This attribute lists the status of each voltage probe
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.13
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateAmperageStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.14
+        type: OctetString
+        help: 0200.0010.0001.0014 This attribute lists the state settings of each amperage
+          probe of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.14
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateAmperageStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.15
+        type: gauge
+        help: 0200.0010.0001.0015 This attribute defines the combined status of all amperage
+          probes of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.15
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateAmperageStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.16
+        type: OctetString
+        help: 0200.0010.0001.0016 This attribute lists the status of each amperage probe
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.16
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCoolingUnitStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.17
+        type: OctetString
+        help: 0200.0010.0001.0017 This attribute lists the state settings of each cooling
+          unit of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.17
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCoolingUnitStatusRedundancy
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.18
+        type: gauge
+        help: 0200.0010.0001.0018 This attribute defines the combined redundancy status
+          of all cooling units of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.18
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: full
+          4: degraded
+          5: lost
+          6: notRedundant
+          7: redundancyOffline
+      - name: systemStateCoolingUnitStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.19
+        type: OctetString
+        help: 0200.0010.0001.0019 This attribute lists the redundancy status of each cooling
+          unit of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.19
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCoolingDeviceStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.20
+        type: OctetString
+        help: 0200.0010.0001.0020 This attribute lists the state settings of each cooling
+          device of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.20
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCoolingDeviceStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.21
+        type: gauge
+        help: 0200.0010.0001.0021 This attribute defines the combined status of all cooling
+          devices of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.21
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateCoolingDeviceStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.22
+        type: OctetString
+        help: 0200.0010.0001.0022 This attribute lists the status of each cooling device
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.22
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateTemperatureStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.23
+        type: OctetString
+        help: 0200.0010.0001.0023 This attribute lists the state settings of each temperature
+          probe of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.23
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateTemperatureStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.24
+        type: gauge
+        help: 0200.0010.0001.0024 This attribute defines the combined status of all temperature
+          probes of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.24
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateTemperatureStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.25
+        type: OctetString
+        help: 0200.0010.0001.0025 This attribute lists the status of each temperature
+          probe of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.25
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateMemoryDeviceStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.26
+        type: OctetString
+        help: 0200.0010.0001.0026 This attribute lists the state settings of each memory
+          device of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.26
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateMemoryDeviceStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.27
+        type: gauge
+        help: 0200.0010.0001.0027 This attribute defines the combined status of all memory
+          devices of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.27
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateMemoryDeviceStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.28
+        type: OctetString
+        help: 0200.0010.0001.0028 This attribute lists the status of each memory device
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.28
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateChassisIntrusionStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.29
+        type: OctetString
+        help: 0200.0010.0001.0029 This attribute lists the state settings of each intrusion
+          detection device of this system chassis - 1.3.6.1.4.1.674.10892.5.4.200.10.1.29
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateChassisIntrusionStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.30
+        type: gauge
+        help: 0200.0010.0001.0030 This attribute defines the combined status of all intrusion
+          detection devices of this system chassis. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.30
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateChassisIntrusionStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.31
+        type: OctetString
+        help: 0200.0010.0001.0031 This attribute lists the status of each intrusion detection
+          device of this system chassis - 1.3.6.1.4.1.674.10892.5.4.200.10.1.31
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStatePowerUnitStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.42
+        type: gauge
+        help: 0200.0010.0001.0042 This attribute defines the combined status of all power
+          units of this chassis. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.42
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStatePowerUnitStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.43
+        type: OctetString
+        help: 0200.0010.0001.0043 This attribute lists the status of each power unit of
+          this chassis - 1.3.6.1.4.1.674.10892.5.4.200.10.1.43
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCoolingUnitStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.44
+        type: gauge
+        help: 0200.0010.0001.0044 This attribute defines the combined status of all cooling
+          units of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.44
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateCoolingUnitStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.45
+        type: OctetString
+        help: 0200.0010.0001.0045 This attribute lists the status of each cooling unit
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.45
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateProcessorDeviceStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.50
+        type: gauge
+        help: 0200.0010.0001.0050 This attribute defines the combined status of all processor
+          devices of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.50
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateProcessorDeviceStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.51
+        type: OctetString
+        help: 0200.0010.0001.0051 This attribute lists the status of each processor device
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.51
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateBatteryStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.52
+        type: gauge
+        help: 0200.0010.0001.0052 This attribute defines the combined status of all batteries
+          of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.52
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateBatteryStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.53
+        type: OctetString
+        help: 0200.0010.0001.0053 This attribute lists the status of each battery of this
+          system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.53
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateSDCardUnitStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.54
+        type: gauge
+        help: 0200.0010.0001.0054 This attribute defines the combined status of all SD
+          Card units of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.54
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateSDCardUnitStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.55
+        type: OctetString
+        help: 0200.0010.0001.0055 This attribute lists the status of each SD Card unit
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.55
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateSDCardDeviceStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.56
+        type: gauge
+        help: 0200.0010.0001.0056 This attribute defines the combined status of all SD
+          Card devices of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.56
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateSDCardDeviceStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.57
+        type: OctetString
+        help: 0200.0010.0001.0057 This attribute lists the status of each SD Card device
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.57
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateIDSDMCardUnitStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.58
+        type: gauge
+        help: 0200.0010.0001.0058 This attribute defines the combined status of all IDSDM
+          Card units of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.58
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateIDSDMCardUnitStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.59
+        type: OctetString
+        help: 0200.0010.0001.0059 This attribute lists the status of each IDSDM Card unit
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.59
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateIDSDMCardDeviceStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.60
+        type: gauge
+        help: 0200.0010.0001.0060 This attribute defines the combined status of all IDSDM
+          Card devices of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.60
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateIDSDMCardDeviceStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.61
+        type: OctetString
+        help: 0200.0010.0001.0061 This attribute lists the status of each IDSDM Card device
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.61
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateTemperatureStatisticsStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.62
+        type: OctetString
+        help: 0200.0010.0001.0062 This attribute lists the state settings of each temperature
+          statistics object of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.62
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateTemperatureStatisticsStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.63
+        type: gauge
+        help: 0200.0010.0001.0063 This attribute defines the combined status of all temperature
+          statistics objects of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.63
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateTemperatureStatisticsStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.64
+        type: OctetString
+        help: 0200.0010.0001.0064 This attribute lists the status of each temperature
+          statistics object of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.64
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCMCStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.65
+        type: gauge
+        help: 0200.0010.0001.0065 This attribute defines the status of CMC. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.65
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemBIOSStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.300.50.1.5
+        type: gauge
+        help: 0300.0050.0001.0005 This attribute defines the status of the system BIOS.
+          - 1.3.6.1.4.1.674.10892.5.4.300.50.1.5
+        indexes:
+        - labelname: systemBIOSchassisIndex
+          type: gauge
+        - labelname: systemBIOSIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: powerSupplychassisIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.1
+        type: gauge
+        help: 0600.0012.0001.0001 This attribute defines the index (one based) of the
+          system chassis. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.1
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.2
+        type: gauge
+        help: 0600.0012.0001.0002 This attribute defines the index (one based) of the
+          power supply. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.2
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyStateCapabilitiesUnique
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.3
+        type: gauge
+        help: 0600.0012.0001.0003 This attribute defines the state capabilities of the
+          power supply. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.3
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: unknown
+          2: onlineCapable
+          4: notReadyCapable
+      - name: powerSupplyStateSettingsUnique
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.4
+        type: gauge
+        help: 0600.0012.0001.0004 This attribute defines the state settings of the power
+          supply. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.4
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: unknown
+          2: onLine
+          4: notReady
+          8: fanFailure
+          10: onlineAndFanFailure
+          16: powerSupplyIsON
+          32: powerSupplyIsOK
+          64: acSwitchIsON
+          66: onlineandAcSwitchIsON
+          128: acPowerIsON
+          130: onlineAndAcPowerIsON
+          210: onlineAndPredictiveFailure
+          242: acPowerAndSwitchAreOnPowerSupplyIsOnIsOkAndOnline
+      - name: powerSupplyStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.5
+        type: gauge
+        help: 0600.0012.0001.0005 This attribute defines the status of the power supply.
+          - 1.3.6.1.4.1.674.10892.5.4.600.12.1.5
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: powerSupplyOutputWatts
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.6
+        type: gauge
+        help: 0600.0012.0001.0006 This attribute defines the maximum sustained output
+          wattage of the power supply (in tenths of Watts). - 1.3.6.1.4.1.674.10892.5.4.600.12.1.6
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyType
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.7
+        type: gauge
+        help: 0600.0012.0001.0007 This attribute defines the type of the power supply.
+          - 1.3.6.1.4.1.674.10892.5.4.600.12.1.7
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: powerSupplyTypeIsOther
+          2: powerSupplyTypeIsUnknown
+          3: powerSupplyTypeIsLinear
+          4: powerSupplyTypeIsSwitching
+          5: powerSupplyTypeIsBattery
+          6: powerSupplyTypeIsUPS
+          7: powerSupplyTypeIsConverter
+          8: powerSupplyTypeIsRegulator
+          9: powerSupplyTypeIsAC
+          10: powerSupplyTypeIsDC
+          11: powerSupplyTypeIsVRM
+      - name: powerSupplyLocationName
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.8
+        type: OctetString
+        help: 0600.0012.0001.0008 This attribute defines the location of the power supply.
+          - 1.3.6.1.4.1.674.10892.5.4.600.12.1.8
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyMaximumInputVoltage
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.9
+        type: gauge
+        help: 0600.0012.0001.0009 This attribute defines the maximum input voltage of
+          the power supply (in Volts). - 1.3.6.1.4.1.674.10892.5.4.600.12.1.9
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplypowerUnitIndexReference
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.10
+        type: gauge
+        help: 0600.0012.0001.0010 This attribute defines the index to the associated power
+          unit if the power supply is part of a power unit. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.10
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplySensorState
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.11
+        type: gauge
+        help: 0600.0012.0001.0011 This attribute defines the state reported by the power
+          supply sensor - 1.3.6.1.4.1.674.10892.5.4.600.12.1.11
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: presenceDetected
+          2: psFailureDetected
+          4: predictiveFailure
+          8: psACLost
+          16: acLostOrOutOfRange
+          32: acOutOfRangeButPresent
+          64: configurationError
+      - name: powerSupplyConfigurationErrorType
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.12
+        type: gauge
+        help: 0600.0012.0001.0012 This attribute defines the type of configuration error
+          reported by the power supply sensor - 1.3.6.1.4.1.674.10892.5.4.600.12.1.12
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: vendorMismatch
+          2: revisionMismatch
+          3: processorMissing
+      - name: powerSupplyPowerMonitorCapable
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.13
+        type: gauge
+        help: 0600.0012.0001.0013 This attribute defines a boolean value that reports
+          whether the power supply is capable of monitoring power consumption. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.13
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyRatedInputWattage
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.14
+        type: gauge
+        help: 0600.0012.0001.0014 This attribute defines the rated input wattage of the
+          power supply (in tenths of Watts). - 1.3.6.1.4.1.674.10892.5.4.600.12.1.14
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyFQDD
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.15
+        type: OctetString
+        help: 0600.0012.0001.0015 Fully qualified device descriptor (FQDD) of the power
+          supply. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.15
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyCurrentInputVoltage
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.16
+        type: gauge
+        help: 0600.0012.0001.0016 This attribute defines the current input voltage to
+          the power supply (in Volts). - 1.3.6.1.4.1.674.10892.5.4.600.12.1.16
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: amperageProbeReading
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.30.1.6
+        type: gauge
+        help: 0600.0030.0001.0006 This attribute defines the reading for an amperage probe
+          of type other than amperageProbeTypeIsDiscrete - 1.3.6.1.4.1.674.10892.5.4.600.30.1.6
+        indexes:
+        - labelname: amperageProbechassisIndex
+          type: gauge
+        - labelname: amperageProbeIndex
+          type: gauge
+      - name: temperatureProbechassisIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.1
+        type: gauge
+        help: 0700.0020.0001.0001 This attribute defines the index (one based) of the
+          associated system chassis. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.1
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.2
+        type: gauge
+        help: 0700.0020.0001.0002 This attribute defines the index (one based) of the
+          temperature probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.2
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeStateCapabilities
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.3
+        type: gauge
+        help: 0700.0020.0001.0003 This attribute defines the state capabilities of the
+          temperature probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.3
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: unknownCapabilities
+          2: enableCapable
+          4: notReadyCapable
+          6: enableAndNotReadyCapable
+      - name: temperatureProbeStateSettings
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.4
+        type: gauge
+        help: 0700.0020.0001.0004 This attribute defines the state settings of the temperature
+          probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.4
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: unknown
+          2: enabled
+          4: notReady
+          6: enabledAndNotReady
+      - name: temperatureProbeStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.5
+        type: gauge
+        help: 0700.0020.0001.0005 This attribute defines the probe status of the temperature
+          probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.5
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCriticalUpper
+          5: criticalUpper
+          6: nonRecoverableUpper
+          7: nonCriticalLower
+          8: criticalLower
+          9: nonRecoverableLower
+          10: failed
+      - name: temperatureProbeReading
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.6
+        type: gauge
+        help: 0700.0020.0001.0006 This attribute defines the reading for a temperature
+          probe of type other than temperatureProbeTypeIsDiscrete - 1.3.6.1.4.1.674.10892.5.4.700.20.1.6
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeType
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.7
+        type: gauge
+        help: 0700.0020.0001.0007 This attribute defines the type of the temperature probe.
+          - 1.3.6.1.4.1.674.10892.5.4.700.20.1.7
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: temperatureProbeTypeIsOther
+          2: temperatureProbeTypeIsUnknown
+          3: temperatureProbeTypeIsAmbientESM
+          16: temperatureProbeTypeIsDiscrete
+      - name: temperatureProbeLocationName
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.8
+        type: DisplayString
+        help: 0700.0020.0001.0008 This attribute defines the location name of the temperature
+          probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.8
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeUpperNonRecoverableThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.9
+        type: gauge
+        help: 0700.0020.0001.0009 This attribute defines the upper nonrecoverable threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.9
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeUpperCriticalThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.10
+        type: gauge
+        help: 0700.0020.0001.0010 This attribute defines the upper critical threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.10
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeUpperNonCriticalThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.11
+        type: gauge
+        help: 0700.0020.0001.0011 This attribute defines the upper noncritical threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.11
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeLowerNonCriticalThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.12
+        type: gauge
+        help: 0700.0020.0001.0012 This attribute defines the lower noncritical threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.12
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeLowerCriticalThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.13
+        type: gauge
+        help: 0700.0020.0001.0013 This attribute defines the lower critical threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.13
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeLowerNonRecoverableThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.14
+        type: gauge
+        help: 0700.0020.0001.0014 This attribute defines the lower nonrecoverable threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.14
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeProbeCapabilities
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.15
+        type: gauge
+        help: 0700.0020.0001.0015 This attribute defines the probe capabilities of the
+          temperature probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.15
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: upperNonCriticalThresholdSetCapable
+          2: lowerNonCriticalThresholdSetCapable
+          4: upperNonCriticalThresholdDefaultCapable
+          8: lowerNonCriticalThresholdDefaultCapable
+      - name: temperatureProbeDiscreteReading
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.16
+        type: gauge
+        help: 0700.0020.0001.0016 This attribute defines the reading for a temperature
+          probe of type temperatureProbeTypeIsDiscrete - 1.3.6.1.4.1.674.10892.5.4.700.20.1.16
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: temperatureIsGood
+          2: temperatureIsBad
+      - name: physicalDiskCapacityInMB
+        oid: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.11
+        type: gauge
+        help: The size of the physical disk in megabytes. - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.11
+        indexes:
+        - labelname: physicalDiskNumber
+          type: gauge
+      - name: physicalDiskComponentStatus
+        oid: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.24
+        type: gauge
+        help: The status of the physical disk itself without the propagation of any contained
+          component status - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.24
+        indexes:
+        - labelname: physicalDiskNumber
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: physicalDiskDisplayName
+        oid: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.55
+        type: DisplayString
+        help: The physical disk's friendly FQDD as represented in Storage Management.
+          - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.55
+        indexes:
+        - labelname: physicalDiskNumber
+          type: gauge
+      - name: physicalDiskProductID
+        oid: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.6
+        type: DisplayString
+        help: The model number of the physical disk. - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.6
+        indexes:
+        - labelname: physicalDiskNumber
+          type: gauge
+      - name: physicalDiskSerialNo
+        oid: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.7
+        type: DisplayString
+        help: The physical disk's unique identification number from the manufacturer.
+          - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.7
+        indexes:
+        - labelname: physicalDiskNumber
+          type: gauge
+      version: 2
+      auth:
+        community: public
+    dell_walk:
+      walk:
+      - 1.3.6.1.4.1.674.10892.5.2
+      - 1.3.6.1.4.1.674.10892.5.4.1100.30
+      - 1.3.6.1.4.1.674.10892.5.4.1100.50.1.14
+      - 1.3.6.1.4.1.674.10892.5.4.200
+      - 1.3.6.1.4.1.674.10892.5.4.600.12.1
+      - 1.3.6.1.4.1.674.10892.5.4.600.30.1.6
+      - 1.3.6.1.4.1.674.10892.5.4.700.20.1
+      - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.11
+      - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.24
+      - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.55
+      - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.6
+      - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.7
+      get:
+      - 1.3.6.1.2.1.1.3.0
+      - 1.3.6.1.4.1.674.10892.5.4.300.50.1.5.1.1
+      metrics:
+      - name: sysUpTime
+        oid: 1.3.6.1.2.1.1.3
+        type: gauge
+        help: The time (in hundredths of a second) since the network management portion
+          of the system was last re-initialized. - 1.3.6.1.2.1.1.3
+      - name: globalSystemStatus
+        oid: 1.3.6.1.4.1.674.10892.5.2.1
+        type: gauge
+        help: This attribute defines the overall rollup status of all components in the
+          system being monitored by the remote access card - 1.3.6.1.4.1.674.10892.5.2.1
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemLCDStatus
+        oid: 1.3.6.1.4.1.674.10892.5.2.2
+        type: gauge
+        help: This attribute defines the system status as it is reflected by the LCD front
+          panel - 1.3.6.1.4.1.674.10892.5.2.2
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: globalStorageStatus
+        oid: 1.3.6.1.4.1.674.10892.5.2.3
+        type: gauge
+        help: This attribute defines the overall storage status being monitored by the
+          remote access card. - 1.3.6.1.4.1.674.10892.5.2.3
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemPowerState
+        oid: 1.3.6.1.4.1.674.10892.5.2.4
+        type: gauge
+        help: This attribute defines the power state of the system. - 1.3.6.1.4.1.674.10892.5.2.4
+        enum_values:
+          1: other
+          2: unknown
+          3: "off"
+          4: "on"
+      - name: systemPowerUpTime
+        oid: 1.3.6.1.4.1.674.10892.5.2.5
+        type: gauge
+        help: This attribute defines the power-up time of the system in seconds. - 1.3.6.1.4.1.674.10892.5.2.5
+      - name: processorDevicechassisIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.1
+        type: gauge
+        help: 1100.0030.0001.0001 This attribute defines the index (one based) of the
+          associated system chassis. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.1
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.2
+        type: gauge
+        help: 1100.0030.0001.0002 This attribute defines the index (one based) of the
+          processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.2
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceStateCapabilities
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.3
+        type: gauge
+        help: 1100.0030.0001.0003 This attribute defines the state capabilities of the
+          processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.3
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: unknownCapabilities
+          2: enableCapable
+          4: notReadyCapable
+          6: enableAndNotReadyCapable
+      - name: processorDeviceStateSettings
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.4
+        type: gauge
+        help: 1100.0030.0001.0004 This attribute defines the state settings of the processor
+          device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.4
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: unknown
+          2: enabled
+          4: notReady
+          6: enabledAndNotReady
+      - name: processorDeviceStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.5
+        type: gauge
+        help: 1100.0030.0001.0005 This attribute defines the status of the processor device.
+          - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.5
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: processorDeviceType
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.7
+        type: gauge
+        help: 1100.0030.0001.0007 This attribute defines the type of the processor device.
+          - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.7
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: deviceTypeIsOther
+          2: deviceTypeIsUnknown
+          3: deviceTypeIsCPU
+          4: deviceTypeIsMathProcessor
+          5: deviceTypeIsDSP
+          6: deviceTypeIsAVideoProcessor
+      - name: processorDeviceManufacturerName
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.8
+        type: OctetString
+        help: 1100.0030.0001.0008 This attribute defines the name of the manufacturer
+          of the processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.8
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceStatusState
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.9
+        type: gauge
+        help: 1100.0030.0001.0009 This attribute defines the status state of the processor
+          device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.9
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: enabled
+          4: userDisabled
+          5: biosDisabled
+          6: idle
+      - name: processorDeviceFamily
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.10
+        type: gauge
+        help: 1100.0030.0001.0010 This attribute defines the family of the processor device.
+          - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.10
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+        enum_values:
+          1: deviceFamilyIsOther
+          2: deviceFamilyIsUnknown
+          3: deviceFamilyIs8086
+          4: deviceFamilyIs80286
+          5: deviceFamilyIsIntel386
+          6: deviceFamilyIsIntel486
+          7: deviceFamilyIs8087
+          8: deviceFamilyIs80287
+          9: deviceFamilyIs80387
+          10: deviceFamilyIs80487
+          11: deviceFamilyIsPentium
+          12: deviceFamilyIsPentiumPro
+          13: deviceFamilyIsPentiumII
+          14: deviceFamilyIsPentiumMMX
+          15: deviceFamilyIsCeleron
+          16: deviceFamilyIsPentiumIIXeon
+          17: deviceFamilyIsPentiumIII
+          18: deviceFamilyIsPentiumIIIXeon
+          19: deviceFamilyIsPentiumIIISpeedStep
+          20: deviceFamilyIsItanium
+          21: deviceFamilyIsIntelXeon
+          22: deviceFamilyIsPentium4
+          23: deviceFamilyIsIntelXeonMP
+          24: deviceFamilyIsIntelItanium2
+          25: deviceFamilyIsK5
+          26: deviceFamilyIsK6
+          27: deviceFamilyIsK6Dash2
+          28: deviceFamilyIsK6Dash3
+          29: deviceFamilyIsAMDAthlon
+          30: deviceFamilyIsAMD2900
+          31: deviceFamilyIsK6Dash2Plus
+          32: deviceFamilyIsPowerPC
+          33: deviceFamilyIsPowerPC601
+          34: deviceFamilyIsPowerPC603
+          35: deviceFamilyIsPowerPC603Plus
+          36: deviceFamilyIsPowerPC604
+          37: deviceFamilyIsPowerPC620
+          38: deviceFamilyIsPowerPCx704
+          39: deviceFamilyIsPowerPC750
+          40: deviceFamilyIsIntelCoreDuo
+          41: deviceFamilyIsIntelCoreDuoMobile
+          42: deviceFamilyIsIntelCoreSoloMobile
+          43: deviceFamilyIsIntelAtom
+          48: deviceFamilyIsAlpha
+          49: deviceFamilyIsAlpha21064
+          50: deviceFamilyIsAlpha21066
+          51: deviceFamilyIsAlpha21164
+          52: deviceFamilyIsAlpha21164PC
+          53: deviceFamilyIsAlpha21164a
+          54: deviceFamilyIsAlpha21264
+          55: deviceFamilyIsAlpha21364
+          56: deviceFamilyIsAMDTurionIIUltraDualMobileM
+          57: deviceFamilyIsAMDTurionIIDualMobileM
+          58: deviceFamilyIsAMDAthlonIIDualMobileM
+          59: deviceFamilyIsAMDOpteron6100
+          60: deviceFamilyIsAMDOpteron4100
+          61: deviceFamilyIsAMDOpteron6200
+          62: deviceFamilyIsAMDOpteron4200
+          64: deviceFamilyIsMIPS
+          65: deviceFamilyIsMIPSR4000
+          66: deviceFamilyIsMIPSR4200
+          67: deviceFamilyIsMIPSR4400
+          68: deviceFamilyIsMIPSR4600
+          69: deviceFamilyIsMIPSR10000
+          80: deviceFamilyIsSPARC
+          81: deviceFamilyIsSuperSPARC
+          82: deviceFamilyIsmicroSPARCII
+          83: deviceFamilyIsmicroSPARCIIep
+          84: deviceFamilyIsUltraSPARC
+          85: deviceFamilyIsUltraSPARCII
+          86: deviceFamilyIsUltraSPARCIIi
+          87: deviceFamilyIsUltraSPARCIII
+          88: deviceFamilyIsUltraSPARCIIIi
+          96: deviceFamilyIs68040
+          97: deviceFamilyIs68xxx
+          98: deviceFamilyIs68000
+          99: deviceFamilyIs68010
+          100: deviceFamilyIs68020
+          101: deviceFamilyIs68030
+          107: deviceFamilyIsAMDZen
+          112: deviceFamilyIsHobbit
+          120: deviceFamilyIsCrusoeTM5000
+          121: deviceFamilyIsCrusoeTM3000
+          122: deviceFamilyIsEfficeonTM8000
+          128: deviceFamilyIsWeitek
+          130: deviceFamilyIsIntelCeleronM
+          131: deviceFamilyIsAMDAthlon64
+          132: deviceFamilyIsAMDOpteron
+          133: deviceFamilyIsAMDSempron
+          134: deviceFamilyIsAMDTurion64Mobile
+          135: deviceFamilyIsDualCoreAMDOpteron
+          136: deviceFamilyIsAMDAthlon64X2DualCore
+          137: deviceFamilyIsAMDTurion64X2Mobile
+          138: deviceFamilyIsQuadCoreAMDOpteron
+          139: deviceFamilyIsThirdGenerationAMDOpteron
+          140: deviceFamilyIsAMDPhenomFXQuadCore
+          141: deviceFamilyIsAMDPhenomX4QuadCore
+          142: deviceFamilyIsAMDPhenomX2DualCore
+          143: deviceFamilyIsAMDAthlonX2DualCore
+          144: deviceFamilyIsPARISC
+          145: deviceFamilyIsPARISC8500
+          146: deviceFamilyIsPARISC8000
+          147: deviceFamilyIsPARISC7300LC
+          148: deviceFamilyIsPARISC7200
+          149: deviceFamilyIsPARISC7100LC
+          150: deviceFamilyIsPARISC7100
+          160: deviceFamilyIsV30
+          161: deviceFamilyIsQuadCoreIntelXeon3200
+          162: deviceFamilyIsDualCoreIntelXeon3000
+          163: deviceFamilyIsQuadCoreIntelXeon5300
+          164: deviceFamilyIsDualCoreIntelXeon5100
+          165: deviceFamilyIsDualCoreIntelXeon5000
+          166: deviceFamilyIsDualCoreIntelXeonLV
+          167: deviceFamilyIsDualCoreIntelXeonULV
+          168: deviceFamilyIsDualCoreIntelXeon7100
+          169: deviceFamilyIsQuadCoreIntelXeon5400
+          170: deviceFamilyIsQuadCoreIntelXeon
+          171: deviceFamilyIsDualCoreIntelXeon5200
+          172: deviceFamilyIsDualCoreIntelXeon7200
+          173: deviceFamilyIsQuadCoreIntelXeon7300
+          174: deviceFamilyIsQuadCoreIntelXeon7400
+          175: deviceFamilyIsMultiCoreIntelXeon7400
+          176: deviceFamilyIsM1
+          177: deviceFamilyIsM2
+          179: deviceFamilyIsIntelPentium4HT
+          180: deviceFamilyIsAS400
+          182: deviceFamilyIsAMDAthlonXP
+          183: deviceFamilyIsAMDAthlonMP
+          184: deviceFamilyIsAMDDuron
+          185: deviceFamilyIsIntelPentiumM
+          186: deviceFamilyIsIntelCeleronD
+          187: deviceFamilyIsIntelPentiumD
+          188: deviceFamilyIsIntelPentiumExtreme
+          189: deviceFamilyIsIntelCoreSolo
+          190: deviceFamilyIsIntelCore2
+          191: deviceFamilyIsIntelCore2Duo
+          192: deviceFamilyIsIntelCore2Solo
+          193: deviceFamilyIsIntelCore2Extreme
+          194: deviceFamilyIsIntelCore2Quad
+          195: deviceFamilyIsIntelCore2ExtremeMobile
+          196: deviceFamilyIsIntelCore2DuoMobile
+          197: deviceFamilyIsIntelCore2SoloMobile
+          198: deviceFamilyIsIntelCorei7
+          199: deviceFamilyIsDualCoreIntelCeleron
+          200: deviceFamilyIsIBM390
+          201: deviceFamilyIsG4
+          202: deviceFamilyIsG5
+          203: deviceFamilyIsESA390G6
+          204: deviceFamilyIszArchitectur
+          205: deviceFamilyIsIntelCorei5
+          206: deviceFamilyIsIntelCorei3
+          210: deviceFamilyIsVIAC7M
+          211: deviceFamilyIsVIAC7D
+          212: deviceFamilyIsVIAC7
+          213: deviceFamilyIsVIAEden
+          214: deviceFamilyIsMultiCoreIntelXeon
+          215: deviceFamilyIsDualCoreIntelXeon3xxx
+          216: deviceFamilyIsQuadCoreIntelXeon3xxx
+          217: deviceFamilyIsVIANano
+          218: deviceFamilyIsDualCoreIntelXeon5xxx
+          219: deviceFamilyIsQuadCoreIntelXeon5xxx
+          221: deviceFamilyIsDualCoreIntelXeon7xxx
+          222: deviceFamilyIsQuadCoreIntelXeon7xxx
+          223: deviceFamilyIsMultiCoreIntelXeon7xxx
+          224: deviceFamilyIsMultiCoreIntelXeon3400
+          230: deviceFamilyIsEmbeddedAMDOpertonQuadCore
+          231: deviceFamilyIsAMDPhenomTripleCore
+          232: deviceFamilyIsAMDTurionUltraDualCoreMobile
+          233: deviceFamilyIsAMDTurionDualCoreMobile
+          234: deviceFamilyIsAMDAthlonDualCore
+          235: deviceFamilyIsAMDSempronSI
+          236: deviceFamilyIsAMDPhenomII
+          237: deviceFamilyIsAMDAthlonII
+          238: deviceFamilyIsSixCoreAMDOpteron
+          239: deviceFamilyIsAMDSempronM
+          250: deviceFamilyIsi860
+          251: deviceFamilyIsi960
+      - name: processorDeviceMaximumSpeed
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.11
+        type: gauge
+        help: 1100.0030.0001.0011 This attribute defines the maximum speed of the processor
+          device in MHz - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.11
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceCurrentSpeed
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.12
+        type: gauge
+        help: 1100.0030.0001.0012 This attribute defines the current speed of the processor
+          device in MHz - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.12
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceExternalClockSpeed
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.13
+        type: gauge
+        help: 1100.0030.0001.0013 This attribute defines the speed of the external clock
+          for the processor device in MHz - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.13
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceVoltage
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.14
+        type: gauge
+        help: 1100.0030.0001.0014 This attribute defines the voltage powering the processor
+          device in millivolts - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.14
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceVersionName
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.16
+        type: OctetString
+        help: 1100.0030.0001.0016 This attribute defines the version of the processor
+          device - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.16
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceCoreCount
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.17
+        type: gauge
+        help: 1100.0030.0001.0017 This attribute defines the number of processor cores
+          detected for the processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.17
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceCoreEnabledCount
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.18
+        type: gauge
+        help: 1100.0030.0001.0018 This attribute defines the number of processor cores
+          enabled for the processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.18
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceThreadCount
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.19
+        type: gauge
+        help: 1100.0030.0001.0019 This attribute defines the number of processor threads
+          detected for the processor device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.19
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceCharacteristics
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.20
+        type: gauge
+        help: 1100.0030.0001.0020 This attribute defines characteristics of the processor
+          device - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.20
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceExtendedCapabilities
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.21
+        type: gauge
+        help: 1100.0030.0001.0021 This attribute defines extended capabilities of the
+          processor device - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.21
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceExtendedSettings
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.22
+        type: gauge
+        help: 1100.0030.0001.0022 This attribute defines extended settings of the processor
+          device - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.22
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceBrandName
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.23
+        type: OctetString
+        help: 1100.0030.0001.0023 This attribute defines the brand of the processor device.
+          - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.23
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: processorDeviceFQDD
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.30.1.26
+        type: OctetString
+        help: 1100.0030.0001.0026 Fully qualified device descriptor (FQDD) of the processor
+          device. - 1.3.6.1.4.1.674.10892.5.4.1100.30.1.26
+        indexes:
+        - labelname: processorDevicechassisIndex
+          type: gauge
+        - labelname: processorDeviceIndex
+          type: gauge
+      - name: memoryDeviceSize
+        oid: 1.3.6.1.4.1.674.10892.5.4.1100.50.1.14
+        type: gauge
+        help: 1100.0050.0001.0014 This attribute defines the size in KBytes of the memory
+          device - 1.3.6.1.4.1.674.10892.5.4.1100.50.1.14
+        indexes:
+        - labelname: memoryDevicechassisIndex
+          type: gauge
+        - labelname: memoryDeviceIndex
+          type: gauge
+      - name: systemStatechassisIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.1
+        type: gauge
+        help: 0200.0010.0001.0001 This attribute defines the index (one based) of this
+          system chassis. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.1
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateGlobalSystemStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.2
+        type: gauge
+        help: 0200.0010.0001.0002 This attribute defines the global system status of all
+          system chassis being monitored by the systems management software. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.2
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateChassisState
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.3
+        type: gauge
+        help: 0200.0010.0001.0003 This attribute defines the state settings of this system
+          chassis. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.3
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: unknown
+          2: enabled
+          4: notReady
+          6: enabledAndNotReady
+      - name: systemStateChassisStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.4
+        type: gauge
+        help: 0200.0010.0001.0004 This attribute defines the status of this system chassis.
+          - 1.3.6.1.4.1.674.10892.5.4.200.10.1.4
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStatePowerUnitStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.5
+        type: OctetString
+        help: 0200.0010.0001.0005 This attribute lists the state settings of each power
+          unit of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.5
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStatePowerUnitStatusRedundancy
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.6
+        type: gauge
+        help: 0200.0010.0001.0006 This attribute defines the combined redundancy status
+          of all power units of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.6
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: full
+          4: degraded
+          5: lost
+          6: notRedundant
+          7: redundancyOffline
+      - name: systemStatePowerUnitStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.7
+        type: OctetString
+        help: 0200.0010.0001.0007 This attribute lists the redundancy status of each power
+          unit of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.7
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStatePowerSupplyStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.8
+        type: OctetString
+        help: 0200.0010.0001.0008 This attribute lists the state settings of each power
+          supply of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.8
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStatePowerSupplyStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.9
+        type: gauge
+        help: 0200.0010.0001.0009 This attribute defines the combined status of all power
+          supplies of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.9
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStatePowerSupplyStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.10
+        type: OctetString
+        help: 0200.0010.0001.0010 This attribute lists the status of each power supply
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.10
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateVoltageStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.11
+        type: OctetString
+        help: 0200.0010.0001.0011 This attribute lists the state settings of each voltage
+          probe of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.11
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateVoltageStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.12
+        type: gauge
+        help: 0200.0010.0001.0012 This attribute defines the combined status of all voltage
+          probes of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.12
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateVoltageStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.13
+        type: OctetString
+        help: 0200.0010.0001.0013 This attribute lists the status of each voltage probe
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.13
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateAmperageStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.14
+        type: OctetString
+        help: 0200.0010.0001.0014 This attribute lists the state settings of each amperage
+          probe of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.14
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateAmperageStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.15
+        type: gauge
+        help: 0200.0010.0001.0015 This attribute defines the combined status of all amperage
+          probes of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.15
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateAmperageStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.16
+        type: OctetString
+        help: 0200.0010.0001.0016 This attribute lists the status of each amperage probe
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.16
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCoolingUnitStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.17
+        type: OctetString
+        help: 0200.0010.0001.0017 This attribute lists the state settings of each cooling
+          unit of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.17
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCoolingUnitStatusRedundancy
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.18
+        type: gauge
+        help: 0200.0010.0001.0018 This attribute defines the combined redundancy status
+          of all cooling units of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.18
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: full
+          4: degraded
+          5: lost
+          6: notRedundant
+          7: redundancyOffline
+      - name: systemStateCoolingUnitStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.19
+        type: OctetString
+        help: 0200.0010.0001.0019 This attribute lists the redundancy status of each cooling
+          unit of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.19
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCoolingDeviceStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.20
+        type: OctetString
+        help: 0200.0010.0001.0020 This attribute lists the state settings of each cooling
+          device of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.20
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCoolingDeviceStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.21
+        type: gauge
+        help: 0200.0010.0001.0021 This attribute defines the combined status of all cooling
+          devices of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.21
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateCoolingDeviceStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.22
+        type: OctetString
+        help: 0200.0010.0001.0022 This attribute lists the status of each cooling device
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.22
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateTemperatureStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.23
+        type: OctetString
+        help: 0200.0010.0001.0023 This attribute lists the state settings of each temperature
+          probe of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.23
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateTemperatureStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.24
+        type: gauge
+        help: 0200.0010.0001.0024 This attribute defines the combined status of all temperature
+          probes of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.24
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateTemperatureStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.25
+        type: OctetString
+        help: 0200.0010.0001.0025 This attribute lists the status of each temperature
+          probe of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.25
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateMemoryDeviceStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.26
+        type: OctetString
+        help: 0200.0010.0001.0026 This attribute lists the state settings of each memory
+          device of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.26
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateMemoryDeviceStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.27
+        type: gauge
+        help: 0200.0010.0001.0027 This attribute defines the combined status of all memory
+          devices of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.27
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateMemoryDeviceStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.28
+        type: OctetString
+        help: 0200.0010.0001.0028 This attribute lists the status of each memory device
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.28
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateChassisIntrusionStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.29
+        type: OctetString
+        help: 0200.0010.0001.0029 This attribute lists the state settings of each intrusion
+          detection device of this system chassis - 1.3.6.1.4.1.674.10892.5.4.200.10.1.29
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateChassisIntrusionStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.30
+        type: gauge
+        help: 0200.0010.0001.0030 This attribute defines the combined status of all intrusion
+          detection devices of this system chassis. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.30
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateChassisIntrusionStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.31
+        type: OctetString
+        help: 0200.0010.0001.0031 This attribute lists the status of each intrusion detection
+          device of this system chassis - 1.3.6.1.4.1.674.10892.5.4.200.10.1.31
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStatePowerUnitStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.42
+        type: gauge
+        help: 0200.0010.0001.0042 This attribute defines the combined status of all power
+          units of this chassis. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.42
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStatePowerUnitStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.43
+        type: OctetString
+        help: 0200.0010.0001.0043 This attribute lists the status of each power unit of
+          this chassis - 1.3.6.1.4.1.674.10892.5.4.200.10.1.43
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCoolingUnitStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.44
+        type: gauge
+        help: 0200.0010.0001.0044 This attribute defines the combined status of all cooling
+          units of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.44
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateCoolingUnitStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.45
+        type: OctetString
+        help: 0200.0010.0001.0045 This attribute lists the status of each cooling unit
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.45
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateProcessorDeviceStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.50
+        type: gauge
+        help: 0200.0010.0001.0050 This attribute defines the combined status of all processor
+          devices of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.50
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateProcessorDeviceStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.51
+        type: OctetString
+        help: 0200.0010.0001.0051 This attribute lists the status of each processor device
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.51
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateBatteryStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.52
+        type: gauge
+        help: 0200.0010.0001.0052 This attribute defines the combined status of all batteries
+          of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.52
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateBatteryStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.53
+        type: OctetString
+        help: 0200.0010.0001.0053 This attribute lists the status of each battery of this
+          system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.53
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateSDCardUnitStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.54
+        type: gauge
+        help: 0200.0010.0001.0054 This attribute defines the combined status of all SD
+          Card units of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.54
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateSDCardUnitStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.55
+        type: OctetString
+        help: 0200.0010.0001.0055 This attribute lists the status of each SD Card unit
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.55
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateSDCardDeviceStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.56
+        type: gauge
+        help: 0200.0010.0001.0056 This attribute defines the combined status of all SD
+          Card devices of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.56
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateSDCardDeviceStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.57
+        type: OctetString
+        help: 0200.0010.0001.0057 This attribute lists the status of each SD Card device
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.57
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateIDSDMCardUnitStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.58
+        type: gauge
+        help: 0200.0010.0001.0058 This attribute defines the combined status of all IDSDM
+          Card units of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.58
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateIDSDMCardUnitStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.59
+        type: OctetString
+        help: 0200.0010.0001.0059 This attribute lists the status of each IDSDM Card unit
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.59
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateIDSDMCardDeviceStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.60
+        type: gauge
+        help: 0200.0010.0001.0060 This attribute defines the combined status of all IDSDM
+          Card devices of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.60
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateIDSDMCardDeviceStatusList
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.61
+        type: OctetString
+        help: 0200.0010.0001.0061 This attribute lists the status of each IDSDM Card device
+          of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.61
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateTemperatureStatisticsStateDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.62
+        type: OctetString
+        help: 0200.0010.0001.0062 This attribute lists the state settings of each temperature
+          statistics object of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.62
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateTemperatureStatisticsStatusCombined
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.63
+        type: gauge
+        help: 0200.0010.0001.0063 This attribute defines the combined status of all temperature
+          statistics objects of this system. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.63
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemStateTemperatureStatisticsStatusDetails
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.64
+        type: OctetString
+        help: 0200.0010.0001.0064 This attribute lists the status of each temperature
+          statistics object of this system - 1.3.6.1.4.1.674.10892.5.4.200.10.1.64
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+      - name: systemStateCMCStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.200.10.1.65
+        type: gauge
+        help: 0200.0010.0001.0065 This attribute defines the status of CMC. - 1.3.6.1.4.1.674.10892.5.4.200.10.1.65
+        indexes:
+        - labelname: systemStatechassisIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: systemBIOSStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.300.50.1.5
+        type: gauge
+        help: 0300.0050.0001.0005 This attribute defines the status of the system BIOS.
+          - 1.3.6.1.4.1.674.10892.5.4.300.50.1.5
+        indexes:
+        - labelname: systemBIOSchassisIndex
+          type: gauge
+        - labelname: systemBIOSIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: powerSupplychassisIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.1
+        type: gauge
+        help: 0600.0012.0001.0001 This attribute defines the index (one based) of the
+          system chassis. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.1
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.2
+        type: gauge
+        help: 0600.0012.0001.0002 This attribute defines the index (one based) of the
+          power supply. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.2
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyStateCapabilitiesUnique
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.3
+        type: gauge
+        help: 0600.0012.0001.0003 This attribute defines the state capabilities of the
+          power supply. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.3
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: unknown
+          2: onlineCapable
+          4: notReadyCapable
+      - name: powerSupplyStateSettingsUnique
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.4
+        type: gauge
+        help: 0600.0012.0001.0004 This attribute defines the state settings of the power
+          supply. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.4
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: unknown
+          2: onLine
+          4: notReady
+          8: fanFailure
+          10: onlineAndFanFailure
+          16: powerSupplyIsON
+          32: powerSupplyIsOK
+          64: acSwitchIsON
+          66: onlineandAcSwitchIsON
+          128: acPowerIsON
+          130: onlineAndAcPowerIsON
+          210: onlineAndPredictiveFailure
+          242: acPowerAndSwitchAreOnPowerSupplyIsOnIsOkAndOnline
+      - name: powerSupplyStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.5
+        type: gauge
+        help: 0600.0012.0001.0005 This attribute defines the status of the power supply.
+          - 1.3.6.1.4.1.674.10892.5.4.600.12.1.5
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: powerSupplyOutputWatts
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.6
+        type: gauge
+        help: 0600.0012.0001.0006 This attribute defines the maximum sustained output
+          wattage of the power supply (in tenths of Watts). - 1.3.6.1.4.1.674.10892.5.4.600.12.1.6
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyType
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.7
+        type: gauge
+        help: 0600.0012.0001.0007 This attribute defines the type of the power supply.
+          - 1.3.6.1.4.1.674.10892.5.4.600.12.1.7
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: powerSupplyTypeIsOther
+          2: powerSupplyTypeIsUnknown
+          3: powerSupplyTypeIsLinear
+          4: powerSupplyTypeIsSwitching
+          5: powerSupplyTypeIsBattery
+          6: powerSupplyTypeIsUPS
+          7: powerSupplyTypeIsConverter
+          8: powerSupplyTypeIsRegulator
+          9: powerSupplyTypeIsAC
+          10: powerSupplyTypeIsDC
+          11: powerSupplyTypeIsVRM
+      - name: powerSupplyLocationName
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.8
+        type: OctetString
+        help: 0600.0012.0001.0008 This attribute defines the location of the power supply.
+          - 1.3.6.1.4.1.674.10892.5.4.600.12.1.8
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyMaximumInputVoltage
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.9
+        type: gauge
+        help: 0600.0012.0001.0009 This attribute defines the maximum input voltage of
+          the power supply (in Volts). - 1.3.6.1.4.1.674.10892.5.4.600.12.1.9
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplypowerUnitIndexReference
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.10
+        type: gauge
+        help: 0600.0012.0001.0010 This attribute defines the index to the associated power
+          unit if the power supply is part of a power unit. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.10
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplySensorState
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.11
+        type: gauge
+        help: 0600.0012.0001.0011 This attribute defines the state reported by the power
+          supply sensor - 1.3.6.1.4.1.674.10892.5.4.600.12.1.11
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: presenceDetected
+          2: psFailureDetected
+          4: predictiveFailure
+          8: psACLost
+          16: acLostOrOutOfRange
+          32: acOutOfRangeButPresent
+          64: configurationError
+      - name: powerSupplyConfigurationErrorType
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.12
+        type: gauge
+        help: 0600.0012.0001.0012 This attribute defines the type of configuration error
+          reported by the power supply sensor - 1.3.6.1.4.1.674.10892.5.4.600.12.1.12
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+        enum_values:
+          1: vendorMismatch
+          2: revisionMismatch
+          3: processorMissing
+      - name: powerSupplyPowerMonitorCapable
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.13
+        type: gauge
+        help: 0600.0012.0001.0013 This attribute defines a boolean value that reports
+          whether the power supply is capable of monitoring power consumption. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.13
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyRatedInputWattage
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.14
+        type: gauge
+        help: 0600.0012.0001.0014 This attribute defines the rated input wattage of the
+          power supply (in tenths of Watts). - 1.3.6.1.4.1.674.10892.5.4.600.12.1.14
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyFQDD
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.15
+        type: OctetString
+        help: 0600.0012.0001.0015 Fully qualified device descriptor (FQDD) of the power
+          supply. - 1.3.6.1.4.1.674.10892.5.4.600.12.1.15
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: powerSupplyCurrentInputVoltage
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.12.1.16
+        type: gauge
+        help: 0600.0012.0001.0016 This attribute defines the current input voltage to
+          the power supply (in Volts). - 1.3.6.1.4.1.674.10892.5.4.600.12.1.16
+        indexes:
+        - labelname: powerSupplychassisIndex
+          type: gauge
+        - labelname: powerSupplyIndex
+          type: gauge
+      - name: amperageProbeReading
+        oid: 1.3.6.1.4.1.674.10892.5.4.600.30.1.6
+        type: gauge
+        help: 0600.0030.0001.0006 This attribute defines the reading for an amperage probe
+          of type other than amperageProbeTypeIsDiscrete - 1.3.6.1.4.1.674.10892.5.4.600.30.1.6
+        indexes:
+        - labelname: amperageProbechassisIndex
+          type: gauge
+        - labelname: amperageProbeIndex
+          type: gauge
+      - name: temperatureProbechassisIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.1
+        type: gauge
+        help: 0700.0020.0001.0001 This attribute defines the index (one based) of the
+          associated system chassis. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.1
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeIndex
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.2
+        type: gauge
+        help: 0700.0020.0001.0002 This attribute defines the index (one based) of the
+          temperature probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.2
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeStateCapabilities
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.3
+        type: gauge
+        help: 0700.0020.0001.0003 This attribute defines the state capabilities of the
+          temperature probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.3
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: unknownCapabilities
+          2: enableCapable
+          4: notReadyCapable
+          6: enableAndNotReadyCapable
+      - name: temperatureProbeStateSettings
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.4
+        type: gauge
+        help: 0700.0020.0001.0004 This attribute defines the state settings of the temperature
+          probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.4
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: unknown
+          2: enabled
+          4: notReady
+          6: enabledAndNotReady
+      - name: temperatureProbeStatus
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.5
+        type: gauge
+        help: 0700.0020.0001.0005 This attribute defines the probe status of the temperature
+          probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.5
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCriticalUpper
+          5: criticalUpper
+          6: nonRecoverableUpper
+          7: nonCriticalLower
+          8: criticalLower
+          9: nonRecoverableLower
+          10: failed
+      - name: temperatureProbeReading
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.6
+        type: gauge
+        help: 0700.0020.0001.0006 This attribute defines the reading for a temperature
+          probe of type other than temperatureProbeTypeIsDiscrete - 1.3.6.1.4.1.674.10892.5.4.700.20.1.6
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeType
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.7
+        type: gauge
+        help: 0700.0020.0001.0007 This attribute defines the type of the temperature probe.
+          - 1.3.6.1.4.1.674.10892.5.4.700.20.1.7
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: temperatureProbeTypeIsOther
+          2: temperatureProbeTypeIsUnknown
+          3: temperatureProbeTypeIsAmbientESM
+          16: temperatureProbeTypeIsDiscrete
+      - name: temperatureProbeLocationName
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.8
+        type: DisplayString
+        help: 0700.0020.0001.0008 This attribute defines the location name of the temperature
+          probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.8
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeUpperNonRecoverableThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.9
+        type: gauge
+        help: 0700.0020.0001.0009 This attribute defines the upper nonrecoverable threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.9
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeUpperCriticalThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.10
+        type: gauge
+        help: 0700.0020.0001.0010 This attribute defines the upper critical threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.10
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeUpperNonCriticalThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.11
+        type: gauge
+        help: 0700.0020.0001.0011 This attribute defines the upper noncritical threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.11
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeLowerNonCriticalThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.12
+        type: gauge
+        help: 0700.0020.0001.0012 This attribute defines the lower noncritical threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.12
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeLowerCriticalThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.13
+        type: gauge
+        help: 0700.0020.0001.0013 This attribute defines the lower critical threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.13
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeLowerNonRecoverableThreshold
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.14
+        type: gauge
+        help: 0700.0020.0001.0014 This attribute defines the lower nonrecoverable threshold
+          of the temperature probe - 1.3.6.1.4.1.674.10892.5.4.700.20.1.14
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+      - name: temperatureProbeProbeCapabilities
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.15
+        type: gauge
+        help: 0700.0020.0001.0015 This attribute defines the probe capabilities of the
+          temperature probe. - 1.3.6.1.4.1.674.10892.5.4.700.20.1.15
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: upperNonCriticalThresholdSetCapable
+          2: lowerNonCriticalThresholdSetCapable
+          4: upperNonCriticalThresholdDefaultCapable
+          8: lowerNonCriticalThresholdDefaultCapable
+      - name: temperatureProbeDiscreteReading
+        oid: 1.3.6.1.4.1.674.10892.5.4.700.20.1.16
+        type: gauge
+        help: 0700.0020.0001.0016 This attribute defines the reading for a temperature
+          probe of type temperatureProbeTypeIsDiscrete - 1.3.6.1.4.1.674.10892.5.4.700.20.1.16
+        indexes:
+        - labelname: temperatureProbechassisIndex
+          type: gauge
+        - labelname: temperatureProbeIndex
+          type: gauge
+        enum_values:
+          1: temperatureIsGood
+          2: temperatureIsBad
+      - name: physicalDiskCapacityInMB
+        oid: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.11
+        type: gauge
+        help: The size of the physical disk in megabytes. - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.11
+        indexes:
+        - labelname: physicalDiskNumber
+          type: gauge
+      - name: physicalDiskComponentStatus
+        oid: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.24
+        type: gauge
+        help: The status of the physical disk itself without the propagation of any contained
+          component status - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.24
+        indexes:
+        - labelname: physicalDiskNumber
+          type: gauge
+        enum_values:
+          1: other
+          2: unknown
+          3: ok
+          4: nonCritical
+          5: critical
+          6: nonRecoverable
+      - name: physicalDiskDisplayName
+        oid: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.55
+        type: DisplayString
+        help: The physical disk's friendly FQDD as represented in Storage Management.
+          - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.55
+        indexes:
+        - labelname: physicalDiskNumber
+          type: gauge
+      - name: physicalDiskProductID
+        oid: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.6
+        type: DisplayString
+        help: The model number of the physical disk. - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.6
+        indexes:
+        - labelname: physicalDiskNumber
+          type: gauge
+      - name: physicalDiskSerialNo
+        oid: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.7
+        type: DisplayString
+        help: The physical disk's unique identification number from the manufacturer.
+          - 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.7
+        indexes:
+        - labelname: physicalDiskNumber
+          type: gauge

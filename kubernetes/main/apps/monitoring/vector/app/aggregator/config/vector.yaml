@@ -1,0 +1,132 @@
+---
+data_dir: /vector-data-dir
+api:
+  enabled: true
+  address: 0.0.0.0:8686
+
+enrichment_tables:
+  geoip_table:
+    type: geoip
+    path: /usr/share/GeoIP/GeoLite2-City.mmdb
+
+#
+# Sources
+#
+
+sources:
+  journald_source:
+    type: vector
+    version: "2"
+    address: 0.0.0.0:6000
+
+  kubernetes_source:
+    type: vector
+    version: "2"
+    address: 0.0.0.0:6010
+
+  vyos_source:
+    type: syslog
+    address: 0.0.0.0:6020
+    mode: tcp
+
+#
+# Transforms
+#
+
+transforms:
+  kubernetes_remap:
+    type: remap
+    inputs: ["kubernetes_source"]
+    source: |
+      # Standardize 'app' index
+      .custom_app_name = .pod_labels."app.kubernetes.io/name" || .pod_labels.app || .pod_labels."k8s-app" || "unknown"
+      # Drop pod_labels
+      del(.pod_labels)
+
+  # [63950.153039] [wan-local-default-D]IN=eth4 OUT= MAC=xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx SRC=xxx.xxx.xxx.xxx DST=xxx.xxx.xxx.xxx LEN=40 TOS=0x00 PREC=0x00 TTL=240 ID=60610 PROTO=TCP SPT=53451 DPT=2002 WINDOW=1024 RES=0x00 SYN URGP=0
+  vyos_firewall_route:
+    type: route
+    inputs: ["vyos_source"]
+    route:
+      firewall: |
+        .facility == "kern" && match!(.message, r'^\[(.*?)\].(.*)')
+
+  vyos_firewall_remap:
+    type: remap
+    inputs: ["vyos_firewall_route.firewall"]
+    source: |
+      # Parse firewall rule message
+      split_message, split_err = parse_regex(.message, r'^\[.*\].\[(?P<rule>.*?)\](?P<fields>.*)')
+      if split_err != null {
+          abort
+      }
+      # Extract separate fields from message
+      split_message.fields, split_err = strip_whitespace(split_message.fields)
+      if split_err != null {
+          abort
+      }
+      .message, parse_err = parse_key_value(split_message.fields, whitespace: "strict")
+      if parse_err != null {
+          abort
+      }
+      # Add more information about the triggered rule
+      .message.RULE, parse_err = parse_regex(split_message.rule, r'^(?P<from_zone>\w+)-(?P<to_zone>\w+)-(?P<id>\w+)-(?P<action>\w+)$')
+      if parse_err != null {
+          abort
+      }
+
+  vyos_firewall_wan_route:
+    type: route
+    inputs: ["vyos_firewall_remap"]
+    route:
+      from_wan: .message.RULE.from_zone == "wan"
+
+  vyos_firewall_geoip_remap:
+    type: remap
+    inputs: ["vyos_firewall_wan_route.from_wan"]
+    source: |
+      .geoip = get_enrichment_table_record!(
+          "geoip_table", {
+              "ip": .message.SRC
+          }
+      )
+
+#
+# Sinks
+#
+
+sinks:
+  journald:
+    inputs: ["journald_source"]
+    type: loki
+    endpoint: http://loki-gateway.monitoring.svc.cluster.local
+    encoding: { codec: json }
+    out_of_order_action: accept
+    remove_label_fields: true
+    remove_timestamp: true
+    labels:
+      hostname: '{{ host }}'
+
+  kubernetes:
+    inputs: ["kubernetes_remap"]
+    type: loki
+    endpoint: http://loki-gateway.monitoring.svc.cluster.local
+    encoding: { codec: json }
+    out_of_order_action: accept
+    remove_label_fields: true
+    remove_timestamp: true
+    labels:
+      app: '{{ custom_app_name }}'
+      namespace: '{{ kubernetes.pod_namespace }}'
+      node: '{{ kubernetes.pod_node_name }}'
+
+  vyos:
+    inputs: ["vyos_source", "vyos_firewall_geoip_remap"]
+    type: loki
+    endpoint: http://loki-gateway.monitoring.svc.cluster.local
+    encoding: { codec: json }
+    out_of_order_action: accept
+    remove_label_fields: true
+    remove_timestamp: true
+    labels:
+      hostname: '{{ host }}'

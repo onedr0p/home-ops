@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/notification.toolkit.fluxcd.io/provider_v1beta2.json
+apiVersion: notification.toolkit.fluxcd.io/v1beta2
+kind: Provider
+metadata:
+  name: github
+  namespace: flux-system
+spec:
+  type: github
+  address: https://github.com/onedr0p/home-ops
+  interval: 10m
+  secretRef:
+    name: github-token-secret
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/notification.toolkit.fluxcd.io/alert_v1beta2.json
+apiVersion: notification.toolkit.fluxcd.io/v1beta2
+kind: Alert
+metadata:
+  name: github
+  namespace: flux-system
+spec:
+  providerRef:
+    name: github
+  eventSeverity: info
+  eventSources:
+    - kind: Kustomization
+      name: "*"
+    - kind: HelmRelease
+      name: "*"
