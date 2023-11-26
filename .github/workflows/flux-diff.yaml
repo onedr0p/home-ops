@@ -14,7 +14,7 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        path: ["kubernetes"]
+        path: ["kubernetes/main", "kubernetes/storage"]
         resource: ["helmrelease", "kustomization"]
     steps:
       - name: Generate Token
@@ -28,8 +28,8 @@ jobs:
         uses: fluxcd/flux2/action@a18d4f345021182d6516bf3e8e00210567f46ab5 # v2.1.2
 
       - name: Diff Resources
-        uses: allenporter/flux-local/action/diff@19bfc6920e8964a479363bc230e6c329120ead02 # 3.2.0
-        # uses: allenporter/flux-local/action/diff@flux-build
+        # uses: allenporter/flux-local/action/diff@19bfc6920e8964a479363bc230e6c329120ead02 # 3.2.0
+        uses: allenporter/flux-local/action/diff@flux-build
         id: diff
         with:
           sources: home-kubernetes
