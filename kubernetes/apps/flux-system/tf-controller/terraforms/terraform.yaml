@@ -16,7 +16,7 @@ spec:
   backendConfig:
     disable: true
   cliConfigSecretRef:
-    name: &secret tf-controller-secret
+    name: tf-controller-tfrc-secret
   runnerPodTemplate:
     spec:
       env:
@@ -25,7 +25,7 @@ spec:
         - name: OP_CONNECT_TOKEN
           valueFrom:
             secretKeyRef:
-              name: *secret
+              name: &secret tf-controller-secret
               key: OP_CONNECT_TOKEN
       volumeMounts:
         - name: sops
