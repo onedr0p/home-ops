@@ -36,24 +36,43 @@ tasks:
       - .venv/bin/python3 -m pip install --upgrade --requirement "{{.ROOT_DIR}}/requirements.txt"
       - .venv/bin/ansible-galaxy install --role-file "{{.ROOT_DIR}}/requirements.yaml" --force
 
+  flux-bootstrap:
+    desc: Bootstrap Flux into a cluster
+    summary: task {{.TASK}} [cluster=main]
+    cmds:
+      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux
+      - sops --decrypt {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/age-key.sops.yaml | kubectl apply -f -
+      - sops --decrypt {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.sops.yaml | kubectl apply -f -
+      - sops --decrypt --in-place {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
+      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars
+      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/config
+      - defer: sops --encrypt --in-place {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
+    vars:
+      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
+    preconditions:
+      - sh: test -f {{.SOPS_AGE_KEY_FILE}}
+      - sh: test -f {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/age-key.sops.yaml
+      - sh: test -f {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.sops.yaml
+      - sh: test -f {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-settings.env
+      - sh: test -f {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
+
   flux-apply:
     desc: Apply a resource path that contains Flux substitution variables
+    summary: task {{.TASK}} ks=./kubernetes/apps/default/plex/app
     dotenv: ['{{.CLUSTER_SETTINGS_FILE}}']
-    vars:
-      ks: '{{ or .ks (fail "Missing path (`ks` var)") }}'
     cmd: |
       sops exec-env {{.CLUSTER_SECRETS_FILE}} \
         "kustomize build --load-restrictor=LoadRestrictionsNone {{.ks}} | \
           envsubst | kubectl apply --server-side --field-manager=kustomize-controller -f -"
+    vars:
+      ks: '{{ or .ks (fail "Missing path (`ks` var)") }}'
     preconditions:
       - sh: test -f {{.CLUSTER_SECRETS_FILE}}
       - sh: test -f {{.CLUSTER_SETTINGS_FILE}}
 
   sync-secrets:
     desc: Sync ExternalSecret resources
-    vars:
-      secret: '{{ .secret | default ""}}'
-      ns: '{{.ns | default "default"}}'
+    summary: task {{.TASK}} [secret=plex] [ns=default]
     cmd: |
       {{if eq .secret ""}}
         kubectl get externalsecret.external-secrets.io --all-namespaces --no-headers -A | awk '{print $1, $2}' \
@@ -61,17 +80,18 @@ tasks:
       {{else}}
         kubectl -n {{.ns}} annotate externalsecret.external-secrets.io {{.secret}} force-sync=$(date +%s) --overwrite
       {{end}}
+    vars:
+      secret: '{{ .secret | default ""}}'
+      ns: '{{.ns | default "default"}}'
     preconditions:
       - kubectl -n {{.ns}} get externalsecret {{.secret}}
 
   mount-volume:
     desc: Mount a PersistentVolumeClaim to a temporary pod
+    summary: task {{.TASK}} claim=plex [ns=default]
     interactive: true
-    vars:
-      claim: '{{ or .claim (fail "PersistentVolumeClaim `claim` is required") }}'
-      namespace: '{{.namespace | default "default"}}'
     cmd: |
-      kubectl run -n {{.namespace}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
+      kubectl run -n {{.ns}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
         {
           "apiVersion": "v1",
           "spec": {
@@ -102,16 +122,20 @@ tasks:
             "restartPolicy": "Never"
           }
         }'
-    preconditions:
-      - kubectl -n {{.namespace}} get pvc {{.claim}}
-
-  # https://github.com/fluxcd/helm-controller/issues/644
-  "644":
-    cmds:
-      - kubectl -n {{.namespace}} delete secret -l owner=helm,name={{.release}},status=pending-upgrade
-      - flux -n {{.namespace}} reconcile hr {{.release}}
     vars:
-      release: '{{ or .release (fail "HelmRelease `release` is required") }}'
-      namespace: '{{.namespace | default "default"}}'
+      claim: '{{ or .claim (fail "Argument (claim) is required") }}'
+      ns: '{{.ns | default "default"}}'
     preconditions:
-      - flux -n {{.namespace}} get hr {{.release}}
+      - kubectl -n {{.ns}} get persistentvolumeclaim {{.claim}}
+
+  "644":
+    desc: Workaround for https://github.com/fluxcd/helm-controller/issues/644
+    summary: task {{.TASK}} [hr=plex] [ns=default]
+    cmds:
+      - kubectl -n {{.ns}} delete secret -l owner=helm,name={{.hr}},status=pending-upgrade
+      - flux -n {{.ns}} reconcile hr {{.hr}}
+    vars:
+      hr: '{{ or .hr (fail "Argument (hr) is required") }}'
+      ns: '{{.ns | default "default"}}'
+    preconditions:
+      - flux -n {{.ns}} get helmrelease {{.hr}}
