@@ -77,7 +77,7 @@ tasks:
       app: '{{ or .app (fail "Argument (app) is required") }}'
       ns: '{{.ns | default "default"}}'
       controller:
-        sh: "{{.scriptsDir}}/controller.sh {{.ns}} {{.app}}"
+        sh: "{{.scriptsDir}}/controller.sh {{.app}} {{.ns}}"
     env: *task-vars
     preconditions:
       - sh: test -f {{.scriptsDir}}/controller.sh
@@ -104,7 +104,7 @@ tasks:
       ns: '{{.ns | default "default"}}'
       previous: '{{.previous | default 2}}'
       controller:
-        sh: "{{.scriptsDir}}/controller.sh {{.ns}} {{.app}}"
+        sh: "{{.scriptsDir}}/controller.sh {{.app}} {{.ns}}"
       claim:
         sh: kubectl -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.sourcePVC}"
       puid:
