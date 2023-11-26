@@ -55,6 +55,9 @@ tasks:
       - sh: test -f {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.sops.yaml
       - sh: test -f {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-settings.env
       - sh: test -f {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
+      - sh: sops --decrypt {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/age-key.sops.yaml
+      - sh: sops --decrypt {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.sops.yaml
+      - sh: sops --decrypt {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
 
   flux-apply:
     desc: Apply a resource path that contains Flux substitution variables
