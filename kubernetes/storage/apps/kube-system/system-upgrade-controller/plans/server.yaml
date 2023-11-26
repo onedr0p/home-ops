@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/upgrade.cattle.io/plan_v1.json
+apiVersion: upgrade.cattle.io/v1
+kind: Plan
+metadata:
+  name: server
+spec:
+  # renovate: datasource=github-releases depName=k3s-io/k3s
+  version: "v1.28.3+k3s2"
+  serviceAccountName: system-upgrade
+  concurrency: 1
+  cordon: true
+  nodeSelector:
+    matchExpressions:
+      - {key: node-role.kubernetes.io/control-plane, operator: Exists}
+  tolerations:
+    - {effect: NoSchedule, operator: Exists}
+    - {effect: NoExecute, operator: Exists}
+    - {key: node-role.kubernetes.io/control-plane, effect: NoSchedule, operator: Exists}
+    - {key: node-role.kubernetes.io/master, effect: NoSchedule, operator: Exists}
+    - {key: node-role.kubernetes.io/etcd, effect: NoExecute, operator: Exists}
+    - {key: CriticalAddonsOnly, operator: Exists}
+  upgrade:
+    image: rancher/k3s-upgrade
