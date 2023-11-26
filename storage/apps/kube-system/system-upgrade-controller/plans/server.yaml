@@ -13,5 +13,12 @@ spec:
   nodeSelector:
     matchExpressions:
       - {key: node-role.kubernetes.io/control-plane, operator: Exists}
+  tolerations:
+    - {effect: NoSchedule, operator: Exists}
+    - {effect: NoExecute, operator: Exists}
+    - {key: node-role.kubernetes.io/control-plane, effect: NoSchedule, operator: Exists}
+    - {key: node-role.kubernetes.io/master, effect: NoSchedule, operator: Exists}
+    - {key: node-role.kubernetes.io/etcd, effect: NoExecute, operator: Exists}
+    - {key: CriticalAddonsOnly, operator: Exists}
   upgrade:
     image: rancher/k3s-upgrade
