@@ -5,14 +5,5 @@ kind: Kustomization
 resources:
   # renovate: datasource=github-releases depName=rancher/system-upgrade-controller
   - https://github.com/rancher/system-upgrade-controller/releases/download/v0.13.1/crd.yaml
-  - https://github.com/rancher/system-upgrade-controller?ref=v0.13.1
-images:
-  - name: rancher/system-upgrade-controller
-    newTag: v0.13.1
-patches:
-  - patch: |
-      $patch: delete
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: system-upgrade
+  - helmrelease.yaml
+  - rbac.yaml
