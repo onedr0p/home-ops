@@ -37,7 +37,9 @@ spec:
               repository: ghcr.io/foxcpp/maddy
               tag: 0.7.0
             env:
-              SMTP_RELAY_PORT: 465
+              SMTP_RELAY_SMTP_PORT: &port 25
+              SMTP_RELAY_METRICS_PORT: &metricsPort 8080
+              SMTP_RELAY_SERVER_PORT: 465
             envFrom:
               - secretRef:
                   name: smtp-relay-secret
@@ -67,9 +69,9 @@ spec:
           io.cilium/lb-ipam-ips: 192.168.42.203
         ports:
           http:
-            port: 8080
+            port: *metricsPort
           smtp:
-            port: 25
+            port: *port
     serviceMonitor:
       main:
         enabled: true
