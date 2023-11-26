@@ -6,8 +6,6 @@ vars:
   PYTHON_BIN: python3
   CLUSTER_DIR: "{{.ROOT_DIR}}/kubernetes"
   ANSIBLE_DIR: "{{.ROOT_DIR}}/ansible"
-  CLUSTER_SECRETS_FILE: "{{.CLUSTER_DIR}}/flux/vars/cluster-secrets.sops.env"
-  CLUSTER_SETTINGS_FILE: "{{.CLUSTER_DIR}}/flux/vars/cluster-settings.env"
 
 env:
   KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
@@ -61,40 +59,42 @@ tasks:
 
   flux-apply:
     desc: Apply a resource path that contains Flux substitution variables
-    summary: task {{.TASK}} ks=./kubernetes/apps/default/plex/app
-    dotenv: ['{{.CLUSTER_SETTINGS_FILE}}']
+    summary: task {{.TASK}} ks=./kubernetes/main/apps/default/plex/app [cluster=main]
+    dotenv: ['{{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-settings.env']
     cmd: |
-      sops exec-env {{.CLUSTER_SECRETS_FILE}} \
+      sops exec-env {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env \
         "kustomize build --load-restrictor=LoadRestrictionsNone {{.ks}} | \
-          envsubst | kubectl apply --server-side --field-manager=kustomize-controller -f -"
+          envsubst | kubectl --context {{.cluster}} apply --server-side --field-manager=kustomize-controller -f -"
     vars:
       ks: '{{ or .ks (fail "Missing path (`ks` var)") }}'
+      cluster: '{{.cluster | default "main"}}'
     preconditions:
-      - sh: test -f {{.CLUSTER_SECRETS_FILE}}
-      - sh: test -f {{.CLUSTER_SETTINGS_FILE}}
+      - sh: test -f {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-settings.env
+      - sh: test -f {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
 
   sync-secrets:
     desc: Sync ExternalSecret resources
-    summary: task {{.TASK}} [secret=plex] [ns=default]
+    summary: task {{.TASK}} [secret=plex] [ns=default] [cluster=main]
     cmd: |
       {{if eq .secret ""}}
-        kubectl get externalsecret.external-secrets.io --all-namespaces --no-headers -A | awk '{print $1, $2}' \
-          | xargs --max-procs=4 -l bash -c 'kubectl -n $0 annotate externalsecret.external-secrets.io $1 force-sync=$(date +%s) --overwrite'
+        kubectl --context {{.cluster}} get externalsecret.external-secrets.io --all-namespaces --no-headers -A | awk '{print $1, $2}' \
+          | xargs --max-procs=4 -l bash -c 'kubectl --context {{.cluster}} -n $0 annotate externalsecret.external-secrets.io $1 force-sync=$(date +%s) --overwrite'
       {{else}}
-        kubectl -n {{.ns}} annotate externalsecret.external-secrets.io {{.secret}} force-sync=$(date +%s) --overwrite
+        kubectl --context {{.cluster}} -n {{.ns}} annotate externalsecret.external-secrets.io {{.secret}} force-sync=$(date +%s) --overwrite
       {{end}}
     vars:
       secret: '{{ .secret | default ""}}'
       ns: '{{.ns | default "default"}}'
+      cluster: '{{.cluster | default "main"}}'
     preconditions:
       - kubectl -n {{.ns}} get externalsecret {{.secret}}
 
   mount-volume:
     desc: Mount a PersistentVolumeClaim to a temporary pod
-    summary: task {{.TASK}} claim=plex [ns=default]
+    summary: task {{.TASK}} claim=plex [ns=default] [cluster=main]
     interactive: true
     cmd: |
-      kubectl run -n {{.ns}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
+      kubectl --context {{.cluster}} run -n {{.ns}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
         {
           "apiVersion": "v1",
           "spec": {
@@ -128,17 +128,19 @@ tasks:
     vars:
       claim: '{{ or .claim (fail "Argument (claim) is required") }}'
       ns: '{{.ns | default "default"}}'
+      cluster: '{{.cluster | default "main"}}'
     preconditions:
       - kubectl -n {{.ns}} get persistentvolumeclaim {{.claim}}
 
   "644":
     desc: Workaround for https://github.com/fluxcd/helm-controller/issues/644
-    summary: task {{.TASK}} [hr=plex] [ns=default]
+    summary: task {{.TASK}} [hr=plex] [ns=default] [cluster=main]
     cmds:
-      - kubectl -n {{.ns}} delete secret -l owner=helm,name={{.hr}},status=pending-upgrade
-      - flux -n {{.ns}} reconcile hr {{.hr}}
+      - kubectl --context {{.cluster}} -n {{.ns}} delete secret -l owner=helm,name={{.hr}},status=pending-upgrade
+      - flux --context {{.cluster}} -n {{.ns}} reconcile hr {{.hr}}
     vars:
       hr: '{{ or .hr (fail "Argument (hr) is required") }}'
       ns: '{{.ns | default "default"}}'
+      cluster: '{{.cluster | default "main"}}'
     preconditions:
-      - flux -n {{.ns}} get helmrelease {{.hr}}
+      - flux --context {{.cluster}} -n {{.ns}} get helmrelease {{.hr}}
