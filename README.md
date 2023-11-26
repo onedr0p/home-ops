@@ -53,9 +53,9 @@ My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Debian using
 
 ### GitOps
 
-[Flux](https://github.com/fluxcd/flux2) watches my [kubernetes](./kubernetes/) folder (see Directories below) and makes the changes to my cluster based on the YAML manifests.
+[Flux](https://github.com/fluxcd/flux2) watches the clusters in my [kubernetes](./kubernetes/) folder (see Directories below) and makes the changes to my cluster based on the state of my Git repository.
 
-The way Flux works for me here is it will recursively search the [kubernetes/apps](./kubernetes/apps) folder until it finds the most top level `kustomization.yaml` per directory and then apply all the resources listed in it. That aforementioned `kustomization.yaml` will generally only have a namespace resource and one or many Flux kustomizations. Those Flux kustomizations will generally have a `HelmRelease` or other resources related to the application underneath it which will be applied.
+The way Flux works for me here is it will recursively search the `kubernetes/${cluster}/apps` folder until it finds the most top level `kustomization.yaml` per directory and then apply all the resources listed in it. That aforementioned `kustomization.yaml` will generally only have a namespace resource and one or many Flux kustomizations. Those Flux kustomizations will generally have a `HelmRelease` or other resources related to the application underneath it which will be applied.
 
 [Renovate](https://github.com/renovatebot/renovate) watches my **entire** repository looking for dependency updates, when they are found a PR is automatically created. When some PRs are merged [Flux](https://github.com/fluxcd/flux2) applies the changes to my cluster.
 
@@ -64,10 +64,16 @@ The way Flux works for me here is it will recursively search the [kubernetes/app
 This Git repository contains the following directories under [Kubernetes](./kubernetes/).
 
 ```sh
-📁 kubernetes      # Kubernetes cluster defined as code
-├─📁 bootstrap     # Flux installation
-├─📁 flux          # Main Flux configuration of the repository
-└─📁 apps          # Apps deployed into my cluster grouped by namespace (see below)
+ kubernetes
+├──  main            # main cluster
+│   ├──  apps           # applications
+│   ├──  bootstrap      # bootstrap procedures
+│   ├──  flux           # core flux configuration
+│   └──  templates      # re-useable components
+└──  storage         # storage cluster
+    ├──  apps           # applications
+    ├──  bootstrap      # bootstrap procedures
+    └──  flux           # core flux configuration
 ```
 
 ### Cluster Layout
@@ -79,20 +85,20 @@ Below is a high-level look at the layout of how my directory structure with Flux
 GitRepository :: home-kubernetes
     Kustomization :: cluster
         Kustomization :: cluster-apps
-            Kustomization :: cluster-apps-cloudnative-pg
+            Kustomization :: cloudnative-pg
                 HelmRelease :: cloudnative-pg
-            Kustomization :: cluster-apps-cloudnative-pg-cluster
+            Kustomization :: cloudnative-pg-cluster
                 DependsOn:
-                    Kustomization :: cluster-apps-cloudnative-pg
+                    Kustomization :: cloudnative-pg
                 Cluster :: postgres
-            Kustomization :: cluster-apps-lldap
+            Kustomization :: lldap
                 HelmRelease :: lldap
                 DependsOn:
-                    Kustomization :: cluster-apps-cloudnative-pg-cluster
-            Kustomization :: cluster-apps-authelia
+                    Kustomization :: cloudnative-pg-cluster
+            Kustomization :: authelia
                 DependsOn:
-                    Kustomization :: cluster-apps-lldap
-                    Kustomization :: cluster-apps-cloudnative-pg-cluster
+                    Kustomization :: lldap
+                    Kustomization :: cloudnative-pg-cluster
                 HelmRelease :: authelia
 ```
 
