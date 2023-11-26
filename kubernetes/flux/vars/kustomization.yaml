@@ -5,14 +5,12 @@ kind: Kustomization
 configMapGenerator:
   - name: cluster-settings
     namespace: flux-system
-    envs:
-      - ./cluster-settings.env
+    envs: ["./cluster-settings.env"]
 secretGenerator:
   - name: cluster-secrets
     namespace: flux-system
-    envs:
-      # # TODO: On bootstrap this file is not yet decrypted, so we need to use the decrypted version
-      # - ./.decrypted~cluster-secrets.sops.env
-      - ./cluster-secrets.sops.env
+    envs: ["./cluster-secrets.sops.env"]
+    # TODO: On bootstrap this file is not yet decrypted, so we need to use the decrypted version
+    # envs: ["./.decrypted~cluster-secrets.sops.env"]
 generatorOptions:
   disableNameSuffixHash: true
