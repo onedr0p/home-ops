@@ -17,7 +17,7 @@ resource "cloudflare_record" "root" {
 }
 
 resource "cloudflare_record" "home_cname" {
-  name    = module.onepassword_item.fields["cname-wan-ip"]
+  name    = module.onepassword_item.fields["CLOUDFLARE_DIRECT_CNAME"]
   zone_id = data.cloudflare_zone.domain.id
   value   = "ipv4.devbu.io"
   proxied = false
