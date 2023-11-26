@@ -13,7 +13,7 @@ on:
         required: true
   pull_request:
     branches: ["main"]
-    paths: ["kubernetes/**/helmrelease.yaml"]
+    paths: ["kubernetes/main/**/helmrelease.yaml"]
 
 env:
   DEBCONF_NONINTERACTIVE_SEEN: "true"
@@ -56,7 +56,7 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@25ef3926d147cd02fc7e931c1ef50772bbb0d25d # v40.1.1
         with:
-          files: kubernetes/**/helmrelease.yaml
+          files: kubernetes/main/**/helmrelease.yaml
 
       - if: ${{ github.event.inputs.repoNamespace == '' && github.event.inputs.repoName == '' }}
         name: Sync HelmRepository
