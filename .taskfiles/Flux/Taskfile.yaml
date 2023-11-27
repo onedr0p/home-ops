@@ -8,12 +8,12 @@ tasks:
     desc: Bootstrap Flux into a cluster
     summary: task {{.TASK}} [cluster=main]
     cmds:
-      - sleep 0.1 && {{.kubectl}} apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux
+      - true && {{.kubectl}} apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux
       - sops --decrypt {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/age-key.sops.yaml | {{.kubectl}} apply -f -
       - sops --decrypt {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.sops.yaml | {{.kubectl}} apply -f -
       - sops --decrypt --in-place {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
-      - sleep 0.1 && {{.kubectl}} apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars
-      - sleep 0.1 && {{.kubectl}} apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/config
+      - true && {{.kubectl}} apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars
+      - true && {{.kubectl}} apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/config
       - defer: sops --encrypt --in-place {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
     env:
       SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
