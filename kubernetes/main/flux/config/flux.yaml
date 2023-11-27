@@ -41,7 +41,7 @@ spec:
     - patch: |
         - op: add
           path: /spec/template/spec/containers/0/args/-
-          value: --concurrent=10
+          value: --concurrent=12
         - op: add
           path: /spec/template/spec/containers/0/args/-
           value: --kube-api-qps=500
@@ -51,10 +51,6 @@ spec:
         - op: add
           path: /spec/template/spec/containers/0/args/-
           value: --requeue-dependency=5s
-        - op: add
-          path: /spec/template/spec/volumes/0/emptyDir
-          value:
-            medium: Memory
       target:
         kind: Deployment
         name: (kustomize-controller|helm-controller|source-controller)
@@ -70,11 +66,22 @@ spec:
                 - name: manager
                   resources:
                     limits:
-                      cpu: 2000m
                       memory: 2Gi
       target:
         kind: Deployment
         name: (kustomize-controller|helm-controller|source-controller)
+    # Enable in-memory-kustomize builds
+    # https://fluxcd.io/flux/installation/configuration/vertical-scaling/#enable-in-memory-kustomize-builds
+    - patch: |
+        - op: replace
+          path: /spec/template/spec/volumes/0
+          value:
+            name: temp
+            emptyDir:
+              medium: Memory
+      target:
+        kind: Deployment
+        name: kustomize-controller
     # Enable Helm near OOM detection
     # https://fluxcd.io/flux/cheatsheets/bootstrap/#enable-helm-near-oom-detection
     - patch: |
