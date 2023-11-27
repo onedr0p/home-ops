@@ -6,10 +6,10 @@ tasks:
 
   mount:
     desc: Mount a PersistentVolumeClaim to a temporary pod
-    summary: task {{.TASK}} [cluster=main]? [ns=default]? [claim=plex]
+    summary: task {{.TASK}} [cluster=main] [ns=default]? [claim=plex]
     interactive: true
     cmd: |
-      kubectl run -n {{.ns}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
+      {{.kubectl}} run -n {{.ns}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
         {
           "apiVersion": "v1",
           "spec": {
@@ -43,7 +43,5 @@ tasks:
     vars:
       ns: '{{.ns | default "default"}}'
       claim: '{{ or .claim (fail "Argument (claim) is required") }}'
-    env:
-      KUBECONFIG: "{{.CLUSTER_DIR}}/{{.cluster}}/kubeconfig"
     preconditions:
-      - kubectl -n {{.ns}} get persistentvolumeclaim {{.claim}}
+      - sleep 0.1 && {{.kubectl}} -n {{.ns}} get persistentvolumeclaim {{.claim}}

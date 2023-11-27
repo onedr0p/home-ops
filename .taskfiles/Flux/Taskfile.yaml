@@ -8,15 +8,14 @@ tasks:
     desc: Bootstrap Flux into a cluster
     summary: task {{.TASK}} [cluster=main]
     cmds:
-      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux
-      - sops --decrypt {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/age-key.sops.yaml | kubectl apply -f -
-      - sops --decrypt {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.sops.yaml | kubectl apply -f -
+      - sleep 0.1 && {{.kubectl}} apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux
+      - sops --decrypt {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/age-key.sops.yaml | {{.kubectl}} apply -f -
+      - sops --decrypt {{.CLUSTER_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.sops.yaml | {{.kubectl}} apply -f -
       - sops --decrypt --in-place {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
-      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars
-      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/config
+      - sleep 0.1 && {{.kubectl}} apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars
+      - sleep 0.1 && {{.kubectl}} apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/config
       - defer: sops --encrypt --in-place {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
     env:
-      KUBECONFIG: "{{.CLUSTER_DIR}}/{{.cluster}}/kubeconfig"
       SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
     preconditions:
       - sh: test -f {{.ROOT_DIR}}/age.key
@@ -30,16 +29,15 @@ tasks:
 
   apply:
     desc: Apply a resource path that contains Flux variables
-    summary: task {{.TASK}} [cluster=main]? [ks=./kubernetes/main/apps/default/plex/app]
+    summary: task {{.TASK}} [cluster=main] [ks=./kubernetes/main/apps/default/plex/app]
     dotenv: ['{{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-settings.env']
     cmd: |
       sops exec-env {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env \
         "kustomize build --load-restrictor=LoadRestrictionsNone {{.ks}} | \
-          envsubst | kubectl apply --server-side --field-manager=kustomize-controller -f -"
+          envsubst | {{.kubectl}} apply --server-side --field-manager=kustomize-controller -f -"
     vars:
       ks: '{{ or .ks (fail "Missing path (`ks` var)") }}'
     env:
-      KUBECONFIG: "{{.CLUSTER_DIR}}/{{.cluster}}/kubeconfig"
       SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
     preconditions:
       - sh: test -f {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-settings.env
