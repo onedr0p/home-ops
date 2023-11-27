@@ -1,3 +1,5 @@
+# TODO: cloudflare_filter is deprecated use cloudflare_ruleset instead
+
 # Block Countries
 resource "cloudflare_filter" "block_countries" {
   zone_id     = data.cloudflare_zone.domain.id
