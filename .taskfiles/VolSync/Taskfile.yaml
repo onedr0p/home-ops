@@ -26,7 +26,7 @@ vars:
 tasks:
   list:
     desc: List all snapshots
-    summary: task {{.TASK}} app=plex [ns=default]
+    summary: task {{.TASK}} [ns=default]? [app=plex]
     cmds:
       - envsubst < <(cat {{.templatesDir}}/list.tmpl.yaml) | kubectl apply -f -
       - bash {{.scriptsDir}}/wait.sh list-{{.app}}-{{.ts}} {{.ns}}
@@ -44,7 +44,7 @@ tasks:
 
   unlock:
     desc: Unlock a Restic repository
-    summary: task {{.TASK}} app=plex [ns=default]
+    summary: task {{.TASK}} [ns=default]? [app=plex]
     cmds:
       - envsubst < <(cat {{.templatesDir}}/unlock.tmpl.yaml) | kubectl apply -f -
       - bash {{.scriptsDir}}/wait.sh unlock-{{.app}}-{{.ts}} {{.ns}}
@@ -64,11 +64,11 @@ tasks:
   #  - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:snapshot app=$0 ns=$1'
   snapshot:
     desc: Trigger a Restic ReplicationSource snapshot
-    summary: task {{.TASK}} app=plex [ns=default]
+    summary: task {{.TASK}} [ns=default]? [app=plex]
     cmds:
       # # TODO: Only suspend when a arg is passed to the task
       # # https://github.com/go-task/task/issues/608
-      # - task: suspend-task
+      # - task: .suspend
       #   vars: *task-vars
       - kubectl -n {{.ns}} patch replicationsources {{.app}} --type merge -p '{"spec":{"trigger":{"manual":"{{.ts}}"}}}'
       - bash {{.scriptsDir}}/wait.sh volsync-src-{{.app}} {{.ns}}
@@ -89,15 +89,15 @@ tasks:
   #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore app=$0 ns=$1'
   restore:
     desc: Trigger a Restic ReplicationSource restore
-    summary: task {{.TASK}} app=plex [ns=default] [previous=2]
+    summary: task {{.TASK}} [ns=default]? [app=plex] [previous=2]?
     cmds:
-      - task: suspend-task
+      - task: .suspend
         vars: *task-vars
-      - task: wipe-task
+      - task: .wipe
         vars: *task-vars
-      - task: restore-task
+      - task: .restore
         vars: *task-vars
-      - task: resume-task
+      - task: .resume
         vars: *task-vars
     vars:
       app: '{{ or .app (fail "Argument (app) is required") }}'
@@ -119,7 +119,7 @@ tasks:
       - sh: test -f {{.templatesDir}}/wipe.tmpl.yaml
 
   # Suspend the Flux ks and hr
-  suspend-task:
+  .suspend:
     internal: true
     cmds:
       - flux -n flux-system suspend kustomization {{.app}}
@@ -129,7 +129,7 @@ tasks:
     env: *task-vars
 
   # Wipe the PVC of all data
-  wipe-task:
+  .wipe:
     internal: true
     cmds:
       - envsubst < <(cat {{.templatesDir}}/wipe.tmpl.yaml) | kubectl apply -f -
@@ -140,7 +140,7 @@ tasks:
     env: *task-vars
 
   # Create VolSync replicationdestination CR to restore data
-  restore-task:
+  .restore:
     internal: true
     cmds:
       - envsubst < <(cat {{.templatesDir}}/replicationdestination.tmpl.yaml) | kubectl apply -f -
@@ -150,7 +150,7 @@ tasks:
     env: *task-vars
 
   # Resume Flux ks and hr
-  resume-task:
+  .resume:
     internal: true
     cmds:
       - flux -n {{.ns}} resume helmrelease {{.app}}

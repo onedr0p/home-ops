@@ -1,0 +1,50 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+
+  mount:
+    desc: Mount a PersistentVolumeClaim to a temporary pod
+    summary: task {{.TASK}} [cluster=main]? [ns=default]? [claim=plex]
+    interactive: true
+    cmd: |
+      kubectl run -n {{.ns}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
+        {
+          "apiVersion": "v1",
+          "spec": {
+            "containers": [
+              {
+                "name": "debug",
+                "image": "ghcr.io/onedr0p/alpine:rolling",
+                "command": ["/bin/bash"],
+                "stdin": true,
+                "stdinOnce": true,
+                "tty": true,
+                "volumeMounts": [
+                  {
+                    "name": "config",
+                    "mountPath": "/config"
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "persistentVolumeClaim": {
+                  "claimName": "{{.claim}}"
+                }
+              }
+            ],
+            "restartPolicy": "Never"
+          }
+        }'
+    vars:
+      claim: '{{ or .claim (fail "Argument (claim) is required") }}'
+      ns: '{{.ns | default "default"}}'
+      cluster: '{{.cluster | default "main"}}'
+    env:
+      KUBECONFIG: "{{.CLUSTER_DIR}}/{{.cluster}}/kubeconfig"
+    preconditions:
+      - kubectl -n {{.ns}} get persistentvolumeclaim {{.claim}}
