@@ -15,8 +15,6 @@ tasks:
       - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars
       - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/{{.cluster}}/flux/config
       - defer: sops --encrypt --in-place {{.CLUSTER_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
-    vars:
-      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
     env:
       KUBECONFIG: "{{.CLUSTER_DIR}}/{{.cluster}}/kubeconfig"
       SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
@@ -40,7 +38,6 @@ tasks:
           envsubst | kubectl apply --server-side --field-manager=kustomize-controller -f -"
     vars:
       ks: '{{ or .ks (fail "Missing path (`ks` var)") }}'
-      cluster: '{{.cluster | default "main"}}'
     env:
       KUBECONFIG: "{{.CLUSTER_DIR}}/{{.cluster}}/kubeconfig"
       SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"

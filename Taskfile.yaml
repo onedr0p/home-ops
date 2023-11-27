@@ -5,12 +5,17 @@ version: "3"
 includes:
   ansible:
     taskfile: .taskfiles/Ansible/Taskfile.yaml
+    vars: &vars
+      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
   external-secrets:
     taskfile: .taskfiles/ExternalSecrets/Taskfile.yaml
+    vars: *vars
   flux:
     taskfile: .taskfiles/Flux/Taskfile.yaml
+    vars: *vars
   kubernetes:
     taskfile: .taskfiles/Kubernetes/Taskfile.yaml
+    vars: *vars
   volsync:
     taskfile: .taskfiles/VolSync/Taskfile.yaml
 
