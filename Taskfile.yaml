@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
-# TODO: Clean up KUBECTL, FLUXCTL and hacky `true && ...` in tasks
+# TODO: Clean up `--context` usage
 # https://github.com/go-task/task/issues/1038
 
 env:
@@ -16,21 +16,14 @@ vars:
 includes:
   ansible:
     taskfile: .taskfiles/Ansible/Taskfile.yaml
-    vars: &vars
-      KUBECTL: kubectl --context {{.cluster}}
-      FLUXCTL: flux --context {{.cluster}}
   external-secrets:
     taskfile: .taskfiles/ExternalSecrets/Taskfile.yaml
-    vars: *vars
   flux:
     taskfile: .taskfiles/Flux/Taskfile.yaml
-    vars: *vars
   kubernetes:
     taskfile: .taskfiles/Kubernetes/Taskfile.yaml
-    vars: *vars
   volsync:
     taskfile: .taskfiles/VolSync/Taskfile.yaml
-    vars: *vars
 
 tasks:
 

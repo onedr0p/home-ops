@@ -28,11 +28,11 @@ tasks:
     desc: List all snapshots
     summary: task {{.TASK}} [ns=default]? [app=plex]
     cmds:
-      - envsubst < <(cat {{.templatesDir}}/list.tmpl.yaml) | {{.KUBECTL}} apply -f -
+      - envsubst < <(cat {{.templatesDir}}/list.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
       - bash {{.scriptsDir}}/wait.sh list-{{.app}}-{{.ts}} {{.ns}}
-      - true && {{.KUBECTL}} -n {{.ns}} wait job/list-{{.app}}-{{.ts}} --for condition=complete --timeout=1m
-      - true && {{.KUBECTL}} -n {{.ns}} logs job/list-{{.app}}-{{.ts}} --container list
-      - true && {{.KUBECTL}} -n {{.ns}} delete job list-{{.app}}-{{.ts}}
+      - kubectl --context {{.cluster}} -n {{.ns}} wait job/list-{{.app}}-{{.ts}} --for condition=complete --timeout=1m
+      - kubectl --context {{.cluster}} -n {{.ns}} logs job/list-{{.app}}-{{.ts}} --container list
+      - kubectl --context {{.cluster}} -n {{.ns}} delete job list-{{.app}}-{{.ts}}
     env: *env
     vars:
       cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
@@ -47,11 +47,11 @@ tasks:
     desc: Unlock a Restic repository
     summary: task {{.TASK}} [ns=default]? [app=plex]
     cmds:
-      - envsubst < <(cat {{.templatesDir}}/unlock.tmpl.yaml) | {{.KUBECTL}} apply -f -
+      - envsubst < <(cat {{.templatesDir}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
       - bash {{.scriptsDir}}/wait.sh unlock-{{.app}}-{{.ts}} {{.ns}}
-      - true && {{.KUBECTL}} -n {{.ns}} wait job/unlock-{{.app}}-{{.ts}} --for condition=complete --timeout=1m
-      - true && {{.KUBECTL}} -n {{.ns}} logs job/unlock-{{.app}}-{{.ts}} --container unlock
-      - true && {{.KUBECTL}} -n {{.ns}} delete job unlock-{{.app}}-{{.ts}}
+      - kubectl --context {{.cluster}} -n {{.ns}} wait job/unlock-{{.app}}-{{.ts}} --for condition=complete --timeout=1m
+      - kubectl --context {{.cluster}} -n {{.ns}} logs job/unlock-{{.app}}-{{.ts}} --container unlock
+      - kubectl --context {{.cluster}} -n {{.ns}} delete job unlock-{{.app}}-{{.ts}}
     env: *env
     vars:
       cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
@@ -72,9 +72,9 @@ tasks:
       # # https://github.com/go-task/task/issues/608
       # - task: .suspend
       #   vars: *env
-      - true && {{.KUBECTL}} -n {{.ns}} patch replicationsources {{.app}} --type merge -p '{"spec":{"trigger":{"manual":"{{.ts}}"}}}'
+      - kubectl --context {{.cluster}} -n {{.ns}} patch replicationsources {{.app}} --type merge -p '{"spec":{"trigger":{"manual":"{{.ts}}"}}}'
       - bash {{.scriptsDir}}/wait.sh volsync-src-{{.app}} {{.ns}}
-      - true && {{.KUBECTL}} -n {{.ns}} wait job/volsync-src-{{.app}} --for condition=complete --timeout=120m
+      - kubectl --context {{.cluster}} -n {{.ns}} wait job/volsync-src-{{.app}} --for condition=complete --timeout=120m
     env: *env
     vars:
       cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
@@ -85,7 +85,7 @@ tasks:
     preconditions:
       - sh: test -f {{.scriptsDir}}/controller.sh
       - sh: test -f {{.scriptsDir}}/wait.sh
-      - sh: true && {{.KUBECTL}} -n {{.ns}} get replicationsources {{.app}}
+      - sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources {{.app}}
         msg: ReplicationSource '{{.app}}' not found in namespace '{{.ns}}'
 
   # To run restore jobs in parallel for all replicationdestinations:
@@ -111,11 +111,11 @@ tasks:
       controller:
         sh: "{{.scriptsDir}}/controller.sh {{.app}} {{.ns}}"
       claim:
-        sh: true && {{.KUBECTL}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.sourcePVC}"
+        sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.sourcePVC}"
       puid:
-        sh: true && {{.KUBECTL}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsUser}"
+        sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsUser}"
       pgid:
-        sh: true && {{.KUBECTL}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
+        sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
     preconditions:
       - sh: test -f {{.scriptsDir}}/controller.sh
       - sh: test -f {{.scriptsDir}}/wait.sh
@@ -126,37 +126,37 @@ tasks:
   .suspend:
     internal: true
     cmds:
-      - true && {{.FLUXCTL}} -n flux-system suspend kustomization {{.app}}
-      - true && {{.FLUXCTL}} -n {{.ns}} suspend helmrelease {{.app}}
-      - true && {{.KUBECTL}} -n {{.ns}} scale {{.controller}} --replicas 0
-      - true && {{.KUBECTL}} -n {{.ns}} wait pod --for delete --selector="app.kubernetes.io/name={{.app}}" --timeout=2m
+      - flux --context {{.cluster}} -n flux-system suspend kustomization {{.app}}
+      - flux --context {{.cluster}} -n {{.ns}} suspend helmrelease {{.app}}
+      - kubectl --context {{.cluster}} -n {{.ns}} scale {{.controller}} --replicas 0
+      - kubectl --context {{.cluster}} -n {{.ns}} wait pod --for delete --selector="app.kubernetes.io/name={{.app}}" --timeout=2m
     env: *env
 
   # Wipe the PVC of all data
   .wipe:
     internal: true
     cmds:
-      - envsubst < <(cat {{.templatesDir}}/wipe.tmpl.yaml) | {{.KUBECTL}} apply -f -
+      - envsubst < <(cat {{.templatesDir}}/wipe.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
       - bash {{.scriptsDir}}/wait.sh wipe-{{.app}}-{{.ts}} {{.ns}}
-      - true && {{.KUBECTL}} -n {{.ns}} wait job/wipe-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
-      - true && {{.KUBECTL}} -n {{.ns}} logs job/wipe-{{.app}}-{{.ts}} --container wipe
-      - true && {{.KUBECTL}} -n {{.ns}} delete job wipe-{{.app}}-{{.ts}}
+      - kubectl --context {{.cluster}} -n {{.ns}} wait job/wipe-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
+      - kubectl --context {{.cluster}} -n {{.ns}} logs job/wipe-{{.app}}-{{.ts}} --container wipe
+      - kubectl --context {{.cluster}} -n {{.ns}} delete job wipe-{{.app}}-{{.ts}}
     env: *env
 
   # Create VolSync replicationdestination CR to restore data
   .restore:
     internal: true
     cmds:
-      - envsubst < <(cat {{.templatesDir}}/replicationdestination.tmpl.yaml) | {{.KUBECTL}} apply -f -
+      - envsubst < <(cat {{.templatesDir}}/replicationdestination.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
       - bash {{.scriptsDir}}/wait.sh volsync-dst-{{.app}}-{{.ts}} {{.ns}}
-      - true && {{.KUBECTL}} -n {{.ns}} wait job/volsync-dst-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
-      - true && {{.KUBECTL}} -n {{.ns}} delete replicationdestination {{.app}}-{{.ts}}
+      - kubectl --context {{.cluster}} -n {{.ns}} wait job/volsync-dst-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
+      - kubectl --context {{.cluster}} -n {{.ns}} delete replicationdestination {{.app}}-{{.ts}}
     env: *env
 
   # Resume Flux ks and hr
   .resume:
     internal: true
     cmds:
-      - true && {{.FLUXCTL}} -n {{.ns}} resume helmrelease {{.app}}
-      - true && {{.FLUXCTL}} -n flux-system resume kustomization {{.app}}
+      - flux --context {{.cluster}} -n {{.ns}} resume helmrelease {{.app}}
+      - flux --context {{.cluster}} -n flux-system resume kustomization {{.app}}
     env: *env

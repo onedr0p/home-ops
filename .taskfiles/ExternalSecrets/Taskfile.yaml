@@ -7,13 +7,7 @@ tasks:
   sync:
     desc: Sync ExternalSecret resources
     summary: task {{.TASK}} [cluster=main] [ns=default]? [secret=plex]?
-    cmd: |
-      {{if eq .secret ""}}
-        {{.KUBECTL}} get externalsecret --all-namespaces --no-headers -A | awk '{print $1, $2}' \
-          | xargs --max-procs=4 -l bash -c '{{.KUBECTL}} -n $0 annotate externalsecret $1 force-sync=$(date +%s) --overwrite'
-      {{else}}
-        {{.KUBECTL}} -n {{.ns}} annotate externalsecret {{.secret}} force-sync=$(date +%s) --overwrite
-      {{end}}
+    cmd: kubectl --context {{.cluster}} -n {{.ns}} annotate externalsecret {{.secret}} force-sync=$(date +%s) --overwrite
     env:
       KUBECONFIG: "{{.KUBERNETES_DIR}}/{{.cluster}}/kubeconfig"
     vars:
@@ -21,4 +15,21 @@ tasks:
       ns: '{{.ns | default "default"}}'
       secret: '{{ .secret | default ""}}'
     preconditions:
-      - "{{.KUBECTL}} -n {{.ns}} get externalsecret {{.secret}}"
+      - { msg: "ExternalSecret not found", sh: "kubectl --context {{.cluster}} -n {{.ns}} get externalsecret {{.secret}}" }
+
+  sync-all:
+    desc: Sync all ExternalSecret resources
+    summary: task {{.TASK}} [cluster=main]
+    cmds:
+      - for: { var: secrets, split: '' }
+        task: sync
+        vars:
+          cluster: '{{.cluster}}'
+          ns: '{{$a := split "/" .ITEM}}{{$a._0}}'
+          secret: '{{$a := split "/" .ITEM}}{{$a._1}}'
+    env:
+      KUBECONFIG: "{{.KUBERNETES_DIR}}/{{.cluster}}/kubeconfig"
+    vars:
+      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
+      secrets:
+        sh: kubectl --context {{.cluster}} get externalsecret --all-namespaces --no-headers -A | awk '{print $1 "/" $2}'
