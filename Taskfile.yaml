@@ -2,16 +2,23 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
-# TODO: Clean up kubectl, fluxctl and hacky `true && ...` in tasks
+# TODO: Clean up KUBECTL, FLUXCTL and hacky `true && ...` in tasks
 # https://github.com/go-task/task/issues/1038
+
+env:
+  SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
+
+vars:
+  KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
+  ANSIBLE_DIR: "{{.ROOT_DIR}}/ansible"
+  TERRAFORM_DIR: "{{.ROOT_DIR}}/terraform"
 
 includes:
   ansible:
     taskfile: .taskfiles/Ansible/Taskfile.yaml
     vars: &vars
-      kubectl: kubectl --context {{.cluster}}
-      fluxctl: flux --context {{.cluster}}
-      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
+      KUBECTL: kubectl --context {{.cluster}}
+      FLUXCTL: flux --context {{.cluster}}
   external-secrets:
     taskfile: .taskfiles/ExternalSecrets/Taskfile.yaml
     vars: *vars

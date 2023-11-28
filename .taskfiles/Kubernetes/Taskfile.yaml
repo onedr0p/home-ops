@@ -9,7 +9,7 @@ tasks:
     summary: task {{.TASK}} [cluster=main] [ns=default]? [claim=plex]
     interactive: true
     cmd: |
-      {{.kubectl}} run -n {{.ns}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
+      {{.KUBECTL}} run -n {{.ns}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
         {
           "apiVersion": "v1",
           "spec": {
@@ -41,7 +41,8 @@ tasks:
           }
         }'
     vars:
+      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
       ns: '{{.ns | default "default"}}'
       claim: '{{ or .claim (fail "Argument (claim) is required") }}'
     preconditions:
-      - true && {{.kubectl}} -n {{.ns}} get persistentvolumeclaim {{.claim}}
+      - true && {{.KUBECTL}} -n {{.ns}} get persistentvolumeclaim {{.claim}}

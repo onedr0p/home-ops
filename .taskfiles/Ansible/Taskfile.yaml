@@ -4,7 +4,6 @@ version: "3"
 
 vars:
   PYTHON_BIN: python3
-  ANSIBLE_DIR: "{{.ROOT_DIR}}/ansible"
 
 env:
   PATH: "{{.ROOT_DIR}}/.venv/bin:$PATH"
@@ -12,7 +11,7 @@ env:
   ANSIBLE_COLLECTIONS_PATH: "{{.ROOT_DIR}}/.venv/galaxy"
   ANSIBLE_ROLES_PATH: "{{.ROOT_DIR}}/.venv/galaxy/ansible_roles"
   ANSIBLE_VARS_ENABLED: "host_group_vars,community.sops.sops"
-  K8S_AUTH_KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
+  # K8S_AUTH_KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
 
 tasks:
 
@@ -24,12 +23,14 @@ tasks:
   run:
     desc: Run an Ansible playbook
     summary: task {{.TASK}} [cluster=main] [playbook=cluster-prepare]
+    prompt: Run Ansible playbook '{{.playbook}}' against the '{{.cluster}}' cluster... continue?
     deps: ["deps"]
     cmd: |
       .venv/bin/ansible-playbook \
         --inventory {{.ANSIBLE_DIR}}/{{.cluster}}/inventory/hosts.yaml \
         {{.ANSIBLE_DIR}}/{{.cluster}}/playbooks/{{.playbook}}.yaml
     vars:
+      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
       playbook: '{{ or .playbook (fail "Argument (playbook) is required") }}'
     preconditions:
       - { msg: "Venv not found",      sh: "test -d {{.ROOT_DIR}}/.venv" }
@@ -39,7 +40,7 @@ tasks:
   .venv:
     internal: true
     cmds:
-      - sleep 0.1 && {{.PYTHON_BIN}} -m venv {{.ROOT_DIR}}/.venv
+      - true && {{.PYTHON_BIN}} -m venv {{.ROOT_DIR}}/.venv
       - .venv/bin/python3 -m pip install --upgrade pip setuptools wheel
       - .venv/bin/python3 -m pip install --upgrade --requirement {{.ANSIBLE_DIR}}/requirements.txt
       - .venv/bin/ansible-galaxy install --role-file "{{.ANSIBLE_DIR}}/requirements.yaml" --force

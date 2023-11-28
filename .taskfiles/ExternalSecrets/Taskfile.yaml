@@ -9,15 +9,16 @@ tasks:
     summary: task {{.TASK}} [cluster=main] [ns=default]? [secret=plex]?
     cmd: |
       {{if eq .secret ""}}
-        {{.kubectl}} get externalsecret --all-namespaces --no-headers -A | awk '{print $1, $2}' \
-          | xargs --max-procs=4 -l bash -c '{{.kubectl}} -n $0 annotate externalsecret $1 force-sync=$(date +%s) --overwrite'
+        {{.KUBECTL}} get externalsecret --all-namespaces --no-headers -A | awk '{print $1, $2}' \
+          | xargs --max-procs=4 -l bash -c '{{.KUBECTL}} -n $0 annotate externalsecret $1 force-sync=$(date +%s) --overwrite'
       {{else}}
-        {{.kubectl}} -n {{.ns}} annotate externalsecret {{.secret}} force-sync=$(date +%s) --overwrite
+        {{.KUBECTL}} -n {{.ns}} annotate externalsecret {{.secret}} force-sync=$(date +%s) --overwrite
       {{end}}
     env:
-      KUBECONFIG: "{{.ROOT_DIR}}/kubernetes/{{.cluster}}/kubeconfig"
+      KUBECONFIG: "{{.KUBERNETES_DIR}}/{{.cluster}}/kubeconfig"
     vars:
+      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
       ns: '{{.ns | default "default"}}'
       secret: '{{ .secret | default ""}}'
     preconditions:
-      - "{{.kubectl}} -n {{.ns}} get externalsecret {{.secret}}"
+      - "{{.KUBECTL}} -n {{.ns}} get externalsecret {{.secret}}"
