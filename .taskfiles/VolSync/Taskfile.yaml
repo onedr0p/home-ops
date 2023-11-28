@@ -25,7 +25,7 @@ vars:
 
 tasks:
   list:
-    desc: List all snapshots
+    desc: List snapshots for an application
     summary: task {{.TASK}} [ns=default]? [app=plex]
     cmds:
       - envsubst < <(cat {{.templatesDir}}/list.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
@@ -44,7 +44,7 @@ tasks:
     silent: true
 
   unlock:
-    desc: Unlock a Restic repository
+    desc: Unlock a Restic repository for an application
     summary: task {{.TASK}} [ns=default]? [app=plex]
     cmds:
       - envsubst < <(cat {{.templatesDir}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
@@ -65,7 +65,7 @@ tasks:
   # To run backup jobs in parallel for all replicationsources:
   #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:snapshot app=$0 ns=$1'
   snapshot:
-    desc: Trigger a Restic ReplicationSource snapshot
+    desc: Snapshot a PVC for an application
     summary: task {{.TASK}} [ns=default]? [app=plex]
     cmds:
       # # TODO: Only suspend when a arg is passed to the task
@@ -91,7 +91,7 @@ tasks:
   # To run restore jobs in parallel for all replicationdestinations:
   #    - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore app=$0 ns=$1'
   restore:
-    desc: Trigger a Restic ReplicationSource restore
+    desc: Restore a PVC for an application
     summary: task {{.TASK}} [ns=default]? [app=plex] [previous=2]?
     cmds:
       - task: .suspend

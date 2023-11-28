@@ -5,7 +5,7 @@ version: "3"
 tasks:
 
   bootstrap:
-    desc: Bootstrap Flux into a cluster
+    desc: Bootstrap Flux into a Kubernetes cluster
     summary: task {{.TASK}} [cluster=main]
     prompt: Bootstrap Flux into the '{{.cluster}}' cluster... continue?
     cmds:
@@ -29,7 +29,7 @@ tasks:
       - { msg: "Unable to decrypt sops secret",  sh: "sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env" }
 
   apply:
-    desc: Apply a Kustomization resource path
+    desc: Apply a Kustomization resource path for a cluster
     summary: task {{.TASK}} [cluster=main] [ks=apps/default/plex/app]
     dotenv: ['{{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-settings.env']
     cmd: |

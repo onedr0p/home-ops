@@ -5,7 +5,7 @@ version: "3"
 tasks:
 
   sync:
-    desc: Sync ExternalSecret resources
+    desc: Sync an ExternalSecret for a cluster
     summary: task {{.TASK}} [cluster=main] [ns=default]? [secret=plex]?
     cmd: kubectl --context {{.cluster}} -n {{.ns}} annotate externalsecret {{.secret}} force-sync=$(date +%s) --overwrite
     env:
@@ -18,7 +18,7 @@ tasks:
       - { msg: "ExternalSecret not found", sh: "kubectl --context {{.cluster}} -n {{.ns}} get externalsecret {{.secret}}" }
 
   sync-all:
-    desc: Sync all ExternalSecret resources
+    desc: Sync all ExternalSecrets for a cluster
     summary: task {{.TASK}} [cluster=main]
     cmds:
       - for: { var: secrets, split: '' }
