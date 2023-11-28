@@ -25,11 +25,11 @@ tasks:
         task: sync
         vars:
           cluster: '{{.cluster}}'
-          ns: '{{$a := split "/" .ITEM}}{{$a._0}}'
-          secret: '{{$a := split "/" .ITEM}}{{$a._1}}'
+          ns: '{{$a := split "|" .ITEM}}{{$a._0}}'
+          secret: '{{$a := split "|" .ITEM}}{{$a._1}}'
     env:
       KUBECONFIG: "{{.KUBERNETES_DIR}}/{{.cluster}}/kubeconfig"
     vars:
       cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
       secrets:
-        sh: kubectl --context {{.cluster}} get externalsecret --all-namespaces --no-headers -A | awk '{print $1 "/" $2}'
+        sh: kubectl --context {{.cluster}} get externalsecret --all-namespaces --no-headers -A | awk '{print $1 "|" $2}'
