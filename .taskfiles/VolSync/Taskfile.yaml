@@ -39,8 +39,8 @@ tasks:
       ns: '{{.ns | default "default"}}'
       app: '{{ or .app (fail "Argument (app) is required") }}'
     preconditions:
-      - sh: test -f {{.scriptsDir}}/wait.sh
-      - sh: test -f {{.templatesDir}}/list.tmpl.yaml
+      - { msg: "Wait script not found",   sh: "test -f {{.scriptsDir}}/wait.sh" }
+      - { msg: "List template not found", sh: "test -f {{.templatesDir}}/list.tmpl.yaml" }
     silent: true
 
   unlock:
@@ -58,8 +58,8 @@ tasks:
       ns: '{{.ns | default "default"}}'
       app: '{{ or .app (fail "Argument (app) is required") }}'
     preconditions:
-      - sh: test -f {{.scriptsDir}}/wait.sh
-      - sh: test -f {{.templatesDir}}/unlock.tmpl.yaml
+      - { msg: "Wait script not found",     sh: "test -f {{.scriptsDir}}/wait.sh" }
+      - { msg: "Unlock template not found", sh: "test -f {{.templatesDir}}/unlock.tmpl.yaml" }
     silent: true
 
   # To run backup jobs in parallel for all replicationsources:
@@ -83,10 +83,9 @@ tasks:
       controller:
         sh: true && {{.scriptsDir}}/controller.sh {{.app}} {{.ns}}
     preconditions:
-      - sh: test -f {{.scriptsDir}}/controller.sh
-      - sh: test -f {{.scriptsDir}}/wait.sh
-      - sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources {{.app}}
-        msg: ReplicationSource '{{.app}}' not found in namespace '{{.ns}}'
+      - { msg: "Controller script not found", sh: "test -f {{.scriptsDir}}/controller.sh" }
+      - { msg: "Wait script not found",       sh: "test -f {{.scriptsDir}}/wait.sh" }
+      - { msg: "RepositorySource not found",  sh: "kubectl --context {{.cluster}} -n {{.ns}} get replicationsources {{.app}}" }
 
   # To run restore jobs in parallel for all replicationdestinations:
   #    - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore app=$0 ns=$1'
@@ -117,10 +116,10 @@ tasks:
       pgid:
         sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
     preconditions:
-      - sh: test -f {{.scriptsDir}}/controller.sh
-      - sh: test -f {{.scriptsDir}}/wait.sh
-      - sh: test -f {{.templatesDir}}/replicationdestination.tmpl.yaml
-      - sh: test -f {{.templatesDir}}/wipe.tmpl.yaml
+      - { msg: "Controller script not found",             sh: "test -f {{.scriptsDir}}/controller.sh" }
+      - { msg: "Wait script not found",                   sh: "test -f {{.scriptsDir}}/wait.sh" }
+      - { msg: "ReplicationDestination script not found", sh: "test -f {{.templatesDir}}/replicationdestination.tmpl.yaml" }
+      - { msg: "Wipe template not found",                 sh: "test -f {{.templatesDir}}/wipe.tmpl.yaml" }
 
   # Suspend the Flux ks and hr
   .suspend:
