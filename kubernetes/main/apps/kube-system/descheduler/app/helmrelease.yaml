@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: descheduler
-      version: 0.28.0
+      version: 0.28.1
       sourceRef:
         kind: HelmRepository
         name: descheduler
@@ -25,63 +25,71 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    replicas: 2
     kind: Deployment
-    schedule: "*/5 * * * *"
+    deschedulerPolicyAPIVersion: descheduler/v1alpha2
     deschedulerPolicy:
-      strategies:
-        RemovePodsHavingTooManyRestarts:
-          enabled: true
-          params:
-            podsHavingTooManyRestarts:
+      profiles:
+        - name: ProfileName
+          pluginConfig:
+          - name: DefaultEvictor
+            args:
+              evictSystemCriticalPods: true
+              evictFailedBarePods: true
+              evictLocalStoragePods: true
+          - name: RemovePodsHavingTooManyRestarts
+            args:
               podRestartThreshold: 5
               includingInitContainers: true
-        RemovePodsViolatingTopologySpreadConstraint:
-          enabled: true
-          params:
-            includeSoftConstraints: true
-        PodLifeTime:
-          enabled: true
-          params:
-            podLifeTime:
+          - name: RemovePodsViolatingTopologySpreadConstraint
+            args:
+              constraints:
+                - DoNotSchedule
+          - name: PodLifeTime
+            args:
               states:
                 - Pending
                 - PodInitializing
                 - ContainerCreating
-              maxPodLifeTimeSeconds: 3600
-        RemoveFailedPods:
-          enabled: true
-          params:
-            failedPods:
-              reasons:
-                - NodeShutdown
-                - ImagePullBackOff
-                - CreateContainerConfigError
-              includingInitContainers: true
+              maxPodLifeTimeSeconds: 300
+          - name: RemoveFailedPods
+            args:
               excludeOwnerKinds:
                 - Job
-              minPodLifetimeSeconds: 3600
-        RemoveDuplicates:
-          enabled: true
-        RemovePodsViolatingNodeTaints:
-          enabled: true
-        RemovePodsViolatingNodeAffinity:
-          enabled: true
-          params:
-            nodeAffinityType:
-              - requiredDuringSchedulingIgnoredDuringExecution
-        RemovePodsViolatingInterPodAntiAffinity:
-          enabled: true
-        LowNodeUtilization:
-          enabled: true
-          params:
-            nodeResourceUtilizationThresholds:
+              includingInitContainers: true
+              minPodLifetimeSeconds: 300
+          - name: RemoveDuplicates
+          - name: RemovePodsViolatingNodeTaints
+          - name: RemovePodsViolatingNodeAffinity
+            args:
+              nodeAffinityType:
+                - requiredDuringSchedulingIgnoredDuringExecution
+          - name: RemovePodsViolatingInterPodAntiAffinity
+          - name: LowNodeUtilization
+            args:
               thresholds:
-                cpu: 35
-                memory: 35
-              targetThresholds:
                 cpu: 40
-                memory: 40
+                pods: 30
+              targetThresholds:
+                cpu: 45
+                pods: 45
+          plugins:
+            balance:
+              enabled:
+                - RemoveDuplicates
+                - LowNodeUtilization
+                - RemovePodsViolatingTopologySpreadConstraint
+            deschedule:
+              enabled:
+                - PodLifeTime
+                - RemoveFailedPods
+                - RemovePodsViolatingNodeTaints
+                - RemovePodsViolatingNodeAffinity
+                - RemovePodsHavingTooManyRestarts
+                - RemovePodsViolatingInterPodAntiAffinity
     service:
       enabled: true
     serviceMonitor:
+      enabled: true
+    leaderElection:
       enabled: true
