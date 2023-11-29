@@ -3,11 +3,13 @@
   "extends": [
     "config:recommended",
     "docker:enableMajor",
+    "replacements:k8s-registry-move",
     ":disableRateLimiting",
     ":dependencyDashboard",
     ":semanticCommits",
     ":automergeDigest",
     ":automergeBranch",
+    ":timezone(America/New_York)",
     "github>onedr0p/home-ops//.github/renovate/allowedVersions.json5",
     "github>onedr0p/home-ops//.github/renovate/autoMerge.json5",
     "github>onedr0p/home-ops//.github/renovate/clusters.json5",
@@ -18,7 +20,8 @@
     "github>onedr0p/home-ops//.github/renovate/labels.json5",
     "github>onedr0p/home-ops//.github/renovate/packageRules.json5",
     "github>onedr0p/home-ops//.github/renovate/semanticCommits.json5",
-    "helpers:pinGitHubActionDigests"
+    "helpers:pinGitHubActionDigests",
+    "security:openssf-scorecard"
   ],
   "platform": "github",
   "platformCommit": true,
@@ -26,6 +29,14 @@
   "requireConfig": "optional",
   "dependencyDashboardTitle": "Renovate Dashboard 🤖",
   "suppressNotifications": ["prIgnoreNotification"],
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "automerge": true,
+    "automergeType": "branch",
+    "schedule": ["at any time"]
+  },
+  "osvVulnerabilityAlerts": true,
+  "dependencyDashboardOSVVulnerabilitySummary": "all",
   "ignorePaths": ["**/archive/**"],
   "flux": {
     "fileMatch": [
