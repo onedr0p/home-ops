@@ -6,7 +6,9 @@ tasks:
 
   bootstrap:
     desc: Bootstrap Flux into a Kubernetes cluster
-    summary: task {{.TASK}} [cluster=main]
+    summary: |
+      Args:
+        cluster: Cluster to apply the Kustomization resource to (required)
     prompt: Bootstrap Flux into the '{{.cluster}}' cluster... continue?
     cmds:
       - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux
@@ -45,7 +47,7 @@ tasks:
           --field-manager=kustomize-controller -f -
     vars:
       cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
-      path: '{{ or .ks (fail "Argument (path) is required") }}'
+      path: '{{ or .path (fail "Argument (path) is required") }}'
       ns: '{{.ns | default "flux-system"}}'
     preconditions:
-      - { msg: "Kustomization file not found", sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.ks}}/ks.yaml" }
+      - { msg: "Kustomization file not found", sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}}/ks.yaml" }
