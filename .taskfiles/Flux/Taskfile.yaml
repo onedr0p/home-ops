@@ -29,17 +29,19 @@ tasks:
       - { msg: "Unable to decrypt sops secret",  sh: "sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env" }
 
   apply:
-    desc: Apply a Kustomization resource path for a cluster
-    summary: task {{.TASK}} [cluster=main] [ks=apps/default/plex/app]
-    dotenv: ['{{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-settings.env']
+    desc: Apply a Flux Kustomization resource for a cluster
+    summary: task {{.TASK}} [cluster=main] [ks=default/plex/ks.yaml] [ns=flux-system]?
     cmd: |
-      sops exec-env {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env \
-        "kustomize build --load-restrictor=LoadRestrictionsNone {{.KUBERNETES_DIR}}/{{.cluster}}/{{.ks}} | \
-          envsubst | kubectl --context {{.cluster}} apply --server-side --field-manager=kustomize-controller -f -"
+      flux --context {{.cluster}} build ks $(basename $(dirname {{.ks}})) \
+          --namespace {{.ns}} \
+          --kustomization-file {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.ks}} \
+          --path {{.KUBERNETES_DIR}}/{{.cluster}}/apps/$(dirname {{.ks}}) \
+      | \
+      kubectl --context {{.cluster}} apply --server-side \
+          --field-manager=kustomize-controller -f -
     vars:
       cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
-      ks: '{{ or .ks (fail "Missing path (`ks` var)") }}'
+      ks: '{{ or .ks (fail "Argument (ks) is required") }}'
+      ns: '{{.ns | default "flux-system"}}'
     preconditions:
-      - { msg: "Kustomization path not found", sh: "test -d {{.KUBERNETES_DIR}}/{{.cluster}}/{{.ks}}" }
-      - { msg: "Cluster settings not found",   sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-settings.env" }
-      - { msg: "Cluster secrets not found",    sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env" }
+      - { msg: "Kustomization file not found", sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.ks}}" }
