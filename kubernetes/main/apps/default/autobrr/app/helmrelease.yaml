@@ -41,15 +41,13 @@ spec:
         containers:
           main:
             image:
-              repository: ghcr.io/buroa/autobrr
-              tag: develop@sha256:407c6d98cea5b0f4ea41fe5a3898d8291dfd1f148979c0d55f7f7167faf4e923
-              # repository: ghcr.io/autobrr/autobrr
-              # tag: v1.33.0
+              repository: ghcr.io/autobrr/autobrr
+              tag: v1.34.0
             env:
-              AUTOBRR__CHECKFORUPDATES: "false"
+              AUTOBRR__CHECK_FOR_UPDATES: "false"
               AUTOBRR__HOST: 0.0.0.0
               AUTOBRR__PORT: &port 80
-              AUTOBRR__LOGLEVEL: DEBUG
+              AUTOBRR__LOG_LEVEL: DEBUG
             envFrom: *envFrom
             probes:
               liveness: &probes
@@ -97,14 +95,3 @@ spec:
         tls:
           - hosts:
               - *host
-    persistence:
-      config:
-        enabled: true
-        type: emptyDir
-      config-file:
-        type: configMap
-        name: autobrr-configmap
-        globalMounts:
-          - path: /config/config.toml
-            subPath: config.toml
-            readOnly: true
