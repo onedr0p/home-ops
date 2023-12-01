@@ -6,20 +6,26 @@ tasks:
 
   sync:
     desc: Sync an ExternalSecret for a cluster
-    summary: task {{.TASK}} [cluster=main] [ns=default]? [secret=plex]?
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+        ns: Namespace the externalsecret is in (default: default)
+        secret: Secret to sync (required)
     cmd: kubectl --context {{.cluster}} -n {{.ns}} annotate externalsecret {{.secret}} force-sync=$(date +%s) --overwrite
     env:
       KUBECONFIG: "{{.KUBERNETES_DIR}}/{{.cluster}}/kubeconfig"
     vars:
       cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
       ns: '{{.ns | default "default"}}'
-      secret: '{{ .secret | default ""}}'
+      secret: '{{ or .secret (fail "Argument (secret) is required") }}'
     preconditions:
       - { msg: "ExternalSecret not found", sh: "kubectl --context {{.cluster}} -n {{.ns}} get externalsecret {{.secret}}" }
 
   sync-all:
     desc: Sync all ExternalSecrets for a cluster
-    summary: task {{.TASK}} [cluster=main]
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
     cmds:
       - for: { var: secrets, split: '' }
         task: sync

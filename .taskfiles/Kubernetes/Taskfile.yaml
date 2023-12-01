@@ -6,7 +6,11 @@ tasks:
 
   mount:
     desc: Mount a PersistentVolumeClaim to a temporary pod for a cluster
-    summary: task {{.TASK}} [cluster=main] [ns=default]? [claim=plex]
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+        ns: Namespace the PVC is in (default: default)
+        claim: PVC to mount (required)
     interactive: true
     cmd: |
       kubectl --context {{.cluster}} run -n {{.ns}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='

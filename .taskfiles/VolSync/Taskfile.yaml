@@ -26,7 +26,11 @@ vars:
 tasks:
   list:
     desc: List snapshots for an application
-    summary: task {{.TASK}} [ns=default]? [app=plex]
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+        ns: Namespace the PVC is in (default: default)
+        app: Application to list snapshots for (required)
     cmds:
       - envsubst < <(cat {{.templatesDir}}/list.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
       - bash {{.scriptsDir}}/wait.sh list-{{.app}}-{{.ts}} {{.ns}}
@@ -45,7 +49,11 @@ tasks:
 
   unlock:
     desc: Unlock a Restic repository for an application
-    summary: task {{.TASK}} [ns=default]? [app=plex]
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+        ns: Namespace the PVC is in (default: default)
+        app: Application to unlock (required)
     cmds:
       - envsubst < <(cat {{.templatesDir}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
       - bash {{.scriptsDir}}/wait.sh unlock-{{.app}}-{{.ts}} {{.ns}}
@@ -66,7 +74,11 @@ tasks:
   #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:snapshot app=$0 ns=$1'
   snapshot:
     desc: Snapshot a PVC for an application
-    summary: task {{.TASK}} [ns=default]? [app=plex]
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+        ns: Namespace the PVC is in (default: default)
+        app: Application to snapshot (required)
     cmds:
       # # TODO: Only suspend when a arg is passed to the task
       # # https://github.com/go-task/task/issues/608
@@ -91,7 +103,12 @@ tasks:
   #    - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore app=$0 ns=$1'
   restore:
     desc: Restore a PVC for an application
-    summary: task {{.TASK}} [ns=default]? [app=plex] [previous=2]?
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+        ns: Namespace the PVC is in (default: default)
+        app: Application to restore (required)
+        previous: Previous number of snapshots to restore (default: 2)
     cmds:
       - task: .suspend
         vars: *env
