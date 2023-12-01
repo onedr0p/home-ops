@@ -30,18 +30,22 @@ tasks:
 
   apply:
     desc: Apply a Flux Kustomization resource for a cluster
-    summary: task {{.TASK}} [cluster=main] [ks=default/plex/ks.yaml] [ns=flux-system]?
+    summary: |
+      Args:
+        cluster: Cluster to apply the Kustomization resource to (required)
+        path: Path to the Flux Kustomization resource (required)
+        ns: Namespace the Flux Kustomization exists in (default: flux-system)
     cmd: |
-      flux --context {{.cluster}} build ks $(basename $(dirname {{.ks}})) \
+      flux --context {{.cluster}} build ks $(basename {{.path}}) \
           --namespace {{.ns}} \
-          --kustomization-file {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.ks}} \
-          --path {{.KUBERNETES_DIR}}/{{.cluster}}/apps/$(dirname {{.ks}}) \
+          --kustomization-file {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}}/ks.yaml \
+          --path {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}} \
       | \
       kubectl --context {{.cluster}} apply --server-side \
           --field-manager=kustomize-controller -f -
     vars:
       cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
-      ks: '{{ or .ks (fail "Argument (ks) is required") }}'
+      path: '{{ or .ks (fail "Argument (path) is required") }}'
       ns: '{{.ns | default "flux-system"}}'
     preconditions:
-      - { msg: "Kustomization file not found", sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.ks}}" }
+      - { msg: "Kustomization file not found", sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.ks}}/ks.yaml" }
