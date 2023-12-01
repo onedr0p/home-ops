@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: exportarr-pg
+  name: prowlarr-exporter
 spec:
   interval: 30m
   chart:
@@ -27,10 +27,6 @@ spec:
   dependsOn:
     - name: prowlarr
       namespace: default
-    - name: radarr
-      namespace: default
-    - name: sonarr
-      namespace: default
   values:
     controllers:
       main:
@@ -41,9 +37,14 @@ spec:
             image:
               repository: docker.io/adonato/query-exporter
               tag: 2.9.2
+            env:
+              PROWLARR_POD_NAME:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
             envFrom:
               - secretRef:
-                  name: exportarr-pg-secret
+                  name: prowlarr-exporter-secret
             command: ["query-exporter", "-H", "0.0.0.0", "--", "/config/config.yaml"]
             securityContext:
               allowPrivilegeEscalation: false
@@ -82,7 +83,7 @@ spec:
     persistence:
       config-file:
         type: configMap
-        name: exportarr-pg-configmap
+        name: prowlarr-exporter-configmap
         defaultMode: 0775
         globalMounts:
           - path: /config/config.yaml
