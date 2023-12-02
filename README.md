@@ -2,7 +2,7 @@
 
 <img src="https://camo.githubusercontent.com/5b298bf6b0596795602bd771c5bddbb963e83e0f/68747470733a2f2f692e696d6775722e636f6d2f7031527a586a512e706e67" align="center" width="144px" height="144px"/>
 
-### My Home Operations Repository :Octocat:
+### My Home Operations Repository :octocat:
 
 _... managed with Flux, Renovate, and GitHub Actions_ 🤖
 
@@ -36,8 +36,6 @@ There is a template over at [onedr0p/flux-cluster-template](https://github.com/o
 
 My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Debian using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi-hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server for (NFS) file storage.
 
-🔸 _[Click here](./ansible/) to see my Ansible playbooks and roles._
-
 ### Core Components
 
 - [actions-runner-controller](https://github.com/actions/actions-runner-controller): self-hosted Github runners
@@ -47,17 +45,18 @@ My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Debian using
 - [external-secrets](https://github.com/external-secrets/external-secrets/): managed Kubernetes secrets using [1Password Connect](https://github.com/1Password/connect).
 - [ingress-nginx](https://github.com/kubernetes/ingress-nginx/): ingress controller for Kubernetes using NGINX as a reverse proxy and load balancer
 - [rook](https://github.com/rook/rook): distributed block storage for persistent storage
+- [spegel](https://github.com/XenitAB/spegel): stateless cluster local OCI registry mirror
 - [sops](https://toolkit.fluxcd.io/guides/mozilla-sops/): managed secrets for Kubernetes, Ansible, and Terraform which are committed to Git
 - [tf-controller](https://github.com/weaveworks/tf-controller): additional Flux component used to run Terraform from within a Kubernetes cluster.
-- [volsync](https://github.com/backube/volsync) and [snapscheduler](https://github.com/backube/snapscheduler): backup and recovery of persistent volume claims
+- [volsync](https://github.com/backube/volsync): backup and recovery of persistent volume claims
 
 ### GitOps
 
-[Flux](https://github.com/fluxcd/flux2) watches the clusters in my [kubernetes](./kubernetes/) folder (see Directories below) and makes the changes to my cluster based on the state of my Git repository.
+[Flux](https://github.com/fluxcd/flux2) watches the clusters in my [kubernetes](./kubernetes/) folder (see Directories below) and makes the changes to my clusters based on the state of my Git repository.
 
 The way Flux works for me here is it will recursively search the `kubernetes/${cluster}/apps` folder until it finds the most top level `kustomization.yaml` per directory and then apply all the resources listed in it. That aforementioned `kustomization.yaml` will generally only have a namespace resource and one or many Flux kustomizations. Those Flux kustomizations will generally have a `HelmRelease` or other resources related to the application underneath it which will be applied.
 
-[Renovate](https://github.com/renovatebot/renovate) watches my **entire** repository looking for dependency updates, when they are found a PR is automatically created. When some PRs are merged [Flux](https://github.com/fluxcd/flux2) applies the changes to my cluster.
+[Renovate](https://github.com/renovatebot/renovate) watches my **entire** repository looking for dependency updates, when they are found a PR is automatically created. When some PRs are merged Flux applies the changes to my cluster.
 
 ### Directories
 
@@ -109,12 +108,6 @@ GitRepository :: home-kubernetes
 
   <img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/networks.png" align="center" width="600px" alt="dns"/>
 </details>
-
-| Name                  | CIDR              |
-|-----------------------|-------------------|
-| Server VLAN           | `192.168.42.0/24` |
-| Kubernetes pods       | `10.32.0.0/16`    |
-| Kubernetes services   | `10.33.0.0/16`    |
 
 ---
 
