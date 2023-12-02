@@ -58,6 +58,10 @@ spec:
               readiness: *probes
               startup:
                 enabled: false
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 gpu.intel.com/i915: 1
@@ -81,6 +85,7 @@ spec:
           securityContext:
             runAsUser: 568
             runAsGroup: 568
+            runAsNonRoot: true
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
             supplementalGroups: [44, 105, 10000]
@@ -113,6 +118,8 @@ spec:
       config:
         enabled: true
         existingClaim: plex
+      tmp:
+        type: emptyDir
       transcode:
         type: emptyDir
       media:
