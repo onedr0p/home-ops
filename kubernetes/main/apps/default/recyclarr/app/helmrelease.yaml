@@ -32,8 +32,11 @@ spec:
   values:
     controllers:
       main:
+        type: cronjob
         annotations:
           reloader.stakater.com/auto: "true"
+        cronjob:
+          schedule: "@daily"
         containers:
           main:
             image:
@@ -47,6 +50,7 @@ spec:
             envFrom:
               - secretRef:
                   name: recyclarr-secret
+            args: ["sync"]
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
