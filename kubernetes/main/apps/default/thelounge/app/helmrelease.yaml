@@ -42,6 +42,10 @@ spec:
             env:
               # https://github.com/thelounge/thelounge/issues/2656
               THELOUNGE_HOME: /config/thelounge
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
@@ -52,6 +56,7 @@ spec:
           securityContext:
             runAsUser: 568
             runAsGroup: 568
+            runAsNonRoot: true
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
     service:

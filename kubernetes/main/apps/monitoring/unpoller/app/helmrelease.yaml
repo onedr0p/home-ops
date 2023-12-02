@@ -40,6 +40,10 @@ spec:
               UP_UNIFI_DEFAULT_USER: unifipoller
               UP_UNIFI_DEFAULT_PASS: 1nternalUseOnly
               UP_INFLUXDB_DISABLE: true
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 5m
@@ -50,6 +54,7 @@ spec:
           securityContext:
             runAsUser: 568
             runAsGroup: 568
+            runAsNonRoot: true
     service:
       main:
         ports:

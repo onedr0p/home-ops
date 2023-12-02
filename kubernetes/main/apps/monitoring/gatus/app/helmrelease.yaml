@@ -69,6 +69,10 @@ spec:
               GATUS_CONFIG_PATH: /config
               CUSTOM_WEB_PORT: &port 80
             envFrom: *envFrom
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
@@ -84,11 +88,13 @@ spec:
               RESOURCE: both
               UNIQUE_FILENAMES: true
               METHOD: WATCH
+            securityContext: *securityContext
             resources: *configSyncResources
         pod:
           securityContext:
             runAsUser: 568
             runAsGroup: 568
+            runAsNonRoot: true
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
     service:
