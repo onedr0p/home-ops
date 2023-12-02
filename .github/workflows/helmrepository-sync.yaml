@@ -73,10 +73,10 @@ jobs:
               cluster_name=$(echo "${f}" | awk -F'/' '{print $2}')
               repo_namespace="$(yq eval '.spec.chart.spec.sourceRef.namespace' "${f}")"
               repo_name="$(yq eval '.spec.chart.spec.sourceRef.name' "${f}")"
-              repos+=("${cluster_name}:${repo_namespace}:${repoName}")
+              repos+=("${cluster_name}:${repo_namespace}:${repo_name}")
           done
-          repos=($(for r in ${repos[@]}; do echo $r; done | sort -u))
-          for r in ${repos[@]}; do
+          mapfile -t repos < <(printf "%s\n" "${repos[@]}" | sort -u)
+          for r in "${repos[@]}"; do
               IFS=':' read -r cluster_name repo_namespace repo_name <<< "${r}"
               flux \
                   --context "${cluster_name}" \
