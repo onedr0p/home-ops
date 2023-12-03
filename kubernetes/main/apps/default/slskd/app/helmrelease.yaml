@@ -61,10 +61,10 @@ spec:
             envFrom:
               - secretRef:
                   name: slskd-secret
-            # securityContext:
-            #   allowPrivilegeEscalation: false
-            #   readOnlyRootFilesystem: true
-            #   capabilities: { drop: ["ALL"] }
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
@@ -75,7 +75,7 @@ spec:
           securityContext:
             runAsUser: 568
             runAsGroup: 568
-            # runAsNonRoot: true
+            runAsNonRoot: true
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
             supplementalGroups: [10000]
@@ -122,10 +122,12 @@ spec:
           - path: /config/slskd.yml
             subPath: slskd.yml
             readOnly: true
-      # tmp:
-      #   type: emptyDir
-      #   globalMounts:
-      #     - path: /.net/slskd
+      tmp:
+        type: emptyDir
+      tmp-slskd:
+        type: emptyDir
+        globalMounts:
+          - path: /.net/slskd
       media:
         type: nfs
         server: expanse.turbo.ac
