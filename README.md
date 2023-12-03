@@ -83,6 +83,9 @@ This is a high-level look how Flux deploys my applications with dependencies. Be
 graph TD;
   id1>Kustomization: cluster] -->|Creates| id2>Kustomization: cluster-apps];
   id2>Kustomization: cluster-apps] -->|Creates| id3>Kustomization: postgres];
+  id2>Kustomization: cluster-apps] -->|Creates| id6>Kustomization: lldap]
+  id2>Kustomization: cluster-apps] -->|Creates| id8>Kustomization: authelia]
+  id2>Kustomization: cluster-apps] -->|Creates| id5>Kustomization: postgres-cluster]
   id3>Kustomization: postgres] -->|Creates| id4[HelmRelease: postgres];
   id5>Kustomization: postgres-cluster] -->|Depends on| id3>Kustomization: postgres];
   id5>Kustomization: postgres-cluster] -->|Creates| id10[Postgres Cluster];
