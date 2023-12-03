@@ -24,6 +24,10 @@ on:
       - .github/renovate.json5
       - .github/renovate/**.json5
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
 # Retrieve BOT_USER_ID via `curl -s "https://api.github.com/users/${BOT_USERNAME}%5Bbot%5D" | jq .id`
 env:
   WORKFLOW_DRY_RUN: false
