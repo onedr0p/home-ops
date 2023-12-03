@@ -75,30 +75,22 @@ This Git repository contains the following directories under [Kubernetes](./kube
     └── 📁 flux           # core flux configuration
 ```
 
-### Cluster Layout
+### Flux Workflow
 
-Below is a high-level look at the layout of how my directory structure with Flux works. In this brief example, you are able to see that `authelia` will not be able to run until `lldap` and  `cloudnative-pg` are running. It also shows that the `Cluster` custom resource depends on the `cloudnative-pg` Helm chart. This is needed because `cloudnative-pg` installs the `Cluster` custom resource definition in the Helm chart.
+This is a high-level look how Flux deploys my applications with dependencies. Below there are 3 apps `postgres`, `lldap` and `authelia`. `postgres` is the first app that needs to be running and healthy before `lldap` and `authelia`. Once `postgres` is healthy `lldap` will be deployed and after that is healthy `authelia` will be deployed.
 
-```python
-# Key: <kind> :: <metadata.name>
-GitRepository :: home-kubernetes
-    Kustomization :: cluster
-        Kustomization :: cluster-apps
-            Kustomization :: cloudnative-pg
-                HelmRelease :: cloudnative-pg
-            Kustomization :: cloudnative-pg-cluster
-                DependsOn:
-                    Kustomization :: cloudnative-pg
-                Cluster :: postgres
-            Kustomization :: lldap
-                HelmRelease :: lldap
-                DependsOn:
-                    Kustomization :: cloudnative-pg-cluster
-            Kustomization :: authelia
-                DependsOn:
-                    Kustomization :: lldap
-                    Kustomization :: cloudnative-pg-cluster
-                HelmRelease :: authelia
+```mermaid
+graph TD;
+  id1>Kustomization: cluster] -->|Creates| id2>Kustomization: cluster-apps];
+  id2>Kustomization: cluster-apps] -->|Creates| id3>Kustomization: postgres];
+  id3>Kustomization: postgres] -->|Creates| id4[HelmRelease: postgres];
+  id5>Kustomization: postgres-cluster] -->|Depends on| id3>Kustomization: postgres];
+  id5>Kustomization: postgres-cluster] -->|Creates| id10[Postgres Cluster];
+  id6>Kustomization: lldap] -->|Creates| id7(HelmRelease: lldap);
+  id6>Kustomization: lldap] -->|Depends on| id5>Kustomization: postgres-cluster];
+  id8>Kustomization: authelia] -->|Creates| id9(HelmRelease: authelia);
+  id8>Kustomization: authelia] -->|Depends on| id5>Kustomization: postgres-cluster];
+  id9(HelmRelease: authelia) -->|Depends on| id7(HelmRelease: lldap);
 ```
 
 ### Networking
