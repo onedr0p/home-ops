@@ -40,6 +40,9 @@ spec:
               repository: ghcr.io/slskd/slskd
               tag: 0.19.1
             env:
+              # https://github.com/Radarr/Radarr/issues/7030#issuecomment-1039689518
+              # https://github.com/dotnet/runtime/issues/9336
+              COMPlus_EnableDiagnostics: "0"
               TZ: America/New_York
               SLSKD_APP_DIR: /config
               SLSKD_DOWNLOADS_DIR: /media/complete
@@ -58,6 +61,10 @@ spec:
             envFrom:
               - secretRef:
                   name: slskd-secret
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
@@ -68,6 +75,7 @@ spec:
           securityContext:
             runAsUser: 568
             runAsGroup: 568
+            runAsNonRoot: true
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
             supplementalGroups: [10000]

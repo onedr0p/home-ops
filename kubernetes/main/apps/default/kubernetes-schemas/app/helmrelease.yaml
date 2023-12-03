@@ -34,6 +34,10 @@ spec:
             image:
               repository: ghcr.io/onedr0p/kubernetes-schemas
               tag: latest@sha256:c651144176f1411110a073777b46241f1275c01f7d402a65a896337118e59bea
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 5m
@@ -44,6 +48,7 @@ spec:
           securityContext:
             runAsUser: 568
             runAsGroup: 568
+            runAsNonRoot: true
           topologySpreadConstraints:
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname
