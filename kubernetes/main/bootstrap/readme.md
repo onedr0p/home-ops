@@ -3,5 +3,5 @@
 ## Install Flux into the cluster
 
 ```sh
-task bootstrap-flux cluster=main
+task flux:bootstrap cluster=main
 ```
