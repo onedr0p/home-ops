@@ -12,8 +12,12 @@ on:
         description: Log Level
         default: debug
         required: false
+      version:
+        description: Renovate version
+        default: latest
+        required: true
   schedule:
-    - cron: "0 * * * *"
+    - cron: "*/30 * * * *"
   push:
     branches: ["main"]
     paths:
@@ -60,4 +64,4 @@ jobs:
         with:
           configurationFile: "${{ env.RENOVATE_ONBOARDING_CONFIG_FILE_NAME }}"
           token: "${{ steps.app-token.outputs.token }}"
-          renovate-version: 37.59.8
+          renovate-version: "${{ github.event.inputs.version || latest }}"
