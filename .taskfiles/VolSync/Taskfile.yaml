@@ -33,7 +33,7 @@ tasks:
         app: Application to list snapshots for (required)
     cmds:
       - envsubst < <(cat {{.templatesDir}}/list.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.scriptsDir}}/wait.sh list-{{.app}}-{{.ts}} {{.ns}}
+      - bash {{.scriptsDir}}/wait.sh list-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/list-{{.app}}-{{.ts}} --for condition=complete --timeout=1m
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/list-{{.app}}-{{.ts}} --container list
       - kubectl --context {{.cluster}} -n {{.ns}} delete job list-{{.app}}-{{.ts}}
@@ -56,7 +56,7 @@ tasks:
         app: Application to unlock (required)
     cmds:
       - envsubst < <(cat {{.templatesDir}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.scriptsDir}}/wait.sh unlock-{{.app}}-{{.ts}} {{.ns}}
+      - bash {{.scriptsDir}}/wait.sh unlock-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/unlock-{{.app}}-{{.ts}} --for condition=complete --timeout=1m
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/unlock-{{.app}}-{{.ts}} --container unlock
       - kubectl --context {{.cluster}} -n {{.ns}} delete job unlock-{{.app}}-{{.ts}}
@@ -85,7 +85,7 @@ tasks:
       # - task: .suspend
       #   vars: *env
       - kubectl --context {{.cluster}} -n {{.ns}} patch replicationsources {{.app}} --type merge -p '{"spec":{"trigger":{"manual":"{{.ts}}"}}}'
-      - bash {{.scriptsDir}}/wait.sh volsync-src-{{.app}} {{.ns}}
+      - bash {{.scriptsDir}}/wait.sh volsync-src-{{.app}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/volsync-src-{{.app}} --for condition=complete --timeout=120m
     env: *env
     vars:
@@ -93,7 +93,7 @@ tasks:
       ns: '{{.ns | default "default"}}'
       app: '{{ or .app (fail "Argument (app) is required") }}'
       controller:
-        sh: true && {{.scriptsDir}}/controller.sh {{.app}} {{.ns}}
+        sh: true && {{.scriptsDir}}/controller.sh {{.app}} {{.ns}} {{.cluster}}
     preconditions:
       - { msg: "Controller script not found", sh: "test -f {{.scriptsDir}}/controller.sh" }
       - { msg: "Wait script not found",       sh: "test -f {{.scriptsDir}}/wait.sh" }
@@ -153,7 +153,7 @@ tasks:
     internal: true
     cmds:
       - envsubst < <(cat {{.templatesDir}}/wipe.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.scriptsDir}}/wait.sh wipe-{{.app}}-{{.ts}} {{.ns}}
+      - bash {{.scriptsDir}}/wait.sh wipe-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/wipe-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/wipe-{{.app}}-{{.ts}} --container wipe
       - kubectl --context {{.cluster}} -n {{.ns}} delete job wipe-{{.app}}-{{.ts}}
@@ -164,7 +164,7 @@ tasks:
     internal: true
     cmds:
       - envsubst < <(cat {{.templatesDir}}/replicationdestination.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.scriptsDir}}/wait.sh volsync-dst-{{.app}}-{{.ts}} {{.ns}}
+      - bash {{.scriptsDir}}/wait.sh volsync-dst-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/volsync-dst-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
       - kubectl --context {{.cluster}} -n {{.ns}} delete replicationdestination {{.app}}-{{.ts}}
     env: *env

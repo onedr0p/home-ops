@@ -2,13 +2,14 @@
 
 APP=$1
 NAMESPACE="${2:-default}"
+CLUSTER="${3:-main}"
 
 is_deployment() {
-    kubectl -n "${NAMESPACE}" get deployment "${APP}" >/dev/null 2>&1
+    kubectl --context "${CLUSTER}" -n "${NAMESPACE}" get deployment "${APP}" >/dev/null 2>&1
 }
 
 is_statefulset() {
-    kubectl -n "${NAMESPACE}" get statefulset "${APP}" >/dev/null 2>&1
+    kubectl --context "${CLUSTER}" -n "${NAMESPACE}" get statefulset "${APP}" >/dev/null 2>&1
 }
 
 if is_deployment; then
