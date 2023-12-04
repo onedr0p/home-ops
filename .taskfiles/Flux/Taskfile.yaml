@@ -42,7 +42,7 @@ tasks:
           --namespace {{.ns}} \
           --kustomization-file {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}}/ks.yaml \
           --path {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}} \
-          {{- if contains "Error" .exists }}--dry-run \{{ end }}
+          {{- if contains "NotFound" .exists }}--dry-run \{{ end }}
       | \
       kubectl --context {{.cluster}} apply --server-side \
           --field-manager=kustomize-controller -f -
