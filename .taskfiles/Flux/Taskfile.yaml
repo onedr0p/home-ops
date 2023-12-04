@@ -42,7 +42,7 @@ tasks:
           --namespace {{.ns}} \
           --kustomization-file {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}}/ks.yaml \
           --path {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}} \
-          {{- if contains "not found" .exists }}--dry-run \{{ end }}
+          {{- if contains "not found" .ks }}--dry-run \{{ end }}
       | \
       kubectl --context {{.cluster}} apply --server-side \
           --field-manager=kustomize-controller -f -
@@ -50,7 +50,7 @@ tasks:
       cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
       path: '{{ or .path (fail "Argument (path) is required") }}'
       ns: '{{.ns | default "flux-system"}}'
-      exists:
+      ks:
         sh: flux --context {{.cluster}} --namespace {{.ns}} get kustomizations $(basename {{.path}}) 2>&1
     preconditions:
       - { msg: "Kustomization file not found", sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}}/ks.yaml" }
