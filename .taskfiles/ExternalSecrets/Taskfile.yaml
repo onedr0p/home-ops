@@ -18,9 +18,8 @@ tasks:
       ns: '{{.ns | default "default"}}'
       secret: '{{ or .secret (fail "Argument (secret) is required") }}'
     preconditions:
-      - { msg: "ExternalSecret not found", sh: "kubectl --context {{.cluster}} -n {{.ns}} get externalsecret {{.secret}}" }
-      - { msg: "Argument (cluster) is required", sh: 'test -n "{{.cluster}}"' }
-
+      - { msg: "ExternalSecret not found",       sh: "kubectl --context {{.cluster}} -n {{.ns}} get externalsecret {{.secret}}" }
+      - { msg: "Argument (cluster) is required", sh: "test -n {{.cluster}}" }
 
   sync-all:
     desc: Sync all ExternalSecrets for a cluster
@@ -40,4 +39,4 @@ tasks:
       secrets:
         sh: kubectl --context {{.cluster}} get externalsecret --all-namespaces --no-headers -A | awk '{print $1 "|" $2}'
     preconditions:
-      - { msg: "Argument (cluster) is required", sh: 'test -n "{{.cluster}}"' }
+      - { msg: "Argument (cluster) is required", sh: "test -n {{.cluster}}" }

@@ -20,7 +20,7 @@ tasks:
       - defer: sops --encrypt --in-place {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
 
     preconditions:
-      - { msg: "Argument (cluster) is required", sh: 'test -n "{{.cluster}}"' }
+      - { msg: "Argument (cluster) is required", sh: "test -n {{.cluster}}" }
       - { msg: "Age private key not found",      sh: "test -f {{.ROOT_DIR}}/age.key" }
       - { msg: "Age secret not found",           sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.sops.yaml" }
       - { msg: "Github deploy secret not found", sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.sops.yaml" }
@@ -52,5 +52,5 @@ tasks:
       ks:
         sh: flux --context {{.cluster}} --namespace {{.ns}} get kustomizations $(basename {{.path}}) 2>&1
     preconditions:
-      - { msg: "Argument (cluster) is required", sh: 'test -n "{{.cluster}}"' }
-      - { msg: "Kustomization file not found", sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}}/ks.yaml" }
+      - { msg: "Argument (cluster) is required", sh: "test -n {{.cluster}}" }
+      - { msg: "Kustomization file not found",   sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}}/ks.yaml" }
