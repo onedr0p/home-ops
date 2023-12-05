@@ -5,16 +5,20 @@ on:
   workflow_dispatch:
   pull_request:
     branches: ["main"]
-    paths: ["kubernetes/main/**"]
+    paths:
+      - "kubernetes/main/**"
+      - "kubernetes/storage/**"
 
 env:
-  KUBERNETES_DIR: ./kubernetes/main
   SCHEMA_DIR: /home/runner/crds
 
 jobs:
   kubeconform:
     name: Kubeconform
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path: ["kubernetes/main", "kubernetes/storage"]
     steps:
       - name: Generate Token
         uses: actions/create-github-app-token@46e4a501e119d39574a54e53a06c9a705efc55c9 # v1.6.1
@@ -55,4 +59,4 @@ jobs:
 
       - name: Run kubeconform
         shell: bash
-        run: bash ./.github/scripts/kubeconform.sh ${{ env.KUBERNETES_DIR }} ${{ env.SCHEMA_DIR }}
+        run: bash ./.github/scripts/kubeconform.sh ${{ matrix.path }} ${{ env.SCHEMA_DIR }}
