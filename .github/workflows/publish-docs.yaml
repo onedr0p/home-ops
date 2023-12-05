@@ -9,8 +9,17 @@ on:
     branches: ["main"]
     paths: ["docs/**", "README.md"]
 
+env:
+  RENOVATE_USERNAME: "${{ secrets.BOT_USERNAME }}[bot]"
+  RENOVATE_GIT_AUTHOR: "${{ secrets.BOT_USERNAME }} <${{ secrets.BOT_USER_ID }}+${{ secrets.BOT_USERNAME }}[bot]@users.noreply.github.com>"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-  publish-docs:
+  build:
     name: Publish Docs
     runs-on: ubuntu-latest
     concurrency:
@@ -28,16 +37,40 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d # v4.0.0
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+          enablement: true
+
       - name: Build docs
         uses: docker://ghcr.io/bjw-s/mdbook:0.4.36@sha256:b7bfe9e63b8e8a8d6617c58918ea3e6d08bcc2ad74377c0bd26e75d0e716d2f7
         with:
           args: mdbook build docs
 
-      - if: ${{ github.ref == 'refs/heads/main' }}
-        name: Deploy
-        uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3.9.3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@a753861a5debcf57bf8b404356158c8e1e33150c # v2.0.0
         with:
-          github_token: "${{ steps.app-token.outputs.token }}"
-          publish_dir: ./docs/book
-          user_name: bot-ross[bot]
-          user_email: bot-ross <98030736+bot-ross[bot]@users.noreply.github.com>
+          path: ./docs/book
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: ["build"]
+    steps:
+      - name: Generate Token
+        uses: actions/create-github-app-token@46e4a501e119d39574a54e53a06c9a705efc55c9 # v1.6.1
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@77d7344265e1f960dab5c00dbff52287a70b0d4f # v3.0.0
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+          artifact_name: github-pages
