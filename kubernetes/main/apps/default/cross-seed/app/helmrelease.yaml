@@ -40,6 +40,9 @@ spec:
             env:
               TZ: America/New_York
               CROSSSEED_PORT: &port 80
+            envFrom:
+              - secretRef:
+                  name: cross-seed-secret
             args: ["daemon"]
             securityContext:
               allowPrivilegeEscalation: false
@@ -71,8 +74,8 @@ spec:
         globalMounts:
           - path: /config
       config-file:
-        type: secret
-        name: cross-seed-secret
+        type: configMap
+        name: cross-seed-configmap # overriden by kustomizeconfig
         globalMounts:
           - path: /config/config.js
             subPath: config.js
