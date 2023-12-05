@@ -39,10 +39,10 @@ tasks:
       - kubectl --context {{.cluster}} -n {{.ns}} delete job list-{{.app}}-{{.ts}}
     env: *env
     vars:
-      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
       ns: '{{.ns | default "default"}}'
       app: '{{ or .app (fail "Argument (app) is required") }}'
     preconditions:
+      - { msg: "Argument (cluster) is required", sh: 'test -n "{{.cluster}}"' }
       - { msg: "Wait script not found",   sh: "test -f {{.scriptsDir}}/wait.sh" }
       - { msg: "List template not found", sh: "test -f {{.templatesDir}}/list.tmpl.yaml" }
     silent: true
@@ -62,10 +62,10 @@ tasks:
       - kubectl --context {{.cluster}} -n {{.ns}} delete job unlock-{{.app}}-{{.ts}}
     env: *env
     vars:
-      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
       ns: '{{.ns | default "default"}}'
       app: '{{ or .app (fail "Argument (app) is required") }}'
     preconditions:
+      - { msg: "Argument (cluster) is required", sh: 'test -n "{{.cluster}}"' }
       - { msg: "Wait script not found",     sh: "test -f {{.scriptsDir}}/wait.sh" }
       - { msg: "Unlock template not found", sh: "test -f {{.templatesDir}}/unlock.tmpl.yaml" }
     silent: true
@@ -95,6 +95,7 @@ tasks:
       controller:
         sh: true && {{.scriptsDir}}/controller.sh {{.app}} {{.ns}} {{.cluster}}
     preconditions:
+      - { msg: "Argument (cluster) is required", sh: 'test -n "{{.cluster}}"' }
       - { msg: "Controller script not found", sh: "test -f {{.scriptsDir}}/controller.sh" }
       - { msg: "Wait script not found",       sh: "test -f {{.scriptsDir}}/wait.sh" }
       - { msg: "RepositorySource not found",  sh: "kubectl --context {{.cluster}} -n {{.ns}} get replicationsources {{.app}}" }
@@ -120,7 +121,6 @@ tasks:
         vars: *env
     env: *env
     vars:
-      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
       ns: '{{.ns | default "default"}}'
       app: '{{ or .app (fail "Argument (app) is required") }}'
       previous: '{{.previous | default 2}}'
@@ -133,6 +133,7 @@ tasks:
       pgid:
         sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
     preconditions:
+      - { msg: "Argument (cluster) is required",          sh: 'test -n "{{.cluster}}"' }
       - { msg: "Controller script not found",             sh: "test -f {{.scriptsDir}}/controller.sh" }
       - { msg: "Wait script not found",                   sh: "test -f {{.scriptsDir}}/wait.sh" }
       - { msg: "ReplicationDestination script not found", sh: "test -f {{.templatesDir}}/replicationdestination.tmpl.yaml" }
