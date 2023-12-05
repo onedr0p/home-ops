@@ -32,13 +32,12 @@ tasks:
       .venv/bin/ansible-playbook \
         --inventory {{.ANSIBLE_DIR}}/{{.cluster}}/inventory/hosts.yaml \
         {{.ANSIBLE_DIR}}/{{.cluster}}/playbooks/{{.playbook}}.yaml {{.CLI_ARGS}}
-    vars:
-      cluster: '{{ or .cluster (fail "Argument (cluster) is required") }}'
-      playbook: '{{ or .playbook (fail "Argument (playbook) is required") }}'
     preconditions:
-      - { msg: "Venv not found",      sh: "test -d {{.ROOT_DIR}}/.venv" }
+      - { msg: "Argument (cluster) is required", sh: 'test -n "{{.cluster}}"' }
+      - { msg: "Argument (playbook) is required", sh: 'test -n "{{.playbook}}"' }
+      - { msg: "Venv not found", sh: "test -d {{.ROOT_DIR}}/.venv" }
       - { msg: "Inventory not found", sh: "test -f {{.ANSIBLE_DIR}}/{{.cluster}}/inventory/hosts.yaml" }
-      - { msg: "Playbook not found",  sh: "test -f {{.ANSIBLE_DIR}}/{{.cluster}}/playbooks/{{.playbook}}.yaml" }
+      - { msg: "Playbook not found", sh: "test -f {{.ANSIBLE_DIR}}/{{.cluster}}/playbooks/{{.playbook}}.yaml" }
 
   .venv:
     internal: true
