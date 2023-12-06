@@ -12,23 +12,22 @@ tasks:
     prompt: Bootstrap Flux into the '{{.cluster}}' cluster... continue?
     cmds:
       - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux
-      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.sops.yaml | kubectl --context {{.cluster}} apply -f -
-      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.sops.yaml | kubectl --context {{.cluster}} apply -f -
-      - sops --decrypt --in-place {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
+      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml | kubectl --context {{.cluster}} apply -f -
+      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml | kubectl --context {{.cluster}} apply -f -
+      - sops --decrypt --in-place {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.env
       - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars
       - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/flux/config
-      - defer: sops --encrypt --in-place {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env
-
+      - defer: sops --encrypt --in-place {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.env
     preconditions:
       - { msg: "Argument (cluster) is required", sh: "test -n {{.cluster}}" }
       - { msg: "Age private key not found",      sh: "test -f {{.ROOT_DIR}}/age.key" }
-      - { msg: "Age secret not found",           sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.sops.yaml" }
-      - { msg: "Github deploy secret not found", sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.sops.yaml" }
+      - { msg: "Age secret not found",           sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml" }
+      - { msg: "Github deploy secret not found", sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml" }
       - { msg: "Cluster settings not found",     sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-settings.env" }
-      - { msg: "Cluster secrets not found",      sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env" }
-      - { msg: "Unable to decrypt sops secret",  sh: "sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.sops.yaml" }
-      - { msg: "Unable to decrypt sops secret",  sh: "sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.sops.yaml" }
-      - { msg: "Unable to decrypt sops secret",  sh: "sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.sops.env" }
+      - { msg: "Cluster secrets not found",      sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.env" }
+      - { msg: "Unable to decrypt sops secret",  sh: "sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml" }
+      - { msg: "Unable to decrypt sops secret",  sh: "sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml" }
+      - { msg: "Unable to decrypt sops secret",  sh: "sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.env" }
 
   apply:
     desc: Apply a Flux Kustomization resource for a cluster
