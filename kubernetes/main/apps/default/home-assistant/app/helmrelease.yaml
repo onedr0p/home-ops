@@ -36,12 +36,33 @@ spec:
           reloader.stakater.com/auto: "true"
         initContainers:
           init-db:
+            order: 1
             image:
               repository: ghcr.io/onedr0p/postgres-init
               tag: 15
             envFrom: &envFrom
               - secretRef:
                   name: home-assistant-secret
+          # TODO: Convert this to a proper 'sidecar' container someday
+          init-config:
+            order: 2
+            image: &configSyncImage
+              repository: ghcr.io/kiwigrid/k8s-sidecar
+              tag: 1.25.3
+            env: &env
+              FOLDER: /config
+              LABEL: home-assistant.io/enabled
+              NAMESPACE: default
+              RESOURCE: both
+              SCRIPT: /app/reload.py
+              SLEEP_TIME_SIDECAR: 5s
+              METHOD: LIST
+            resources: &configSyncResources
+              requests:
+                cpu: 10m
+                memory: 10Mi
+              limits:
+                memory: 128Mi
         containers:
           main:
             image:
@@ -68,25 +89,13 @@ spec:
               limits:
                 memory: 1Gi
           config-sync:
-            image:
-              repository: ghcr.io/kiwigrid/k8s-sidecar
-              tag: 1.25.3
+            image: *configSyncImage
             env:
-              FOLDER: /config
-              LABEL: home-assistant.io/enabled
-              NAMESPACE: default
-              RESOURCE: both
+              <<: *env
               METHOD: WATCH
-              SCRIPT: /app/reload.py
-              SLEEP_TIME_SIDECAR: 5s
             envFrom: *envFrom
             securityContext: *securityContext
-            resources:
-              requests:
-                cpu: 10m
-                memory: 10Mi
-              limits:
-                memory: 128Mi
+            resources: *configSyncResources
         pod:
           securityContext:
             runAsUser: 568
