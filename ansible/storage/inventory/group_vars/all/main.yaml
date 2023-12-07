@@ -6,28 +6,22 @@ k3s_become: true
 k3s_registration_address: 192.168.42.80
 k3s_control_node: true
 k3s_server:
-  node-ip: "{{ ansible_host }}"
-  flannel-iface: bond0
-  tls-san:
-    - "{{ k3s_registration_address }}"
-    - expanse.turbo.ac
-  docker: false
-  disable-network-policy: true
+  cluster-cidr: 10.142.0.0/16
+  disable: ["local-storage", "metrics-server", "traefik"]
   disable-cloud-controller: true
-  cluster-cidr: "10.142.0.0/16"
-  service-cidr: "10.143.0.0/16"
-  write-kubeconfig-mode: "0644"
+  disable-network-policy: true
+  docker: false
   etcd-expose-metrics: true
-  kube-controller-manager-arg:
-    - bind-address=0.0.0.0
-  kube-scheduler-arg:
-    - bind-address=0.0.0.0
-  kube-apiserver-arg:
-    - anonymous-auth=true
-  disable:
-    - local-storage
-    - metrics-server
-    - traefik
+  flannel-iface: bond0
+  kube-controller-manager-arg: ["bind-address=0.0.0.0"]
+  kube-scheduler-arg: ["bind-address=0.0.0.0"]
+  kube-apiserver-arg: ["anonymous-auth=true"]
+  node-ip: "{{ ansible_host }}"
+  pause-image: registry.k8s.io/pause:3.9
+  secrets-encryption: true
+  service-cidr: "10.143.0.0/16"
+  tls-san: ["{{ k3s_registration_address }}", "expanse.turbo.ac"]
+  write-kubeconfig-mode: "0644"
 k3s_server_manifests_urls:
   # Essential Prometheus Operator CRDs (the rest are installed with the kube-prometheus-stack helm release)
   - url: https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.69.1/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
