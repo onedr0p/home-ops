@@ -7,3 +7,30 @@ resources:
   - ./helmrelease.yaml
   - ../../../../templates/gatus/external
   - ../../../../templates/volsync
+configMapGenerator:
+  - name: home-assistant-script-configmap
+    files:
+      - reload.py=./scripts/reload.py
+  - name: home-assistant-alerts-configmap
+    files:
+      - basement.yaml=./config/alerts/basement.yaml
+      - foyer.yaml=./config/alerts/foyer.yaml
+      - garage.yaml=./config/alerts/garage.yaml
+patches:
+  - target:
+      version: v1
+      kind: ConfigMap
+      name: home-assistant-alerts-configmap
+      namespace: default
+    patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: home-assistant-alerts-configmap
+        annotations:
+          home-assistant.io/enabled: "true"
+          k8s-sidecar-target-directory: /config/alerts
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
