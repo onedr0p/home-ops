@@ -16,9 +16,8 @@ def reload_configuration(hass_url, hass_token):
         "Authorization": f"Bearer {hass_token}",
         "Content-Type": "application/json",
     }
-    data = json.dumps({"action": "reload_core_config"})
     try:
-        response = requests.post(url, headers=headers, data=data)
+        response = requests.post(url, headers=headers)
     except requests.exceptions.RequestException as e:
         print(f"Error reloading configuration: {e}")
         sys.exit(1)
