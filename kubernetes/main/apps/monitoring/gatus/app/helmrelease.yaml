@@ -44,7 +44,7 @@ spec:
             image: &configSyncImage
               repository: ghcr.io/kiwigrid/k8s-sidecar
               tag: 1.25.3
-            env:
+            env: &configSyncEnv
               FOLDER: /config
               LABEL: gatus.io/enabled
               NAMESPACE: ALL
@@ -80,11 +80,7 @@ spec:
           config-sync:
             image: *configSyncImage
             env:
-              FOLDER: /config
-              LABEL: gatus.io/enabled
-              NAMESPACE: ALL
-              RESOURCE: both
-              UNIQUE_FILENAMES: true
+              <<: *configSyncEnv
               METHOD: WATCH
             securityContext: *securityContext
             resources: *configSyncResources
