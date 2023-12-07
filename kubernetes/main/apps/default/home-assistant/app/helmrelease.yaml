@@ -36,33 +36,12 @@ spec:
           reloader.stakater.com/auto: "true"
         initContainers:
           init-db:
-            order: 1
             image:
               repository: ghcr.io/onedr0p/postgres-init
               tag: 15
             envFrom: &envFrom
               - secretRef:
                   name: home-assistant-secret
-          # TODO: Convert this to a proper 'sidecar' container someday
-          init-config:
-            order: 2
-            image: &configSyncImage
-              repository: ghcr.io/kiwigrid/k8s-sidecar
-              tag: 1.25.3
-            env: &configSyncEnv
-              FOLDER: /config
-              LABEL: home-assistant.io/enabled
-              NAMESPACE: default
-              RESOURCE: both
-              SCRIPT: /app/reload.py
-              SLEEP_TIME_SIDECAR: 5s
-              METHOD: LIST
-            resources: &configSyncResources
-              requests:
-                cpu: 10m
-                memory: 10Mi
-              limits:
-                memory: 128Mi
         containers:
           main:
             image:
@@ -78,7 +57,7 @@ spec:
                 enabled: false
               startup:
                 enabled: false
-            securityContext: &securityContext
+            securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
@@ -88,14 +67,6 @@ spec:
                 memory: 128Mi
               limits:
                 memory: 1Gi
-          config-sync:
-            image: *configSyncImage
-            env:
-              <<: *configSyncEnv
-              METHOD: WATCH
-            envFrom: *envFrom
-            securityContext: *securityContext
-            resources: *configSyncResources
         pod:
           securityContext:
             runAsUser: 568
@@ -138,15 +109,5 @@ spec:
       config:
         enabled: true
         existingClaim: home-assistant
-        globalMounts:
-          - path: /config
       tmp:
         type: emptyDir
-      reload-script:
-        type: configMap
-        name: home-assistant-script-configmap
-        defaultMode: 0775
-        globalMounts:
-          - path: /app/reload.py
-            subPath: reload.py
-            readOnly: true
