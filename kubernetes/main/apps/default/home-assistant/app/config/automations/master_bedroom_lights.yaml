@@ -1,0 +1,57 @@
+---
+- alias: Home - Master Bedroom Bed - Lights - Turn on (motion)
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.master_bedroom_bed_motion_sensor_1_occupancy
+        - binary_sensor.master_bedroom_bed_motion_sensor_2_occupancy
+      from: "off"
+      to: "on"
+  action:
+    - service: light.turn_on
+      data:
+        entity_id: light.master_bedroom_bed_light_strip
+        brightness: 140
+        color_name: blueviolet
+
+- alias: Home - Master Bedroom Bed - Lights - Turn off (motion)
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.master_bedroom_bed_motion_sensor_1_occupancy
+        - binary_sensor.master_bedroom_bed_motion_sensor_2_occupancy
+      from: "on"
+      to: "off"
+      for:
+        minutes: 5
+  condition:
+    - condition: state
+      entity_id:
+        - binary_sensor.master_bedroom_bed_motion_sensor_1_occupancy
+        - binary_sensor.master_bedroom_bed_motion_sensor_2_occupancy
+      state: "off"
+  action:
+    - service: light.turn_off
+      entity_id: light.master_bedroom_bed_light_strip
+
+- alias: Home - Master Bedroom Closet - Lights - Turn on (motion)
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.master_bedroom_closet_motion_sensor_occupancy
+      from: "off"
+      to: "on"
+  action:
+    - service: light.turn_on
+      entity_id: light.master_bedroom_closet_light
+
+- alias: Home - Master Bedroom Closet - Lights - Turn off (motion)
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.master_bedroom_closet_motion_sensor_occupancy
+      from: "on"
+      to: "off"
+      for:
+        minutes: 5
+  action:
+    - service: light.turn_off
+      entity_id: light.master_bedroom_closet_light

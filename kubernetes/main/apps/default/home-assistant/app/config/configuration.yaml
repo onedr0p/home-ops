@@ -1,0 +1,185 @@
+---
+homeassistant:
+  legacy_templates: false
+  name: Bahay
+  latitude: !env_var HASS_LATITUDE
+  longitude: !env_var HASS_LONGITUDE
+  elevation: !env_var HASS_ELEVATION
+  currency: USD
+  country: US
+  unit_system: imperial
+  time_zone: !env_var TZ
+  external_url: https://hass.devbu.io
+  internal_url: https://hass.devbu.io
+  allowlist_external_dirs: ["/"]
+
+alert: !include_dir_merge_named alerts/
+automation: !include automations.yaml
+automation split: !include_dir_merge_list automations/
+
+backup:
+frontend:
+logger:
+  default: info
+system_health:
+sun:
+zeroconf:
+mobile_app:
+map:
+person:
+energy:
+
+notify:
+  - platform: group
+    name: devin_phone
+    services:
+      - service: mobile_app_devin_phone
+  - platform: group
+    name: louie_phone
+    services:
+      - service: mobile_app_louie_phone
+  - platform: group
+    name: adults
+    services:
+      - service: mobile_app_devin_phone
+      - service: mobile_app_louie_phone
+
+binary_sensor:
+  - platform: template
+    sensors:
+      flume_flow_status:
+        unique_id: flume_flow_status
+        friendly_name: Flume Flow Status
+        value_template: >-
+          {{ states.sensor.flume_sensor.state != "0" }}
+
+template:
+  - binary_sensor:
+      - name: Garage door open after dark
+        unique_id: garage_door_open_after_dark
+        state: |
+          {{ (is_state("cover.car_garage_door", "open") or is_state("cover.car_garage_door", "closing")) and now() > today_at("21:00") }}
+  - binary_sensor:
+      - name: Garage door open and no one is home
+        unique_id: garage_door_open_and_no_one_is_home
+        state: |
+          {{ is_state("cover.car_garage_door", "open") and is_state("person.devin", "not_home") and is_state("person.louie", "not_home") }}
+  - binary_sensor:
+      - name: Front door unlocked after dark
+        unique_id: front_door_unlocked_after_dark
+        state: |
+          {{ is_state("lock.front_door_lock", "unlocked") and now() > today_at("21:00") }}
+  - binary_sensor:
+      - name: Front door unlocked and no one is home
+        unique_id: front_door_unlocked_and_no_one_is_home
+        state: |
+          {{ is_state("lock.front_door_lock", "unlocked") and is_state("person.devin", "not_home") and is_state("person.louie", "not_home") }}
+
+sensor:
+  - platform: template
+    sensors:
+      car_port_door_state:
+        unique_id: opengarage_car_port_door_state
+        value_template: |
+          {% if states.cover.car_garage_door %}
+            {% if states.cover.car_garage_door.state == "open" %}
+              Open
+            {% elif states.cover.car_garage_door.state == "closed" %}
+              Closed
+            {% elif states.cover.car_garage_door.state == "opening" %}
+              Opening
+            {% elif states.cover.car_garage_door.state == "closing" %}
+              Closing
+            {% elif states.cover.car_garage_door.state == "offline" %}
+              Offline
+            {% else %}
+              Unknown
+            {% endif %}
+          {% else %}
+            n/a
+          {% endif %}
+      car_port_vehicle_state:
+        unique_id: opengarage_car_port_vehicle_state
+        value_template: |
+          {% if states.binary_sensor.car_port_door_vehicle.state == 'on' %}
+            Yes
+          {% elif states.binary_sensor.car_port_door_vehicle.state == 'off' %}
+            No
+          {% else %}
+            n/a
+          {% endif %}
+
+mqtt:
+  switch:
+    - unique_id: custom_siren_switch
+      name: Custom Siren Switch
+      state_topic: zigbee2mqtt/Siren
+      command_topic: zigbee2mqtt/Siren/set
+      availability:
+        - topic: zigbee2mqtt/Siren/availability
+          payload_available: online
+          payload_not_available: offline
+      payload_on: '{"warning": {"duration": 1800, "mode": "emergency", "strobe": true}}'
+      payload_off: '{"warning": {"duration": 0, "mode": "stop", "strobe": false}}'
+      state_on: "on"
+      state_off: "off"
+      icon: mdi:alarm-light
+      qos: 0
+      optimistic: true
+      retain: true
+
+history:
+  exclude:
+    entities:
+      - sensor.time
+      - sensor.time_utc
+      - sensor.date
+      - sensor.date_time
+
+google_assistant:
+  project_id: !env_var HASS_GOOGLE_PROJECT_ID
+  secure_devices_pin: !env_var HASS_GOOGLE_SECURE_DEVICES_PIN
+  service_account: !include google_service_account.json
+  report_state: true
+
+http:
+  server_host: 0.0.0.0
+  ip_ban_enabled: true
+  login_attempts_threshold: 10
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 10.32.0.0/16
+    - 192.168.42.0/24
+
+logbook:
+  exclude:
+    entities:
+      - sensor.time
+      - sensor.time_utc
+      - sensor.date
+      - sensor.date_time
+    domains:
+      - group
+
+weather:
+  - platform: pirateweather
+    api_key: !env_var HASS_PIRATE_WEATHER_API_KEY
+    latitude: !env_var HASS_LATITUDE
+    longitude: !env_var HASS_LONGITUDE
+    mode: daily
+
+recorder:
+  db_url: !env_var HASS_POSTGRES_URL
+  purge_keep_days: 30
+
+tts:
+  platform: google_translate
+  language: en
+  cache: true
+  cache_dir: /config/tts
+  time_memory: 300
+  service_name: google_say
+
+favicon:
+  title: Bahay
+  icon_path: /local/favicons/

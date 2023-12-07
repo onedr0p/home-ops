@@ -1,0 +1,47 @@
+---
+- alias: Home - Patio - Lights - Turn on (time)
+  trigger:
+    - platform: sun
+      event: sunset
+      offset: "-00:10:00"
+  action:
+    - service: light.turn_on
+      entity_id: light.patio_door_light
+
+- alias: Home - Patio - Lights - Turn off (time)
+  trigger:
+    - platform: time
+      at: "22:00:00"
+  action:
+    - service: light.turn_off
+      entity_id: light.patio_door_light
+
+- alias: Home - Patio - Lights - Turn on (door, motion, time)
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.patio_door_sensor_contact
+        - binary_sensor.patio_motion_sensor_occupancy
+      from: "off"
+      to: "on"
+  condition:
+    condition: state
+    entity_id: sun.sun
+    state: below_horizon
+  action:
+    - service: light.turn_on
+      entity_id: light.patio_door_light
+
+- alias: Home - Patio - Lights - Turn off (door, motion)
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.patio_door_sensor_contact
+        - binary_sensor.patio_motion_sensor_occupancy
+      from: "on"
+      to: "off"
+      for:
+        minutes: 15
+  action:
+    - service: light.turn_off
+      entity_id: light.patio_door_light

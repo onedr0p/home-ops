@@ -1,0 +1,36 @@
+---
+- alias: Home - Basement - Lights - Turn on (door, object)
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.basement_door_sensor_contact
+        - binary_sensor.frigate_basement_1_person_occupancy
+      from: "off"
+      to: "on"
+  action:
+    - service: light.turn_on
+      entity_id: light.basement_lights
+    - service: switch.turn_on
+      entity_id: switch.basement_workbench_light_plug
+
+- alias: Home - Basement - Lights - Turn off (door, object)
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.basement_door_sensor_contact
+        - binary_sensor.frigate_basement_1_person_occupancy
+      from: "on"
+      to: "off"
+      for:
+        minutes: 15
+  condition:
+    - condition: state
+      entity_id:
+        - binary_sensor.basement_door_sensor_contact
+        - binary_sensor.frigate_basement_1_person_occupancy
+      state: "off"
+  action:
+    - service: light.turn_off
+      entity_id: light.basement_lights
+    - service: switch.turn_off
+      entity_id: switch.basement_workbench_light_plug

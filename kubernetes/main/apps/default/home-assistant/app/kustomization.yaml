@@ -12,12 +12,39 @@ configMapGenerator:
   - name: home-assistant-script-configmap
     files:
       - reload.py=./scripts/reload.py
+  - name: home-assistant-configuration-configmap
+    files:
+      - configuration.yaml=./config/configuration.yaml
   - name: home-assistant-alerts-configmap
     files:
       - basement.yaml=./config/alerts/basement.yaml
       - foyer.yaml=./config/alerts/foyer.yaml
       - garage.yaml=./config/alerts/garage.yaml
+  - name: home-assistant-automations-configmap
+    files:
+      - basement_lights.yaml=./config/automations/basement_lights.yaml
+      - car.yaml=./config/automations/car.yaml
+      - driveway_lights.yaml=./config/automations/driveway_lights.yaml
+      - garage_lights.yaml=./config/automations/garage_lights.yaml
+      - laundry_lights.yaml=./config/automations/laundry_lights.yaml
+      - master_bedroom_lights.yaml=./config/automations/master_bedroom_lights.yaml
+      - patio_lights.yaml=./config/automations/patio_lights.yaml
+      - porch_lights.yaml=./config/automations/porch_lights.yaml
 patches:
+  - target:
+      version: v1
+      kind: ConfigMap
+      name: home-assistant-configuration-configmap
+      namespace: default
+    patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: home-assistant-configuration-configmap
+        labels:
+          home-assistant.io/enabled: "true"
+        annotations:
+          k8s-sidecar-target-directory: /config
   - target:
       version: v1
       kind: ConfigMap
@@ -31,7 +58,21 @@ patches:
         labels:
           home-assistant.io/enabled: "true"
         annotations:
-          k8s-sidecar-target-directory: /config/alerts-test
+          k8s-sidecar-target-directory: /config/alerts
+  - target:
+      version: v1
+      kind: ConfigMap
+      name: home-assistant-automations-configmap
+      namespace: default
+    patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: home-assistant-automations-configmap
+        labels:
+          home-assistant.io/enabled: "true"
+        annotations:
+          k8s-sidecar-target-directory: /config/automations
 generatorOptions:
   disableNameSuffixHash: true
   annotations:
