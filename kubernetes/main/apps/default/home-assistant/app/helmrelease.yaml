@@ -49,7 +49,7 @@ spec:
             image: &configSyncImage
               repository: ghcr.io/kiwigrid/k8s-sidecar
               tag: 1.25.3
-            env: &env
+            env: &configSyncEnv
               FOLDER: /config
               LABEL: home-assistant.io/enabled
               NAMESPACE: default
@@ -91,7 +91,7 @@ spec:
           config-sync:
             image: *configSyncImage
             env:
-              <<: *env
+              <<: *configSyncEnv
               METHOD: WATCH
             envFrom: *envFrom
             securityContext: *securityContext
