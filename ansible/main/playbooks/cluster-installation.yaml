@@ -1,6 +1,6 @@
 ---
 - name: Cluster Installation
-  hosts: all
+  hosts: kubernetes
   become: true
   gather_facts: true
   any_errors_fatal: true
@@ -73,6 +73,7 @@
       vars:
         stale_containers_state: disabled
 
+    # TODO: Replace this with embedded spegel in the future
     - name: Copy custom containerd configuration
       notify: Restart Kubernetes
       ansible.builtin.copy:
