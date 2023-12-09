@@ -1,0 +1,16 @@
+---
+- name: Helm Controller
+  block:
+    - name: Helm Controller | Disable Helm controller
+      ansible.builtin.replace:
+        path: /etc/rancher/k3s/config.yaml
+        regexp: '^disable-helm-controller: false$'
+        replace: 'disable-helm-controller: true'
+
+    - name: Helm Controller | Delete Helm controller CRDs
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        name: "{{ item }}"
+        kind: CustomResourceDefinition
+        state: absent
+      loop: ["helmcharts.helm.cattle.io", "helmchartconfigs.helm.cattle.io"]
