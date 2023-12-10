@@ -43,14 +43,14 @@ spec:
           main:
             image:
               repository: ghcr.io/atuinsh/atuin
-              tag: 17.0.1@sha256:2f716593220fff9e61cd96f17b9676c040f2151423010038f180c27af7f6711e
+              tag: 17.1.0@sha256:dff8af77f8ab61386295bf476a60c95e1193ec659bc838e39ec8c4109bd5afaa
             env:
               ATUIN_HOST: 0.0.0.0
               ATUIN_PORT: &port 80
               ATUIN_OPEN_REGISTRATION: "true"
-              # ATUIN_METRICS_ENABLE: "true"
-              # ATUIN_METRICS_HOST: 0.0.0.0
-              # ATUIN_METRICS_PORT: &metricsPort 8080
+              ATUIN_METRICS_ENABLE: "true"
+              ATUIN_METRICS_HOST: 0.0.0.0
+              ATUIN_METRICS_PORT: &metricsPort 8080
             envFrom: *envFrom
             args: ["server", "start"]
             securityContext:
@@ -75,17 +75,17 @@ spec:
         ports:
           http:
             port: *port
-          # metrics:
-          #   port: *metricsPort
-    # serviceMonitor:
-    #   main:
-    #     enabled: true
-    #     endpoints:
-    #       - port: metrics
-    #         scheme: http
-    #         path: /metrics
-    #         interval: 1m
-    #         scrapeTimeout: 10s
+          metrics:
+            port: *metricsPort
+    serviceMonitor:
+      main:
+        enabled: true
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
     ingress:
       main:
         enabled: true
