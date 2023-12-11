@@ -1,0 +1,24 @@
+---
+name: "NixPkg Test"
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  test:
+    name: NixPkg Test
+    runs-on: ["arc-runner-set-home-ops"]
+    steps:
+      - name: Setup Nix
+        uses: cachix/install-nix-action@7ac1ec25491415c381d9b62f0657c7a028df52a7 # v24
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: Install tools
+        uses: workflow/nix-shell-action@30b994036de138cbbd60454713e1060d8aed1acd # v3.3.0
+        with:
+          packages: fluxcd,jo
+      - name: Test
+        run: |
+          flux --version
+          jo -v
