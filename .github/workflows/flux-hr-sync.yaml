@@ -1,5 +1,5 @@
 ---
-name: "HelmRepository Sync"
+name: "Flux Helm Repository Sync"
 
 on:
   workflow_dispatch:
@@ -8,12 +8,12 @@ on:
         description: Cluster Name
         default: main
         required: true
-      repoName:
-        description: Flux HelmRepository Name
-        required: true
-      repoNamespace:
-        description: Flux HelmRepository Namespace
+      helmRepoNamespace:
+        description: Helm Repository Namespace
         default: flux-system
+        required: true
+      helmRepoName:
+        description: Helm Repository Name
         required: true
   pull_request:
     branches: ["main"]
@@ -26,7 +26,7 @@ env:
 
 jobs:
   sync:
-    name: Flux HelmRepository Sync
+    name: Flux Helm Repository Sync
     runs-on: ["arc-runner-set-home-ops"]
     steps:
       - name: Checkout
@@ -55,15 +55,15 @@ jobs:
           encodedString: "${{ secrets.KUBECONFIG }}"
           fileName: kubeconfig
 
-      - if: ${{ github.event.inputs.clusterName == '' && github.event.inputs.repoNamespace == '' && github.event.inputs.repoName == '' }}
+      - if: ${{ github.event.inputs.clusterName == '' && github.event.inputs.helmRepoNamespace == '' && github.event.inputs.helmRepoName == '' }}
         name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@94549999469dbfa032becf298d95c87a14c34394 # v40.2.2
         with:
           files: kubernetes/**/helmrelease.yaml
 
-      - if: ${{ github.event.inputs.clusterName == '' && github.event.inputs.repoNamespace == '' && github.event.inputs.repoName == '' }}
-        name: Sync HelmRepository
+      - if: ${{ github.event.inputs.clusterName == '' && github.event.inputs.helmRepoNamespace == '' && github.event.inputs.helmRepoName == '' }}
+        name: Sync Helm Repository
         env:
           KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
@@ -84,13 +84,13 @@ jobs:
                   reconcile source helm "${repo_name}"
           done
 
-      - if: ${{ github.event.inputs.clusterName != '' && github.event.inputs.repoNamespace != '' && github.event.inputs.repoName != '' }}
-        name: Sync HelmRepository
+      - if: ${{ github.event.inputs.clusterName != '' && github.event.inputs.helmRepoNamespace != '' && github.event.inputs.helmRepoName != '' }}
+        name: Sync Helm Repository
         env:
           KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
         shell: bash
         run: |
           flux \
               --context ${{ github.event.inputs.clusterName }} \
-              --namespace ${{ github.event.inputs.repoNamespace }} \
-              reconcile source helm ${{ github.event.inputs.repoName }}
+              --namespace ${{ github.event.inputs.helmRepoNamespace }} \
+              reconcile source helm ${{ github.event.inputs.helmRepoName }}

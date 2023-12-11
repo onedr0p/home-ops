@@ -1,0 +1,46 @@
+---
+name: "Flux Kustomization Sync"
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["kubernetes/storage/**"]
+
+env:
+  DEBCONF_NONINTERACTIVE_SEEN: "true"
+  DEBIAN_FRONTEND: noninteractive
+  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
+
+jobs:
+  sync:
+    name: Flux Kustomization Sync
+    runs-on: ["arc-runner-set-home-ops"]
+    strategy:
+      matrix:
+        cluster: ["storage"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Flux
+        uses: fluxcd/flux2/action@a18d4f345021182d6516bf3e8e00210567f46ab5 # v2.1.2
+
+      - name: Write kubeconfig
+        id: kubeconfig
+        uses: timheuer/base64-to-file@784a1a4a994315802b7d8e2084e116e783d157be # v1.2.4
+        with:
+          encodedString: "${{ secrets.KUBECONFIG }}"
+          fileName: kubeconfig
+
+      - name: Sync Kustomization
+        env:
+          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
+        shell: bash
+        run: |
+          flux \
+              --context "${{ matrix.cluster }}" \
+              --namespace flux-system \
+              reconcile ks cluster \
+              --with-source
