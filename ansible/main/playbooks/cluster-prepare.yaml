@@ -17,26 +17,14 @@
 
     - name: Packages
       block:
-        - name: Packages | Add fish key
-          ansible.builtin.get_url:
-            url: https://download.opensuse.org/repositories/shells:fish:release:3/Debian_12/Release.key
-            dest: /etc/apt/trusted.gpg.d/fish.asc
-            owner: root
-            group: root
-            mode: "0644"
-        - name: Packages | Add fish repository
-          ansible.builtin.apt_repository:
-            repo: deb [signed-by=/etc/apt/trusted.gpg.d/fish.asc] http://download.opensuse.org/repositories/shells:/fish:/release:/3/Debian_12/ /
-            filename: fish
-            update_cache: true
         - name: Packages | Add non-free repository
           ansible.builtin.apt_repository:
             repo: deb http://deb.debian.org/debian/ stable main contrib non-free
             filename: non-free
             update_cache: true
-        - name: Packages | Install
+        - name: Packages | Install common packages
           ansible.builtin.apt:
-            name: i965-va-driver-shaders,apt-transport-https,ca-certificates,conntrack,curl,dirmngr,fish,gdisk,
+            name: i965-va-driver-shaders,apt-transport-https,ca-certificates,conntrack,curl,dirmngr,gdisk,
               gnupg,hdparm,htop,intel-gpu-tools,intel-media-va-driver-non-free,iperf3,iptables,iputils-ping,ipvsadm,
               libseccomp2,lm-sensors,neofetch,net-tools,nfs-common,nvme-cli,open-iscsi,parted,psmisc,python3,
               python3-apt,python3-openshift,python3-kubernetes,python3-yaml,smartmontools,socat,software-properties-common,
@@ -51,7 +39,7 @@
             key: "https://github.com/{{ github_username }}.keys"
         - name: User Configuration | Silence login
           ansible.builtin.file:
-            dest: "{{ '/home/' + ansible_user if ansible_user != 'root' else '/root' }}/.hushlogin"
+            dest: "{{ ansible_user if ansible_user != 'root' else '/root' }}/.hushlogin"
             state: touch
             owner: "{{ ansible_user }}"
             group: "{{ ansible_user }}"
@@ -66,25 +54,44 @@
             owner: root
             group: root
             mode: "0440"
-        - name: User Configuration | Fish shell (1)
+
+    - name: Fish
+      block:
+        - name: Fish | Add fish apt key
+          ansible.builtin.get_url:
+            url: https://download.opensuse.org/repositories/shells:fish:release:3/Debian_12/Release.key
+            dest: /etc/apt/trusted.gpg.d/fish.asc
+            owner: root
+            group: root
+            mode: "0644"
+        - name: Fish | Add fish repository
+          ansible.builtin.apt_repository:
+            repo: deb [signed-by=/etc/apt/trusted.gpg.d/fish.asc] http://download.opensuse.org/repositories/shells:/fish:/release:/3/Debian_12/ /
+            filename: fish
+            update_cache: true
+        - name: Fish | Install fish
+          ansible.builtin.apt:
+            name: fish
+            install_recommends: false
+        - name: Fish | Set as default shell
           ansible.builtin.user:
             name: "{{ ansible_user }}"
             shell: /usr/bin/fish
-        - name: User Configuration | Fish shell (2)
+        - name: Fish | Create configuration directory
           ansible.builtin.file:
             path: "{{ '/home/' + ansible_user if ansible_user != 'root' else '/root' }}/.config/fish/functions"
             state: directory
             owner: "{{ ansible_user }}"
             group: "{{ ansible_user }}"
             recurse: true
-        - name: User Configuration | Fish shell (3)
+        - name: Fish | Create neofetch greeting
           ansible.builtin.copy:
             dest: "{{ '/home/' + ansible_user if ansible_user != 'root' else '/root' }}/.config/fish/functions/fish_greeting.fish"
             owner: "{{ ansible_user }}"
             group: "{{ ansible_user }}"
             mode: "0755"
             content: neofetch --config none
-        - name: User Configuration | Fish shell (3)
+        - name: Fish | Create kubectl shorthand
           ansible.builtin.copy:
             dest: "{{ '/home/' + ansible_user if ansible_user != 'root' else '/root' }}/.config/fish/functions/k.fish"
             owner: "{{ ansible_user }}"
@@ -112,7 +119,7 @@
               ff02::1 ip6-allnodes
               ff02::2 ip6-allrouters
             mode: preserve
-        - name: Network Configuration | Set NIC
+        - name: Network Configuration | Set NIC MTU
           ansible.builtin.copy:
             dest: /etc/network/interfaces.d/enp7s0
             content: |
@@ -127,11 +134,6 @@
     - name: System Configuration
       notify: Reboot
       block:
-        - name: System Configuration | Neofetch
-          ansible.builtin.copy:
-            dest: /etc/profile.d/neofetch.sh
-            mode: "0755"
-            content: neofetch --config none
         - name: System Configuration | NFS
           ansible.builtin.copy:
             src: files/nfsmount.conf
@@ -150,25 +152,18 @@
             fstype: swap
             state: absent
           loop: ["none", "swap"]
-        - name: System Configuration | Kernel modules (1)
-          community.general.modprobe:
-            name: "{{ item }}"
-            state: present
-          loop: [
-            "br_netfilter", "ceph", "ip_vs",
-            "ip_vs_rr", "nbd", "overlay",
-            "rbd", "tcp_bbr"
-          ]
-        - name: System Configuration | Kernel modules (2)
+        - name: System Configuration | Create Kernel modules
           ansible.builtin.copy:
             dest: "/etc/modules-load.d/{{ item }}.conf"
             mode: "0644"
             content: "{{ item }}"
-          loop: [
-            "br_netfilter", "ceph", "ip_vs",
-            "ip_vs_rr", "nbd", "overlay",
-            "rbd", "tcp_bbr"
-          ]
+          loop: ["br_netfilter", "ceph", "ip_vs", "ip_vs_rr", "nbd", "overlay", "rbd", "tcp_bbr"]
+          register: modules_status
+        - name: System Configuration | Reload Kernel modules # noqa: no-changed-when no-handler
+          when: modules_status.changed
+          ansible.builtin.systemd:
+            name: systemd-modules-load
+            state: restarted
         - name: System Configuration | Sysctl
           ansible.posix.sysctl:
             name: "{{ item.key }}"
@@ -193,8 +188,8 @@
               mitigations: "off"
           register: grub_status
         - name: System Configuration | Grub (2) # noqa: no-changed-when no-handler
-          ansible.builtin.command: update-grub
           when: grub_status.changed
+          ansible.builtin.command: update-grub
 
   handlers:
     - name: Reboot

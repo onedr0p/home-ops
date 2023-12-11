@@ -34,6 +34,7 @@
 
         - name: Drain
           kubernetes.core.k8s_drain:
+            name: "{{ inventory_hostname }}"
             kubeconfig: /etc/rancher/k3s/k3s.yaml
             state: drain
             delete_options:
@@ -42,7 +43,7 @@
               terminate_grace_period: 600
               wait_timeout: 900
             pod_selectors:
-             - app!=rook-ceph-osd
+              - app!=rook-ceph-osd
           delegate_to: "{{ groups['master'][0] }}"
 
         - name: Update
