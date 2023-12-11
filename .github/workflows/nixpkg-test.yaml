@@ -10,6 +10,12 @@ jobs:
     name: NixPkg Test
     runs-on: ["arc-runner-set-home-ops"]
     steps:
+      - name: Install Nix
+        uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes recursive-nix
+
       - name: Setup Tools
         uses: yaxitech/nix-install-pkgs-action@v3
         with:
