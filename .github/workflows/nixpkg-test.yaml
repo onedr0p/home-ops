@@ -1,0 +1,26 @@
+---
+name: "NixPkg Test"
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  test:
+    name: NixPkg Test
+    runs-on: ["arc-runner-set-home-ops"]
+    steps:
+      - name: Setup Tools
+        uses: yaxitech/nix-install-pkgs-action@v3
+        with:
+          packages: >
+            fluxcd,
+            git,
+            yq
+
+      - name: Test
+        shell: bash
+        run: |
+          flux --version
+          git --version
+          yq --version
