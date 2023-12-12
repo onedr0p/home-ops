@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+
+  silence:
+    desc: Sync all ExternalSecrets for a cluster
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+    cmds:
+      - for: { var: secrets, split: '' }
+        task: sync
+        vars:
+          cluster: '{{.cluster}}'
+          ns: '{{$a := split "|" .ITEM}}{{$a._0}}'
+          secret: '{{$a := split "|" .ITEM}}{{$a._1}}'
+    env:
+      KUBECONFIG: "{{.KUBERNETES_DIR}}/{{.cluster}}/kubeconfig"
+    vars:
+      secrets:
+        sh: kubectl --context {{.cluster}} get externalsecret --all-namespaces --no-headers -A | awk '{print $1 "|" $2}'
+    preconditions:
+      - { msg: "Argument (cluster) is required", sh: "test -n {{.cluster}}" }
