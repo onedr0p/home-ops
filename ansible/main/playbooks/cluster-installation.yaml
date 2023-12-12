@@ -90,8 +90,6 @@
 
   handlers:
     - name: Restart Kubernetes
-      ansible.builtin.include_role:
-        name: xanmanning.k3s
-        public: true
-      vars:
-        k3s_state: restarted
+      ansible.builtin.systemd:
+        name: k3s
+        state: restarted
