@@ -4,7 +4,6 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: reloader
-  namespace: &namespace kube-system
 spec:
   interval: 30m
   chart:
@@ -28,6 +27,7 @@ spec:
   values:
     fullnameOverride: reloader
     reloader:
+      readOnlyRootFileSystem: true
       podMonitor:
-        enabled: false
-        namespace: *namespace
+        enabled: true
+        namespace: "{{ .Release.Namespace }}"
