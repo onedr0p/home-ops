@@ -54,24 +54,24 @@ spec:
         reclaimPolicy: Delete
         volumeBindingMode: WaitForFirstConsumer
         allowVolumeExpansion: true
+    driver:
+      config:
+        driver: local-hostpath
+        local-hostpath:
+          shareBasePath: &storagePath /var/lib/rancher/k3s/democratic-csi/storage
+          controllerBasePath: *storagePath
+          dirPermissionsMode: "0770"
+          dirPermissionsUser: 0
+          dirPermissionsGroup: 0
     node:
       driver:
         image: ghcr.io/democratic-csi/democratic-csi:v1.8.4
         extraVolumeMounts:
           - name: local-hostpath
-            mountPath: /var/lib/democratic-csi-local-hostpath
+            mountPath: *storagePath
             mountPropagation: Bidirectional
       extraVolumes:
         - name: local-hostpath
           hostPath:
-            path: /var/lib/democratic-csi-local-hostpath
+            path: *storagePath
             type: DirectoryOrCreate
-    driver:
-      config:
-        driver: local-hostpath
-        local-hostpath:
-          shareBasePath: /var/lib/democratic-csi-local-hostpath
-          controllerBasePath: /var/lib/democratic-csi-local-hostpath
-          dirPermissionsMode: "0770"
-          dirPermissionsUser: 0
-          dirPermissionsGroup: 0
