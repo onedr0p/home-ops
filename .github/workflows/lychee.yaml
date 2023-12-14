@@ -1,14 +1,17 @@
 ---
-name: "Broken Link Check"
+name: "Lychee"
 
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 0"
 
+env:
+  ISSUE_LABEL: lint/lychee
+
 jobs:
-  check-links:
-    name: Check Links
+  lychee:
+    name: Lychee
     runs-on: ubuntu-latest
     steps:
       - name: Generate Token
@@ -32,17 +35,18 @@ jobs:
           args: --verbose --no-progress --exclude-mail './**/*.md'
 
       - name: Find Link Checker Issue
-        id: broken-link-check-issue
+        id: issue-number
         uses: micalevisk/last-issue-action@f5661581217cc78cc282d1351aa65bd8bd155003 # v2.2.1
         with:
+          token: "${{ steps.app-token.outputs.token }}"
           state: open
-          labels: broken-links
+          labels: "${{ env.ISSUE_LABEL }}"
 
       - name: Update Issue
         uses: peter-evans/create-issue-from-file@433e51abf769039ee20ba1293a088ca19d573b7f # v4.0.1
         with:
-          title: Broken links detected 🔗
-          issue-number: "${{ steps.broken-link-check-issue.outputs.issue-number }}"
-          content-filepath: ./lychee/out.md
           token: "${{ steps.app-token.outputs.token }}"
-          labels: broken-links
+          title: Link Checker Dashboard 🔗
+          issue-number: "${{ steps.issue-number.outputs.issue-number }}"
+          content-filepath: ./lychee/out.md
+          labels: "${{ env.ISSUE_LABEL }}"
