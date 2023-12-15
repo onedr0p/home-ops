@@ -1,9 +1,23 @@
 ---
 metrics:
-  - name: node_cpu_usage
+  - name: cluster_cpu_usage
     query: round(cluster:node_cpu:ratio_rate5m * 100, 0.1)
     suffix: "%"
     colors:
       - { color: "green", min: 0, max: 35 }
       - { color: "orange", min: 36, max: 75 }
-      - { color: "red", min: 76, max: 1000 }
+      - { color: "red", min: 76, max: 9999 }
+
+  - name: cluster_node_count
+    query: count(count by (node) (kube_node_info))
+
+  - name: cluster_pods_running
+    query: sum(kube_pod_status_phase{phase="Running"})
+
+  - name: cluster_ups_power_watts
+    query: round(upsHighPrecOutputCurrent * upsHighPrecOutputVoltage * 0.01, 0.1)
+    suffix: "w"
+    colors:
+      - { color: "green", min: 0, max: 400 }
+      - { color: "orange", min: 401, max: 750 }
+      - { color: "red", min: 751, max: 9999 }
