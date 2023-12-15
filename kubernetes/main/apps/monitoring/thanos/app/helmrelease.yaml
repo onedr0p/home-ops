@@ -28,6 +28,8 @@ spec:
   dependsOn:
     - name: local-path-provisioner
       namespace: kube-system
+    - name: redis
+      namespace: database
     - name: rook-ceph-cluster
       namespace: rook-ceph
   values:
@@ -42,6 +44,15 @@ spec:
     queryFrontend:
       enabled: true
       replicaCount: 2
+      config: &config |-
+        type: REDIS
+        config:
+          addr: >-
+            redis-node-0.redis-headless.database.svc.cluster.local:26379,
+            redis-node-1.redis-headless.database.svc.cluster.local:26379,
+            redis-node-2.redis-headless.database.svc.cluster.local:26379
+          db: 13
+          master_name: redis-master
       ingress:
         enabled: true
         ingressClassName: internal
@@ -75,6 +86,7 @@ spec:
     storegateway:
       enabled: true
       replicaCount: 2
+      config: *config
       persistence:
         enabled: true
         storageClass: local-path
