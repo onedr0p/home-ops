@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: &app kubernetes-schemas
+  name: &app kromgo
 spec:
   interval: 30m
   chart:
@@ -29,11 +29,16 @@ spec:
       main:
         replicas: 2
         strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           main:
             image:
-              repository: ghcr.io/onedr0p/kubernetes-schemas
-              tag: latest@sha256:0c8925146673e20f2b09aa33c7340608cac3f1b770880657f4c4110dbb852c2b
+              repository: ghcr.io/kashalls/kromgo
+              tag: 0.2.0@sha256:1e887453f6d15f90fa9c1ed75e7b6a3f590e30030eb364b9ed2dd02b807d55c0
+            env:
+              PROMETHEUS_URL: http://prometheus.monitoring.svc.cluster.local:9090
+              PORT: &port 80
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -60,7 +65,7 @@ spec:
       main:
         ports:
           http:
-            port: 8080
+            port: *port
     ingress:
       main:
         enabled: true
@@ -78,5 +83,10 @@ spec:
           - hosts:
               - *host
     persistence:
-      tmp:
-        type: emptyDir
+      config-file:
+        type: configMap
+        name: kromgo-configmap
+        globalMounts:
+          - path: /config/config.yaml
+            subPath: config.yaml
+            readOnly: true
