@@ -1,0 +1,51 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: wego
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: weave-gitops
+      version: 4.0.36
+      sourceRef:
+        kind: HelmRepository
+        name: weaveworks
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    adminUser:
+      create: true
+      createSecret: false
+      username: admin
+    ingress:
+      enabled: true
+      className: internal
+      hosts:
+        - host: &host wego.turbo.ac
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - *host
+    networkPolicy:
+      create: false
+    metrics:
+      enabled: true
+    rbac:
+      create: true
+      impersonationResourceNames: ["admin"]
+    podAnnotations:
+      secret.reloader.stakater.com/reload: cluster-user-auth
