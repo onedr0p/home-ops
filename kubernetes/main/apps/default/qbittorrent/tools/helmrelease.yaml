@@ -33,7 +33,7 @@ spec:
         enabled: false
       tagging:
         type: cronjob
-        cronjob:
+        cronjob: &cronJobSpec
           schedule: "@hourly"
           timeZone: &timeZone America/New_York
           concurrencyPolicy: Forbid
@@ -103,11 +103,8 @@ spec:
       orphaned:
         type: cronjob
         cronjob:
+          <<: *cronJobSpec
           schedule: "@daily"
-          timeZone: *timeZone
-          concurrencyPolicy: Forbid
-          successfulJobsHistory: 1
-          failedJobsHistory: 1
         containers:
           main:
             image: *image
