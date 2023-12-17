@@ -31,6 +31,27 @@ spec:
       namespace: database
     - name: rook-ceph-cluster
       namespace: rook-ceph
+  valuesFrom:
+    - targetPath: objstoreConfig.config.bucket
+      kind: ConfigMap
+      name: thanos-bucket-v2
+      valuesKey: BUCKET_NAME
+    - targetPath: objstoreConfig.config.endpoint
+      kind: ConfigMap
+      name: thanos-bucket-v2
+      valuesKey: BUCKET_HOST
+    - targetPath: objstoreConfig.config.region
+      kind: ConfigMap
+      name: thanos-bucket-v2
+      valuesKey: BUCKET_REGION
+    - targetPath: objstoreConfig.config.access_key
+      kind: Secret
+      name: thanos-bucket-v2
+      valuesKey: AWS_ACCESS_KEY_ID
+    - targetPath: objstoreConfig.config.secret_key
+      kind: Secret
+      name: thanos-bucket-v2
+      valuesKey: AWS_SECRET_ACCESS_KEY
   values:
     image:
       registry: quay.io
@@ -115,24 +136,3 @@ spec:
       enabled: true
       serviceMonitor:
         enabled: true
-  valuesFrom:
-    - targetPath: objstoreConfig.config.bucket
-      kind: ConfigMap
-      name: thanos-bucket-v2
-      valuesKey: BUCKET_NAME
-    - targetPath: objstoreConfig.config.endpoint
-      kind: ConfigMap
-      name: thanos-bucket-v2
-      valuesKey: BUCKET_HOST
-    - targetPath: objstoreConfig.config.region
-      kind: ConfigMap
-      name: thanos-bucket-v2
-      valuesKey: BUCKET_REGION
-    - targetPath: objstoreConfig.config.access_key
-      kind: Secret
-      name: thanos-bucket-v2
-      valuesKey: AWS_ACCESS_KEY_ID
-    - targetPath: objstoreConfig.config.secret_key
-      kind: Secret
-      name: thanos-bucket-v2
-      valuesKey: AWS_SECRET_ACCESS_KEY

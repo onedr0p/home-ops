@@ -23,6 +23,19 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
+  valuesFrom:
+    - targetPath: githubConfigSecret.github_app_id
+      kind: Secret
+      name: actions-runner-controller-auth-secret
+      valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_APP_ID
+    - targetPath: githubConfigSecret.github_app_installation_id
+      kind: Secret
+      name: actions-runner-controller-auth-secret
+      valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_INSTALLATION_ID
+    - targetPath: githubConfigSecret.github_app_private_key
+      kind: Secret
+      name: actions-runner-controller-auth-secret
+      valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_PRIVATE_KEY
   values:
     runnerScaleSetName: arc-runner-set-home-ops
     githubConfigUrl: https://github.com/onedr0p/home-ops
@@ -34,21 +47,8 @@ spec:
       spec:
         containers:
           - name: runner
-            image: ghcr.io/onedr0p/actions-runner:2.311.0@sha256:b29062788e3eaedf38a6bf392ab76dd4b559562358f28dac64e97d7fb605f625
+            image: ghcr.io/actions/actions-runner:2.311.0
             command: ["/home/runner/run.sh"]
     controllerServiceAccount:
       name: actions-runner-controller-gha-rs-controller
       namespace: actions-runner-system
-  valuesFrom:
-    - kind: Secret
-      name: actions-runner-controller-auth-secret
-      valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_APP_ID
-      targetPath: githubConfigSecret.github_app_id
-    - kind: Secret
-      name: actions-runner-controller-auth-secret
-      valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_INSTALLATION_ID
-      targetPath: githubConfigSecret.github_app_installation_id
-    - kind: Secret
-      name: actions-runner-controller-auth-secret
-      valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_PRIVATE_KEY
-      targetPath: githubConfigSecret.github_app_private_key
