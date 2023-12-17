@@ -64,25 +64,25 @@ jobs:
         id: kubeconfig
         uses: timheuer/base64-to-file@784a1a4a994315802b7d8e2084e116e783d157be # v1.2.4
         with:
-          encodedString: ${{ secrets.KUBECONFIG }}
+          encodedString: "${{ secrets.KUBECONFIG }}"
           fileName: kubeconfig
 
       - name: Download and run crd-extractor
         env:
-          KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
+          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
         run: |
-          mkdir -p /home/runner/crds
+          mkdir -p ${{ env.CRDS_PATH }}
           curl -fsSL -o $GITHUB_WORKSPACE/crd-extractor.sh \
               https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/Utilities/crd-extractor.sh
           chmod +x $GITHUB_WORKSPACE/crd-extractor.sh
           bash $GITHUB_WORKSPACE/crd-extractor.sh
-          mv /home/runner/.datree/crdSchemas/* /home/runner/crds
+          mv /home/runner/.datree/crdSchemas/* ${{ env.CRDS_PATH }}
 
-      - name: Deploy
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@5e8484995321734668f14981c316aa9188d76ed1 # v3.3.2
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: ${{ env.CRDS_PATH }}
+          apiToken: "${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          accountId: "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+          workingDirectory: "${{ env.CRDS_PATH }}"
           command: pages deploy --project-name=kubernetes-schemas --branch main .
