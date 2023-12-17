@@ -88,9 +88,9 @@ jobs:
           for r in "${repos[@]}"; do
               IFS=':' read -r cluster_name repo_namespace repo_name <<< "${r}"
               flux \
-                  --context "${cluster_name}" \
-                  --namespace "${repo_namespace}" \
-                  reconcile source helm "${repo_name}"
+                  --context ${cluster_name} \
+                  --namespace ${repo_namespace} \
+                  reconcile source helm ${repo_name}
           done
 
       - if: ${{ github.event.inputs.clusterName != '' && github.event.inputs.helmRepoNamespace != '' && github.event.inputs.helmRepoName != '' }}
