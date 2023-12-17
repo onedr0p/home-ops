@@ -94,21 +94,27 @@ spec:
                       operator: Exists
         mon: *placement
       resources:
-        mgr: &resources
+        mgr:
           requests:
-            memory: 1Gi
-            cpu: 1000m
-          limits: {}
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
         mon:
           requests:
-            memory: 1Gi
             cpu: 1000m
-          limits: {}
-        osd:
-          <<: *resources
+            memory: 1Gi
           limits:
+            cpu: 4000m
             memory: 4Gi
-            cpu: 8000m
+        osd:
+          requests:
+            cpu: 1000m
+            memory: 4Gi
+          limits:
+            cpu: 4000m
+            memory: 8Gi
     cephBlockPools:
       - name: ceph-blockpool
         spec:
@@ -151,10 +157,11 @@ spec:
             activeCount: 1
             activeStandby: true
             resources:
-              <<: *resources
+              requests:
+                cpu: 1000m
+                memory: 4Gi
               limits:
                 memory: 4Gi
-                cpu: 8000m
         storageClass:
           enabled: true
           isDefault: false
@@ -191,10 +198,11 @@ spec:
           gateway:
             port: 80
             resources:
-              <<: *resources
+              requests:
+                cpu: 1000m
+                memory: 1Gi
               limits:
-                memory: 4Gi
-                cpu: 8000m
+                memory: 2Gi
             instances: 2
           healthCheck:
             bucket:

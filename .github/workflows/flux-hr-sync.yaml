@@ -80,8 +80,8 @@ jobs:
           declare -a repos=()
           for f in ${{ steps.changed-files.outputs.all_changed_and_modified_files }}; do
               cluster_name=$(echo "${f}" | awk -F'/' '{print $2}')
-              repo_namespace="$(yq '.spec.chart.spec.sourceRef.namespace' "${f}")"
-              repo_name="$(yq '.spec.chart.spec.sourceRef.name' "${f}")"
+              repo_namespace="$(yq -r '.spec.chart.spec.sourceRef.namespace' "${f}")"
+              repo_name="$(yq -r '.spec.chart.spec.sourceRef.name' "${f}")"
               repos+=("${cluster_name}:${repo_namespace}:${repo_name}")
           done
           mapfile -t repos < <(printf "%s\n" "${repos[@]}" | sort -u)
