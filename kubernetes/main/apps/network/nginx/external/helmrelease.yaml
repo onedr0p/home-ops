@@ -23,6 +23,11 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
+  valuesFrom:
+    - targetPath: controller.maxmindLicenseKey
+      kind: Secret
+      name: nginx-external-maxmind-secret
+      valuesKey: MAXMIND_LICENSE_KEY
   values:
     fullnameOverride: nginx-external
     controller:
@@ -91,8 +96,3 @@ spec:
           memory: 500Mi
     defaultBackend:
       enabled: false
-  valuesFrom:
-    - targetPath: controller.maxmindLicenseKey
-      kind: Secret
-      name: nginx-external-maxmind-secret
-      valuesKey: MAXMIND_LICENSE_KEY
