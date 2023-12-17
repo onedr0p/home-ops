@@ -1,0 +1,39 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: volsync
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: volsync
+      version: 0.8.0
+      sourceRef:
+        kind: HelmRepository
+        name: backube
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  dependsOn:
+    - name: snapshot-controller
+      namespace: storage
+  values:
+    manageCRDs: true
+    image:
+      repository: &image ghcr.io/onedr0p/volsync
+      tag: &tag 0.8.0
+    restic:
+      repository: *image
+      tag: *tag
+    metrics:
+      disableAuth: true

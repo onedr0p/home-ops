@@ -29,7 +29,7 @@ spec:
     - name: rook-ceph-operator
       namespace: rook-ceph
     - name: snapshot-controller
-      namespace: kube-system
+      namespace: storage
   values:
     monitoring:
       enabled: true
@@ -51,8 +51,6 @@ spec:
       bdev_async_discard = true
       osd_class_update_on_start = false
     cephClusterSpec:
-      cephVersion:
-        image: quay.io/ceph/ceph:v18.2.1
       network:
         provider: host
         connections:
@@ -87,6 +85,16 @@ spec:
           - name: k8s-5
             devices:
               - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NJ0T813624W
+      placement:
+        mgr:
+          nodeAffinity: &nodeAffinity
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: node-role.kubernetes.io/control-plane
+                      operator: Exists
+        mon:
+          nodeAffinity: *nodeAffinity
       resources:
         mgr:
           requests:

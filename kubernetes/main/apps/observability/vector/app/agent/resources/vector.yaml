@@ -1,0 +1,36 @@
+---
+data_dir: /vector-data-dir
+
+sources:
+  journald_source:
+    type: journald
+    journal_directory: /var/log/journal
+
+  kubernetes_source:
+    type: kubernetes_logs
+    use_apiserver_cache: true
+    pod_annotation_fields:
+      container_image: container_image
+      container_name: container_name
+      pod_labels: pod_labels
+      pod_name: pod_name
+      pod_annotations: ""
+    namespace_annotation_fields:
+      namespace_labels: ""
+    node_annotation_fields:
+      node_labels: ""
+
+sinks:
+  journald:
+    type: vector
+    compression: true
+    version: "2"
+    address: vector-aggregator.observability.svc.cluster.local:6000
+    inputs: ["journald_source"]
+
+  kubernetes:
+    type: vector
+    compression: true
+    version: "2"
+    address: vector-aggregator.observability.svc.cluster.local:6010
+    inputs: ["kubernetes_source"]
