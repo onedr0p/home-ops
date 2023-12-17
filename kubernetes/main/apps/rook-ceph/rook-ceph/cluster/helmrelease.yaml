@@ -86,17 +86,16 @@ spec:
             devices:
               - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NJ0T813624W
       placement:
-        mgr:
-          nodeAffinity: &nodeAffinity
+        mgr: &placement
+          nodeAffinity:
             requiredDuringSchedulingIgnoredDuringExecution:
               nodeSelectorTerms:
                 - matchExpressions:
                     - key: node-role.kubernetes.io/control-plane
                       operator: Exists
-        mon:
-          nodeAffinity: *nodeAffinity
+        mon: *placement
       resources:
-        mgr:
+        mgr: &resources
           requests:
             memory: 1Gi
             cpu: 1000m
@@ -107,10 +106,10 @@ spec:
             cpu: 1000m
           limits: {}
         osd:
-          requests:
+          <<: *resources
+          limits:
             memory: 4Gi
-            cpu: 1000m
-          limits: {}
+            cpu: 8000m
     cephBlockPools:
       - name: ceph-blockpool
         spec:
@@ -153,11 +152,10 @@ spec:
             activeCount: 1
             activeStandby: true
             resources:
-              requests:
-                cpu: 1000m
-                memory: 4Gi
+              <<: *resources
               limits:
                 memory: 4Gi
+                cpu: 8000m
         storageClass:
           enabled: true
           isDefault: false
@@ -194,11 +192,10 @@ spec:
           gateway:
             port: 80
             resources:
-              requests:
-                cpu: 1000m
-                memory: 1Gi
+              <<: *resources
               limits:
-                memory: 2Gi
+                memory: 4Gi
+                cpu: 8000m
             instances: 2
           healthCheck:
             bucket:
