@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: weave-gitops
+  name: wego
 spec:
   interval: 30m
   chart:
@@ -25,6 +25,7 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    fullnameOverride: wego
     adminUser:
       create: true
       createSecret: false
@@ -33,18 +34,13 @@ spec:
       enabled: true
       className: internal
       hosts:
-        - host: &host weave-gitops.devbu.io
-          paths:
-            - path: /
-              pathType: Prefix
-        - host: &customHost gitops.devbu.io
+        - host: &host wego.devbu.io
           paths:
             - path: /
               pathType: Prefix
       tls:
         - hosts:
             - *host
-            - *customHost
     networkPolicy:
       create: false
     metrics:
