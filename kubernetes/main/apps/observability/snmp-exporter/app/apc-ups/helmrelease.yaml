@@ -4,7 +4,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app snmp-exporter-apc-ups
-  namespace: &namespace monitoring
+  namespace: &namespace observability
 spec:
   interval: 30m
   chart:
@@ -28,8 +28,7 @@ spec:
     fullnameOverride: *app
     image:
       repository: quay.io/prometheus/snmp-exporter
-    extraArgs:
-      - "--config.file=/config/snmp.yaml"
+    extraArgs: ["--config.file=/config/snmp.yaml"]
     extraConfigmapMounts:
       - name: *app
         mountPath: /config/snmp.yaml
@@ -42,11 +41,9 @@ spec:
       namespace: *namespace
       params:
         - name: apc-ups-0
-          module:
-            - apcups
+          module: ["apcups"]
           target: apc-ups-0
       path: /snmp
       scrapeTimeout: 10s
       relabelings:
-        - sourceLabels: [__param_target]
-          targetLabel: instance
+        - { sourceLabels: ["__param_target"], targetLabel: instance }
