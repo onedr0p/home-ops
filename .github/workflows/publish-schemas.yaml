@@ -30,6 +30,11 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+
       - name: Install OS Deps
         shell: bash
         run: sudo apt-get update && sudo apt-get install -y curl git xz-utils
