@@ -50,6 +50,11 @@ jobs:
         with:
           arguments: "${{ env.NIX_FLAKE_PATH }}"
 
+      - name: Setup Node
+        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
+        with:
+          node-version: 18.x
+
       - name: Setup Python
         uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
@@ -79,4 +84,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy --project-name=kubernetes-schemas --branch main ${{ env.CRDS_PATH }}
+          workingDirectory: ${{ env.CRDS_PATH }}
+          command: pages deploy --project-name=kubernetes-schemas --branch main .
