@@ -58,17 +58,6 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
 
-      - name: Extract files from container image
-        shell: bash
-        run: |
-          mkdir -p ${{ env.SCHEMA_DIR }}
-          docker run --rm \
-              -v ${{ env.SCHEMA_DIR }}:/crds \
-              -u $(id -u) \
-              --entrypoint /bin/sh \
-              ghcr.io/onedr0p/kubernetes-schemas:latest \
-              -c "cp -r /usr/share/nginx/html/* /crds"
-
       - name: Run kubeconform
         shell: bash
-        run: bash ./.github/scripts/kubeconform.sh ${{ matrix.path }} ${{ env.SCHEMA_DIR }}
+        run: bash ./.github/scripts/kubeconform.sh ${{ matrix.path }}
