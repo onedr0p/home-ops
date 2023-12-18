@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: "Publish Schemas"
 
 on:
@@ -13,8 +14,8 @@ env:
   DEBCONF_NONINTERACTIVE_SEEN: "true"
   DEBIAN_FRONTEND: noninteractive
   APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
-  NIX_FLAKE_PATH: ./.github/workflows/resources/nix
-  CRDS_PATH: /home/runner/crds
+  WORKFLOW_RESOURCE_DIR: ./.github/workflows/resources
+  SCHEMAS_DIR: /home/runner/crds
 
 jobs:
   publish-schemas:
@@ -48,7 +49,7 @@ jobs:
       - name: Switch to Nix devShell
         uses: nicknovitski/nix-develop@a2060d116a50b36dfab02280af558e73ab52427d # v1.1.0
         with:
-          arguments: "${{ env.NIX_FLAKE_PATH }}"
+          arguments: "${{ env.WORKFLOW_RESOURCE_DIR }}"
 
       - name: Setup Node
         uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
@@ -72,17 +73,17 @@ jobs:
           KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
         run: |
-          mkdir -p ${{ env.CRDS_PATH }}
+          mkdir -p ${{ env.SCHEMAS_DIR }}
           curl -fsSL -o $GITHUB_WORKSPACE/crd-extractor.sh \
               https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/Utilities/crd-extractor.sh
           chmod +x $GITHUB_WORKSPACE/crd-extractor.sh
           bash $GITHUB_WORKSPACE/crd-extractor.sh
-          mv /home/runner/.datree/crdSchemas/* ${{ env.CRDS_PATH }}
+          mv /home/runner/.datree/crdSchemas/* ${{ env.SCHEMAS_DIR }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@5e8484995321734668f14981c316aa9188d76ed1 # v3.3.2
         with:
           apiToken: "${{ secrets.CLOUDFLARE_API_TOKEN }}"
           accountId: "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
-          workingDirectory: "${{ env.CRDS_PATH }}"
+          workingDirectory: "${{ env.SCHEMAS_DIR }}"
           command: pages deploy --project-name=kubernetes-schemas --branch main .

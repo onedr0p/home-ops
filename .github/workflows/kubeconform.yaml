@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: "Kubeconform"
 
 on:
@@ -13,8 +14,7 @@ env:
   DEBCONF_NONINTERACTIVE_SEEN: "true"
   DEBIAN_FRONTEND: noninteractive
   APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
-  NIX_FLAKE_PATH: ./.github/workflows/resources/nix
-  SCHEMA_DIR: /home/runner/crds
+  WORKFLOW_RESOURCE_DIR: ./.github/workflows/resources
 
 jobs:
   kubeconform:
@@ -48,8 +48,8 @@ jobs:
       - name: Switch to Nix devShell
         uses: nicknovitski/nix-develop@a2060d116a50b36dfab02280af558e73ab52427d # v1.1.0
         with:
-          arguments: "${{ env.NIX_FLAKE_PATH }}"
+          arguments: "${{ env.WORKFLOW_RESOURCE_DIR }}"
 
       - name: Run kubeconform
         shell: bash
-        run: bash ./.github/scripts/kubeconform.sh ${{ matrix.path }}
+        run: bash ${{ env.WORKFLOW_RESOURCE_DIR }}/kubeconform.sh ${{ matrix.path }}

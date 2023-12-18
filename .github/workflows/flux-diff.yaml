@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: "Flux Diff"
 
 on:
@@ -10,7 +11,7 @@ env:
   DEBCONF_NONINTERACTIVE_SEEN: "true"
   DEBIAN_FRONTEND: noninteractive
   APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
-  NIX_FLAKE_PATH: ./.github/workflows/resources/nix
+  WORKFLOW_RESOURCE_DIR: ./.github/workflows/resources
 
 jobs:
   flux-diff:
@@ -47,7 +48,7 @@ jobs:
       - name: Switch to Nix devShell
         uses: nicknovitski/nix-develop@a2060d116a50b36dfab02280af558e73ab52427d # v1.1.0
         with:
-          arguments: "${{ env.NIX_FLAKE_PATH }}"
+          arguments: "${{ env.WORKFLOW_RESOURCE_DIR }}"
 
       - name: Diff Resources
         # uses: allenporter/flux-local/action/diff@19bfc6920e8964a479363bc230e6c329120ead02 # 3.2.0
