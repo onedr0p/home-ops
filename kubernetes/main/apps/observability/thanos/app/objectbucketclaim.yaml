@@ -7,25 +7,3 @@ metadata:
 spec:
   bucketName: thanos-v2
   storageClassName: ceph-bucket
----
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/pushsecret_v1alpha1.json
-apiVersion: external-secrets.io/v1alpha1
-kind: PushSecret
-metadata:
-  name: ceph-rgw-thanos
-spec:
-  secretStoreRefs:
-    - name: onepassword-connect
-      kind: ClusterSecretStore
-  selector:
-    secret:
-      name: thanos-bucket-v2
-  data:
-    - match:
-        secretKey: AWS_ACCESS_KEY_ID
-        remoteRef:
-          remoteKey: ceph-rgw-thanos
-    - match:
-        secretKey: AWS_SECRET_ACCESS_KEY
-        remoteRef:
-          remoteKey: ceph-rgw-thanos
