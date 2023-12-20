@@ -1,0 +1,48 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "Aqua Test"
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  DEBCONF_NONINTERACTIVE_SEEN: "true"
+  DEBIAN_FRONTEND: noninteractive
+  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
+  WORKFLOW_RESOURCE_DIR: ./.github/workflows/resources
+
+jobs:
+  sync:
+    name: Flux Kustomization Sync
+    runs-on: ["arc-runner-set-home-ops"]
+    steps:
+      - name: Generate Token
+        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+          fetch-depth: 0
+
+      # - name: Install OS Deps
+      #   shell: bash
+      #   run: sudo apt-get update && sudo apt-get install -y curl git xz-utils
+
+      - name: Install Aqua
+        uses: aquaproj/aqua-installer@928a2ee4243a9ee8312d80dc8cbaca88fb602a91 # v2.2.0
+        with:
+          aqua_version: v2.21.3
+        env:
+          AQUA_CONFIG: "${{ env.WORKFLOW_RESOURCE_DIR }}/aqua-config.yaml"
+
+      - name: Test Aqua
+        shell: bash
+        run: |
+          flux --version
+
