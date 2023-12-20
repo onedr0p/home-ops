@@ -12,9 +12,6 @@ on:
 
 env:
   AQUA_CONFIG: ./.github/aqua.yaml
-  DEBCONF_NONINTERACTIVE_SEEN: "true"
-  DEBIAN_FRONTEND: noninteractive
-  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
   SCHEMAS_DIR: /home/runner/crds
 
 jobs:
@@ -82,7 +79,7 @@ jobs:
           mkdir -p ${{ env.SCHEMAS_DIR }}
           curl -fsSL -o $GITHUB_WORKSPACE/crd-extractor.sh \
               https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/Utilities/crd-extractor.sh
-          chmod +x $GITHUB_WORKSPACE/crd-extractor.sh
+          chmod u+x $GITHUB_WORKSPACE/crd-extractor.sh
           bash $GITHUB_WORKSPACE/crd-extractor.sh
           mv /home/runner/.datree/crdSchemas/* ${{ env.SCHEMAS_DIR }}
 
