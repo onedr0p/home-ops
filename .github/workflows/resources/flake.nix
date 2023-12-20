@@ -13,6 +13,7 @@
               buildInputs = (with pkgs; [
                 cosign
                 fluxcd
+                helm
                 kubeconform
                 kubectl
                 kustomize
