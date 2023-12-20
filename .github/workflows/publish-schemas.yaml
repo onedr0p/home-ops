@@ -11,11 +11,7 @@ on:
     paths: [".github/workflows/publish-schemas.yaml"]
 
 env:
-  DEBCONF_NONINTERACTIVE_SEEN: "true"
-  DEBIAN_FRONTEND: noninteractive
-  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
-  WORKFLOW_RESOURCE_DIR: ./.github/workflows/resources
-  SCHEMAS_DIR: /home/runner/crds
+  AQUA_GLOBAL_CONFIG: ./.github/aqua.yaml
 
 jobs:
   publish-schemas:
@@ -37,29 +33,25 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Install OS Deps
+      - name: Install System Tools
         shell: bash
-        run: sudo apt-get update && sudo apt-get install -y curl git xz-utils
+        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@7ac1ec25491415c381d9b62f0657c7a028df52a7 # v24
+      - name: Cache Aqua
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
-          github_access_token: "${{ steps.app-token.outputs.token }}"
+          path: ~/.local/share/aquaproj-aqua
+          key: v1-aqua-installer-${{runner.os}}-${{runner.arch}}-${{hashFiles('./.github/aqua.yaml')}}
+          restore-keys: |
+            v1-aqua-installer-${{runner.os}}-${{runner.arch}}-
 
-      - name: Switch to Nix devShell
-        uses: nicknovitski/nix-develop@a2060d116a50b36dfab02280af558e73ab52427d # v1.1.0
+      - name: Install Aqua and CLI Tools
+        uses: aquaproj/aqua-installer@928a2ee4243a9ee8312d80dc8cbaca88fb602a91 # v2.2.0
         with:
-          arguments: "${{ env.WORKFLOW_RESOURCE_DIR }}"
-
-      - name: Setup Node
-        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
-        with:
-          node-version: 18.x
-
-      - name: Setup Python
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
-        with:
-          python-version: 3.x
+          aqua_version: v2.21.3
+          aqua_opts: -a
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
 
       - name: Write kubeconfig
         id: kubeconfig
@@ -68,22 +60,29 @@ jobs:
           encodedString: "${{ secrets.KUBECONFIG }}"
           fileName: kubeconfig
 
-      - name: Download and run crd-extractor
+      - name: Setup Python
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: 3.x
+
+      - name: Test
+        run: command -v kubectl && kubectl version --client
+
+      - name: Run crd-extractor
         env:
           KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
-        run: |
-          mkdir -p ${{ env.SCHEMAS_DIR }}
-          curl -fsSL -o $GITHUB_WORKSPACE/crd-extractor.sh \
-              https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/Utilities/crd-extractor.sh
-          chmod +x $GITHUB_WORKSPACE/crd-extractor.sh
-          bash $GITHUB_WORKSPACE/crd-extractor.sh
-          mv /home/runner/.datree/crdSchemas/* ${{ env.SCHEMAS_DIR }}
+        run: bash ./.github/scripts/crd-extractor.sh
+
+      - name: Setup Node
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+        with:
+          node-version: 18.x
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@a8be0ea72a399752dd2735fa16ea0d424f2335ca # v3.4.0
         with:
           apiToken: "${{ secrets.CLOUDFLARE_API_TOKEN }}"
           accountId: "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
-          workingDirectory: "${{ env.SCHEMAS_DIR }}"
+          workingDirectory: /home/runner/.datree/crdSchemas
           command: pages deploy --project-name=kubernetes-schemas --branch main .
