@@ -65,7 +65,7 @@ done < <(kubectl get crds 2>&1 | sed -n '/NAME/,$p' | tail -n +2)
 # If no CRDs exist in the cluster, exit
 if [ $NUM_OF_CRDS == 0 ]; then
     printf "No CRDs found in the cluster, exiting...\n"
-    exit 0
+    exit 1
 fi
 
 # Download converter script
