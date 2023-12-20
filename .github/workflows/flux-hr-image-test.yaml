@@ -8,7 +8,7 @@ on:
     paths: ["kubernetes/**/helmrelease.yaml"]
 
 env:
-  AQUA_CONFIG: ./.github/workflows/resources/aqua.yaml
+  AQUA_CONFIG: ./.github/aqua.yaml
   DEBCONF_NONINTERACTIVE_SEEN: "true"
   DEBIAN_FRONTEND: noninteractive
   APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
@@ -79,7 +79,7 @@ jobs:
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: ~/.local/share/aquaproj-aqua
-          key: v1-aqua-installer-${{runner.os}}-${{runner.arch}}-${{hashFiles('./.github/workflows/resources/aqua.yaml')}}
+          key: v1-aqua-installer-${{runner.os}}-${{runner.arch}}-${{hashFiles('./.github/aqua.yaml')}}
           restore-keys: |
             v1-aqua-installer-${{runner.os}}-${{runner.arch}}-
 
@@ -94,7 +94,7 @@ jobs:
       - name: Extract Images from Helm Release
         id: extract-images
         run: |
-          images=$(npx zx ./.github/workflows/resources/extract-images.mjs --kubernetes-dir "${{ env.KUBERNETES_DIR }}" --helmrelease "${{ matrix.files }}")
+          images=$(npx zx ./.github/scripts/extract-images.mjs --kubernetes-dir "${{ env.KUBERNETES_DIR }}" --helmrelease "${{ matrix.files }}")
           echo "images=${images}" >> $GITHUB_OUTPUT
           echo "${images}"
 
