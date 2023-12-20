@@ -93,4 +93,4 @@ const kustomizeBuild = await renderKustomize(path.dirname(HelmRelease), helmRele
 const helmRepository = await parseHelmRepository(KubernetesDir, kustomizeBuild.spec.chart.spec.sourceRef.name)
 const images         = await helmTemplate(kustomizeBuild, helmRepository)
 
-echo(JSON.stringify({"images": images}))
+echo(JSON.stringify(images))
