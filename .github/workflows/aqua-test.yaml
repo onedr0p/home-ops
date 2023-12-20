@@ -7,10 +7,10 @@ on:
     branches: ["main"]
 
 env:
+  AQUA_CONFIG: ./.github/workflows/resources/aqua.yaml
   DEBCONF_NONINTERACTIVE_SEEN: "true"
   DEBIAN_FRONTEND: noninteractive
   APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
-  AQUA_CONFIG: ./.github/workflows/resources/aqua.yaml
 
 jobs:
   aqua:
@@ -30,25 +30,22 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
           fetch-depth: 0
 
-      - name: Install OS Deps
+      - name: Install System Tools
         shell: bash
-        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl
+        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo
 
-      - name: Install Aqua
+      - name: Cache Aqua
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+        with:
+          path: ~/.local/share/aquaproj-aqua
+          key: v1-aqua-installer-${{runner.os}}-${{runner.arch}}-${{hashFiles('./.github/workflows/resources/aqua.yaml')}}
+          restore-keys: |
+            v1-aqua-installer-${{runner.os}}-${{runner.arch}}-
+
+      - name: Install Aqua and CLI Tools
         uses: aquaproj/aqua-installer@928a2ee4243a9ee8312d80dc8cbaca88fb602a91 # v2.2.0
         with:
           aqua_version: v2.21.3
           aqua_opts: ""
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-
-      - name: Test Aqua
-        shell: bash
-        run: |
-          kubectl version
-          flux --version
-          helm version
-          kustomize version
-          yq --version
-          kubeconform -v
-          cosign version

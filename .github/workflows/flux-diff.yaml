@@ -8,10 +8,10 @@ on:
     paths: ["kubernetes/**"]
 
 env:
+  AQUA_CONFIG: ./.github/workflows/resources/aqua.yaml
   DEBCONF_NONINTERACTIVE_SEEN: "true"
   DEBIAN_FRONTEND: noninteractive
   APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
-  WORKFLOW_RESOURCE_DIR: ./.github/workflows/resources
 
 jobs:
   flux-diff:
@@ -36,19 +36,25 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Install OS Deps
+      - name: Install System Tools
         shell: bash
-        run: sudo apt-get update && sudo apt-get install -y curl git xz-utils
+        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@7ac1ec25491415c381d9b62f0657c7a028df52a7 # v24
+      - name: Cache Aqua
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
-          github_access_token: "${{ steps.app-token.outputs.token }}"
+          path: ~/.local/share/aquaproj-aqua
+          key: v1-aqua-installer-${{runner.os}}-${{runner.arch}}-${{hashFiles('./.github/workflows/resources/aqua.yaml')}}
+          restore-keys: |
+            v1-aqua-installer-${{runner.os}}-${{runner.arch}}-
 
-      - name: Switch to Nix devShell
-        uses: nicknovitski/nix-develop@a2060d116a50b36dfab02280af558e73ab52427d # v1.1.0
+      - name: Install Aqua and CLI Tools
+        uses: aquaproj/aqua-installer@928a2ee4243a9ee8312d80dc8cbaca88fb602a91 # v2.2.0
         with:
-          arguments: "${{ env.WORKFLOW_RESOURCE_DIR }}"
+          aqua_version: v2.21.3
+          aqua_opts: ""
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
 
       - name: Diff Resources
         # uses: allenporter/flux-local/action/diff@19bfc6920e8964a479363bc230e6c329120ead02 # 3.2.0
