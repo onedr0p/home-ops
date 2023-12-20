@@ -12,7 +12,6 @@ on:
 
 env:
   AQUA_GLOBAL_CONFIG: ./.github/aqua.yaml
-  SCHEMAS_DIR: /home/runner/crds
 
 jobs:
   publish-schemas:
@@ -73,13 +72,7 @@ jobs:
         env:
           KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
-        run: |
-          mkdir -p ${{ env.SCHEMAS_DIR }}
-          curl -fsSL -o $GITHUB_WORKSPACE/crd-extractor.sh \
-              https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/Utilities/crd-extractor.sh
-          chmod u+x $GITHUB_WORKSPACE/crd-extractor.sh
-          bash $GITHUB_WORKSPACE/crd-extractor.sh
-          mv /home/runner/.datree/crdSchemas/* ${{ env.SCHEMAS_DIR }}
+        run: bash ./.github/scripts/crd-extractor.sh
 
       - name: Setup Node
         uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
@@ -91,5 +84,5 @@ jobs:
         with:
           apiToken: "${{ secrets.CLOUDFLARE_API_TOKEN }}"
           accountId: "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
-          workingDirectory: "${{ env.SCHEMAS_DIR }}"
+          workingDirectory: /home/runner/.datree/crdSchemas
           command: pages deploy --project-name=kubernetes-schemas --branch main .
