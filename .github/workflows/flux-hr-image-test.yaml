@@ -1,0 +1,106 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "Flux Helm Release Image Test"
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths: ["kubernetes/**/helmrelease.yaml"]
+
+env:
+  DEBCONF_NONINTERACTIVE_SEEN: "true"
+  DEBIAN_FRONTEND: noninteractive
+  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
+  WORKFLOW_RESOURCE_DIR: ./.github/workflows/resources
+  WORKFLOW_KUBERNETES_DIR: ./kubernetes
+
+jobs:
+  changed-files:
+    name: Get Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
+    steps:
+      - name: Generate Token
+        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@56284d80811fb5963a972b438f2870f175e5b7c8 # v40.2.3
+        with:
+          files: kubernetes/**/helmrelease.yaml
+          json: true
+          quotepath: false
+          escape_json: false
+
+      - name: List all changed files
+        run: echo "${{ steps.changed-files.outputs.all_changed_and_modified_files }}"
+
+  extract-images:
+    name: Extract images from Helm Release
+    runs-on: ubuntu-latest
+    needs: ["changed-files"]
+    strategy:
+      matrix:
+        files: ${{ fromJSON(needs.changed-files.outputs.matrix) }}
+      max-parallel: 4
+      fail-fast: false
+    outputs:
+      matrix: ${{ steps.extract-images.outputs.images }}
+    steps:
+      - name: Generate Token
+        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+          fetch-depth: 0
+
+      - name: Install OS Deps
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install -y curl git xz-utils
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@7ac1ec25491415c381d9b62f0657c7a028df52a7 # v24
+        with:
+          github_access_token: "${{ steps.app-token.outputs.token }}"
+
+      - name: Switch to Nix devShell
+        uses: nicknovitski/nix-develop@a2060d116a50b36dfab02280af558e73ab52427d # v1.1.0
+        with:
+          arguments: "${{ env.WORKFLOW_RESOURCE_DIR }}"
+
+      - name: Extract Images from Helm Release
+        id: extract-images
+        run: |
+          images=$(npx zx ${{ env.WORKFLOW_RESOURCE_DIR }}/extract-images.mjs --kubernetes-dir "${{ env.WORKFLOW_KUBERNETES_DIR }}" --helmrelease "${{ matrix.files }}")
+          echo "images=${images}" >> $GITHUB_OUTPUT
+          echo "${images}"
+
+  test-images:
+    name: Test images from Helm Release
+    runs-on: ubuntu-latest
+    needs: ["extract-images"]
+    strategy:
+      matrix:
+        images: ${{ fromJSON(needs.extract-images.outputs.matrix) }}
+      max-parallel: 4
+      fail-fast: false
+    steps:
+      - name: Test Images from Helm Release
+        run: docker pull ${{ matrix.images }}

@@ -14,6 +14,7 @@
                 cosign
                 fluxcd
                 kubeconform
+                kubernetes-helm
                 kubectl
                 kustomize
                 jo
