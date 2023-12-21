@@ -59,7 +59,7 @@ do
     CRD_GROUPS["$resourceKind"]="$resourceGroup"
 
     ((++NUM_OF_CRDS)) || true
-done < <(kubectl get crds 2>&1 | sed -n '/NAME/,$p' | tail -n +2)
+done < <(kubectl get crds --no-headers)
 
 # If no CRDs exist in the cluster, exit
 if [ $NUM_OF_CRDS == 0 ]; then
