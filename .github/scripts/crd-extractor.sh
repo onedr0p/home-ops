@@ -32,12 +32,10 @@ fi
 # Create temp folder for CRDs
 TMP_CRD_DIR=$HOME/.datree/crds
 mkdir -p $TMP_CRD_DIR
-echo "TMP_CRD_DIR=$TMP_CRD_DIR"
 
 # Create final schemas directory
 SCHEMAS_DIR=$HOME/.datree/crdSchemas
 mkdir -p $SCHEMAS_DIR
-echo "SCHEMAS_DIR=$SCHEMAS_DIR"
 cd $SCHEMAS_DIR
 
 # Create array to store CRD kinds and groups
@@ -47,6 +45,8 @@ if [ $? -ne 0 ]; then
     # Array creation failed, signal to skip organization by group
     ORGANIZE_BY_GROUP=false
 fi
+
+kubectl get crds
 
 # Extract CRDs from cluster
 NUM_OF_CRDS=0
@@ -61,7 +61,7 @@ do
     # Save name and group for later directory organization
     CRD_GROUPS["$resourceKind"]="$resourceGroup"
 
-    let ++NUM_OF_CRDS
+    ((++NUM_OF_CRDS)) || true
 done < <(kubectl get crds 2>&1 | sed -n '/NAME/,$p' | tail -n +2)
 
 # If no CRDs exist in the cluster, exit
