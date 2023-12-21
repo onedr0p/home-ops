@@ -68,17 +68,11 @@ jobs:
       - name: Install PyYAML
         run: pip install pyyaml
 
-      - name: Run crd-extractor
+      - name: Extract CRDs
         env:
           KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
-        run: kubectl get nodes
-
-      - name: Run crd-extractor
-        env:
-          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
-        shell: bash
-        run: bash .github/scripts/crd-extractor.sh
+        run: bash .github/scripts/extract-crds.sh
 
       - name: Setup Node
         uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
