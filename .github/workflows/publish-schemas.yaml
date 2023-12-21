@@ -72,6 +72,12 @@ jobs:
         env:
           KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
+        run: kubectl get nodes
+
+      - name: Run crd-extractor
+        env:
+          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
+        shell: bash
         run: bash .github/scripts/crd-extractor.sh
 
       - name: Setup Node
