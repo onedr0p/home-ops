@@ -37,20 +37,8 @@ jobs:
         shell: bash
         run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo
 
-      - name: Cache Aqua
-        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
-        with:
-          path: ~/.local/share/aquaproj-aqua
-          key: aqua-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/aqua.yaml') }}
-          restore-keys: aqua-${{ runner.os }}-${{ runner.arch }}-
-
-      - name: Install Aqua and CLI Tools
-        uses: aquaproj/aqua-installer@928a2ee4243a9ee8312d80dc8cbaca88fb602a91 # v2.2.0
-        with:
-          aqua_version: v2.21.3
-          aqua_opts: -a
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+      - name: Install kubectl
+        uses: azure/setup-kubectl@901a10e89ea615cf61f57ac05cecdf23e7de06d8 # v3.2
 
       - name: Write kubeconfig
         id: kubeconfig
@@ -64,14 +52,15 @@ jobs:
         with:
           python-version: 3.x
 
-      - name: Install PyYAML
-        run: pip install pyyaml
-
-      - name: Extract CRDs
+      - name: Download and run crd-extractor
         env:
           KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
-        run: bash .github/scripts/extract-crds.sh
+        run: |
+          curl -fsSL -o $GITHUB_WORKSPACE/crd-extractor.sh \
+              https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/Utilities/crd-extractor.sh
+          chmod +x $GITHUB_WORKSPACE/crd-extractor.sh
+          bash $GITHUB_WORKSPACE/crd-extractor.sh
 
       - name: Setup Node
         uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
