@@ -65,6 +65,12 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+          fetch-depth: 0
+
       - name: Setup System Tools
         shell: bash
         run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
