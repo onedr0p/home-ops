@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -o errexit
 
-KUBECTL_BIN=$(command -v kubectl)
-
 # Create temp folder for CRDs
 TMP_CRD_DIR=$HOME/.datree/crds
 mkdir -p $TMP_CRD_DIR
@@ -25,7 +23,7 @@ NUM_OF_CRDS=0
 while read -r crd
 do
     filename=${crd%% *}
-    $KUBECTL_BIN get crds "$filename" -o yaml > "$TMP_CRD_DIR/$filename.yaml" 2>&1
+    kubectl get crds "$filename" -o yaml > "$TMP_CRD_DIR/$filename.yaml" 2>&1
 
     resourceKind=$(grep "kind:" "$TMP_CRD_DIR/$filename.yaml" | awk 'NR==2{print $2}' | tr '[:upper:]' '[:lower:]')
     resourceGroup=$(grep "group:" "$TMP_CRD_DIR/$filename.yaml" | awk 'NR==1{print $2}')
@@ -34,7 +32,7 @@ do
     CRD_GROUPS["$resourceKind"]="$resourceGroup"
 
     ((++NUM_OF_CRDS)) || true
-done < <($KUBECTL_BIN get crds --no-headers)
+done < <(kubectl get crds --no-headers)
 
 # If no CRDs exist in the cluster, exit
 if [ $NUM_OF_CRDS == 0 ]; then
