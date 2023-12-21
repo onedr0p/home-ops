@@ -2,6 +2,8 @@
 # Source: https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/Utilities/crd-extractor.sh
 set -o errexit
 
+kubectl get nodes
+
 # Create temp folder for CRDs
 TMP_CRD_DIR=$HOME/.datree/crds
 mkdir -p $TMP_CRD_DIR
