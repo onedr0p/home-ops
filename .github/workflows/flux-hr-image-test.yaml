@@ -8,7 +8,7 @@ on:
     paths: ["kubernetes/**/helmrelease.yaml"]
 
 env:
-  KUBERNETES_DIR: ./kubernetes
+  WORKFLOW_KUBERNETES_DIR: ./kubernetes
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -72,11 +72,11 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
           fetch-depth: 0
 
-      - name: Install System Tools
+      - name: Setup System Tools
         shell: bash
         run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
 
-      - name: Install Workflow Tools
+      - name: Setup Workflow Tools
         uses: jdx/rtx-action@v1
         with:
           install: true
@@ -89,7 +89,7 @@ jobs:
       - name: Extract Images from Helm Release
         id: extract-images
         run: |
-          images=$(npx zx ./.github/scripts/extract-images.mjs --kubernetes-dir "${{ env.KUBERNETES_DIR }}" --helmrelease "${{ matrix.files }}")
+          images=$(npx zx ./.github/scripts/extract-images.mjs --kubernetes-dir "${{ env.WORKFLOW_KUBERNETES_DIR }}" --helmrelease "${{ matrix.files }}")
           echo "images=${images}" >> $GITHUB_OUTPUT
           echo "${images}"
 

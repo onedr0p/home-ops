@@ -30,11 +30,21 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Install System Tools
+      - name: Setup System Tools
         shell: bash
         run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
 
-      - name: Install kubectl
+      - name: Setup Python
+        uses: actions/setup-python@v5.0.0
+        with:
+          python-version: 3.x
+
+      - name: Setup Node
+        uses: actions/setup-node@v4.0.1
+        with:
+          node-version: 18.x
+
+      - name: Setup kubectl
         uses: azure/setup-kubectl@v3.2
 
       - name: Write kubeconfig
@@ -43,11 +53,6 @@ jobs:
         with:
           encodedString: "${{ secrets.KUBECONFIG }}"
           fileName: kubeconfig
-
-      - name: Setup Python
-        uses: actions/setup-python@v5.0.0
-        with:
-          python-version: 3.x
 
       - name: Download and run crd-extractor
         env:
@@ -59,10 +64,6 @@ jobs:
           chmod +x $GITHUB_WORKSPACE/crd-extractor.sh
           bash $GITHUB_WORKSPACE/crd-extractor.sh
 
-      - name: Setup Node
-        uses: actions/setup-node@v4.0.1
-        with:
-          node-version: 18.x
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3.4.0

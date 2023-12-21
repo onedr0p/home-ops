@@ -8,7 +8,7 @@ on:
     - cron: "0 0 * * *"
 
 env:
-  ISSUE_LABEL: lint/lychee
+  WORKFLOW_ISSUE_LABEL: lint/lychee
 
 jobs:
   lychee:
@@ -42,7 +42,7 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
           state: open
-          labels: "${{ env.ISSUE_LABEL }}"
+          labels: "${{ env.WORKFLOW_ISSUE_LABEL }}"
 
       - name: Update Issue
         uses: peter-evans/create-issue-from-file@v4.0.1
@@ -51,4 +51,4 @@ jobs:
           title: Link Checker Dashboard 🔗
           issue-number: "${{ steps.issue-number.outputs.issue-number }}"
           content-filepath: /tmp/results.md
-          labels: "${{ env.ISSUE_LABEL }}"
+          labels: "${{ env.WORKFLOW_ISSUE_LABEL }}"
