@@ -7,8 +7,9 @@ on:
     branches: ["main"]
     paths: ["kubernetes/**"]
 
-env:
-  AQUA_GLOBAL_CONFIG: .github/aqua.yaml
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
   changed-files:
@@ -72,22 +73,16 @@ jobs:
 
       - name: Install System Tools
         shell: bash
-        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo
+        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
 
-      - name: Cache Aqua
-        uses: actions/cache@v3.3.2
+      - name: Install Workflow Tools
+        uses: jdx/rtx-action@v1
         with:
-          path: ~/.local/share/aquaproj-aqua
-          key: aqua-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/aqua.yaml') }}
-          restore-keys: aqua-${{ runner.os }}-${{ runner.arch }}-
-
-      - name: Install Aqua and CLI Tools
-        uses: aquaproj/aqua-installer@v2.2.0
-        with:
-          aqua_version: v2.21.3
-          aqua_opts: -a
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+          install: true
+          cache: true
+          rtx_toml: |
+            [tools]
+            flux2 = "latest"
 
       - name: Diff Resources
         uses: allenporter/flux-local/action/diff@4.0.0
@@ -108,3 +103,14 @@ jobs:
             ```diff
             ${{ steps.diff.outputs.diff }}
             ```
+
+  # Summarize matrix https://github.community/t/status-check-for-a-matrix-jobs/127354/7
+  flux-diff-success:
+    if: ${{ always() }}
+    needs: ["flux-diff"]
+    name: Flux diff successful
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        name: Check matrix status
+        run: exit 1

@@ -32,10 +32,16 @@ jobs:
 
       - name: Install System Tools
         shell: bash
-        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo
+        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3.2
+      - name: Install Workflow Tools
+        uses: jdx/rtx-action@v1
+        with:
+          install: true
+          cache: true
+          rtx_toml: |
+            [tools]
+            kubectl = "latest"
 
       - name: Write kubeconfig
         id: kubeconfig

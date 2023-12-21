@@ -8,8 +8,11 @@ on:
     paths: ["kubernetes/**/helmrelease.yaml"]
 
 env:
-  AQUA_GLOBAL_CONFIG: .github/aqua.yaml
   KUBERNETES_DIR: ./kubernetes
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
   changed-files:
@@ -44,6 +47,7 @@ jobs:
         run: echo "${{ steps.changed-files.outputs.all_changed_and_modified_files }}"
 
   extract-images:
+    if: ${{ needs.changed-files.outputs.matrix != '[]' }}
     name: Extract images from Helm Release
     runs-on: ubuntu-latest
     needs: ["changed-files"]
@@ -70,22 +74,17 @@ jobs:
 
       - name: Install System Tools
         shell: bash
-        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo
+        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
 
-      - name: Cache Aqua
-        uses: actions/cache@v3.3.2
+      - name: Install Workflow Tools
+        uses: jdx/rtx-action@v1
         with:
-          path: ~/.local/share/aquaproj-aqua
-          key: aqua-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/aqua.yaml') }}
-          restore-keys: aqua-${{ runner.os }}-${{ runner.arch }}-
-
-      - name: Install Aqua and CLI Tools
-        uses: aquaproj/aqua-installer@v2.2.0
-        with:
-          aqua_version: v2.21.3
-          aqua_opts: -a
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+          install: true
+          cache: true
+          rtx_toml: |
+            [tools]
+            helm = "latest"
+            kustomize = "latest"
 
       - name: Extract Images from Helm Release
         id: extract-images
@@ -95,6 +94,7 @@ jobs:
           echo "${images}"
 
   test-images:
+    if: ${{ needs.extract-images.outputs.matrix != '[]' }}
     name: Test images from Helm Release
     runs-on: ubuntu-latest
     needs: ["extract-images"]
@@ -106,3 +106,14 @@ jobs:
     steps:
       - name: Test Images from Helm Release
         run: docker pull ${{ matrix.images }}
+
+  # Summarize matrix https://github.community/t/status-check-for-a-matrix-jobs/127354/7
+  test-images-success:
+    if: ${{ always() }}
+    needs: ["test-images"]
+    name: Test images from Helm Release successful
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        name: Check matrix status
+        run: exit 1
