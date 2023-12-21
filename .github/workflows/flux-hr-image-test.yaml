@@ -19,21 +19,21 @@ jobs:
       matrix: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        uses: actions/create-github-app-token@v1.6.2
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4.1.1
         with:
           token: "${{ steps.app-token.outputs.token }}"
           fetch-depth: 0
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@56284d80811fb5963a972b438f2870f175e5b7c8 # v40.2.3
+        uses: tj-actions/changed-files@v40.2.3
         with:
           files: kubernetes/**/helmrelease.yaml
           json: true
@@ -56,14 +56,14 @@ jobs:
       matrix: ${{ steps.extract-images.outputs.images }}
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        uses: actions/create-github-app-token@v1.6.2
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4.1.1
         with:
           token: "${{ steps.app-token.outputs.token }}"
           fetch-depth: 0
@@ -73,14 +73,14 @@ jobs:
         run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo
 
       - name: Cache Aqua
-        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+        uses: actions/cache@v3.3.2
         with:
           path: ~/.local/share/aquaproj-aqua
           key: aqua-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/aqua.yaml') }}
           restore-keys: aqua-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install Aqua and CLI Tools
-        uses: aquaproj/aqua-installer@928a2ee4243a9ee8312d80dc8cbaca88fb602a91 # v2.2.0
+        uses: aquaproj/aqua-installer@v2.2.0
         with:
           aqua_version: v2.21.3
           aqua_opts: -a

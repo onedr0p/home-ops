@@ -19,14 +19,14 @@ jobs:
       packages: write
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        uses: actions/create-github-app-token@v1.6.2
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4.1.1
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
@@ -35,17 +35,17 @@ jobs:
         run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@901a10e89ea615cf61f57ac05cecdf23e7de06d8 # v3.2
+        uses: azure/setup-kubectl@v3.2
 
       - name: Write kubeconfig
         id: kubeconfig
-        uses: timheuer/base64-to-file@784a1a4a994315802b7d8e2084e116e783d157be # v1.2.4
+        uses: timheuer/base64-to-file@v1.2.4
         with:
           encodedString: "${{ secrets.KUBECONFIG }}"
           fileName: kubeconfig
 
       - name: Setup Python
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        uses: actions/setup-python@v5.0.0
         with:
           python-version: 3.x
 
@@ -60,12 +60,12 @@ jobs:
           bash $GITHUB_WORKSPACE/crd-extractor.sh
 
       - name: Setup Node
-        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+        uses: actions/setup-node@v4.0.1
         with:
           node-version: 18.x
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@a8be0ea72a399752dd2735fa16ea0d424f2335ca # v3.4.0
+        uses: cloudflare/wrangler-action@v3.4.0
         with:
           apiToken: "${{ secrets.CLOUDFLARE_API_TOKEN }}"
           accountId: "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
