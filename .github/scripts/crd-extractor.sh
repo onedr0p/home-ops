@@ -46,8 +46,6 @@ if [ $? -ne 0 ]; then
     ORGANIZE_BY_GROUP=false
 fi
 
-kubectl get crds
-
 # Extract CRDs from cluster
 NUM_OF_CRDS=0
 while read -r crd
@@ -61,7 +59,7 @@ do
     # Save name and group for later directory organization
     CRD_GROUPS["$resourceKind"]="$resourceGroup"
 
-    ((++NUM_OF_CRDS)) || true
+    let ++NUM_OF_CRDS
 done < <(kubectl get crds 2>&1 | sed -n '/NAME/,$p' | tail -n +2)
 
 # If no CRDs exist in the cluster, exit
