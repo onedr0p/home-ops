@@ -64,16 +64,11 @@ jobs:
         with:
           python-version: 3.x
 
-      - name: Test
-        env:
-          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
-        run: kubectl get nodes
-
       - name: Run crd-extractor
         env:
           KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
-        run: bash ./.github/scripts/crd-extractor.sh
+        run: bash .github/scripts/crd-extractor.sh
 
       - name: Setup Node
         uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
@@ -85,5 +80,5 @@ jobs:
         with:
           apiToken: "${{ secrets.CLOUDFLARE_API_TOKEN }}"
           accountId: "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
-          workingDirectory: /home/runner/.datree/crdSchemas
+          workingDirectory: ~/.datree/crdSchemas
           command: pages deploy --project-name=kubernetes-schemas --branch main .

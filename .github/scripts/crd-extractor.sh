@@ -32,10 +32,12 @@ fi
 # Create temp folder for CRDs
 TMP_CRD_DIR=$HOME/.datree/crds
 mkdir -p $TMP_CRD_DIR
+echo "TMP_CRD_DIR=$TMP_CRD_DIR"
 
 # Create final schemas directory
 SCHEMAS_DIR=$HOME/.datree/crdSchemas
 mkdir -p $SCHEMAS_DIR
+echo "SCHEMAS_DIR=$SCHEMAS_DIR"
 cd $SCHEMAS_DIR
 
 # Create array to store CRD kinds and groups
