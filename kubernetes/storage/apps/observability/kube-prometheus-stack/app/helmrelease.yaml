@@ -35,8 +35,6 @@ spec:
       enabled: true
     alertmanager:
       enabled: false
-    defaultRules:
-      create: false
     kubelet:
       enabled: true
       serviceMonitor:
@@ -105,7 +103,12 @@ spec:
           - hosts:
               - *host
       prometheusSpec:
+        additionalAlertManagerConfigs:
+          - static_configs:
+              - targets:
+                  - alertmanager.devbu.io
         replicas: 1
+        replicaExternalLabelName: __replica__
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
@@ -128,6 +131,24 @@ spec:
               resources:
                 requests:
                   storage: 20Gi
+        thanos:
+          image: quay.io/thanos/thanos:v0.33.0
+          objectStorageConfig:
+            existingSecret:
+              name: kube-prometheus-stack-secret
+              key: objstore.yml
+          # renovate: datasource=docker depName=quay.io/thanos/thanos
+          version: "0.33.0"
+      thanosService:
+        enabled: true
+      thanosServiceExternal:
+        enabled: true
+        type: LoadBalancer
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: thanos.turbo.ac
+        externalTrafficPolicy: Cluster
+      thanosServiceMonitor:
+        enabled: true
     nodeExporter:
       enabled: true
     prometheus-node-exporter:
