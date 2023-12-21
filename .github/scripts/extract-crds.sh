@@ -1,32 +1,7 @@
 #!/usr/bin/env bash
+set -o errexit
 
-# Check if python3 is installed
-if ! command -v python3 &> /dev/null; then
-    printf "python3 is required for this utility, and is not installed on your machine"
-    printf "please visit https://www.python.org/downloads/ to install it"
-    exit 1
-fi
-# Check if kubectl is installed
-if ! command -v kubectl &> /dev/null; then
-    printf "kubectl is required for this utility, and is not installed on your machine"
-    printf "please visit https://kubernetes.io/docs/tasks/tools/#kubectl to install it"
-    exit 1
-fi
-
-# Check if the pyyaml module is installed
-if ! echo 'import yaml' | python3 &> /dev/null; then
-    printf "the python3 module 'yaml' is required, and is not installed on your machine.\n"
-
-    while true; do
-        read -p "Do you wish to install this program? (y/n) " yn
-        case $yn in
-            [Yy] ) pip3 install pyyaml; break;;
-            "" ) pip3 install pyyaml; break;;
-            [Nn] ) echo "Exiting..."; exit;;
-            * ) echo "Please answer 'y' (yes) or 'n' (no).";;
-        esac
-    done
-fi
+KUBECTL_BIN=$(command -v kubectl)
 
 # Create temp folder for CRDs
 TMP_CRD_DIR=$HOME/.datree/crds
@@ -50,7 +25,7 @@ NUM_OF_CRDS=0
 while read -r crd
 do
     filename=${crd%% *}
-    kubectl get crds "$filename" -o yaml > "$TMP_CRD_DIR/$filename.yaml" 2>&1
+    $KUBECTL_BIN get crds "$filename" -o yaml > "$TMP_CRD_DIR/$filename.yaml" 2>&1
 
     resourceKind=$(grep "kind:" "$TMP_CRD_DIR/$filename.yaml" | awk 'NR==2{print $2}' | tr '[:upper:]' '[:lower:]')
     resourceGroup=$(grep "group:" "$TMP_CRD_DIR/$filename.yaml" | awk 'NR==1{print $2}')
@@ -59,7 +34,7 @@ do
     CRD_GROUPS["$resourceKind"]="$resourceGroup"
 
     ((++NUM_OF_CRDS)) || true
-done < <(kubectl get crds --no-headers)
+done < <($KUBECTL_BIN get crds --no-headers)
 
 # If no CRDs exist in the cluster, exit
 if [ $NUM_OF_CRDS == 0 ]; then
