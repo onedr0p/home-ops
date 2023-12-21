@@ -9,7 +9,7 @@ on:
     paths: ["kubernetes/**"]
 
 env:
-  AQUA_CONFIG: ./.github/aqua.yaml
+  AQUA_CONFIG: .github/aqua.yaml
 
 jobs:
   kubeconform:
@@ -39,9 +39,8 @@ jobs:
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: ~/.local/share/aquaproj-aqua
-          key: v1-aqua-installer-${{runner.os}}-${{runner.arch}}-${{hashFiles('./.github/aqua.yaml')}}
-          restore-keys: |
-            v1-aqua-installer-${{runner.os}}-${{runner.arch}}-
+          key: aqua-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/aqua.yaml') }}
+          restore-keys: aqua-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install Aqua and CLI Tools
         uses: aquaproj/aqua-installer@928a2ee4243a9ee8312d80dc8cbaca88fb602a91 # v2.2.0
