@@ -25,20 +25,20 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v1.6.2
+        uses: actions/create-github-app-token@v1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
       - name: Setup Pages
         id: pages
-        uses: actions/configure-pages@v4.0.0
+        uses: actions/configure-pages@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
           enablement: true
@@ -49,7 +49,7 @@ jobs:
           args: mdbook build docs
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3.0.0
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs/book
 
@@ -62,7 +62,7 @@ jobs:
     needs: build
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v1.6.2
+        uses: actions/create-github-app-token@v1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -70,6 +70,6 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4.0.0
+        uses: actions/deploy-pages@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"

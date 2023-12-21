@@ -16,14 +16,14 @@ jobs:
         cluster: ["storage"]
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v1.6.2
+        uses: actions/create-github-app-token@v1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
           fetch-depth: 0
@@ -43,7 +43,7 @@ jobs:
 
       - name: Write kubeconfig
         id: kubeconfig
-        uses: timheuer/base64-to-file@v1.2.4
+        uses: timheuer/base64-to-file@v1
         with:
           encodedString: "${{ secrets.KUBECONFIG }}"
           fileName: kubeconfig

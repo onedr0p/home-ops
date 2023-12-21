@@ -16,19 +16,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v1.6.2
+        uses: actions/create-github-app-token@v1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
       - name: Scan for broken links
-        uses: lycheeverse/lychee-action@v1.8.0
+        uses: lycheeverse/lychee-action@v1
         id: lychee
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
@@ -38,14 +38,14 @@ jobs:
 
       - name: Find Link Checker Issue
         id: issue-number
-        uses: micalevisk/last-issue-action@v2.2.1
+        uses: micalevisk/last-issue-action@v2
         with:
           token: "${{ steps.app-token.outputs.token }}"
           state: open
           labels: "${{ env.WORKFLOW_ISSUE_LABEL }}"
 
       - name: Update Issue
-        uses: peter-evans/create-issue-from-file@v4.0.1
+        uses: peter-evans/create-issue-from-file@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
           title: Link Checker Dashboard 🔗

@@ -17,14 +17,14 @@ jobs:
       packages: write
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@v1.6.2
+        uses: actions/create-github-app-token@v1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
@@ -42,7 +42,7 @@ jobs:
             flux2 = "latest"
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3.0.0
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: "${{ github.actor }}"
