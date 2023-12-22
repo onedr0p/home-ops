@@ -10,13 +10,6 @@ on:
     branches: ["main"]
     paths: [".github/workflows/publish-schemas.yaml"]
 
-env:
-  DEBCONF_NONINTERACTIVE_SEEN: "true"
-  DEBIAN_FRONTEND: noninteractive
-  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
-  WORKFLOW_RESOURCE_DIR: ./.github/workflows/resources
-  SCHEMAS_DIR: /home/runner/crds
-
 jobs:
   publish-schemas:
     name: Publish Schemas
@@ -26,44 +19,37 @@ jobs:
       packages: write
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        uses: actions/create-github-app-token@v1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Install OS Deps
+      - name: Setup System Tools
         shell: bash
-        run: sudo apt-get update && sudo apt-get install -y curl git xz-utils
-
-      - name: Install Nix
-        uses: cachix/install-nix-action@7ac1ec25491415c381d9b62f0657c7a028df52a7 # v24
-        with:
-          github_access_token: "${{ steps.app-token.outputs.token }}"
-
-      - name: Switch to Nix devShell
-        uses: nicknovitski/nix-develop@a2060d116a50b36dfab02280af558e73ab52427d # v1.1.0
-        with:
-          arguments: "${{ env.WORKFLOW_RESOURCE_DIR }}"
-
-      - name: Setup Node
-        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
-        with:
-          node-version: 18.x
+        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
 
       - name: Setup Python
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        uses: actions/setup-python@v5
         with:
           python-version: 3.x
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
       - name: Write kubeconfig
         id: kubeconfig
-        uses: timheuer/base64-to-file@784a1a4a994315802b7d8e2084e116e783d157be # v1.2.4
+        uses: timheuer/base64-to-file@v1
         with:
           encodedString: "${{ secrets.KUBECONFIG }}"
           fileName: kubeconfig
@@ -73,17 +59,16 @@ jobs:
           KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
         run: |
-          mkdir -p ${{ env.SCHEMAS_DIR }}
           curl -fsSL -o $GITHUB_WORKSPACE/crd-extractor.sh \
               https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/Utilities/crd-extractor.sh
           chmod +x $GITHUB_WORKSPACE/crd-extractor.sh
           bash $GITHUB_WORKSPACE/crd-extractor.sh
-          mv /home/runner/.datree/crdSchemas/* ${{ env.SCHEMAS_DIR }}
+
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@5e8484995321734668f14981c316aa9188d76ed1 # v3.3.2
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: "${{ secrets.CLOUDFLARE_API_TOKEN }}"
           accountId: "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
-          workingDirectory: "${{ env.SCHEMAS_DIR }}"
+          workingDirectory: /home/runner/.datree/crdSchemas
           command: pages deploy --project-name=kubernetes-schemas --branch main .

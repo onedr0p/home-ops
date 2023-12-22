@@ -7,12 +7,6 @@ on:
     branches: ["main"]
     paths: ["kubernetes/storage/**"]
 
-env:
-  DEBCONF_NONINTERACTIVE_SEEN: "true"
-  DEBIAN_FRONTEND: noninteractive
-  APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: DontWarn
-  WORKFLOW_RESOURCE_DIR: ./.github/workflows/resources
-
 jobs:
   sync:
     name: Flux Kustomization Sync
@@ -22,35 +16,34 @@ jobs:
         cluster: ["storage"]
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        uses: actions/create-github-app-token@v1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
           fetch-depth: 0
 
-      - name: Install OS Deps
+      - name: Setup System Tools
         shell: bash
-        run: sudo apt-get update && sudo apt-get install -y curl git xz-utils
+        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@7ac1ec25491415c381d9b62f0657c7a028df52a7 # v24
+      - name: Setup Workflow Tools
+        uses: jdx/rtx-action@v1
         with:
-          github_access_token: "${{ steps.app-token.outputs.token }}"
-
-      - name: Switch to Nix devShell
-        uses: nicknovitski/nix-develop@a2060d116a50b36dfab02280af558e73ab52427d # v1.1.0
-        with:
-          arguments: "${{ env.WORKFLOW_RESOURCE_DIR }}"
+          install: true
+          cache: true
+          rtx_toml: |
+            [tools]
+            flux2 = "latest"
 
       - name: Write kubeconfig
         id: kubeconfig
-        uses: timheuer/base64-to-file@784a1a4a994315802b7d8e2084e116e783d157be # v1.2.4
+        uses: timheuer/base64-to-file@v1
         with:
           encodedString: "${{ secrets.KUBECONFIG }}"
           fileName: kubeconfig

@@ -3,6 +3,7 @@
 name: "Publish Docs"
 
 on:
+  workflow_dispatch:
   push:
     branches: ["main"]
     paths:
@@ -11,9 +12,10 @@ on:
       - README.md
 
 permissions:
+  actions: write
   contents: read
-  pages: write
   id-token: write
+  pages: write
 
 jobs:
   build:
@@ -23,31 +25,31 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        uses: actions/create-github-app-token@v1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
       - name: Setup Pages
         id: pages
-        uses: actions/configure-pages@1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d # v4.0.0
+        uses: actions/configure-pages@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
           enablement: true
 
       - name: Build docs
-        uses: docker://ghcr.io/bjw-s/mdbook:0.4.36@sha256:fb39e02eb5bcc052e2883dad6d9dd480a4fbd2a69b4e3404682f7ac215a5d501
+        uses: docker://ghcr.io/bjw-s/mdbook:0.4.36@sha256:d86edc42a0d22e38f3d59d6cf517a9d93a7dbe8ec3ec80a114dfd7a99d9354cd
         with:
           args: mdbook build docs
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@a753861a5debcf57bf8b404356158c8e1e33150c # v2.0.0
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs/book
 
@@ -60,7 +62,7 @@ jobs:
     needs: build
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        uses: actions/create-github-app-token@v1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -68,7 +70,6 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@13b55b33dd8996121833dbc1db458c793a334630 # v3.0.1
+        uses: actions/deploy-pages@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
-          artifact_name: github-pages

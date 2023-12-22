@@ -5,10 +5,10 @@ name: "Lychee"
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * 0"
+    - cron: "0 0 * * *"
 
 env:
-  ISSUE_LABEL: lint/lychee
+  WORKFLOW_ISSUE_NUMBER: 6587
 
 jobs:
   lychee:
@@ -16,38 +16,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        uses: actions/create-github-app-token@v1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
       - name: Scan for broken links
-        uses: lycheeverse/lychee-action@ec3ed119d4f44ad2673a7232460dc7dff59d2421 # v1.8.0
+        uses: lycheeverse/lychee-action@v1
         id: lychee
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-        with:
-          args: --verbose --no-progress --exclude-mail './**/*.md'
-
-      - name: Find Link Checker Issue
-        id: issue-number
-        uses: micalevisk/last-issue-action@f5661581217cc78cc282d1351aa65bd8bd155003 # v2.2.1
         with:
           token: "${{ steps.app-token.outputs.token }}"
-          state: open
-          labels: "${{ env.ISSUE_LABEL }}"
+          args: --verbose --no-progress --exclude-mail './**/*.md'
+          output: /tmp/results.md
 
       - name: Update Issue
-        uses: peter-evans/create-issue-from-file@433e51abf769039ee20ba1293a088ca19d573b7f # v4.0.1
+        uses: peter-evans/create-issue-from-file@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
           title: Link Checker Dashboard 🔗
-          issue-number: "${{ steps.issue-number.outputs.issue-number }}"
-          content-filepath: ./lychee/out.md
-          labels: "${{ env.ISSUE_LABEL }}"
+          issue-number: "${{ env.WORKFLOW_ISSUE_NUMBER }}"
+          content-filepath: /tmp/results.md
