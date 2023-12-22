@@ -91,12 +91,13 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
           ref: main
+          path: default
 
       - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
-          path: derp
+          path: pull
 
       - name: Diff Resources
         uses: docker://ghcr.io/allenporter/flux-local:main
@@ -104,8 +105,8 @@ jobs:
           args: >-
             diff ${{ matrix.resources }}
             --unified 6
-            --path-orig ${{ matrix.paths }}
-            --path derp/${{ matrix.paths }}
+            --path-orig default/${{ matrix.paths }}
+            --path pull/${{ matrix.paths }}
             --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
             --limit-bytes 10000
             --all-namespaces
