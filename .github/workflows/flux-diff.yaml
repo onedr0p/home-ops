@@ -98,6 +98,12 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
           path: pr
 
+      - name: List all files
+        run: |
+          ls -la
+          pwd
+          pwd
+
       - name: Diff Resources
         uses: docker://ghcr.io/allenporter/flux-local:main
         with:
@@ -105,7 +111,7 @@ jobs:
             diff ${{ matrix.resources }}
             --unified 6
             --path-orig ${{ matrix.paths }}
-            --path ${{ matrix.paths }}
+            --path pr/${{ matrix.paths }}
             --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
             --limit-bytes 10000
             --all-namespaces
