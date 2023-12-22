@@ -85,19 +85,19 @@ jobs:
         uses: docker://ghcr.io/allenporter/flux-local:main
         id: diff
         with:
-          args: >
-            flux-local
-                diff
-                ${{ matrix.resources }}
-                --unified 6
-                --path-orig live/${{ matrix.paths }}
-                --path pr/${{ matrix.paths }}
-                --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
-                --skip-crds
-                --skip-secrets
-                --limit-bytes 10000
-                --all-namespaces
-                --sources "home-kubernetes"
+          args: |
+            flux-local \
+                diff \
+                ${{ matrix.resources }} \
+                --unified 6 \
+                --path-orig live/${{ matrix.paths }} \
+                --path pr/${{ matrix.paths }} \
+                --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart" \
+                --skip-crds \
+                --skip-secrets \
+                --limit-bytes 10000 \
+                --all-namespaces \
+                --sources "home-kubernetes" \
             >> $GITHUB_OUTPUT
 
       - if: ${{ steps.diff.outputs.diff != '' }}
