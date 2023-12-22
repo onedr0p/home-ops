@@ -65,27 +65,26 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Checkout Live Branch
-        uses: actions/checkout@v4
-        with:
-          token: "${{ steps.app-token.outputs.token }}"
-          path: live
-
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-        with:
-          token: "${{ steps.app-token.outputs.token }}"
-          path: pr
-
       - name: Setup System Tools
         shell: bash
         run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
 
+      - name: Setup Workflow Tools
+        uses: jdx/rtx-action@v1
+        with:
+          install: true
+          cache: true
+          rtx_toml: |
+            [tools]
+            flux2 = "latest"
+
       - name: Diff Resources
+        uses: allenporter/flux-local/action/diff@4.1.1
         id: diff
-        shell: bash
-        run: |
-          docker run --rm ghcr.io/allenporter/flux-local:main sh -c 'flux-local diff ${{ matrix.resources }} --unified 6 --path-orig live/${{ matrix.paths }} --path pr/${{ matrix.paths }} --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart" --skip-crds --skip-secrets --limit-bytes 10000 --all-namespaces --sources "home-kubernetes"' >> $GITHUB_OUTPUT
+        with:
+          sources: home-kubernetes
+          path: "${{ matrix.paths }}"
+          resource: "${{ matrix.resources }}"
 
       - if: ${{ steps.diff.outputs.diff != '' }}
         name: Add comment
