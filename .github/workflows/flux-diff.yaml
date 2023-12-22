@@ -69,57 +69,57 @@ jobs:
         shell: bash
         run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
 
-      # - name: Setup Workflow Tools
-      #   uses: jdx/rtx-action@v1
-      #   with:
-      #     install: true
-      #     cache: true
-      #     rtx_toml: |
-      #       [tools]
-      #       flux2 = "latest"
-
-      # - name: Diff Resources
-      #   uses: allenporter/flux-local/action/diff@4.1.1
-      #   id: diff
-      #   with:
-      #     sources: home-kubernetes
-      #     path: "${{ matrix.paths }}"
-      #     resource: "${{ matrix.resources }}"
-
-      - name: Checkout Live Branch
-        uses: actions/checkout@v4
+      - name: Setup Workflow Tools
+        uses: jdx/rtx-action@v1
         with:
-          token: "${{ steps.app-token.outputs.token }}"
-          ref: main
-          path: default
-
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-        with:
-          token: "${{ steps.app-token.outputs.token }}"
-          path: pull
+          install: true
+          cache: true
+          rtx_toml: |
+            [tools]
+            flux2 = "latest"
 
       - name: Diff Resources
-        uses: docker://ghcr.io/allenporter/flux-local:main
-        with:
-          args: >-
-            diff ${{ matrix.resources }}
-            --unified 6
-            --path-orig default/${{ matrix.paths }}
-            --path pull/${{ matrix.paths }}
-            --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
-            --limit-bytes 10000
-            --all-namespaces
-            --sources "home-kubernetes"
-            --output-file diff.patch
-
-      - name: Generate Diff
+        uses: allenporter/flux-local/action/diff@4.1.1
         id: diff
-        run: |
-          cat diff.patch
-          echo "diff<<EOF" >> $GITHUB_OUTPUT
-          cat diff.patch >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+        with:
+          sources: home-kubernetes
+          path: "${{ matrix.paths }}"
+          resource: "${{ matrix.resources }}"
+
+      # - name: Checkout Live Branch
+      #   uses: actions/checkout@v4
+      #   with:
+      #     token: "${{ steps.app-token.outputs.token }}"
+      #     ref: main
+      #     path: default
+
+      # - name: Checkout PR branch
+      #   uses: actions/checkout@v4
+      #   with:
+      #     token: "${{ steps.app-token.outputs.token }}"
+      #     path: pull
+
+      # - name: Diff Resources
+      #   uses: docker://ghcr.io/allenporter/flux-local:main
+      #   with:
+      #     args: >-
+      #       diff ${{ matrix.resources }}
+      #       --unified 6
+      #       --path-orig default/${{ matrix.paths }}
+      #       --path pull/${{ matrix.paths }}
+      #       --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
+      #       --limit-bytes 10000
+      #       --all-namespaces
+      #       --sources "home-kubernetes"
+      #       --output-file diff.patch
+
+      # - name: Generate Diff
+      #   id: diff
+      #   run: |
+      #     cat diff.patch
+      #     echo "diff<<EOF" >> $GITHUB_OUTPUT
+      #     cat diff.patch >> $GITHUB_OUTPUT
+      #     echo "EOF" >> $GITHUB_OUTPUT
 
       - if: ${{ steps.diff.outputs.diff != '' }}
         name: Add comment
