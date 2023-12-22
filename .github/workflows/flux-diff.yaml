@@ -90,6 +90,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
+          ref: main
 
       - name: Checkout PR branch
         uses: actions/checkout@v4
@@ -104,7 +105,7 @@ jobs:
             diff ${{ matrix.resources }}
             --unified 6
             --path-orig ${{ matrix.paths }}
-            --path pr/${{ matrix.paths }}
+            --path ${{ matrix.paths }}
             --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
             --limit-bytes 10000
             --all-namespaces
