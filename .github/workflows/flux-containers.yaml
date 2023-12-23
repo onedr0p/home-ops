@@ -90,8 +90,8 @@
               get cluster
               --path /github/workspace/default/${{ matrix.paths }}
               --enable-images
-              --output json
-              --output-file default.json
+              --output yaml
+              --output-file default.yaml
 
         - name: Gather images in pull request branch
           uses: docker://ghcr.io/allenporter/flux-local:main
@@ -101,5 +101,13 @@
               get cluster
               --path /github/workspace/pull/${{ matrix.paths }}
               --enable-images
-              --output json
-              --output-file pull.json
+              --output yaml
+              --output-file pull.yaml
+
+        - name: Test
+          shell: bash
+          run: |
+            echo "default.yaml"
+            cat default.yaml
+            echo "pull.yaml"
+            cat pull.yaml
