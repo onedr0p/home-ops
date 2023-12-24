@@ -1,0 +1,128 @@
+---
+  # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+  name: "Flux Image Test"
+
+  on:
+    pull_request:
+      branches: ["main"]
+      paths: ["kubernetes/**"]
+
+  concurrency:
+    group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+    cancel-in-progress: true
+
+  jobs:
+    changed-files:
+      name: Get Changed Files
+      runs-on: ubuntu-latest
+      outputs:
+        matrix: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
+      steps:
+        - name: Generate Token
+          uses: actions/create-github-app-token@v1
+          id: app-token
+          with:
+            app-id: "${{ secrets.BOT_APP_ID }}"
+            private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            token: "${{ steps.app-token.outputs.token }}"
+            fetch-depth: 0
+
+        - name: Get changed files
+          id: changed-files
+          uses: tj-actions/changed-files@v41
+          with:
+            files: kubernetes/**
+            dir_names_max_depth: 2
+            dir_names: true
+            escape_json: false
+            json: true
+            quotepath: false
+            safe_output: false
+
+        - name: List all changed files
+          run: echo "${{ steps.changed-files.outputs.all_changed_and_modified_files }}"
+
+    flux-image-test:
+      name: Flux Image Test
+      runs-on: ubuntu-latest
+      needs: ["changed-files"]
+      permissions:
+        pull-requests: write
+      strategy:
+        matrix:
+          paths: ${{ fromJSON(needs.changed-files.outputs.matrix) }}
+        max-parallel: 4
+        fail-fast: false
+      steps:
+        - name: Generate Token
+          uses: actions/create-github-app-token@v1
+          id: app-token
+          with:
+            app-id: "${{ secrets.BOT_APP_ID }}"
+            private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+        - name: Setup System Tools
+          shell: bash
+          run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
+
+        - name: Setup Workflow Tools
+          uses: jdx/rtx-action@v1
+          with:
+            install: true
+            cache: true
+            rtx_toml: |
+              [tools]
+              flux2 = "latest"
+              yq = "latest"
+
+        - name: Checkout Live Branch
+          uses: actions/checkout@v4
+          with:
+            token: "${{ steps.app-token.outputs.token }}"
+            ref: main
+            path: default
+
+        - name: Checkout PR branch
+          uses: actions/checkout@v4
+          with:
+            token: "${{ steps.app-token.outputs.token }}"
+            path: pull
+
+        - name: Gather images in default branch
+          uses: docker://ghcr.io/allenporter/flux-local:pr-472
+          with:
+            args: >-
+              --log-level DEBUG
+              get cluster
+              --path /github/workspace/default/${{ matrix.paths }}
+              --enable-images
+              --output yaml
+              --output-file default.yaml
+
+        - name: Filter default branch results
+          shell: bash
+          run: yq -r '[.. | .images? | select(. != null)] | flatten | sort | unique | .[]' default.yaml
+
+        - name: Gather images in pull request branch
+          uses: docker://ghcr.io/allenporter/flux-local:pr-472
+          with:
+            args: >-
+              --log-level DEBUG
+              get cluster
+              --path /github/workspace/pull/${{ matrix.paths }}
+              --enable-images
+              --output yaml
+              --output-file pull.yaml
+
+        - name: Filter default branch results
+          shell: bash
+          run: yq -r '[.. | .images? | select(. != null)] | flatten | sort | unique | .[]' pull.yaml
+
+        - name: Diff results
+          shell: bash
+          run: |
+            diff -u default.yaml pull.yaml || true
