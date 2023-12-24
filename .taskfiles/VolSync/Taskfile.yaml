@@ -58,7 +58,8 @@ tasks:
       - envsubst < <(cat {{.templatesDir}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
       - bash {{.scriptsDir}}/wait.sh unlock-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/unlock-{{.app}}-{{.ts}} --for condition=complete --timeout=1m
-      - kubectl --context {{.cluster}} -n {{.ns}} logs job/unlock-{{.app}}-{{.ts}} --container unlock
+      - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.app}}-unlock-snapshots-{{.ts}} --container unlock-minio
+      - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.app}}-unlock-snapshots-{{.ts}} --container unlock-r2
       - kubectl --context {{.cluster}} -n {{.ns}} delete job unlock-{{.app}}-{{.ts}}
     env: *env
     vars:
