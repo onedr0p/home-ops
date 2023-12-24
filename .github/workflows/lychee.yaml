@@ -11,7 +11,7 @@ on:
     - cron: "0 0 * * *"
 
 env:
-  WORKFLOW_ISSUE_NUMBER: 6587
+  WORKFLOW_ISSUE_TITLE: "Link Checker Dashboard 🔗"
 
 jobs:
   lychee:
@@ -30,39 +30,32 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Find Link Checker Issue
-        uses: actions/github-script@v7
+      - name: Scan for broken links
+        uses: lycheeverse/lychee-action@v1
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         with:
-          script: |
-            const query = `query($owner:String!, $name:String!, $title:String!) {
-              repository(owner:$owner, name:$name){
-                issues(first:100, in:$title) {
-                  nodes {
-                    id
-                  }
-                }
-              }
-            }`;
-            const variables = {
-              owner: context.repo.owner,
-              name: context.repo.repo,
-              title 'Link Checker Dashboard 🔗'
-            }
-            const result = await github.graphql(query, variables)
-            console.log(result)
+          args: --verbose --no-progress --exclude-mail './**/*.md'
+          output: /tmp/results.md
 
-      # - name: Scan for broken links
-      #   uses: lycheeverse/lychee-action@v1
-      #   env:
-      #     GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-      #   with:
-      #     args: --verbose --no-progress --exclude-mail './**/*.md'
-      #     output: /tmp/results.md
+      - name: Find Link Checker Issue
+        id: find-issue
+        shell: bash
+        run: |
+          issue_number=$( \
+              gh issue list \
+                  --search "in:title ${{ env.WORKFLOW_ISSUE_TITLE }}" \
+                  --state open \
+                  --json number \
+                  | jq --raw-output '.[0].number' \
+          )
+          echo "issue-number=${issue_number}" >> $GITHUB_OUTPUT
+          echo "${issue}"
 
-      # - name: Update Issue
-      #   uses: peter-evans/create-issue-from-file@v4
-      #   with:
-      #     token: "${{ steps.app-token.outputs.token }}"
-      #     title: Link Checker Dashboard 🔗
-      #     issue-number: "${{ env.WORKFLOW_ISSUE_NUMBER }}"
-      #     content-filepath: /tmp/results.md
+      - name: Update Issue
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+          title: Link Checker Dashboard 🔗
+          issue-number: "${{ steps.find-issue.outputs.issue-number || '' }}"
+          content-filepath: /tmp/results.md
