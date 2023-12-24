@@ -4,6 +4,9 @@ name: "Lychee"
 
 on:
   workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths: [".github/workflows/lychee.yaml"]
   schedule:
     - cron: "0 0 * * *"
 
@@ -27,18 +30,39 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Scan for broken links
-        uses: lycheeverse/lychee-action@v1
-        id: lychee
+      - name: Find Link Checker Issue
+        uses: actions/github-script@v7
         with:
-          token: "${{ steps.app-token.outputs.token }}"
-          args: --verbose --no-progress --exclude-mail './**/*.md'
-          output: /tmp/results.md
+          script: |
+            const query = `query($owner:String!, $name:String!, $title:String!) {
+              repository(owner:$owner, name:$name){
+                issues(first:100, in: $title) {
+                  nodes {
+                    id
+                  }
+                }
+              }
+            }`;
+            const variables = {
+              owner: context.repo.owner,
+              name: context.repo.repo,
+              title 'Link Checker Dashboard 🔗'
+            }
+            const result = await github.graphql(query, variables)
+            console.log(result)
 
-      - name: Update Issue
-        uses: peter-evans/create-issue-from-file@v4
-        with:
-          token: "${{ steps.app-token.outputs.token }}"
-          title: Link Checker Dashboard 🔗
-          issue-number: "${{ env.WORKFLOW_ISSUE_NUMBER }}"
-          content-filepath: /tmp/results.md
+      # - name: Scan for broken links
+      #   uses: lycheeverse/lychee-action@v1
+      #   env:
+      #     GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+      #   with:
+      #     args: --verbose --no-progress --exclude-mail './**/*.md'
+      #     output: /tmp/results.md
+
+      # - name: Update Issue
+      #   uses: peter-evans/create-issue-from-file@v4
+      #   with:
+      #     token: "${{ steps.app-token.outputs.token }}"
+      #     title: Link Checker Dashboard 🔗
+      #     issue-number: "${{ env.WORKFLOW_ISSUE_NUMBER }}"
+      #     content-filepath: /tmp/results.md
