@@ -25,12 +25,12 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Checkout
+      - name: Checkout Default Branch
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Scan for broken links
+      - name: Scan For Broken Links
         uses: lycheeverse/lychee-action@v1
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
@@ -54,7 +54,7 @@ jobs:
           echo "issue-number=${issue_number}" >> $GITHUB_OUTPUT
           echo "${issue_number}"
 
-      - name: Update Issue
+      - name: Create or Update Issue
         uses: peter-evans/create-issue-from-file@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
