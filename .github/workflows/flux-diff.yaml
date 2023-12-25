@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   changed-files:
-    name: Get Changed Files
+    name: Changed Files
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
@@ -25,13 +25,13 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Checkout
+      - name: Checkout Default Branch
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
           fetch-depth: 0
 
-      - name: Get changed files
+      - name: Get Changed Files
         id: changed-files
         uses: tj-actions/changed-files@v41
         with:
@@ -41,7 +41,7 @@ jobs:
           json: true
           escape_json: false
 
-      - name: List all changed files
+      - name: List All Changed Files
         run: echo "${{ steps.changed-files.outputs.all_changed_and_modified_files }}"
 
   flux-diff:
@@ -68,14 +68,14 @@ jobs:
         shell: bash
         run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
 
-      - name: Checkout Live Branch
+      - name: Checkout Default Branch
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
-          ref: main
+          ref: "${{ github.event.repository.default_branch }}"
           path: default
 
-      - name: Checkout PR branch
+      - name: Checkout Pull Request Branch
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
@@ -120,7 +120,7 @@ jobs:
   flux-diff-success:
     if: ${{ always() }}
     needs: ["flux-diff"]
-    name: Flux diff successful
+    name: Flux Diff Successful
     runs-on: ubuntu-latest
     steps:
       - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
