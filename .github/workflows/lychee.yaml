@@ -36,9 +36,10 @@ jobs:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         with:
           args: --verbose --no-progress --exclude-mail './**/*.md'
+          output: results.md
 
       - name: Print Output
-        run: cat ./lychee/results.md
+        run: cat results.md
 
       - name: Find Link Checker Issue
         id: find-issue
@@ -62,4 +63,4 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
           title: "${{ env.WORKFLOW_ISSUE_TITLE }}"
           issue-number: "${{ steps.find-issue.outputs.issue-number || '' }}"
-          content-filepath: ./lychee/results.md
+          content-filepath: results.md
