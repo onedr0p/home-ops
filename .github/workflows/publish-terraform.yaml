@@ -28,17 +28,8 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Setup System Tools
-        shell: bash
-        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git
-
-      - name: Setup Workflow Tools
-        uses: jdx/rtx-action@v1
-        with:
-          install: true
-          rtx_toml: |
-            [tools]
-            flux2 = "latest"
+      - name: Setup Flux
+        uses: fluxcd/flux2/action@main
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
