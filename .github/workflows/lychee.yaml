@@ -36,10 +36,10 @@ jobs:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         with:
           args: --verbose --no-progress --exclude-mail './**/*.md'
-          output: /github/workspace/results.md
+          output: results.md
 
       - name: Print Output
-        run: cat /github/workspace/results.md
+        run: cat results.md
 
       - name: Find Link Checker Issue
         id: find-issue
@@ -63,4 +63,4 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
           title: "${{ env.WORKFLOW_ISSUE_TITLE }}"
           issue-number: "${{ steps.find-issue.outputs.issue-number || '' }}"
-          content-filepath: /github/workspace/results.md
+          content-filepath: results.md
