@@ -30,14 +30,24 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
+      - name: Setup Workflow Tools
+        uses: jdx/rtx-action@v1
+        with:
+          install: true
+          rtx_toml: |
+            [tools]
+            lychee = "latest"
+
       - name: Scan For Broken Links
-        uses: lycheeverse/lychee-action@v1
+        shell: bash
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-        with:
-          args: --verbose --no-progress --exclude-mail './**/*.md'
-          format: markdown
-          output: results.md
+        run: |
+          lychee --verbose --no-progress \
+              --format markdown \
+              --output results.md \
+              --exclude-mail \
+              ./**/*.md
 
       - name: Print Output
         run: cat results.md
