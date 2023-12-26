@@ -140,6 +140,16 @@ tasks:
       - { msg: "ReplicationDestination script not found", sh: "test -f {{.templatesDir}}/replicationdestination.tmpl.yaml" }
       - { msg: "Wipe template not found",                 sh: "test -f {{.templatesDir}}/wipe.tmpl.yaml" }
 
+  cleanup:
+    desc: Delete volume populator PVCs in all namespaces
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+    cmd: kubectl --context {{.cluster}} get pvc --all-namespaces --no-headers | grep "dst-dest" | awk '{print $2, $1}' | xargs -l bash -c 'kubectl --context {{.cluster}} delete pvc -n $1 $0'
+    env: *env
+    preconditions:
+      - { msg: "Argument (cluster) is required", sh: "test -n {{.cluster}}" }
+
   # Suspend the Flux ks and hr
   .suspend:
     internal: true
