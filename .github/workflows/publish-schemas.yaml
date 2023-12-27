@@ -30,9 +30,12 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Setup System Tools
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Setup Workflow Tools
         shell: bash
-        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo jq
+        run: brew install kubectl
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -43,9 +46,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
 
       - name: Write kubeconfig
         id: kubeconfig

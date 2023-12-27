@@ -65,12 +65,12 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Setup System Tools
-        shell: bash
-        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo jq
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
 
-      - name: Setup yq
-        uses: frenck/action-setup-yq@v1
+      - name: Setup Workflow Tools
+        shell: bash
+        run: brew install yq
 
       - name: Checkout Default Branch
         uses: actions/checkout@v4

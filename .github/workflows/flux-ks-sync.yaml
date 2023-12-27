@@ -28,12 +28,12 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
           fetch-depth: 0
 
-      - name: Setup System Tools
-        shell: bash
-        run: sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -y curl git jo jq
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
 
-      - name: Setup Flux
-        uses: fluxcd/flux2/action@main
+      - name: Setup Workflow Tools
+        shell: bash
+        run: brew install fluxcd/tap/flux
 
       - name: Write kubeconfig
         id: kubeconfig
