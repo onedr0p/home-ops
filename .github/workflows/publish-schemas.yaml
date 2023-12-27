@@ -30,11 +30,10 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
       - name: Setup Workflow Tools
         shell: bash
+        env:
+          PATH: "/home/linuxbrew/.linuxbrew/bin:${PATH}"
         run: brew install kubectl
 
       - name: Setup Python
