@@ -66,13 +66,12 @@ spec:
             securityContext:
               privileged: true
             resources:
-              requests:
-                gpu.intel.com/i915: "1"
-                cpu: 1000m
-                memory: 2Gi
-              limits:
+              limits: &resources
                 gpu.intel.com/i915: "1"
                 memory: 8Gi
+              requests:
+                <<: *resources
+                cpu: 1000m
         pod:
           affinity:
             podAntiAffinity:

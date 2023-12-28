@@ -56,11 +56,11 @@ spec:
               startup:
                 enabled: false
             resources:
+              limits: &resources
+                memory: 1Gi
               requests:
-                cpu: 100m
-                memory: 128Mi
-              limits:
-                memory: 512Mi
+                <<: *resources
+                cpu: 10m
           jbops:
             image:
               repository: registry.k8s.io/git-sync/git-sync
@@ -71,11 +71,11 @@ spec:
               GITSYNC_PERIOD: 24h
               GITSYNC_ROOT: /add-ons
             resources:
+              limits: &resources
+                memory: 128Mi
               requests:
+                <<: *resources
                 cpu: 10m
-                memory: 10M
-              limits:
-                memory: 128M
         pod:
           securityContext:
             runAsUser: 568

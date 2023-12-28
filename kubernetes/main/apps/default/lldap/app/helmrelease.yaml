@@ -51,11 +51,11 @@ spec:
               LLDAP_LDAP_BASE_DN: dc=home,dc=arpa
             envFrom: *envFrom
             resources:
+              limits: &resources
+                memory: 128Mi
               requests:
-                cpu: 5m
-                memory: 36M
-              limits:
-                memory: 128M
+                <<: *resources
+                cpu: 10m
         pod:
           topologySpreadConstraints:
             - maxSkew: 1

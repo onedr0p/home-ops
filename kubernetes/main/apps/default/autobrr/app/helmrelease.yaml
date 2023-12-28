@@ -67,11 +67,11 @@ spec:
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
             resources:
-              requests:
-                memory: 128Mi
-                cpu: 10m
-              limits:
+              limits: &resources
                 memory: 256Mi
+              requests:
+                <<: *resources
+                cpu: 10m
         pod:
           securityContext:
             runAsUser: 568

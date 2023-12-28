@@ -58,11 +58,11 @@ spec:
             securityContext:
               privileged: true
             resources:
-              requests:
-                cpu: 50m
-                memory: 64Mi
-              limits:
+              limits: &resources
                 memory: 512Mi
+              requests:
+                <<: *resources
+                cpu: 10m
         pod:
           nodeSelector:
             aeotec.feature.node.kubernetes.io/zwave: "true"

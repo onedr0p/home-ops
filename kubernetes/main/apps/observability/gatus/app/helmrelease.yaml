@@ -53,7 +53,7 @@ spec:
             resources: &configSyncResources
               requests:
                 cpu: 10m
-                memory: 10Mi
+                memory: 128Mi
               limits:
                 memory: 128Mi
         containers:
@@ -71,11 +71,11 @@ spec:
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
             resources:
+              limits: &resources
+                memory: 256Mi
               requests:
+                <<: *resources
                 cpu: 10m
-                memory: 256M
-              limits:
-                memory: 512M
           config-sync:
             image: *configSyncImage
             env:
