@@ -26,8 +26,6 @@ spec:
   values:
     ingress:
       enabled: true
-      annotations:
-        kubernetes.io/ingress.class: internal
       hosts:
         - host: &host headlamp.devbu.io
           paths:
@@ -36,3 +34,17 @@ spec:
       tls:
        - hosts:
            - *host
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: networking.k8s.io
+              version: v1
+              kind: Ingress
+            patch: |-
+              apiVersion: networking.k8s.io/v1
+              kind: Ingress
+              metadata:
+                name: headlamp
+              spec:
+                ingressClassName: internal
