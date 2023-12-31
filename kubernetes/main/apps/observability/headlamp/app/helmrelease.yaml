@@ -23,7 +23,17 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
+  valuesFrom:
+    - targetPath: config.oidc.clientSecret
+      kind: Secret
+      name: headlamp-secret
+      valuesKey: HEADLAMP_OAUTH_CLIENT_SECRET
   values:
+    config:
+      oidc:
+        clientID: headlamp
+        issuerURL: https://auth.devbu.io
+        scopes: openid,profile,email,groups
     ingress:
       enabled: true
       hosts:
