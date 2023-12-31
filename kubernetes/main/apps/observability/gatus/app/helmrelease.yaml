@@ -105,13 +105,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.devbu.io
         hosts:
-          - host: &host "{{ .Release.Name }}.devbu.io"
-            paths:
-              - path: /
-                service:
-                  name: main
-                  port: http
-          - host: &customHost status.devbu.io
+          - host: &host status.devbu.io
             paths:
               - path: /
                 service:
@@ -120,7 +114,6 @@ spec:
         tls:
           - hosts:
               - *host
-              - *customHost
     serviceAccount:
       create: true
       name: gatus

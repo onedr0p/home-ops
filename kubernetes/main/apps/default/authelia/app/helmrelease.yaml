@@ -123,13 +123,7 @@ spec:
             add_header X-Frame-Options "SAMEORIGIN";
             add_header X-XSS-Protection "1; mode=block";
         hosts:
-          - host: &host "{{ .Release.Name }}.devbu.io"
-            paths:
-              - path: /
-                service:
-                  name: main
-                  port: http
-          - host: &customHost auth.devbu.io
+          - host: &host auth.devbu.io
             paths:
               - path: /
                 service:
@@ -138,7 +132,6 @@ spec:
         tls:
           - hosts:
               - *host
-              - *customHost
     persistence:
       config:
         enabled: true
