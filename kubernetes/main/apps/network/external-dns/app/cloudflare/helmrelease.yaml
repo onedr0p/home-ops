@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: external-dns-cloudflare
+  name: &app external-dns-cloudflare
 spec:
   interval: 30m
   chart:
@@ -84,6 +84,9 @@ spec:
             runAsUser: 568
             runAsGroup: 568
             runAsNonRoot: true
+    serviceAccount:
+      create: true
+      name: *app
     service:
       main:
         ports:
