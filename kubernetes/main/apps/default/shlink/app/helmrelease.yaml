@@ -45,7 +45,7 @@ spec:
           main:
             image:
               repository: ghcr.io/shlinkio/shlink
-              tag: 3.7.2-non-root@sha256:366433f664fb7f1046aa3d2c7fda2dbc0b58d909de4cb7be90cc99a1ffc728f0
+              tag: 3.7.3-beta.1-non-root@sha256:5e66bae0821510950d1f590e23133db3264a4966378503f0eff8f40cfa09b9f3
             env:
               DEFAULT_DOMAIN: &host ln.devbu.io
               DISABLE_TRACKING_FROM: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
@@ -77,10 +77,10 @@ spec:
               readiness: *probes
               startup:
                 enabled: false
-            # securityContext:
-            #   allowPrivilegeEscalation: false
-            #   readOnlyRootFilesystem: true
-            #   capabilities: { drop: ["ALL"] }
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               limits: &resources
                 memory: 512Mi
@@ -120,14 +120,10 @@ spec:
         tls:
           - hosts:
               - *host
-    # persistence:
-    #   tmp:
-    #     type: emptyDir
-    #   tmp-data-locks:
-    #     type: emptyDir
-    #     globalMounts:
-    #       - path: /etc/shlink/data/locks
-    #   tmp-data-proxies:
-    #     type: emptyDir
-    #     globalMounts:
-    #       - path: /etc/shlink/data/proxies
+    persistence:
+      tmp:
+        type: emptyDir
+      tmp-data:
+        type: emptyDir
+        globalMounts:
+          - path: /etc/shlink/data
