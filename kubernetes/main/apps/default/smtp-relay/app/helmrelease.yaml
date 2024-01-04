@@ -42,6 +42,10 @@ spec:
             envFrom:
               - secretRef:
                   name: smtp-relay-secret
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               limits: &resources
                 memory: 128Mi
@@ -52,8 +56,7 @@ spec:
           securityContext:
             runAsUser: 568
             runAsGroup: 568
-            fsGroup: 568
-            fsGroupChangePolicy: OnRootMismatch
+            runAsNonRoot: true
           topologySpreadConstraints:
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname
