@@ -43,17 +43,40 @@
             path: /etc/cni/net.d
             state: absent
 
-    - name: Uninstall Kubernetes
-      ansible.builtin.include_role:
-        name: xanmanning.k3s
-        public: true
-      vars:
-        k3s_state: uninstalled
+    - name: Check to see if k3s-killall.sh exits
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s-killall.sh
+      register: check_k3s_killall_script
 
-    - name: Stale Containers
-      ansible.builtin.include_tasks: tasks/stale_containers.yaml
-      vars:
-        stale_containers_state: disabled
+    - name: Check to see if k3s-uninstall.sh exits
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s-uninstall.sh
+      register: check_k3s_uninstall_script
+
+    - name: Run k3s-killall.sh
+      when: check_k3s_killall_script.stat.exists
+      ansible.builtin.command:
+        cmd: /usr/local/bin/k3s-killall.sh
+      register: k3s_killall
+      changed_when: k3s_killall.rc == 0
+
+    - name: Run k3s-uninstall.sh
+      when: check_k3s_uninstall_script.stat.exists
+      ansible.builtin.command:
+        cmd: /usr/local/bin/k3s-uninstall.sh
+      args:
+        removes: /usr/local/bin/k3s-uninstall.sh
+      register: k3s_uninstall
+      changed_when: k3s_uninstall.rc == 0
+
+    - name: Ensure hard links are removed
+      when:
+        - k3s_install_hard_links
+        - not ansible_check_mode
+      ansible.builtin.file:
+        path: "{{ k3s_install_dir }}/{{ item }}"
+        state: absent
+      loop: ["kubectl", "crictl", "ctr"]
 
     - name: Reboot
       ansible.builtin.reboot:
