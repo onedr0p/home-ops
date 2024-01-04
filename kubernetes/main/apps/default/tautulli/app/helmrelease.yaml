@@ -55,6 +55,10 @@ spec:
               readiness: *probes
               startup:
                 enabled: false
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               limits: &resources
                 memory: 1Gi
@@ -70,6 +74,7 @@ spec:
               GITSYNC_REF: master
               GITSYNC_PERIOD: 24h
               GITSYNC_ROOT: /add-ons
+            securityContext: *securityContext
             resources:
               limits: &resources
                 memory: 128Mi
@@ -105,5 +110,7 @@ spec:
       config:
         enabled: true
         existingClaim: tautulli
+      tmp:
+        type: emptyDir
       add-ons:
         type: emptyDir
