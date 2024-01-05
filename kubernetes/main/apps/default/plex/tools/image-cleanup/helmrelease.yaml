@@ -1,0 +1,83 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: plex-image-cleanup
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  dependsOn:
+    - name: plex
+      namespace: default
+  values:
+    controllers:
+      main:
+        type: cronjob
+        cronjob:
+          schedule: "30 8 * * 6"
+          timeZone: &timeZone America/New_York
+        containers:
+          main:
+            image:
+              repository: docker.io/meisnate12/plex-image-cleanup
+              tag: v1.0.1@sha256:89baeaa3c807f65208b315030f3ea6b04d313116159e94189ac0880488949dca
+            env:
+              TZ: *timeZone
+              PLEX_URL: http://plex.default.svc.cluster.local:32400
+              PLEX_PATH: /plex-config/Library/Application Support/Plex Media Server
+              MODE: remove
+              PHOTO_TRANSCODER: true
+            envFrom:
+              - secretRef:
+                  name: plex-image-cleanup-secret
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+        pod:
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values: ["plex"]
+                  topologyKey: kubernetes.io/hostname
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            runAsNonRoot: true
+    service:
+      main:
+        enabled: false
+    persistence:
+      config:
+        enabled: true
+        type: emptyDir
+      plex-config:
+        existingClaim: plex
