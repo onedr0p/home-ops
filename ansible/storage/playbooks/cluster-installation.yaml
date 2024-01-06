@@ -32,26 +32,3 @@
       ansible.builtin.include_tasks: tasks/kubeconfig.yaml
       vars:
         repository_base: "{{ lookup('ansible.builtin.pipe', 'git rev-parse --show-toplevel') }}"
-
-    - name: Wait for custom manifests to rollout
-      when:
-        - k3s_primary_control_node
-        - (k3s_server_manifests_templates | length > 0
-            or k3s_server_manifests_urls | length > 0)
-      kubernetes.core.k8s_info:
-        kubeconfig: /etc/rancher/k3s/k3s.yaml
-        kind: "{{ item.kind }}"
-        name: "{{ item.name }}"
-        namespace: "{{ item.namespace | default('') }}"
-        wait: true
-        wait_sleep: 10
-        wait_timeout: 360
-      loop:
-        - { name: podmonitors.monitoring.coreos.com, kind: CustomResourceDefinition }
-        - { name: prometheusrules.monitoring.coreos.com, kind: CustomResourceDefinition }
-        - { name: scrapeconfigs.monitoring.coreos.com, kind: CustomResourceDefinition }
-        - { name: servicemonitors.monitoring.coreos.com, kind: CustomResourceDefinition }
-
-    - name: Cruft
-      when: k3s_primary_control_node
-      ansible.builtin.include_tasks: tasks/cruft.yaml

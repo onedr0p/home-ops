@@ -18,19 +18,10 @@ k3s_server:
   kube-controller-manager-arg: ["bind-address=0.0.0.0"]
   kube-scheduler-arg: ["bind-address=0.0.0.0"]
   kube-apiserver-arg: ["anonymous-auth=true"]
+  kubelet-arg: ["image-gc-low-threshold=50", "image-gc-high-threshold=55"]
   node-ip: "{{ ansible_host }}"
   pause-image: registry.k8s.io/pause:3.9
   secrets-encryption: true
   service-cidr: "10.143.0.0/16"
   tls-san: ["{{ k3s_registration_address }}", "expanse.turbo.ac"]
   write-kubeconfig-mode: "0644"
-k3s_server_manifests_urls:
-  # Essential Prometheus Operator CRDs (the rest are installed with the kube-prometheus-stack helm release)
-  - url: https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
-    filename: custom-prometheus-podmonitors.yaml
-  - url: https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
-    filename: custom-prometheus-prometheusrules.yaml
-  - url: https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml
-    filename: custom-prometheus-scrapeconfigs.yaml
-  - url: https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.70.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
-    filename: custom-prometheus-servicemonitors.yaml

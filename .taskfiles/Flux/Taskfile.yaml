@@ -2,6 +2,10 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+vars:
+  # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
+  PROMETHEUS_OPERATOR_VERSION: "v0.70.0"
+
 tasks:
 
   bootstrap:
@@ -11,6 +15,12 @@ tasks:
         cluster: Cluster to run command against (required)
     prompt: Bootstrap Flux into the '{{.cluster}}' cluster... continue?
     cmds:
+      # Install essential Prometheus Operator CRDs
+      - kubectl --context {{.cluster}} apply --server-side --filename https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/{{ .PROMETHEUS_OPERATOR_VERSION }}/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+      - kubectl --context {{.cluster}} apply --server-side --filename https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/{{ .PROMETHEUS_OPERATOR_VERSION }}/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+      - kubectl --context {{.cluster}} apply --server-side --filename https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/{{ .PROMETHEUS_OPERATOR_VERSION }}/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml
+      - kubectl --context {{.cluster}} apply --server-side --filename https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/{{ .PROMETHEUS_OPERATOR_VERSION }}/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+      # Install Flux
       - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux
       - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml | kubectl --context {{.cluster}} apply -f -
       - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml | kubectl --context {{.cluster}} apply -f -
@@ -20,6 +30,7 @@ tasks:
       - defer: sops --encrypt --in-place {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.env
     preconditions:
       - { msg: "Argument (cluster) is required", sh: "test -n {{.cluster}}" }
+      - { msg: "Flux appears already installed", sh: "exit $(( ! $(kubectl --context {{.cluster}} get namespace flux-system) ))" }
       - { msg: "Age private key not found",      sh: "test -f {{.ROOT_DIR}}/age.key" }
       - { msg: "Age secret not found",           sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml" }
       - { msg: "Github deploy secret not found", sh: "test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml" }
