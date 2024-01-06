@@ -50,10 +50,9 @@ spec:
               RESOURCE: both
               UNIQUE_FILENAMES: true
               METHOD: LIST
-            resources: &configSyncResources
+            resources: &resources
               requests:
                 cpu: 10m
-                memory: 128Mi
               limits:
                 memory: 128Mi
         containers:
@@ -70,19 +69,14 @@ spec:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
-            resources:
-              limits: &resources
-                memory: 256Mi
-              requests:
-                <<: *resources
-                cpu: 10m
+            resources: *resources
           config-sync:
             image: *configSyncImage
             env:
               <<: *configSyncEnv
               METHOD: WATCH
             securityContext: *securityContext
-            resources: *configSyncResources
+            resources: *resources
         pod:
           dnsConfig:
             options:
