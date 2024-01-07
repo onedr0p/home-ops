@@ -4,6 +4,15 @@ name: "Bulk Merge PRs"
 
 on:
   workflow_dispatch:
+    inputs:
+      dryRun:
+        description: Dry Run
+        default: "false"
+        required: false
+      labels:
+        description: Labels
+        default: "any"
+        required: false
 
 jobs:
   bulk-merge-prs:
@@ -27,6 +36,19 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         run: |
-          for id in $(gh pr list --jq '.[].number' --json number); do
-              gh pr merge $id --squash
+          args=()
+          args+=(--app ${{ secrets.BOT_USERNAME }})
+          args+=(--state open)
+          if [ "${{ github.event.inputs.labels }}" != "any" ]; then
+              IFS=',' read -ra labels <<< "${{ github.event.inputs.labels }}"
+              for label in "${labels[@]}"; do
+                  args+=(--label "${label}")
+              done
+          fi
+          for id in $(gh pr list "${args[@]}" --jq '.[].number' --json number); do
+              if [ "${{ github.event.inputs.dryRun }}" = "true" ]; then
+                  echo "Dry run: gh pr merge $id --squash"
+                  continue
+              fi
+              gh pr merge "${id}" --squash
           done
