@@ -30,10 +30,6 @@ spec:
     podMonitorMetricRelabelings:
       - { sourceLabels: ["cluster"], targetLabel: cnpg_cluster, action: replace }
       - { regex: cluster, action: labeldrop }
-  # Note: bootstrap is needed when recovering from an existing cnpg cluster
-  # bootstrap:
-  #   recovery:
-  #     source: &previousCluster postgres16-v1
   backup:
     retentionPolicy: 30d
     barmanObjectStore: &barmanObjectStore
@@ -44,6 +40,8 @@ spec:
         maxParallel: 8
       destinationPath: s3://cloudnative-pg/
       endpointURL: https://s3.turbo.ac
+      # Note: serverName version needs to be inclemented
+      # when recovering from an existing cnpg cluster
       serverName: &currentCluster postgres16-v2
       s3Credentials:
         accessKeyId:
@@ -52,7 +50,12 @@ spec:
         secretAccessKey:
           name: cloudnative-pg-secret
           key: aws-secret-access-key
-  # Note: externalClusters is needed when recovering from an existing cnpg cluster
+  # # Note: previousCluster needs to be set to the name of the previous
+  # # cluster when recovering from an existing cnpg cluster
+  # bootstrap:
+  #   recovery:
+  #     source: &previousCluster postgres16-v1
+  # # Note: externalClusters is needed when recovering from an existing cnpg cluster
   # externalClusters:
   #   - name: *previousCluster
   #     barmanObjectStore:
