@@ -1,4 +1,5 @@
 ---
+# Note: Authelia vars should be escaped with $${VAR_NAME} to avoid interpolation by Flux
 authentication_backend:
   password_reset:
     disable: true
@@ -78,25 +79,16 @@ identity_providers:
     clients:
       - id: grafana
         description: Grafana
-        secret: "${GRAFANA_OAUTH_CLIENT_SECRET}"
+        secret: "$${GRAFANA_OAUTH_CLIENT_SECRET}"
         public: false
         authorization_policy: two_factor
         pre_configured_consent_duration: 1y
         scopes: ["openid", "profile", "groups", "email"]
         redirect_uris: ["https://grafana.devbu.io/login/generic_oauth"]
         userinfo_signed_response_alg: none
-      - id: headlamp
-        description: Headlamp
-        secret: "${HEADLAMP_OAUTH_CLIENT_SECRET}"
-        public: false
-        authorization_policy: two_factor
-        pre_configured_consent_duration: 1y
-        scopes: ["openid", "profile", "groups", "email"]
-        redirect_uris: ["https://headlamp.devbu.io/oidc-callback"]
-        userinfo_signing_algorithm: none
       - id: miniflux
         description: Miniflux
-        secret: "${MINIFLUX_OAUTH_CLIENT_SECRET}"
+        secret: "$${MINIFLUX_OAUTH_CLIENT_SECRET}"
         public: false
         authorization_policy: two_factor
         pre_configured_consent_duration: 1y
@@ -105,7 +97,7 @@ identity_providers:
         userinfo_signed_response_alg: none
       - id: weave-gitops
         description: Weave GitOps
-        secret: "${WEAVE_GITOPS_OAUTH_CLIENT_SECRET}"
+        secret: "$${WEAVE_GITOPS_OAUTH_CLIENT_SECRET}"
         public: false
         authorization_policy: two_factor
         pre_configured_consent_duration: 1y
