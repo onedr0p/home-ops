@@ -33,14 +33,6 @@ spec:
       main:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 16
-            envFrom: &envFrom
-              - secretRef:
-                  name: home-assistant-secret
         containers:
           main:
             image:
@@ -48,7 +40,9 @@ spec:
               tag: 2024.1.2@sha256:994754a626420f6c336f90e8dbc6adb2fd3dd63eb9d893629303ff2329476b36
             env:
               TZ: America/New_York
-            envFrom: *envFrom
+            envFrom:
+              - secretRef:
+                  name: home-assistant-secret
             probes:
               liveness:
                 enabled: false
