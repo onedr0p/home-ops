@@ -20,7 +20,7 @@ EOF
 fi
 
 # Timezone
-timedatectl set-timezone "#{ bootstrap_timezone }#"
+timedatectl set-timezone "America/New_York"
 
 # Install Packages
 apt-get install -y --no-install-recommends \
@@ -48,9 +48,9 @@ systemctl restart systemd-modules-load.service
 
 # Sysctls
 cat <<EOF > /etc/sysctl.d/99-kubernetes.conf
-fs.inotify.max_queued_events: 65536
-fs.inotify.max_user_watches: 524288
-fs.inotify.max_user_instances: 8192
+fs.inotify.max_queued_events = 65536
+fs.inotify.max_user_watches = 524288
+fs.inotify.max_user_instances = 8192
 EOF
 sysctl -p /etc/sysctl.d/99-kubernetes.conf
 
