@@ -4,9 +4,11 @@ set -o noglob
 
 [ $(id -u) -eq 0 ] || exec sudo $0 $@
 
-# Create kube-vip config
-mkdir -p /var/lib/k0s/manifests
-cat <<EOF > /var/lib/k0s/manifests/kube-vip-rbac.yaml
+# Create directory
+mkdir -p /var/lib/k0s/manifests/kube-vip
+
+# Create kube-vip rbac
+cat <<EOF > /var/lib/k0s/manifests/kube-vip/rbac.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -50,65 +52,80 @@ subjects:
   namespace: kube-system
 EOF
 
-mkdir -p /var/lib/k0s/pod-manifests
-cat <<EOF > /var/lib/k0s/pod-manifests/kube-vip.yaml
+cat <<EOF > /var/lib/k0s/manifests/kube-vip/ds.yaml
 ---
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: DaemonSet
 metadata:
   name: kube-vip
   namespace: kube-system
   labels:
-    app.kubernetes.io/instance: kube-vip
     app.kubernetes.io/name: kube-vip
 spec:
-  containers:
-    - name: kube-vip
-      image: ghcr.io/kube-vip/kube-vip:v0.6.4
-      imagePullPolicy: IfNotPresent
-      args: ["manager"]
-      env:
-        - name: address
-          value: 192.168.42.55
-        - name: vip_arp
-          value: "true"
-        - name: lb_enable
-          value: "true"
-        - name: port
-          value: "6443"
-        - name: vip_cidr
-          value: "32"
-        - name: cp_enable
-          value: "true"
-        - name: cp_namespace
-          value: kube-system
-        - name: vip_ddns
-          value: "false"
-        - name: svc_enable
-          value: "false"
-        - name: vip_leaderelection
-          value: "true"
-        - name: vip_leaseduration
-          value: "15"
-        - name: vip_renewdeadline
-          value: "10"
-        - name: vip_retryperiod
-          value: "2"
-        - name: prometheus_server
-          value: :2112
-      securityContext:
-        capabilities:
-          add: ["NET_ADMIN", "NET_RAW"]
-      volumeMounts:
-        - mountPath: /etc/kubernetes/admin.conf
-          name: kubeconfig
-  hostAliases:
-    - hostnames:
-        - kubernetes
-      ip: 127.0.0.1
-  hostNetwork: true
-  volumes:
-    - name: kubeconfig
-      hostPath:
-        path: /var/lib/k0s/pki/admin.conf
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kube-vip
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kube-vip
+    spec:
+      containers:
+        - name: kube-vip
+          image: ghcr.io/kube-vip/kube-vip:v0.6.4
+          imagePullPolicy: IfNotPresent
+          args: ["manager"]
+          env:
+            - name: address
+              value: 192.168.42.55
+            - name: vip_arp
+              value: "true"
+            - name: lb_enable
+              value: "true"
+            - name: port
+              value: "6443"
+            - name: vip_cidr
+              value: "32"
+            - name: cp_enable
+              value: "true"
+            - name: cp_namespace
+              value: kube-system
+            - name: vip_ddns
+              value: "false"
+            - name: svc_enable
+              value: "false"
+            - name: vip_leaderelection
+              value: "true"
+            - name: vip_leaseduration
+              value: "15"
+            - name: vip_renewdeadline
+              value: "10"
+            - name: vip_retryperiod
+              value: "2"
+            - name: prometheus_server
+              value: :2112
+          securityContext:
+            capabilities:
+              add: ["NET_ADMIN", "NET_RAW", "SYS_TIME"]
+      hostAliases:
+        - hostnames:
+            - kubernetes
+          ip: 127.0.0.1
+      hostNetwork: true
+      serviceAccountName: kube-vip
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/master
+                    operator: Exists
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/control-plane
+                    operator: Exists
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
 EOF
