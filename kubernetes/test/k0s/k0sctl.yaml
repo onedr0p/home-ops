@@ -16,6 +16,7 @@ spec:
         apply:
           before:
             - curl -sfL https://raw.githubusercontent.com/onedr0p/home-ops/main/kubernetes/test/k0s/resources/apply-system.sh | INSTALL_K0S_HOSTNAME="k8s-test-0" bash -s -
+            - curl -sfL https://raw.githubusercontent.com/onedr0p/home-ops/main/kubernetes/test/k0s/resources/apply-kube-vip.sh | bash -s -
         reset:
           before:
             - curl -sfL https://raw.githubusercontent.com/onedr0p/home-ops/main/kubernetes/test/k0s/resources/reset-cilium.sh | bash -s -
@@ -29,6 +30,9 @@ spec:
       spec:
         telemetry:
           enabled: false
+        kubelet:
+          extraArgs:
+            pod-manifest-path: /var/lib/k0s/pod-manifests
         controllerManager:
           extraArgs:
             bind-address: "0.0.0.0" # Required to monitor kube-controller-manager with kube-prometheus-stack
