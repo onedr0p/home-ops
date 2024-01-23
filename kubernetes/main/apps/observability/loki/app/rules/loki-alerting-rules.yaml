@@ -95,7 +95,7 @@ groups:
     rules:
       - alert: CrossSeedDatabaseMalformed
         expr: |
-          sum by (container) (count_over_time({app="cross-seed"} |~ "(?i)database disk image is malformed"[1h])) > 0
+          sum by (app) (count_over_time({app="cross-seed"} |~ "(?i)database disk image is malformed"[1h])) > 0
         for: 2m
         labels:
           severity: critical
