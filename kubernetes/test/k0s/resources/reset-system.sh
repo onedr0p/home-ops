@@ -11,4 +11,4 @@ rm -rf /etc/k0s/containerd.d
 rm -rf /var/openebs/local
 
 # Reboot
-(sleep 10 && systemctl reboot)&
+(sleep 30 && systemctl reboot)&
