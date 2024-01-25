@@ -10,12 +10,12 @@
         "(^|/)kubernetes/.+\\.ya?ml(\\.j2)?$"
       ],
       "matchStrings": [
-        // Example:
-        //   k3s_release_version: "v1.27.3+k3s1"
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( repository=(?<registryUrl>\\S+))?( extractVersion=(?<extractVersion>\\S+))?\n.*?\"(?<currentValue>.*)\"\n",
-        // Example:
-        //   - https://github.com/rancher/system-upgrade-controller/releases/download/v0.11.0/crd.yaml
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\n.*?-\\s(.*?)\/(?<currentValue>[^/]+)\/[^/]+\n"
+        // # renovate: datasource=github-releases depName=k3s-io/k3s
+        // k3s_release_version: v1.29.0+k3s1
+        "(?m:# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( repository=(?<registryUrl>\\S+))?\\n.+?: \"?(?<currentValue>\\S+?)\"?$)",
+        // # renovate: datasource=github-releases depName=rancher/system-upgrade-controller
+        // https://github.com/rancher/system-upgrade-controller/releases/download/v0.13.2/crd.yaml
+        "(?m:# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+?\/(?<currentValue>(v|\\d)[^\/]+)\\S+$)"
       ],
       "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}"
     },
