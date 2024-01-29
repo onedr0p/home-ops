@@ -17,8 +17,9 @@
         "(^|/)kubernetes/.+\\.ya?ml(\\.j2)?$"
       ],
       "matchStrings": [
-        "depName=\"(?<depName>.*)\"\\n.*?gnetId: (?<packageName>\\d+)\\n.*?revision: (?<currentValue>\\d+)"
+        "depName=\"(?<depName>.*)\"\\n(?<indentation>\\s+)gnetId: (?<packageName>\\d+)\\n.+revision: (?<currentValue>\\d+)"
       ],
+      "autoReplaceStringTemplate": "depName=\"{{{depName}}}\"\n{{{indentation}}}gnetId: {{{packageName}}}\n{{{indentation}}}revision: {{{newValue}}}",
       "datasourceTemplate": "custom.grafana-dashboards",
       "versioningTemplate": "regex:^(?<major>\\d+)$"
     }
@@ -26,10 +27,10 @@
   "packageRules": [
     {
       "addLabels": ["renovate/grafana-dashboard"],
-      "matchDatasources": ["grafana-dashboards", "custom.grafana-dashboards"],
+      "matchDatasources": ["custom.grafana-dashboards"],
       "matchUpdateTypes": ["major"],
+      "semanticCommitType": "chore",
       "semanticCommitScope": "grafana-dashboards",
-      "semanticCommitType": "",
       "commitMessageTopic": "dashboard {{depName}}",
       "commitMessageExtra": "( {{currentVersion}} → {{newVersion}} )"
     }
