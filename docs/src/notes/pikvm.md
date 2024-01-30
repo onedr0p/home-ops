@@ -183,17 +183,6 @@ reboot
 
 ## Monitoring
 
-### Disable auth on prometheus exporter
-
-```sh
-rw
-nano /usr/lib/python3.11/site-packages/kvmd/apps/kvmd/api/export.py
-# Add the False arg on the exposed_http decorator...
-# @exposed_http("GET", "/export/prometheus/metrics", False)
-ro
-systemctl restart kvmd.service
-```
-
 ### Install node-exporter
 
 ```sh
