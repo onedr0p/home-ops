@@ -4,15 +4,18 @@ set -o noglob
 
 [ $(id -u) -eq 0 ] || exec sudo $0 $@
 
+K0S_HOSTNAME="$1"
+
 # Prepare
 sudo apt-get update -y
 
 # Hostname
-if [ -n "${INSTALL_K0S_HOSTNAME}" ] && [ "$(hostnamectl hostname)" != "${INSTALL_K0S_HOSTNAME}" ]; then
-    hostnamectl set-hostname "${INSTALL_K0S_HOSTNAME}"
+if [ -n "${K0S_HOSTNAME}" ] && [ "$(hostnamectl hostname)" != "${K0S_HOSTNAME}" ]; then
+    hostnamectl set-hostname "${K0S_HOSTNAME}"
+cat <<EOF > /etc/hosts
 tee /etc/hosts > /dev/null <<EOF
 127.0.0.1 localhost
-127.0.1.1 $INSTALL_K0S_HOSTNAME
+127.0.1.1 $K0S_HOSTNAME
 ::1       localhost ip6-localhost ip6-loopback
 ff02::1   ip6-allnodes
 ff02::2   ip6-allrouters
@@ -25,7 +28,7 @@ timedatectl set-timezone "America/New_York"
 # Install Packages
 apt-get install -y --no-install-recommends \
     apt-transport-https ca-certificates conntrack curl dirmngr gdisk gnupg hdparm htop \
-    iptables iputils-ping ipvsadm libseccomp2 lm-sensors neofetch net-tools nfs-common \
+    iptables iputils-ping ipvsadm libseccomp2 lm-sensors net-tools nfs-common \
     nvme-cli open-iscsi parted psmisc python3 python3-apt python3-kubernetes python3-yaml \
     smartmontools socat software-properties-common unzip util-linux
 
@@ -61,12 +64,6 @@ swapoff -a
 if systemctl is-enabled apparmor.service; then
     systemctl mask apparmor.service
 fi
-
-# Neofetch
-cat <<EOF > /etc/profile.d/neofetch.sh
-neofetch --config none
-EOF
-chmod 755 /etc/profile.d/neofetch.sh
 
 # Create containerd config
 mkdir -p /etc/k0s/containerd.d

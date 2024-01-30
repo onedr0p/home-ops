@@ -21,6 +21,10 @@
         k3s_server_manifests_templates: []
         k3s_server_manifests_urls: []
 
+    - name: Prevent downgrades
+      when: k3s_installed.stat.exists
+      ansible.builtin.include_tasks: tasks/version-check.yaml
+
     - name: Install Kubernetes
       ansible.builtin.include_role:
         name: xanmanning.k3s

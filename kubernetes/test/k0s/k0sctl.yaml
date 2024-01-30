@@ -12,16 +12,19 @@ spec:
       installFlags:
         - --disable-components=metrics-server
         - --no-taints
+      files:
+        - name: bootstrap-scripts
+          src: scripts
       hooks:
         apply:
           before:
-            - curl -sfL https://raw.githubusercontent.com/onedr0p/home-ops/main/kubernetes/test/k0s/resources/apply-system.sh | INSTALL_K0S_HOSTNAME="k8s-test-0" bash -s -
-            - curl -sfL https://raw.githubusercontent.com/onedr0p/home-ops/main/kubernetes/test/k0s/resources/apply-kube-vip.sh | bash -s -
+            - bash ~/apply-system.sh "k8s-test-0"
+            - bash ~/apply-kube-vip.sh
         reset:
           before:
-            - curl -sfL https://raw.githubusercontent.com/onedr0p/home-ops/main/kubernetes/test/k0s/resources/reset-cilium.sh | bash -s -
+            - bash ~/reset-cilium.sh
           after:
-            - curl -sfL https://raw.githubusercontent.com/onedr0p/home-ops/main/kubernetes/test/k0s/resources/reset-system.sh | bash -s -
+            - bash ~/reset-system.sh
   k0s:
     # renovate: datasource=github-releases depName=k0sproject/k0s
     version: v1.29.1+k0s.0

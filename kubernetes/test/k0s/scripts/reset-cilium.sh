@@ -7,7 +7,7 @@ set -o noglob
 remove_interfaces() {
   ip link show 2>/dev/null | grep 'cilium' | while read ignore iface ignore; do
       iface=${iface%%@*}
-      [ -z "$iface" ] || ip link delete $iface
+      [ -z "$iface" ] || (ip link delete $iface || true)
   done
 }
 
