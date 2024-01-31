@@ -8,7 +8,7 @@ spec:
   repo: https://helm.cilium.io/
   chart: cilium
   # renovate: datasource=helm depName=cilium repository=https://helm.cilium.io
-  version: 1.15.0-rc.1
+  version: 1.15.0
   targetNamespace: kube-system
   bootstrap: true
   valuesContent: |-
@@ -23,6 +23,7 @@ spec:
     containerRuntime:
       integration: containerd
       socketPath: /var/run/k3s/containerd/containerd.sock
+    enableRuntimeDeviceDetection: true
     endpointRoutes:
       enabled: true
     hubble:
@@ -36,10 +37,8 @@ spec:
     kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
     l2announcements:
       enabled: true
-      leaseDuration: 120s
-      leaseRenewDeadline: 60s
-      leaseRetryPeriod: 1s
     loadBalancer:
+      acceleration: native
       algorithm: maglev
       mode: dsr
     localRedirectPolicy: true
