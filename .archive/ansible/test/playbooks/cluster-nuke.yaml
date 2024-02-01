@@ -1,0 +1,84 @@
+---
+- name: Cluster Nuke
+  hosts: kubernetes
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+  pre_tasks:
+    - name: Pausing for 2 seconds...
+      ansible.builtin.pause:
+        seconds: 2
+  tasks:
+    - name: Stop Kubernetes # noqa: ignore-errors
+      ignore_errors: true
+      block:
+        - name: Stop Kubernetes
+          ansible.builtin.include_role:
+            name: xanmanning.k3s
+            public: true
+          vars:
+            k3s_state: stopped
+
+    # Ref: https://github.com/k3s-io/docs/blob/main/docs/installation/network-options.md
+    - name: Networking
+      block:
+        - name: Networking | Delete Cilium links
+          ansible.builtin.command:
+            cmd: "ip link delete {{ item }}"
+            removes: "/sys/class/net/{{ item }}"
+          loop: ["cilium_host", "cilium_net", "cilium_vxlan"]
+        - name: Networking | Flush iptables
+          ansible.builtin.iptables:
+            table: "{{ item }}"
+            flush: true
+          loop: ["filter", "nat", "mangle", "raw"]
+        - name: Networking | Flush ip6tables
+          ansible.builtin.iptables:
+            table: "{{ item }}"
+            flush: true
+            ip_version: ipv6
+          loop: ["filter", "nat", "mangle", "raw"]
+        - name: Networking | Delete CNI directory
+          ansible.builtin.file:
+            path: /etc/cni/net.d
+            state: absent
+
+    - name: Check to see if k3s-killall.sh exits
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s-killall.sh
+      register: check_k3s_killall_script
+
+    - name: Check to see if k3s-uninstall.sh exits
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s-uninstall.sh
+      register: check_k3s_uninstall_script
+
+    - name: Run k3s-killall.sh
+      when: check_k3s_killall_script.stat.exists
+      ansible.builtin.command:
+        cmd: /usr/local/bin/k3s-killall.sh
+      register: k3s_killall
+      changed_when: k3s_killall.rc == 0
+
+    - name: Run k3s-uninstall.sh
+      when: check_k3s_uninstall_script.stat.exists
+      ansible.builtin.command:
+        cmd: /usr/local/bin/k3s-uninstall.sh
+      args:
+        removes: /usr/local/bin/k3s-uninstall.sh
+      register: k3s_uninstall
+      changed_when: k3s_uninstall.rc == 0
+
+    - name: Ensure hard links are removed
+      when:
+        - k3s_install_hard_links
+        - not ansible_check_mode
+      ansible.builtin.file:
+        path: "{{ k3s_install_dir }}/{{ item }}"
+        state: absent
+      loop: ["kubectl", "crictl", "ctr"]
+
+    - name: Reboot
+      ansible.builtin.reboot:
+        msg: Rebooting nodes
+        reboot_timeout: 3600
