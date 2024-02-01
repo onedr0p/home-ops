@@ -31,17 +31,20 @@ spec:
         containers:
           main:
             image:
-              repository: docker.io/jmalloc/echo-server
-              tag: 0.3.6@sha256:86f2c45aa7e7ebe1be30b21f8cfff25a7ed6e3b059751822d4b35bf244a688d5
+              repository: ghcr.io/mendhak/http-https-echo
+              tag: 31
             env:
-              PORT: &port 8080
+              HTTP_PORT: &port 8080
+              LOG_WITHOUT_NEWLINE: true
+              LOG_IGNORE_PATH: /healthz
+              PROMETHEUS_ENABLED: true
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /health
+                    path: /healthz
                     port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
@@ -71,6 +74,9 @@ spec:
         ports:
           http:
             port: *port
+    serviceMonitor:
+      main:
+        enabled: true
     ingress:
       main:
         enabled: true
