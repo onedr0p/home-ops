@@ -65,19 +65,3 @@
     - name: Cruft
       when: k3s_primary_control_node
       ansible.builtin.include_tasks: tasks/cruft.yaml
-
-    # TODO: Replace this with embedded spegel in the future
-    - name: Copy custom containerd configuration
-      notify: Restart Kubernetes
-      ansible.builtin.copy:
-        src: files/config.toml.tmpl
-        dest: /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
-        owner: root
-        group: root
-        mode: "0644"
-
-  handlers:
-    - name: Restart Kubernetes
-      ansible.builtin.systemd:
-        name: k3s
-        state: restarted
