@@ -47,16 +47,17 @@ spec:
                 valueFrom:
                   fieldRef:
                     fieldPath: metadata.namespace
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+              seccompProfile:
+                type: RuntimeDefault
         pod:
           securityContext:
-            runAsNonRoot: true
             runAsUser: 65534
             runAsGroup: 65534
-            allowPrivilegeEscalation: false
-            seccompProfile:
-              type: RuntimeDefault
-            capabilities:
-              drop: ["ALL"]
+            runAsNonRoot: true
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
@@ -65,11 +66,14 @@ spec:
                       - key: node-role.kubernetes.io/control-plane
                         operator: Exists
           tolerations:
-            - {key: CriticalAddonsOnly, operator: Exists}
-            - {key: node-role.kubernetes.io/master, operator: Exists, effect: NoSchedule}
-            - {key: node-role.kubernetes.io/controlplane, operator: Exists, effect: NoSchedule}
-            - {key: node-role.kubernetes.io/control-plane, operator: Exists, effect: NoSchedule}
-            - {key: node-role.kubernetes.io/etcd, operator: Exists, effect: NoExecute}
+            - key: CriticalAddonsOnly
+              operator: Exists
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+            - key: node-role.kubernetes.io/master
+              operator: Exists
+              effect: NoSchedule
     serviceAccount:
       create: true
       name: system-upgrade
