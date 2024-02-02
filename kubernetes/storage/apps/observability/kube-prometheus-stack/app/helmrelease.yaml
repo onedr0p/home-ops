@@ -27,8 +27,8 @@ spec:
   uninstall:
     keepHistory: false
   dependsOn:
-    - name: local-path-provisioner
-      namespace: storage
+    - name: openebs
+      namespace: openebs-system
   values:
     cleanPrometheusOperatorObjectNames: true
     crds:
@@ -80,7 +80,8 @@ spec:
             sourceLabels: ["__name__"]
             regex: "(apiserver_audit|apiserver_client|apiserver_delegated|apiserver_envelope|apiserver_storage|apiserver_webhooks|attachdetach_controller|authenticated_user|authentication|cronjob_controller|disabled_metric|endpoint_slice|ephemeral_volume|garbagecollector_controller|get_token|go|hidden_metric|job_controller|kubernetes_build|kubernetes_feature|leader_election|node_collector|node_ipam|process_cpu|process_max|process_open|process_resident|process_start|process_virtual|pv_collector|registered_metric|replicaset_controller|rest_client|retroactive_storageclass|root_ca|running_managed|scrape_duration|scrape_samples|scrape_series|service_controller|storage_count|storage_operation|ttl_after|volume_operation|workqueue)_(.+)"
     kubeEtcd:
-      enabled: false # sqlite
+      enabled: true
+      endpoints: *cp
     kubeScheduler:
       enabled: true
       endpoints: *cp
@@ -127,18 +128,17 @@ spec:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: local-hostpath
+              storageClassName: openebs-hostpath
               resources:
                 requests:
                   storage: 20Gi
         thanos:
-          image: quay.io/thanos/thanos:v0.34.0
+          image: "quay.io/thanos/thanos:${THANOS_VERSION}"
+          version: "${THANOS_VERSION#v}"
           objectStorageConfig:
             existingSecret:
               name: kube-prometheus-stack-secret
               key: objstore.yml
-          # renovate: datasource=docker depName=quay.io/thanos/thanos
-          version: v0.34.0
       thanosService:
         enabled: true
       thanosServiceExternal:

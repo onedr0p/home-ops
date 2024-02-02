@@ -3,25 +3,19 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app kube-prometheus-stack
+  name: &app cilium
   namespace: flux-system
 spec:
-  targetNamespace: observability
+  targetNamespace: kube-system
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: external-secrets-stores
-  path: ./kubernetes/main/apps/observability/kube-prometheus-stack/app
-  prune: true
+  path: ./kubernetes/main/apps/kube-system/cilium/app
+  prune: false # never should be deleted
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
   wait: false
   interval: 30m
   retryInterval: 1m
-  timeout: 15m
-  postBuild:
-    substitute:
-      # renovate: datasource=docker depName=quay.io/thanos/thanos
-      THANOS_VERSION: v0.34.0
+  timeout: 5m

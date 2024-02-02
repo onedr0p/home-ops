@@ -23,7 +23,7 @@
 
     - name: Prevent downgrades
       when: k3s_installed.stat.exists
-      ansible.builtin.include_tasks: tasks/version-check.yaml
+      ansible.builtin.include_tasks: tasks/downgrade.yaml
 
     - name: Install Kubernetes
       ansible.builtin.include_role:
@@ -31,11 +31,6 @@
         public: true
       vars:
         k3s_state: installed
-
-    - name: Kubeconfig
-      ansible.builtin.include_tasks: tasks/kubeconfig.yaml
-      vars:
-        repository_base: "{{ lookup('ansible.builtin.pipe', 'git rev-parse --show-toplevel') }}"
 
     - name: Wait for custom manifests to rollout
       when:

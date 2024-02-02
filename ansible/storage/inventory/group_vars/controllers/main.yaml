@@ -1,0 +1,24 @@
+---
+k3s_control_node: true
+k3s_server:
+  cluster-cidr: 10.132.0.0/16
+  disable: ["coredns", "flannel", "local-storage", "metrics-server", "servicelb", "traefik"]
+  disable-cloud-controller: true
+  disable-helm-controller: false
+  disable-kube-proxy: true
+  disable-network-policy: true
+  docker: false
+  embedded-registry: false
+  etcd-disable-snapshots: true
+  etcd-expose-metrics: true
+  flannel-backend: "none" # quote
+  kube-apiserver-arg: ["anonymous-auth=true"]
+  kube-controller-manager-arg: ["bind-address=0.0.0.0"]
+  kube-scheduler-arg: ["bind-address=0.0.0.0"]
+  kubelet-arg: ["image-gc-low-threshold=50", "image-gc-high-threshold=55"]
+  node-ip: "{{ ansible_host }}"
+  pause-image: registry.k8s.io/pause:3.9
+  secrets-encryption: true
+  service-cidr: 10.133.0.0/16
+  tls-san: ["{{ k3s_registration_address }}", "expanse.turbo.ac", "expanse"]
+  write-kubeconfig-mode: "0644" # quote

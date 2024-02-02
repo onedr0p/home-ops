@@ -21,6 +21,10 @@
         k3s_server_manifests_templates: []
         k3s_server_manifests_urls: []
 
+    - name: Prevent downgrades
+      when: k3s_installed.stat.exists
+      ansible.builtin.include_tasks: tasks/downgrade.yaml
+
     - name: Install Kubernetes
       ansible.builtin.include_role:
         name: xanmanning.k3s
@@ -28,7 +32,31 @@
       vars:
         k3s_state: installed
 
-    - name: Kubeconfig
-      ansible.builtin.include_tasks: tasks/kubeconfig.yaml
-      vars:
-        repository_base: "{{ lookup('ansible.builtin.pipe', 'git rev-parse --show-toplevel') }}"
+    - name: Wait for custom manifests to rollout
+      when:
+        - k3s_primary_control_node
+        - (k3s_server_manifests_templates | length > 0
+            or k3s_server_manifests_urls | length > 0)
+      kubernetes.core.k8s_info:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        kind: "{{ item.kind }}"
+        name: "{{ item.name }}"
+        namespace: "{{ item.namespace | default('') }}"
+        wait: true
+        wait_sleep: 10
+        wait_timeout: 360
+      loop:
+        - { name: cilium, kind: HelmChart, namespace: kube-system }
+        - { name: coredns, kind: HelmChart, namespace: kube-system }
+
+    - name: Coredns
+      when: k3s_primary_control_node
+      ansible.builtin.include_tasks: tasks/coredns.yaml
+
+    - name: Cilium
+      when: k3s_primary_control_node
+      ansible.builtin.include_tasks: tasks/cilium.yaml
+
+    - name: Cruft
+      when: k3s_primary_control_node
+      ansible.builtin.include_tasks: tasks/cruft.yaml
