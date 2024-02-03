@@ -19,8 +19,7 @@ x-env: &env
   ts: '{{.ts}}'
 
 vars:
-  scriptsDir: '{{.ROOT_DIR}}/.taskfiles/VolSync/scripts'
-  templatesDir: '{{.ROOT_DIR}}/.taskfiles/VolSync/templates'
+  resources: '{{.ROOT_DIR}}/.taskfiles/VolSync/resources'
   ts: '{{now | date "150405"}}'
 
 tasks:
@@ -32,8 +31,8 @@ tasks:
         ns: Namespace the PVC is in (default: default)
         app: Application to list snapshots for (required)
     cmds:
-      - envsubst < <(cat {{.templatesDir}}/list.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.scriptsDir}}/wait.sh list-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
+      - envsubst < <(cat {{.resources}}/list.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.resources}}/wait.sh list-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/list-{{.app}}-{{.ts}} --for condition=complete --timeout=1m
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/list-{{.app}}-{{.ts}} --container list
       - kubectl --context {{.cluster}} -n {{.ns}} delete job list-{{.app}}-{{.ts}}
@@ -43,8 +42,8 @@ tasks:
     vars:
       ns: '{{.ns | default "default"}}'
     preconditions:
-      - { msg: "Wait script not found", sh: "test -f {{.scriptsDir}}/wait.sh" }
-      - { msg: "List template not found", sh: "test -f {{.templatesDir}}/list.tmpl.yaml" }
+      - { msg: "Wait script not found", sh: "test -f {{.resources}}/wait.sh" }
+      - { msg: "List template not found", sh: "test -f {{.resources}}/list.tmpl.yaml" }
     silent: true
 
   unlock:
@@ -55,11 +54,11 @@ tasks:
         ns: Namespace the PVC is in (default: default)
         app: Application to unlock (required)
     cmds:
-      - envsubst < <(cat {{.templatesDir}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.scriptsDir}}/wait.sh unlock-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
+      - envsubst < <(cat {{.resources}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.resources}}/wait.sh unlock-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/unlock-{{.app}}-{{.ts}} --for condition=complete --timeout=1m
-      - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.app}}-unlock-snapshots-{{.ts}} --container unlock-minio
-      - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.app}}-unlock-snapshots-{{.ts}} --container unlock-r2
+      - kubectl --context {{.cluster}} -n {{.ns}} logs job/unlock-{{.app}}-{{.ts}} --container unlock-minio
+      - kubectl --context {{.cluster}} -n {{.ns}} logs job/unlock-{{.app}}-{{.ts}} --container unlock-r2
       - kubectl --context {{.cluster}} -n {{.ns}} delete job unlock-{{.app}}-{{.ts}}
     env: *env
     requires:
@@ -67,8 +66,8 @@ tasks:
     vars:
       ns: '{{.ns | default "default"}}'
     preconditions:
-      - { msg: "Wait script not found", sh: "test -f {{.scriptsDir}}/wait.sh" }
-      - { msg: "Unlock template not found", sh: "test -f {{.templatesDir}}/unlock.tmpl.yaml" }
+      - { msg: "Wait script not found", sh: "test -f {{.resources}}/wait.sh" }
+      - { msg: "Unlock template not found", sh: "test -f {{.resources}}/unlock.tmpl.yaml" }
     silent: true
 
   # To run backup jobs in parallel for all replicationsources:
@@ -81,12 +80,8 @@ tasks:
         ns: Namespace the PVC is in (default: default)
         app: Application to snapshot (required)
     cmds:
-      # # TODO: Only suspend when a arg is passed to the task
-      # # Ref: https://github.com/go-task/task/issues/608
-      # - task: .suspend
-      #   vars: *env
       - kubectl --context {{.cluster}} -n {{.ns}} patch replicationsources {{.app}} --type merge -p '{"spec":{"trigger":{"manual":"{{.ts}}"}}}'
-      - bash {{.scriptsDir}}/wait.sh volsync-src-{{.app}} {{.ns}} {{.cluster}}
+      - bash {{.resources}}/wait.sh volsync-src-{{.app}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/volsync-src-{{.app}} --for condition=complete --timeout=120m
     env: *env
     requires:
@@ -94,10 +89,10 @@ tasks:
     vars:
       ns: '{{.ns | default "default"}}'
       controller:
-        sh: true && {{.scriptsDir}}/controller.sh {{.app}} {{.ns}} {{.cluster}}
+        sh: true && {{.resources}}/controller.sh {{.app}} {{.ns}} {{.cluster}}
     preconditions:
-      - { msg: "Controller script not found", sh: "test -f {{.scriptsDir}}/controller.sh" }
-      - { msg: "Wait script not found", sh: "test -f {{.scriptsDir}}/wait.sh" }
+      - { msg: "Controller script not found", sh: "test -f {{.resources}}/controller.sh" }
+      - { msg: "Wait script not found", sh: "test -f {{.resources}}/wait.sh" }
       - { msg: "RepositorySource not found", sh: "kubectl --context {{.cluster}} -n {{.ns}} get replicationsources {{.app}}" }
 
   # To run restore jobs in parallel for all replicationdestinations:
@@ -126,7 +121,7 @@ tasks:
       ns: '{{.ns | default "default"}}'
       previous: '{{.previous | default 2}}'
       controller:
-        sh: "{{.scriptsDir}}/controller.sh {{.app}} {{.ns}}"
+        sh: "{{.resources}}/controller.sh {{.app}} {{.ns}}"
       claim:
         sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.sourcePVC}"
       puid:
@@ -134,10 +129,10 @@ tasks:
       pgid:
         sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
     preconditions:
-      - { msg: "Controller script not found", sh: "test -f {{.scriptsDir}}/controller.sh" }
-      - { msg: "Wait script not found", sh: "test -f {{.scriptsDir}}/wait.sh" }
-      - { msg: "ReplicationDestination script not found", sh: "test -f {{.templatesDir}}/replicationdestination.tmpl.yaml" }
-      - { msg: "Wipe template not found", sh: "test -f {{.templatesDir}}/wipe.tmpl.yaml" }
+      - { msg: "Controller script not found", sh: "test -f {{.resources}}/controller.sh" }
+      - { msg: "Wait script not found", sh: "test -f {{.resources}}/wait.sh" }
+      - { msg: "ReplicationDestination script not found", sh: "test -f {{.resources}}/replicationdestination.tmpl.yaml" }
+      - { msg: "Wipe template not found", sh: "test -f {{.resources}}/wipe.tmpl.yaml" }
 
   cleanup:
     desc: Delete volume populator PVCs in all namespaces
@@ -176,8 +171,8 @@ tasks:
   .wipe:
     internal: true
     cmds:
-      - envsubst < <(cat {{.templatesDir}}/wipe.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.scriptsDir}}/wait.sh wipe-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
+      - envsubst < <(cat {{.resources}}/wipe.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.resources}}/wait.sh wipe-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/wipe-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/wipe-{{.app}}-{{.ts}} --container wipe
       - kubectl --context {{.cluster}} -n {{.ns}} delete job wipe-{{.app}}-{{.ts}}
@@ -187,8 +182,8 @@ tasks:
   .restore:
     internal: true
     cmds:
-      - envsubst < <(cat {{.templatesDir}}/replicationdestination.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.scriptsDir}}/wait.sh volsync-dst-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
+      - envsubst < <(cat {{.resources}}/replicationdestination.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.resources}}/wait.sh volsync-dst-{{.app}}-{{.ts}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/volsync-dst-{{.app}}-{{.ts}} --for condition=complete --timeout=120m
       - kubectl --context {{.cluster}} -n {{.ns}} delete replicationdestination {{.app}}-{{.ts}}
     env: *env

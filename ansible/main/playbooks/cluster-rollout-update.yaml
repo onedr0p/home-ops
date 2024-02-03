@@ -14,7 +14,7 @@
     - name: Details
       ansible.builtin.command: "kubectl get node {{ inventory_hostname }} -o json"
       register: kubectl_get_node
-      delegate_to: "{{ groups['master'][0] }}"
+      delegate_to: "{{ groups['controllers'][0] }}"
       failed_when: false
       changed_when: false
 
@@ -30,7 +30,7 @@
             name: "{{ inventory_hostname }}"
             kubeconfig: /etc/rancher/k3s/k3s.yaml
             state: cordon
-          delegate_to: "{{ groups['master'][0] }}"
+          delegate_to: "{{ groups['controllers'][0] }}"
 
         - name: Drain
           kubernetes.core.k8s_drain:
@@ -44,7 +44,7 @@
               wait_timeout: 900
             pod_selectors:
               - app!=rook-ceph-osd
-          delegate_to: "{{ groups['master'][0] }}"
+          delegate_to: "{{ groups['controllers'][0] }}"
 
         - name: Update
           ansible.builtin.apt:
@@ -68,4 +68,4 @@
             name: "{{ inventory_hostname }}"
             kubeconfig: /etc/rancher/k3s/k3s.yaml
             state: uncordon
-          delegate_to: "{{ groups['master'][0] }}"
+          delegate_to: "{{ groups['controllers'][0] }}"

@@ -11,6 +11,9 @@ reboot
 
 1. Add or replace the file `/etc/kvmd/override.yaml`
     ```yaml
+    nginx:
+        https:
+            enabled: false
     kvmd:
         prometheus:
             auth:
@@ -123,62 +126,6 @@ reboot
 2. Restart kvmd
     ```sh
     systemctl restart kvmd.service
-    ```
-
-## Disable SSL
-
-1. Add or replace the file `/etc/kvmd/nginx/nginx.conf`
-    ```nginx
-    worker_processes 4;
-
-    error_log stderr;
-
-    include /usr/share/kvmd/extras/*/nginx.ctx-main.conf;
-
-    events {
-        worker_connections 1024;
-        use epoll;
-        multi_accept on;
-    }
-
-    http {
-        types_hash_max_size 4096;
-        server_names_hash_bucket_size 128;
-
-        access_log off;
-
-        include /etc/kvmd/nginx/mime-types.conf;
-        default_type application/octet-stream;
-        charset utf-8;
-
-        sendfile on;
-        tcp_nodelay on;
-        tcp_nopush on;
-        keepalive_timeout 10;
-        client_max_body_size 4k;
-
-        client_body_temp_path    /tmp/kvmd-nginx/client_body_temp;
-        fastcgi_temp_path        /tmp/kvmd-nginx/fastcgi_temp;
-        proxy_temp_path            /tmp/kvmd-nginx/proxy_temp;
-        scgi_temp_path            /tmp/kvmd-nginx/scgi_temp;
-        uwsgi_temp_path            /tmp/kvmd-nginx/uwsgi_temp;
-
-        include /etc/kvmd/nginx/kvmd.ctx-http.conf;
-        include /usr/share/kvmd/extras/*/nginx.ctx-http.conf;
-
-        server {
-            listen 80;
-            listen [::]:80;
-            server_name localhost;
-            include /etc/kvmd/nginx/kvmd.ctx-server.conf;
-            include /usr/share/kvmd/extras/*/nginx.ctx-server.conf;
-        }
-    }
-    ```
-
-2. Restart kvmd-nginx
-    ```sh
-    systemctl restart kvmd-nginx.service
     ```
 
 ## Monitoring
