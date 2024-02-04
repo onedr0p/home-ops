@@ -19,11 +19,11 @@ tasks:
     cmds:
       - true && {{.PYTHON_BIN}} -m venv {{.ROOT_DIR}}/.venv
       - .venv/bin/python3 -m pip install --upgrade pip setuptools wheel
-      - .venv/bin/python3 -m pip install --upgrade --requirement {{.ANSIBLE_DIR}}/requirements.txt
-      - .venv/bin/ansible-galaxy install --role-file "{{.ANSIBLE_DIR}}/requirements.yaml" --force
+      - .venv/bin/python3 -m pip install --upgrade --requirement {{.ROOT_DIR}}/requirements.txt
+      - .venv/bin/ansible-galaxy install --role-file "{{.ROOT_DIR}}/requirements.yaml" --force
     sources:
-      - "{{.ANSIBLE_DIR}}/requirements.txt"
-      - "{{.ANSIBLE_DIR}}/requirements.yaml"
+      - "{{.ROOT_DIR}}/requirements.txt"
+      - "{{.ROOT_DIR}}/requirements.yaml"
     generates:
       - "{{.ROOT_DIR}}/.venv/pyvenv.cfg"
 
@@ -37,11 +37,11 @@ tasks:
     deps: ["deps"]
     cmd: |
       .venv/bin/ansible-playbook \
-        --inventory {{.ANSIBLE_DIR}}/{{.cluster}}/inventory/hosts.yaml \
-        {{.ANSIBLE_DIR}}/{{.cluster}}/playbooks/{{.playbook}}.yaml {{.CLI_ARGS}}
+        --inventory {{.ROOT_DIR}}/{{.cluster}}/inventory/hosts.yaml \
+        {{.ROOT_DIR}}/{{.cluster}}/playbooks/{{.playbook}}.yaml {{.CLI_ARGS}}
     requires:
       vars: ["cluster", "playbook"]
     preconditions:
       - { msg: "Venv not found", sh: "test -d {{.ROOT_DIR}}/.venv" }
-      - { msg: "Inventory not found", sh: "test -f {{.ANSIBLE_DIR}}/{{.cluster}}/inventory/hosts.yaml" }
-      - { msg: "Playbook not found", sh: "test -f {{.ANSIBLE_DIR}}/{{.cluster}}/playbooks/{{.playbook}}.yaml" }
+      - { msg: "Inventory not found", sh: "test -f {{.ROOT_DIR}}/{{.cluster}}/inventory/hosts.yaml" }
+      - { msg: "Playbook not found", sh: "test -f {{.ROOT_DIR}}/{{.cluster}}/playbooks/{{.playbook}}.yaml" }
