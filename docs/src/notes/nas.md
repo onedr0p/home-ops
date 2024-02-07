@@ -35,10 +35,10 @@ My NAS configuration as documentation currently using Ubuntu 22.04
             mii-monitor-interval: 100
       ethernets:
         eports:
-        mtu: 9000
-        match:
-          name: "enp6*"
-        optional: true
+          mtu: 9000
+          match:
+            name: "enp6*"
+          optional: true
     ```
 
 2. Add or replace file `/etc/modules-load.d/modules.conf`
