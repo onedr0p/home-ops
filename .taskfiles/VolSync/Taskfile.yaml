@@ -23,6 +23,19 @@ vars:
   ts: '{{now | date "150405"}}'
 
 tasks:
+  suspend:
+    desc: Suspends Volsync
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+    cmds:
+      - flux --context {{.cluster}} suspend ks volsync
+      - flux --context {{.cluster}} suspend hr -n storage volsync
+      - kubectl --context {{.cluster}} -n storage scale deployment volsync --replicas 0
+    env: *env
+    requires:
+      vars: ["cluster"]
+
   list:
     desc: List snapshots for an application
     summary: |
