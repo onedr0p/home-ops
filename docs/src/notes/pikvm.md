@@ -11,107 +11,185 @@ reboot
 
 1. Add or replace the file `/etc/kvmd/override.yaml`
     ```yaml
+    ---
+
     nginx:
-        https:
-            enabled: false
+      https:
+        enabled: false
+
     kvmd:
-        prometheus:
-            auth:
-                enabled: false
-        gpio:
-            drivers:
-                tes:
-                    type: tesmart
-                    host: 192.168.1.10
-                    port: 5000
-            scheme:
-                server0_led:
-                    driver: tes
-                    pin: 0
-                    mode: input
-                server0_switch:
-                    driver: tes
-                    pin: 0
-                    mode: output
-                    switch: false
-                server1_led:
-                    driver: tes
-                    pin: 1
-                    mode: input
-                server1_switch:
-                    driver: tes
-                    pin: 1
-                    mode: output
-                    switch: false
-                server2_led:
-                    driver: tes
-                    pin: 2
-                    mode: input
-                server2_switch:
-                    driver: tes
-                    pin: 2
-                    mode: output
-                    switch: false
-                server3_led:
-                    driver: tes
-                    pin: 3
-                    mode: input
-                server3_switch:
-                    driver: tes
-                    pin: 3
-                    mode: output
-                    switch: false
-                server4_led:
-                    driver: tes
-                    pin: 4
-                    mode: input
-                server4_switch:
-                    driver: tes
-                    pin: 4
-                    mode: output
-                    switch: false
-                server5_led:
-                    driver: tes
-                    pin: 5
-                    mode: input
-                server5_switch:
-                    driver: tes
-                    pin: 5
-                    mode: output
-                    switch: false
-                server6_led:
-                    driver: tes
-                    pin: 6
-                    mode: input
-                server6_switch:
-                    driver: tes
-                    pin: 6
-                    mode: output
-                    switch: false
-                server7_led:
-                    driver: tes
-                    pin: 7
-                    mode: input
-                server7_switch:
-                    driver: tes
-                    pin: 7
-                    mode: output
-                    switch: false
-            view:
-                table:
-                    - ["TESMART Switch"]
-                    - []
-                    - ["#device-0", server0_led, server0_switch|Switch]
-                    - ["#device-1", server1_led, server1_switch|Switch]
-                    - ["#device-2", server2_led, server2_switch|Switch]
-                    - ["#device-3", server3_led, server3_switch|Switch]
-                    - ["#device-4", server4_led, server4_switch|Switch]
-                    - ["#device-5", server5_led, server5_switch|Switch]
-                    - ["#device-6", server6_led, server6_switch|Switch]
-                    - ["#device-7", server7_led, server7_switch|Switch]
+      auth:
+        enabled: false
+      prometheus:
+        auth:
+          enabled: false
+      streamer:
+        desired_fps:
+          default: 20
+        h264_bitrate:
+          default: 2500
+        h264_gop:
+          default: 30
+        quality: 75
+      gpio:
+        drivers:
+          tes:
+            type: tesmart
+            host: 192.168.1.10
+            port: 5000
+          wol_dev0:
+            type: wol
+            mac: 1c:69:7a:0d:8d:99
+          wol_dev1:
+            type: wol
+            mac: 1c:69:7a:0e:f7:ed
+          wol_dev2:
+            type: wol
+            mac: 1c:69:7a:0d:62:d4
+          wol_dev3:
+            type: wol
+            mac: 94:c6:91:a7:7b:2b
+          wol_dev4:
+            type: wol
+            mac: 94:c6:91:af:15:3d
+          wol_dev5:
+            type: wol
+            mac: 1c:69:7a:09:bf:39
+          reboot:
+            type: cmd
+            cmd: ["/usr/bin/sudo", "reboot"]
+          restart_service:
+            type: cmd
+            cmd: ["/usr/bin/sudo", "systemctl", "restart", "kvmd"]
+        scheme:
+          dev0_led:
+            driver: tes
+            pin: 0
+            mode: input
+          dev0_btn:
+            driver: tes
+            pin: 0
+            mode: output
+            switch: false
+          dev0_wol:
+            driver: wol_dev0
+            pin: 0
+            mode: output
+            switch: false
+          dev1_led:
+            driver: tes
+            pin: 1
+            mode: input
+          dev1_btn:
+            driver: tes
+            pin: 1
+            mode: output
+            switch: false
+          dev1_wol:
+            driver: wol_dev1
+            pin: 0
+            mode: output
+            switch: false
+          dev2_led:
+            driver: tes
+            pin: 2
+            mode: input
+          dev2_btn:
+            driver: tes
+            pin: 2
+            mode: output
+            switch: false
+          dev2_wol:
+            driver: wol_dev2
+            pin: 0
+            mode: output
+            switch: false
+          dev3_led:
+            driver: tes
+            pin: 3
+            mode: input
+          dev3_btn:
+            driver: tes
+            pin: 3
+            mode: output
+            switch: false
+          dev3_wol:
+            driver: wol_dev3
+            pin: 0
+            mode: output
+            switch: false
+          dev4_led:
+            driver: tes
+            pin: 4
+            mode: input
+          dev4_btn:
+            driver: tes
+            pin: 4
+            mode: output
+            switch: false
+          dev4_wol:
+            driver: wol_dev4
+            pin: 0
+            mode: output
+            switch: false
+          dev5_led:
+            driver: tes
+            pin: 5
+            mode: input
+          dev5_btn:
+            driver: tes
+            pin: 5
+            mode: output
+            switch: false
+          dev5_wol:
+            driver: wol_dev5
+            pin: 0
+            mode: output
+            switch: false
+          dev6_led:
+            driver: tes
+            pin: 6
+            mode: input
+          dev6_btn:
+            driver: tes
+            pin: 6
+            mode: output
+            switch: false
+          dev7_led:
+            driver: tes
+            pin: 7
+            mode: input
+          dev7_btn:
+            driver: tes
+            pin: 7
+            mode: output
+            switch: false
+          reboot_button:
+            driver: reboot
+            pin: 0
+            mode: output
+            switch: false
+          restart_service_button:
+            driver: restart_service
+            pin: 0
+            mode: output
+            switch: false
+        view:
+          header:
+            title: Devices
+          table:
+            - ["#pikvm", "pikvm_led|green", "restart_service_button|confirm|Service", "reboot_button|confirm|Reboot"]
+            - ["#0", "dev0_led", "dev0_btn | KVM", "dev0_wol | WOL"]
+            - ["#1", "dev1_led", "dev1_btn | KVM", "dev1_wol | WOL"]
+            - ["#2", "dev2_led", "dev2_btn | KVM", "dev2_wol | WOL"]
+            - ["#3", "dev3_led", "dev3_btn | KVM", "dev3_wol | WOL"]
+            - ["#4", "dev4_led", "dev4_btn | KVM", "dev4_wol | WOL"]
+            - ["#5", "dev5_led", "dev5_btn | KVM", "dev5_wol | WOL"]
+            - ["#6", "dev6_led", "dev6_btn"]
+            - ["#7", "dev7_led", "dev7_btn"]
     ```
 
-2. Restart kvmd
+1. Restart kvmd
     ```sh
     systemctl restart kvmd.service
     ```
