@@ -1,0 +1,70 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+vars:
+  VYOS_ADDR: vyos.turbo.ac
+  VYOS_USER: devin
+  VYOS_PRIVATE_KEY: ~/.ssh/id_rsa
+  VYOS_MATCHBOX_ASSETS_DIR: /config/containers/matchbox/data/assets
+
+tasks:
+
+  # task talos:ctl cluster=main -- health
+  ctl:
+    desc: Talosctl Wrapper
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
+    cmd: talosctl --talosconfig <(sops --decrypt talosconfig.secret.sops.yaml) {{.CLI_ARGS}}
+    requires:
+      vars: ["cluster"]
+
+  sync:
+    desc: Sync Talos controller and worker configuration to VyOS / Matchbox for PXE Boot
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
+    cmds:
+      - for: ["controller.secret.sops.yaml", "worker.secret.sops.yaml"]
+        cmd: |
+          sops --decrypt {{.ITEM}} | \
+              curl -skT - -u {{.VYOS_USER}}: --key {{.VYOS_PRIVATE_KEY}} \
+                  sftp://{{.VYOS_ADDR}}/{{.VYOS_MATCHBOX_ASSETS_DIR}}/$(basename {{.ITEM | replace ".secret.sops.yaml" ".yaml"}})
+    requires:
+      vars: ["cluster"]
+
+  bootstrap-etcd:
+    desc: Bootstrap Etcd
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
+    cmds:
+      - talosctl --talosconfig <(sops --decrypt talosconfig.secret.sops.yaml) config endpoint {{.controller}}
+      - talosctl --talosconfig <(sops --decrypt talosconfig.secret.sops.yaml) config node {{.controller}}
+      - talosctl --talosconfig <(sops --decrypt talosconfig.secret.sops.yaml) bootstrap
+    requires:
+      vars: ["cluster", "controller"]
+
+  kubeconfig:
+    desc: Fetch kubeconfig from Talos controllers
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
+    cmd: |
+      talosctl --talosconfig <(sops --decrypt talosconfig.secret.sops.yaml) kubeconfig \
+          --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
+    requires:
+      vars: ["cluster"]
+
+  bootstrap-extras:
+    desc: Bootstrap extras
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
+    cmds:
+      - for: ["cilium", "kubelet-csr-approver"]
+        task: .bootstrap-extras
+        vars:
+          extras: '{{.ITEM}}'
+    requires:
+      vars: ["cluster"]
+
+  .bootstrap-extras:
+    internal: true
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
+    cmds:
+      - kubectl kustomize --enable-helm ./{{.extras}} | kubectl --context {{.cluster}} apply --server-side --filename -
+      - defer: rm -rf ./{{.extras}}/charts
+    requires:
+      vars: ["extras"]
