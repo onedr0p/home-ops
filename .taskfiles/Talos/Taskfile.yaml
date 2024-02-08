@@ -5,8 +5,12 @@ version: "3"
 vars:
   VYOS_ADDR: vyos.turbo.ac
   VYOS_USER: devin
-  VYOS_PRIVATE_KEY: ~/.ssh/id_rsa
-  VYOS_MATCHBOX_ASSETS_DIR: /config/containers/matchbox/data/assets
+  # These matchbox dirs should be pre-created on the vyos host
+  #   mkdir -p /config/containers/matchbox/data/{groups,profiles,assets}
+  VYOS_MATCHBOX_DIR: /config/containers/matchbox/data
+  VYOS_MATCHBOX_GROUPS_DIR: "{{.VYOS_MATCHBOX_DIR}}/groups"
+  VYOS_MATCHBOX_PROFILES_DIR: "{{.VYOS_MATCHBOX_DIR}}/profiles"
+  VYOS_MATCHBOX_ASSETS_DIR: "{{.VYOS_MATCHBOX_DIR}}/assets"
 
 tasks:
 
@@ -18,17 +22,22 @@ tasks:
     requires:
       vars: ["cluster"]
 
-  sync:
-    desc: Sync Talos controller and worker configuration to VyOS / Matchbox for PXE Boot
+  bootstrap:
+    desc: Bootstrap Talos
     dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
     cmds:
-      - for: ["controller.secret.sops.yaml", "worker.secret.sops.yaml"]
-        cmd: |
-          sops --decrypt {{.ITEM}} | \
-              curl -skT - -u {{.VYOS_USER}}: --key {{.VYOS_PRIVATE_KEY}} \
-                  sftp://{{.VYOS_ADDR}}/{{.VYOS_MATCHBOX_ASSETS_DIR}}/$(basename {{.ITEM | replace ".secret.sops.yaml" ".yaml"}})
+      - task: bootstrap-etcd
+        vars:
+          cluster: "{{.cluster}}"
+          controller: "{{.controller}}"
+      - task: fetch-kubeconfig
+        vars:
+          cluster: "{{.cluster}}"
+      - task: bootstrap-core-apps
+        vars:
+          cluster: "{{.cluster}}"
     requires:
-      vars: ["cluster"]
+      vars: ["cluster", "controller"]
 
   bootstrap-etcd:
     desc: Bootstrap Etcd
@@ -40,7 +49,7 @@ tasks:
     requires:
       vars: ["cluster", "controller"]
 
-  kubeconfig:
+  fetch-kubeconfig:
     desc: Fetch kubeconfig from Talos controllers
     dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
     cmd: |
@@ -49,22 +58,37 @@ tasks:
     requires:
       vars: ["cluster"]
 
-  bootstrap-extras:
-    desc: Bootstrap extras
+  bootstrap-core-apps:
+    desc: Bootstrap core apps
     dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
     cmds:
       - for: ["cilium", "kubelet-csr-approver"]
-        task: .bootstrap-extras
+        task: .apply-core-apps
         vars:
-          extras: '{{.ITEM}}'
+          app: '{{.ITEM}}'
     requires:
       vars: ["cluster"]
 
-  .bootstrap-extras:
+  bootstrap-matchbox:
+    desc: Sync required Matchbox configuration to Vyos for PXE Boot
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
+    cmds:
+      - for: ["controller.secret.sops.yaml", "worker.secret.sops.yaml"]
+        cmd: |
+          sops --decrypt {{.ITEM}} | \
+              curl -skT - -u {{.VYOS_USER}}: \
+                  sftp://{{.VYOS_ADDR}}/{{.VYOS_MATCHBOX_ASSETS_DIR}}/$(basename {{.ITEM | replace ".secret.sops.yaml" ".yaml"}})
+      - 'curl -skT "matchbox/groups/k8s-[0-5].json" -u {{.VYOS_USER}}: sftp://{{.VYOS_ADDR}}/{{.VYOS_MATCHBOX_GROUPS_DIR}}/'
+      - 'curl -skT "matchbox/profiles/{talos-controller.json,talos-worker.json}" -u {{.VYOS_USER}}: sftp://{{.VYOS_ADDR}}/{{.VYOS_MATCHBOX_PROFILES_DIR}}/'
+      - ssh -l {{.VYOS_USER}} {{.VYOS_ADDR}} -t /opt/vyatta/bin/vyatta-op-cmd-wrapper "restart container matchbox"
+    requires:
+      vars: ["cluster"]
+
+  .apply-core-apps:
     internal: true
     dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
     cmds:
-      - kubectl kustomize --enable-helm ./{{.extras}} | kubectl --context {{.cluster}} apply --server-side --filename -
-      - defer: rm -rf ./{{.extras}}/charts
+      - kubectl kustomize --enable-helm ./{{.app}} | kubectl --context {{.cluster}} apply --server-side --filename -
+      - defer: rm -rf ./{{.app}}/charts
     requires:
-      vars: ["extras"]
+      vars: ["app"]
