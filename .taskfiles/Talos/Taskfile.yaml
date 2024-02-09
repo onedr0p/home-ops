@@ -3,7 +3,6 @@
 version: "3"
 
 vars:
-  TALOSCTL_ARGS: --talosconfig <(sops --decrypt talosconfig.secret.sops.yaml)
   VYOS_ADDR: vyos.turbo.ac
   VYOS_USER: devin
   # These matchbox dirs should be pre-created on the vyos host
@@ -15,17 +14,8 @@ vars:
 
 tasks:
 
-  # task talos:ctl cluster=main -- health
-  ctl:
-    desc: Talosctl Wrapper
-    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
-    cmd: talosctl {{.TALOSCTL_ARGS}} {{.CLI_ARGS}}
-    requires:
-      vars: ["cluster"]
-
   bootstrap:
     desc: Bootstrap Talos
-    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
     cmds:
       - task: bootstrap-etcd
         vars:
@@ -34,7 +24,7 @@ tasks:
       - task: fetch-kubeconfig
         vars:
           cluster: "{{.cluster}}"
-      - task: bootstrap-core-apps
+      - task: bootstrap-helm
         vars:
           cluster: "{{.cluster}}"
     requires:
@@ -42,37 +32,21 @@ tasks:
 
   bootstrap-etcd:
     desc: Bootstrap Etcd
-    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
-    cmds:
-      - talosctl {{.TALOSCTL_ARGS}} config endpoint {{.controller}}
-      - talosctl {{.TALOSCTL_ARGS}} config node {{.controller}}
-      - talosctl {{.TALOSCTL_ARGS}} bootstrap
+    cmd: talosctl --context {{.cluster}} --node {{.controller}} bootstrap
     requires:
       vars: ["cluster", "controller"]
 
   fetch-kubeconfig:
     desc: Fetch kubeconfig from Talos controllers
-    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
     cmd: |
-      talosctl {{.TALOSCTL_ARGS}} kubeconfig \
+      talosctl --context {{.cluster}} kubeconfig \
           --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
-    requires:
-      vars: ["cluster"]
-
-  bootstrap-core-apps:
-    desc: Bootstrap core apps
-    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
-    cmds:
-      - for: ["cilium", "kubelet-csr-approver"]
-        task: .apply-core-apps
-        vars:
-          app: '{{.ITEM}}'
     requires:
       vars: ["cluster"]
 
   bootstrap-matchbox:
     desc: Sync required Matchbox configuration to Vyos for PXE Boot
-    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos"
     cmds:
       - for: ["controller.secret.sops.yaml", "worker.secret.sops.yaml"]
         cmd: |
@@ -85,9 +59,28 @@ tasks:
     requires:
       vars: ["cluster"]
 
+  bootstrap-helm:
+    desc: Bootstrap Helm apps
+    cmds:
+      - for: ["cilium", "kubelet-csr-approver"]
+        task: bootstrap-helm-app
+        vars:
+          app: '{{.ITEM}}'
+    requires:
+      vars: ["cluster"]
+
+  bootstrap-helm-app:
+    internal: true
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/helm/{{.app}}"
+    cmds:
+      - kubectl kustomize --enable-helm . | kubectl --context {{.cluster}} apply --server-side --filename -
+      - defer: rm -rf ./charts
+    requires:
+      vars: ["app"]
+
   upgrade-talos:
     desc: Upgrade Talos on a node
-    cmd: talosctl {{.TALOSCTL_ARGS}} --nodes {{.node}} upgrade --image {{.image}} --preserve=true
+    cmd: talosctl --context {{.cluster}} --nodes {{.node}} upgrade --image {{.image}} --preserve=true
     requires:
       vars: ["node", "image"]
     preconditions:
@@ -95,17 +88,8 @@ tasks:
 
   upgrade-k8s:
     desc: Upgrade k8s on a node
-    cmd: talosctl {{.TALOSCTL_ARGS}} --nodes {{.node}} upgrade-k8s --to {{.to}}
+    cmd: talosctl --context {{.cluster}} --nodes {{.node}} upgrade-k8s --to {{.to}}
     requires:
       vars: ["node", "to"]
     preconditions:
       - { msg: "Node not found", sh: "talosctl --nodes {{.node}} get machineconfig" }
-
-  .apply-core-apps:
-    internal: true
-    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/talos"
-    cmds:
-      - kubectl kustomize --enable-helm ./{{.app}} | kubectl --context {{.cluster}} apply --server-side --filename -
-      - defer: rm -rf ./{{.app}}/charts
-    requires:
-      vars: ["app"]
