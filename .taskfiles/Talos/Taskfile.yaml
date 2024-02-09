@@ -44,21 +44,6 @@ tasks:
     requires:
       vars: ["cluster"]
 
-  bootstrap-matchbox:
-    desc: Sync required Matchbox configuration to Vyos for PXE Boot
-    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos"
-    cmds:
-      - for: ["controller.secret.sops.yaml", "worker.secret.sops.yaml"]
-        cmd: |
-          sops --decrypt {{.ITEM}} | \
-              curl -skT - -u {{.VYOS_USER}}: \
-                  sftp://{{.VYOS_ADDR}}/{{.VYOS_MATCHBOX_ASSETS_DIR}}/$(basename {{.ITEM | replace ".secret.sops.yaml" ".yaml"}})
-      - 'curl -skT "matchbox/groups/k8s-[0-5].json" -u {{.VYOS_USER}}: sftp://{{.VYOS_ADDR}}/{{.VYOS_MATCHBOX_GROUPS_DIR}}/'
-      - 'curl -skT "matchbox/profiles/{talos-controller.json,talos-worker.json}" -u {{.VYOS_USER}}: sftp://{{.VYOS_ADDR}}/{{.VYOS_MATCHBOX_PROFILES_DIR}}/'
-      - ssh -l {{.VYOS_USER}} {{.VYOS_ADDR}} -t /opt/vyatta/bin/vyatta-op-cmd-wrapper "restart container matchbox"
-    requires:
-      vars: ["cluster"]
-
   bootstrap-helm:
     desc: Bootstrap Helm apps
     cmds:
