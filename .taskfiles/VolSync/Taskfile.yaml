@@ -20,7 +20,7 @@ x-env: &env
   puid: '{{.puid}}'
 
 vars:
-  shared_dir: '{{.ROOT_DIR}}/.taskfiles/VolSync/scripts'
+  scripts_dir: '{{.ROOT_DIR}}/.taskfiles/VolSync/scripts'
   templates_dir: '{{.ROOT_DIR}}/.taskfiles/VolSync/templates'
   now: '{{now | date "150405"}}'
 
@@ -48,9 +48,9 @@ tasks:
         app: Application to list snapshots for (required)
     cmds:
       - envsubst < <(cat {{.templates_dir}}/list.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.shared_dir}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
+      - bash {{.scripts_dir}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=1m
-      - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.job}} --container list
+      - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.job}} --container main
       - kubectl --context {{.cluster}} -n {{.ns}} delete job {{.job}}
     env: *env
     requires:
@@ -59,7 +59,7 @@ tasks:
       ns: '{{.ns | default "default"}}'
       job: volsync-list-{{.app}}
     preconditions:
-      - test -f {{.shared_dir}}/wait-for-job.sh
+      - test -f {{.scripts_dir}}/wait-for-job.sh
       - test -f {{.templates_dir}}/list.tmpl.yaml
     silent: true
 
@@ -72,7 +72,7 @@ tasks:
         app: Application to unlock (required)
     cmds:
       - envsubst < <(cat {{.templates_dir}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.shared_dir}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
+      - bash {{.scripts_dir}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=1m
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.job}} --container minio
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.job}} --container r2
@@ -84,7 +84,7 @@ tasks:
       ns: '{{.ns | default "default"}}'
       job: volsync-unlock-{{.app}}
     preconditions:
-      - test -f {{.shared_dir}}/wait-for-job.sh
+      - test -f {{.scripts_dir}}/wait-for-job.sh
       - test -f {{.templates_dir}}/unlock.tmpl.yaml
     silent: true
 
@@ -99,7 +99,7 @@ tasks:
         app: Application to snapshot (required)
     cmds:
       - kubectl --context {{.cluster}} -n {{.ns}} patch replicationsources {{.app}} --type merge -p '{"spec":{"trigger":{"manual":"{{.now}}"}}}'
-      - bash {{.shared_dir}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
+      - bash {{.scripts_dir}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=120m
     env: *env
     requires:
@@ -108,10 +108,10 @@ tasks:
       ns: '{{.ns | default "default"}}'
       job: volsync-src-{{.app}}
       controller:
-        sh: true && {{.shared_dir}}/which-controller.sh {{.app}} {{.ns}} {{.cluster}}
+        sh: true && {{.scripts_dir}}/which-controller.sh {{.app}} {{.ns}} {{.cluster}}
     preconditions:
-      - test -f {{.shared_dir}}/which-controller.sh
-      - test -f {{.shared_dir}}/wait-for-job.sh
+      - test -f {{.scripts_dir}}/which-controller.sh
+      - test -f {{.scripts_dir}}/wait-for-job.sh
       - kubectl --context {{.cluster}} -n {{.ns}} get replicationsources {{.app}}
 
   # To run restore jobs in parallel for all replicationdestinations:
@@ -140,7 +140,7 @@ tasks:
       ns: '{{.ns | default "default"}}'
       previous: '{{.previous | default 2}}'
       controller:
-        sh: "{{.shared_dir}}/which-controller.sh {{.app}} {{.ns}}"
+        sh: "{{.scripts_dir}}/which-controller.sh {{.app}} {{.ns}}"
       claim:
         sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.sourcePVC}"
       puid:
@@ -148,8 +148,8 @@ tasks:
       pgid:
         sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
     preconditions:
-      - test -f {{.shared_dir}}/which-controller.sh
-      - test -f {{.shared_dir}}/wait-for-job.sh
+      - test -f {{.scripts_dir}}/which-controller.sh
+      - test -f {{.scripts_dir}}/wait-for-job.sh
       - test -f {{.templates_dir}}/replicationdestination.tmpl.yaml
       - test -f {{.templates_dir}}/wipe.tmpl.yaml
 
@@ -191,9 +191,9 @@ tasks:
     internal: true
     cmds:
       - envsubst < <(cat {{.templates_dir}}/wipe.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.shared_dir}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
+      - bash {{.scripts_dir}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=120m
-      - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.job}} --container wipe
+      - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.job}} --container main
       - kubectl --context {{.cluster}} -n {{.ns}} delete job {{.job}}
     env: *env
     vars:
@@ -204,7 +204,7 @@ tasks:
     internal: true
     cmds:
       - envsubst < <(cat {{.templates_dir}}/replicationdestination.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.shared_dir}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
+      - bash {{.scripts_dir}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=120m
       - kubectl --context {{.cluster}} -n {{.ns}} delete replicationdestination {{.job}}
     env: *env

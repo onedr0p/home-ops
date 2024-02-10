@@ -3,24 +3,26 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: "${job}"
-  namespace: "${ns}"
+  namespace: "default"
 spec:
   ttlSecondsAfterFinished: 3600
   template:
     spec:
       automountServiceAccountToken: false
-      restartPolicy: OnFailure
+      restartPolicy: Never
+      nodeName: ${node}
       containers:
         - name: main
           image: ghcr.io/onedr0p/alpine:rolling
-          command: ["/bin/sh", "-c", "cd /config; find . -delete"]
+          command: ["/bin/sh", "-c"]
+          args: ["rm -rf /mnt/host_var/lib/rook"]
           volumeMounts:
-            - name: config
-              mountPath: /config
+            - mountPath: /mnt/host_var
+              name: host-var
           securityContext:
             privileged: true
           resources: {}
       volumes:
-        - name: config
-          persistentVolumeClaim:
-            claimName: "${claim}"
+        - name: host-var
+          hostPath:
+            path: /var

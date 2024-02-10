@@ -1,0 +1,26 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "${job}"
+  namespace: "default"
+spec:
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      nodeName: ${node}
+      containers:
+        - name: main
+          image: ghcr.io/onedr0p/alpine:rolling
+          command: ["/bin/sh", "-c"]
+          args:
+            - apk add --no-cache sgdisk util-linux parted;
+              sgdisk --zap-all ${disk};
+              dd if=/dev/zero bs=1M count=10000 oflag=direct of=${disk};
+              blkdiscard ${disk};
+              partprobe ${disk};
+          securityContext:
+            privileged: true
+          resources: {}
