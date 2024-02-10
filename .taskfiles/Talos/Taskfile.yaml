@@ -17,13 +17,15 @@ tasks:
   bootstrap:
     desc: Bootstrap Talos
     cmds:
-      - task: bootstrap-etcd
-        vars:
-          cluster: "{{.cluster}}"
-          controller: "{{.controller}}"
-      - task: fetch-kubeconfig
-        vars:
-          cluster: "{{.cluster}}"
+      # - task: bootstrap-etcd
+      #   vars:
+      #     cluster: "{{.cluster}}"
+      #     controller: "{{.controller}}"
+      # - sleep 120
+      # - task: fetch-kubeconfig
+      #   vars:
+      #     cluster: "{{.cluster}}"
+      # - sleep 120
       - task: bootstrap-helm
         vars:
           cluster: "{{.cluster}}"
@@ -32,14 +34,14 @@ tasks:
 
   bootstrap-etcd:
     desc: Bootstrap Etcd
-    cmd: talosctl --context {{.cluster}} --node {{.controller}} bootstrap
+    cmd: talosctl --context {{.cluster}} --nodes {{.controller}} bootstrap
     requires:
       vars: ["cluster", "controller"]
 
   fetch-kubeconfig:
     desc: Fetch kubeconfig from Talos controllers
     cmd: |
-      talosctl --context {{.cluster}} kubeconfig \
+      talosctl --context {{.cluster}} kubeconfig --nodes {{.controller}} \
           --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
     requires:
       vars: ["cluster"]
