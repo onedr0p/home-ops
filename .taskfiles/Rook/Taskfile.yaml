@@ -8,8 +8,8 @@ x-env: &env
   node: "{{.node}}"
 
 vars:
-  scripts_dir: '{{.ROOT_DIR}}/.taskfiles/Rook/scripts'
-  templates_dir: '{{.ROOT_DIR}}/.taskfiles/Rook/templates'
+  rook_scripts_dir: '{{.ROOT_DIR}}/.taskfiles/Rook/scripts'
+  rook_templates_dir: '{{.ROOT_DIR}}/.taskfiles/Rook/templates'
 
 tasks:
 
@@ -30,7 +30,7 @@ tasks:
     vars:
       cluster: main
       disk: /dev/nvme0n1
-      nodes: k8s-0 k8s-1 k8s-2 k8s-3 k8s-4 k8s-5
+      nodes: talos-8uj-x6b talos-bwv-7ud talos-jc3-wt1 talos-q6f-nch talos-w0s-lcv talos-zop-8xq
 
   wipe-disk:
     desc: Wipe all remnants of rook-ceph from a given cluster, node and disk
@@ -40,8 +40,8 @@ tasks:
         disk: Disk to wipe (required)
         node: Node the disk is on (required)
     cmds:
-      - envsubst < <(cat {{.templates_dir}}/WipeDiskJob.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.scripts_dir}}/wait-for-job.sh {{.job}} default {{.cluster}}
+      - envsubst < <(cat {{.rook_templates_dir}}/WipeDiskJob.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.rook_scripts_dir}}/wait-for-job.sh {{.job}} default {{.cluster}}
       - kubectl --context {{.cluster}} -n default wait job/{{.job}} --for condition=complete --timeout=1m
       - kubectl --context {{.cluster}} -n default logs job/{{.job}}
       - kubectl --context {{.cluster}} -n default delete job {{.job}}
@@ -51,8 +51,8 @@ tasks:
     vars:
       job: wipe-disk-{{.node}}-{{.disk | replace "/" "-"}}
     preconditions:
-      - test -f {{.scripts_dir}}/wait-for-job.sh
-      - test -f {{.templates_dir}}/WipeDiskJob.tmpl.yaml
+      - test -f {{.rook_scripts_dir}}/wait-for-job.sh
+      - test -f {{.rook_templates_dir}}/WipeDiskJob.tmpl.yaml
 
   wipe-data:
     desc: Wipe all remnants of rook-ceph from a given cluster and node
@@ -61,8 +61,8 @@ tasks:
         cluster: Cluster to run command against (required)
         node: Node the data is on (required)
     cmds:
-      - envsubst < <(cat {{.templates_dir}}/WipeDataJob.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.scripts_dir}}/wait-for-job.sh {{.job}} default {{.cluster}}
+      - envsubst < <(cat {{.rook_templates_dir}}/WipeDataJob.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.rook_scripts_dir}}/wait-for-job.sh {{.job}} default {{.cluster}}
       - kubectl --context {{.cluster}} -n default wait job/{{.job}} --for condition=complete --timeout=1m
       - kubectl --context {{.cluster}} -n default logs job/{{.job}}
       - kubectl --context {{.cluster}} -n default delete job {{.job}}
@@ -72,5 +72,5 @@ tasks:
     vars:
       job: wipe-data-{{.node}}
     preconditions:
-      - test -f {{.scripts_dir}}/wait-for-job.sh
-      - test -f {{.templates_dir}}/WipeDataJob.tmpl.yaml
+      - test -f {{.rook_scripts_dir}}/wait-for-job.sh
+      - test -f {{.rook_templates_dir}}/WipeDataJob.tmpl.yaml
