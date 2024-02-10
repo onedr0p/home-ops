@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "unlock-${app}-${ts}"
+  name: "${job}"
   namespace: "${ns}"
 spec:
   ttlSecondsAfterFinished: 3600
@@ -11,13 +11,13 @@ spec:
       automountServiceAccountToken: false
       restartPolicy: OnFailure
       containers:
-        - name: unlock-minio
+        - name: minio
           image: docker.io/restic/restic:0.16.4
           args: ["unlock", "--remove-all"]
           envFrom:
             - secretRef:
                 name: "${app}-volsync-secret"
-        - name: unlock-r2
+        - name: r2
           image: docker.io/restic/restic:0.16.4
           args: ["unlock", "--remove-all"]
           envFrom:
