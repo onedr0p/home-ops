@@ -32,14 +32,14 @@ tasks:
 
   bootstrap-etcd:
     desc: Bootstrap Etcd
-    cmd: talosctl --context {{.cluster}} --node {{.controller}} bootstrap
+    cmd: talosctl --context {{.cluster}} --nodes {{.controller}} bootstrap
     requires:
       vars: ["cluster", "controller"]
 
   fetch-kubeconfig:
     desc: Fetch kubeconfig from Talos controllers
     cmd: |
-      talosctl --context {{.cluster}} kubeconfig \
+      talosctl --context {{.cluster}} kubeconfig --nodes {{.controller}} \
           --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
     requires:
       vars: ["cluster"]
