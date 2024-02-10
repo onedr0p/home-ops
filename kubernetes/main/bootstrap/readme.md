@@ -34,8 +34,8 @@ set container name matchbox volume matchbox-data destination '/var/lib/matchbox'
 set container name matchbox volume matchbox-data mode 'rw'
 set container name matchbox volume matchbox-data propagation 'private'
 set container name matchbox volume matchbox-data source '/config/containers/matchbox/data'
-curl -L -o /config/containers/matchbox/data/assets/vmlinuz https://factory.talos.dev/image/9f71407746a79875f1ce7668b1063acf2c80c03a0a9472410175fe00b0f03865/v1.6.4/kernel-amd64
-curl -L -o /config/containers/matchbox/data/assets/initramfs.xz https://factory.talos.dev/image/9f71407746a79875f1ce7668b1063acf2c80c03a0a9472410175fe00b0f03865/v1.6.4/initramfs-amd64.xz
+curl -L -o /config/containers/matchbox/data/assets/vmlinuz https://factory.talos.dev/image/d715f723f882b1e1e8063f1b89f237dcc0e3bd000f9f970243af59c8baae0100/v1.6.4/kernel-amd64
+curl -L -o /config/containers/matchbox/data/assets/initramfs.xz https://factory.talos.dev/image/d715f723f882b1e1e8063f1b89f237dcc0e3bd000f9f970243af59c8baae0100/v1.6.4/initramfs-amd64.xz
 ```
 
 ### DHCP
