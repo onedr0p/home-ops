@@ -18,6 +18,8 @@ includes:
   external-secrets: .taskfiles/ExternalSecrets/Taskfile.yaml
   flux: .taskfiles/Flux/Taskfile.yaml
   kubernetes: .taskfiles/Kubernetes/Taskfile.yaml
+  rook: .taskfiles/Rook/Taskfile.yaml
+  talos: .taskfiles/Talos/Taskfile.yaml
   volsync: .taskfiles/VolSync/Taskfile.yaml
 
 tasks:
@@ -31,10 +33,10 @@ tasks:
     cmds:
       - true && {{.PYTHON_BIN}} -m venv {{.ROOT_DIR}}/.venv
       - .venv/bin/python3 -m pip install --upgrade pip setuptools wheel
-      - .venv/bin/python3 -m pip install --upgrade --requirement {{.ROOT_DIR}}/requirements.txt
-      - .venv/bin/ansible-galaxy install --role-file "{{.ROOT_DIR}}/requirements.yaml" --force
+      - .venv/bin/python3 -m pip install --upgrade --requirement {{.ANSIBLE_DIR}}/requirements.txt
+      - .venv/bin/ansible-galaxy install --role-file "{{.ANSIBLE_DIR}}/requirements.yaml" --force
     sources:
-      - "{{.ROOT_DIR}}/requirements.txt"
-      - "{{.ROOT_DIR}}/requirements.yaml"
+      - "{{.ANSIBLE_DIR}}/requirements.txt"
+      - "{{.ANSIBLE_DIR}}/requirements.yaml"
     generates:
       - "{{.ROOT_DIR}}/.venv/pyvenv.cfg"

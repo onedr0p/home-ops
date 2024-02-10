@@ -28,7 +28,7 @@ spec:
     - name: rook-ceph-operator
       namespace: rook-ceph
     - name: snapshot-controller
-      namespace: storage
+      namespace: volsync-system
   values:
     monitoring:
       enabled: true
@@ -48,7 +48,7 @@ spec:
       [global]
       bdev_enable_discard = true
       bdev_async_discard = true
-      osd_class_update_on_start = false
+      bluefs_buffered_io = false
     cephClusterSpec:
       network:
         provider: host
@@ -68,22 +68,22 @@ spec:
         nodes:
           - name: k8s-0
             devices:
-              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NJ0TB03807K
+              - name: nvme0n1
           - name: k8s-1
             devices:
-              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NS0W223961P
+              - name: nvme0n1
           - name: k8s-2
             devices:
-              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NS0W224436E
+              - name: nvme0n1
           - name: k8s-3
             devices:
-              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NS0TC01391F
+              - name: nvme0n1
           - name: k8s-4
             devices:
-              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S59ANM0W417201H
+              - name: nvme0n1
           - name: k8s-5
             devices:
-              - name: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S6S1NJ0T813624W
+              - name: nvme0n1
       placement:
         mgr: &placement
           nodeAffinity:

@@ -1,0 +1,80 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+vars:
+  VYOS_ADDR: vyos.turbo.ac
+  VYOS_USER: devin
+  # These matchbox dirs should be pre-created on the vyos host
+  #   mkdir -p /config/containers/matchbox/data/{groups,profiles,assets}
+  VYOS_MATCHBOX_DIR: /config/containers/matchbox/data
+  VYOS_MATCHBOX_GROUPS_DIR: "{{.VYOS_MATCHBOX_DIR}}/groups"
+  VYOS_MATCHBOX_PROFILES_DIR: "{{.VYOS_MATCHBOX_DIR}}/profiles"
+  VYOS_MATCHBOX_ASSETS_DIR: "{{.VYOS_MATCHBOX_DIR}}/assets"
+
+tasks:
+
+  bootstrap:
+    desc: Bootstrap Talos
+    cmds:
+      - task: bootstrap-etcd
+        vars:
+          cluster: "{{.cluster}}"
+          controller: "{{.controller}}"
+      - task: fetch-kubeconfig
+        vars:
+          cluster: "{{.cluster}}"
+      - task: bootstrap-helm
+        vars:
+          cluster: "{{.cluster}}"
+    requires:
+      vars: ["cluster", "controller"]
+
+  bootstrap-etcd:
+    desc: Bootstrap Etcd
+    cmd: talosctl --context {{.cluster}} --node {{.controller}} bootstrap
+    requires:
+      vars: ["cluster", "controller"]
+
+  fetch-kubeconfig:
+    desc: Fetch kubeconfig from Talos controllers
+    cmd: |
+      talosctl --context {{.cluster}} kubeconfig \
+          --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
+    requires:
+      vars: ["cluster"]
+
+  bootstrap-helm:
+    desc: Bootstrap Helm apps
+    cmds:
+      - for: ["cilium", "kubelet-csr-approver"]
+        task: bootstrap-helm-app
+        vars:
+          app: '{{.ITEM}}'
+    requires:
+      vars: ["cluster"]
+
+  bootstrap-helm-app:
+    internal: true
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/helm/{{.app}}"
+    cmds:
+      - kubectl kustomize --enable-helm . | kubectl --context {{.cluster}} apply --server-side --filename -
+      - defer: rm -rf ./charts
+    requires:
+      vars: ["app"]
+
+  upgrade-talos:
+    desc: Upgrade Talos on a node
+    cmd: talosctl --context {{.cluster}} --nodes {{.node}} upgrade --image {{.image}} --preserve=true
+    requires:
+      vars: ["node", "image"]
+    preconditions:
+      - talosctl --nodes {{.node}} get machineconfig
+
+  upgrade-k8s:
+    desc: Upgrade k8s on a node
+    cmd: talosctl --context {{.cluster}} --nodes {{.node}} upgrade-k8s --to {{.to}}
+    requires:
+      vars: ["node", "to"]
+    preconditions:
+      - talosctl --nodes {{.node}} get machineconfig
