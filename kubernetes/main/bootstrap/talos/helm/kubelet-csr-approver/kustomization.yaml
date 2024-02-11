@@ -1,17 +1,17 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: kube-system
+namespace: &namespace kube-system
+commonAnnotations:
+  meta.helm.sh/release-name: kubelet-csr-approver
+  meta.helm.sh/release-namespace: *namespace
+commonLabels:
+  app.kubernetes.io/managed-by: Helm
 helmCharts:
   - name: kubelet-csr-approver
     repo: https://postfinance.github.io/kubelet-csr-approver
     version: 1.0.7
     releaseName: kubelet-csr-approver
-    namespace: kube-system
+    namespace: *namespace
     valuesInline:
       providerRegex: ^k8s-\d$
-commonAnnotations:
-  meta.helm.sh/release-name: kubelet-csr-approver
-  meta.helm.sh/release-namespace: kube-system
-commonLabels:
-  app.kubernetes.io/managed-by: Helm

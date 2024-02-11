@@ -19,7 +19,6 @@
           vars:
             k3s_state: stopped
 
-    # Ref: https://github.com/k3s-io/docs/blob/main/docs/installation/network-options.md
     - name: Networking
       block:
         - name: Networking | Delete Cilium links
@@ -71,9 +70,7 @@
       changed_when: k3s_uninstall.rc == 0
 
     - name: Ensure hard links are removed
-      when:
-        - k3s_install_hard_links
-        - not ansible_check_mode
+      when: k3s_install_hard_links and not ansible_check_mode
       ansible.builtin.file:
         path: "{{ k3s_install_dir }}/{{ item }}"
         state: absent
