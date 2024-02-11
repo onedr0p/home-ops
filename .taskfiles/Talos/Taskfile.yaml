@@ -2,30 +2,20 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
-vars:
-  VYOS_ADDR: vyos.turbo.ac
-  VYOS_USER: devin
-  # These matchbox dirs should be pre-created on the vyos host
-  #   mkdir -p /config/containers/matchbox/data/{groups,profiles,assets}
-  VYOS_MATCHBOX_DIR: /config/containers/matchbox/data
-  VYOS_MATCHBOX_GROUPS_DIR: "{{.VYOS_MATCHBOX_DIR}}/groups"
-  VYOS_MATCHBOX_PROFILES_DIR: "{{.VYOS_MATCHBOX_DIR}}/profiles"
-  VYOS_MATCHBOX_ASSETS_DIR: "{{.VYOS_MATCHBOX_DIR}}/assets"
-
 tasks:
 
   bootstrap:
     desc: Bootstrap Talos
     cmds:
-      # - task: bootstrap-etcd
-      #   vars:
-      #     cluster: "{{.cluster}}"
-      #     controller: "{{.controller}}"
-      # - sleep 120
-      # - task: fetch-kubeconfig
-      #   vars:
-      #     cluster: "{{.cluster}}"
-      # - sleep 120
+      - task: bootstrap-etcd
+        vars:
+          cluster: "{{.cluster}}"
+          controller: "{{.controller}}"
+      - sleep 60
+      - task: fetch-kubeconfig
+        vars:
+          cluster: "{{.cluster}}"
+      - sleep 60
       - task: bootstrap-helm
         vars:
           cluster: "{{.cluster}}"
@@ -50,13 +40,13 @@ tasks:
     desc: Bootstrap Helm apps
     cmds:
       - for: ["cilium", "kubelet-csr-approver"]
-        task: bootstrap-helm-app
+        task: .bootstrap-helm-app
         vars:
           app: '{{.ITEM}}'
     requires:
       vars: ["cluster"]
 
-  bootstrap-helm-app:
+  .bootstrap-helm-app:
     internal: true
     dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/helm/{{.app}}"
     cmds:

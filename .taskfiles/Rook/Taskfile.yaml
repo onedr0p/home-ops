@@ -8,22 +8,23 @@ x-env: &env
   node: "{{.node}}"
 
 vars:
-  rook_scripts_dir: '{{.ROOT_DIR}}/.taskfiles/Rook/scripts'
-  rook_templates_dir: '{{.ROOT_DIR}}/.taskfiles/Rook/templates'
+  ROOK_SCRIPTS_DIR: '{{.ROOT_DIR}}/.taskfiles/Rook/scripts'
+  ROOK_TEMPLATES_DIR: '{{.ROOT_DIR}}/.taskfiles/Rook/templates'
 
 tasks:
 
-  wipe-main:
-    desc: Wipe specified disk drives and delete /var/lib/rook on all nodes in the main cluster
+  reset-main:
+    desc: Reset Rook on the main cluster
+    prompt: Reset rook-ceph on '{{.cluster}}' cluster... continue?
     cmds:
       - for: { var: nodes }
-        task: wipe-disk
+        task: .reset-disk
         vars:
           cluster: '{{.cluster}}'
           node: '{{.ITEM}}'
           disk: '{{.disk}}'
       - for: { var: nodes }
-        task: wipe-data
+        task: .reset-data
         vars:
           cluster: '{{.cluster}}'
           node: '{{.ITEM}}'
@@ -32,16 +33,16 @@ tasks:
       disk: /dev/nvme0n1
       nodes: k8s-0 k8s-1 k8s-2 k8s-3 k8s-4 k8s-5
 
-  wipe-disk:
-    desc: Wipe all remnants of rook-ceph from a given cluster, node and disk
+  .reset-disk:
+    internal: true
     summary: |
       Args:
         cluster: Cluster to run command against (required)
         disk: Disk to wipe (required)
         node: Node the disk is on (required)
     cmds:
-      - envsubst < <(cat {{.rook_templates_dir}}/WipeDiskJob.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.rook_scripts_dir}}/wait-for-job.sh {{.job}} default {{.cluster}}
+      - envsubst < <(cat {{.ROOK_TEMPLATES_DIR}}/WipeDiskJob.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.ROOK_SCRIPTS_DIR}}/wait-for-job.sh {{.job}} default {{.cluster}}
       - kubectl --context {{.cluster}} -n default wait job/{{.job}} --for condition=complete --timeout=1m
       - kubectl --context {{.cluster}} -n default logs job/{{.job}}
       - kubectl --context {{.cluster}} -n default delete job {{.job}}
@@ -51,18 +52,18 @@ tasks:
     vars:
       job: wipe-disk-{{.node}}-{{.disk | replace "/" "-"}}
     preconditions:
-      - test -f {{.rook_scripts_dir}}/wait-for-job.sh
-      - test -f {{.rook_templates_dir}}/WipeDiskJob.tmpl.yaml
+      - test -f {{.ROOK_SCRIPTS_DIR}}/wait-for-job.sh
+      - test -f {{.ROOK_TEMPLATES_DIR}}/WipeDiskJob.tmpl.yaml
 
-  wipe-data:
-    desc: Wipe all remnants of rook-ceph from a given cluster and node
+  .reset-data:
+    internal: true
     summary: |
       Args:
         cluster: Cluster to run command against (required)
         node: Node the data is on (required)
     cmds:
-      - envsubst < <(cat {{.rook_templates_dir}}/WipeDataJob.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.rook_scripts_dir}}/wait-for-job.sh {{.job}} default {{.cluster}}
+      - envsubst < <(cat {{.ROOK_TEMPLATES_DIR}}/WipeDataJob.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.ROOK_SCRIPTS_DIR}}/wait-for-job.sh {{.job}} default {{.cluster}}
       - kubectl --context {{.cluster}} -n default wait job/{{.job}} --for condition=complete --timeout=1m
       - kubectl --context {{.cluster}} -n default logs job/{{.job}}
       - kubectl --context {{.cluster}} -n default delete job {{.job}}
@@ -72,5 +73,5 @@ tasks:
     vars:
       job: wipe-data-{{.node}}
     preconditions:
-      - test -f {{.rook_scripts_dir}}/wait-for-job.sh
-      - test -f {{.rook_templates_dir}}/WipeDataJob.tmpl.yaml
+      - test -f {{.ROOK_SCRIPTS_DIR}}/wait-for-job.sh
+      - test -f {{.ROOK_TEMPLATES_DIR}}/WipeDataJob.tmpl.yaml
