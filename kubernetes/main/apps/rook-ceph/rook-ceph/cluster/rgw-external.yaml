@@ -8,46 +8,46 @@ spec:
   # Ref: https://rook.io/docs/rook/v1.13/Storage-Configuration/Object-Storage-RGW/object-storage/
   store: ceph-objectstore
   displayName: Cluster Admin
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rook-ceph-rgw-ceph-objectstore-external
-  namespace: rook-ceph
-  labels:
-    app: rook-ceph-rgw
-    rook_cluster: rook-ceph
-    rook_object_store: ceph-objectstore
-spec:
-  type: NodePort
-  selector:
-    app: rook-ceph-rgw
-    rook_cluster: rook-ceph
-    rook_object_store: ceph-objectstore
-  ports:
-    - name: rgw
-      port: 80
-      protocol: TCP
-      targetPort: 80
-  sessionAffinity: None
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: rook-ceph-rgw
-spec:
-  ingressClassName: internal
-  rules:
-    - host: &host rook-ceph-rgw.devbu.io
-      http:
-        paths:
-          - backend:
-              service:
-                name: rook-ceph-rgw-ceph-objectstore-external
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
-  tls:
-    - hosts:
-        - *host
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: rook-ceph-rgw-ceph-objectstore-external
+#   namespace: rook-ceph
+#   labels:
+#     app: rook-ceph-rgw
+#     rook_cluster: rook-ceph
+#     rook_object_store: ceph-objectstore
+# spec:
+#   type: NodePort
+#   selector:
+#     app: rook-ceph-rgw
+#     rook_cluster: rook-ceph
+#     rook_object_store: ceph-objectstore
+#   ports:
+#     - name: rgw
+#       port: 80
+#       protocol: TCP
+#       targetPort: 80
+#   sessionAffinity: None
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: rook-ceph-rgw
+# spec:
+#   ingressClassName: internal
+#   rules:
+#     - host: &host rook-ceph-rgw.devbu.io
+#       http:
+#         paths:
+#           - backend:
+#               service:
+#                 name: rook-ceph-rgw-ceph-objectstore-external
+#                 port:
+#                   number: 80
+#             path: /
+#             pathType: Prefix
+#   tls:
+#     - hosts:
+#         - *host
