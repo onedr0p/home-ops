@@ -11,8 +11,7 @@ tasks:
         vars:
           cluster: "{{.cluster}}"
           controller: "{{.controller}}"
-      - # FIXME: implement a wait for etcd to be ready, talosctl maybe?
-        sleep 60
+      - talosctl health --nodes {{.controller}}
       - task: fetch-kubeconfig
         vars:
           cluster: "{{.cluster}}"
