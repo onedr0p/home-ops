@@ -24,7 +24,7 @@ vars:
 
 tasks:
 
-  suspend:
+  suspend-controller:
     desc: Suspends Volsync
     summary: |
       Args:
@@ -124,14 +124,10 @@ tasks:
         app: Application to restore (required)
         previous: Previous number of snapshots to restore (default: 2)
     cmds:
-      - task: .suspend
-        vars: *env
-      - task: .wipe
-        vars: *env
-      - task: .restore
-        vars: *env
-      - task: .resume
-        vars: *env
+      - { task: .suspend, vars: *env }
+      - { task: .wipe, vars: *env }
+      - { task: .restore, vars: *env }
+      - { task: .resume, vars: *env }
     env: *env
     requires:
       vars: ["cluster", "app"]

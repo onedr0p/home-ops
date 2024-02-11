@@ -11,11 +11,9 @@ tasks:
         vars:
           cluster: "{{.cluster}}"
           controller: "{{.controller}}"
-      - sleep 60
       - task: fetch-kubeconfig
         vars:
           cluster: "{{.cluster}}"
-      - sleep 60
       - task: bootstrap-helm
         vars:
           cluster: "{{.cluster}}"
@@ -24,7 +22,9 @@ tasks:
 
   bootstrap-etcd:
     desc: Bootstrap Etcd
-    cmd: talosctl --context {{.cluster}} --nodes {{.controller}} bootstrap
+    cmds:
+      - talosctl --context {{.cluster}} --nodes {{.controller}} bootstrap
+      - talosctl --context {{.cluster}} --nodes {{.controller}} health --server=false
     requires:
       vars: ["cluster", "controller"]
 
