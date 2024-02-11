@@ -46,11 +46,11 @@ This is a mono repository for my home infrastructure and Kubernetes cluster. I t
 
 ## ⛵ Kubernetes
 
-There is a template over at [onedr0p/flux-cluster-template](https://github.com/onedr0p/flux-cluster-template) if you want to try and follow along with some of the practices I use here.
+There is a template over at [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) if you want to try and follow along with some of the practices I use here.
 
 ### Installation
 
-My cluster is [k3s](https://k3s.io/) provisioned overtop bare-metal Debian using the [Ansible](https://www.ansible.com/) galaxy role [ansible-role-k3s](https://github.com/PyratLabs/ansible-role-k3s). This is a semi-hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server with ZFS for NFS/SMB shares, bulk file storage and backups.
+My Kubernetes cluster is deploy with [Talos](https://www.talos.dev). This is a semi-hyper-converged cluster, workloads and block storage are sharing the same available resources on my nodes while I have a separate server with ZFS for NFS/SMB shares, bulk file storage and backups.
 
 ### Core Components
 
@@ -166,19 +166,19 @@ Outside the `external-dns` instance mentioned above another instance is deployed
   <img src="https://user-images.githubusercontent.com/213795/172947261-65a82dcd-3274-45bd-aabf-140d60a04aa9.png" align="center" width="200px" alt="rack"/>
 </details>
 
-| Device                      | Count | OS Disk Size | Data Disk Size              | Ram  | Operating System | Purpose             |
-|-----------------------------|-------|--------------|-----------------------------|------|------------------|---------------------|
-| Intel NUC8i5BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)        | 64GB | Debian           | Kubernetes Masters  |
-| Intel NUC8i7BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)        | 64GB | Debian           | Kubernetes Workers  |
-| PowerEdge T340              | 1     | 2TB SSD      | 8x12TB ZFS (mirrored vdevs) | 64GB | Ubuntu           | NFS + Backup Server |
-| Lenovo SA120                | 1     | -            | 6x12TB (+2 hot spares)      | -    | -                | DAS                 |
-| Raspberry Pi 4              | 1     | 32GB (SD)    | -                           | 4GB  | PiKVM (Arch)     | Network KVM         |
-| TESmart 8 Port KVM Switch   | 1     | -            | -                           | -    | -                | Network KVM (PiKVM) |
-| HP EliteDesk 800 G3 SFF     | 1     | 256GB NVMe   | -                           | 8GB  | Vyos (Debian)    | Router              |
-| Unifi US-16-XG              | 1     | -            | -                           | -    | -                | 10Gb Core Switch    |
-| Unifi USW-Enterprise-24-PoE | 1     | -            | -                           | -    | -                | 2.5Gb PoE Switch    |
-| Unifi USP PDU Pro           | 1     | -            | -                           | -    | -                | PDU                 |
-| APC SMT1500RM2U w/ NIC      | 1     | -            | -                           | -    | -                | UPS                 |
+| Device                      | Count | OS Disk Size | Data Disk Size              | Ram  | Operating System | Purpose                |
+|-----------------------------|-------|--------------|-----------------------------|------|------------------|------------------------|
+| Intel NUC8i5BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)        | 64GB | Debian           | Kubernetes Controllers |
+| Intel NUC8i7BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)        | 64GB | Debian           | Kubernetes Workers     |
+| PowerEdge T340              | 1     | 2TB SSD      | 8x12TB ZFS (mirrored vdevs) | 64GB | Ubuntu           | NFS + Backup Server    |
+| Lenovo SA120                | 1     | -            | 6x12TB (+2 hot spares)      | -    | -                | DAS                    |
+| Raspberry Pi 4              | 1     | 32GB (SD)    | -                           | 4GB  | PiKVM (Arch)     | Network KVM            |
+| TESmart 8 Port KVM Switch   | 1     | -            | -                           | -    | -                | Network KVM (PiKVM)    |
+| HP EliteDesk 800 G3 SFF     | 1     | 256GB NVMe   | -                           | 8GB  | Vyos (Debian)    | Router                 |
+| Unifi US-16-XG              | 1     | -            | -                           | -    | -                | 10Gb Core Switch       |
+| Unifi USW-Enterprise-24-PoE | 1     | -            | -                           | -    | -                | 2.5Gb PoE Switch       |
+| Unifi USP PDU Pro           | 1     | -            | -                           | -    | -                | PDU                    |
+| APC SMT1500RM2U w/ NIC      | 1     | -            | -                           | -    | -                | UPS                    |
 
 ---
 
