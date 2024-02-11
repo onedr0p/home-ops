@@ -11,7 +11,7 @@ _... managed with Flux, Renovate, and GitHub Actions_ 🤖
 <div align="center">
 
 [![Discord](https://img.shields.io/discord/673534664354430999?style=for-the-badge&label&logo=discord&logoColor=white&color=blue)](https://discord.gg/home-operations)&nbsp;&nbsp;
-[![Kubernetes](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fonedr0p%2Fhome-ops%2Fmain%2Fkubernetes%2Fmain%2Fapps%2Ftools%2Fsystem-upgrade-controller%2Fplans%2Fserver.yaml&query=%24.spec.version&style=for-the-badge&logo=kubernetes&logoColor=white&label=%20)](https://k3s.io/)&nbsp;&nbsp;
+[![Kubernetes](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fonedr0p%2Fhome-ops%2Fmain%2Fkubernetes%2Fmain%2Fapps%2Fsystem-upgrade%2Fsystem-upgrade-plans%2Fks.yaml&query=%24.spec.postBuild.substitute.KUBERNETES_VERSION&style=for-the-badge&logo=kubernetes&logoColor=white&label=%20)](https://k3s.io/)&nbsp;&nbsp;
 [![Renovate](https://img.shields.io/github/actions/workflow/status/onedr0p/home-ops/renovate.yaml?branch=main&label=&logo=renovatebot&style=for-the-badge&color=blue)](https://github.com/onedr0p/home-ops/actions/workflows/renovate.yaml)
 
 </div>
