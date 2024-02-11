@@ -18,16 +18,16 @@ tasks:
     prompt: Reset rook-ceph on '{{.cluster}}' cluster... continue?
     cmds:
       - for: { var: nodes }
+        task: .reset-data
+        vars:
+          cluster: '{{.cluster}}'
+          node: '{{.ITEM}}'
+      - for: { var: nodes }
         task: .reset-disk
         vars:
           cluster: '{{.cluster}}'
           node: '{{.ITEM}}'
           disk: '{{.disk}}'
-      - for: { var: nodes }
-        task: .reset-data
-        vars:
-          cluster: '{{.cluster}}'
-          node: '{{.ITEM}}'
     vars:
       cluster: main
       disk: /dev/nvme0n1

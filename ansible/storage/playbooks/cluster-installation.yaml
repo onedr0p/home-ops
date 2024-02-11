@@ -15,15 +15,15 @@
         path: /etc/rancher/k3s/config.yaml
       register: k3s_installed
 
+    - name: Check if cluster can be upgraded
+      when: k3s_installed.stat.exists
+      ansible.builtin.include_tasks: tasks/upgrade.yaml
+
     - name: Ignore manifests templates and urls if the cluster is already installed
       when: k3s_installed.stat.exists
       ansible.builtin.set_fact:
         k3s_server_manifests_templates: []
         k3s_server_manifests_urls: []
-
-    - name: Prevent downgrades
-      when: k3s_installed.stat.exists
-      ansible.builtin.include_tasks: tasks/downgrade.yaml
 
     - name: Install Kubernetes
       ansible.builtin.include_role:
@@ -47,11 +47,6 @@
         wait_timeout: 360
       loop:
         - { name: cilium, kind: HelmChart, namespace: kube-system }
-        - { name: coredns, kind: HelmChart, namespace: kube-system }
-
-    - name: Coredns
-      when: k3s_primary_control_node
-      ansible.builtin.include_tasks: tasks/coredns.yaml
 
     - name: Cilium
       when: k3s_primary_control_node
