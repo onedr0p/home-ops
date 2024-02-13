@@ -19,3 +19,16 @@ tasks:
             sh: kubectl --context {{.cluster}} get nodes --output json | jq --join-output '[.items[].metadata.name] | join(" ")'
       - task: :flux:bootstrap
         vars: *vars
+
+  storage:
+    vars: &vars
+      cluster: storage
+    cmds:
+      - task: :ansible:venv
+        vars: *vars
+      - task: :ansible:run
+        vars:
+          <<: *vars
+          playbook: cluster-installation
+      - task: :flux:bootstrap
+        vars: *vars
