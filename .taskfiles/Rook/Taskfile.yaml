@@ -13,28 +13,27 @@ vars:
 
 tasks:
 
-  reset-main:
+  reset:
     desc: Reset Rook on the main cluster
     prompt: Reset rook-ceph on '{{.cluster}}' cluster... continue?
     cmds:
       - for: { var: nodes }
-        task: .reset-data
+        task: reset-data
         vars:
           cluster: '{{.cluster}}'
           node: '{{.ITEM}}'
       - for: { var: nodes }
-        task: .reset-disk
+        task: reset-disk
         vars:
           cluster: '{{.cluster}}'
           node: '{{.ITEM}}'
           disk: '{{.disk}}'
-    vars:
-      cluster: main
-      disk: /dev/nvme0n1
-      nodes: k8s-0 k8s-1 k8s-2 k8s-3 k8s-4 k8s-5
+    requires:
+      vars: ["cluster", "disk", "nodes"]
 
-  .reset-disk:
-    internal: true
+  reset-disk:
+    desc: Reset a rook disk on a node
+    prompt: Reset rook disk '{{.disk}}' on node '{{.node}}' on '{{.cluster}}' cluster... continue?
     summary: |
       Args:
         cluster: Cluster to run command against (required)
@@ -55,8 +54,9 @@ tasks:
       - test -f {{.ROOK_SCRIPTS_DIR}}/wait-for-job.sh
       - test -f {{.ROOK_TEMPLATES_DIR}}/WipeDiskJob.tmpl.yaml
 
-  .reset-data:
-    internal: true
+  reset-data:
+    desc: Reset rook data on a node
+    prompt: Reset rook data on node '{{.node}}' on '{{.cluster}}' cluster... continue?
     summary: |
       Args:
         cluster: Cluster to run command against (required)

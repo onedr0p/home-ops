@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+
+  main:
+    vars: &vars
+      cluster: main
+      controller: 192.168.42.10
+    cmds:
+      - task: :talos:bootstrap
+        vars: *vars
+      - task: :rook:reset
+        vars:
+          <<: *vars
+          disk: /dev/nvme0n1
+          nodes:
+            sh: kubectl --context {{.cluster}} get nodes --output json | jq --join-output '[.items[].metadata.name] | join(" ")'
+      - task: :flux:bootstrap
+        vars: *vars

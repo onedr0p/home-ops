@@ -6,17 +6,20 @@ tasks:
 
   bootstrap:
     desc: Bootstrap Talos
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+        controller: Controller node to run command against (required)
+    prompt: Bootstrap Talos on the '{{.cluster}}' cluster... continue?
     cmds:
       - task: bootstrap-etcd
-        vars:
+        vars: &vars
           cluster: "{{.cluster}}"
           controller: "{{.controller}}"
       - task: fetch-kubeconfig
-        vars:
-          cluster: "{{.cluster}}"
+        vars: *vars
       - task: bootstrap-core-apps
-        vars:
-          cluster: "{{.cluster}}"
+        vars: *vars
     requires:
       vars: ["cluster", "controller"]
 
@@ -30,7 +33,6 @@ tasks:
 
   bootstrap-core-apps:
     desc: Bootstrap Helm apps
-    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos"
     cmd: helmfile --kube-context {{.cluster}} --file {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/apps/helmfile.yaml apply
     requires:
       vars: ["cluster"]
