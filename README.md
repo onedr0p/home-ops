@@ -168,8 +168,8 @@ Outside the `external-dns` instance mentioned above another instance is deployed
 
 | Device                      | Count | OS Disk Size | Data Disk Size              | Ram  | Operating System | Purpose                |
 |-----------------------------|-------|--------------|-----------------------------|------|------------------|------------------------|
-| Intel NUC8i5BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)        | 64GB | Debian           | Kubernetes Controllers |
-| Intel NUC8i7BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)        | 64GB | Debian           | Kubernetes Workers     |
+| Intel NUC8i5BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)        | 64GB | Talos            | Kubernetes Controllers |
+| Intel NUC8i7BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)        | 64GB | Talos            | Kubernetes Workers     |
 | PowerEdge T340              | 1     | 2TB SSD      | 8x12TB ZFS (mirrored vdevs) | 64GB | Ubuntu           | NFS + Backup Server    |
 | Lenovo SA120                | 1     | -            | 6x12TB (+2 hot spares)      | -    | -                | DAS                    |
 | Raspberry Pi 4              | 1     | 32GB (SD)    | -                           | 4GB  | PiKVM (Arch)     | Network KVM            |
