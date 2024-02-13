@@ -22,23 +22,24 @@ tasks:
       - kubectl --context {{.cluster}} apply --server-side --filename https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/{{.PROMETHEUS_OPERATOR_VERSION}}/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
       # Install Flux
       - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux
+      # Install secrets and configmaps
       - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml | kubectl --context {{.cluster}} apply -f -
       - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml | kubectl --context {{.cluster}} apply -f -
-      - sops --decrypt --in-place {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.env
-      - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars
+      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.yaml | kubectl --context {{.cluster}} apply -f -
+      - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-settings.yaml
+      # Install Flux Kustomization resources
       - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/flux/config
-      - defer: sops --encrypt --in-place {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.env
     requires:
       vars: ["cluster"]
     preconditions:
       - test -f {{.ROOT_DIR}}/age.key
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-settings.env
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.env
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-settings.yaml
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.yaml
       - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml
       - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml
-      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.env
+      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.yaml
 
   apply:
     desc: Apply a Flux Kustomization resource for a cluster
