@@ -25,15 +25,16 @@ tasks:
 
   bootstrap-etcd:
     desc: Bootstrap Etcd
-    cmds:
-      - talosctl --context {{.cluster}} --nodes {{.controller}} bootstrap
-      - talosctl --context {{.cluster}} --nodes {{.controller}} health --server=false
+    cmd: until talosctl --context {{.cluster}} --nodes {{.controller}} bootstrap; do sleep 10; done
     requires:
       vars: ["cluster", "controller"]
 
   bootstrap-core-apps:
     desc: Bootstrap Helm apps
-    cmd: helmfile --kube-context {{.cluster}} --file {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/apps/helmfile.yaml apply
+    cmds:
+      - until kubectl --context {{.cluster}} wait --for=condition=Ready=False nodes --all --timeout=600s; do sleep 10; done
+      - helmfile --kube-context {{.cluster}} --file {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/apps/helmfile.yaml apply
+      - until kubectl --context {{.cluster}} wait --for=condition=Ready nodes --all --timeout=600s; do sleep 10; done
     requires:
       vars: ["cluster"]
 
