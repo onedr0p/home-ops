@@ -14,7 +14,7 @@ tasks:
       - task: fetch-kubeconfig
         vars:
           cluster: "{{.cluster}}"
-      - task: bootstrap-helm
+      - task: bootstrap-core-apps
         vars:
           cluster: "{{.cluster}}"
     requires:
@@ -28,32 +28,12 @@ tasks:
     requires:
       vars: ["cluster", "controller"]
 
-  fetch-kubeconfig:
-    desc: Fetch kubeconfig from Talos controllers
-    cmd: |
-      talosctl --context {{.cluster}} kubeconfig --nodes {{.controller}} \
-          --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
-    requires:
-      vars: ["cluster"]
-
-  bootstrap-helm:
+  bootstrap-core-apps:
     desc: Bootstrap Helm apps
-    cmds:
-      - for: ["cilium", "kubelet-csr-approver"]
-        task: .bootstrap-helm-app
-        vars:
-          app: '{{.ITEM}}'
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos"
+    cmd: helmfile --kube-context {{.cluster}} --file {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/apps/helmfile.yaml apply
     requires:
       vars: ["cluster"]
-
-  .bootstrap-helm-app:
-    internal: true
-    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/helm/{{.app}}"
-    cmds:
-      - kubectl kustomize --enable-helm . | kubectl --context {{.cluster}} apply --server-side --filename -
-      - defer: rm -rf ./charts
-    requires:
-      vars: ["app"]
 
   upgrade-talos:
     desc: Upgrade Talos on a node
@@ -70,3 +50,11 @@ tasks:
       vars: ["node", "to"]
     preconditions:
       - talosctl --nodes {{.node}} get machineconfig
+
+  fetch-kubeconfig:
+    desc: Fetch kubeconfig from Talos controllers
+    cmd: |
+      talosctl --context {{.cluster}} kubeconfig --nodes {{.controller}} \
+          --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
+    requires:
+      vars: ["cluster"]
