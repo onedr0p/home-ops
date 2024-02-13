@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliuml2announcementpolicy_v2alpha1.json
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: l2-policy
+spec:
+  loadBalancerIPs: true
+  interfaces:
+    - ^enp.*
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux
+  serviceSelector:
+    matchLabels:
+      "io.cilium/lb-ipam": "layer2"
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumloadbalancerippool_v2alpha1.json
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: l2-pool
+spec:
+  allowFirstLastIPs: "Yes"
+  blocks:
+    - start: 192.168.42.120
+      stop: 192.168.42.149
+  serviceSelector:
+    matchLabels:
+      "io.cilium/lb-ipam": "layer2"
