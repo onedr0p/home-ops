@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: thanos
-      version: 12.23.1
+      version: 13.0.0
       sourceRef:
         kind: HelmRepository
         name: bitnami
@@ -61,6 +61,10 @@ spec:
       type: s3
       config:
         insecure: true
+    receive:
+      enabled: false
+      networkPolicy:
+        enabled: false
     queryFrontend:
       enabled: true
       replicaCount: 2
@@ -81,6 +85,8 @@ spec:
         extraTls:
           - hosts:
               - *host
+      networkPolicy:
+        enabled: false
     query:
       enabled: true
       replicaCount: 2
@@ -89,9 +95,13 @@ spec:
         sidecarsService: kube-prometheus-stack-thanos-discovery
         sidecarsNamespace: observability
       stores: ["thanos.turbo.ac:10901"]
+      networkPolicy:
+        enabled: false
     bucketweb:
       enabled: true
       replicaCount: 2
+      networkPolicy:
+        enabled: false
     compactor:
       enabled: true
       extraFlags:
@@ -104,6 +114,8 @@ spec:
         enabled: true
         storageClass: openebs-hostpath
         size: 10Gi
+      networkPolicy:
+        enabled: false
     storegateway:
       enabled: true
       replicaCount: 2
@@ -112,6 +124,8 @@ spec:
         enabled: true
         storageClass: openebs-hostpath
         size: 10Gi
+      networkPolicy:
+        enabled: false
     ruler:
       enabled: true
       replicaCount: 2
@@ -133,6 +147,8 @@ spec:
         enabled: true
         storageClass: openebs-hostpath
         size: 10Gi
+      networkPolicy:
+        enabled: false
     metrics:
       enabled: true
       serviceMonitor:
