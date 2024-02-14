@@ -1,0 +1,79 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app fstrim
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 2.6.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      main:
+        type: cronjob
+        cronjob:
+          schedule: "@weekly"
+          parallelism: 6 # Set this to your number of nodes
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/fstrim
+              tag: 2.39.3@sha256:3262acbb9a4caa609b74731637e7549148c21d7a4be909f973aa6673fff3844e
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 25m
+              limits:
+                memory: 128Mi
+            securityContext:
+              privileged: true
+        pod:
+          hostNetwork: true
+          hostPID: true
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: *app
+    service:
+      main:
+        enabled: false
+    persistence:
+      procfs:
+        type: hostPath
+        hostPath: /proc
+        hostPathType: Directory
+        globalMounts:
+          - path: /host/proc
+            readOnly: true
+      netfs:
+        type: hostPath
+        hostPath: /sys
+        hostPathType: Directory
+        globalMounts:
+          - path: /host/net
+            readOnly: true
