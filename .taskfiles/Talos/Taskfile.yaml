@@ -28,6 +28,8 @@ tasks:
     cmd: until talosctl --context {{.cluster}} --nodes {{.controller}} bootstrap; do sleep 10; done
     requires:
       vars: ["cluster", "controller"]
+    preconditions:
+      - talosctl config get-contexts | grep {{.cluster}}
 
   bootstrap-apps:
     desc: Bootstrap core apps needed for Talos
@@ -37,6 +39,9 @@ tasks:
       - until kubectl --context {{.cluster}} wait --for=condition=Ready nodes --all --timeout=600s; do sleep 10; done
     requires:
       vars: ["cluster"]
+    preconditions:
+      - kubectl config get-contexts {{.cluster}}
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/apps/helmfile.yaml
 
   upgrade-talos:
     desc: Upgrade Talos on a node
@@ -44,6 +49,7 @@ tasks:
     requires:
       vars: ["node", "image"]
     preconditions:
+      - talosctl config get-contexts | grep {{.cluster}}
       - talosctl --nodes {{.node}} get machineconfig
 
   upgrade-k8s:
@@ -52,6 +58,7 @@ tasks:
     requires:
       vars: ["node", "to"]
     preconditions:
+      - talosctl config get-contexts | grep {{.cluster}}
       - talosctl --nodes {{.node}} get machineconfig
 
   fetch-kubeconfig:
@@ -61,3 +68,5 @@ tasks:
           --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
     requires:
       vars: ["cluster"]
+    preconditions:
+      - talosctl config get-contexts | grep {{.cluster}}
