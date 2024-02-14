@@ -81,6 +81,8 @@ spec:
         extraTls:
           - hosts:
               - *host
+      networkPolicy:
+        enabled: false
     query:
       enabled: true
       replicaCount: 2
@@ -89,9 +91,13 @@ spec:
         sidecarsService: kube-prometheus-stack-thanos-discovery
         sidecarsNamespace: observability
       stores: ["thanos.turbo.ac:10901"]
+      networkPolicy:
+        enabled: false
     bucketweb:
       enabled: true
       replicaCount: 2
+      networkPolicy:
+        enabled: false
     compactor:
       enabled: true
       extraFlags:
@@ -104,6 +110,8 @@ spec:
         enabled: true
         storageClass: openebs-hostpath
         size: 10Gi
+      networkPolicy:
+        enabled: false
     storegateway:
       enabled: true
       replicaCount: 2
@@ -112,6 +120,8 @@ spec:
         enabled: true
         storageClass: openebs-hostpath
         size: 10Gi
+      networkPolicy:
+        enabled: false
     ruler:
       enabled: true
       replicaCount: 2
@@ -133,6 +143,8 @@ spec:
         enabled: true
         storageClass: openebs-hostpath
         size: 10Gi
+      networkPolicy:
+        enabled: false
     metrics:
       enabled: true
       serviceMonitor:
