@@ -4,49 +4,42 @@ version: "3"
 
 tasks:
 
-  mount:
-    desc: Mount a PersistentVolumeClaim to a temporary pod for a cluster
+  delete-evicted-pods:
+    desc: Deletes pods with Evicted phase
     summary: |
       Args:
         cluster: Cluster to run command against (required)
-        ns: Namespace the PVC is in (default: default)
-        claim: PVC to mount (required)
-    interactive: true
-    cmd: |
-      kubectl --context {{.cluster}} run -n {{.ns}} debug-{{.claim}} -i --tty --rm --image=null --privileged --overrides='
-        {
-          "apiVersion": "v1",
-          "spec": {
-            "containers": [
-              {
-                "name": "debug",
-                "image": "ghcr.io/onedr0p/alpine:rolling",
-                "command": ["/bin/bash"],
-                "stdin": true,
-                "stdinOnce": true,
-                "tty": true,
-                "volumeMounts": [
-                  {
-                    "name": "config",
-                    "mountPath": "/config"
-                  }
-                ]
-              }
-            ],
-            "volumes": [
-              {
-                "name": "config",
-                "persistentVolumeClaim": {
-                  "claimName": "{{.claim}}"
-                }
-              }
-            ],
-            "restartPolicy": "Never"
-          }
-        }'
+    cmds:
+      - kubectl --context {{.cluster}} delete pods --field-selector status.phase=Evicted -A --ignore-not-found=true
     requires:
-      vars: ["cluster", "claim"]
-    vars:
-      ns: '{{.ns | default "default"}}'
-    preconditions:
-      - kubectl --context {{.cluster}} -n {{.ns}} get persistentvolumeclaim {{.claim}}
+      vars: ["cluster"]
+
+  delete-failed-pods:
+    desc: Deletes pods with Failed phase
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+    cmds:
+      - kubectl --context {{.cluster}} delete pods --field-selector status.phase=Failed -A --ignore-not-found=true
+    requires:
+      vars: ["cluster"]
+
+  delete-succeeded-pods:
+    desc: Deletes pods with Succeeded phase
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+    cmds:
+      - kubectl --context {{.cluster}} delete pods --field-selector status.phase=Succeeded -A --ignore-not-found=true
+    requires:
+      vars: ["cluster"]
+
+  delete-pending-pods:
+    desc: Deletes pods with Pending phase
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+    cmds:
+      - kubectl --context {{.cluster}} delete pods --field-selector status.phase=Pending -A --ignore-not-found=true
+    requires:
+      vars: ["cluster"]
