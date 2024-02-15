@@ -1,0 +1,75 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "Upgrade Talos"
+
+on:
+  workflow_dispatch:
+    inputs:
+      talosPullRequestNumber:
+        description: Talos Upgrade PR Number
+        required: true
+      kubeClusterName:
+        description: Kube Cluster Name
+        required: true
+        default: main
+      pgClusterName:
+        description: PG Cluster Name
+        required: true
+        default: postgres16
+      pgMaintenanceMode:
+        description: PG Maintenance Mode
+        required: true
+        default: "true"
+
+jobs:
+  upgrade:
+    name: Upgrade Talos
+    runs-on: ["arc-runner-set-home-ops"]
+    steps:
+      - name: Generate Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Setup Workflow Tools
+        shell: bash
+        run: |
+          brew install kubernetes-cli krew
+          echo "$HOME/.krew/bin" >> $GITHUB_PATH
+          kubectl krew install cnpg
+
+      - name: Write kubeconfig
+        id: kubeconfig
+        uses: timheuer/base64-to-file@v1
+        with:
+          encodedString: "${{ secrets.KUBECONFIG }}"
+          fileName: kubeconfig
+
+      - name: Print cnpg status
+        shell: bash
+        env:
+          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
+        run: kubectl cnpg --context ${{ github.event.inputs.kubeClusterName }} -n database status ${{ github.event.inputs.pgClusterName }}
+
+      - if: ${{ github.event.inputs.pgMaintenanceMode == 'true' }}
+        name: Merge Talos Upgrade PR
+        shell: bash
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+        run: gh pr merge ${{ github.event.inputs.talosPullRequestNumber }} --squash
+
+      - name: Change CNPG Maintenance Mode
+        shell: bash
+        env:
+          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
+        run: |
+          if [ "${{ github.event.inputs.pgMaintenanceMode }}" == "true" ]; then
+              kubectl cnpg --context ${{ github.event.inputs.kubeClusterName }} maintenance set --reusePVC --all-namespaces
+          else
+              kubectl cnpg --context ${{ github.event.inputs.kubeClusterName }} maintenance unset --reusePVC --all-namespaces
+          fi
