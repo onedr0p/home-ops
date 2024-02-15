@@ -5,8 +5,8 @@ kind: Cluster
 metadata:
   name: postgres16
 spec:
-  instances: 3
-  imageName: ghcr.io/cloudnative-pg/postgresql:16.2-1
+  instances: 6 # Set to my total number of nodes
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.2-2
   primaryUpdateStrategy: unsupervised
   storage:
     size: 20Gi
@@ -16,9 +16,8 @@ spec:
   enableSuperuserAccess: true
   postgresql:
     parameters:
-      max_connections: "600"
-      max_slot_wal_keep_size: 10GB
-      shared_buffers: 512MB
+      max_connections: "200"
+      shared_buffers: 256MB
   resources:
     requests:
       cpu: 500m

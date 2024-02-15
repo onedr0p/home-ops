@@ -104,7 +104,10 @@ spec:
       replicas: *replica
       config:
         global:
+          # Grafana requires session
+          # Ref: https://github.com/grafana/grafana/issues/74260
           pool_mode: transaction
+          client_tls_sslmode: prefer
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
