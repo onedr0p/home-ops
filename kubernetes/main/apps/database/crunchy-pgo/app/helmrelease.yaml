@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: crunchy-postgres-operator
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: pgo
+      version: 5.5.0
+      sourceRef:
+        kind: HelmRepository
+        name: crunchydata
+        namespace: flux-system
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  dependsOn:
+    - name: openebs
+      namespace: openebs-system
+  values:
+    install:
+      clusterLabels:
+        app.kubernetes.io/name: pgo
