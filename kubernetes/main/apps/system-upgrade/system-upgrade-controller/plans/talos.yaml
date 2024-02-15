@@ -18,6 +18,11 @@ spec:
     deleteLocalData: true
     disableEviction: false
     ignoreDaemonSets: true
+    podSelector:
+      matchExpressions:
+        - key: app
+          operator: NotIn
+          values: ["rook-ceph-osd"]
   exclusive: true
   nodeSelector:
     matchExpressions:
@@ -27,16 +32,7 @@ spec:
   tolerations:
     - key: CriticalAddonsOnly
       operator: Exists
-    - key: node-role.kubernetes.io/master
-      operator: Exists
-      effect: NoSchedule
-    - key: node-role.kubernetes.io/controlplane
-      operator: Exists
-      effect: NoSchedule
     - key: node-role.kubernetes.io/control-plane
-      operator: Exists
-      effect: NoSchedule
-    - key: node-role.kubernetes.io/etcd
       operator: Exists
       effect: NoSchedule
   prepare: &prepare

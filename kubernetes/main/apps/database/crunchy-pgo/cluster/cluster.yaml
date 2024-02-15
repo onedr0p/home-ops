@@ -71,17 +71,19 @@ spec:
             bucket: crunchy-pgo
             endpoint: s3.turbo.ac
             region: us-east-1
-          schedules: &schedules
-            full: "0 0 * * 0" # Sunday at midnight
-            differential: "@daily"
-            incremental: "@hourly"
+          schedules:
+            full: "0 1 * * 0"           # Sunday at 1am
+            differential: "0 1 * * 1-6" # Mon-Sat at 1am
+            incremental: "0 2-23 * * *" # Every hour except 1am
         - # Cloudflare R2
           name: repo2
           s3: &r2
             bucket: crunchy-pgo
             endpoint: ${CLUSTER_SECRET_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
             region: us-east-1
-          schedules: *schedules
+          schedules:
+            full: "0 2 * * 0"           # Sunday at 2am
+            differential: "0 2 * * 1-6" # Mon-Sat at 2am
   dataSource:
     pgbackrest:
       stanza: db
