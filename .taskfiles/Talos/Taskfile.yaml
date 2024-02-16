@@ -2,6 +2,19 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+vars:
+  VYOS_ADDR: vyos.turbo.ac
+  VYOS_USER: devin
+  MATCHBOX_DIR: /config/containers/matchbox/data
+  MATCHBOX_GROUPS_DIR: "{{.MATCHBOX_DIR}}/groups"
+  MATCHBOX_PROFILES_DIR: "{{.MATCHBOX_DIR}}/profiles"
+  MATCHBOX_ASSETS_DIR: "{{.MATCHBOX_DIR}}/assets"
+  # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+  TALOS_VERSION: v1.6.3
+  TALOS_SCHEMATIC_ID: d715f723f882b1e1e8063f1b89f237dcc0e3bd000f9f970243af59c8baae0100
+  # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+  KUBERNETES_VERSION: v1.29.1
+
 tasks:
 
   bootstrap:
@@ -70,3 +83,30 @@ tasks:
       vars: ["cluster"]
     preconditions:
       - talosctl config get-contexts | grep {{.cluster}}
+
+  sync-matchbox:
+    desc: Sync required Matchbox configuration to Vyos for PXE Boot
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/matchbox"
+    cmds:
+      - ssh -l {{.VYOS_USER}} {{.VYOS_ADDR}} "sudo mkdir -p {{.MATCHBOX_DIR}}/{groups,profiles,assets}"
+      - ssh -l {{.VYOS_USER}} {{.VYOS_ADDR}} "sudo chown -R {{.VYOS_USER}}:users {{.MATCHBOX_DIR}}/{groups,profiles,assets}"
+      - for: ["kernel-amd64", "initramfs-amd64.xz"]
+        cmd: |
+          curl -skL https://factory.talos.dev/image/{{.TALOS_SCHEMATIC_ID}}/{{.TALOS_VERSION}}/{{.ITEM}} | \
+              curl -skT - -u "{{.VYOS_USER}}:" \
+                  sftp://{{.VYOS_ADDR}}/{{.MATCHBOX_ASSETS_DIR}}/{{.ITEM}}
+      - for: ["controller.partial.yaml", "worker.partial.yaml"]
+        cmd: |
+          sops -d assets/{{.ITEM | replace ".partial.yaml" ".partial.secret.sops.yaml"}} \
+              | yq eval-all '. as $item ireduce ({}; . * $item )' assets/{{.ITEM}} - | \
+                  envsubst | curl -skT - -u "{{.VYOS_USER}}:" \
+                      sftp://{{.VYOS_ADDR}}/{{.MATCHBOX_ASSETS_DIR}}/{{.ITEM | replace ".partial.yaml" ".yaml"}}
+      - find ./groups -type f -name "*.json" -exec curl -skT {} -u "{{.VYOS_USER}}:" sftp://{{.VYOS_ADDR}}/{{.MATCHBOX_GROUPS_DIR}}/ \;
+      - find ./profiles -type f -name "*.json" -exec curl -skT {} -u "{{.VYOS_USER}}:" sftp://{{.VYOS_ADDR}}/{{.MATCHBOX_PROFILES_DIR}}/ \;
+      - ssh -l {{.VYOS_USER}} {{.VYOS_ADDR}} -t /opt/vyatta/bin/vyatta-op-cmd-wrapper "restart container matchbox"
+    env:
+      TALOS_VERSION: "{{.TALOS_VERSION}}"
+      TALOS_SCHEMATIC_ID: "{{.TALOS_SCHEMATIC_ID}}"
+      KUBERNETES_VERSION: "{{.KUBERNETES_VERSION}}"
+    requires:
+      vars: ["cluster"]

@@ -1,0 +1,109 @@
+version: v1alpha1
+debug: false
+persist: true
+machine:
+    type: worker
+    certSANs:
+        - 127.0.0.1
+        - 192.168.42.254
+    kubelet:
+        image: ghcr.io/siderolabs/kubelet:${KUBERNETES_VERSION}
+        extraArgs:
+            image-gc-high-threshold: "55"
+            image-gc-low-threshold: "50"
+            rotate-server-certificates: "true"
+        extraMounts:
+            - destination: /var/openebs/local
+              type: bind
+              source: /var/openebs/local
+              options:
+                - bind
+                - rshared
+                - rw
+        defaultRuntimeSeccompProfileEnabled: true
+        nodeIP:
+            validSubnets:
+                - 192.168.42.0/24
+        disableManifestsDirectory: true
+    network:
+        interfaces:
+            - deviceSelector:
+                driver: e1000e
+              ignore: true
+            - deviceSelector:
+                hardwareAddr: 00:30:93:12:*
+                driver: atlantic
+              mtu: 9000
+              dhcp: true
+        nameservers:
+            - 192.168.254.2
+    install:
+        diskSelector:
+            model: Samsung SSD 870
+        extraKernelArgs:
+            - mitigations=off
+        image: factory.talos.dev/installer/${TALOS_SCHEMATIC_ID}:${TALOS_VERSION}
+        wipe: false
+    files:
+        - content: |-
+            [plugins."io.containerd.grpc.v1.cri"]
+              enable_unprivileged_ports = true
+              enable_unprivileged_icmp = true
+            [plugins."io.containerd.grpc.v1.cri".containerd]
+              discard_unpacked_layers = false
+            [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+              discard_unpacked_layers = false
+          permissions: 0
+          path: /etc/cri/conf.d/20-customization.part
+          op: create
+        - content: |-
+            [ NFSMount_Global_Options ]
+            nfsvers=4.2
+            hard=True
+            noatime=True
+            nodiratime=True
+            rsize=131072
+            wsize=131072
+            nconnect=8
+          permissions: 420
+          path: /etc/nfsmount.conf
+          op: overwrite
+    time:
+        disabled: false
+        servers:
+            - 192.168.0.1
+    sysctls:
+        fs.inotify.max_queued_events: "65536"
+        fs.inotify.max_user_instances: "8192"
+        fs.inotify.max_user_watches: "524288"
+    features:
+        rbac: true
+        stableHostname: true
+        apidCheckExtKeyUsage: true
+        diskQuotaSupport: true
+        kubePrism:
+            enabled: true
+            port: 7445
+    udev:
+        rules:
+            - ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
+            - SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
+            - KERNEL=="ttyACM[0-9]", GROUP="20", MODE="0660"
+cluster:
+    controlPlane:
+        endpoint: https://192.168.42.254:6443
+    network:
+        cni:
+            name: none
+        dnsDomain: cluster.local
+        podSubnets:
+            - 10.42.0.0/16
+        serviceSubnets:
+            - 10.43.0.0/16
+    discovery:
+        enabled: true
+        registries:
+            kubernetes:
+                disabled: false
+            service:
+                disabled: false
