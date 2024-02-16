@@ -84,6 +84,23 @@ tasks:
     preconditions:
       - talosctl config get-contexts | grep {{.cluster}}
 
+  apply-config:
+    desc: Apply Talos configuration to a node
+    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/matchbox/assets"
+    cmd: |
+      sops -d {{.role | replace "controlplane" "controller"}}.secret.sops.yaml | \
+          envsubst | \
+              talosctl --context {{.cluster}} apply-config --nodes {{.node}} --file /dev/stdin
+    env:
+      TALOS_VERSION: "{{.TALOS_VERSION}}"
+      TALOS_SCHEMATIC_ID: "{{.TALOS_SCHEMATIC_ID}}"
+      KUBERNETES_VERSION: "{{.KUBERNETES_VERSION}}"
+    vars:
+      role:
+        sh: talosctl --context {{.cluster}} --nodes {{.node}} get mc -o yaml | yq .spec.machine.type
+    requires:
+      vars: ["cluster", "node"]
+
   sync-matchbox:
     desc: Sync required Matchbox configuration to Vyos for PXE Boot
     dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/matchbox"
