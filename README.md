@@ -54,17 +54,18 @@ My Kubernetes cluster is deploy with [Talos](https://www.talos.dev). This is a s
 
 ### Core Components
 
-- [actions-runner-controller](https://github.com/actions/actions-runner-controller): self-hosted Github runners
-- [cilium](https://github.com/cilium/cilium): internal Kubernetes networking plugin
-- [cert-manager](https://cert-manager.io/docs/): creates SSL certificates for services in my cluster
-- [external-dns](https://github.com/kubernetes-sigs/external-dns): automatically syncs DNS records from my cluster ingresses to a DNS provider
-- [external-secrets](https://github.com/external-secrets/external-secrets/): managed Kubernetes secrets using [1Password Connect](https://github.com/1Password/connect).
-- [ingress-nginx](https://github.com/kubernetes/ingress-nginx/): ingress controller for Kubernetes using NGINX as a reverse proxy and load balancer
-- [rook](https://github.com/rook/rook): distributed block storage for persistent storage
-- [sops](https://toolkit.fluxcd.io/guides/mozilla-sops/): managed secrets for Kubernetes, Ansible, and Terraform which are committed to Git
-- [spegel](https://github.com/XenitAB/spegel): stateless cluster local OCI registry mirror
-- [tf-controller](https://github.com/weaveworks/tf-controller): additional Flux component used to run Terraform from within a Kubernetes cluster.
-- [volsync](https://github.com/backube/volsync): backup and recovery of persistent volume claims
+- [actions-runner-controller](https://github.com/actions/actions-runner-controller): Self-hosted Github runners.
+- [cert-manager](https://github.com/cert-manager/cert-manager): Creates SSL certificates for services in my cluster.
+- [cilium](https://github.com/cilium/cilium): Internal Kubernetes container networking interface.
+- [cloudflared](https://github.com/cloudflare/cloudflared): Enables Cloudflare secure access to certain ingresses.
+- [external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically syncs ingress DNS records to a DNS provider.
+- [external-secrets](https://github.com/external-secrets/external-secrets): Managed Kubernetes secrets using [1Password Connect](https://github.com/1Password/connect).
+- [ingress-nginx](https://github.com/kubernetes/ingress-nginx): Kubernetes ingress controller using NGINX as a reverse proxy and load balancer.
+- [rook](https://github.com/rook/rook): Distributed block storage for peristent storage.
+- [sops](https://github.com/getsops/sops): Managed secrets for Kubernetes and Terraform which are commited to Git.
+- [spegel](https://github.com/XenitAB/spegel): Stateless cluster local OCI registry mirror.
+- [tf-controller](https://github.com/weaveworks/tf-controller): Additional Flux component used to run Terraform from within a Kubernetes cluster.
+- [volsync](https://github.com/backube/volsync): Backup and recovery of persistent volume claims.
 
 ### GitOps
 
@@ -195,15 +196,3 @@ Outside the `external-dns` instance mentioned above another instance is deployed
 ## 🤝 Gratitude and Thanks
 
 Thanks to all the people who donate their time to the [Home Operations](https://discord.gg/home-operations) Discord community. Be sure to check out [kubesearch.dev](https://kubesearch.dev/) for ideas on how to deploy applications or get ideas on what you may deploy.
-
----
-
-## 📜 Changelog
-
-See my _awful_ [commit history](https://github.com/onedr0p/home-ops/commits/main)
-
----
-
-## 🔏 License
-
-See [LICENSE](./LICENSE)
