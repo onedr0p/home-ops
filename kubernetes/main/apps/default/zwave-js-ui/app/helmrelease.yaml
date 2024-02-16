@@ -56,15 +56,24 @@ spec:
               startup:
                 enabled: false
             securityContext:
-              privileged: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
               limits:
+                smarter-devices/ttyACM0: 1
                 memory: 512Mi
         pod:
           nodeSelector:
             aeotec.feature.node.kubernetes.io/zwave: "true"
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            runAsNonRoot: true
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
     service:
       main:
         ports:
@@ -90,14 +99,10 @@ spec:
           - hosts:
               - *host
     persistence:
+      tmp:
+        type: emptyDir
       config:
         enabled: true
         existingClaim: zwave-js-ui
         globalMounts:
           - path: /usr/src/app/store
-      usb:
-        type: hostPath
-        hostPath: /dev/serial/by-id/usb-0658_0200-if00
-        hostPathType: CharDevice
-        globalMounts:
-          - path: /dev/serial/by-id/usb-0658_0200-if00
