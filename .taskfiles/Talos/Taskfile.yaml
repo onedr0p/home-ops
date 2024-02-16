@@ -95,14 +95,13 @@ tasks:
           curl -skL https://factory.talos.dev/image/{{.TALOS_SCHEMATIC_ID}}/{{.TALOS_VERSION}}/{{.ITEM}} | \
               curl -skT - -u "{{.VYOS_USER}}:" \
                   sftp://{{.VYOS_ADDR}}/{{.MATCHBOX_ASSETS_DIR}}/{{.ITEM}}
-      - for: ["controller.partial.yaml", "worker.partial.yaml"]
+      - for: ["controller.secret.sops.yaml", "worker.secret.sops.yaml"]
         cmd: |
-          sops -d assets/{{.ITEM | replace ".partial.yaml" ".partial.secret.sops.yaml"}} \
-              | yq eval-all '. as $item ireduce ({}; . * $item )' assets/{{.ITEM}} - | \
-                  envsubst | curl -skT - -u "{{.VYOS_USER}}:" \
-                      sftp://{{.VYOS_ADDR}}/{{.MATCHBOX_ASSETS_DIR}}/{{.ITEM | replace ".partial.yaml" ".yaml"}}
-      - find ./groups -type f -name "*.json" -exec curl -skT {} -u "{{.VYOS_USER}}:" sftp://{{.VYOS_ADDR}}/{{.MATCHBOX_GROUPS_DIR}}/ \;
-      - find ./profiles -type f -name "*.json" -exec curl -skT {} -u "{{.VYOS_USER}}:" sftp://{{.VYOS_ADDR}}/{{.MATCHBOX_PROFILES_DIR}}/ \;
+          sops -d assets/{{.ITEM}} | \
+              envsubst | curl -skT - -u "{{.VYOS_USER}}:" \
+                  sftp://{{.VYOS_ADDR}}/{{.MATCHBOX_ASSETS_DIR}}/{{.ITEM | replace ".secret.sops.yaml" ".yaml"}}
+      - find ./groups -type f | xargs -I{} curl -skT {} -u "{{.VYOS_USER}}:" sftp://{{.VYOS_ADDR}}/{{.MATCHBOX_GROUPS_DIR}}/
+      - find ./profiles -type f | xargs -I{} curl -skT {} -u "{{.VYOS_USER}}:" sftp://{{.VYOS_ADDR}}/{{.MATCHBOX_PROFILES_DIR}}/
       - ssh -l {{.VYOS_USER}} {{.VYOS_ADDR}} -t /opt/vyatta/bin/vyatta-op-cmd-wrapper "restart container matchbox"
     env:
       TALOS_VERSION: "{{.TALOS_VERSION}}"
