@@ -41,7 +41,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              capabilities: { add: ["NET_ADMIN"] }
             resources:
               requests:
                 cpu: 10m
@@ -51,6 +51,11 @@ spec:
         pod:
           nodeSelector:
             nesdr.feature.node.kubernetes.io/rtlamr: "true"
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            runAsNonRoot: true
+            supplementalGroups: [20]
     service:
       main:
         enabled: false
