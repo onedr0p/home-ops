@@ -1,5 +1,7 @@
 ---
 repositories:
+  - name: coredns
+    url: https://coredns.github.io/helm
   - name: cilium
     url: https://helm.cilium.io
   - name: postfinance
@@ -12,63 +14,18 @@ releases:
     version: 1.15.1
     wait: true
     values:
-      - autoDirectNodeRoutes: true
-        bgpControlPlane:
-          enabled: true
-        bpf:
-          masquerade: true
-        cgroup:
-          automount:
-            enabled: false
-          hostRoot: /sys/fs/cgroup
-        cluster:
-          id: 1
-          name: main
-        containerRuntime:
-          integration: containerd
-        devices: enp+
-        enableRuntimeDeviceDetection: true
-        endpointRoutes:
-          enabled: true
-        hubble:
-          enabled: false
-        ipam:
-          mode: kubernetes
-        ipv4NativeRoutingCIDR: 10.42.0.0/16
-        k8sServiceHost: 127.0.0.1
-        k8sServicePort: 7445
-        kubeProxyReplacement: true
-        kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
-        loadBalancer:
-          algorithm: maglev
-          mode: dsr
-        localRedirectPolicy: true
-        operator:
-          rollOutPods: true
-        rollOutCiliumPods: true
-        routingMode: native
-        securityContext:
-          capabilities:
-            ciliumAgent:
-              - CHOWN
-              - KILL
-              - NET_ADMIN
-              - NET_RAW
-              - IPC_LOCK
-              - SYS_ADMIN
-              - SYS_RESOURCE
-              - DAC_OVERRIDE
-              - FOWNER
-              - SETGID
-              - SETUID
-            cleanCiliumState:
-              - NET_ADMIN
-              - SYS_ADMIN
-              - SYS_RESOURCE
+      - '{{ requiredEnv "CLUSTER_DIR" }}/apps/kube-system/cilium/app/values.yaml'
+  - name: coredns
+    namespace: kube-system
+    chart: coredns/coredns
+    version: 1.29.0
+    wait: true
+    values:
+      - '{{ requiredEnv "CLUSTER_DIR" }}/apps/kube-system/coredns/app/values.yaml'
   - name: kubelet-csr-approver
     namespace: kube-system
     chart: postfinance/kubelet-csr-approver
     version: 1.0.7
     wait: true
     values:
-      - providerRegex: ^k8s-\d$
+      - '{{ requiredEnv "CLUSTER_DIR" }}/apps/kube-system/kubelet-csr-approver/app/values.yaml'

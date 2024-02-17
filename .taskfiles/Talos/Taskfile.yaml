@@ -48,8 +48,10 @@ tasks:
     desc: Bootstrap core apps needed for Talos
     cmds:
       - until kubectl --context {{.cluster}} wait --for=condition=Ready=False nodes --all --timeout=600s; do sleep 10; done
-      - helmfile --kube-context {{.cluster}} --file {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/apps/helmfile.yaml apply --suppress-diff
+      - helmfile --quiet --kube-context {{.cluster}} --file {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
       - until kubectl --context {{.cluster}} wait --for=condition=Ready nodes --all --timeout=600s; do sleep 10; done
+    env:
+      CLUSTER_DIR: "{{.KUBERNETES_DIR}}/{{.cluster}}" # required for helmfile
     requires:
       vars: ["cluster"]
     preconditions:

@@ -20,6 +20,18 @@ tasks:
     requires:
       vars: ["cluster", "claim"]
 
+  drain:
+    desc: Drain a node
+    summary: |
+      Args:
+        cluster: Cluster to run command against (required)
+        node: Node to drain (required)
+    cmd: |
+      kubectl --context {{.cluster}} drain {{.node}} --ignore-daemonsets \
+          --delete-local-data --force --pod-selector 'app!=rook-ceph-osd'
+    requires:
+      vars: ["cluster", "node"]
+
   delete-failed-pods:
     desc: Deletes pods with a fucked status
     summary: |

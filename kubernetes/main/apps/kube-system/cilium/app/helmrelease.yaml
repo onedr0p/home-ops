@@ -23,28 +23,10 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
+  valuesFrom:
+    - kind: ConfigMap
+      name: cilium-values
   values:
-    autoDirectNodeRoutes: true
-    bandwidthManager:
-      enabled: true
-      bbr: true
-    bgpControlPlane:
-      enabled: true
-    bpf:
-      masquerade: true
-    cgroup:
-      automount:
-        enabled: false
-      hostRoot: /sys/fs/cgroup
-    cluster:
-      id: 1
-      name: main
-    containerRuntime:
-      integration: containerd
-    devices: enp+
-    enableRuntimeDeviceDetection: true
-    endpointRoutes:
-      enabled: true
     hubble:
       enabled: true
       metrics:
@@ -79,21 +61,7 @@ spec:
           tls:
             - hosts:
                 - *host
-    ipam:
-      mode: kubernetes
-    ipv4NativeRoutingCIDR: 10.42.0.0/16
-    k8sServiceHost: 127.0.0.1
-    k8sServicePort: 7445
-    kubeProxyReplacement: true
-    kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
-    l2announcements:
-      enabled: true
-    loadBalancer:
-      algorithm: maglev
-      mode: dsr
-    localRedirectPolicy: true
     operator:
-      rollOutPods: true
       prometheus:
         enabled: true
         serviceMonitor:
@@ -111,23 +79,3 @@ spec:
       enabled: true
       annotations:
         grafana_folder: Cilium
-    rollOutCiliumPods: true
-    routingMode: native
-    securityContext:
-      capabilities:
-        ciliumAgent:
-          - CHOWN
-          - KILL
-          - NET_ADMIN
-          - NET_RAW
-          - IPC_LOCK
-          - SYS_ADMIN
-          - SYS_RESOURCE
-          - DAC_OVERRIDE
-          - FOWNER
-          - SETGID
-          - SETUID
-        cleanCiliumState:
-          - NET_ADMIN
-          - SYS_ADMIN
-          - SYS_RESOURCE
