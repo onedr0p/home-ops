@@ -45,14 +45,14 @@ spec:
             envFrom:
               - secretRef:
                   name: home-assistant-secret
-            probes:
+            probes: &probes
               liveness:
                 enabled: false
               readiness:
                 enabled: false
               startup:
                 enabled: false
-            securityContext:
+            securityContext: &securityContext
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
@@ -61,6 +61,26 @@ spec:
                 cpu: 10m
               limits:
                 memory: 1Gi
+          code:
+            image:
+              repository: ghcr.io/coder/code-server
+              tag: 4.21.1
+            env:
+              TZ: America/New_York
+            args: [
+              "--auth", "none",
+              "--user-data-dir", "/config/.vscode",
+              "--extensions-dir", "/config/.vscode",
+              "--port", "80",
+              "/config"
+            ]
+            probes: *probes
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
         pod:
           securityContext:
             runAsUser: 568
@@ -73,6 +93,8 @@ spec:
         ports:
           http:
             port: 8123
+          code:
+            port: 80
     ingress:
       main:
         enabled: true
@@ -86,6 +108,19 @@ spec:
                 service:
                   name: main
                   port: http
+        tls:
+          - hosts:
+              - *host
+      code:
+        enabled: true
+        className: internal
+        hosts:
+          - host: &host hass-code.devbu.io
+            paths:
+              - path: /
+                service:
+                  name: main
+                  port: code
         tls:
           - hosts:
               - *host
