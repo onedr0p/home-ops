@@ -26,8 +26,6 @@ spec:
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
-    - name: smarter-device-manager
-      namespace: kube-system
     - name: volsync
       namespace: volsync-system
   values:
@@ -58,25 +56,15 @@ spec:
               startup:
                 enabled: false
             securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              privileged: true
             resources:
               requests:
                 cpu: 10m
               limits:
-                smarter-devices/ttyACM0: "1"
                 memory: 512Mi
         pod:
           nodeSelector:
             aeotec.feature.node.kubernetes.io/zwave: "true"
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            runAsNonRoot: true
-            fsGroup: 568
-            fsGroupChangePolicy: OnRootMismatch
-            supplementalGroups: [20]
     service:
       main:
         ports:
@@ -102,10 +90,14 @@ spec:
           - hosts:
               - *host
     persistence:
-      tmp:
-        type: emptyDir
       config:
         enabled: true
         existingClaim: zwave-js-ui
         globalMounts:
           - path: /usr/src/app/store
+      usb:
+        type: hostPath
+        hostPath: /dev/serial/by-id/usb-0658_0200-if00
+        hostPathType: CharDevice
+        globalMounts:
+          - path: /dev/serial/by-id/usb-0658_0200-if00

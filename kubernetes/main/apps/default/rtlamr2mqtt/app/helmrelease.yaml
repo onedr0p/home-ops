@@ -44,22 +44,14 @@ spec:
               requests:
                 cpu: 10m
               limits:
-                smarter-devices/rtl2838: "1"
                 memory: 256Mi
         pod:
           nodeSelector:
             nesdr.feature.node.kubernetes.io/rtlamr: "true"
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            runAsNonRoot: true
-            supplementalGroups: [20]
     service:
       main:
         enabled: false
     persistence:
-      tmp:
-        type: emptyDir
       config-file:
         type: secret
         name: rtlamr2mqtt-secret
