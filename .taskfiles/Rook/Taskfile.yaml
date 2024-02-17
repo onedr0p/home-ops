@@ -14,26 +14,23 @@ vars:
 tasks:
 
   reset:
-    desc: Reset Rook on the main cluster
-    prompt: Reset rook-ceph on '{{.cluster}}' cluster... continue?
+    desc: Reset Rook
+    vars: &vars
+      cluster: "{{.cluster}}"
+      disk: "{{.disk}}"
+      node: "{{.ITEM}}"
     cmds:
       - for: { var: nodes }
         task: reset-data
-        vars:
-          cluster: '{{.cluster}}'
-          node: '{{.ITEM}}'
+        vars: *vars
       - for: { var: nodes }
         task: reset-disk
-        vars:
-          cluster: '{{.cluster}}'
-          node: '{{.ITEM}}'
-          disk: '{{.disk}}'
+        vars: *vars
     requires:
-      vars: ["cluster", "disk", "nodes"]
+      vars: ["cluster", "nodes", "disk"]
 
   reset-disk:
     desc: Reset a rook disk on a node
-    prompt: Reset rook disk '{{.disk}}' on node '{{.node}}' on '{{.cluster}}' cluster... continue?
     summary: |
       Args:
         cluster: Cluster to run command against (required)
@@ -56,7 +53,6 @@ tasks:
 
   reset-data:
     desc: Reset rook data on a node
-    prompt: Reset rook data on node '{{.node}}' on '{{.cluster}}' cluster... continue?
     summary: |
       Args:
         cluster: Cluster to run command against (required)
