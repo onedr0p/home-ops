@@ -24,21 +24,19 @@ spec:
     - key: node-role.kubernetes.io/control-plane
       operator: Exists
       effect: NoSchedule
-  prepare:
-    image: registry.k8s.io/kubectl:v1.29.2
-    args:
-      - wait
-      - --namespace=rook-ceph
-      - --timeout=300s
-      - --for=jsonpath=.status.ceph.health=HEALTH_OK
-      - cephcluster/rook-ceph
-  upgrade:
+  prepare: &prepare
     image: ghcr.io/siderolabs/talosctl:v1.6.4
     envs:
       - name: NODE_IP
         valueFrom:
           fieldRef:
             fieldPath: status.hostIP
+    args:
+      - --nodes=$(NODE_IP)
+      - health
+      - --server=false
+  upgrade:
+    <<: *prepare
     args:
       - --nodes=$(NODE_IP)
       - upgrade-k8s

@@ -13,12 +13,8 @@ spec:
       path: /var/run/secrets/talos.dev
       ignoreUpdates: true
   concurrency: 1
-  cordon: true
-  drain:
-    deleteLocalData: true
-    disableEviction: false
-    ignoreDaemonSets: true
   exclusive: true
+  cordon: false
   nodeSelector:
     matchExpressions:
       - key: kubernetes.io/os
@@ -31,15 +27,20 @@ spec:
       operator: Exists
       effect: NoSchedule
   prepare:
-    image: registry.k8s.io/kubectl:v1.29.2
-    args:
-      - wait
-      - --namespace=rook-ceph
-      - --timeout=300s
-      - --for=jsonpath=.status.ceph.health=HEALTH_OK
-      - cephcluster/rook-ceph
+    image: ghcr.io/onedr0p/kubanetics:2024.2.4@sha256:a324577779adf8b473298caf7ab498ae7a897ced005370b92952a77dde108338
+    envs:
+      - name: SCRIPT_NAME
+        value: talos-upgrade.sh
+      - name: NODE_IP
+        valueFrom:
+          fieldRef:
+            fieldPath: status.hostIP
+      - name: ROOK_CEPH_HEALTHCHECK
+        value: "true"
+      - name: CNPG_MAINTENANCE
+        value: "true"
   upgrade:
-    image: ghcr.io/siderolabs/talosctl
+    image: ghcr.io/siderolabs/talosctl:v1.6.4
     envs:
       - name: NODE_IP
         valueFrom:
