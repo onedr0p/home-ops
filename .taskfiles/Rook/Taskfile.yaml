@@ -17,17 +17,17 @@ tasks:
     desc: Reset Rook
     vars: &vars
       cluster: "{{.cluster}}"
-      disk: "{{.disk}}"
+      disk: "{{.cephdisk}}"
       node: "{{.ITEM}}"
     cmds:
-      - for: { var: nodes }
+      - for: { var: cephnodes }
         task: reset-data
         vars: *vars
-      - for: { var: nodes }
+      - for: { var: cephnodes }
         task: reset-disk
         vars: *vars
     requires:
-      vars: ["cluster", "nodes", "disk"]
+      vars: ["cluster", "cephnodes", "cephdisk"]
 
   reset-disk:
     desc: Reset a rook disk on a node

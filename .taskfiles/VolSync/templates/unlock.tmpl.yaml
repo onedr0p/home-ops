@@ -2,8 +2,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "${job}"
-  namespace: "${ns}"
+  name: ${job}
+  namespace: ${ns}
 spec:
   ttlSecondsAfterFinished: 3600
   template:
@@ -16,12 +16,12 @@ spec:
           args: ["unlock", "--remove-all"]
           envFrom:
             - secretRef:
-                name: "${app}-volsync-secret"
+                name: ${app}-volsync-secret
           resources: {}
         - name: r2
           image: docker.io/restic/restic:0.16.4
           args: ["unlock", "--remove-all"]
           envFrom:
             - secretRef:
-                name: "${app}-volsync-r2-secret"
+                name: ${app}-volsync-r2-secret
           resources: {}

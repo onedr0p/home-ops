@@ -22,27 +22,29 @@ tasks:
     summary: |
       Args:
         cluster: Cluster to run command against (required)
-        controller: Controller node to run command against (required)
     prompt: Bootstrap Talos on the '{{.cluster}}' cluster... continue?
     cmds:
       - task: bootstrap-etcd
         vars: &vars
           cluster: "{{.cluster}}"
-          controller: "{{.controller}}"
       - task: fetch-kubeconfig
         vars: *vars
       - task: bootstrap-apps
         vars: *vars
     requires:
-      vars: ["cluster", "controller"]
+      vars: ["cluster"]
 
   bootstrap-etcd:
     desc: Bootstrap Etcd
     cmd: until talosctl --context {{.cluster}} --nodes {{.controller}} bootstrap; do sleep 10; done
+    vars:
+      controller:
+        sh: talosctl --context {{.cluster}} config info --output json | jq --raw-output '.endpoints[0]'
     requires:
-      vars: ["cluster", "controller"]
+      vars: ["cluster"]
     preconditions:
-      - talosctl config get-contexts | grep {{.cluster}}
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
 
   bootstrap-apps:
     desc: Bootstrap core apps needed for Talos
@@ -50,12 +52,11 @@ tasks:
       - until kubectl --context {{.cluster}} wait --for=condition=Ready=False nodes --all --timeout=600s; do sleep 10; done
       - helmfile --quiet --kube-context {{.cluster}} --file {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
       - until kubectl --context {{.cluster}} wait --for=condition=Ready nodes --all --timeout=600s; do sleep 10; done
-    env:
-      CLUSTER_DIR: "{{.KUBERNETES_DIR}}/{{.cluster}}" # required for helmfile
     requires:
       vars: ["cluster"]
     preconditions:
-      - kubectl config get-contexts {{.cluster}}
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/apps/helmfile.yaml
 
   upgrade-talos:
@@ -64,7 +65,8 @@ tasks:
     requires:
       vars: ["node", "image"]
     preconditions:
-      - talosctl config get-contexts | grep {{.cluster}}
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
       - talosctl --context {{.cluster}} --nodes {{.node}} get machineconfig >/dev/null 2>&1
 
   upgrade-k8s:
@@ -73,7 +75,8 @@ tasks:
     requires:
       vars: ["node", "to"]
     preconditions:
-      - talosctl config get-contexts | grep {{.cluster}}
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
       - talosctl --context {{.cluster}} --nodes {{.node}} get machineconfig >/dev/null 2>&1
 
   fetch-kubeconfig:
@@ -81,10 +84,14 @@ tasks:
     cmd: |
       talosctl --context {{.cluster}} kubeconfig --nodes {{.controller}} \
           --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
+    vars:
+      controller:
+        sh: talosctl --context {{.cluster}} config info --output json | jq --raw-output '.endpoints[0]'
     requires:
       vars: ["cluster"]
     preconditions:
-      - talosctl config get-contexts | grep {{.cluster}}
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
 
   apply-config:
     desc: Apply Talos configuration to a node
@@ -103,6 +110,7 @@ tasks:
     requires:
       vars: ["cluster", "node"]
     preconditions:
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/matchbox/assets/controller.secret.sops.yaml
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/matchbox/assets/worker.secret.sops.yaml
       - talosctl --context {{.cluster}} --nodes {{.node}} get machineconfig >/dev/null 2>&1
