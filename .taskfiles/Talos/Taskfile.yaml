@@ -129,6 +129,7 @@ tasks:
       - for: { var: nodes }
         task: upgrade
         vars:
+          cluster: "{{.cluster}}"
           node: "{{.ITEM}}"
           rollout: "true"
       - kubectl cnpg --context {{.cluster}} maintenance unset --reusePVC --all-namespaces
@@ -152,7 +153,8 @@ tasks:
       - '{{if not (eq .rollout "true")}}flux --context {{.cluster}} suspend kustomization --all{{end}}'
       - '{{if not (eq .rollout "true")}}kubectl cnpg --context {{.cluster}} maintenance set --reusePVC --all-namespaces{{end}}'
       - kubectl --context {{.cluster}} drain {{.nodename}} --ignore-daemonsets --delete-emptydir-data --force
-      - talosctl --context {{.cluster}} --nodes {{.node}} upgrade --image=factory.talos.dev/installer/{{.TALOS_SCHEMATIC_ID}}:{{.TALOS_VERSION}} --preserve=true
+      - talosctl --context {{.cluster}} --nodes {{.node}} upgrade --image=factory.talos.dev/installer/{{.TALOS_SCHEMATIC_ID}}:{{.TALOS_VERSION}} --preserve=true --wait --timeout=10m
+      - kubectl --context {{.cluster}} uncordon {{.nodename}}
       - talosctl --context {{.cluster}} --nodes {{.node}} health --wait-timeout=10m --server=false
       - '{{if not (eq .rollout "true")}}kubectl --context {{.cluster}} wait --timeout=10m --for=jsonpath=.status.ceph.health=HEALTH_OK cephcluster --all --all-namespaces{{end}}'
       - '{{if not (eq .rollout "true")}}flux --context {{.cluster}} resume kustomization --all{{end}}'
