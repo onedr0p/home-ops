@@ -76,11 +76,10 @@ tasks:
 
   apply-config:
     desc: Apply Talos configuration to a node
-    dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/matchbox/assets"
     cmd: |
-      sops -d {{.role | replace "controlplane" "controller"}}.secret.sops.yaml | \
+      sops -d {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/matchbox/assets/{{.role | replace "controlplane" "controller"}}.secret.sops.yaml | \
           envsubst | \
-              talosctl --context {{.cluster}} apply-config --nodes {{.node}} --file /dev/stdin
+              talosctl --context {{.cluster}} apply-config --mode=reboot --nodes {{.node}} --file /dev/stdin
     env:
       TALOS_VERSION: "{{.TALOS_VERSION}}"
       TALOS_SCHEMATIC_ID: "{{.TALOS_SCHEMATIC_ID}}"
