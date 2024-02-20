@@ -5,7 +5,7 @@ kind: Cluster
 metadata:
   name: postgres16
 spec:
-  instances: 6 # Set to my total number of nodes
+  instances: 3
   imageName: ghcr.io/cloudnative-pg/postgresql:16.2-3
   primaryUpdateStrategy: unsupervised
   storage:
@@ -44,7 +44,7 @@ spec:
       endpointURL: https://s3.turbo.ac
       # Note: serverName version needs to be inclemented
       # when recovering from an existing cnpg cluster
-      serverName: &currentCluster postgres16-v5
+      serverName: &currentCluster postgres16-v6
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
@@ -56,7 +56,7 @@ spec:
   # cluster when recovering from an existing cnpg cluster
   bootstrap:
     recovery:
-      source: &previousCluster postgres16-v4
+      source: &previousCluster postgres16-v5
   # Note: externalClusters is needed when recovering from an existing cnpg cluster
   externalClusters:
     - name: *previousCluster
