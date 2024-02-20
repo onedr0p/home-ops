@@ -7,8 +7,7 @@ tasks:
   main:
     vars: &vars
       cluster: main
-      cephnodes:
-        sh: kubectl --context {{.cluster}} get nodes --output json | jq --join-output '[.items[].metadata.name] | join(" ")'
+      cephnodes: k8s-0 k8s-1 k8s-2 k8s-3 k8s-4 k8s-5
       cephdisk: /dev/nvme0n1
     cmds:
       - task: :talos:bootstrap
