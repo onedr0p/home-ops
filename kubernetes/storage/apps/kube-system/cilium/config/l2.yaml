@@ -3,11 +3,10 @@
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
 metadata:
-  name: policy
+  name: l2-policy
 spec:
   loadBalancerIPs: true
-  interfaces:
-    - ^enp.*
+  interfaces: ["bond0"]
   nodeSelector:
     matchLabels:
       kubernetes.io/os: linux
@@ -16,7 +15,9 @@ spec:
 apiVersion: cilium.io/v2alpha1
 kind: CiliumLoadBalancerIPPool
 metadata:
-  name: pool
+  name: l2-pool
 spec:
-  cidrs:
-    - cidr: 192.168.42.0/24
+  allowFirstLastIPs: "Yes"
+  blocks:
+    - start: 192.168.42.100
+      stop: 192.168.42.110
