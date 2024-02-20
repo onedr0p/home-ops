@@ -50,6 +50,7 @@ spec:
       bdev_async_discard = true
       bluefs_buffered_io = false
     cephClusterSpec:
+      provider: host
       network:
         connections:
           requireMsgr2: true
@@ -104,7 +105,7 @@ spec:
         spec:
           failureDomain: host
           replicated:
-            size: 3
+            size: 6
         storageClass:
           enabled: true
           name: ceph-block
@@ -132,11 +133,11 @@ spec:
         spec:
           metadataPool:
             replicated:
-              size: 3
+              size: 6
           dataPools:
             - failureDomain: host
               replicated:
-                size: 3
+                size: 6
               name: data0
           metadataServer:
             activeCount: 1
@@ -175,12 +176,12 @@ spec:
           metadataPool:
             failureDomain: host
             replicated:
-              size: 3
+              size: 6
           dataPool:
             failureDomain: host
             erasureCoded:
-              dataChunks: 2
-              codingChunks: 1
+              dataChunks: 4
+              codingChunks: 2
           preservePoolsOnDelete: true
           gateway:
             port: 80
