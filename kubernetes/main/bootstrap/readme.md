@@ -55,14 +55,8 @@ set service dhcp-server shared-network-name SERVERS subnet 192.168.42.0/24 subne
 set service dhcp-server shared-network-name SERVERS subnet 192.168.42.0/24 subnet-parameters '}'
 ```
 
-## Talos Bootstrap
+## Bootstrap
 
 ```sh
-task talos:bootstrap cluster=main controller=192.168.42.10
-```
-
-## Flux Bootstrap
-
-```sh
-task flux:bootstrap cluster=main
+task bootstrap:main
 ```
