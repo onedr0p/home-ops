@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: media-browser
+  name: filebrowser
 spec:
   interval: 30m
   chart:
@@ -23,9 +23,6 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
-  dependsOn:
-    - name: rook-ceph-cluster
-      namespace: rook-ceph
   values:
     controllers:
       main:
@@ -39,7 +36,7 @@ spec:
             env:
               TZ: America/New_York
               FB_DATABASE: /config/filebrowser.db
-              FB_ROOT: /media
+              FB_ROOT: /eros
               FB_LOG: stdout
               FB_NOAUTH: true
             probes:
@@ -84,7 +81,7 @@ spec:
         enabled: true
         className: internal
         hosts:
-          - host: &host "{{ .Release.Name }}.devbu.io"
+          - host: &host "{{ .Release.Name }}.turbo.ac"
             paths:
               - path: /
                 service:
@@ -96,10 +93,10 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: media-browser
-      media:
-        type: nfs
-        server: expanse.turbo.ac
-        path: /eros/Media
+        existingClaim: filebrowser
+      eros:
+        type: hostPath
+        hostPath: /eros
+        hostPathType: Directory
         globalMounts:
-          - path: /media
+          - path: /eros
