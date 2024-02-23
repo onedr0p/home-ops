@@ -4,7 +4,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: &app snmp-exporter-apc-ups
-  namespace: &namespace observability
+  namespace: observability
 spec:
   interval: 30m
   chart:
@@ -38,7 +38,6 @@ spec:
         defaultMode: 420
     serviceMonitor:
       enabled: true
-      namespace: *namespace
       params:
         - name: apc-ups-0
           module: ["apcups"]
