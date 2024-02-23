@@ -104,6 +104,9 @@ spec:
           - hosts:
               - *host
       prometheusSpec:
+        podMetadata:
+          annotations:
+            secret.reloader.stakater.com/reload: &secret kube-prometheus-stack-secret
         additionalAlertManagerConfigs:
           - static_configs:
               - targets:
@@ -137,7 +140,7 @@ spec:
           version: "${THANOS_VERSION#v}"
           objectStorageConfig:
             existingSecret:
-              name: kube-prometheus-stack-secret
+              name: *secret
               key: objstore.yml
       thanosService:
         enabled: true
