@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: prometheus-snmp-exporter
-      version: 2.1.0
+      version: 3.0.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
@@ -29,10 +29,10 @@ spec:
       repository: quay.io/prometheus/snmp-exporter
     extraArgs: ["--config.file=/config/snmp.yaml"]
     extraConfigmapMounts:
-      - name: *app
+      - name: &name dell-idrac-snmp-configmap
         mountPath: /config/snmp.yaml
         subPath: snmp.yaml
-        configMap: *app
+        configMap: *name
         readOnly: true
         defaultMode: 420
     serviceMonitor:
