@@ -1,18 +1,5 @@
 ---
 groups:
-  - name: smart
-    rules:
-      - alert: SMARTFailure
-        expr: |
-          sum by (hostname) (count_over_time({hostname=~".+"} | json | _SYSTEMD_UNIT = "smartmontools.service" !~ "(?i)previous self-test completed without error" !~ "(?i)Prefailure" |~ "(?i)(error|fail)"[2m])) > 0
-        for: 2m
-        labels:
-          severity: critical
-          category: logs
-        annotations:
-          hostname: "{{ $labels.hostname }}"
-          summary: "{{ $labels.hostname }} has reported SMART failures"
-
   - name: zigbee2mqtt
     rules:
       - alert: ZigbeeMQTTUnreachable
@@ -179,3 +166,16 @@ groups:
   #       annotations:
   #         hostname: "{{ $labels.hostname }}"
   #         summary: "{{ $labels.hostname }} is unable to connect to MQTT"
+
+  # - name: smart
+  #   rules:
+  #     - alert: SMARTFailure
+  #       expr: |
+  #         sum by (hostname) (count_over_time({hostname=~".+"} | json | _SYSTEMD_UNIT = "smartmontools.service" !~ "(?i)previous self-test completed without error" !~ "(?i)Prefailure" |~ "(?i)(error|fail)"[2m])) > 0
+  #       for: 2m
+  #       labels:
+  #         severity: critical
+  #         category: logs
+  #       annotations:
+  #         hostname: "{{ $labels.hostname }}"
+  #         summary: "{{ $labels.hostname }} has reported SMART failures"
