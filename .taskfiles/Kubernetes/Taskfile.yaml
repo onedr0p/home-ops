@@ -4,7 +4,7 @@ version: "3"
 
 tasks:
 
-  browse-pvc: # This is broken
+  browse-pvc:
     desc: Browse PersistentVolumeClaims
     summary: |
       Args:
@@ -12,11 +12,7 @@ tasks:
         ns: Namespace to browse PersistentVolumeClaims in (default: default)
         claim: PersistentVolumeClaim to browse (required)
     interactive: true
-    cmd: |
-      kubectl browse-pvc --context {{.cluster}} \
-          --namespace {{.ns}} \
-          --image ghcr.io/onedr0p/alpine:rolling \
-          {{.claim}}
+    cmd: kubectl browse-pvc --context {{.cluster}} --namespace {{.ns}} {{.claim}}
     requires:
       vars: ["cluster", "claim"]
 
@@ -26,9 +22,7 @@ tasks:
       Args:
         cluster: Cluster to run command against (required)
         node: Node to drain (required)
-    cmd: |
-      kubectl --context {{.cluster}} drain {{.node}} --ignore-daemonsets \
-          --delete-local-data --force --pod-selector 'app!=rook-ceph-osd'
+    cmd: kubectl --context {{.cluster}} drain {{.node}} --ignore-daemonsets --delete-local-data --force
     requires:
       vars: ["cluster", "node"]
 
