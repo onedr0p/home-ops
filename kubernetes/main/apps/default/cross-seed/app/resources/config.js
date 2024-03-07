@@ -1,12 +1,15 @@
-// Note: Cross-Seed vars should be escaped with $${VAR_NAME} to avoid interpolation by Flux
+// Note: Cross-Seed vars should be escaped with $${VAR_NAME} to avoid any interpolation by Flux
 module.exports = {
   delay: 20,
   qbittorrentUrl: "http://qbittorrent.default.svc.cluster.local",
   torznab: [
-    `http://prowlarr.default.svc.cluster.local/2/api?apikey=$${process.env.PROWLARR_API_KEY}`,
-    `http://prowlarr.default.svc.cluster.local/8/api?apikey=$${process.env.PROWLARR_API_KEY}`,
-    `http://prowlarr.default.svc.cluster.local/11/api?apikey=$${process.env.PROWLARR_API_KEY}`,
-    `http://prowlarr.default.svc.cluster.local/45/api?apikey=$${process.env.PROWLARR_API_KEY}`,
+    `http://prowlarr.default.svc.cluster.local/2/api?apikey=$${process.env.PROWLARR_API_KEY}`,  // avz
+    `http://prowlarr.default.svc.cluster.local/8/api?apikey=$${process.env.PROWLARR_API_KEY}`,  // ptp
+    `http://prowlarr.default.svc.cluster.local/11/api?apikey=$${process.env.PROWLARR_API_KEY}`, // btn
+    `http://prowlarr.default.svc.cluster.local/26/api?apikey=$${process.env.PROWLARR_API_KEY}`, // mtv
+    `http://prowlarr.default.svc.cluster.local/45/api?apikey=$${process.env.PROWLARR_API_KEY}`, // bhd
+    `http://prowlarr.default.svc.cluster.local/48/api?apikey=$${process.env.PROWLARR_API_KEY}`, // ant
+    `http://prowlarr.default.svc.cluster.local/49/api?apikey=$${process.env.PROWLARR_API_KEY}`, // athr
   ],
   port: process.env.CROSSSEED_PORT || 80,
   apiAuth: false,
