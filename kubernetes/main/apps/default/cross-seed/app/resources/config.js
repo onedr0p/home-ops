@@ -24,6 +24,6 @@ module.exports = {
   duplicateCategories: true,
   matchMode: "safe",
   skipRecheck: true,
-  outputDir: "/config/xseeds",
-  torrentDir: "/config/qBittorrent/BT_backup",
+  outputDir: "/config",
+  torrentDir: "/qbittorrent/BT_backup",
 };
