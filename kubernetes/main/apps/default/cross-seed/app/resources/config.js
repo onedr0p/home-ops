@@ -23,7 +23,6 @@ module.exports = {
   linkType: "hardlink",
   linkDir: "/media/Downloads/qbittorrent/complete/cross-seed",
   dataDirs: [
-    "/media/Downloads/qbittorrent/complete/prowlarr",
     "/media/Downloads/qbittorrent/complete/radarr",
     "/media/Downloads/qbittorrent/complete/sonarr",
   ],
