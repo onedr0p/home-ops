@@ -25,5 +25,5 @@ module.exports = {
   matchMode: "safe",
   skipRecheck: true,
   outputDir: "/config",
-  torrentDir: "/qbittorrent/BT_backup",
+  torrentDir: "/qbittorrent/qBittorrent/BT_backup",
 };
