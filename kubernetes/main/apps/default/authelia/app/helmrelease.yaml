@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.0-beta3
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -42,7 +42,7 @@ spec:
               - secretRef:
                   name: authelia-secret
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/authelia/authelia
               tag: v4.38.0-beta3@sha256:1c13c1cbc883ddd311c55bd7ae2143dabf01fdadcf30cb87d16e955384b22947
@@ -68,8 +68,6 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-              startup:
-                enabled: false
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -80,7 +78,6 @@ spec:
               limits:
                 memory: 128Mi
         pod:
-          enableServiceLinks: false
           securityContext:
             runAsUser: 568
             runAsGroup: 568
@@ -93,15 +90,16 @@ spec:
                 matchLabels:
                   app.kubernetes.io/name: *app
     service:
-      main:
+      app:
+        controller: main
         ports:
           http:
             port: *port
           metrics:
             port: 8080
     serviceMonitor:
-      main:
-        enabled: true
+      app:
+        serviceName: app
         endpoints:
           - port: metrics
             scheme: http
@@ -109,8 +107,7 @@ spec:
             interval: 1m
             scrapeTimeout: 10s
     ingress:
-      main:
-        enabled: true
+      app:
         className: external
         annotations:
           external-dns.alpha.kubernetes.io/target: external.devbu.io
@@ -124,14 +121,13 @@ spec:
             paths:
               - path: /
                 service:
-                  name: main
+                  name: app
                   port: http
         tls:
           - hosts:
               - *host
     persistence:
       config:
-        enabled: true
         type: configMap
         name: authelia-configmap
         globalMounts:
