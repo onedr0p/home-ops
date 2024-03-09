@@ -162,6 +162,10 @@ tasks:
         cmd: |
           {{- $items := (split "/" .ITEM) }}
           kubectl --context {{.cluster}} delete pvc -n {{ $items._0 }} {{ $items._1 }}
+      - for: { var: snaps }
+        cmd: |
+          {{- $items := (split "/" .ITEM) }}
+          kubectl --context {{.cluster}} delete volumesnapshot -n {{ $items._0 }} {{ $items._1 }}
     env: *env
     requires:
       vars: ["cluster"]
@@ -170,6 +174,8 @@ tasks:
         sh: kubectl --context {{.cluster}} get pvc --all-namespaces --no-headers | grep "dst-dest" | awk '{print $1 "/" $2}'
       cache:
         sh: kubectl --context {{.cluster}} get pvc --all-namespaces --no-headers | grep "dst-cache" | awk '{print $1 "/" $2}'
+      snaps:
+        sh: kubectl --context {{.cluster}} get volumesnapshot --all-namespaces --no-headers | grep "dst-dest" | awk '{print $1 "/" $2}'
 
   # Suspend the Flux ks and hr
   .suspend:
