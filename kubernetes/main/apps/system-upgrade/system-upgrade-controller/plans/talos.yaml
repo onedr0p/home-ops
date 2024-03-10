@@ -5,7 +5,7 @@ kind: Plan
 metadata:
   name: talos
 spec:
-  # renovate: datasource=docker depName=ghcr.io/buroa/installer
+  # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
   version: &version v1.6.6
   serviceAccountName: system-upgrade
   secrets:
@@ -14,11 +14,7 @@ spec:
       ignoreUpdates: true
   concurrency: 1
   exclusive: true
-  cordon: true
-  drain:
-    deleteLocalData: true
-    disableEviction: false
-    ignoreDaemonSets: true
+  cordon: false
   nodeSelector:
     matchExpressions:
       - key: kubernetes.io/os
@@ -44,7 +40,7 @@ spec:
     args:
       - --nodes=$(NODE_IP)
       - health
-      - --wait-timeout=300s
+      - --wait-timeout=600s
       - --server=false
   upgrade:
     <<: *prepare
