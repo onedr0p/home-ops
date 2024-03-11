@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -21,6 +21,7 @@ spec:
     cleanupOnFail: true
     remediation:
       retries: 3
+      strategy: uninstall
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -28,14 +29,14 @@ spec:
       namespace: volsync-system
   values:
     controllers:
-      main:
+      recyclarr:
         type: cronjob
         annotations:
           reloader.stakater.com/auto: "true"
         cronjob:
           schedule: "@daily"
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/recyclarr/recyclarr
               tag: 6.0.2@sha256:02add40feae0569401b5020528e06419b47046723d0bb4bef1e82325e9eefdad
@@ -62,12 +63,8 @@ spec:
             runAsNonRoot: true
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
-    service:
-      main:
-        enabled: false
     persistence:
       config:
-        enabled: true
         existingClaim: recyclarr
       config-file:
         type: configMap

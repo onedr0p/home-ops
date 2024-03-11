@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -21,18 +21,19 @@ spec:
     cleanupOnFail: true
     remediation:
       retries: 3
+      strategy: uninstall
   dependsOn:
     - name: plex
       namespace: default
   values:
     controllers:
-      main:
+      plex-off-deck:
         type: cronjob
         cronjob:
           schedule: "@hourly"
           timeZone: &timeZone America/New_York
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/onedr0p/jbops
               tag: 1.0.893@sha256:ca9cf29415e06874027bf6f7e9d177ba39eb89b4a33bea454f33030de9430156
@@ -44,16 +45,6 @@ spec:
               "--markWatched",
               "--playlists", "Toons", "SleepMix"
             ]
-            probes:
-              liveness:
-                enabled: false
-              readiness:
-                enabled: false
-              startup:
-                enabled: false
-    service:
-      main:
-        enabled: false
     persistence:
       secret-file:
         type: secret
