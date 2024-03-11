@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: vector-agent
+  name: &app vector-agent
 spec:
   interval: 30m
   timeout: 15m
@@ -24,13 +24,13 @@ spec:
       retries: 3
   values:
     controllers:
-      main:
+      vector-agent:
         type: daemonset
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: docker.io/timberio/vector
               tag: 0.36.0-debian@sha256:3034a2226b64bc828299aed748473fdb1c0b77caa04c0f43fd27de8704f2a836
@@ -55,15 +55,11 @@ spec:
             args: ["--config", "/etc/vector/vector.yaml"]
             securityContext:
               privileged: true
-    service:
-      main:
-        enabled: false
     serviceAccount:
       create: true
-      name: vector-agent
+      name: *app
     persistence:
       config:
-        enabled: true
         type: configMap
         name: vector-agent-configmap
         globalMounts:
