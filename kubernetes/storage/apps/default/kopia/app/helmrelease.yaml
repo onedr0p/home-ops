@@ -23,11 +23,11 @@ spec:
       retries: 3
   values:
     controllers:
-      main:
+      kopia:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: docker.io/kopia/kopia
               tag: 0.15.0@sha256:e7af739af249782004a280a15fdc22b93012d5e118051bf143a1484669f0aa8a
@@ -68,15 +68,15 @@ spec:
               privileged: true
               runAsUser: 0
     service:
-      main:
+      app:
         ports:
           http:
             port: 80
           metrics:
             port: 8080
     serviceMonitor:
-      main:
-        enabled: true
+      app:
+        serviceName: app
         endpoints:
           - port: metrics
             scheme: http
@@ -85,14 +85,13 @@ spec:
             scrapeTimeout: 10s
     ingress:
       main:
-        enabled: true
         className: internal
         hosts:
           - host: &host "{{ .Release.Name }}.turbo.ac"
             paths:
               - path: /
                 service:
-                  name: main
+                  name: app
                   port: http
         tls:
           - hosts:
