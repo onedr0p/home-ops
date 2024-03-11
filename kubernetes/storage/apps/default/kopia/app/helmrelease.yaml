@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -23,11 +23,11 @@ spec:
       retries: 3
   values:
     controllers:
-      main:
+      kopia:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: docker.io/kopia/kopia
               tag: 0.15.0@sha256:e7af739af249782004a280a15fdc22b93012d5e118051bf143a1484669f0aa8a
@@ -68,15 +68,16 @@ spec:
               privileged: true
               runAsUser: 0
     service:
-      main:
+      app:
+        controller: kopia
         ports:
           http:
             port: 80
           metrics:
             port: 8080
     serviceMonitor:
-      main:
-        enabled: true
+      app:
+        serviceName: kopia
         endpoints:
           - port: metrics
             scheme: http
@@ -85,14 +86,13 @@ spec:
             scrapeTimeout: 10s
     ingress:
       main:
-        enabled: true
         className: internal
         hosts:
           - host: &host "{{ .Release.Name }}.turbo.ac"
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: http
         tls:
           - hosts:
