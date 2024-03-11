@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 2.6.0
+      version: 3.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -23,11 +23,11 @@ spec:
       retries: 3
   values:
     controllers:
-      main:
+      minio:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: quay.io/minio/minio
               tag: RELEASE.2024-03-07T00-43-48Z@sha256:0534dcbc36264485c80c7cff2d58be2c392debef8fcddb31652b527307b7fb80
@@ -69,15 +69,16 @@ spec:
               fsGroupChangePolicy: OnRootMismatch
               supplementalGroups: [100]
     service:
-      main:
+      app:
+        controller: minio
         ports:
           http:
             port: 9001
           s3:
             port: 9000
     serviceMonitor:
-      main:
-        enabled: true
+      app:
+        serviceName: minio
         endpoints:
           - port: s3
             scheme: http
@@ -85,21 +86,20 @@ spec:
             interval: 1m
             scrapeTimeout: 10s
     ingress:
-      main:
-        enabled: true
+      app:
         className: internal
         hosts:
           - host: &host "{{ .Release.Name }}.turbo.ac"
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: http
           - host: &s3Host s3.turbo.ac
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: s3
         tls:
           - hosts:
@@ -107,7 +107,6 @@ spec:
               - *s3Host
     persistence:
       config:
-        enabled: true
         type: hostPath
         hostPath: /eros/Minio
         hostPathType: Directory
