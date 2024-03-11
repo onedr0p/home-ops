@@ -23,12 +23,12 @@ spec:
       retries: 3
   values:
     controllers:
-      main:
+      external-dns-bind:
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: registry.k8s.io/external-dns/external-dns
               tag: v0.14.0@sha256:474077b3dfccb3021db0a6638274967d0f64ce60dd9730a6f464bee2f78b046f
@@ -88,10 +88,10 @@ spec:
       create: true
       name: *app
     service:
-      main:
+      app:
         ports:
           http:
             port: *port
     serviceMonitor:
-      main:
-        enabled: true
+      app:
+        serviceName: app
