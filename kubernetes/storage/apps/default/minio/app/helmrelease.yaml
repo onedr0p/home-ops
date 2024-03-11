@@ -23,11 +23,11 @@ spec:
       retries: 3
   values:
     controllers:
-      main:
+      minio:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: quay.io/minio/minio
               tag: RELEASE.2024-03-07T00-43-48Z@sha256:0534dcbc36264485c80c7cff2d58be2c392debef8fcddb31652b527307b7fb80
@@ -69,15 +69,15 @@ spec:
               fsGroupChangePolicy: OnRootMismatch
               supplementalGroups: [100]
     service:
-      main:
+      app:
         ports:
           http:
             port: 9001
           s3:
             port: 9000
     serviceMonitor:
-      main:
-        enabled: true
+      app:
+        serviceName: app
         endpoints:
           - port: s3
             scheme: http
@@ -85,8 +85,7 @@ spec:
             interval: 1m
             scrapeTimeout: 10s
     ingress:
-      main:
-        enabled: true
+      app:
         className: internal
         hosts:
           - host: &host "{{ .Release.Name }}.turbo.ac"
@@ -107,7 +106,6 @@ spec:
               - *s3Host
     persistence:
       config:
-        enabled: true
         type: hostPath
         hostPath: /eros/Minio
         hostPathType: Directory
