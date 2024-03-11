@@ -1,0 +1,67 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: plex-auto-languages
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.0.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: plex
+      namespace: default
+  values:
+    controllers:
+      plex-auto-languages:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: docker.io/remirigal/plex-auto-languages
+              tag: v1.2.3@sha256:54bd9cf5d399514b8ed3052ce1d01a14375825a429653cb06da129685740889e
+            env:
+              TZ: America/New_York
+              PLEX_URL: http://plex.default.svc.cluster.local:32400
+              REFRESH_LIBRARY_ON_SCAN: false
+            envFrom:
+              - secretRef:
+                  name: plex-auto-languages-secret
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 1Gi
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            runAsNonRoot: true
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+    persistence:
+      config:
+        type: emptyDir
+      local:
+        type: emptyDir
+        globalMounts:
+          - path: /.local
