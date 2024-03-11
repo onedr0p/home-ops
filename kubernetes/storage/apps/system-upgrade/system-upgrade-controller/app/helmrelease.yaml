@@ -23,12 +23,12 @@ spec:
       retries: 3
   values:
     controllers:
-      main:
+      system-upgrade-controller:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: docker.io/rancher/system-upgrade-controller
               tag: v0.13.4@sha256:3df6d01b9eb583a78c309ce0b2cfeed98a9af97983e4ea96bf53410dd56c6f45
@@ -77,9 +77,6 @@ spec:
     serviceAccount:
       create: true
       name: system-upgrade
-    service:
-      main:
-        enabled: false
     persistence:
       tmp:
         type: emptyDir
