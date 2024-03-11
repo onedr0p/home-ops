@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -28,11 +28,11 @@ spec:
       namespace: volsync-system
   values:
     controllers:
-      main:
+      zwave-js-ui:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/zwave-js/zwave-js-ui
               tag: 9.9.1@sha256:ce5278bd998ad8ea2422a6f6c2ec606fcde0d065f6c8e2ae5300a196b4fcf1bb
@@ -51,8 +51,6 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-              startup:
-                enabled: false
             securityContext:
               privileged: true
             resources:
@@ -64,32 +62,38 @@ spec:
           nodeSelector:
             aeotec.feature.node.kubernetes.io/zwave: "true"
     service:
-      main:
+      app:
+        controller: zwave-js-ui
         ports:
           http:
             port: *port
           websocket:
             port: 3000
+    # requires https://github.com/kvaster/zwavejs-prom
     serviceMonitor:
-      main:
-        enabled: true # requires https://github.com/kvaster/zwavejs-prom
+      app:
+        serviceName: zwave-js-ui
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
     ingress:
-      main:
-        enabled: true
+      app:
         className: internal
         hosts:
           - host: &host "zwave.devbu.io"
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: http
         tls:
           - hosts:
               - *host
     persistence:
       config:
-        enabled: true
         existingClaim: zwave-js-ui
         globalMounts:
           - path: /usr/src/app/store

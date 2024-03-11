@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -28,11 +28,11 @@ spec:
       namespace: volsync-system
   values:
     controllers:
-      main:
+      rtlamr2mqtt:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: docker.io/allangood/rtlamr2mqtt
               tag: 2.3.4@sha256:f5b7bab1bbecfc3af57f2beec26ac6a005758486a95b7ed9caee7a70a1994de7
@@ -46,9 +46,6 @@ spec:
         pod:
           nodeSelector:
             nesdr.feature.node.kubernetes.io/rtlamr: "true"
-    service:
-      main:
-        enabled: false
     persistence:
       config-file:
         type: secret

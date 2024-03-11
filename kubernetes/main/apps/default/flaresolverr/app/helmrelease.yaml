@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -23,12 +23,12 @@ spec:
       retries: 3
   values:
     controllers:
-      main:
+      flaresolverr:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/flaresolverr/flaresolverr
               tag: v3.3.16@sha256:088412db1051d04ab32c902266510011aec1dc9f7a3a3bda3f58b93186591347
@@ -51,23 +51,22 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-              startup:
-                enabled: false
             resources:
               requests:
                 cpu: 10m
               limits:
                 memory: 1Gi
     service:
-      main:
+      app:
+        controller: flaresolverr
         ports:
           http:
             port: *port
           metrics:
             port: *metricsPort
     serviceMonitor:
-      main:
-        enabled: true
+      app:
+        serviceName: flaresolverr
         endpoints:
           - port: metrics
             scheme: http

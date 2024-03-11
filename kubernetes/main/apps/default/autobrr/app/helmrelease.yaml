@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -23,7 +23,7 @@ spec:
       retries: 3
   values:
     controllers:
-      main:
+      autobrr:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -35,7 +35,7 @@ spec:
               - secretRef:
                   name: autobrr-secret
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/autobrr/autobrr
               tag: v1.39.1@sha256:7149943f3f6a528ea653662272e8a2c78156cdbf51fd3313911eb57a03378a50
@@ -58,8 +58,6 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-              startup:
-                enabled: false
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -75,20 +73,20 @@ spec:
             runAsGroup: 568
             runAsNonRoot: true
     service:
-      main:
+      app:
+        controller: autobrr
         ports:
           http:
             port: *port
     ingress:
-      main:
-        enabled: true
+      app:
         className: internal
         hosts:
           - host: &host "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: http
         tls:
           - hosts:

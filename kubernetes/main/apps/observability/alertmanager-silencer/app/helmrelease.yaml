@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -26,12 +26,12 @@ spec:
       namespace: observability
   values:
     controllers:
-      main:
+      alertmanager-silencer:
         type: cronjob
         cronjob:
           schedule: "@daily"
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/onedr0p/kubanetics
               tag: 2024.3.3@sha256:3a67297acb996356b4721e95e136ba41baed35e235a63dff18d6bfe58b42107d
@@ -48,11 +48,6 @@ spec:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
-            probes:
-              liveness: &noProbes
-                enabled: false
-              readiness: *noProbes
-              startup: *noProbes
             resources:
               requests:
                 cpu: 25m
@@ -63,6 +58,3 @@ spec:
             runAsUser: 568
             runAsGroup: 568
             runAsNonRoot: true
-    service:
-      main:
-        enabled: false

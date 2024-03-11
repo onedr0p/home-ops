@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -26,7 +26,7 @@ spec:
       namespace: database
   values:
     controllers:
-      main:
+      shlink:
         replicas: 2
         strategy: RollingUpdate
         annotations:
@@ -40,7 +40,7 @@ spec:
               - secretRef:
                   name: shlink-secret
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/shlinkio/shlink
               tag: 4.0.2@sha256:7a269a8598ee3e6dc14cb167bf9c8b18de92327606b9e717bc9972d086bc923f
@@ -72,8 +72,6 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-              startup:
-                enabled: false
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -96,13 +94,13 @@ spec:
                 matchLabels:
                   app.kubernetes.io/name: *app
     service:
-      main:
+      app:
+        controller: shlink
         ports:
           http:
             port: *port
     ingress:
-      main:
-        enabled: true
+      app:
         className: external
         annotations:
           external-dns.alpha.kubernetes.io/target: external.devbu.io
@@ -111,7 +109,7 @@ spec:
             paths:
               - path: /
                 service:
-                  name: main
+                  identifier: app
                   port: http
         tls:
           - hosts:
