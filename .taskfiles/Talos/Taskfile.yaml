@@ -96,6 +96,82 @@ tasks:
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/matchbox/assets/worker.secret.sops.yaml
       - talosctl --context {{.cluster}} --nodes {{.node}} get machineconfig >/dev/null 2>&1
 
+  upgrade:
+    desc: Upgrade Talos on a node
+    cmd: bash {{.TALOS_SCRIPTS_DIR}}/upgrade.sh "{{.cluster}}" "{{.node}}" "{{.TALOS_SCHEMATIC_ID}}:{{.TALOS_VERSION}}" "{{.rollout}}"
+    vars:
+      rollout: '{{.rollout | default "false"}}'
+    requires:
+      vars: ["cluster", "node"]
+    preconditions:
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
+      - talosctl --context {{.cluster}} --nodes {{.node}} get machineconfig >/dev/null 2>&1
+
+  upgrade-rollout:
+    desc: Rollout Talos upgrade on all nodes
+    cmds:
+      - flux --context {{.cluster}} suspend kustomization --all
+      - kubectl cnpg --context {{.cluster}} maintenance set --reusePVC --all-namespaces
+      - for: { var: nodes, split: "," }
+        task: upgrade
+        vars:
+          cluster: "{{.cluster}}"
+          node: "{{.ITEM}}"
+          rollout: "true"
+      - kubectl cnpg --context {{.cluster}} maintenance unset --reusePVC --all-namespaces
+      - flux --context {{.cluster}} resume kustomization --all
+      - task: :kubernetes:delete-failed-pods
+        vars:
+          cluster: "{{.cluster}}"
+    vars:
+      nodes:
+        sh: talosctl --context {{.cluster}} config info --output json | jq --join-output '[.nodes[]] | join(",")'
+    requires:
+      vars: ["cluster"]
+    preconditions:
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
+      - talosctl --context {{.cluster}} --nodes {{.nodes}} get machineconfig >/dev/null 2>&1
+
+  upgrade-k8s:
+    desc: Upgrade the clusters k8s version
+    cmd: talosctl --context {{.cluster}} --nodes {{.controller}} upgrade-k8s --to {{.KUBERNETES_VERSION}}
+    vars:
+      controller:
+        sh: talosctl --context {{.cluster}} config info --output json | jq --raw-output '.endpoints[0]'
+    requires:
+      vars: ["cluster"]
+    preconditions:
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
+      - talosctl --context {{.cluster}} --nodes {{.node}} get machineconfig >/dev/null 2>&1
+
+  reset-node:
+    desc: Reset a Talos node and shut it down
+    prompt: Reset Talos '{{.node}}' node on the '{{.cluster}}' cluster ... continue?
+    cmd: talosctl --context {{.cluster}} reset --nodes {{.node}} --graceful=false
+    requires:
+      vars: ["cluster", "node"]
+    preconditions:
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
+      - talosctl --context {{.cluster}} --nodes {{.node}} get machineconfig >/dev/null 2>&1
+
+  reset-cluster:
+    desc: Reset all the Talos nodes and shut 'em down
+    prompt: Reset Talos on the '{{.cluster}}' cluster ... continue?
+    cmd: talosctl --context {{.cluster}} reset --nodes {{.nodes}} --graceful=false
+    vars:
+      nodes:
+        sh: talosctl --context {{.cluster}} config info --output json | jq --join-output '[.nodes[]] | join(",")'
+    requires:
+      vars: ["cluster"]
+    preconditions:
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
+      - talosctl --context {{.cluster}} --nodes {{.nodes}} get machineconfig >/dev/null 2>&1
+
   bootstrap-matchbox:
     desc: Bootstrap required Matchbox configuration to Vyos for PXE Boot
     dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/matchbox"
@@ -122,53 +198,3 @@ tasks:
       KUBERNETES_VERSION: "{{.KUBERNETES_VERSION}}"
     requires:
       vars: ["cluster"]
-
-  upgrade-rollout:
-    desc: Rollout Talos upgrade on all nodes
-    cmds:
-      - flux --context {{.cluster}} suspend kustomization --all
-      - kubectl cnpg --context {{.cluster}} maintenance set --reusePVC --all-namespaces
-      - for: { var: nodes }
-        task: upgrade
-        vars:
-          cluster: "{{.cluster}}"
-          node: "{{.ITEM}}"
-          rollout: "true"
-      - kubectl cnpg --context {{.cluster}} maintenance unset --reusePVC --all-namespaces
-      - flux --context {{.cluster}} resume kustomization --all
-      - task: :kubernetes:delete-failed-pods
-        vars:
-          cluster: "{{.cluster}}"
-    vars:
-      nodes:
-        sh: talosctl --context {{.cluster}} config info --output json | jq --join-output '[.nodes[]] | join(" ")'
-    requires:
-      vars: ["cluster"]
-    preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
-
-  upgrade:
-    desc: Upgrade Talos on a node
-    cmd: bash {{.TALOS_SCRIPTS_DIR}}/upgrade.sh "{{.cluster}}" "{{.node}}" "{{.TALOS_SCHEMATIC_ID}}:{{.TALOS_VERSION}}" "{{.rollout}}"
-    vars:
-      rollout: '{{.rollout | default "false"}}'
-    requires:
-      vars: ["cluster", "node"]
-    preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
-      - talosctl --context {{.cluster}} --nodes {{.node}} get machineconfig >/dev/null 2>&1
-
-  upgrade-k8s:
-    desc: Upgrade the clusters k8s version
-    cmd: talosctl --context {{.cluster}} --nodes {{.controller}} upgrade-k8s --to {{.KUBERNETES_VERSION}}
-    vars:
-      controller:
-        sh: talosctl --context {{.cluster}} config info --output json | jq --raw-output '.endpoints[0]'
-    requires:
-      vars: ["cluster"]
-    preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
-      - talosctl --context {{.cluster}} --nodes {{.node}} get machineconfig >/dev/null 2>&1
