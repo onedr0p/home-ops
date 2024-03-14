@@ -33,13 +33,12 @@ jobs:
 
       - name: Get Changed Clusters
         id: changed-clusters
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@v43
         with:
           files: kubernetes/**
           dir_names: true
           dir_names_max_depth: 2
-          json: true
-          escape_json: false
+          matrix: true
 
       - name: List All Changed Clusters
         run: echo "${{ steps.changed-clusters.outputs.all_changed_and_modified_files }}"
@@ -121,8 +120,8 @@ jobs:
         id: extract-images
         shell: bash
         run: |
-          images=$(jo -a $(grep -vf default.txt pull.txt))
-          echo "images=${images}" >> $GITHUB_OUTPUT
+          images=$(jo -a "$(grep -vf default.txt pull.txt)")
+          echo "images=${images}" >> "$GITHUB_OUTPUT"
           echo "${images}"
           echo "### Images" >> "$GITHUB_STEP_SUMMARY"
           echo "${images}" | jq -r 'to_entries[] | "* \(.value)"' >> "$GITHUB_STEP_SUMMARY"
