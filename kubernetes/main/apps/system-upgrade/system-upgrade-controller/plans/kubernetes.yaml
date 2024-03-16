@@ -16,6 +16,9 @@ spec:
   exclusive: true
   nodeSelector:
     matchExpressions:
+      - key: feature.node.kubernetes.io/system-os_release.ID
+        operator: In
+        values: ["talos"]
       - key: node-role.kubernetes.io/control-plane
         operator: Exists
   tolerations:
@@ -34,6 +37,7 @@ spec:
     args:
       - --nodes=$(NODE_IP)
       - health
+      - --wait-timeout=300s
       - --server=false
   upgrade:
     <<: *prepare
