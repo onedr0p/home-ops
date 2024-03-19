@@ -1,0 +1,54 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app external-dns-bind
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: external-dns
+      version: 1.14.3
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    fullnameOverride: *app
+    provider: rfc2136
+    env:
+      - name: EXTERNAL_DNS_RFC2136_HOST
+        value: "192.168.254.10"
+      - name: EXTERNAL_DNS_RFC2136_PORT
+        value: "53"
+      - name: EXTERNAL_DNS_RFC2136_ZONE
+        value: &domain turbo.ac
+      - name: EXTERNAL_DNS_RFC2136_TSIG_AXFR
+        value: "true"
+      - name: EXTERNAL_DNS_RFC2136_TSIG_KEYNAME
+        value: kubernetes-storage-key
+      - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET_ALG
+        value: hmac-sha256
+      - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: &secret external-dns-bind-secret
+            key: EXTERNAL_DNS_RFC2136_TSIG_SECRET
+    policy: sync
+    sources: ["ingress", "service"]
+    txtOwnerId: default
+    txtPrefix: k8s.
+    domainFilters: [*domain]
+    serviceMonitor:
+      enabled: true
+    podAnnotations:
+      secret.reloader.stakater.com/reload: *secret
