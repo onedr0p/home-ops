@@ -100,16 +100,14 @@ spec:
         hosts:
           - &host prometheus.turbo.ac
         tls:
-          - hosts:
-              - *host
+          - hosts: [*host]
       prometheusSpec:
         podMetadata:
           annotations:
             secret.reloader.stakater.com/reload: &secret kube-prometheus-stack-secret
         additionalAlertManagerConfigs:
           - static_configs:
-              - targets:
-                  - alertmanager.devbu.io
+              - targets: ["alertmanager.devbu.io"]
         replicas: 1
         replicaExternalLabelName: __replica__
         scrapeInterval: 1m # Must match interval in Grafana Helm chart
@@ -169,8 +167,7 @@ spec:
             - action: replace
               regex: (.*)
               replacement: $1
-              sourceLabels:
-                - __meta_kubernetes_pod_node_name
+              sourceLabels: ["__meta_kubernetes_pod_node_name"]
               targetLabel: kubernetes_node
     kubeStateMetrics:
       enabled: true
@@ -187,8 +184,7 @@ spec:
             - action: replace
               regex: (.*)
               replacement: $1
-              sourceLabels:
-                - __meta_kubernetes_pod_node_name
+              sourceLabels: ["__meta_kubernetes_pod_node_name"]
               targetLabel: kubernetes_node
     grafana:
       enabled: false

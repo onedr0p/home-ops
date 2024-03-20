@@ -42,8 +42,7 @@ spec:
         hosts:
           - &host alertmanager.devbu.io
         tls:
-          - hosts:
-              - *host
+          - hosts: [*host]
       alertmanagerSpec:
         replicas: 2
         useExistingSecret: true
@@ -100,8 +99,7 @@ spec:
         hosts:
           - &host prometheus.devbu.io
         tls:
-          - hosts:
-              - *host
+          - hosts: [*host]
       thanosService:
         enabled: true
       thanosServiceMonitor:
@@ -155,8 +153,7 @@ spec:
             - action: replace
               regex: (.*)
               replacement: $1
-              sourceLabels:
-                - __meta_kubernetes_pod_node_name
+              sourceLabels: ["__meta_kubernetes_pod_node_name"]
               targetLabel: kubernetes_node
     kubeStateMetrics:
       enabled: true
@@ -173,8 +170,7 @@ spec:
             - action: replace
               regex: (.*)
               replacement: $1
-              sourceLabels:
-                - __meta_kubernetes_pod_node_name
+              sourceLabels: ["__meta_kubernetes_pod_node_name"]
               targetLabel: kubernetes_node
     grafana:
       enabled: false
