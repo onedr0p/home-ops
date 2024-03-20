@@ -24,16 +24,18 @@ vars:
 
 tasks:
 
-  suspend-controller:
-    desc: Suspends Volsync
+  controller-*:
+    desc: Suspend or Resume Volsync
     summary: |
       Args:
         cluster: Cluster to run command against (required)
     cmds:
-      - flux --context {{.cluster}} suspend ks volsync
-      - flux --context {{.cluster}} suspend hr -n volsync-system volsync
-      - kubectl --context {{.cluster}} -n volsync-system scale deployment volsync --replicas 0
+      - flux --context {{.cluster}} {{.state}} ks volsync
+      - flux --context {{.cluster}} {{.state}} hr -n volsync-system volsync
+      - kubectl --context {{.cluster}} -n volsync-system scale deployment volsync --replicas {{ if eq "suspend" .state }}0{{ else }}1{{ end }}
     env: *env
+    vars:
+      state: '{{index .MATCH 0}}'
     requires:
       vars: ["cluster"]
 
