@@ -91,6 +91,19 @@ groups:
           app: "{{ $labels.container }}"
           summary: "{{ $labels.container }} is experiencing database issues"
 
+  - name: qbittorrent
+    rules:
+      - alert: QbittorrentMismatchFileSize
+        expr: |
+          sum by (app) (count_over_time({app="qbittorrent"} |~ "(?i)mismatching file size"[1h])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          app: "{{ $labels.container }}"
+          summary: "{{ $labels.container }} has a torrent with mismatching file size"
+
   #
   # Deprecated
   #
