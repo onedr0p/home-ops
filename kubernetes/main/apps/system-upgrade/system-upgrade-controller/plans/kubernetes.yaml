@@ -5,8 +5,7 @@ kind: Plan
 metadata:
   name: kubernetes
 spec:
-  # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
-  version: v1.29.3
+  version: ${KUBERNETES_VERSION}
   serviceAccountName: system-upgrade
   secrets:
     - name: talos
@@ -28,7 +27,7 @@ spec:
       operator: Exists
       effect: NoSchedule
   prepare: &prepare
-    image: ghcr.io/siderolabs/talosctl:v1.6.7
+    image: ghcr.io/siderolabs/talosctl:${TALOS_VERSION}
     envs:
       - name: NODE_IP
         valueFrom:

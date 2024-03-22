@@ -5,8 +5,7 @@ kind: Plan
 metadata:
   name: talos
 spec:
-  # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-  version: &version v1.6.7
+  version: ${TALOS_VERSION}
   serviceAccountName: system-upgrade
   secrets:
     - name: talos
@@ -21,7 +20,7 @@ spec:
         values: ["talos"]
       - key: feature.node.kubernetes.io/system-os_release.VERSION_ID
         operator: NotIn
-        values: [*version]
+        values: ["${TALOS_VERSION}"]
   tolerations:
     - key: CriticalAddonsOnly
       operator: Exists
@@ -29,7 +28,7 @@ spec:
       operator: Exists
       effect: NoSchedule
   prepare: &prepare
-    image: ghcr.io/siderolabs/talosctl:v1.6.7
+    image: ghcr.io/siderolabs/talosctl:${TALOS_VERSION}
     envs:
       - name: NODE_IP
         valueFrom:
