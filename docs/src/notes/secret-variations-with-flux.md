@@ -31,7 +31,7 @@ envFrom:
 ```
 
 ```admonish example
-View example [Helm Release](https://ln.devbu.io/ngLju) and corresponding [Secret](https://ln.devbu.io/ULgnl).
+View example [Helm Release](https://github.com/onedr0p/home-ops/blob/782ec8c15cacc17329aec08841380aba134794a1/cluster/apps/default/home-assistant/helm-release.yaml) and corresponding [Secret](https://github.com/onedr0p/home-ops/blob/782ec8c15cacc17329aec08841380aba134794a1/cluster/apps/default/home-assistant/secret.sops.yaml).
 ```
 
 ### Method 2: `env.valueFrom`
@@ -48,7 +48,7 @@ env:
 ```
 
 ```admonish example
-View example [Helm Release](https://ln.devbu.io/0lbMT) and corresponding [Secret](https://ln.devbu.io/KYjhP).
+View example [Helm Release](https://github.com/onedr0p/home-ops/blob/782ec8c15cacc17329aec08841380aba134794a1/cluster/apps/networking/external-dns/helm-release.yaml) and corresponding [Secret](https://github.com/onedr0p/home-ops/blob/782ec8c15cacc17329aec08841380aba134794a1/cluster/apps/networking/external-dns/secret.sops.yaml).
 ```
 
 ### Method 3: `spec.valuesFrom`
@@ -66,7 +66,7 @@ valuesFrom:
 ```
 
 ```admonish example
-View example [Helm Release](https://ln.devbu.io/ARdun) and corresponding [Secret](https://ln.devbu.io/hNef8).
+View example [Helm Release](https://github.com/onedr0p/home-ops/blob/782ec8c15cacc17329aec08841380aba134794a1/cluster/apps/default/emqx/helm-release.yaml) and corresponding [Secret](https://github.com/onedr0p/home-ops/blob/782ec8c15cacc17329aec08841380aba134794a1/cluster/apps/default/emqx/secret.sops.yaml).
 ```
 
 ### Method 4: Variable Substitution with Flux
@@ -100,7 +100,7 @@ spec:
 ```
 
 ```admonish example
-View example [Fluxtomization](https://ln.devbu.io/ZMbfI), [Helm Release](https://ln.devbu.io/y6DJS), and corresponding [Secret](https://ln.devbu.io/kRoHj).
+View example [Fluxtomization](https://github.com/onedr0p/home-ops/blob/782ec8c15cacc17329aec08841380aba134794a1/cluster/flux/apps.yaml), [Helm Release](https://github.com/onedr0p/home-ops/blob/782ec8c15cacc17329aec08841380aba134794a1/cluster/apps/monitoring/kube-prometheus-stack/helm-release.yaml), and corresponding [Secret](https://github.com/onedr0p/home-ops/blob/782ec8c15cacc17329aec08841380aba134794a1/cluster/config/cluster-secrets.sops.yaml).
 ```
 
 ## Final Thoughts
