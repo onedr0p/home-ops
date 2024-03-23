@@ -35,24 +35,24 @@ spec:
             envFrom: &envFrom
               - secretRef:
                   name: gatus-secret
-          # TODO: Convert this to a proper 'sidecar' container someday
           init-config:
             dependsOn: init-db
-            image: &configSyncImage
+            image:
               repository: ghcr.io/kiwigrid/k8s-sidecar
               tag: 1.26.1@sha256:b8d5067137fec093cf48670dc3a1dbb38f9e734f3a6683015c2e89a45db5fd16
-            env: &configSyncEnv
+            env:
               FOLDER: /config
               LABEL: gatus.io/enabled
               NAMESPACE: ALL
               RESOURCE: both
               UNIQUE_FILENAMES: true
-              METHOD: LIST
+              METHOD: WATCH
+            restartPolicy: Always
             resources: &resources
               requests:
                 cpu: 10m
               limits:
-                memory: 128Mi
+                memory: 256Mi
         containers:
           app:
             image:
@@ -69,24 +69,17 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: &path /health
+                    path: /health
                     port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-            securityContext: &securityContext
+            securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
-            resources: *resources
-          config-sync:
-            image: *configSyncImage
-            env:
-              <<: *configSyncEnv
-              METHOD: WATCH
-            securityContext: *securityContext
             resources: *resources
         pod:
           dnsConfig:
