@@ -10,10 +10,10 @@ spec:
   chart:
     spec:
       chart: thanos
-      version: 14.0.2
+      version: 1.16.1
       sourceRef:
         kind: HelmRepository
-        name: bitnami
+        name: stevehipwell
         namespace: flux-system
   install:
     remediation:
@@ -31,120 +31,98 @@ spec:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   valuesFrom:
-    - targetPath: objstoreConfig.config.bucket
+    - targetPath: objstoreConfig.value.config.bucket
       kind: ConfigMap
-      name: thanos-bucket-v2
+      name: thanos-bucket
       valuesKey: BUCKET_NAME
-    - targetPath: objstoreConfig.config.endpoint
+    - targetPath: objstoreConfig.value.config.endpoint
       kind: ConfigMap
-      name: thanos-bucket-v2
+      name: thanos-bucket
       valuesKey: BUCKET_HOST
-    - targetPath: objstoreConfig.config.region
+    - targetPath: objstoreConfig.value.config.region
       kind: ConfigMap
-      name: thanos-bucket-v2
+      name: thanos-bucket
       valuesKey: BUCKET_REGION
-    - targetPath: objstoreConfig.config.access_key
+    - targetPath: objstoreConfig.value.config.access_key
       kind: Secret
-      name: thanos-bucket-v2
+      name: thanos-bucket
       valuesKey: AWS_ACCESS_KEY_ID
-    - targetPath: objstoreConfig.config.secret_key
+    - targetPath: objstoreConfig.value.config.secret_key
       kind: Secret
-      name: thanos-bucket-v2
+      name: thanos-bucket
       valuesKey: AWS_SECRET_ACCESS_KEY
   values:
-    image:
-      registry: quay.io
-      repository: thanos/thanos
-      tag: v0.34.1
     objstoreConfig:
-      type: s3
-      config:
-        insecure: true
-    receive:
-      enabled: false
-      networkPolicy:
-        enabled: false
+      value:
+        type: s3
+        config:
+          insecure: true
+    additionalEndpoints:
+      - dnssrv+_grpc._tcp.kube-prometheus-stack-thanos-discovery.observability.svc.cluster.local
+    additionalReplicaLabels: ["__replica__"]
+    serviceMonitor:
+      enabled: true
+    compact:
+      enabled: true
+      extraArgs:
+        - --compact.concurrency=4
+        - --delete-delay=30m
+        - --retention.resolution-raw=14d
+        - --retention.resolution-5m=30d
+        - --retention.resolution-1h=60d
+      persistence: &persistence
+        enabled: true
+        storageClass: openebs-hostpath
+        size: 10Gi
+    query:
+      replicas: 2
+      additionalStores: ["thanos.turbo.ac:10901"]
+      extraArgs: ["--alert.query-url=http://thanos-query-frontend.devbu.io"]
     queryFrontend:
       enabled: true
-      replicaCount: 2
-      config: &config |-
-        type: REDIS
-        config:
-          addr: >-
-            redis-node-0.redis-headless.database.svc.cluster.local:26379,
-            redis-node-1.redis-headless.database.svc.cluster.local:26379,
-            redis-node-2.redis-headless.database.svc.cluster.local:26379
-          db: 13
-          master_name: redis-master
+      replicas: 2
+      podAnnotations:
+        configmap.reloader.stakater.com/reload: &configmap thanos-cache-configmap
+      # TODO: Add cache configMap as volumeMount
+      # extraArgs:
+      #   - --query-range.response-cache-config-file=/conf/cache/cache.yaml
       ingress:
         enabled: true
         ingressClassName: internal
-        hostname: &host thanos-query-frontend.devbu.io
-        tls: true
-        extraTls:
+        hosts:
+          - &host thanos-query-frontend.devbu.io
+        tls:
           - hosts: [*host]
-      networkPolicy:
-        enabled: false
-    query:
-      enabled: true
-      replicaCount: 2
-      replicaLabel: ["__replica__"]
-      dnsDiscovery:
-        sidecarsService: kube-prometheus-stack-thanos-discovery
-        sidecarsNamespace: observability
-      stores: ["thanos.turbo.ac:10901"]
-      networkPolicy:
-        enabled: false
-    compactor:
-      enabled: true
-      extraFlags:
-        - --compact.concurrency=4
-        - --delete-delay=30m
-      retentionResolutionRaw: 14d
-      retentionResolution5m: 30d
-      retentionResolution1h: 60d
-      persistence:
-        enabled: true
-        storageClass: openebs-hostpath
-        size: 10Gi
-      networkPolicy:
-        enabled: false
-    storegateway:
-      enabled: true
-      replicaCount: 2
-      config: *config
-      persistence:
-        enabled: true
-        storageClass: openebs-hostpath
-        size: 10Gi
-      networkPolicy:
-        enabled: false
     ruler:
       enabled: true
-      replicaCount: 2
-      replicaLabel: __replica__
-      alertmanagers: ["http://alertmanager-operated.observability.svc.cluster.local:9093"]
-      extraFlags: ["--web.prefix-header=X-Forwarded-Prefix"]
-      config: |-
-        groups:
-          - name: PrometheusWatcher
-            rules:
-              - alert: PrometheusDown
-                annotations:
-                  summary: A Prometheus has disappeared from Prometheus target discovery
-                expr: absent(up{job="kube-prometheus-stack-prometheus"})
-                for: 5m
-                labels:
-                  severity: critical
-      persistence:
-        enabled: true
-        storageClass: openebs-hostpath
-        size: 10Gi
-      networkPolicy:
-        enabled: false
-    bucketweb:
-      enabled: false
-    metrics:
-      enabled: true
-      serviceMonitor:
-        enabled: true
+      replicas: 2
+      extraArgs:
+        - --alert.query-url=http://thanos-query-frontend.devbu.io
+        - --web.prefix-header=X-Forwarded-Prefix
+      alertmanagersConfig:
+        value: |-
+          alertmanagers:
+            - api_version: v2
+              static_configs:
+                - dnssrv+_http-web._tcp.alertmanager-operated.observability.svc.cluster.local
+      rules:
+        value: |-
+          groups:
+            - name: PrometheusWatcher
+              rules:
+                - alert: PrometheusDown
+                  annotations:
+                    summary: A Prometheus has disappeared from Prometheus target discovery
+                  expr: absent(up{job="kube-prometheus-stack-prometheus"})
+                  for: 5m
+                  labels:
+                    severity: critical
+      persistence: *persistence
+    storegateway:
+      replicas: 2
+      podAnnotations:
+        configmap.reloader.stakater.com/reload: *configmap
+      # TODO: Add cache configMap as volumeMount
+      # extraArgs:
+      #   - --index-cache.config-file=/conf/cache/cache.yaml
+      persistence: *persistence
