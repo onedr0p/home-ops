@@ -76,23 +76,27 @@ spec:
         size: 10Gi
     query:
       replicas: 2
+      extraArgs: ["--alert.query-url=https://thanos.devbu.io"]
       additionalStores: ["thanos.turbo.ac:10901"]
-      extraArgs: ["--alert.query-url=http://thanos-query-frontend.devbu.io"]
     queryFrontend:
       enabled: true
       replicas: 2
-      podAnnotations:
-        configmap.reloader.stakater.com/reload: &configmap thanos-cache-configmap
-      # TODO: Add cache configMap as volumeMount
-      # extraArgs:
-      #   - --query-range.response-cache-config-file=/conf/cache/cache.yaml
+      extraEnv: &extraEnv
+        - name: THANOS_CACHE_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: &configMap thanos-cache-configmap
+              key: cache.yaml
+      extraArgs: ["--query-range.response-cache-config=$(THANOS_CACHE_CONFIG)"]
       ingress:
         enabled: true
         ingressClassName: internal
         hosts:
-          - &host thanos-query-frontend.devbu.io
+          - &host thanos.devbu.io
         tls:
           - hosts: [*host]
+      podAnnotations:
+        configmap.reloader.stakater.com/reload: *configMap
     rule:
       enabled: true
       replicas: 2
@@ -118,9 +122,7 @@ spec:
       persistence: *persistence
     storeGateway:
       replicas: 2
-      podAnnotations:
-        configmap.reloader.stakater.com/reload: *configmap
-      # TODO: Add cache configMap as volumeMount
-      # extraArgs:
-      #   - --index-cache.config-file=/conf/cache/cache.yaml
+      extraEnv: *extraEnv
+      extraArgs: ["--index-cache.config=$(THANOS_CACHE_CONFIG)"]
       persistence: *persistence
+      podAnnotations: *podAnnotations
