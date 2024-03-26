@@ -136,7 +136,6 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 | [GCP](https://cloud.google.com/)                | Voice interactions with Home Assistant over Google Assistant      | Free           |
 | [GitHub](https://github.com/)                   | Hosting this repository and continuous integration/deployments    | Free           |
 | [Migadu](https://migadu.com/)                   | Email hosting                                                     | ~$20/yr        |
-| [NextDNS](https://nextdns.io/)                  | My router DNS server which includes AdBlocking                    | ~$20/yr        |
 | [Pushover](https://pushover.net/)               | Kubernetes Alerts and application notifications                   | $5 OTP         |
 | [Terraform Cloud](https://www.terraform.io/)    | Storing Terraform state                                           | Free           |
 | [UptimeRobot](https://uptimerobot.com/)         | Monitoring internet connectivity and external facing applications | ~$60/yr        |
@@ -148,9 +147,9 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 
 ### Home DNS
 
-On my Vyos router I have [Bind9](https://github.com/isc-projects/bind9) and [dnsdist](https://dnsdist.org/) deployed as containers. In my cluster `external-dns` is deployed with the `RFC2136` provider which syncs DNS records to `bind9`.
+On my Vyos router I have [Bind9](https://github.com/isc-projects/bind9), [blocky](https://github.com/0xERR0R/blocky/) and [dnsdist](https://dnsdist.org/) deployed as containers. In my cluster `external-dns` is deployed with the `RFC2136` provider which syncs DNS records to `bind9`.
 
-Downstream DNS servers configured in `dnsdist` such as `bind9` (above) and [NextDNS](https://nextdns.io/). All my clients use `dnsdist` as the upstream DNS server, this allows for more granularity with configuring DNS across my networks. These could be things like giving each of my VLANs a specific `nextdns` profile, or having all requests for my domain forward to `bind9` on certain networks, or only using `1.1.1.1` instead of `nextdns` on certain networks where adblocking isn't required.
+`dnsdist` is a DNS loadbalancer and has "downstream" DNS servers configured such as `bind9` and `blocky`. All my clients use `dnsdist` as the upstream DNS server, this allows for more granularity with configuring DNS across my networks such as having all requests for my domain forward to `bind9` on certain networks, or only using `1.1.1.1` instead of `blocky` on certain networks where adblocking isn't required.
 
 ### Public DNS
 
