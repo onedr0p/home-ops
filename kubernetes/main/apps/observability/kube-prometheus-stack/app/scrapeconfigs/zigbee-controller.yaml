@@ -3,8 +3,12 @@
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
-  name: zigbee-controller
+  name: &name zigbee-controller
 spec:
   staticConfigs:
     - targets: ["zigbee-controller.turbo.ac"]
   metricsPath: /metrics
+  relabelings:
+    - action: replace
+      targetLabel: job
+      replacement: *name
