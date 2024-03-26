@@ -3,28 +3,54 @@
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
-  name: vyos-gatus
+  name: &name vyos-gatus
 spec:
   staticConfigs:
     - targets: ["status.turbo.ac"]
   metricsPath: /metrics
+  relabelings:
+    - action: replace
+      targetLabel: job
+      replacement: *name
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
-  name: vyos-smtp-relay
+  name: &name vyos-smtp-relay
 spec:
   staticConfigs:
     - targets: ["192.168.254.4:8080"]
   metricsPath: /metrics
+  relabelings:
+    - action: replace
+      targetLabel: job
+      replacement: *name
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: &name vyos-blocky
+spec:
+  staticConfigs:
+    - targets: ["192.168.254.9:4000"]
+  metricsPath: /metrics
+  relabelings:
+    - action: replace
+      targetLabel: job
+      replacement: *name
 # ---
 # # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
 # apiVersion: monitoring.coreos.com/v1alpha1
 # kind: ScrapeConfig
 # metadata:
-#   name: vyos-vnstat
+#   name: &name vyos-vnstat
 # spec:
 #   staticConfigs:
 #     - targets: ["vyos.turbo.ac:8685"]
 #   metricsPath: /metrics
+#   relabelings:
+#     - action: replace
+#       targetLabel: job
+#       replacement: *name
