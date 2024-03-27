@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: gha-runner-home-ops
+  name: gha-runner-scale-set
 spec:
   interval: 30m
   chart:
@@ -39,7 +39,8 @@ spec:
       name: actions-runner-controller-auth-secret
       valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_PRIVATE_KEY
   values:
-    runnerScaleSetName: gha-runner-home-ops
+    nameOverride: gha-runner-scale-set
+    runnerScaleSetName: gha-runner-scale-set
     githubConfigUrl: https://github.com/onedr0p/home-ops
     minRunners: 1
     maxRunners: 6
