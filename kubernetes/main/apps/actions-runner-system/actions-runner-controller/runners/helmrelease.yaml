@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: arc-home-ops
+  name: gha-runner-home-ops
 spec:
   interval: 30m
   chart:
@@ -22,6 +22,9 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
+  dependsOn:
+    - name: gha-runner-scale-set-controller
+      namespace: actions-runner-controller
   valuesFrom:
     - targetPath: githubConfigSecret.github_app_id
       kind: Secret
@@ -36,7 +39,7 @@ spec:
       name: actions-runner-controller-auth-secret
       valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_PRIVATE_KEY
   values:
-    runnerScaleSetName: arc-runner-set-home-ops
+    runnerScaleSetName: gha-runner-home-ops
     githubConfigUrl: https://github.com/onedr0p/home-ops
     minRunners: 1
     maxRunners: 6
@@ -49,5 +52,5 @@ spec:
             image: ghcr.io/onedr0p/actions-runner:2.315.0@sha256:08ea5f7f4768d07be9975a2190ffc5ab2df44e77e173f4cda96f9906dffdaadd
             command: ["/home/runner/run.sh"]
     controllerServiceAccount:
-      name: actions-runner-controller-gha-rs-controller
+      name: gha-runner-scale-set-controller
       namespace: actions-runner-system
