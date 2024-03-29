@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: &app lldap
+  name: &app glauth
 spec:
   interval: 30m
   chart:
@@ -24,50 +24,44 @@ spec:
       retries: 3
   values:
     controllers:
-      lldap:
+      glauth:
         replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 16
-            envFrom: &envFrom
-              - secretRef:
-                  name: lldap-secret
         containers:
           app:
             image:
-              repository: ghcr.io/lldap/lldap
-              tag: v0.5.0@sha256:f0f5d92cd6c6dca9415993cfc57919f0618e87090b323a98c1536975860fa45a
-            env:
-              TZ: America/New_York
-              LLDAP_HTTP_PORT: &port 80
-              LLDAP_HTTP_URL: https://lldap.devbu.io
-              LLDAP_LDAP_PORT: &ldapPort 389
-              LLDAP_LDAP_BASE_DN: dc=home,dc=arpa
-            envFrom: *envFrom
+              repository: docker.io/glauth/glauth
+              tag: v2.3.2
+            command: ["/app/glauth", "-c", "/config"]
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /health
-                    port: *port
+                    path: /
+                    port: &port 5555
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
               limits:
                 memory: 128Mi
         pod:
+          securityContext:
+            runAsUser: 65534
+            runAsGroup: 65534
+            runAsNonRoot: true
           topologySpreadConstraints:
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname
@@ -77,24 +71,34 @@ spec:
                   app.kubernetes.io/name: *app
     service:
       app:
-        controller: lldap
+        controller: *app
         ports:
           http:
             port: *port
           ldap:
-            port: *ldapPort
-    ingress:
+            enabled: true
+            port: 389
+            protocol: TCP
+    serviceMonitor:
       app:
-        className: internal
-        hosts:
-          - host: &host "{{ .Release.Name }}.devbu.io"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts: [*host]
+        serviceName: *app
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
     persistence:
-      data:
-        type: emptyDir
+      config:
+        type: secret
+        name: glauth-secret
+        globalMounts:
+          - path: /config/groups.toml
+            subPath: groups.toml
+            readOnly: true
+          - path: /config/server.toml
+            subPath: server.toml
+            readOnly: true
+          - path: /config/users.toml
+            subPath: users.toml
+            readOnly: true

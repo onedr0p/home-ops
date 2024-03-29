@@ -1,28 +1,28 @@
 ---
 # Note: Authelia vars should be escaped with $${VAR_NAME} to avoid interpolation by Flux
 authentication_backend:
-  password_reset:
-    disable: true
-  refresh_interval: 1m
   ldap:
-    address: ldap://lldap.default.svc.cluster.local:389
+    address: ldap://glauth.default.svc.cluster.local:389
     implementation: custom
     timeout: 5s
     start_tls: false
     base_dn: dc=home,dc=arpa
-    additional_users_dn: ou=people
-    users_filter: (&({username_attribute}={input})(objectClass=person))
+    additional_users_dn: ou=users
+    users_filter: (&({username_attribute}={input})(objectClass=posixAccount))
     additional_groups_dn: ou=groups
-    groups_filter: (member={dn})
+    groups_filter: (&(memberUid={username})(objectClass=posixGroup))
     group_search_mode: filter
-    user: uid=admin,ou=people,dc=home,dc=arpa
+    user: cn=search,ou=svcaccts,dc=home,dc=arpa
     password: password
     attributes:
       username: uid
-      display_name: displayName
+      display_name: givenName
       mail: mail
       member_of: memberOf
       group_name: cn
+  password_reset:
+    disable: true
+  refresh_interval: 1m
 
 session:
   same_site: lax
