@@ -6,13 +6,13 @@ metadata:
   name: &app certificates-import
   namespace: flux-system
 spec:
-  targetNamespace: network
+  targetNamespace: cert-manager
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
-  path: ./kubernetes/main/apps/network/certificates/import
+  path: ./kubernetes/main/apps/cert-manager/certificates/import
   prune: false
   sourceRef:
     kind: GitRepository
@@ -29,15 +29,15 @@ metadata:
   name: &app certificates
   namespace: flux-system
 spec:
-  targetNamespace: network
+  targetNamespace: cert-manager
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: cert-manager-issuers
     - name: certificates-import
+    - name: cert-manager-issuers
     - name: external-secrets-stores
-  path: ./kubernetes/main/apps/network/certificates/app
+  path: ./kubernetes/main/apps/cert-manager/certificates/app
   prune: false
   sourceRef:
     kind: GitRepository
