@@ -48,10 +48,36 @@ spec:
       bdev_async_discard = true
       osd_class_update_on_start = false
     cephClusterSpec:
+      crashCollector:
+        disable: false
+      dashboard:
+        enabled: true
+        urlPrefix: /
+        ssl: false
+        prometheusEndpoint: http://thanos-query-frontend.observability.svc.cluster.local:10902
+      mgr:
+        modules:
+          - name: pg_autoscaler
+            enabled: true
       network:
         provider: host
         connections:
           requireMsgr2: true
+      storage:
+        useAllNodes: true
+        useAllDevices: true
+        deviceFilter: nvme0n1
+        config:
+          osdsPerDevice: "1"
+      placement:
+        mgr: &placement
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: node-role.kubernetes.io/control-plane
+                      operator: Exists
+        mon: *placement
       resources:
         mgr:
           requests:
@@ -77,28 +103,6 @@ spec:
             memory: 128Mi
           limits:
             memory: 256Mi
-      crashCollector:
-        disable: false
-      dashboard:
-        enabled: true
-        urlPrefix: /
-        ssl: false
-        prometheusEndpoint: http://thanos-query-frontend.observability.svc.cluster.local:10902
-      storage:
-        useAllNodes: true
-        useAllDevices: true
-        deviceFilter: nvme0n1
-        config:
-          osdsPerDevice: "1"
-      placement:
-        mgr: &placement
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-                - matchExpressions:
-                    - key: node-role.kubernetes.io/control-plane
-                      operator: Exists
-        mon: *placement
     cephBlockPools:
       - name: ceph-blockpool
         spec:
