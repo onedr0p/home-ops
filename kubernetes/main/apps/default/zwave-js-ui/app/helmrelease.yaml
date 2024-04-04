@@ -39,6 +39,7 @@ spec:
               tag: 9.10.2@sha256:b8a32e5059d4a1ded6c8b1011e897564146f5a6d7b14f6f17aaf9746e58c306c
             env:
               TZ: America/New_York
+              PORT: &port 80
             probes:
               liveness: &probes
                 enabled: true
@@ -46,7 +47,7 @@ spec:
                 spec:
                   httpGet:
                     path: /health
-                    port: &port 8091
+                    port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
