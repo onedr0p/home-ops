@@ -62,8 +62,6 @@ spec:
                     path: /health
                     port: *apiPort
                   initialDelaySeconds: 15
-              startup:
-                enabled: false
             securityContext: &securityContext
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -106,8 +104,6 @@ spec:
                     path: /health
                     port: *syncPort
                   initialDelaySeconds: 15
-              startup:
-                enabled: false
             securityContext: *securityContext
             resources: *resources
         pod:
@@ -131,7 +127,7 @@ spec:
             paths:
               - path: /
                 service:
-                  identifier: api
+                  identifier: app
                   port: http
         tls:
           - hosts: [*host]
