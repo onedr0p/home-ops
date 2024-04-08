@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: loki
-      version: 6.0.0
+      version: 5.47.2
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -171,8 +171,20 @@ spec:
             name: loki-alerting-rules
         - name: scratch
           emptyDir: {}
-    lokiCanary:
-      enabled: false
+    monitoring:
+      dashboards:
+        annotations:
+          grafana_folder: Loki
+      serviceMonitor:
+        enabled: false
+        metricsInstance:
+          enabled: false
+      selfMonitoring:
+        enabled: false
+        grafanaAgent:
+          installOperator: false
+      lokiCanary:
+        enabled: false
     sidecar:
       image:
         repository: ghcr.io/kiwigrid/k8s-sidecar
