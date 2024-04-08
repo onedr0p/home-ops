@@ -13,19 +13,6 @@ groups:
           app: "{{ $labels.app }}"
           summary: "{{ $labels.app }} is unable to reach MQTT"
 
-  - name: zwave-js-ui
-    rules:
-      - alert: ZwaveMQTTUnreachable
-        expr: |
-          sum(count_over_time({app="zwave-js-ui"} |~ "(?i)error while connecting mqtt"[2m])) > 0
-        for: 2m
-        labels:
-          severity: critical
-          category: logs
-        annotations:
-          app: "{{ $labels.app }}"
-          summary: "{{ $labels.app }} is unable to reach MQTT"
-
   - name: frigate
     rules:
       - alert: FrigateMQTTUnreachable
@@ -107,6 +94,19 @@ groups:
   #
   # Deprecated
   #
+
+  # - name: zwave
+  #   rules:
+  #     - alert: ZwaveMQTTUnreachable
+  #       expr: |
+  #         sum(count_over_time({app="zwave"} |~ "(?i)error while connecting mqtt"[2m])) > 0
+  #       for: 2m
+  #       labels:
+  #         severity: critical
+  #         category: logs
+  #       annotations:
+  #         app: "{{ $labels.app }}"
+  #         summary: "{{ $labels.app }} is unable to reach MQTT"
 
   # - name: node-red
   #   rules:
