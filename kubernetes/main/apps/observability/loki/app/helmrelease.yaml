@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: loki
-      version: 5.47.2
+      version: 6.0.0
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -115,7 +115,7 @@ spec:
               store: memberlist
         compactor:
           working_directory: /var/loki/boltdb-shipper-compactor
-          shared_store: s3
+          delete_request_store: s3
           compaction_interval: 10m
           retention_enabled: true
           retention_delete_delay: 2h
@@ -171,20 +171,8 @@ spec:
             name: loki-alerting-rules
         - name: scratch
           emptyDir: {}
-    monitoring:
-      dashboards:
-        annotations:
-          grafana_folder: Loki
-      serviceMonitor:
-        enabled: false
-        metricsInstance:
-          enabled: false
-      selfMonitoring:
-        enabled: false
-        grafanaAgent:
-          installOperator: false
-      lokiCanary:
-        enabled: false
+    lokiCanary:
+      enabled: false
     sidecar:
       image:
         repository: ghcr.io/kiwigrid/k8s-sidecar
