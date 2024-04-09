@@ -3,9 +3,22 @@
 apiVersion: apps.emqx.io/v2beta1
 kind: EMQX
 metadata:
-  name: emqx
+  name: emqx5
+  namespace: database
 spec:
   image: public.ecr.aws/emqx/emqx:5.6.0
+  config:
+    data: |
+      log.console.level = debug
   coreTemplate:
     spec:
       replicas: 3
+  # replicantTemplate:
+  #   spec:
+  #     replicas: 3
+  # listenersServiceTemplate:
+  #   metadata:
+  #     annotations:
+  #       io.cilium/lb-ipam-ips: 192.168.42.129
+  #   spec:
+  #     type: LoadBalancer
