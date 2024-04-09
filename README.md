@@ -93,7 +93,7 @@ This Git repository contains the following directories under [Kubernetes](./kube
 
 ### Flux Workflow
 
-This is a high-level look how Flux deploys my applications with dependencies. Below there are 3 apps `postgres`, `glauth` and `authelia`. `postgres` is the first app that needs to be running and healthy before `glauth` and `authelia`. Once `postgres` is healthy `glauth` will be deployed and after that is healthy `authelia` will be deployed.
+This is a high-level look how Flux deploys my applications with dependencies. Below there are 3 apps `postgres`, `glauth` and `authelia`. `postgres` is the first app that needs to be running and healthy before `glauth` and `authelia`. Once `postgres` and `glauth` are healthy `authelia` will be deployed.
 
 ```mermaid
 graph TD;
