@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/apps.emqx.io/emqx_v2beta1.json
+apiVersion: apps.emqx.io/v2beta1
+kind: EMQX
+metadata:
+  name: emqx
+spec:
+  image: public.ecr.aws/emqx/emqx:5.6.0
+  imagePullPolicy: IfNotPresent
+  config:
+    data: |
+      log.console.level = debug
+  coreTemplate:
+    spec:
+      replicas: 3
+      volumeClaimTemplates:
+        storageClassName: openebs-hostpath
+        resources:
+          requests:
+            storage: 100Mi
+        accessModes: ["ReadWriteOnce"]
