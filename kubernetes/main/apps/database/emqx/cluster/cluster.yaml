@@ -9,10 +9,47 @@ spec:
   image: public.ecr.aws/emqx/emqx:5.6.0
   config:
     data: |
-      log.console.level = debug
+      authentication {
+        backend = "built_in_database"
+        mechanism = "password_based"
+        password_hash_algorithm {
+            name = "bcrypt",
+        }
+        user_id_type = "username"
+      }
+      authorization {
+        sources = [
+          {
+            type = built_in_database
+            enable = true
+          }
+        ]
+        no_match: "deny"
+      }
+  # config:
+  #   data: |
+  #     log.console.level = debug
+  #     authentication {
+  #       backend = "ldap"
+  #       mechanism = "password_based"
+  #       method {
+  #         type = bind
+  #         bind_password = "${password}"
+  #       }
+  #       server = "glauth.default.svc.cluster.local:389"
+  #       username = "cn=search,ou=svcaccts,dc=home,dc=arpa"
+  #       password = ""
+  #       base_dn = "dc=home,dc=arpa"
+  #       filter = "(&(uid=${username})(objectClass=posixAccount))"
+  #     }
   coreTemplate:
     spec:
       replicas: 3
+      env:
+        - name: EMQX_DASHBOARD__DEFAULT_USERNAME
+          value: admin
+        - name: EMQX_DASHBOARD__DEFAULT_PASSWORD
+          value: ""
   # replicantTemplate:
   #   spec:
   #     replicas: 3

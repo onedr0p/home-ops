@@ -1,0 +1,21 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: emqx-dashboard
+  namespace: database
+spec:
+  ingressClassName: internal
+  rules:
+    - host: &host emqx.devbu.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: emqx5-dashboard
+                port:
+                  number: 18083
+  tls:
+    - hosts: [*host]
