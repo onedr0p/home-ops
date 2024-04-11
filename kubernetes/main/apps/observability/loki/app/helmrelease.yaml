@@ -103,26 +103,10 @@ spec:
           enable_api: true
           enable_alertmanager_v2: true
           alertmanager_url: http://alertmanager-operated.observability.svc.cluster.local:9093
-          storage:
-            type: local
-            local:
-              directory: /rules
-          rule_path: /tmp/scratch
         analytics:
           reporting_enabled: false
     backend:
       replicas: 2
-      extraVolumeMounts:
-        - name: rules
-          mountPath: /rules/fake
-        - name: scratch
-          mountPath: /tmp/scratch
-      extraVolumes:
-        - name: rules
-          configMap:
-            name: loki-alerting-rules
-        - name: scratch
-          emptyDir: {}
       persistence:
         size: 20Gi
         storageClass: openebs-hostpath
@@ -142,12 +126,6 @@ spec:
           - hosts: [*host]
     read:
       replicas: 2
-      extraVolumeMounts:
-        - name: rules
-          mountPath: /rules
-      extraVolumes:
-        - name: rules
-          emptyDir: {}
     write:
       replicas: 2
       persistence:
@@ -156,6 +134,8 @@ spec:
     sidecar:
       image:
         repository: ghcr.io/kiwigrid/k8s-sidecar
+      rules:
+        searchNamespace: ALL
     lokiCanary:
       enabled: false
     test:
