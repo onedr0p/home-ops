@@ -7,11 +7,11 @@ authentication_backend:
     timeout: 5s
     start_tls: false
     base_dn: dc=home,dc=arpa
-    additional_users_dn: ou=people,ou=users
+    additional_users_dn: ou=users
+    additional_groups_dn: ""
     users_filter: (&({username_attribute}={input})(objectClass=posixAccount))
-    groups_filter: (&(uniqueMember=cn={input},ou=users,dc=redacted,dc=com)(objectClass=posixGroup))
-    group_search_mode: filter
-    user: cn=search,ou=svcaccts,ou=users,dc=home,dc=arpa
+    groups_filter: (&(uniqueMember=cn={input},ou=users,dc=home,dc=arpa)(objectClass=posixGroup))
+    user: cn=search,ou=svcaccts,dc=home,dc=arpa
     attributes:
       username: uid
       display_name: givenName
