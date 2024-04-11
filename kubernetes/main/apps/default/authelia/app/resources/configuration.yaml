@@ -5,11 +5,11 @@ authentication_backend:
     address: ldap://glauth.default.svc.cluster.local:389
     implementation: custom
     timeout: 5s
-    start_tls: false
     base_dn: dc=home,dc=arpa
     additional_users_dn: ou=people,ou=users
     users_filter: (&({username_attribute}={input})(objectClass=posixAccount))
-    groups_filter: (&(memberUid={username})(objectClass=posixGroup))
+    additional_groups_dn: ou=users
+    groups_filter: (&(uniqueMember={dn})(objectClass=posixGroup))
     user: cn=search,ou=svcaccts,ou=users,dc=home,dc=arpa
     attributes:
       username: uid
