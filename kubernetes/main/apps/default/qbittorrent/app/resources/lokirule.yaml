@@ -1,0 +1,14 @@
+---
+groups:
+  - name: qbittorrent
+    rules:
+      - alert: QbittorrentFastResumeRejected
+        expr: |
+          sum by (app) (count_over_time({app="qbittorrent"} |~ "(?i)fast resume rejected"[1h])) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          app: "{{ $labels.container }}"
+          summary: "{{ $labels.container }} has a torrent with fast resume rejected"

@@ -6,3 +6,12 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ../../../../templates/gatus/guarded
+configMapGenerator:
+  - name: autobrr-loki-rules
+    files:
+      - autobrr.yaml=./resources/lokirule.yaml
+    options:
+      labels:
+        loki_rule: "true"
+generatorOptions:
+  disableNameSuffixHash: true
