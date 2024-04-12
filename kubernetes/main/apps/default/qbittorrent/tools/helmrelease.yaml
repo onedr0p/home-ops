@@ -42,6 +42,10 @@ spec:
               tag: v0.15.1@sha256:dc8957554902738837d1d0a6b4c4af5e27e1454341b0d9df5992be51cc1ecd65
             env: &env
               TZ: *timeZone
+              POD_NAMESPACE:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
             args: [
               "tagging",
               "--added-on",
@@ -49,7 +53,7 @@ spec:
               "--last-activity",
               "--sites",
               "--unregistered",
-              "--server", "qbittorrent.default.svc.cluster.local",
+              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
               "--port", "80",
               "--config", "/config/config.yaml"
             ]
@@ -69,7 +73,7 @@ spec:
               "--exclude-category", "music.import",
               "--include-tag", "unregistered",
               # "--dry-run",
-              "--server", "qbittorrent.default.svc.cluster.local",
+              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
               "--port", "80"
             ]
             resources: *resources
@@ -85,7 +89,7 @@ spec:
               "--include-tag", "expired", # defined in config.yaml
               "--include-tag", "added:7d",
               # "--dry-run",
-              "--server", "qbittorrent.default.svc.cluster.local",
+              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
               "--port", "80"
             ]
             resources: *resources
@@ -110,7 +114,7 @@ spec:
               "--exclude-pattern", "*/manual/*",
               "--exclude-pattern", "*/music.import/*",
               # "--dry-run",
-              "--server", "qbittorrent.default.svc.cluster.local",
+              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
               "--port", "80"
             ]
             resources: *resources
@@ -125,7 +129,7 @@ spec:
             args: [
               "reannounce",
               "--process-seeding",
-              "--server", "qbittorrent.default.svc.cluster.local",
+              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
               "--port", "80"
             ]
             resources: *resources
