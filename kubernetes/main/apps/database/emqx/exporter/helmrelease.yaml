@@ -34,18 +34,7 @@ spec:
             image:
               repository: ghcr.io/emqx/emqx-exporter
               tag: main@sha256:cf1069083431dcfbf29bb395d4c812b385a1cc897323192e604dd25815aa7d26
-            env:
-              POD_NAMESPACE:
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.namespace
-            envFrom:
-              - secretRef:
-                  name: emqx-secret
-            args:
-              - --emqx.nodes=emqx-dashboard.$(POD_NAMESPACE).svc.cluster.local:18083
-              - --emqx.auth-username=$(X_EMQX_EXPORTER_APIKEY_KEY)
-              - --emqx.auth-password=$(X_EMQX_EXPORTER_APIKEY_SECRET)
+            args: ["--config.file", "/etc/emqx-exporter/config.yaml"]
             probes:
               liveness: &probes
                 enabled: true
@@ -91,7 +80,7 @@ spec:
             relabelings: &relabelings
               - action: replace
                 # user-defined cluster name, requires unique
-                replacement: emqx5
+                replacement: emqx
                 targetLabel: cluster
               - action: replace
                 # fix value, don't modify
@@ -112,3 +101,11 @@ spec:
             interval: 1m
             scrapeTimeout: 10s
             relabelings: *relabelings
+    persistence:
+      config:
+        type: secret
+        name: emqx-exporter-secret
+        globalMounts:
+          - path: /etc/emqx-exporter/config.yaml
+            subPath: config.yaml
+            readOnly: true
