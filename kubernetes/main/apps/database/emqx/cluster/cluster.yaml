@@ -3,8 +3,7 @@
 apiVersion: apps.emqx.io/v2beta1
 kind: EMQX
 metadata:
-  name: emqx5
-  namespace: database
+  name: emqx
 spec:
   image: public.ecr.aws/emqx/emqx:5.6.0
   config:
@@ -26,33 +25,31 @@ spec:
         ]
         no_match: "deny"
       }
-  # config:
-  #   data: |
-  #     log.console.level = debug
-  #     authentication {
-  #       backend = "ldap"
-  #       mechanism = "password_based"
-  #       method {
-  #         type = bind
-  #         bind_password = "${password}"
-  #       }
-  #       server = "glauth.default.svc.cluster.local:389"
-  #       username = "cn=search,ou=svcaccts,dc=home,dc=arpa"
-  #       password = ""
-  #       base_dn = "dc=home,dc=arpa"
-  #       filter = "(&(uid=${username})(objectClass=posixAccount))"
-  #     }
   coreTemplate:
+    metadata:
+      annotations:
+        reloader.stakater.com/auto: "true"
     spec:
       replicas: 3
-      env:
-        - name: EMQX_DASHBOARD__DEFAULT_USERNAME
-          value: admin
-        - name: EMQX_DASHBOARD__DEFAULT_PASSWORD
-          value: ""
-  # replicantTemplate:
-  #   spec:
-  #     replicas: 3
+      envFrom: &envFrom
+        - secretRef:
+            name: emqx-secret
+      extraContainers:
+        - name: init-mqtt
+          image: docker.io/library/python:3.12-alpine
+          env:
+            - name: X_EMQX_ADDRESS
+              value: emqx-dashboard.database.svc.cluster.local:18083
+          envFrom: *envFrom
+          command: ["python", "/init-mqtt.py"]
+          volumeMounts:
+            - name: init-mqtt
+              mountPath: /init-mqtt.py
+              subPath: init-mqtt.py
+      extraVolumes:
+        - name: init-mqtt
+          configMap:
+            name: emqx-init-mqtt-configmap
   listenersServiceTemplate:
     metadata:
       annotations:
