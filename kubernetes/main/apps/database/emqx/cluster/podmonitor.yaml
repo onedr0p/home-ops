@@ -12,3 +12,16 @@ spec:
   podMetricsEndpoints:
     - port: dashboard
       path: /api/v5/prometheus/stats
+      relabelings:
+        - action: replace
+          # user-defined cluster name, requires unique
+          replacement: emqx5
+          targetLabel: cluster
+        - action: replace
+          # fix value, don't modify
+          replacement: emqx
+          targetLabel: from
+        - action: replace
+          # fix value, don't modify
+          sourceLabels: ['pod']
+          targetLabel: "instance"

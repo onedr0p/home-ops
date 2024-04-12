@@ -1,0 +1,114 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: emqx-exporter
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      emqx-exporter:
+        replicas: 1
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/emqx/emqx-exporter
+              tag: main@sha256:cf1069083431dcfbf29bb395d4c812b385a1cc897323192e604dd25815aa7d26
+            env:
+              POD_NAMESPACE:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+            envFrom:
+              - secretRef:
+                  name: emqx-secret
+            args:
+              - --emqx.nodes=emqx-dashboard.$(POD_NAMESPACE).svc.cluster.local:18083
+              - --emqx.auth-username=$(X_EMQX_EXPORTER_APIKEY_KEY)
+              - --emqx.auth-password=$(X_EMQX_EXPORTER_APIKEY_SECRET)
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 8085
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
+        pod:
+          securityContext:
+            runAsUser: 65534
+            runAsGroup: 65534
+            runAsNonRoot: true
+    service:
+      app:
+        controller: emqx-exporter
+        ports:
+          http:
+            port: *port
+    serviceMonitor:
+      app:
+        serviceName: emqx-exporter
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
+            relabelings: &relabelings
+              - action: replace
+                # user-defined cluster name, requires unique
+                replacement: emqx5
+                targetLabel: cluster
+              - action: replace
+                # fix value, don't modify
+                replacement: exporter
+                targetLabel: from
+              - action: replace
+                # fix value, don't modify
+                sourceLabels: ['pod']
+                regex: '(.*)-.*-.*'
+                replacement: $1
+                targetLabel: "instance"
+              - action: labeldrop
+                # fix value, don't modify
+                regex: 'pod'
+          - port: http
+            scheme: http
+            path: /probe
+            interval: 1m
+            scrapeTimeout: 10s
+            relabelings: *relabelings
