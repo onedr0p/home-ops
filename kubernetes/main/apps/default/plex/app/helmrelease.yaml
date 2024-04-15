@@ -66,25 +66,26 @@ spec:
               limits:
                 gpu.intel.com/i915: 1
                 memory: 16Gi
-        pod:
-          affinity:
-            podAntiAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                - labelSelector:
-                    matchExpressions:
-                      - key: app.kubernetes.io/name
-                        operator: In
-                        values: ["frigate"]
-                  topologyKey: kubernetes.io/hostname
-          nodeSelector:
-            intel.feature.node.kubernetes.io/gpu: "true"
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            runAsNonRoot: true
-            fsGroup: 568
-            fsGroupChangePolicy: OnRootMismatch
-            supplementalGroups: [44, 10000]
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [44, 10000]
+        seccompProfile: { type: RuntimeDefault }
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values: ["frigate"]
+              topologyKey: kubernetes.io/hostname
+      nodeSelector:
+        intel.feature.node.kubernetes.io/gpu: "true"
     service:
       app:
         controller: plex
