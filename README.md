@@ -123,9 +123,9 @@ graph TD;
 
 ## ☁️ Cloud Dependencies
 
-While most of my infrastructure and workloads are self-hosted I do rely upon the cloud for certain key parts of my setup. This saves me from having to worry about two things. (1) Dealing with chicken/egg scenarios and (2) services I critically need whether my cluster is online or not.
+While most of my infrastructure and workloads are self-hosted I do rely upon the cloud for certain key parts of my setup. This saves me from having to worry about three things. (1) Dealing with chicken/egg scenarios, (2) services I critically need whether my cluster is online or not and (3) The "hit by a bus factor" - what happens to critical apps (e.g. Password Manager, Photos) that my family relies on when I no longer around.
 
-The alternative solution to these two problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/). However, maintaining another cluster and monitoring another group of workloads is a lot more time and effort than I am willing to put in.
+Alternative solutions to the first two of these problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/). However, maintaining another cluster and monitoring another group of workloads will probably be more or equal out to the same costs as described below.
 
 | Service                                         | Use                                                               | Cost           |
 |-------------------------------------------------|-------------------------------------------------------------------|----------------|
@@ -136,7 +136,6 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 | [GitHub](https://github.com/)                   | Hosting this repository and continuous integration/deployments    | Free           |
 | [Migadu](https://migadu.com/)                   | Email hosting                                                     | ~$20/yr        |
 | [Pushover](https://pushover.net/)               | Kubernetes Alerts and application notifications                   | $5 OTP         |
-| [Terraform Cloud](https://www.terraform.io/)    | Storing Terraform state                                           | Free           |
 | [UptimeRobot](https://uptimerobot.com/)         | Monitoring internet connectivity and external facing applications | ~$60/yr        |
 |                                                 |                                                                   | Total: ~$20/mo |
 
