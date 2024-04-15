@@ -95,10 +95,6 @@ spec:
             resources: *resources
         pod:
           restartPolicy: OnFailure
-          securityContext: &securityContext
-            runAsUser: 568
-            runAsGroup: 568
-            runAsNonRoot: true
       orphaned:
         type: cronjob
         cronjob:
@@ -120,7 +116,6 @@ spec:
             resources: *resources
         pod:
           restartPolicy: OnFailure
-          securityContext: *securityContext
       reannounce:
         containers:
           app:
@@ -133,8 +128,12 @@ spec:
               "--port", "80"
             ]
             resources: *resources
-        pod:
-          securityContext: *securityContext
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        seccompProfile: { type: RuntimeDefault }
     persistence:
       secret-file:
         type: secret

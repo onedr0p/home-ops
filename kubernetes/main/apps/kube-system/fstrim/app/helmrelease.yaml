@@ -45,16 +45,16 @@ spec:
                 memory: 128Mi
             securityContext:
               privileged: true
-        pod:
-          hostNetwork: true
-          hostPID: true
-          topologySpreadConstraints:
-            - maxSkew: 1
-              topologyKey: kubernetes.io/hostname
-              whenUnsatisfiable: DoNotSchedule
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: *app
+    defaultPodOptions:
+      hostNetwork: true
+      hostPID: true
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: *app
     persistence:
       procfs:
         type: hostPath
