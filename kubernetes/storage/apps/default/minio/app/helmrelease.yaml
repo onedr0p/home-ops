@@ -43,11 +43,7 @@ spec:
             envFrom:
               - secretRef:
                   name: minio-secret
-            args:
-              - server
-              - /data
-              - --console-address
-              - :9001
+            args: ["server", "/data", "--console-address", ":9001"]
             probes:
               liveness: &probes
                 enabled: true
@@ -64,11 +60,23 @@ spec:
               startup:
                 enabled: false
             securityContext:
-              runAsUser: 568
-              runAsGroup: 568
-              fsGroup: 568
-              fsGroupChangePolicy: OnRootMismatch
-              supplementalGroups: [100]
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [10000]
+        seccompProfile: { type: RuntimeDefault }
     service:
       app:
         controller: minio
