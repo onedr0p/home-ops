@@ -98,20 +98,18 @@ spec:
       app:
         className: internal
         hosts:
-          - host: &host "{{ .Release.Name }}.turbo.ac"
+          - host: "{{ .Release.Name }}.turbo.ac"
             paths:
               - path: /
                 service:
                   identifier: app
                   port: http
-          - host: &s3Host s3.turbo.ac
+          - host: s3.turbo.ac
             paths:
               - path: /
                 service:
                   identifier: app
                   port: s3
-        tls:
-          - hosts: [*host, *s3Host]
     persistence:
       config:
         type: hostPath
