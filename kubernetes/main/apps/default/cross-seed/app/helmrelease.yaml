@@ -34,13 +34,9 @@ spec:
           app:
             image:
               repository: ghcr.io/cross-seed/cross-seed
-              tag: 5.9.2@sha256:6abdca45f0ecfd8d23a3035beefa716a14b66f23c14854631fe369d1ad346f1e
+              tag: v6-unstable@sha256:480156a24a954582c966cc09fadf303da097911953fd90807e89fc35887a8662
             env:
               TZ: America/New_York
-              CROSSSEED_PORT: &port 80
-            envFrom:
-              - secretRef:
-                  name: cross-seed-secret
             args: ["daemon"]
             probes:
               liveness:
@@ -70,16 +66,27 @@ spec:
         controller: cross-seed
         ports:
           http:
-            port: *port
+            port: 80
     persistence:
       config:
         type: emptyDir
-      config-file:
-        type: configMap
-        name: cross-seed-configmap
+      secret-file:
+        type: secret
+        name: cross-seed-secret
         globalMounts:
           - path: /config/config.js
             subPath: config.js
             readOnly: true
       qbittorrent:
         existingClaim: qbittorrent
+        globalMounts:
+          - path: /qbittorrent/qBittorrent/BT_backup
+            subPath: qBittorrent/BT_backup
+            readOnly: true
+      media:
+        type: nfs
+        server: expanse.turbo.ac
+        path: /eros/Media
+        globalMounts:
+          - path: /media/Downloads/qbittorrent
+            subPath: Downloads/qbittorrent
