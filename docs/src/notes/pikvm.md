@@ -1,12 +1,5 @@
 # PiKVM
 
-## Update PiKVM
-
-```sh
-rw; pacman -Syyu
-reboot
-```
-
 ## Load TESmart KVM
 
 1. Add or replace the file `/etc/kvmd/override.yaml`
@@ -185,8 +178,8 @@ reboot
             - ["#3", "dev3_led", "dev3_btn | KVM", "dev3_wol | WOL"]
             - ["#4", "dev4_led", "dev4_btn | KVM", "dev4_wol | WOL"]
             - ["#5", "dev5_led", "dev5_btn | KVM", "dev5_wol | WOL"]
-            - ["#6", "dev6_led", "dev6_btn"]
-            - ["#7", "dev7_led", "dev7_btn"]
+            - ["#6", "dev6_led", "dev6_btn | KVM"]
+            - ["#7", "dev7_led", "dev7_btn | KVM"]
     ```
 
 2. Restart kvmd
@@ -251,5 +244,5 @@ systemctl enable --now prometheus-node-exporter
 4. Start promtail
     ```sh
     systemctl daemon-reload
-    systemctl start promtail.service
+    systemctl enable --now promtail.service
     ```
