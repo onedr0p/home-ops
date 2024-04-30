@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2154
 
-PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"true"}"
+PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"false"}"
 # kubectl port-forward service/sonarr -n default 8989:80
 # export PUSHOVER_TOKEN="";
 # export PUSHOVER_USER_KEY="";
