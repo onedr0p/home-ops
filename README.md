@@ -144,7 +144,7 @@ Alternative solutions to the first two of these problems would be to host a Kube
 
 ### Home DNS
 
-On my Vyos router I have [Bind9](https://github.com/isc-projects/bind9), [blocky](https://github.com/0xERR0R/blocky/) and [dnsdist](https://dnsdist.org/) deployed as containers. In my cluster `external-dns` is deployed with the `RFC2136` provider which syncs DNS records to `bind9`.
+On my PiKVM I have [Bind9](https://github.com/isc-projects/bind9), [blocky](https://github.com/0xERR0R/blocky/) and [dnsdist](https://dnsdist.org/) deployed. In my cluster `external-dns` is deployed with the `RFC2136` provider which syncs DNS records to `bind9`.
 
 `dnsdist` is a DNS loadbalancer and has "downstream" DNS servers configured such as `bind9` and `blocky`. All my clients use `dnsdist` as the upstream DNS server, this allows for more granularity with configuring DNS across my networks such as having all requests for my domain forward to `bind9` on certain networks, or only using `1.1.1.1` instead of `blocky` on certain networks where adblocking isn't required.
 
