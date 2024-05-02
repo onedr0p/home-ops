@@ -36,11 +36,12 @@ spec:
             env:
               TZ: America/New_York
               UP_UNIFI_DEFAULT_ROLE: home-ops
-              UP_UNIFI_DEFAULT_URL: https://unifi-network.turbo.ac
-              UP_UNIFI_DEFAULT_VERIFY_SSL: false
-              UP_UNIFI_DEFAULT_USER: unifipoller
-              UP_UNIFI_DEFAULT_PASS: 1nternalUseOnly
+              UP_UNIFI_DEFAULT_URL: https://192.168.1.1
+              UP_PROMETHEUS_HTTP_LISTEN: 0.0.0.0:80
               UP_INFLUXDB_DISABLE: true
+            envFrom:
+              - secretRef:
+                  name: unpoller-secret
             probes:
               liveness:
                 enabled: true
@@ -66,7 +67,7 @@ spec:
         controller: unpoller
         ports:
           http:
-            port: 9130
+            port: 80
     serviceMonitor:
       app:
         serviceName: unpoller

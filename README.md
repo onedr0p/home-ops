@@ -63,7 +63,6 @@ There is a template over at [onedr0p/cluster-template](https://github.com/onedr0
 - [rook](https://github.com/rook/rook): Distributed block storage for peristent storage.
 - [sops](https://github.com/getsops/sops): Managed secrets for Kubernetes and Terraform which are commited to Git.
 - [spegel](https://github.com/spegel-org/spegel): Stateless cluster local OCI registry mirror.
-- [tf-controller](https://github.com/weaveworks/tf-controller): Additional Flux component used to run Terraform from within a Kubernetes cluster.
 - [volsync](https://github.com/backube/volsync): Backup and recovery of persistent volume claims.
 
 ### GitOps
@@ -162,20 +161,19 @@ Outside the `external-dns` instance mentioned above another instance is deployed
   <img src="https://user-images.githubusercontent.com/213795/172947261-65a82dcd-3274-45bd-aabf-140d60a04aa9.png" align="center" width="200px" alt="rack"/>
 </details>
 
-| Device                      | Count | OS Disk Size | Data Disk Size               | Ram  | Operating System | Purpose                |
-|-----------------------------|-------|--------------|------------------------------|------|------------------|------------------------|
-| Intel NUC8i5BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)         | 64GB | Talos            | Kubernetes Controllers |
-| Intel NUC8i7BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)         | 64GB | Talos            | Kubernetes Workers     |
-| PowerEdge T340              | 1     | 2TB SSD      |                              | 64GB | Ubuntu LTS       | NFS + Backup Server    |
-| Lenovo SA120                | 1     | -            | 10x22TB ZFS (mirrored vdevs) | -    | -                | DAS                    |
-| Raspberry Pi 4              | 1     | 32GB (SD)    | -                            | 4GB  | PiKVM (Arch)     | Network KVM            |
-| TESmart 8 Port KVM Switch   | 1     | -            | -                            | -    | -                | Network KVM (PiKVM)    |
-| HP EliteDesk 800 G3 SFF     | 1     | 256GB NVMe   | -                            | 8GB  | Vyos (Debian)    | Router                 |
-| Unifi US-16-XG              | 1     | -            | -                            | -    | -                | 10Gb Core Switch       |
-| Unifi USW-Enterprise-24-PoE | 1     | -            | -                            | -    | -                | 2.5Gb PoE Switch       |
-| Unifi UNVR                  | 1     | -            | 4x8TB HDD                    | -    | -                | NVR                    |
-| Unifi USP PDU Pro           | 1     | -            | -                            | -    | -                | PDU                    |
-| APC SMT1500RM2U w/ NIC      | 1     | -            | -                            | -    | -                | UPS                    |
+| Device                      | Count | OS Disk Size | Data Disk Size               | Ram  | Operating System | Purpose                 |
+|-----------------------------|-------|--------------|------------------------------|------|------------------|-------------------------|
+| Intel NUC8i5BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)         | 64GB | Talos            | Kubernetes Controllers  |
+| Intel NUC8i7BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)         | 64GB | Talos            | Kubernetes Workers      |
+| PowerEdge T340              | 1     | 2TB SSD      |                              | 64GB | Ubuntu 22.04     | NFS + Backup Server     |
+| Lenovo SA120                | 1     | -            | 10x22TB ZFS (mirrored vdevs) | -    | -                | DAS                     |
+| PiKVM (RasPi 4)             | 1     | 64GB (SD)    | -                            | 4GB  | PiKVM (Arch)     | Network DNS & KVM       |
+| TESmart 8 Port KVM Switch   | 1     | -            | -                            | -    | -                | Network KVM (for PiKVM) |
+| Unifi UDMP Max              | 1     | -            | 2x12TB HDD                   | -    | -                | Router & NVR            |
+| Unifi US-16-XG              | 1     | -            | -                            | -    | -                | 10Gb Core Switch        |
+| Unifi USW-Enterprise-24-PoE | 1     | -            | -                            | -    | -                | 2.5Gb PoE Switch        |
+| Unifi USP PDU Pro           | 1     | -            | -                            | -    | -                | PDU                     |
+| APC SMT1500RM2U w/ NIC      | 1     | -            | -                            | -    | -                | UPS                     |
 
 ---
 
