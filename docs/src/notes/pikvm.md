@@ -3,6 +3,7 @@
 ## Load TESmart KVM
 
 1. Add or replace the file `/etc/kvmd/override.yaml`
+
     ```yaml
     ---
 
@@ -16,6 +17,8 @@
       prometheus:
         auth:
           enabled: false
+      atx:
+        type: disabled
       streamer:
         desired_fps:
           default: 20
@@ -30,22 +33,22 @@
             type: tesmart
             host: 192.168.1.10
             port: 5000
-          wol_dev0:
-            type: wol
-            mac: 1c:69:7a:0d:8d:99
-          wol_dev1:
-            type: wol
-            mac: 1c:69:7a:0e:f7:ed
           wol_dev2:
             type: wol
-            mac: 1c:69:7a:0d:62:d4
+            mac: 1c:69:7a:0d:8d:99
           wol_dev3:
             type: wol
-            mac: 94:c6:91:a7:7b:2b
+            mac: 1c:69:7a:0e:f7:ed
           wol_dev4:
             type: wol
-            mac: 94:c6:91:af:15:3d
+            mac: 1c:69:7a:0d:62:d4
           wol_dev5:
+            type: wol
+            mac: 94:c6:91:a7:7b:2b
+          wol_dev6:
+            type: wol
+            mac: 94:c6:91:af:15:3d
+          wol_dev7:
             type: wol
             mac: 1c:69:7a:09:bf:39
           reboot:
@@ -64,11 +67,6 @@
             pin: 0
             mode: output
             switch: false
-          dev0_wol:
-            driver: wol_dev0
-            pin: 0
-            mode: output
-            switch: false
           dev1_led:
             driver: tes
             pin: 1
@@ -76,11 +74,6 @@
           dev1_btn:
             driver: tes
             pin: 1
-            mode: output
-            switch: false
-          dev1_wol:
-            driver: wol_dev1
-            pin: 0
             mode: output
             switch: false
           dev2_led:
@@ -148,6 +141,11 @@
             pin: 6
             mode: output
             switch: false
+          dev6_wol:
+            driver: wol_dev6
+            pin: 0
+            mode: output
+            switch: false
           dev7_led:
             driver: tes
             pin: 7
@@ -155,6 +153,11 @@
           dev7_btn:
             driver: tes
             pin: 7
+            mode: output
+            switch: false
+          dev7_wol:
+            driver: wol_dev7
+            pin: 0
             mode: output
             switch: false
           reboot_button:
@@ -172,17 +175,18 @@
             title: Devices
           table:
             - ["#pikvm", "pikvm_led|green", "restart_service_button|confirm|Service", "reboot_button|confirm|Reboot"]
-            - ["#0", "dev0_led", "dev0_btn | KVM", "dev0_wol | WOL"]
-            - ["#1", "dev1_led", "dev1_btn | KVM", "dev1_wol | WOL"]
+            - ["#0", "dev0_led", "dev0_btn | KVM"]
+            - ["#1", "dev1_led", "dev1_btn | KVM"]
             - ["#2", "dev2_led", "dev2_btn | KVM", "dev2_wol | WOL"]
             - ["#3", "dev3_led", "dev3_btn | KVM", "dev3_wol | WOL"]
             - ["#4", "dev4_led", "dev4_btn | KVM", "dev4_wol | WOL"]
             - ["#5", "dev5_led", "dev5_btn | KVM", "dev5_wol | WOL"]
-            - ["#6", "dev6_led", "dev6_btn | KVM"]
-            - ["#7", "dev7_led", "dev7_btn | KVM"]
+            - ["#6", "dev6_led", "dev6_btn | KVM", "dev6_wol | WOL"]
+            - ["#7", "dev7_led", "dev7_btn | KVM", "dev7_wol | WOL"]
     ```
 
 2. Restart kvmd
+
     ```sh
     systemctl restart kvmd.service
     ```
@@ -199,12 +203,14 @@ systemctl enable --now prometheus-node-exporter
 ### Install promtail
 
 1. Install promtail
+
     ```sh
     pacman -S promtail
     systemctl enable promtail
     ```
 
 2. Override the promtail systemd service
+
     ```sh
     mkdir -p /etc/systemd/system/promtail.service.d/
     cat >/etc/systemd/system/promtail.service.d/override.conf <<EOL
@@ -216,6 +222,7 @@ systemctl enable --now prometheus-node-exporter
     ```
 
 3. Add or replace the file `/etc/loki/promtail.yaml`
+
     ```yaml
     server:
       log_level: info
@@ -242,6 +249,7 @@ systemctl enable --now prometheus-node-exporter
     ```
 
 4. Start promtail
+
     ```sh
     systemctl daemon-reload
     systemctl enable --now promtail.service

@@ -23,32 +23,13 @@ My NAS configuration as documentation currently using Ubuntu 22.04
     ```yaml
     network:
       version: 2
-      bonds:
-        bond0:
-          interfaces: [eports]
-          mtu: 9000
-          dhcp4: true
-          parameters:
-            mode: 802.3ad
-            lacp-rate: fast
-            transmit-hash-policy: layer2+3
-            mii-monitor-interval: 100
       ethernets:
-        eports:
+        enp6s0f0:
+          dhcp4: yes
           mtu: 9000
-          match:
-            name: "enp6*"
-          optional: true
-    ```
-
-2. Add or replace file `/etc/modules-load.d/modules.conf`
-
-    ```text
-    # /etc/modules: kernel modules to load at boot time.
-    #
-    # This file contains the names of kernel modules that should be loaded
-    # at boot time, one per line. Lines beginning with "#" are ignored.
-    bonding
+        enp6s0f1:
+          dhcp4: yes
+          mtu: 9000
     ```
 
 ## ZFS
