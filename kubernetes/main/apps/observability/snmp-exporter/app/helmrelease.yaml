@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app snmp-exporter-dell-idrac
+  name: &app snmp-exporter
 spec:
   interval: 30m
   chart:
@@ -27,22 +27,16 @@ spec:
       namespace: observability
   values:
     fullnameOverride: *app
-    extraArgs: ["--config.file=/config/snmp.yaml"]
-    extraConfigmapMounts:
-      - name: &name dell-idrac-snmp-configmap
-        mountPath: /config/snmp.yaml
-        subPath: snmp.yaml
-        configMap: *name
-        readOnly: true
-        defaultMode: 420
     serviceMonitor:
       enabled: true
       params:
-        - name: dell-idrac
+        - name: apcups
+          module: ["apcups"]
+          target: 192.168.1.80
+          auth: ["public_v1"]
+        - name: dell
           module: ["dell"]
           target: 192.168.1.82
           auth: ["public_v2"]
       path: /snmp
       scrapeTimeout: 10s
-      relabelings:
-        - { sourceLabels: ["__param_target"], targetLabel: instance }
