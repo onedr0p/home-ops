@@ -116,6 +116,18 @@ spec:
             resources: *resources
         pod:
           restartPolicy: OnFailure
+      reannounce:
+        containers:
+          app:
+            image: *image
+            env: *env
+            args: [
+              "reannounce",
+              "--process-seeding",
+              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
+              "--port", "80"
+            ]
+            resources: *resources
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
