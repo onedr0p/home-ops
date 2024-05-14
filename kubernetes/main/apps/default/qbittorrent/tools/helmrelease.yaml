@@ -107,7 +107,6 @@ spec:
             args: [
               "orphaned",
               "--exclude-pattern", "*_unpackerred*",
-              "--exclude-pattern", "*/cross-seed/*",
               "--exclude-pattern", "*/manual/*",
               "--exclude-pattern", "*/music.import/*",
               # "--dry-run",
@@ -117,18 +116,6 @@ spec:
             resources: *resources
         pod:
           restartPolicy: OnFailure
-      reannounce:
-        containers:
-          app:
-            image: *image
-            env: *env
-            args: [
-              "reannounce",
-              "--process-seeding",
-              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
-              "--port", "80"
-            ]
-            resources: *resources
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
