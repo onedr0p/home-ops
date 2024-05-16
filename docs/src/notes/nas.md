@@ -252,7 +252,7 @@ My NAS configuration as documentation currently using Ubuntu 22.04
 6. Set up Time Machine on MacOS
 
     ```sh
-    sudo tmutil setdestination -a smb://devin:${smbpasswd}@expanse.turbo.ac/devin
+    sudo tmutil setdestination -a smb://devin:${smbpasswd}@expanse.internal/devin
     ```
 
 ## System
