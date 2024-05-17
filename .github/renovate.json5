@@ -1,3 +1,45 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json"
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "docker:enableMajor",
+    "replacements:k8s-registry-move",
+    ":automergeBranch",
+    ":disableRateLimiting",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":skipStatusChecks",
+    ":timezone(America/New_York)",
+    "github>onedr0p/home-ops//.github/renovate/allowedVersions.json5",
+    "github>onedr0p/home-ops//.github/renovate/autoMerge.json5",
+    "github>onedr0p/home-ops//.github/renovate/clusters.json5",
+    "github>onedr0p/home-ops//.github/renovate/commitMessage.json5",
+    "github>onedr0p/home-ops//.github/renovate/customManagers.json5",
+    "github>onedr0p/home-ops//.github/renovate/grafanaDashboards.json5",
+    "github>onedr0p/home-ops//.github/renovate/groups.json5",
+    "github>onedr0p/home-ops//.github/renovate/labels.json5",
+    "github>onedr0p/home-ops//.github/renovate/packageRules.json5",
+    "github>onedr0p/home-ops//.github/renovate/semanticCommits.json5"
+  ],
+  "dependencyDashboardTitle": "Renovate Dashboard 🤖",
+  "suppressNotifications": ["prEditedNotification", "prIgnoreNotification"],
+  "onboarding": false,
+  "requireConfig": "ignored",
+  "ignorePaths": ["**/*.sops.*", "**/.archive/**", "**/resources/**"],
+  "flux": {
+    "fileMatch": [
+      "(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"
+    ]
+  },
+  "helm-values": {
+    "fileMatch": [
+      "(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"
+    ]
+  },
+  "kubernetes": {
+    "fileMatch": [
+      "(^|/)\\.taskfiles/.+\\.ya?ml(?:\\.j2)?$",
+      "(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"
+    ]
+  }
 }
