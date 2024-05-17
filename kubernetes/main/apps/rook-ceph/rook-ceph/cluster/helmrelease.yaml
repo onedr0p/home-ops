@@ -194,6 +194,7 @@ spec:
               codingChunks: 1
           preservePoolsOnDelete: true
           gateway:
+            hostNetwork: false
             port: 80
             resources:
               requests:
@@ -216,6 +217,9 @@ spec:
         ingress:
           enabled: true
           ingressClassName: internal
+          annotations:
+            nginx.ingress.kubernetes.io/proxy-body-size: "0"
+            nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
           host:
             name: rgw.devbu.io
             path: /
