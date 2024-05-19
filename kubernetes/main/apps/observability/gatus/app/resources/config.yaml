@@ -1,7 +1,7 @@
 ---
 # Note: Gatus vars should be escaped with $${VAR_NAME} to avoid interpolation by Flux
 web:
-  port: $${CUSTOM_WEB_PORT}
+  port: $${WEB_PORT}
 storage:
   type: postgres
   path: postgres://$${INIT_POSTGRES_USER}:$${INIT_POSTGRES_PASS}@$${INIT_POSTGRES_HOST}:5432/$${INIT_POSTGRES_DBNAME}?sslmode=disable
@@ -13,13 +13,15 @@ ui:
   header: Status
 alerting:
   pushover:
-    application-token: $${CUSTOM_PUSHOVER_TOKEN}
-    user-key: $${CUSTOM_PUSHOVER_USER_KEY}
+    title: Gatus (Kubernetes)
+    application-token: $${PUSHOVER_TOKEN}
+    user-key: $${PUSHOVER_USER_KEY}
+    priority: 1
     default-alert:
       description: health-check failed
       send-on-resolved: true
-      failure-threshold: 5
-      success-threshold: 2
+      failure-threshold: 3
+      success-threshold: 3
 connectivity:
   checker:
     target: 1.1.1.1:53
