@@ -34,6 +34,8 @@ spec:
       createPrometheusRules: true
     ingress:
       dashboard:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.devbu.io
         ingressClassName: internal
         host:
           name: rook.devbu.io
@@ -216,10 +218,11 @@ spec:
             region: us-east-1
         ingress:
           enabled: true
-          ingressClassName: internal
           annotations:
+            external-dns.alpha.kubernetes.io/target: internal.devbu.io
             nginx.ingress.kubernetes.io/proxy-body-size: "0"
             nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+          ingressClassName: internal
           host:
             name: rgw.devbu.io
             path: /
