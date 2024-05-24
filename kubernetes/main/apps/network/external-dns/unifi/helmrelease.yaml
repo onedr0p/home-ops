@@ -30,7 +30,7 @@ spec:
       webhook:
         image:
           repository: ghcr.io/kashalls/external-dns-unifi-webhook
-          tag: main@sha256:93e1b5f9a4a45395deeb848cd4f796e34b30629fb2b145130865ea2a1da42421
+          tag: main@sha256:73eff77a2e45fe63a42eb7d03a454232dbcbc1c811aadeb38b3ce38942cf2980
         env:
           - name: UNIFI_HOST
             value: https://192.168.1.1
@@ -46,17 +46,17 @@ spec:
               secretKeyRef:
                 name: *secret
                 key: EXTERNAL_DNS_UNIFI_PASS
+          - name: LOG_LEVEL
+            value: "debug"
+          - name: UNIFI_SKIP_TLS_VERIFY
+            value: "true"
     policy: sync
-    sources:
-      - ingress
-      - service
+    sources: ["ingress", "service"]
     txtOwnerId: default
     txtPrefix: k8s.
-    domainFilters:
-      - devbu.io
-    excludeDomains:
-      - internal
+    domainFilters: ["devbu.io"]
+    excludeDomains: ["internal"]
     serviceMonitor:
-      enabled: false
+      enabled: true
     podAnnotations:
       secret.reloader.stakater.com/reload: *secret
