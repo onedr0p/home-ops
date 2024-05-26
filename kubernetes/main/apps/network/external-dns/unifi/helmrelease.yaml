@@ -30,12 +30,10 @@ spec:
       webhook:
         image:
           repository: ghcr.io/kashalls/external-dns-unifi-webhook
-          tag: v0.0.5@sha256:221b808ff11ad8d23c4792a067c7184c135f30fc3823e3418321a3203af6b352
+          tag: main@sha256:ec94a157ccfda73856b6ccbf8994774bac4f2502d48768dc1034553969d32579
         env:
           - name: UNIFI_HOST
             value: https://192.168.1.1
-          - name: SERVER_HOST
-            value: 0.0.0.0
           - name: UNIFI_USER
             valueFrom:
               secretKeyRef:
@@ -48,8 +46,6 @@ spec:
                 key: EXTERNAL_DNS_UNIFI_PASS
           - name: LOG_LEVEL
             value: "debug"
-          - name: UNIFI_SKIP_TLS_VERIFY
-            value: "true"
     policy: sync
     sources: ["ingress", "service"]
     txtOwnerId: main
