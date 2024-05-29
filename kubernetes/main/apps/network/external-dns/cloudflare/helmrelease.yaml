@@ -40,10 +40,13 @@ spec:
             name: *secret
             key: *name
     extraArgs:
-      - --ingress-class=external
+      - --cloudflare-dns-records-per-page=1000
       - --cloudflare-proxied
       - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
       - --crd-source-kind=DNSEndpoint
+      - --events
+      - --ignore-ingress-tls-spec
+      - --ingress-class=external
     policy: sync
     sources: ["crd", "ingress"]
     txtOwnerId: default
