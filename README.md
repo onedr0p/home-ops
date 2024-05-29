@@ -84,10 +84,7 @@ This Git repository contains the following directories under [Kubernetes](./kube
 │   ├── 📁 bootstrap      # bootstrap procedures
 │   ├── 📁 flux           # core flux configuration
 │   └── 📁 templates      # re-useable components
-└── 📁 storage         # storage cluster
-    ├── 📁 apps           # applications
-    ├── 📁 bootstrap      # bootstrap procedures
-    └── 📁 flux           # core flux configuration
+└── 📁 ...             # other clusters
 ```
 
 ### Flux Workflow
@@ -113,7 +110,7 @@ graph TD;
 ### Networking
 
 <details>
-  <summary>Click to see a high-level network diagram</summary>
+  <summary>Click here to see my high-level network diagram</summary>
 
   <img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/network-topology.png" align="center" width="600px" alt="dns"/>
 </details>
@@ -124,7 +121,7 @@ graph TD;
 
 While most of my infrastructure and workloads are self-hosted I do rely upon the cloud for certain key parts of my setup. This saves me from having to worry about three things. (1) Dealing with chicken/egg scenarios, (2) services I critically need whether my cluster is online or not and (3) The "hit by a bus factor" - what happens to critical apps (e.g. Email, Password Manager, Photos) that my family relies on when I no longer around.
 
-Alternative solutions to the first two of these problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/); however, maintaining another cluster and monitoring another group of workloads is more work and will probably be more or equal out to the same costs as described below.
+Alternative solutions to the first two of these problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/); however, maintaining another cluster and monitoring another group of workloads would be more work and probably be more or equal out to the same costs as described below.
 
 | Service                                         | Use                                                               | Cost           |
 |-------------------------------------------------|-------------------------------------------------------------------|----------------|
@@ -134,29 +131,23 @@ Alternative solutions to the first two of these problems would be to host a Kube
 | [GitHub](https://github.com/)                   | Hosting this repository and continuous integration/deployments    | Free           |
 | [Migadu](https://migadu.com/)                   | Email hosting                                                     | ~$20/yr        |
 | [Pushover](https://pushover.net/)               | Kubernetes Alerts and application notifications                   | $5 OTP         |
-| [UptimeRobot](https://uptimerobot.com/)         | Monitoring internet connectivity and external facing applications | ~$60/yr        |
+| [UptimeRobot](https://uptimerobot.com/)         | Monitoring internet connectivity and external facing applications | ~$58/yr        |
 |                                                 |                                                                   | Total: ~$20/mo |
 
 ---
 
 ## 🌐 DNS
 
-### Home DNS
-
-On my [home-service](https://github.com/onedr0p/home-service/) machine I have [Bind9](https://github.com/isc-projects/bind9) and [blocky](https://github.com/0xERR0R/blocky/) deployed. In my cluster `external-dns` is deployed with the `RFC2136` provider which syncs DNS records to `bind9`. All my clients use `blocky` as the upstream DNS server, this allows for more granularity with configuring DNS across my networks such as having all requests for my domain forward to `bind9` or having `.internal` domains forwarded to my Unifi router.
-
-### Public DNS
-
-Outside the `external-dns` instance mentioned above another instance is deployed in my cluster and configured to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingress this `external-dns` instance looks at to gather DNS records to put in `Cloudflare` are ones that have an ingress class name of `external` and contain an ingress annotation `external-dns.alpha.kubernetes.io/target`.
+In my cluster there are two [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) instances deployed. One is deployed with the [ExternalDNS webhook provider for UniFi](https://github.com/kashalls/external-dns-unifi-webhook) which syncs DNS records to my UniFi router. The other ExternalDNS instance syncs DNS records to Cloudflare only when the ingresses and services have an ingress class name of `external` and contain an ingress annotation `external-dns.alpha.kubernetes.io/target`. All local clients on my network use my UniFi router as the upstream DNS server.
 
 ---
 
 ## 🔧 Hardware
 
 <details>
-  <summary>Click to see the rack!</summary>
+  <summary>Click here to see my server rack</summary>
 
-  <img src="https://user-images.githubusercontent.com/213795/172947261-65a82dcd-3274-45bd-aabf-140d60a04aa9.png" align="center" width="200px" alt="rack"/>
+  <img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/rack.png" align="center" width="200px" alt="dns"/>
 </details>
 
 | Device                      | Count | OS Disk Size | Data Disk Size               | Ram  | Operating System | Purpose                 |
@@ -165,13 +156,13 @@ Outside the `external-dns` instance mentioned above another instance is deployed
 | Intel NUC8i7BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)         | 64GB | Talos            | Kubernetes Workers      |
 | PowerEdge T340              | 1     | 2TB SSD      |                              | 64GB | Ubuntu 22.04     | NFS + Backup Server     |
 | Lenovo SA120                | 1     | -            | 10x22TB ZFS (mirrored vdevs) | -    | -                | DAS                     |
-| PiKVM (RasPi 4)             | 1     | 64GB (SD)    | -                            | 4GB  | PiKVM (Arch)     | Network DNS & KVM       |
+| PiKVM (RasPi 4)             | 1     | 64GB (SD)    | -                            | 4GB  | PiKVM (Arch)     | KVM                     |
 | TESmart 8 Port KVM Switch   | 1     | -            | -                            | -    | -                | Network KVM (for PiKVM) |
-| Unifi UDMP Max              | 1     | -            | 2x12TB HDD                   | -    | -                | Router & NVR            |
-| Unifi US-16-XG              | 1     | -            | -                            | -    | -                | 10Gb Core Switch        |
-| Unifi USW-Enterprise-24-PoE | 1     | -            | -                            | -    | -                | 2.5Gb PoE Switch        |
-| Unifi USP PDU Pro           | 1     | -            | -                            | -    | -                | PDU                     |
-| APC SMT1500RM2U w/ NIC      | 1     | -            | -                            | -    | -                | UPS                     |
+| UniFi UDMP Max              | 1     | -            | 2x12TB HDD                   | -    | -                | Router & NVR            |
+| UniFi US-16-XG              | 1     | -            | -                            | -    | -                | 10Gb Core Switch        |
+| UniFi USW-Enterprise-24-PoE | 1     | -            | -                            | -    | -                | 2.5Gb PoE Switch        |
+| UniFi USP PDU Pro           | 1     | -            | -                            | -    | -                | PDU                     |
+| APC SMT1500RM2U             | 1     | -            | -                            | -    | -                | UPS                     |
 
 ---
 
