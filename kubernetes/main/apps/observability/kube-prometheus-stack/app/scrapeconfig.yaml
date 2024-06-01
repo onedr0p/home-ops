@@ -22,24 +22,9 @@ metadata:
   name: &name pikvm
 spec:
   staticConfigs:
-    - targets: ["pikvm.internal"]
-  metricsPath: /api/export/prometheus/metrics
-  relabelings:
-    - action: replace
-      targetLabel: job
-      replacement: *name
----
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
-apiVersion: monitoring.coreos.com/v1alpha1
-kind: ScrapeConfig
-metadata:
-  name: &name blocky
-spec:
-  staticConfigs:
     - targets:
-        - blocky.turbo.ac
-        - pikvm.internal:4000
-  metricsPath: /metrics
+        - pikvm.internal
+  metricsPath: /api/export/prometheus/metrics
   relabelings:
     - action: replace
       targetLabel: job
@@ -52,7 +37,8 @@ metadata:
   name: &name zigbee-controller
 spec:
   staticConfigs:
-    - targets: ["zigbee-controller.internal"]
+    - targets:
+        - zigbee-controller.internal
   metricsPath: /metrics
   relabelings:
     - action: replace
