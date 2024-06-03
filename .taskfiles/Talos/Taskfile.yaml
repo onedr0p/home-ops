@@ -73,7 +73,7 @@ tasks:
   apply-config:
     desc: Apply Talos configuration to a node
     cmd: |
-      sops -d {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/assets/{{.hostname}}.secret.sops.yaml | \
+      sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/assets/{{.hostname}}.secret.sops.yaml | \
           envsubst | \
               talosctl --context {{.cluster}} apply-config --mode={{.mode}} --nodes {{.node}} --file /dev/stdin
     env: *env-vars
@@ -107,10 +107,10 @@ tasks:
     desc: Upgrade Kubernetes on a controller node
     cmds:
       - until kubectl --context {{.cluster}} wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
-      - talosctl --context {{.cluster}} --nodes {{.controller}} upgrade-k8s --to {{.KUBERNETES_VERSION}}
+      - talosctl --context {{.cluster}} --nodes {{.node}} upgrade-k8s --to {{.KUBERNETES_VERSION}}
     vars: *env-vars
     requires:
-      vars: ["cluster", "controller"]
+      vars: ["cluster", "node"]
     preconditions:
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
       - talosctl --context {{.cluster}} config info >/dev/null 2>&1
@@ -149,7 +149,7 @@ tasks:
           curl -skL https://factory.talos.dev/image/{{.TALOS_SCHEMATIC_ID}}/{{.TALOS_VERSION}}/{{.ITEM}} | \
               curl -skT - -u "{{.HOME_SERVICE_USER}}:" \
                   sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/{{.ITEM}}
-      - find {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/assets -type f | xargs -I{} sh -c "sops -d {} | envsubst | curl -skT - -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/\$(basename {} | sed 's/\.secret\.sops//')"
+      - find {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/assets -type f | xargs -I{} sh -c "sops --decrypt {} | envsubst | curl -skT - -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/\$(basename {} | sed 's/\.secret\.sops//')"
       - find {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/groups -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/groups/
       - find {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/profiles -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/profiles/
       - ssh -l {{.HOME_SERVICE_USER}} {{.HOME_SERVICE_ADDR}} "cd /var/opt/home-service ; go-task restart-matchbox"
