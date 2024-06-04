@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app smtp-relay
+  namespace: flux-system
+spec:
+  targetNamespace: default
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: external-secrets-stores
+  path: ./kubernetes/main/apps/default/smtp-relay/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-kubernetes
+  wait: false
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m

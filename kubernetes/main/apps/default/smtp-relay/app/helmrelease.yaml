@@ -1,0 +1,104 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app smtp-relay
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      smtp-relay:
+        replicas: 3
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/foxcpp/maddy
+              tag: 0.7.1@sha256:6ab538e2f28baf2324f7cb418c7f9476fd9c7e9fa9b14bc3aecf51a9f6962064
+            env:
+              SMTP_RELAY_SMTP_PORT: &port 25
+              SMTP_RELAY_METRICS_PORT: &metricsPort 8080
+              SMTP_RELAY_SERVER_PORT: 465
+            envFrom:
+              - secretRef:
+                  name: smtp-relay-secret
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile: { type: RuntimeDefault }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: *app
+    service:
+      app:
+        controller: smtp-relay
+        type: LoadBalancer
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: smtp-relay.devbu.io
+          io.cilium/lb-ipam-ips: 192.168.42.123
+        ports:
+          http:
+            primary: true
+            port: *metricsPort
+          smtp:
+            port: *port
+    serviceMonitor:
+      app:
+        serviceName: smtp-relay
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
+    persistence:
+      config:
+        type: configMap
+        name: smtp-relay-configmap
+        globalMounts:
+          - path: /data/maddy.conf
+            subPath: maddy.conf
+            readOnly: true
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /cache
