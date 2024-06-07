@@ -35,7 +35,7 @@ snapshots:
 record:
   enabled: true
   retain:
-    days: 1
+    days: 0
     mode: all
   events:
     retain:
@@ -53,25 +53,31 @@ objects:
 go2rtc:
   streams:
     frigate_porch_hq: rtspx://192.168.1.1:7441/VwpGq6jdn21y2Bjg
-    frigate_porch_lq: rtspx://192.168.1.1:7441/pjt5fr9cOIAUTGpq
+    frigate_porch_mq: rtspx://192.168.1.1:7441/ezkTDbaOR71GUE67
+
     frigate_driveway_hq: rtspx://192.168.1.1:7441/Sp0AVqPtCjjTqWa9
-    frigate_driveway_lq: rtspx://192.168.1.1:7441/3Kw4P8B973r0pnU8
+    frigate_driveway_mq: rtspx://192.168.1.1:7441/SB74mRIu1CkoPcEq
+
     frigate_garage_hq: rtspx://192.168.1.1:7441/Vfv64mbUdREe0z44
-    frigate_garage_lq: rtspx://192.168.1.1:7441/NNtRaYhKJqlsc0tW
+    frigate_garage_mq: rtspx://192.168.1.1:7441/byiXSb6YOREKaaWi
+
     frigate_river_hq: rtspx://192.168.1.1:7441/rHWe97CTPc3c4Wcw
-    frigate_river_lq: rtspx://192.168.1.1:7441/imySjeEjzFLHhMKC
+    frigate_river_mq: rtspx://192.168.1.1:7441/y1bthhYa4kKub0h9
+
     frigate_study_hq: rtspx://192.168.1.1:7441/Kqzd2oancd3blWia
-    frigate_study_lq: rtspx://192.168.1.1:7441/bJJseRnvXF6WjvCu
-    frigate_living_room_hq: rtspx://192.168.1.1:7441/CfJka8v3QndvrCTv
-    frigate_living_room_lq: rtspx://192.168.1.1:7441/WiWPTV90w9gM8Bba
+    frigate_study_mq: rtspx://192.168.1.1:7441/DJUIegLdta4p4P4I
+
+    frigate_living_room_hq: rtspx://192.168.1.1:7441/DCuoiBupfNAvvUoP
+    frigate_living_room_mq: rtspx://192.168.1.1:7441/6yxwoNNfNeg3iNAQ
+
     frigate_basement_hq: rtspx://192.168.1.1:7441/ClBFQnBDDpfV3LeX
-    frigate_basement_lq: rtspx://192.168.1.1:7441/RCB8niMyOC24qh2G
+    frigate_basement_mq: rtspx://192.168.1.1:7441/ugTfZ3GQFk0lNUN0
 
 cameras:
   frigate_porch:
     ffmpeg:
       inputs:
-        - path: rtsp://localhost:8554/frigate_porch_lq
+        - path: rtsp://localhost:8554/frigate_porch_mq
           roles: ["detect"]
         - path: rtsp://localhost:8554/frigate_porch_hq
           roles: ["record"]
@@ -79,18 +85,11 @@ cameras:
       width: 960
       height: 720
       fps: 10
-    objects:
-      filters:
-        person:
-          mask:
-            - 39,445,199,427,198,263,36,228
-            - 304,218,304,408,198,434,198,262
-            - 305,411,485,382,615,393,612,335,578,321,574,233,549,118,308,209
 
   frigate_driveway:
     ffmpeg:
       inputs:
-        - path: rtsp://localhost:8554/frigate_driveway_lq
+        - path: rtsp://localhost:8554/frigate_driveway_mq
           roles: ["detect"]
         - path: rtsp://localhost:8554/frigate_driveway_hq
           roles: ["record"]
@@ -98,16 +97,11 @@ cameras:
       width: 1280
       height: 720
       fps: 10
-    objects:
-      filters:
-        person:
-          mask:
-            - 822,204,1280,360,1280,0,0,0,0,313
 
   frigate_garage:
     ffmpeg:
       inputs:
-        - path: rtsp://localhost:8554/frigate_garage_lq
+        - path: rtsp://localhost:8554/frigate_garage_mq
           roles: ["detect"]
         - path: rtsp://localhost:8554/frigate_garage_hq
           roles: ["record"]
@@ -119,7 +113,7 @@ cameras:
   frigate_river:
     ffmpeg:
       inputs:
-        - path: rtsp://localhost:8554/frigate_river_lq
+        - path: rtsp://localhost:8554/frigate_river_mq
           roles: ["detect"]
         - path: rtsp://localhost:8554/frigate_river_hq
           roles: ["record"]
@@ -131,7 +125,7 @@ cameras:
   frigate_study:
     ffmpeg:
       inputs:
-        - path: rtsp://localhost:8554/frigate_study_lq
+        - path: rtsp://localhost:8554/frigate_study_mq
           roles: ["detect"]
         - path: rtsp://localhost:8554/frigate_study_hq
           roles: ["record"]
@@ -143,19 +137,19 @@ cameras:
   frigate_living_room:
     ffmpeg:
       inputs:
-        - path: rtsp://localhost:8554/frigate_living_room_lq
+        - path: rtsp://localhost:8554/frigate_living_room_mq
           roles: ["detect"]
         - path: rtsp://localhost:8554/frigate_living_room_hq
           roles: ["record"]
     detect:
-      width: 1024
-      height: 576
+      width: 1280
+      height: 720
       fps: 10
 
   frigate_basement_1:
     ffmpeg:
       inputs:
-        - path: rtsp://localhost:8554/frigate_basement_lq
+        - path: rtsp://localhost:8554/frigate_basement_mq
           roles: ["detect"]
         - path: rtsp://localhost:8554/frigate_basement_hq
           roles: ["record"]
