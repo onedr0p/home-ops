@@ -66,9 +66,8 @@ My NAS configuration as documentation currently using Ubuntu 22.04
 1. Create datasets
 
     ```sh
-    sudo zfs create eros/Apps
-    sudo zfs create eros/Apps/Frigate
     sudo zfs create eros/Media
+    sudo zfs create eros/Minio
     ```
 
 2. Share dataset over NFS
@@ -79,7 +78,7 @@ My NAS configuration as documentation currently using Ubuntu 22.04
         eros/Media
     sudo zfs set \
         sharenfs="no_subtree_check,all_squash,anonuid=568,anongid=100,rw=@192.168.42.0/24,rw=@192.168.1.0/24" \
-        eros/Apps/Frigate
+        eros/Minio
     ```
 
 3. Dataset Permissions

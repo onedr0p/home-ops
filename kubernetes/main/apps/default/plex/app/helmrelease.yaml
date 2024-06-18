@@ -80,15 +80,6 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [44, 10000]
         seccompProfile: { type: RuntimeDefault }
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: app.kubernetes.io/name
-                    operator: In
-                    values: ["frigate"]
-              topologyKey: kubernetes.io/hostname
       nodeSelector:
         intel.feature.node.kubernetes.io/gpu: "true"
     service:
