@@ -22,8 +22,10 @@ spec:
     remediation:
       retries: 3
   values:
+    fullnameOverride: promtail
     config:
-      lokiAddress: http://loki-gateway.observability.svc.cluster.local/loki/api/v1/push
+      clients:
+        - url: http://loki-gateway.observability.svc.cluster.local/loki/api/v1/push
       snippets:
         extraScrapeConfigs: |
           - job_name: journal
