@@ -47,20 +47,20 @@ spec:
               prefix: loki_index_
               period: 24h
       structuredConfig:
+        analytics:
+          reporting_enabled: false
         auth_enabled: false
         server:
           log_level: info
-        ruler:
-          enable_api: true
-          enable_alertmanager_v2: true
-          alertmanager_url: http://alertmanager-operated.observability.svc.cluster.local:9093
-          storage:
-            type: local
-            local:
-              directory: /rules
-          rule_path: /rules/fake
-        analytics:
-          reporting_enabled: false
+        # ruler:
+        #   enable_api: true
+        #   enable_alertmanager_v2: true
+        #   alertmanager_url: http://alertmanager-operated.observability.svc.cluster.local:9093
+        #   storage:
+        #     type: local
+        #     local:
+        #       directory: /rules
+        #   rule_path: /rules/fake
     singleBinary:
       replicas: 1
       persistence:
@@ -88,12 +88,12 @@ spec:
       replicas: 0
     write:
       replicas: 0
-    sidecar:
-      image:
-        repository: ghcr.io/kiwigrid/k8s-sidecar
-      rules:
-        searchNamespace: ALL
-        folder: /rules/fake
+    # sidecar:
+    #   image:
+    #     repository: ghcr.io/kiwigrid/k8s-sidecar
+    #   rules:
+    #     searchNamespace: ALL
+    #     folder: /rules/fake
     lokiCanary:
       enabled: false
     test:
