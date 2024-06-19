@@ -26,7 +26,6 @@ spec:
   values:
     controllers:
       vector-aggregator:
-        replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -41,14 +40,6 @@ spec:
                 enabled: true
               readiness:
                 enabled: true
-    defaultPodOptions:
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
-          labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: *app
     service:
       app:
         controller: vector-aggregator

@@ -25,7 +25,6 @@ spec:
   values:
     controllers:
       kromgo:
-        replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -35,7 +34,7 @@ spec:
               repository: ghcr.io/kashalls/kromgo
               tag: 0.3.1@sha256:5ba40b2fda00ab7adb039c0be955161b84febfe9e9e7816d5f1f87d9ab41f173
             env:
-              PROMETHEUS_URL: http://thanos-query-frontend.observability.svc.cluster.local:10902
+              PROMETHEUS_URL: http://prometheus-operated.observability.svc.cluster.local:9090
               PORT: &port 80
             probes:
               liveness: &probes
@@ -65,13 +64,6 @@ spec:
         runAsUser: 65534
         runAsGroup: 65534
         seccompProfile: { type: RuntimeDefault }
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
-          labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: *app
     service:
       app:
         controller: kromgo

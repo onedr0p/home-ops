@@ -16,24 +16,42 @@ spec:
         name: prometheus-community
         namespace: flux-system
   install:
-    crds: CreateReplace
+    crds: Skip
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
-    crds: CreateReplace
+    crds: Skip
     remediation:
       strategy: rollback
       retries: 3
   dependsOn:
+    - name: prometheus-operator-crds
+      namespace: observability
     - name: openebs
       namespace: openebs-system
   values:
-    cleanPrometheusOperatorObjectNames: true
     crds:
-      enabled: true
-    alertmanager:
       enabled: false
+    cleanPrometheusOperatorObjectNames: true
+    alertmanager:
+      ingress:
+        enabled: true
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.turbo.ac
+        ingressClassName: internal
+        hosts: ["alertmanager.turbo.ac"]
+        pathType: Prefix
+      alertmanagerSpec:
+        useExistingSecret: true
+        configSecret: alertmanager-secret
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: openebs-hostpath
+              resources:
+                requests:
+                  storage: 1Gi
     kubelet:
       enabled: true
       serviceMonitor:
@@ -101,14 +119,6 @@ spec:
         hosts: ["prometheus.turbo.ac"]
         pathType: Prefix
       prometheusSpec:
-        podMetadata:
-          annotations:
-            secret.reloader.stakater.com/reload: &secret thanos-objstore-config
-        additionalAlertManagerConfigs:
-          - static_configs:
-              - targets: ["alertmanager.devbu.io"]
-        replicas: 1
-        replicaExternalLabelName: __replica__
         scrapeInterval: 1m # Must match interval in Grafana Helm chart
         ruleSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
@@ -121,40 +131,20 @@ spec:
           - auto-gomemlimit
           - memory-snapshot-on-shutdown
           - new-service-discovery-manager
-        retention: 2d
-        retentionSize: 15GB
-        externalLabels:
-          cluster: storage
+        retention: 14d
+        retentionSize: 70GB
         resources:
           requests:
             cpu: 100m
           limits:
-            memory: 1Gi
+            memory: 1500Mi
         storageSpec:
           volumeClaimTemplate:
             spec:
               storageClassName: openebs-hostpath
               resources:
                 requests:
-                  storage: 20Gi
-        thanos:
-          image: "quay.io/thanos/thanos:${THANOS_VERSION}"
-          version: "${THANOS_VERSION#v}"
-          objectStorageConfig:
-            existingSecret:
-              name: *secret
-              key: config
-      thanosService:
-        enabled: true
-      thanosServiceExternal:
-        enabled: true
-        type: LoadBalancer
-        annotations:
-          external-dns.alpha.kubernetes.io/hostname: thanos.turbo.ac
-          io.cilium/lb-ipam-ips: 192.168.42.101
-        externalTrafficPolicy: Cluster
-      thanosServiceMonitor:
-        enabled: true
+                  storage: 75Gi
     nodeExporter:
       enabled: true
     prometheus-node-exporter:
@@ -187,3 +177,11 @@ spec:
               targetLabel: kubernetes_node
     grafana:
       enabled: false
+      forceDeployDashboards: true
+      sidecar:
+        dashboards:
+          annotations:
+            grafana_folder: Kubernetes
+          multicluster:
+            etcd:
+              enabled: true

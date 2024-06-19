@@ -3,17 +3,15 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app glauth
+  name: &app prometheus-operator-crds
   namespace: flux-system
 spec:
-  targetNamespace: default
+  targetNamespace: observability
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: external-secrets-stores
-  path: ./kubernetes/main/apps/default/glauth/app
-  prune: true
+  path: ./kubernetes/storage/apps/observability/prometheus-operator-crds/app
+  prune: false # never should be deleted
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
