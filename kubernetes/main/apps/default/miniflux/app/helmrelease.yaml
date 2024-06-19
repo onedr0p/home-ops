@@ -25,7 +25,6 @@ spec:
   values:
     controllers:
       miniflux:
-        replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -49,11 +48,6 @@ spec:
               LOG_DATE_TIME: "1"
               METRICS_ALLOWED_NETWORKS: 10.42.0.0/16
               METRICS_COLLECTOR: "1"
-              OAUTH2_CLIENT_ID: miniflux
-              OAUTH2_USER_CREATION: "1"
-              OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://auth.devbu.io
-              OAUTH2_PROVIDER: oidc
-              OAUTH2_REDIRECT_URL: https://miniflux.devbu.io/oauth2/oidc/callback
               POLLING_SCHEDULER: entry_frequency
               POLLING_FREQUENCY: "15"
               PORT: &port 80
@@ -87,13 +81,6 @@ spec:
         runAsUser: 65534
         runAsGroup: 65534
         seccompProfile: { type: RuntimeDefault }
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
-          labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: *app
     service:
       app:
         controller: miniflux
