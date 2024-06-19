@@ -28,51 +28,20 @@ spec:
   dependsOn:
     - name: openebs
       namespace: openebs-system
-    - name: rook-ceph-cluster
-      namespace: rook-ceph
-    - name: vector-agent
-      namespace: observability
-    - name: vector-aggregator
-      namespace: observability
-  valuesFrom:
-    - targetPath: loki.storage.bucketNames.chunks
-      kind: ConfigMap
-      name: &cephBucket loki-bucket
-      valuesKey: BUCKET_NAME
-    - targetPath: loki.storage.s3.endpoint
-      kind: ConfigMap
-      name: *cephBucket
-      valuesKey: BUCKET_HOST
-    - targetPath: loki.storage.s3.region
-      kind: ConfigMap
-      name: *cephBucket
-      valuesKey: BUCKET_REGION
-    - targetPath: loki.storage.s3.accessKeyId
-      kind: Secret
-      name: *cephBucket
-      valuesKey: AWS_ACCESS_KEY_ID
-    - targetPath: loki.storage.s3.secretAccessKey
-      kind: Secret
-      name: *cephBucket
-      valuesKey: AWS_SECRET_ACCESS_KEY
   values:
-    deploymentMode: SimpleScalable
+    deploymentMode: SingleBinary
     loki:
-      podAnnotations:
-        configmap.reloader.stakater.com/reload: *cephBucket
-        secret.reloader.stakater.com/reload: *cephBucket
+      commonConfig:
+        replication_factor: 1
       ingester:
         chunk_encoding: snappy
       storage:
-        type: s3
-        s3:
-          s3ForcePathStyle: true
-          insecure: true
+        type: filesystem
       schemaConfig:
         configs:
           - from: "2024-04-01" # quote
             store: tsdb
-            object_store: s3
+            object_store: filesystem
             schema: v13
             index:
               prefix: loki_index_
@@ -81,26 +50,6 @@ spec:
         auth_enabled: false
         server:
           log_level: info
-          http_listen_port: 3100
-          grpc_listen_port: 9095
-          grpc_server_max_recv_msg_size: 8388608
-          grpc_server_max_send_msg_size: 8388608
-        limits_config:
-          ingestion_burst_size_mb: 128
-          ingestion_rate_mb: 64
-          max_query_parallelism: 100
-          per_stream_rate_limit: 64M
-          per_stream_rate_limit_burst: 128M
-          reject_old_samples: true
-          reject_old_samples_max_age: 168h
-          retention_period: 30d
-          shard_streams:
-            enabled: true
-          split_queries_by_interval: 1h
-        query_scheduler:
-          max_outstanding_requests_per_tenant: 4096
-        frontend:
-          max_outstanding_per_tenant: 4096
         ruler:
           enable_api: true
           enable_alertmanager_v2: true
@@ -112,13 +61,14 @@ spec:
           rule_path: /rules/fake
         analytics:
           reporting_enabled: false
-    backend:
-      replicas: 2
+    singleBinary:
+      replicas: 1
       persistence:
-        size: 20Gi
+        enabled: true
         storageClass: openebs-hostpath
+        size: 50Gi
     gateway:
-      replicas: 2
+      replicas: 1
       image:
         registry: ghcr.io
       ingress:
@@ -132,13 +82,12 @@ spec:
               - path: /
                 pathType: Prefix
         tls: []
+    backend:
+      replicas: 0
     read:
-      replicas: 2
+      replicas: 0
     write:
-      replicas: 2
-      persistence:
-        size: 20Gi
-        storageClass: openebs-hostpath
+      replicas: 0
     sidecar:
       image:
         repository: ghcr.io/kiwigrid/k8s-sidecar
