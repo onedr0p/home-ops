@@ -1,0 +1,80 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: loki
+spec:
+  interval: 30m
+  timeout: 15m
+  chart:
+    spec:
+      chart: loki
+      version: 6.6.3
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+  install:
+    crds: Skip
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    crds: Skip
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: openebs
+      namespace: openebs-system
+  values:
+    deploymentMode: SingleBinary
+    loki:
+      commonConfig:
+        replication_factor: 1
+      ingester:
+        chunk_encoding: snappy
+      storage:
+        type: filesystem
+      schemaConfig:
+        configs:
+          - from: "2024-04-01" # quote
+            store: tsdb
+            object_store: filesystem
+            schema: v13
+            index:
+              prefix: loki_index_
+              period: 24h
+      structuredConfig:
+        analytics:
+          reporting_enabled: false
+        auth_enabled: false
+        server:
+          log_level: info
+    singleBinary:
+      replicas: 1
+      persistence:
+        enabled: true
+        storageClass: openebs-hostpath
+        size: 50Gi
+    gateway:
+      replicas: 1
+      image:
+        registry: ghcr.io
+      ingress:
+        enabled: false
+    backend:
+      replicas: 0
+    read:
+      replicas: 0
+    write:
+      replicas: 0
+    chunksCache:
+      enabled: false
+    resultsCache:
+      enabled: false
+    lokiCanary:
+      enabled: false
+    test:
+      enabled: false

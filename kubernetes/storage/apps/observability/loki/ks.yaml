@@ -3,16 +3,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app vector
+  name: &app loki
   namespace: flux-system
 spec:
   targetNamespace: observability
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: external-secrets-stores
-  path: ./kubernetes/storage/apps/observability/vector/app
+  path: ./kubernetes/storage/apps/observability/loki/app
   prune: true
   sourceRef:
     kind: GitRepository
