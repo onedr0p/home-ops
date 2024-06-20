@@ -89,22 +89,19 @@ This Git repository contains the following directories under [Kubernetes](./kube
 
 ### Flux Workflow
 
-This is a high-level look how Flux deploys my applications with dependencies. Below there are 3 apps `postgres`, `glauth` and `authelia`. `postgres` is the first app that needs to be running and healthy before `glauth` and `authelia`. Once `postgres` and `glauth` are healthy `authelia` will be deployed.
+This is a high-level look how Flux deploys my applications with dependencies. Below there are 3 Flux kustomizations `postgres`, `postgres-cluster`, and `atuin`. `postgres` is the first app that needs to be running and healthy before `postgres-cluster` and once `postgres-cluster` is healthy `atuin` will be deployed.
 
 ```mermaid
 graph TD;
   id1>Kustomization: cluster] -->|Creates| id2>Kustomization: cluster-apps];
   id2>Kustomization: cluster-apps] -->|Creates| id3>Kustomization: postgres];
-  id2>Kustomization: cluster-apps] -->|Creates| id6>Kustomization: glauth]
-  id2>Kustomization: cluster-apps] -->|Creates| id8>Kustomization: authelia]
   id2>Kustomization: cluster-apps] -->|Creates| id5>Kustomization: postgres-cluster]
+  id2>Kustomization: cluster-apps] -->|Creates| id8>Kustomization: atuin]
   id3>Kustomization: postgres] -->|Creates| id4[HelmRelease: postgres];
   id5>Kustomization: postgres-cluster] -->|Depends on| id3>Kustomization: postgres];
   id5>Kustomization: postgres-cluster] -->|Creates| id10[Postgres Cluster];
-  id6>Kustomization: glauth] -->|Creates| id7(HelmRelease: glauth);
-  id8>Kustomization: authelia] -->|Creates| id9(HelmRelease: authelia);
-  id8>Kustomization: authelia] -->|Depends on| id5>Kustomization: postgres-cluster];
-  id9(HelmRelease: authelia) -->|Depends on| id7(HelmRelease: glauth);
+  id8>Kustomization: atuin] -->|Creates| id9(HelmRelease: atuin);
+  id8>Kustomization: atuin] -->|Depends on| id5>Kustomization: postgres-cluster];
 ```
 
 ### Networking

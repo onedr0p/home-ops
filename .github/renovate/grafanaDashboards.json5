@@ -4,18 +4,14 @@
     "grafana-dashboards": {
       "defaultRegistryUrlTemplate": "https://grafana.com/api/dashboards/{{packageName}}",
       "format": "json",
-      "transformTemplates": [
-        "{\"releases\":[{\"version\": $string(revision)}]}"
-      ]
+      "transformTemplates": ["{\"releases\":[{\"version\": $string(revision)}]}"]
     }
   },
   "customManagers": [
     {
       "customType": "regex",
       "description": ["Process Grafana dashboards"],
-      "fileMatch": [
-        "(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"
-      ],
+      "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"],
       "matchStrings": [
         "depName=\"(?<depName>.*)\"\\n(?<indentation>\\s+)gnetId: (?<packageName>\\d+)\\n.+revision: (?<currentValue>\\d+)"
       ],

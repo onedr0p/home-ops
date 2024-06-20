@@ -3,15 +3,14 @@
 version: "3"
 
 vars:
-  ANSIBLE_DIR: "{{.ROOT_DIR}}/ansible"
   KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
+  PYTHON_BIN: python3.12
 
 env:
   KUBECONFIG: "{{.KUBERNETES_DIR}}/kubernetes/main/kubeconfig:{{.KUBERNETES_DIR}}/kubernetes/storage/kubeconfig"
   SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
 
 includes:
-  ansible: .taskfiles/Ansible
   bootstrap: .taskfiles/Bootstrap
   external-secrets: .taskfiles/ExternalSecrets
   flux: .taskfiles/Flux
@@ -25,3 +24,16 @@ tasks:
   default:
     silent: true
     cmd: task -l
+
+  venv:
+    desc: Set up Python virtual environment
+    cmds:
+      - "{{.PYTHON_BIN}} -m venv {{.ROOT_DIR}}/.venv"
+      - .venv/bin/python3 -m pip install --upgrade pip setuptools wheel
+      - .venv/bin/python3 -m pip install --upgrade --requirement {{.ROOT_DIR}}/requirements.txt
+      - .venv/bin/ansible-galaxy install --role-file "{{.ROOT_DIR}}/requirements.yaml" --force
+    sources:
+      - "{{.ROOT_DIR}}/requirements.txt"
+      - "{{.ROOT_DIR}}/requirements.yaml"
+    generates:
+      - "{{.ROOT_DIR}}/.venv/pyvenv.cfg"

@@ -15,10 +15,6 @@
         path: /etc/rancher/k3s/config.yaml
       register: k3s_installed
 
-    - name: Check if cluster can be upgraded
-      when: k3s_installed.stat.exists
-      ansible.builtin.include_tasks: tasks/upgrade.yaml
-
     - name: Ignore manifests templates and urls if the cluster is already installed
       when: k3s_installed.stat.exists
       ansible.builtin.set_fact:
