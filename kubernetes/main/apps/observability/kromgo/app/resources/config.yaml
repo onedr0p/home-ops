@@ -2,25 +2,25 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/kashalls/kromgo/main/config.schema.json
 metrics:
   - name: talos_version
-    query: node_os_info{cluster="main", name="Talos"}
+    query: node_os_info{name="Talos"}
     label: version_id
 
   - name: kubernetes_version
-    query: kubernetes_build_info{cluster="main", service="kubernetes"}
+    query: kubernetes_build_info{service="kubernetes"}
     label: git_version
 
   - name: cluster_node_count
-    query: count(count by (node) (kube_node_status_condition{cluster="main", condition="Ready"}))
+    query: count(count by (node) (kube_node_status_condition{condition="Ready"}))
     colors:
       - { color: "green", min: 0, max: 9999 }
 
   - name: cluster_pod_count
-    query: sum(kube_pod_status_phase{cluster="main", phase="Running"})
+    query: sum(kube_pod_status_phase{phase="Running"})
     colors:
       - { color: "green", min: 0, max: 9999 }
 
   - name: cluster_cpu_usage
-    query: round(avg(instance:node_cpu_utilisation:rate5m{cluster="main"}) * 100, 0.1)
+    query: round(avg(instance:node_cpu_utilisation:rate5m) * 100, 0.1)
     suffix: "%"
     colors:
       - { color: "green", min: 0, max: 35 }
@@ -28,7 +28,7 @@ metrics:
       - { color: "red", min: 76, max: 9999 }
 
   - name: cluster_memory_usage
-    query: round(sum(node_memory_MemTotal_bytes{cluster="main"} - node_memory_MemAvailable_bytes{cluster="main"}) / sum(node_memory_MemTotal_bytes{cluster="main"}) * 100, 0.1)
+    query: round(sum(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes) * 100, 0.1)
     suffix: "%"
     colors:
       - { color: green, min: 0, max: 35 }
@@ -44,7 +44,7 @@ metrics:
       - { color: "red", min: 751, max: 9999 }
 
   - name: cluster_age_days
-    query: round((time() - min(kube_node_created{cluster="main"}) ) / 86400)
+    query: round((time() - min(kube_node_created) ) / 86400)
     suffix: "d"
     colors:
       - { color: "green", min: 0, max: 180 }
@@ -52,7 +52,7 @@ metrics:
       - { color: "red", min: 361, max: 9999 }
 
   - name: cluster_uptime_days
-    query: round(avg(node_time_seconds{cluster="main"} - node_boot_time_seconds{cluster="main"}) / 86400)
+    query: round(avg(node_time_seconds - node_boot_time_seconds) / 86400)
     suffix: "d"
     colors:
       - { color: "green", min: 0, max: 180 }
