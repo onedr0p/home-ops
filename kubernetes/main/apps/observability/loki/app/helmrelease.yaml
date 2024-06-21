@@ -31,6 +31,11 @@ spec:
   values:
     deploymentMode: SingleBinary
     loki:
+      auth_enabled: false
+      analytics:
+        reporting_enabled: false
+      server:
+        log_level: info
       commonConfig:
         replication_factor: 1
       ingester:
@@ -46,12 +51,8 @@ spec:
             index:
               prefix: loki_index_
               period: 24h
-      structuredConfig:
-        analytics:
-          reporting_enabled: false
-        auth_enabled: false
-        server:
-          log_level: info
+      limits_config:
+        retention_period: 14d
     singleBinary:
       replicas: 1
       persistence:
