@@ -3,16 +3,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app vector
+  name: &app promtail
   namespace: flux-system
 spec:
   targetNamespace: observability
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: external-secrets-stores
-  path: ./kubernetes/main/apps/observability/vector/app
+  path: ./kubernetes/main/apps/observability/promtail/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -20,4 +18,4 @@ spec:
   wait: false
   interval: 30m
   retryInterval: 1m
-  timeout: 15m
+  timeout: 5m
