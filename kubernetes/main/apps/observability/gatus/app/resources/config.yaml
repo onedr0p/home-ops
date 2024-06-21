@@ -13,7 +13,7 @@ ui:
   header: Status
 alerting:
   pushover:
-    title: Gatus (Kubernetes)
+    title: Gatus
     application-token: $${PUSHOVER_TOKEN}
     user-key: $${PUSHOVER_USER_KEY}
     priority: 1
@@ -33,17 +33,13 @@ endpoints:
     interval: 1m
     client:
       dns-resolver: tcp://1.1.1.1:53
-    conditions:
-      - "[STATUS] == 200"
-    alerts:
-      - type: pushover
+    conditions: ["[STATUS] == 200"]
+    alerts: { type: pushover }
   - name: flux-webhook
     group: external
     url: https://flux-webhook.devbu.io
     interval: 1m
     client:
       dns-resolver: tcp://1.1.1.1:53
-    conditions:
-      - "[STATUS] == 404"
-    alerts:
-      - type: pushover
+    conditions: ["[STATUS] == 404"]
+    alerts: { type: pushover }
