@@ -53,6 +53,22 @@ spec:
                 cpu: 10m
               limits:
                 memory: 1Gi
+          code-server:
+            image:
+              repository: ghcr.io/coder/code-server
+              tag: 4.90.3@sha256:f54483e9794f1bbd42bf55346ebeadb057a4f0dc9da1a50670e3a335ee295a35
+            args: [
+              "--auth", "none",
+              "--user-data-dir", "/config/.vscode",
+              "--extensions-dir", "/config/.vscode",
+              "--port", "12321",
+              "/config"
+            ]
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -67,6 +83,15 @@ spec:
         ports:
           http:
             port: 8123
+      code-server:
+        type: ClusterIP
+        controller: home-assistant
+        ports:
+          http:
+            enabled: true
+            port: 12321
+            protocol: TCP
+            targetPort: 12321
     ingress:
       app:
         annotations:
@@ -79,9 +104,22 @@ spec:
                 service:
                   identifier: app
                   port: http
+      code-server:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.devbu.io
+        className: internal
+        hosts:
+          - host: hass-code.devbu.io
+            paths:
+              - path: /
+                service:
+                  identifier: code-server
+                  port: http
     persistence:
       config:
         existingClaim: home-assistant
+        globalMounts:
+          - path: /config
       logs:
         type: emptyDir
         globalMounts:
@@ -92,3 +130,5 @@ spec:
           - path: /config/tts
       tmp:
         type: emptyDir
+        globalMounts:
+          - path: /tmp
