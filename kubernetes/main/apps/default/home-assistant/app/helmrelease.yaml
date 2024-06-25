@@ -83,15 +83,8 @@ spec:
         ports:
           http:
             port: 8123
-      code-server:
-        type: ClusterIP
-        controller: home-assistant
-        ports:
-          http:
-            enabled: true
+          code-server:
             port: 12321
-            protocol: TCP
-            targetPort: 12321
     ingress:
       app:
         annotations:
@@ -113,8 +106,8 @@ spec:
             paths:
               - path: /
                 service:
-                  identifier: code-server
-                  port: http
+                  identifier: app
+                  port: code-server
     persistence:
       config:
         existingClaim: home-assistant
