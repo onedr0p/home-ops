@@ -3,14 +3,16 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app filebrowser
+  name: &app kopia
   namespace: flux-system
 spec:
   targetNamespace: default
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/storage/apps/default/filebrowser/app
+  dependsOn:
+    - name: external-secrets-stores
+  path: ./kubernetes/main/apps/default/kopia/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -19,3 +21,6 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
+  postBuild:
+    substitute:
+      APP: *app

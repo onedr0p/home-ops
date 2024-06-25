@@ -101,10 +101,10 @@ spec:
     ingress:
       main:
         annotations:
-          external-dns.alpha.kubernetes.io/target: internal.turbo.ac
+          external-dns.alpha.kubernetes.io/target: internal.devbu.io
         className: internal
         hosts:
-          - host: "{{ .Release.Name }}.turbo.ac"
+          - host: "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
                 service:
@@ -126,10 +126,10 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /app/logs
-      media:
-        type: hostPath
-        hostPath: /eros
-        hostPathType: Directory
+      eros:
+        type: nfs
+        server: expanse.internal
+        path: /eros
         globalMounts:
           - path: /eros
             readOnly: true
