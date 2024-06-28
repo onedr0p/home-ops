@@ -12,28 +12,30 @@ tasks:
     prompt: Bootstrap a Talos Kubernetes cluster ... continue?
     summary: |
       cluster: Cluster to run command against (default: main)
-      nodes: Nodes in the cluster to reset Rook on (required, comma delimited)
-      disk: Disk to reset Rook on (required)
+      nodes: Nodes in the cluster to reset Rook on (required, comma delimited, e.g. k8s-0,k8s-1)
+      disk: Disk to reset Rook on (required, e.g. /dev/nvme0n1)
     vars: &vars
       cluster: '{{.cluster | default "main"}}'
-      nodes: '{{.nodes | default "k8s-0,k8s-1,k8s-2,k8s-3,k8s-4,k8s-5"}}'
-      disk: '{{.disk | default "/dev/nvme0n1"}}'
+      nodes: '{{.nodes}}'
+      disk: '{{.disk}}'
     cmds:
       - { task: etcd, vars: *vars }
       - { task: kubeconfig, vars: *vars }
       - { task: apps, vars: *vars }
       - { task: rook, vars: *vars }
       - { task: flux, vars: *vars }
+    requires:
+      vars: ["nodes", "disk"]
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
       - talosctl --context {{.cluster}} config info >/dev/null 2>&1
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
 
   etcd:
     internal: true
     cmd: until talosctl --context {{.cluster}} --nodes {{.CONTROLLER}} bootstrap; do sleep 10; done
     preconditions:
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
 
   apps:
     internal: true
@@ -42,9 +44,9 @@ tasks:
       - helmfile --quiet --kube-context {{.cluster}} --file {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
       - until kubectl --context {{.cluster}} wait --for=condition=Ready nodes --all --timeout=10m; do sleep 10; done
     preconditions:
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/helmfile.yaml
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
 
   kubeconfig:
     internal: true
@@ -52,8 +54,8 @@ tasks:
       talosctl --context {{.cluster}} kubeconfig --nodes {{.CONTROLLER}} \
           --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
     preconditions:
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
 
   flux:
     internal: true
@@ -65,14 +67,14 @@ tasks:
       - kubectl --context {{.cluster}} apply --server-side --filename {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-settings.yaml
       - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/flux/config
     preconditions:
-      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml
-      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml
-      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.yaml
       - test -f {{.ROOT_DIR}}/age.key
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.yaml
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-settings.yaml
+      - sops filestatus {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml | jq --exit-status '.encrypted'
+      - sops filestatus {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml | jq --exit-status '.encrypted'
+      - sops filestatus {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.yaml | jq --exit-status '.encrypted'
 
   rook:
     internal: true
