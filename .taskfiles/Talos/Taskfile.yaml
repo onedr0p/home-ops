@@ -20,54 +20,6 @@ vars:
 
 tasks:
 
-  bootstrap:
-    desc: Bootstrap Talos
-    prompt: Bootstrap Talos on the '{{.cluster}}' cluster ... continue?
-    cmds:
-      - task: bootstrap-etcd
-        vars: { cluster: "{{.cluster}}" }
-      - task: fetch-kubeconfig
-        vars: { cluster: "{{.cluster}}" }
-      - task: bootstrap-apps
-        vars: { cluster: "{{.cluster}}" }
-    requires:
-      vars: ["cluster"]
-
-  bootstrap-etcd:
-    desc: Bootstrap Etcd
-    cmd: until talosctl --context {{.cluster}} --nodes {{.CONTROLLER}} bootstrap; do sleep 10; done
-    vars: *vars
-    requires:
-      vars: ["cluster"]
-    preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
-
-  bootstrap-apps:
-    desc: Bootstrap core apps needed for Talos
-    cmds:
-      - until kubectl --context {{.cluster}} wait --for=condition=Ready=False nodes --all --timeout=10m; do sleep 10; done
-      - helmfile --quiet --kube-context {{.cluster}} --file {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
-      - until kubectl --context {{.cluster}} wait --for=condition=Ready nodes --all --timeout=10m; do sleep 10; done
-    requires:
-      vars: ["cluster"]
-    preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/helmfile.yaml
-
-  fetch-kubeconfig:
-    desc: Fetch kubeconfig from Talos controllers
-    cmd: |
-      talosctl --context {{.cluster}} kubeconfig --nodes {{.CONTROLLER}} \
-          --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
-    vars: *vars
-    requires:
-      vars: ["cluster"]
-    preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
-
   apply-config:
     desc: Apply Talos configuration to a node
     cmd: |

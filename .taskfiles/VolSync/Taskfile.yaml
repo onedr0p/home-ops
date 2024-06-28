@@ -19,17 +19,15 @@ x-env-vars: &env-vars
   puid: "{{.puid}}"
 
 vars:
-  VOLSYNC_SCRIPTS_DIR: "{{.ROOT_DIR}}/.taskfiles/VolSync/scripts"
-  VOLSYNC_TEMPLATES_DIR: "{{.ROOT_DIR}}/.taskfiles/VolSync/templates"
+  VOLSYNC_RESOURCES_DIR: "{{.ROOT_DIR}}/.taskfiles/volsync/resources"
 
 tasks:
 
   state-*:
     desc: Suspend or Resume Volsync
     summary: |
-      Args:
-        cluster: Cluster to run command against (required)
-        state: resume or suspend (required)
+      cluster: Cluster to run command against (required)
+      state: resume or suspend (required)
     cmds:
       - flux --context {{.cluster}} {{.state}} kustomization volsync
       - flux --context {{.cluster}} -n {{.ns}} {{.state}} helmrelease volsync
@@ -44,13 +42,12 @@ tasks:
   list:
     desc: List snapshots for an application
     summary: |
-      Args:
-        cluster: Cluster to run command against (required)
-        ns: Namespace the PVC is in (default: default)
-        app: Application to list snapshots for (required)
+      cluster: Cluster to run command against (required)
+      ns: Namespace the PVC is in (default: default)
+      app: Application to list snapshots for (required)
     cmds:
-      - envsubst < <(cat {{.VOLSYNC_TEMPLATES_DIR}}/list.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.VOLSYNC_SCRIPTS_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
+      - envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/list.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=1m
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.job}} --container main
       - kubectl --context {{.cluster}} -n {{.ns}} delete job {{.job}}
@@ -61,20 +58,19 @@ tasks:
       ns: '{{.ns | default "default"}}'
       job: volsync-list-{{.app}}
     preconditions:
-      - test -f {{.VOLSYNC_SCRIPTS_DIR}}/wait-for-job.sh
-      - test -f {{.VOLSYNC_TEMPLATES_DIR}}/list.tmpl.yaml
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/list.tmpl.yaml
     silent: true
 
   unlock:
     desc: Unlock a Restic repository for an application
     summary: |
-      Args:
-        cluster: Cluster to run command against (required)
-        ns: Namespace the PVC is in (default: default)
-        app: Application to unlock (required)
+      cluster: Cluster to run command against (required)
+      ns: Namespace the PVC is in (default: default)
+      app: Application to unlock (required)
     cmds:
-      - envsubst < <(cat {{.VOLSYNC_TEMPLATES_DIR}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.VOLSYNC_SCRIPTS_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
+      - envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/unlock.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=1m
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.job}} --container minio
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.job}} --container r2
@@ -86,8 +82,8 @@ tasks:
       ns: '{{.ns | default "default"}}'
       job: volsync-unlock-{{.app}}
     preconditions:
-      - test -f {{.VOLSYNC_SCRIPTS_DIR}}/wait-for-job.sh
-      - test -f {{.VOLSYNC_TEMPLATES_DIR}}/unlock.tmpl.yaml
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/unlock.tmpl.yaml
     silent: true
 
   # To run backup jobs in parallel for all replicationsources:
@@ -95,13 +91,12 @@ tasks:
   snapshot:
     desc: Snapshot a PVC for an application
     summary: |
-      Args:
-        cluster: Cluster to run command against (required)
-        ns: Namespace the PVC is in (default: default)
-        app: Application to snapshot (required)
+      cluster: Cluster to run command against (required)
+      ns: Namespace the PVC is in (default: default)
+      app: Application to snapshot (required)
     cmds:
       - kubectl --context {{.cluster}} -n {{.ns}} patch replicationsources {{.app}} --type merge -p '{"spec":{"trigger":{"manual":"{{.now}}"}}}'
-      - bash {{.VOLSYNC_SCRIPTS_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=120m
     env: *env-vars
     requires:
@@ -111,10 +106,10 @@ tasks:
       ns: '{{.ns | default "default"}}'
       job: volsync-src-{{.app}}
       controller:
-        sh: true && {{.VOLSYNC_SCRIPTS_DIR}}/which-controller.sh {{.app}} {{.ns}} {{.cluster}}
+        sh: true && {{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh {{.app}} {{.ns}} {{.cluster}}
     preconditions:
-      - test -f {{.VOLSYNC_SCRIPTS_DIR}}/which-controller.sh
-      - test -f {{.VOLSYNC_SCRIPTS_DIR}}/wait-for-job.sh
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh
       - kubectl --context {{.cluster}} -n {{.ns}} get replicationsources {{.app}}
 
   # To run restore jobs in parallel for all replicationdestinations:
@@ -122,11 +117,10 @@ tasks:
   restore:
     desc: Restore a PVC for an application
     summary: |
-      Args:
-        cluster: Cluster to run command against (required)
-        ns: Namespace the PVC is in (default: default)
-        app: Application to restore (required)
-        previous: Previous number of snapshots to restore (default: 2)
+      cluster: Cluster to run command against (required)
+      ns: Namespace the PVC is in (default: default)
+      app: Application to restore (required)
+      previous: Previous number of snapshots to restore (default: 2)
     cmds:
       - { task: .suspend, vars: *env-vars }
       - { task: .wipe, vars: *env-vars }
@@ -139,7 +133,7 @@ tasks:
       ns: '{{.ns | default "default"}}'
       previous: '{{.previous | default 2}}'
       controller:
-        sh: "{{.VOLSYNC_SCRIPTS_DIR}}/which-controller.sh {{.app}} {{.ns}}"
+        sh: "{{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh {{.app}} {{.ns}}"
       claim:
         sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.sourcePVC}"
       puid:
@@ -147,16 +141,15 @@ tasks:
       pgid:
         sh: kubectl --context {{.cluster}} -n {{.ns}} get replicationsources/{{.app}} -o jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
     preconditions:
-      - test -f {{.VOLSYNC_SCRIPTS_DIR}}/which-controller.sh
-      - test -f {{.VOLSYNC_SCRIPTS_DIR}}/wait-for-job.sh
-      - test -f {{.VOLSYNC_TEMPLATES_DIR}}/replicationdestination.tmpl.yaml
-      - test -f {{.VOLSYNC_TEMPLATES_DIR}}/wipe.tmpl.yaml
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.tmpl.yaml
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/wipe.tmpl.yaml
 
   cleanup:
     desc: Delete volume populator PVCs in all namespaces
     summary: |
-      Args:
-        cluster: Cluster to run command against (required)
+      cluster: Cluster to run command against (required)
     cmds:
       - for: { var: dest }
         cmd: |
@@ -195,8 +188,8 @@ tasks:
   .wipe:
     internal: true
     cmds:
-      - envsubst < <(cat {{.VOLSYNC_TEMPLATES_DIR}}/wipe.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.VOLSYNC_SCRIPTS_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
+      - envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/wipe.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=120m
       - kubectl --context {{.cluster}} -n {{.ns}} logs job/{{.job}} --container main
       - kubectl --context {{.cluster}} -n {{.ns}} delete job {{.job}}
@@ -208,8 +201,8 @@ tasks:
   .restore:
     internal: true
     cmds:
-      - envsubst < <(cat {{.VOLSYNC_TEMPLATES_DIR}}/replicationdestination.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
-      - bash {{.VOLSYNC_SCRIPTS_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
+      - envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.job}} {{.ns}} {{.cluster}}
       - kubectl --context {{.cluster}} -n {{.ns}} wait job/{{.job}} --for condition=complete --timeout=120m
       - kubectl --context {{.cluster}} -n {{.ns}} delete replicationdestination {{.job}}
     env: *env-vars

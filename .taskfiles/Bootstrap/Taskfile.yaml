@@ -2,20 +2,124 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+vars:
+  BOOTSTRAP_RESOURCES_DIR: "{{.ROOT_DIR}}/.taskfiles/bootstrap/resources"
+
 tasks:
 
-  main:
+  kubernetes:
+    desc: Bootstrap a Talos Kubernetes cluster backed by flux, sops, and rook
+    prompt: Bootstrap a Talos Kubernetes cluster ... continue?
+    summary: |
+      cluster: Cluster to run command against (default: main)
+      nodes: Nodes in the cluster to reset Rook on (required, comma delimited)
+      disk: Disk to reset Rook on (required)
     vars: &vars
-      cluster: main
-      cephnodes: k8s-0 k8s-1 k8s-2 k8s-3 k8s-4 k8s-5
-      cephdisk: /dev/nvme0n1
+      cluster: '{{.cluster | default "main"}}'
+      nodes: '{{.nodes | default "k8s-0,k8s-1,k8s-2,k8s-3,k8s-4,k8s-5"}}'
+      disk: '{{.disk | default "/dev/nvme0n1"}}'
     cmds:
-      - task: :talos:bootstrap
-        vars: *vars
-      - task: :rook:reset
-        vars: *vars
-      - task: :flux:bootstrap
-        vars: *vars
+      - { task: etcd, vars: *vars }
+      - { task: kubeconfig, vars: *vars }
+      - { task: apps, vars: *vars }
+      - { task: rook, vars: *vars }
+      - { task: flux, vars: *vars }
     preconditions:
       - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
       - talosctl --context {{.cluster}} config info >/dev/null 2>&1
+
+  etcd:
+    internal: true
+    cmd: until talosctl --context {{.cluster}} --nodes {{.CONTROLLER}} bootstrap; do sleep 10; done
+    preconditions:
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+
+  apps:
+    internal: true
+    cmds:
+      - until kubectl --context {{.cluster}} wait --for=condition=Ready=False nodes --all --timeout=10m; do sleep 10; done
+      - helmfile --quiet --kube-context {{.cluster}} --file {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+      - until kubectl --context {{.cluster}} wait --for=condition=Ready nodes --all --timeout=10m; do sleep 10; done
+    preconditions:
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/helmfile.yaml
+
+  kubeconfig:
+    internal: true
+    cmd: |
+      talosctl --context {{.cluster}} kubeconfig --nodes {{.CONTROLLER}} \
+          --force --force-context-name {{.cluster}} {{.KUBERNETES_DIR}}/{{.cluster}}
+    preconditions:
+      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
+
+  flux:
+    internal: true
+    cmds:
+      - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux
+      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml | kubectl --context {{.cluster}} apply --server-side --filename -
+      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml | kubectl --context {{.cluster}} apply --server-side --filename -
+      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.yaml | kubectl --context {{.cluster}} apply --server-side --filename -
+      - kubectl --context {{.cluster}} apply --server-side --filename {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-settings.yaml
+      - kubectl --context {{.cluster}} apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.cluster}}/flux/config
+    preconditions:
+      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml
+      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml
+      - sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.yaml
+      - test -f {{.ROOT_DIR}}/age.key
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/age-key.secret.sops.yaml
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/flux/github-deploy-key.secret.sops.yaml
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-secrets.secret.sops.yaml
+      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/flux/vars/cluster-settings.yaml
+
+  rook:
+    internal: true
+    vars: &vars
+      cluster: '{{.cluster}}'
+      node: '{{.ITEM}}'
+      disk: '{{.disk}}'
+    cmds:
+      - for: { var: nodes }
+        task: rook-data
+        vars: *vars
+      - for: { var: nodes }
+        task: rook-disk
+        vars: *vars
+
+  rook-disk:
+    internal: true
+    cmds:
+      - envsubst < <(cat {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh {{.job}} default {{.cluster}}
+      - kubectl --context {{.cluster}} --namespace default wait job/{{.job}} --for condition=complete --timeout=1m
+      - kubectl --context {{.cluster}} --namespace default logs job/{{.job}}
+      - kubectl --context {{.cluster}} --namespace default delete job {{.job}}
+    env:
+      disk: '{{.disk}}'
+      job: '{{.job}}'
+      node: '{{.node}}'
+    vars:
+      job: wipe-disk-{{.node}}
+    preconditions:
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.tmpl.yaml
+
+  rook-data:
+    internal: true
+    cmds:
+      - envsubst < <(cat {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.tmpl.yaml) | kubectl --context {{.cluster}} apply -f -
+      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh {{.job}} default {{.cluster}}
+      - kubectl --context {{.cluster}} --namespace default wait job/{{.job}} --for condition=complete --timeout=1m
+      - kubectl --context {{.cluster}} --namespace default logs job/{{.job}}
+      - kubectl --context {{.cluster}} --namespace default delete job {{.job}}
+    env:
+      disk: '{{.disk}}'
+      job: '{{.job}}'
+      node: '{{.node}}'
+    vars:
+      job: wipe-data-{{.node}}
+    preconditions:
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.tmpl.yaml
