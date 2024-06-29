@@ -24,7 +24,7 @@ tasks:
     desc: Apply Talos configuration to a node
     cmd: |
       sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/assets/{{.hostname}}.secret.sops.yaml | \
-          envsubst | \
+          $GOPATH/bin/envsubst | \
               talosctl --context {{.cluster}} apply-config --mode={{.mode}} --nodes {{.hostname}} --file /dev/stdin
     env: *vars
     vars:
@@ -97,7 +97,7 @@ tasks:
           curl -skL https://factory.talos.dev/image/{{.TALOS_SCHEMATIC_ID}}/{{.TALOS_VERSION}}/{{.ITEM}} | \
               curl -skT - -u "{{.HOME_SERVICE_USER}}:" \
                   sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/{{.ITEM}}
-      - find {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/assets -type f | xargs -I{} sh -c "sops --decrypt {} | envsubst | curl -skT - -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/\$(basename {} | sed 's/\.secret\.sops//')"
+      - find {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/assets -type f | xargs -I{} sh -c "sops --decrypt {} | $GOPATH/bin/envsubst | curl -skT - -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/\$(basename {} | sed 's/\.secret\.sops//')"
       - find {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/groups -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/groups/
       - find {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/profiles -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/profiles/
       - ssh -l {{.HOME_SERVICE_USER}} {{.HOME_SERVICE_ADDR}} "cd /var/opt/home-service ; go-task restart-matchbox"
@@ -105,4 +105,5 @@ tasks:
     requires:
       vars: ["cluster"]
     preconditions:
+      - test -f $GOPATH/bin/envsubst
       - host {{.HOME_SERVICE_ADDR}}
