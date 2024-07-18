@@ -24,20 +24,7 @@ spec:
       retries: 3
   values:
     fullnameOverride: blackbox-exporter
-    config:
-      modules:
-        http_2xx:
-          prober: http
-          timeout: 5s
-          http:
-            valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
-            follow_redirects: true
-            preferred_ip_protocol: ip4
-        icmp:
-          prober: icmp
-          timeout: 30s
-          icmp:
-            preferred_ip_protocol: ip4
+    pspEnabled: false
     ingress:
       enabled: true
       annotations:
@@ -48,6 +35,35 @@ spec:
           paths:
             - path: /
               pathType: Prefix
+    securityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        add: ["NET_RAW"]
+    config:
+      modules:
+        http_2xx:
+          prober: http
+          timeout: 5s
+          http:
+            valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+            follow_redirects: true
+            preferred_ip_protocol: ipv4
+        icmp:
+          prober: icmp
+          timeout: 5s
+          icmp:
+            preferred_ip_protocol: ipv4
+        tcp_connect:
+          prober: tcp
+          timeout: 5s
+          tcp:
+            preferred_ip_protocol: ipv4
+    serviceMonitor:
+      enabled: true
+      defaults:
+        interval: 1m
+        scrapeTimeout: 10s
     prometheusRule:
       enabled: true
       rules:
@@ -59,28 +75,3 @@ spec:
           annotations:
             summary: |-
               The host {{ $labels.target }} is currently unreachable
-    pspEnabled: false
-    securityContext:
-      capabilities:
-        add: ["NET_RAW"]
-    podSecurityContext:
-      sysctls:
-        - name: net.ipv4.ping_group_range
-          value: "0 2147483647"
-    serviceMonitor:
-      enabled: true
-      defaults:
-        interval: 1m
-      targets:
-        - { name: &name expanse.internal, module: icmp, url: *name }
-        - { name: &name garage-door.internal, module: icmp, url: *name }
-        - { name: &name hdhomerun.internal, module: icmp, url: *name }
-        - { name: &name idrac.internal, module: icmp, url: *name }
-        - { name: &name kiosk.internal, module: icmp, url: *name }
-        - { name: &name kvm.internal, module: icmp, url: *name }
-        - { name: &name pikvm.internal, module: icmp, url: *name }
-        - { name: &name receiver.internal, module: icmp, url: *name }
-        - { name: &name ups.internal, module: icmp, url: *name }
-        - { name: &name vacuum.internal, module: icmp, url: *name }
-        - { name: &name zigbee-controller.internal, module: icmp, url: *name }
-        - { name: &name zwave-controller.internal, module: icmp, url: *name }
