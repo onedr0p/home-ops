@@ -50,6 +50,8 @@ spec:
               - --without-password
               - --metrics-listen-addr
               - 0.0.0.0:8080
+              - --config-file
+              - /app/config/repository.config
             probes:
               liveness: &probes
                 enabled: true
@@ -111,6 +113,10 @@ spec:
                   identifier: app
                   port: http
     persistence:
+      config:
+        type: emptyDir
+        globalMounts:
+          - path: /app/config
       config-file:
         type: secret
         name: kopia-repository-secret
