@@ -1,0 +1,135 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bazarr
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.2.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
+  values:
+    controllers:
+      bazarr:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/onedr0p/bazarr
+              tag: 1.4.3@sha256:d2b70813f7d636fb1ab3448e13ca4074630b63216c6c6d02d034cd5d9e938ea3
+            env:
+              TZ: America/New_York
+            envFrom:
+              - secretRef:
+                  name: bazarr-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &port 6767
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 1Gi
+          subcleaner:
+            image:
+              repository: registry.k8s.io/git-sync/git-sync
+              tag: v4.2.3@sha256:19cc7c317d125c5737ecb9a9159d00b5d97f39c45225c6483de365d62fc09fa8
+            env:
+              GITSYNC_REPO: https://github.com/KBlixt/subcleaner
+              GITSYNC_REF: master
+              GITSYNC_PERIOD: 24h
+              GITSYNC_ROOT: /add-ons
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
+            securityContext: *securityContext
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [10000]
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: bazarr
+        ports:
+          http:
+            port: *port
+    ingress:
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.devbu.io
+        className: internal
+        hosts:
+          - host: bazarr.devbu.io
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+    persistence:
+      add-ons:
+        type: emptyDir
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /config/cache
+      config:
+        existingClaim: bazarr
+      log:
+        type: emptyDir
+        globalMounts:
+          - path: /config/log
+      media:
+        type: nfs
+        server: expanse.internal
+        path: /eros/Media
+        globalMounts:
+          - path: /media
+      scripts:
+        type: configMap
+        name: bazarr-scripts
+        defaultMode: 0775
+        globalMounts:
+          - readOnly: true
+      tmp:
+        type: emptyDir
