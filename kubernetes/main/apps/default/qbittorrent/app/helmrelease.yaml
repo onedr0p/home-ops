@@ -35,8 +35,8 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/qbittorrent
-              tag: 4.6.5@sha256:c019af23966ebafcaf1713d4553bc043246858b711a7d57d8bee358a89990a3e
+              repository: ghcr.io/onedr0p/qbittorrent-beta
+              tag: 4.6.5@sha256:251916c90b09018e747b775f4924da711d8b4545b5b959030eb428571b38be2f
             env:
               TZ: America/New_York
               QBITTORRENT__PORT: &port 80
@@ -78,7 +78,7 @@ spec:
               requests:
                 cpu: 100m
               limits:
-                memory: 18Gi
+                memory: 24Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -88,6 +88,8 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [10000]
         seccompProfile: { type: RuntimeDefault }
+      nodeSelector:
+        topology.kubernetes.io/zone: w
     service:
       app:
         controller: qbittorrent
