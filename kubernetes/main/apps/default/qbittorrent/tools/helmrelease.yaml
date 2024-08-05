@@ -36,11 +36,11 @@ spec:
           successfulJobsHistory: 1
           failedJobsHistory: 1
         initContainers:
-          tagging:
-            image: &image
+          tagging: &container
+            image:
               repository: ghcr.io/buroa/qbtools
               tag: v0.15.4@sha256:51c454cdf95e216a8f40ec5744ecbd8f29a924b4aada805fee64beb0b89cbe59
-            env: &env
+            env:
               TZ: *timeZone
               POD_NAMESPACE:
                 valueFrom:
@@ -57,29 +57,31 @@ spec:
               "--port", "80",
               "--config", "/config/config.yaml"
             ]
-            resources: &resources
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
               requests:
                 cpu: 25m
               limits:
                 memory: 256M
         containers:
           unregistered:
-            image: *image
-            env: *env
+            <<: *container
             args: [
               "prune",
               "--exclude-category", "manual",
               "--exclude-category", "music",
               "--exclude-category", "music.import",
+              "--exclude-tag", "added:24h",
               "--include-tag", "unregistered",
               # "--dry-run",
               "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
               "--port", "80"
             ]
-            resources: *resources
           expired:
-            image: *image
-            env: *env
+            <<: *container
             args: [
               "prune",
               "--exclude-category", "manual",
@@ -91,7 +93,6 @@ spec:
               "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
               "--port", "80"
             ]
-            resources: *resources
         pod:
           restartPolicy: OnFailure
       orphaned:
@@ -101,8 +102,7 @@ spec:
           schedule: "@daily"
         containers:
           app:
-            image: *image
-            env: *env
+            <<: *container
             args: [
               "orphaned",
               "--exclude-pattern", "*_unpackerred*",
@@ -112,21 +112,18 @@ spec:
               "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
               "--port", "80"
             ]
-            resources: *resources
         pod:
           restartPolicy: OnFailure
       reannounce:
         containers:
           app:
-            image: *image
-            env: *env
+            <<: *container
             args: [
               "reannounce",
               "--process-seeding",
               "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
               "--port", "80"
             ]
-            resources: *resources
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
