@@ -52,22 +52,20 @@ spec:
               resources:
                 requests:
                   storage: 1Gi
-    kubelet:
-      enabled: true
     kubeApiServer:
-      enabled: true
-    kubeControllerManager:
-      enabled: true
-      endpoints: &cp
-        - 192.168.42.10
-        - 192.168.42.11
-        - 192.168.42.12
-    kubeEtcd:
-      enabled: true
-      endpoints: *cp
+      serviceMonitor:
+        selector:
+          k8s-app: kube-apiserver
     kubeScheduler:
-      enabled: true
-      endpoints: *cp
+      service:
+        selector:
+          k8s-app: kube-scheduler
+    kubeControllerManager: &kubeControllerManager
+      service:
+        selector:
+          k8s-app: kube-controller-manager
+    kubeEtcd:
+      <<: *kubeControllerManager # etcd runs on control plane nodes
     kubeProxy:
       enabled: false
     prometheus:
@@ -105,8 +103,6 @@ spec:
               resources:
                 requests:
                   storage: 75Gi
-    nodeExporter:
-      enabled: true
     prometheus-node-exporter:
       fullnameOverride: node-exporter
       prometheus:
@@ -118,8 +114,6 @@ spec:
               replacement: $1
               sourceLabels: ["__meta_kubernetes_pod_node_name"]
               targetLabel: kubernetes_node
-    kubeStateMetrics:
-      enabled: true
     kube-state-metrics:
       fullnameOverride: kube-state-metrics
       metricLabelsAllowlist:
