@@ -112,6 +112,14 @@ spec:
     persistence:
       config:
         existingClaim: qbittorrent
+      scripts:
+        type: configMap
+        name: qbittorrent-scripts
+        defaultMode: 0775
+        globalMounts:
+          - path: /scripts/completed.sh
+            subPath: completed.sh
+            readOnly: true
       media:
         type: nfs
         server: expanse.internal
