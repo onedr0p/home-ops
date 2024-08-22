@@ -47,6 +47,8 @@ spec:
                 sabnzbd.default.svc.cluster,
                 sabnzbd.default.svc.cluster.local,
                 sab.devbu.io
+              CROSS_SEED_HOST: cross-seed.default.svc.cluster.local
+              CROSS_SEED_PORT: 80
             envFrom:
               - secretRef:
                   name: sabnzbd-secret
@@ -110,6 +112,12 @@ spec:
           - path: /config/logs
       tmp:
         type: emptyDir
+      scripts:
+        type: configMap
+        name: sabnzbd-scripts
+        defaultMode: 0775
+        globalMounts:
+          - readOnly: true
       media:
         type: nfs
         server: expanse.internal
