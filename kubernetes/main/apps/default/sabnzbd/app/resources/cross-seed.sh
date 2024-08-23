@@ -2,7 +2,7 @@
 
 export CROSS_SEED_HOST=${CROSS_SEED_HOST:-cross-seed.default.svc.cluster.local}
 export CROSS_SEED_PORT=${CROSS_SEED_PORT:-80}
-export CROSS_SEED_API_KEY=${CROSS_SEED_PORT:-unset}
+export CROSS_SEED_API_KEY=${CROSS_SEED_API_KEY:-unset}
 export CROSS_SEED_SLEEP_INTERVAL=${SLEEP_INTERVAL:-30}
 
 SEARCH_PATH=$1
@@ -28,4 +28,4 @@ fi
 
 printf "Successfully searched cross-seed for '%s'\n" "${SEARCH_PATH}"
 
-sleep "${SLEEP_INTERVAL}"
+sleep "${CROSS_SEED_SLEEP_INTERVAL}"
