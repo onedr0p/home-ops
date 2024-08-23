@@ -46,6 +46,12 @@ spec:
               QBT_Preferences__WebUI__AuthSubnetWhitelist: |-
                 10.42.0.0/16, 192.168.42.0/24
               QBT_Preferences__WebUI__LocalHostAuth: false
+              CROSS_SEED_HOST: cross-seed.default.svc.cluster.local
+              CROSS_SEED_PORT: 80
+              CROSS_SEED_SLEEP_INTERVAL: 0
+            envFrom:
+              - secretRef:
+                  name: qbittorrent-secret
             probes:
               liveness: &probes
                 enabled: true
@@ -117,8 +123,8 @@ spec:
         name: qbittorrent-scripts
         defaultMode: 0775
         globalMounts:
-          - path: /scripts/completed.sh
-            subPath: completed.sh
+          - path: /scripts/cross-seed.sh
+            subPath: cross-seed.sh
             readOnly: true
       media:
         type: nfs

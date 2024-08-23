@@ -3,6 +3,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ../../../../templates/gatus/guarded
   - ../../../../templates/volsync
@@ -15,6 +16,8 @@ configMapGenerator:
         loki_rule: "true"
   - name: qbittorrent-scripts
     files:
-      - completed.sh=./resources/completed.sh
+      - cross-seed.sh=./resources/cross-seed.sh
 generatorOptions:
   disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
