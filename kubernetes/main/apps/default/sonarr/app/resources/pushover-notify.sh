@@ -41,18 +41,26 @@ if [[ "${sonarr_eventtype:-}" == "Test" ]]; then
 fi
 
 #
-# Send notification on Download or Upgrade
+# Send notification on Import Complete
 #
 if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
     if [[ "${sonarr_isupgrade}" == "True" ]]; then pushover_title="Upgraded"; else pushover_title="Downloaded"; fi
-    printf -v PUSHOVER_TITLE "Episode %s" "${pushover_title}"
-    printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small><small>\n<b>Quality:</b> %s</small>" \
-        "${sonarr_series_title}" \
-        "${sonarr_episodefile_seasonnumber}" \
-        "${sonarr_episodefile_episodenumbers}" \
-        "${sonarr_episodefile_episodetitles}" \
-        "${sonarr_download_client}" \
-        "${sonarr_episodefile_quality}"
+    if [[ "${sonarr_release_releasetype}" == "0" || "${sonarr_release_releasetype}" == "1" || "${sonarr_release_releasetype}" == "2" ]]; then
+        printf -v PUSHOVER_TITLE "Episode %s" "${pushover_title}"
+        printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small><small>\n<b>Quality:</b> %s</small>" \
+            "${sonarr_series_title}" \
+            "${sonarr_episodefile_seasonnumber}" \
+            "${sonarr_episodefile_episodenumbers}" \
+            "${sonarr_episodefile_episodetitles}" \
+            "${sonarr_download_client}" \
+            "${sonarr_episodefile_quality}"
+    else
+        printf -v PUSHOVER_TITLE "Season %s" "${pushover_title}"
+        printf -v PUSHOVER_MESSAGE "<b>%s</b><small>\n\n<b>Episodes:</b> %s</small><small>\n<b>Client:</b> %s</small>" \
+            "${sonarr_series_title}" \
+            "${sonarr_release_episodecount}" \
+            "${sonarr_download_client}"
+    fi
     printf -v PUSHOVER_URL "%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug}"
     printf -v PUSHOVER_URL_TITLE "View series in %s" "${sonarr_instancename:-Sonarr}"
 fi
