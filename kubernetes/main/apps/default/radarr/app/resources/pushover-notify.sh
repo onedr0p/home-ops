@@ -50,8 +50,8 @@ if [[ "${radarr_eventtype:-}" == "Download" ]]; then
         "${radarr_movie_title}" \
         "${radarr_movie_year}" \
         "${radarr_movie_overview}" \
-        "${radarr_download_client}" \
-        "${radarr_moviefile_quality}" \
+        "${radarr_download_client:-Unknown}" \
+        "${radarr_moviefile_quality:-Unknown}" \
         "$(numfmt --to iec --format "%8.2f" "${radarr_release_size}")"
     printf -v PUSHOVER_URL "%s/movie/%s" "${radarr_applicationurl:-localhost}" "${radarr_movie_tmdbid}"
     printf -v PUSHOVER_URL_TITLE "View movie in %s" "${radarr_instancename:-Radarr}"
@@ -62,11 +62,11 @@ fi
 #
 if [[ "${radarr_eventtype:-}" == "ManualInteractionRequired" ]]; then
     PUSHOVER_PRIORITY="1"
-    printf -v PUSHOVER_TITLE "Movie requires manual interaction"
+    printf -v PUSHOVER_TITLE "Movie import requires intervention"
     printf -v PUSHOVER_MESSAGE "<b>%s (%s)</b><small>\n<b>Client:</b> %s</small>" \
         "${radarr_movie_title}" \
         "${radarr_movie_year}" \
-        "${radarr_download_client}"
+        "${radarr_download_client:-Unknown}"
     printf -v PUSHOVER_URL "%s/activity/queue" "${radarr_applicationurl:-localhost}"
     printf -v PUSHOVER_URL_TITLE "View queue in %s" "${radarr_instancename:-Radarr}"
 fi
@@ -97,6 +97,6 @@ status_code=$(curl \
 if [[ "${status_code}" -ne 200 ]] ; then
     printf "%s - Unable to send notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)" >&2
     exit 1
-else
-    printf "%s - Sent notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)"
 fi
+
+printf "%s - Sent notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)"

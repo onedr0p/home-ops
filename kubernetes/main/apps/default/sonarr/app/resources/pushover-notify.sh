@@ -52,14 +52,14 @@ if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
             "${sonarr_episodefile_seasonnumber}" \
             "${sonarr_episodefile_episodenumbers}" \
             "${sonarr_episodefile_episodetitles}" \
-            "${sonarr_download_client}" \
-            "${sonarr_episodefile_quality}"
+            "${sonarr_download_client:-Unknown}" \
+            "${sonarr_episodefile_quality:-Unknown}"
     else
         printf -v PUSHOVER_TITLE "Season %s" "${pushover_title}"
         printf -v PUSHOVER_MESSAGE "<b>%s</b><small>\n\n<b>Episodes:</b> %s</small><small>\n<b>Client:</b> %s</small>" \
             "${sonarr_series_title}" \
-            "${sonarr_release_episodecount}" \
-            "${sonarr_download_client}"
+            "$(echo "${sonarr_episodefile_episodenumbers}" | tr --delete --complement ',' | wc --chars | awk '{print $1+1}')" \
+            "${sonarr_download_client:-Unknown}"
     fi
     printf -v PUSHOVER_URL "%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug}"
     printf -v PUSHOVER_URL_TITLE "View series in %s" "${sonarr_instancename:-Sonarr}"
@@ -70,10 +70,10 @@ fi
 #
 if [[ "${sonarr_eventtype:-}" == "ManualInteractionRequired" ]]; then
     PUSHOVER_PRIORITY="1"
-    printf -v PUSHOVER_TITLE "Episode requires manual interaction"
+    printf -v PUSHOVER_TITLE "Episode import requires intervention"
     printf -v PUSHOVER_MESSAGE "<b>%s</b><small>\n<b>Client:</b> %s</small>" \
         "${sonarr_series_title}" \
-        "${sonarr_download_client}"
+        "${sonarr_download_client:-Unknown}"
     printf -v PUSHOVER_URL "%s/activity/queue" "${sonarr_applicationurl:-localhost}"
     printf -v PUSHOVER_URL_TITLE "View queue in %s" "${sonarr_instancename:-Sonarr}"
 fi
@@ -104,6 +104,6 @@ status_code=$(curl \
 if [[ "${status_code}" -ne 200 ]] ; then
     printf "%s - Unable to send notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)" >&2
     exit 1
-else
-    printf "%s - Sent notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)"
 fi
+
+printf "%s - Sent notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)"
