@@ -1,73 +1,31 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2154
 
-PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"false"}"
-ERRORS=()
+export PUSHOVER_USER_KEY="${PUSHOVER_USER_KEY:-required}"
+export PUSHOVER_TOKEN="${PUSHOVER_TOKEN:-required}"
+export PUSHOVER_DEVICE="${PUSHOVER_DEVICE:-}"
+export PUSHOVER_PRIORITY="${PUSHOVER_PRIORITY:-"-2"}"
+export PUSHOVER_SOUND="${PUSHOVER_SOUND:-}"
 
-#
-# Configurable variables
-#
-# Required
-PUSHOVER_USER_KEY="${PUSHOVER_USER_KEY:-}" && [[ -z "${PUSHOVER_USER_KEY}" ]] && ERRORS+=("PUSHOVER_USER_KEY not defined")
-PUSHOVER_TOKEN="${PUSHOVER_TOKEN:-}" && [[ -z "${PUSHOVER_TOKEN}" ]] && ERRORS+=("PUSHOVER_TOKEN not defined")
-# Optional
-PUSHOVER_DEVICE="${PUSHOVER_DEVICE:-}"
-PUSHOVER_PRIORITY="${PUSHOVER_PRIORITY:-"-2"}"
-PUSHOVER_SOUND="${PUSHOVER_SOUND:-}"
-
-#
-# Print defined variables
-#
-for pushover_vars in ${!PUSHOVER_*}
-do
-    declare -n var="${pushover_vars}"
-    [[ -n "${var}" && "${PUSHOVER_DEBUG}" = "true" ]] && printf "%s - %s=%s\n" "$(date)" "${!var}" "${var}"
-done
-
-#
-# Validate required variables are set
-#
-if [ ${#ERRORS[@]} -gt 0 ]; then
-    for err in "${ERRORS[@]}"; do printf "%s - Undefined variable %s\n" "$(date)" "${err}" >&2; done
-    exit 1
-fi
-
-#
-# Send Notification on Test
-#
 if [[ "${sonarr_eventtype:-}" == "Test" ]]; then
-    PUSHOVER_TITLE="Test Notification"
-    PUSHOVER_MESSAGE="Howdy this is a test notification from ${sonarr_instancename:-Sonarr}"
+    PUSHOVER_PRIORITY="1"
+    printf -v PUSHOVER_TITLE "Test Notification"
+    printf -v PUSHOVER_MESSAGE "Howdy this is a test notification from %s" "${sonarr_instancename:-Sonarr}"
 fi
 
-#
-# Send notification on Import Complete
-#
 if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
-    if [[ "${sonarr_isupgrade}" == "True" ]]; then pushover_title="Upgraded"; else pushover_title="Downloaded"; fi
-    if [[ "${sonarr_release_releasetype}" == "0" || "${sonarr_release_releasetype}" == "1" || "${sonarr_release_releasetype}" == "2" ]]; then
-        printf -v PUSHOVER_TITLE "Episode %s" "${pushover_title}"
-        printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small><small>\n<b>Quality:</b> %s</small>" \
-            "${sonarr_series_title}" \
-            "${sonarr_episodefile_seasonnumber}" \
-            "${sonarr_episodefile_episodenumbers}" \
-            "${sonarr_episodefile_episodetitles}" \
-            "${sonarr_download_client:-Unknown}" \
-            "${sonarr_episodefile_quality:-Unknown}"
-    else
-        printf -v PUSHOVER_TITLE "Season %s" "${pushover_title}"
-        printf -v PUSHOVER_MESSAGE "<b>%s</b><small>\n\n<b>Episodes:</b> %s</small><small>\n<b>Client:</b> %s</small>" \
-            "${sonarr_series_title}" \
-            "$(echo "${sonarr_episodefile_episodenumbers}" | tr --delete --complement ',' | wc --chars | awk '{print $1+1}')" \
-            "${sonarr_download_client:-Unknown}"
-    fi
+    printf -v PUSHOVER_TITLE "Episode %s" "$( [[ "${sonarr_isupgrade}" == "True" ]] && echo "Upgraded" || echo "Downloaded" )"
+    printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Quality:</b> %s</small><small>\n<b>Client:</b> %s</small>" \
+        "${sonarr_series_title}" \
+        "${sonarr_episodefile_seasonnumber}" \
+        "${sonarr_episodefile_episodenumbers}" \
+        "${sonarr_episodefile_episodetitles}" \
+        "${sonarr_episodefile_quality:-Unknown}" \
+        "${sonarr_download_client:-Unknown}"
     printf -v PUSHOVER_URL "%s/series/%s" "${sonarr_applicationurl:-localhost}" "${sonarr_series_titleslug}"
     printf -v PUSHOVER_URL_TITLE "View series in %s" "${sonarr_instancename:-Sonarr}"
 fi
 
-#
-# Send notification on Manual Interaction Required
-#
 if [[ "${sonarr_eventtype:-}" == "ManualInteractionRequired" ]]; then
     PUSHOVER_PRIORITY="1"
     printf -v PUSHOVER_TITLE "Episode import requires intervention"
@@ -78,7 +36,7 @@ if [[ "${sonarr_eventtype:-}" == "ManualInteractionRequired" ]]; then
     printf -v PUSHOVER_URL_TITLE "View queue in %s" "${sonarr_instancename:-Sonarr}"
 fi
 
-notification=$(jq -n \
+notification=$(jq --null-input \
     --arg token "${PUSHOVER_TOKEN}" \
     --arg user "${PUSHOVER_USER_KEY}" \
     --arg title "${PUSHOVER_TITLE}" \
@@ -93,17 +51,18 @@ notification=$(jq -n \
 )
 
 status_code=$(curl \
-    --write-out "%{http_code}" \
     --silent \
+    --write-out "%{http_code}" \
     --output /dev/null \
+    --request POST \
     --header "Content-Type: application/json" \
     --data-binary "${notification}" \
-    --request POST "https://api.pushover.net/1/messages.json" \
+    "https://api.pushover.net/1/messages.json" \
 )
 
 if [[ "${status_code}" -ne 200 ]] ; then
-    printf "%s - Unable to send notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)" >&2
+    printf "pushover notification failed to send with status code %s and payload: %s\n" "${status_code}" "$(echo "${notification}" | jq --compact-output)" >&2
     exit 1
 fi
 
-printf "%s - Sent notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)"
+printf "pushover notification sent with status code %s and payload: %s\n" "${status_code}" "$(echo "${notification}" | jq --compact-output)"

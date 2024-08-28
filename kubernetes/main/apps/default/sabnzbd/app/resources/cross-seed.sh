@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-export CROSS_SEED_HOST=${CROSS_SEED_HOST:-cross-seed.default.svc.cluster.local}
-export CROSS_SEED_PORT=${CROSS_SEED_PORT:-80}
-export CROSS_SEED_API_KEY=${CROSS_SEED_API_KEY:-unset}
-export CROSS_SEED_SLEEP_INTERVAL=${CROSS_SEED_SLEEP_INTERVAL:-30}
+export CROSS_SEED_HOST="${CROSS_SEED_HOST:-required}"
+export CROSS_SEED_PORT="${CROSS_SEED_PORT:-required}"
+export CROSS_SEED_API_KEY="${CROSS_SEED_API_KEY:-required}"
+export CROSS_SEED_SLEEP_INTERVAL="${CROSS_SEED_SLEEP_INTERVAL:-30}"
 
 SEARCH_PATH=$1
 
@@ -11,7 +11,7 @@ SEARCH_PATH=$1
 chmod -R 750 "${SEARCH_PATH}"
 
 # Search for cross-seed
-response=$(curl \
+status_code=$(curl \
     --silent \
     --output /dev/null \
     --write-out "%{http_code}" \
@@ -21,11 +21,11 @@ response=$(curl \
     "http://${CROSS_SEED_HOST}:${CROSS_SEED_PORT}/api/webhook"
 )
 
-if [[ "${response}" != "204" ]]; then
-    printf "Failed to search cross-seed for '%s'\n" "${SEARCH_PATH}"
+if [[ "${status_code}" -ne 204 ]]; then
+    printf "cross-seed search failed with status code %s and path %s\n" "${status_code}" "${SEARCH_PATH}"
     exit 1
 fi
 
-printf "Successfully searched cross-seed for '%s'\n" "${SEARCH_PATH}"
+printf "cross-seed search success with status code %s and path %s\n" "${status_code}" "${SEARCH_PATH}"
 
 sleep "${CROSS_SEED_SLEEP_INTERVAL}"
