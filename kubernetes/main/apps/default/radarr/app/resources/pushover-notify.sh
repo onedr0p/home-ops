@@ -1,65 +1,31 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2154
 
-PUSHOVER_DEBUG="${PUSHOVER_DEBUG:-"false"}"
-ERRORS=()
+export PUSHOVER_USER_KEY="${PUSHOVER_USER_KEY:-required}"
+export PUSHOVER_TOKEN="${PUSHOVER_TOKEN:-required}"
+export PUSHOVER_DEVICE="${PUSHOVER_DEVICE:-}"
+export PUSHOVER_PRIORITY="${PUSHOVER_PRIORITY:-"-2"}"
+export PUSHOVER_SOUND="${PUSHOVER_SOUND:-}"
 
-#
-# Configurable variables
-#
-# Required
-PUSHOVER_USER_KEY="${PUSHOVER_USER_KEY:-}" && [[ -z "${PUSHOVER_USER_KEY}" ]] && ERRORS+=("PUSHOVER_USER_KEY not defined")
-PUSHOVER_TOKEN="${PUSHOVER_TOKEN:-}" && [[ -z "${PUSHOVER_TOKEN}" ]] && ERRORS+=("PUSHOVER_TOKEN not defined")
-# Optional
-PUSHOVER_DEVICE="${PUSHOVER_DEVICE:-}"
-PUSHOVER_PRIORITY="${PUSHOVER_PRIORITY:-"-2"}"
-PUSHOVER_SOUND="${PUSHOVER_SOUND:-}"
-
-#
-# Print defined variables
-#
-for pushover_vars in ${!PUSHOVER_*}
-do
-    declare -n var="${pushover_vars}"
-    [[ -n "${var}" && "${PUSHOVER_DEBUG}" = "true" ]] && printf "%s - %s=%s\n" "$(date)" "${!var}" "${var}"
-done
-
-#
-# Validate required variables are set
-#
-if [ ${#ERRORS[@]} -gt 0 ]; then
-    for err in "${ERRORS[@]}"; do printf "%s - Undefined variable %s\n" "$(date)" "${err}" >&2; done
-    exit 1
-fi
-
-#
-# Send Notification on Test
-#
 if [[ "${radarr_eventtype:-}" == "Test" ]]; then
-    PUSHOVER_TITLE="Test Notification"
-    PUSHOVER_MESSAGE="Howdy this is a test notification from ${radarr_instancename:-Radarr}"
+    PUSHOVER_PRIORITY="1"
+    printf -v PUSHOVER_TITLE "Test Notification"
+    printf -v PUSHOVER_MESSAGE "Howdy this is a test notification from %s" "${radarr_instancename:-Sonarr}"
 fi
 
-#
-# Send notification on Download or Upgrade
-#
 if [[ "${radarr_eventtype:-}" == "Download" ]]; then
-    if [[ "${radarr_isupgrade}" == "True" ]]; then pushover_title="Upgraded"; else pushover_title="Downloaded"; fi
-    printf -v PUSHOVER_TITLE "Movie %s" "${pushover_title}"
+    printf -v PUSHOVER_TITLE "Movie %s" "$( [[ "${radarr_isupgrade}" == "True" ]] && echo "Upgraded" || echo "Downloaded" )"
     printf -v PUSHOVER_MESSAGE "<b>%s (%s)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small><small>\n<b>Quality:</b> %s</small><small>\n<b>Size:</b> %s</small>" \
         "${radarr_movie_title}" \
         "${radarr_movie_year}" \
         "${radarr_movie_overview}" \
         "${radarr_download_client:-Unknown}" \
         "${radarr_moviefile_quality:-Unknown}" \
-        "$(numfmt --to iec --format "%8.2f" "${radarr_release_size}")"
+        "$(numfmt --to iec --format "%8.2f" "${radarr_release_size:-0}")"
     printf -v PUSHOVER_URL "%s/movie/%s" "${radarr_applicationurl:-localhost}" "${radarr_movie_tmdbid}"
     printf -v PUSHOVER_URL_TITLE "View movie in %s" "${radarr_instancename:-Radarr}"
 fi
 
-#
-# Send notification on Manual Interaction Required
-#
 if [[ "${radarr_eventtype:-}" == "ManualInteractionRequired" ]]; then
     PUSHOVER_PRIORITY="1"
     printf -v PUSHOVER_TITLE "Movie import requires intervention"
@@ -71,7 +37,7 @@ if [[ "${radarr_eventtype:-}" == "ManualInteractionRequired" ]]; then
     printf -v PUSHOVER_URL_TITLE "View queue in %s" "${radarr_instancename:-Radarr}"
 fi
 
-notification=$(jq -n \
+notification=$(jq --null-input \
     --arg token "${PUSHOVER_TOKEN}" \
     --arg user "${PUSHOVER_USER_KEY}" \
     --arg title "${PUSHOVER_TITLE}" \
@@ -86,17 +52,18 @@ notification=$(jq -n \
 )
 
 status_code=$(curl \
-    --write-out "%{http_code}" \
     --silent \
+    --write-out "%{http_code}" \
     --output /dev/null \
+    --request POST  \
     --header "Content-Type: application/json" \
     --data-binary "${notification}" \
-    --request POST "https://api.pushover.net/1/messages.json" \
+    "https://api.pushover.net/1/messages.json" \
 )
 
 if [[ "${status_code}" -ne 200 ]] ; then
-    printf "%s - Unable to send notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)" >&2
+    printf "pushover notification failed to send with status code %s and payload: %s\n" "${status_code}" "$(echo "${notification}" | jq --compact-output)" >&2
     exit 1
 fi
 
-printf "%s - Sent notification with status code %s and payload: %s\n" "$(date)" "${status_code}" "$(echo "${notification}" | jq -c)"
+printf "pushover notification sent with status code %s and payload: %s\n" "${status_code}" "$(echo "${notification}" | jq --compact-output)"
