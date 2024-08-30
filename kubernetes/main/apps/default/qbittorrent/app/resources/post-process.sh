@@ -13,12 +13,12 @@ PUSHOVER_TOKEN="${PUSHOVER_TOKEN:-required}"
 
 # Function to set release variables from SABnzbd
 set_sab_vars() {
-    RELEASE_SIZE="${SAB_BYTES:-}"
-    RELEASE_CAT="${SAB_CAT:-}"
-    RELEASE_DIR="${SAB_COMPLETE_DIR:-}"
     RELEASE_NAME="${SAB_FILENAME:-}"
+    RELEASE_DIR="${SAB_COMPLETE_DIR:-}"
+    RELEASE_CAT="${SAB_CAT:-}"
+    RELEASE_SIZE="${SAB_BYTES:-}"
     RELEASE_STATUS="${SAB_PP_STATUS:-}"
-    RELEASE_CLIENT="SABnzbd"
+    RELEASE_TYPE="NZB"
 }
 
 # Function to set release variables from qBittorrent
@@ -28,22 +28,22 @@ set_qb_vars() {
     RELEASE_CAT="$3"  # %L
     RELEASE_SIZE="$4" # %Z
     RELEASE_STATUS=0
-    RELEASE_CLIENT="qBittorrent"
+    RELEASE_TYPE="Torrent"
 }
 
 # Function to send pushover notification
 send_pushover_notification() {
     local pushover_message status_code json_data
     printf -v pushover_message \
-        "<b>%s</b><small>\n\n<b>Category:</b> %s</small><small>\n<b>Size:</b> %s</small>" \
-            "${RELEASE_NAME%.nzb}" \
+        "<b>%s</b><small>\n<b>Category:</b> %s</small><small>\n<b>Size:</b> %s</small>" \
+            "${RELEASE_NAME%.*}" \
             "${RELEASE_CAT}" \
             "$(numfmt --to iec --format "%8.2f" "${RELEASE_SIZE}")"
 
     json_data=$(jo \
         token="${PUSHOVER_TOKEN}" \
         user="${PUSHOVER_USER_KEY}" \
-        title="${RELEASE_CLIENT} Download Complete" \
+        title="${RELEASE_TYPE} Downloaded" \
         message="${pushover_message}" \
         priority="-2" \
         html="1"
