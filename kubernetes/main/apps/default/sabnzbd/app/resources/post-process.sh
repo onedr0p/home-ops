@@ -18,6 +18,7 @@ set_sab_vars() {
     RELEASE_CAT="${SAB_CAT:-}"
     RELEASE_SIZE="${SAB_BYTES:-}"
     RELEASE_STATUS="${SAB_PP_STATUS:-}"
+    RELEASE_SITE="${SAB_URL:-}"
     RELEASE_TYPE="NZB"
 }
 
@@ -27,6 +28,7 @@ set_qb_vars() {
     RELEASE_DIR="$2"  # %F
     RELEASE_CAT="$3"  # %L
     RELEASE_SIZE="$4" # %Z
+    RELEASE_SITE="$5" # %T
     RELEASE_STATUS=0
     RELEASE_TYPE="Torrent"
 }
@@ -35,9 +37,10 @@ set_qb_vars() {
 send_pushover_notification() {
     local pushover_message status_code json_data
     printf -v pushover_message \
-        "<b>%s</b><small>\n<b>Category:</b> %s</small><small>\n<b>Size:</b> %s</small>" \
+        "<b>%s</b><small>\n<b>Category:</b> %s</small><small>\n<b>Site:</b> %s</small><small>\n<b>Size:</b> %s</small>" \
             "${RELEASE_NAME%.*}" \
             "${RELEASE_CAT}" \
+            "${RELEASE_SITE}" \
             "$(numfmt --to iec --format "%8.2f" "${RELEASE_SIZE}")"
 
     json_data=$(jo \
