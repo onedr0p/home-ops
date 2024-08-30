@@ -36,7 +36,7 @@ send_pushover_notification() {
     local pushover_message status_code json_data
     printf -v pushover_message \
         "<b>%s</b><small>\n\n<b>Category:</b> %s</small><small>\n<b>Size:</b> %s</small>" \
-            "${RELEASE_NAME}" \
+            "${RELEASE_NAME%.nzb}" \
             "${RELEASE_CAT}" \
             "$(numfmt --to iec --format "%8.2f" "${RELEASE_SIZE}")"
 
