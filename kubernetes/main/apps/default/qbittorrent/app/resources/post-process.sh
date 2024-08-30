@@ -61,7 +61,7 @@ send_pushover_notification() {
 
     printf "pushover notification returned with HTTP status code %s and payload: %s\n" \
         "${status_code}" \
-        "$(echo "${json_data}" | jq --compact-output)"
+        "$(echo "${json_data}" | jq --compact-output)" >&2
 }
 
 # Function to search for cross-seed
@@ -79,30 +79,34 @@ search_cross_seed() {
 
     printf "cross-seed search returned with HTTP status code %s and path %s\n" \
         "${status_code}" \
-        "${RELEASE_DIR}"
+        "${RELEASE_DIR}" >&2
 
     sleep "${CROSS_SEED_SLEEP_INTERVAL}"
 }
 
-# Determine the source and set release variables accordingly
-if env | grep -q "^SAB_"; then
-    set_sab_vars
-else
-    set_qb_vars "$@"
-fi
+main() {
+    # Determine the source and set release variables accordingly
+    if env | grep -q "^SAB_"; then
+        set_sab_vars
+    else
+        set_qb_vars "$@"
+    fi
 
-# Check if post-processing was successful
-if [[ "${RELEASE_STATUS}" -ne 0 ]]; then
-    printf "post-processing failed with sabnzbd status code %s\n" \
-        "${RELEASE_STATUS}" >&2
-    exit 1
-fi
+    # Check if post-processing was successful
+    if [[ "${RELEASE_STATUS}" -ne 0 ]]; then
+        printf "post-processing failed with sabnzbd status code %s\n" \
+            "${RELEASE_STATUS}" >&2
+        exit 1
+    fi
 
-# Update permissions on the search path
-chmod -R 750 "${RELEASE_DIR}"
+    # Update permissions on the release directory
+    chmod -R 750 "${RELEASE_DIR}"
 
-# Send pushover notification
-send_pushover_notification
+    # Send pushover notification
+    send_pushover_notification
 
-# Search for cross-seed
-search_cross_seed
+    # Search for cross-seed
+    search_cross_seed
+}
+
+main "$@"
