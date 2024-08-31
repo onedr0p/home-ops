@@ -24,12 +24,12 @@ set_sab_vars() {
 
 # Function to set release variables from qBittorrent
 set_qb_vars() {
-    RELEASE_NAME="$1"     # %N
-    RELEASE_DIR="$2"      # %F
-    RELEASE_CAT="$3"      # %L
-    RELEASE_SIZE="$4"     # %Z
-    RELEASE_INDEXER="$5"  # %T
-    RELEASE_STATUS=0
+    RELEASE_NAME="$1"      # %N
+    RELEASE_DIR="$2"       # %F
+    RELEASE_CAT="$3"       # %L
+    RELEASE_SIZE="$4"      # %Z
+    RELEASE_INDEXER="$5"   # %T
+    RELEASE_STATUS=0       # Always 0 for qBittorrent
     RELEASE_TYPE="Torrent"
 }
 
@@ -40,7 +40,7 @@ send_pushover_notification() {
         "<b>%s</b><small>\n<b>Category:</b> %s</small><small>\n<b>Indexer:</b> %s</small><small>\n<b>Size:</b> %s</small>" \
             "${RELEASE_NAME%.*}" \
             "${RELEASE_CAT}" \
-            "$(echo "${RELEASE_INDEXER}" | sed -E 's|^[^/]*//([^/]*).*|\1|')" \
+            "$(trurl --url "${RELEASE_INDEXER}" --get '{idn:host}')" \
             "$(numfmt --to iec --format "%8.2f" "${RELEASE_SIZE}")"
 
     json_data=$(jo \
