@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./externalsecret.yaml
+  - ./pvc.yaml
+  - ./helmrelease.yaml
+  - ../../../../templates/gatus/guarded
+configMapGenerator:
+  - name: slskd-configmap
+    files:
+      - slskd.yml=./resources/slskd.yml
+generatorOptions:
+  disableNameSuffixHash: true
