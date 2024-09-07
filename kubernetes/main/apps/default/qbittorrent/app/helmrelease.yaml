@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.3.2
+      version: 3.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -35,8 +35,8 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/qbittorrent-beta
-              tag: 4.6.5@sha256:251916c90b09018e747b775f4924da711d8b4545b5b959030eb428571b38be2f
+              repository: ghcr.io/onedr0p/qbittorrent
+              tag: 4.6.6@sha256:2fd0eba46205055c3f758411a79d5fa175df324f707dab9ad9a3a5be2ab92071
             env:
               TZ: America/New_York
               QBITTORRENT__PORT: &port 80
@@ -46,6 +46,12 @@ spec:
               QBT_Preferences__WebUI__AuthSubnetWhitelist: |-
                 10.42.0.0/16, 192.168.42.0/24
               QBT_Preferences__WebUI__LocalHostAuth: false
+              CROSS_SEED_HOST: cross-seed.default.svc.cluster.local
+              CROSS_SEED_PORT: 80
+              CROSS_SEED_SLEEP_INTERVAL: 0
+            envFrom:
+              - secretRef:
+                  name: qbittorrent-secret
             probes:
               liveness: &probes
                 enabled: true
@@ -112,6 +118,12 @@ spec:
     persistence:
       config:
         existingClaim: qbittorrent
+      scripts:
+        type: configMap
+        name: qbittorrent-scripts
+        defaultMode: 0775
+        globalMounts:
+          - readOnly: true
       media:
         type: nfs
         server: expanse.internal

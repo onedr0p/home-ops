@@ -5,7 +5,7 @@ kind: EMQX
 metadata:
   name: emqx
 spec:
-  image: public.ecr.aws/emqx/emqx:5.7.1
+  image: public.ecr.aws/emqx/emqx:5.8.0
   config:
     data: |
       authentication {
@@ -15,6 +15,8 @@ spec:
             name = "bcrypt",
         }
         user_id_type = "username"
+        bootstrap_file = "/opt/init-user.json"
+        bootstrap_type = "plain"
       }
       authorization {
         sources = [
@@ -25,39 +27,24 @@ spec:
         ]
         no_match: "deny"
       }
-  bootstrapAPIKeys:
-    - secretRef:
-        key:
-          secretName: emqx-secret
-          secretKey: X_EMQX_APIKEY_KEY
-        secret:
-          secretName: emqx-secret
-          secretKey: X_EMQX_APIKEY_SECRET
   coreTemplate:
     metadata:
       annotations:
         reloader.stakater.com/auto: "true"
     spec:
       replicas: 3
-      envFrom: &envFrom
+      envFrom:
         - secretRef:
             name: emqx-secret
-      extraContainers:
-        - name: init-mqtt
-          image: docker.io/library/python:3.12-alpine
-          env:
-            - name: X_EMQX_ADDRESS
-              value: emqx-dashboard.database.svc.cluster.local:18083
-          envFrom: *envFrom
-          command: ["python", "/init-mqtt.py"]
-          volumeMounts:
-            - name: init-mqtt
-              mountPath: /init-mqtt.py
-              subPath: init-mqtt.py
+      extraVolumeMounts:
+        - name: init-user
+          mountPath: /opt/init-user.json
+          subPath: init-user.json
+          readOnly: true
       extraVolumes:
-        - name: init-mqtt
-          configMap:
-            name: emqx-init-mqtt-configmap
+        - name: init-user
+          secret:
+            secretName: emqx-init-user-secret
   listenersServiceTemplate:
     metadata:
       annotations:

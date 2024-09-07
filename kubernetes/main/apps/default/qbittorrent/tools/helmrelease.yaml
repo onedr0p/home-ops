@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.3.2
+      version: 3.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -39,7 +39,7 @@ spec:
           tagging: &container
             image:
               repository: ghcr.io/buroa/qbtools
-              tag: v0.15.4@sha256:51c454cdf95e216a8f40ec5744ecbd8f29a924b4aada805fee64beb0b89cbe59
+              tag: v0.16.10@sha256:fec06dd13ec90694110ca912eb9003d3a46d29be83944538599b35fc78dcbf18
             env:
               TZ: *timeZone
               POD_NAMESPACE:
@@ -73,7 +73,6 @@ spec:
               "prune",
               "--exclude-category", "manual",
               "--exclude-category", "music",
-              "--exclude-category", "music.import",
               "--exclude-tag", "added:24h",
               "--include-tag", "unregistered",
               # "--dry-run",
@@ -86,7 +85,6 @@ spec:
               "prune",
               "--exclude-category", "manual",
               "--exclude-category", "music",
-              "--exclude-category", "music.import",
               "--include-tag", "expired", # defined in config.yaml
               "--include-tag", "added:7d",
               # "--dry-run",
@@ -107,7 +105,6 @@ spec:
               "orphaned",
               "--exclude-pattern", "*_unpackerred*",
               "--exclude-pattern", "*/manual/*",
-              "--exclude-pattern", "*/music.import/*",
               # "--dry-run",
               "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
               "--port", "80"

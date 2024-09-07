@@ -3,6 +3,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ../../../../templates/gatus/guarded
   - ../../../../templates/volsync
@@ -13,5 +14,10 @@ configMapGenerator:
     options:
       labels:
         loki_rule: "true"
+  - name: qbittorrent-scripts
+    files:
+      - post-process.sh=./resources/post-process.sh
 generatorOptions:
   disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
