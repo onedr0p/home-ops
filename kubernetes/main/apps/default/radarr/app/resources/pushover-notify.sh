@@ -14,7 +14,13 @@ if [[ "${radarr_eventtype:-}" == "Test" ]]; then
         "Test Notification"
     printf -v PUSHOVER_MESSAGE \
         "Howdy this is a test notification from %s" \
-            "${radarr_instancename:-Sonarr}"
+            "${radarr_instancename:-Radarr}"
+    printf -v PUSHOVER_URL \
+        "%s" \
+            "${radarr_applicationurl:-localhost}"
+    printf -v PUSHOVER_URL_TITLE \
+        "Open %s" \
+            "${radarr_instancename:-Radarr}"
 fi
 
 if [[ "${radarr_eventtype:-}" == "Download" ]]; then

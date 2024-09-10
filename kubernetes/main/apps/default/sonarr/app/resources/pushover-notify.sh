@@ -15,6 +15,12 @@ if [[ "${sonarr_eventtype:-}" == "Test" ]]; then
     printf -v PUSHOVER_MESSAGE \
         "Howdy this is a test notification from %s" \
             "${sonarr_instancename:-Sonarr}"
+    printf -v PUSHOVER_URL \
+        "%s" \
+            "${sonarr_applicationurl:-localhost}"
+    printf -v PUSHOVER_URL_TITLE \
+        "Open %s" \
+            "${sonarr_instancename:-Sonarr}"
 fi
 
 if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
