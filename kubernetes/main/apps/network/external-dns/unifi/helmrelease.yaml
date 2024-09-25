@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: external-dns
-      version: 1.14.5
+      version: 1.15.0
       sourceRef:
         kind: HelmRepository
         name: external-dns
@@ -30,7 +30,7 @@ spec:
       webhook:
         image:
           repository: ghcr.io/kashalls/external-dns-unifi-webhook
-          tag: v0.2.2@sha256:7778b1e932e920181007be34bb03306722e85fc8ded34cd87c0f16060b9f07e3
+          tag: v0.2.3@sha256:fe9720cbf0af98694b7ece216472a577677c97a3f79471f8359d79f4da607a0b
         env:
           - name: UNIFI_HOST
             value: https://192.168.1.1
@@ -49,13 +49,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /healthz
-            port: http-wh-metrics
+            port: http-webhook
           initialDelaySeconds: 10
           timeoutSeconds: 5
         readinessProbe:
           httpGet:
             path: /readyz
-            port: http-wh-metrics
+            port: http-webhook
           initialDelaySeconds: 10
           timeoutSeconds: 5
     extraArgs:

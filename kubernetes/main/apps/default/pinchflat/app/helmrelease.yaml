@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: plex
+  name: pinchflat
 spec:
   interval: 30m
   chart:
@@ -23,54 +23,47 @@ spec:
       strategy: rollback
       retries: 3
   dependsOn:
-    - name: intel-device-plugin-gpu
-      namespace: kube-system
     - name: rook-ceph-cluster
       namespace: rook-ceph
     - name: volsync
       namespace: volsync-system
   values:
     controllers:
-      plex:
+      pinchflat:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/plex
-              tag: 1.41.0.8992-8463ad060@sha256:d4c31adff5f2ed92152de7c2fb73464e71bea72c28fc7b4ebe74eefab2d9d048
+              repository: ghcr.io/kieraneglin/pinchflat
+              tag: v2024.9.12@sha256:f8f2ba632c80a4e2aefb5ef341d1f834c09405b3c27a98136c349ed713cc1631
             env:
               TZ: America/New_York
-              PLEX_ADVERTISE_URL: https://plex.devbu.io:443,http://192.168.42.128:32400
-              PLEX_NO_AUTH_NETWORKS: 192.168.10.0/24
+              TZ_DATA_DIR: /tmp/elixir_tz_data
+              PORT: &port 80
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /identity
-                    port: 32400
+                    path: /healthcheck
+                    port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-              startup:
-                enabled: true
-                spec:
-                  failureThreshold: 30
-                  periodSeconds: 10
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 100m
+                cpu: 10m
               limits:
                 gpu.intel.com/i915: 1
-                memory: 16Gi
+                memory: 4Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -84,19 +77,15 @@ spec:
         intel.feature.node.kubernetes.io/gpu: "true"
     service:
       app:
-        controller: plex
-        type: LoadBalancer
-        annotations:
-          io.cilium/lb-ipam-ips: 192.168.42.128
+        controller: pinchflat
         ports:
           http:
-            port: 32400
+            port: *port
     ingress:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.devbu.io
-          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-        className: external
+          external-dns.alpha.kubernetes.io/target: internal.devbu.io
+        className: internal
         hosts:
           - host: "{{ .Release.Name }}.devbu.io"
             paths:
@@ -106,34 +95,15 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: plex
-        # TODO: If setting up Plex for the first time, you'll want to add the globalMounts section
-        # globalMounts:
-        #   - path: /config/Library/Application Support/Plex Media Server
-      # Separate PVC for cache to avoid backing up cache files
-      cache:
-        existingClaim: plex-cache
-        globalMounts:
-          - path: /config/Library/Application Support/Plex Media Server/Cache
-      logs:
+        existingClaim: pinchflat
+      downloads:
         type: emptyDir
-        globalMounts:
-          - path: /config/Library/Application Support/Plex Media Server/Logs
       tmp:
-        type: emptyDir
-      transcode:
         type: emptyDir
       media:
         type: nfs
         server: expanse.internal
         path: /eros/Media
         globalMounts:
-          - path: /media
-            readOnly: true
-      music:
-        type: nfs
-        server: expanse.internal
-        path: /eros/Music
-        globalMounts:
-          - path: /music
-            readOnly: true
+          - path: /media/Library/YouTube
+            subPath: Library/YouTube
