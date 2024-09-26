@@ -4,10 +4,13 @@ version: "3"
 
 vars:
   KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
+  PIP_REQUIREMENTS_FILE: "{{.ROOT_DIR}}/requirements.txt"
+  PYTHON_BIN: python3
 
 env:
   KUBECONFIG: "{{.KUBERNETES_DIR}}/kubernetes/main/kubeconfig"
   SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
+  VIRTUAL_ENV: "{{.ROOT_DIR}}/.venv"
 
 includes:
   bootstrap: .taskfiles/bootstrap
@@ -18,3 +21,16 @@ includes:
 tasks:
 
   default: task -l
+
+  venv:
+    desc: Set up virtual environment
+    cmds:
+      - "{{.PYTHON_BIN}} -m venv {{.VIRTUAL_ENV}}"
+      - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade pip setuptools wheel'
+      - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade --requirement "{{.PIP_REQUIREMENTS_FILE}}"'
+    sources:
+      - "{{.PIP_REQUIREMENTS_FILE}}"
+    generates:
+      - "{{.VIRTUAL_ENV}}/pyvenv.cfg"
+    preconditions:
+      - { msg: "Missing Pip requirements file", sh: "test -f {{.PIP_REQUIREMENTS_FILE}}" }
