@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: ${job}
+  name: ${JOB}
   namespace: default
 spec:
   ttlSecondsAfterFinished: 3600
@@ -10,17 +10,17 @@ spec:
     spec:
       automountServiceAccountToken: false
       restartPolicy: Never
-      nodeName: ${node}
+      nodeName: ${NODE}
       containers:
         - name: main
           image: docker.io/library/alpine:latest
           command: ["/bin/sh", "-c"]
           args:
             - apk add --no-cache sgdisk util-linux util-linux-misc parted device-mapper;
-              sgdisk --zap-all ${disk};
-              dd if=/dev/zero of=${disk} bs=1M count=100 oflag=direct;
-              blkdiscard ${disk};
-              partprobe ${disk};
+              sgdisk --zap-all ${DISK};
+              dd if=/dev/zero of=${DISK} bs=1M count=100 oflag=direct;
+              blkdiscard ${DISK};
+              partprobe ${DISK};
           securityContext:
             privileged: true
           resources: {}

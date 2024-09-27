@@ -1,20 +1,19 @@
 ---
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
-version: "3"
+version: '3'
 
 x-vars: &vars
-  TALOS_VERSION:
-    sh: yq 'select(document_index == 1).spec.postBuild.substitute.TALOS_VERSION' {{.KUBERNETES_DIR}}/{{.cluster}}/apps/system-upgrade/system-upgrade-controller/ks.yaml
-  TALOS_SCHEMATIC_ID:
-    sh: yq 'select(document_index == 1).spec.postBuild.substitute.TALOS_SCHEMATIC_ID' {{.KUBERNETES_DIR}}/{{.cluster}}/apps/system-upgrade/system-upgrade-controller/ks.yaml
   KUBERNETES_VERSION:
-    sh: yq 'select(document_index == 1).spec.postBuild.substitute.KUBERNETES_VERSION' {{.KUBERNETES_DIR}}/{{.cluster}}/apps/system-upgrade/system-upgrade-controller/ks.yaml
-  CONTROLLER:
-    sh: talosctl --context {{.cluster}} config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
+    sh: yq 'select(document_index == 1).spec.postBuild.substitute.KUBERNETES_VERSION' {{.KUBERNETES_DIR}}/{{.CLUSTER}}/apps/system-upgrade/system-upgrade-controller/ks.yaml
+  TALOS_CONTROLLER:
+    sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
+  TALOS_SCHEMATIC_ID:
+    sh: yq 'select(document_index == 1).spec.postBuild.substitute.TALOS_SCHEMATIC_ID' {{.KUBERNETES_DIR}}/{{.CLUSTER}}/apps/system-upgrade/system-upgrade-controller/ks.yaml
+  TALOS_VERSION:
+    sh: yq 'select(document_index == 1).spec.postBuild.substitute.TALOS_VERSION' {{.KUBERNETES_DIR}}/{{.CLUSTER}}/apps/system-upgrade/system-upgrade-controller/ks.yaml
 
 vars:
-  # Ref: https://github.com/onedr0p/home-service
-  HOME_SERVICE_ADDR: voyager.internal
+  HOME_SERVICE_ADDR: voyager.internal # Ref: https://github.com/onedr0p/home-service
   HOME_SERVICE_USER: devin
   HOME_SERVICE_MATCHBOX_DIR: /var/opt/home-service/apps/matchbox/data/config
 
@@ -23,87 +22,87 @@ tasks:
   apply-config:
     desc: Apply Talos configuration to a node
     cmd: |
-      sops --decrypt {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/assets/{{.hostname}}.secret.sops.yaml | \
+      sops --decrypt {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml | \
           $GOPATH/bin/envsubst | \
-              talosctl --context {{.cluster}} apply-config --mode={{.mode}} --nodes {{.hostname}} --file /dev/stdin
+              talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
     env: *vars
     vars:
-      mode: '{{.mode | default "no-reboot"}}'
+      MODE: '{{.MODE | default "no-reboot"}}'
     requires:
-      vars: ["cluster", "hostname"]
+      vars: ['CLUSTER', 'HOSTNAME']
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/assets/{{.hostname}}.secret.sops.yaml
-      - talosctl --context {{.cluster}} --nodes {{.hostname}} get machineconfig >/dev/null 2>&1
+      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
+      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml
+      - talosctl --nodes {{.HOSTNAME}} get machineconfig >/dev/null 2>&1
 
   upgrade:
     desc: Upgrade Talos on a node
     cmds:
-      - until kubectl --context {{.cluster}} wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
-      - talosctl --context {{.cluster}} --nodes {{.hostname}} upgrade --image="factory.talos.dev/installer/{{.TALOS_SCHEMATIC_ID}}:{{.TALOS_VERSION}}" --wait=true --timeout=10m --preserve=true
-      - talosctl --context {{.cluster}} --nodes {{.hostname}} health --wait-timeout=10m --server=false
-      - until kubectl --context {{.cluster}} wait --timeout=5m --for=jsonpath=.status.ceph.health=HEALTH_OK cephcluster --all --all-namespaces; do sleep 10; done
+      - until kubectl wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
+      - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.TALOS_SCHEMATIC_ID}}:{{.TALOS_VERSION}}" --wait=true --timeout=10m --preserve=true
+      - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
+      - until kubectl wait --timeout=5m --for=jsonpath=.status.ceph.health=HEALTH_OK cephcluster --all --all-namespaces; do sleep 10; done
     vars: *vars
     requires:
-      vars: ["cluster", "hostname"]
+      vars: ['CLUSTER', 'HOSTNAME']
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
-      - talosctl --context {{.cluster}} --nodes {{.hostname}} get machineconfig >/dev/null 2>&1
+      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
+      - talosctl config info >/dev/null 2>&1
+      - talosctl --nodes {{.HOSTNAME}} get machineconfig >/dev/null 2>&1
 
   upgrade-k8s:
     desc: Upgrade Kubernetes
     cmds:
-      - until kubectl --context {{.cluster}} wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
-      - talosctl --context {{.cluster}} --nodes {{.CONTROLLER}} upgrade-k8s --to {{.KUBERNETES_VERSION}}
+      - until kubectl wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
+      - talosctl --nodes {{.TALOS_CONTROLLER}} upgrade-k8s --to {{.KUBERNETES_VERSION}}
     vars: *vars
     requires:
-      vars: ["cluster"]
+      vars: ['CLUSTER']
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
-      - talosctl --context {{.cluster}} --nodes {{.CONTROLLER}} get machineconfig >/dev/null 2>&1
+      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
+      - talosctl config info >/dev/null 2>&1
+      - talosctl --nodes {{.TALOS_CONTROLLER}} get machineconfig >/dev/null 2>&1
 
   reset-node:
     desc: Reset a Talos node and shut it down
-    prompt: Reset Talos '{{.hostname}}' node on the '{{.cluster}}' cluster ... continue?
-    cmd: talosctl --context {{.cluster}} reset --nodes {{.hostname}} --graceful=false
+    prompt: Reset Talos '{{.HOSTNAME}}' node on the '{{.CLUSTER}}' cluster ... continue?
+    cmd: talosctl reset --nodes {{.HOSTNAME}} --graceful=false
     requires:
-      vars: ["cluster", "hostname"]
+      vars: ['CLUSTER', 'HOSTNAME']
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
-      - talosctl --context {{.cluster}} --nodes {{.hostname}} get machineconfig >/dev/null 2>&1
+      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
+      - talosctl config info >/dev/null 2>&1
+      - talosctl --nodes {{.HOSTNAME}} get machineconfig >/dev/null 2>&1
 
   reset-cluster:
     desc: Reset all the Talos nodes and shut 'em down
-    prompt: Reset Talos on the '{{.cluster}}' cluster ... continue?
-    cmd: talosctl --context {{.cluster}} reset --nodes {{.nodes}} --graceful=false
+    prompt: Reset Talos on the '{{.CLUSTER}}' cluster ... continue?
+    cmd: talosctl reset --nodes {{.NODES}} --graceful=false
     vars:
-      nodes:
-        sh: talosctl --context {{.cluster}} config info --output json | jq --join-output '[.nodes[]] | join(",")'
+      NODES:
+        sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(",")'
     requires:
-      vars: ["cluster"]
+      vars: ['CLUSTER']
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/talosconfig
-      - talosctl --context {{.cluster}} config info >/dev/null 2>&1
-      - talosctl --context {{.cluster}} --nodes {{.nodes}} get machineconfig >/dev/null 2>&1
+      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
+      - talosctl config info >/dev/null 2>&1
+      - talosctl --nodes {{.NODES}} get machineconfig >/dev/null 2>&1
 
   bootstrap-matchbox:
     desc: Bootstrap required Matchbox configuration to PXE Boot machine
     cmds:
-      - for: ["kernel-amd64", "initramfs-amd64.xz"]
+      - for: ['kernel-amd64', 'initramfs-amd64.xz']
         cmd: |
           curl -skL https://factory.talos.dev/image/{{.TALOS_SCHEMATIC_ID}}/{{.TALOS_VERSION}}/{{.ITEM}} | \
               curl -skT - -u "{{.HOME_SERVICE_USER}}:" \
                   sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/{{.ITEM}}
-      - find {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/assets -type f | xargs -I{} sh -c "sops --decrypt {} | $GOPATH/bin/envsubst | curl -skT - -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/\$(basename {} | sed 's/\.secret\.sops//')"
-      - find {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/groups -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/groups/
-      - find {{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/profiles -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/profiles/
+      - find {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/assets -type f | xargs -I{} sh -c "sops --decrypt {} | $GOPATH/bin/envsubst | curl -skT - -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/\$(basename {} | sed 's/\.secret\.sops//')"
+      - find {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/groups -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/groups/
+      - find {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/profiles -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/profiles/
       - ssh -l {{.HOME_SERVICE_USER}} {{.HOME_SERVICE_ADDR}} "cd /var/opt/home-service ; go-task restart-matchbox"
     vars: *vars
     requires:
-      vars: ["cluster"]
+      vars: ['CLUSTER']
     preconditions:
       - test -f $GOPATH/bin/envsubst
-      - host {{.HOME_SERVICE_ADDR}}
+      # - host {{.HOME_SERVICE_ADDR}}

@@ -1,75 +1,75 @@
 ---
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
-version: "3"
+version: '3'
 
 tasks:
 
   apply-ks:
     desc: Apply a Flux Kustomization resource for a cluster
     summary: |
-      cluster: Cluster to run command against (required)
-      path: Path to the Flux Kustomization resource (required)
-      ns: Namespace the Flux Kustomization exists in (default: flux-system)
+      CLUSTER: Cluster to run command against (required)
+      PATH: Path to the Flux Kustomization resource (required)
+      NS: Namespace the Flux Kustomization exists in (default: flux-system)
     cmd: |
-      flux --context {{.cluster}} build ks $(basename {{.path}}) \
-          --namespace {{.ns}} \
-          --kustomization-file {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}}/ks.yaml \
-          --path {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}} \
-          {{- if contains "not found" .ks }}--dry-run \{{ end }}
+      flux build ks $(basename {{.PATH}}) \
+          --namespace {{.NS}} \
+          --kustomization-file {{.KUBERNETES_DIR}}/{{.CLUSTER}}/apps/{{.PATH}}/ks.yaml \
+          --path {{.KUBERNETES_DIR}}/{{.CLUSTER}}/apps/{{.PATH}} \
+          {{- if contains "not found" .KS }}--dry-run \{{ end }}
       | \
-      kubectl --context {{.cluster}} apply --server-side \
+      kubectl apply --server-side \
           --field-manager=kustomize-controller -f -
     requires:
-      vars: ["cluster", "path"]
+      vars: ['CLUSTER', 'PATH']
     vars:
-      ns: '{{.ns | default "flux-system"}}'
-      ks:
-        sh: flux --context {{.cluster}} --namespace {{.ns}} get kustomizations $(basename {{.path}}) 2>&1
+      NS: '{{.NS | default "flux-system"}}'
+      KS:
+        sh: flux --namespace {{.NS}} get kustomizations $(basename {{.PATH}}) 2>&1
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.cluster}}/apps/{{.path}}/ks.yaml
+      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/apps/{{.PATH}}/ks.yaml
 
   browse-pvc:
     desc: Browse a PersistentVolumeClaim
     summary: |
-      cluster: Cluster to run command against (default: main)
-      ns: Namespace to browse PersistentVolumeClaims in (default: default)
-      claim: PersistentVolumeClaim to browse (required)
+      CLUSTER: Cluster to run command against (default: main)
+      NS: Namespace to browse PersistentVolumeClaims in (default: default)
+      CLAIM: PersistentVolumeClaim to browse (required)
     interactive: true
-    cmd: kubectl browse-pvc --context {{.cluster}} --namespace {{.ns}} {{.claim}}
+    cmd: kubectl browse-pvc --namespace {{.NS}} {{.CLAIM}}
     vars:
-      cluster: '{{.cluster | default "main"}}'
-      ns: '{{.ns | default "default"}}'
+      cluster: '{{.CLUSTER}}'
+      ns: '{{.NS | default "default"}}'
     requires:
-      vars: ["claim"]
+      vars: ['CLAIM']
     preconditions:
-      - kubectl --context {{.cluster}} --namespace {{.ns}} get persistentvolumeclaims {{.claim}}
+      - kubectl --namespace {{.NS}} get persistentvolumeclaims {{.CLAIM}}
 
   delete-failed-pods:
     desc: Delete all pods with an Evicted/Failed/Succeeded status
     summary: |
-      cluster: Cluster to run command against (default: main)
+      CLUSTER: Cluster to run command against (default: main)
     cmds:
-      - for: ["Evicted", "Failed", "Succeeded"]
-        cmd: kubectl --context {{.cluster}} delete pods --field-selector status.phase={{.ITEM}} -A --ignore-not-found=true
+      - for: ['Evicted', 'Failed', 'Succeeded']
+        cmd: kubectl delete pods --field-selector status.phase={{.ITEM}} -A --ignore-not-found=true
     vars:
-      cluster: '{{.cluster | default "main"}}'
+      CLUSTER: '{{.CLUSTER}}'
 
   sync-secrets:
     desc: Sync ExternalSecret resources from provider
     summary: |
-      cluster: Cluster to run command against (default: main)
-      ns: Namespace to sync secret in (default: default)
-      secret: Secret to sync (default: unset/all secrets)
+      CLUSTER: Cluster to run command against (default: main)
+      NS: Namespace to sync secret in (default: default)
+      SECRET: Secret to sync (default: all secrets)
     cmd: |
-      {{if eq .secret ""}}
+      {{if eq .SECRET ""}}
         kubectl get externalsecret --all-namespaces --no-headers -A | awk '{print $1, $2}' \
           | xargs --max-procs=2 -l bash -c 'kubectl -n $0 annotate externalsecret $1 force-sync=$(date +%s) --overwrite'
       {{else}}
-        kubectl --context {{.cluster}} --namespace {{.ns}} annotate externalsecret {{.secret}} force-sync=$(date +%s) --overwrite
+        kubectl --namespace {{.NS}} annotate externalsecret {{.SECRET}} force-sync=$(date +%s) --overwrite
       {{end}}
     vars:
-      secret: '{{ .secret | default ""}}'
-      ns: '{{.ns | default "default"}}'
-      cluster: '{{.cluster | default "main"}}'
+      SECRET: '{{ .SECRET | default ""}}'
+      NS: '{{.NS | default "default"}}'
+      CLUSTER: '{{.CLUSTER}}'
     preconditions:
-      - kubectl --context {{.cluster}} --namespace {{.ns}} get externalsecret {{.secret}}
+      - kubectl --namespace {{.NS}} get externalsecret {{.SECRET}}

@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  PIP_REQUIREMENTS_FILE: '{{.ROOT_DIR}}/requirements.txt'
+  PYTHON_BIN: python3
+
+tasks:
+
+  venv:
+    desc: Set up virtual environment
+    cmds:
+      - '{{.PYTHON_BIN}} -m venv {{.VIRTUAL_ENV}}'
+      - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade pip setuptools wheel'
+      - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade --requirement "{{.PIP_REQUIREMENTS_FILE}}"'
+    sources:
+      - '{{.PIP_REQUIREMENTS_FILE}}'
+    generates:
+      - '{{.VIRTUAL_ENV}}/pyvenv.cfg'
+    preconditions:
+      - test -f {{.PIP_REQUIREMENTS_FILE}}
