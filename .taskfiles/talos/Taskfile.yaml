@@ -33,7 +33,7 @@ tasks:
     preconditions:
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml
-      - talosctl --nodes {{.HOSTNAME}} get machineconfig >/dev/null 2>&1
+      - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
 
   upgrade:
     desc: Upgrade Talos on a node
@@ -47,8 +47,8 @@ tasks:
       vars: ['CLUSTER', 'HOSTNAME']
     preconditions:
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
-      - talosctl config info >/dev/null 2>&1
-      - talosctl --nodes {{.HOSTNAME}} get machineconfig >/dev/null 2>&1
+      - talosctl config info &>/dev/null
+      - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
 
   upgrade-k8s:
     desc: Upgrade Kubernetes
@@ -60,8 +60,8 @@ tasks:
       vars: ['CLUSTER']
     preconditions:
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
-      - talosctl config info >/dev/null 2>&1
-      - talosctl --nodes {{.TALOS_CONTROLLER}} get machineconfig >/dev/null 2>&1
+      - talosctl config info &>/dev/null
+      - talosctl --nodes {{.TALOS_CONTROLLER}} get machineconfig &>/dev/null
 
   reset-node:
     desc: Reset a Talos node and shut it down
@@ -71,8 +71,8 @@ tasks:
       vars: ['CLUSTER', 'HOSTNAME']
     preconditions:
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
-      - talosctl config info >/dev/null 2>&1
-      - talosctl --nodes {{.HOSTNAME}} get machineconfig >/dev/null 2>&1
+      - talosctl config info &>/dev/null
+      - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
 
   reset-cluster:
     desc: Reset all the Talos nodes and shut 'em down
@@ -85,8 +85,8 @@ tasks:
       vars: ['CLUSTER']
     preconditions:
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
-      - talosctl config info >/dev/null 2>&1
-      - talosctl --nodes {{.NODES}} get machineconfig >/dev/null 2>&1
+      - talosctl config info &>/dev/null
+      - talosctl --nodes {{.NODES}} get machineconfig &>/dev/null
 
   bootstrap-matchbox:
     desc: Bootstrap required Matchbox configuration to PXE Boot machine

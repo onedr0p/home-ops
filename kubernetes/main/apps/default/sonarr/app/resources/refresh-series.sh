@@ -13,6 +13,6 @@ if [[ "${sonarr_eventtype:-}" == "Grab" ]]; then
             --header "X-Api-Key: ${SONARR__AUTH__APIKEY}" \
             --header "Content-Type: application/json" \
             --data-binary '{"name": "RefreshSeries", "seriesId": '"${sonarr_series_id}"'}' \
-            --request POST "http://localhost:${SONARR__SERVER__PORT}/api/v3/command" &> /dev/null
+            --request POST "http://localhost:${SONARR__SERVER__PORT}/api/v3/command" &>/dev/null
     fi
 fi

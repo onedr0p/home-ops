@@ -29,7 +29,7 @@ tasks:
     requires:
       vars: ['CLUSTER', 'NODES', 'DISK']
     preconditions:
-      - talosctl config info >/dev/null 2>&1
+      - talosctl config info &>/dev/null
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
 
   etcd:
@@ -37,7 +37,7 @@ tasks:
     cmd: until talosctl --nodes {{.TALOS_CONTROLLER}} bootstrap; do sleep 10; done
     preconditions:
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
-      - talosctl config info >/dev/null 2>&1
+      - talosctl config info &>/dev/null
 
   apps:
     internal: true
@@ -48,14 +48,14 @@ tasks:
     preconditions:
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/helmfile.yaml
-      - talosctl config info >/dev/null 2>&1
+      - talosctl config info &>/dev/null
 
   conf:
     internal: true
     cmd: talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name {{.CLUSTER}} {{.KUBERNETES_DIR}}/{{.CLUSTER}}
     preconditions:
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
-      - talosctl config info >/dev/null 2>&1
+      - talosctl config info &>/dev/null
 
   flux:
     internal: true

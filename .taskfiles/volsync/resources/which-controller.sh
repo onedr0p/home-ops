@@ -4,11 +4,11 @@ APP=$1
 NAMESPACE="${2:-default}"
 
 is_deployment() {
-    kubectl --namespace "${NAMESPACE}" get deployment "${APP}" >/dev/null 2>&1
+    kubectl --namespace "${NAMESPACE}" get deployment "${APP}" &>/dev/null
 }
 
 is_statefulset() {
-    kubectl --namespace "${NAMESPACE}" get statefulset "${APP}" >/dev/null 2>&1
+    kubectl --namespace "${NAMESPACE}" get statefulset "${APP}" &>/dev/null
 }
 
 if is_deployment; then
