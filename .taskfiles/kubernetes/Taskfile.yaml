@@ -8,23 +8,22 @@ tasks:
     desc: Apply a Flux Kustomization resource for a cluster
     summary: |
       CLUSTER: Cluster to run command against (required)
-      PATH: Path to the Flux Kustomization resource (required)
+      PATH: Path to the Flux Kustomization resource from the apps base dir (required, e.g. default/plex)
       NS: Namespace the Flux Kustomization exists in (default: flux-system)
     cmd: |
-      flux build ks $(basename {{.PATH}}) \
+      flux build ks {{base .PATH}} \
           --namespace {{.NS}} \
           --kustomization-file {{.KUBERNETES_DIR}}/{{.CLUSTER}}/apps/{{.PATH}}/ks.yaml \
           --path {{.KUBERNETES_DIR}}/{{.CLUSTER}}/apps/{{.PATH}} \
           {{- if contains "not found" .KS }}--dry-run \{{ end }}
       | \
-      kubectl apply --server-side \
-          --field-manager=kustomize-controller -f -
+      kubectl apply --server-side --field-manager=kustomize-controller -f -
     requires:
       vars: ['CLUSTER', 'PATH']
     vars:
       NS: '{{.NS | default "flux-system"}}'
       KS:
-        sh: flux --namespace {{.NS}} get kustomizations $(basename {{.PATH}}) 2>&1
+        sh: flux --namespace {{.NS}} get kustomizations {{base .PATH}} 2>&1
     preconditions:
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/apps/{{.PATH}}/ks.yaml
 

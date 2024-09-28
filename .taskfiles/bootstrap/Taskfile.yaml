@@ -94,16 +94,18 @@ tasks:
     internal: true
     cmds:
       - $GOPATH/bin/envsubst < <(cat {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.tmpl.yaml) | kubectl apply -f -
-      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} default
-      - kubectl --namespace default wait job/{{.JOB}} --for condition=complete --timeout=1m
-      - kubectl --namespace default logs job/{{.JOB}}
-      - kubectl --namespace default delete job {{.JOB}}
+      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
+      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
+      - kubectl --namespace {{.NS}} logs job/{{.JOB}}
+      - kubectl --namespace {{.NS}} delete job {{.JOB}}
+    vars:
+      JOB: wipe-disk-{{.NODE}}
+      NS: '{{.NS | default "default"}}'
     env:
       DISK: '{{.DISK}}'
       JOB: '{{.JOB}}'
       NODE: '{{.NODE}}'
-    vars:
-      JOB: wipe-disk-{{.NODE}}
+      NS: '{{.NS}}'
     preconditions:
       - test -f $GOPATH/bin/envsubst
       - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh
@@ -113,16 +115,18 @@ tasks:
     internal: true
     cmds:
       - $GOPATH/bin/envsubst < <(cat {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.tmpl.yaml) | kubectl apply -f -
-      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} default {{.CLUSTER}}
-      - kubectl --namespace default wait job/{{.JOB}} --for condition=complete --timeout=1m
-      - kubectl --namespace default logs job/{{.JOB}}
-      - kubectl --namespace default delete job {{.JOB}}
+      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
+      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
+      - kubectl --namespace {{.NS}} logs job/{{.JOB}}
+      - kubectl --namespace {{.NS}} delete job {{.JOB}}
+    vars:
+      JOB: wipe-data-{{.NODE}}
+      NS: '{{.NS | default "default"}}'
     env:
       DISK: '{{.DISK}}'
       JOB: '{{.JOB}}'
       NODE: '{{.NODE}}'
-    vars:
-      JOB: wipe-data-{{.NODE}}
+      NS: '{{.NS}}'
     preconditions:
       - test -f $GOPATH/bin/envsubst
       - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh

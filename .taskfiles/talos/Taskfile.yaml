@@ -25,9 +25,9 @@ tasks:
       sops --decrypt {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml | \
           $GOPATH/bin/envsubst | \
               talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
-    env: *vars
     vars:
       MODE: '{{.MODE | default "no-reboot"}}'
+    env: *vars
     requires:
       vars: ['CLUSTER', 'HOSTNAME']
     preconditions:
