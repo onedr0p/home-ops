@@ -1,0 +1,66 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: limitarr
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: qbittorrent
+      namespace: default
+    - name: sabnzbd
+      namespace: default
+  values:
+    controllers:
+      limitarr:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/onedr0p/kubanetics
+              tag: 2024.10.1@sha256:ac1df568e6530f0317e42ea80c97b632b14fe34b84cf79d56f881c07361fd464
+            env:
+              SCRIPT_NAME: bandwidth-limiter.py
+              QBITTORRENT_URL: http://qbittorrent.default.svc.cluster.local
+              SABNZBD_URL: http://sabnzbd.default.svc.cluster.local
+              MAX_LINE_SPEED_MBPS: "100"
+              LIMIT_PERCENTAGE: "0.40"
+              MAX_PERCENTAGE: "0.80"
+              INTERVAL: "5"
+              LOG_LEVEL: INFO
+            envFrom:
+              - secretRef:
+                  name: limitarr-secret
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 64Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile: { type: RuntimeDefault }
