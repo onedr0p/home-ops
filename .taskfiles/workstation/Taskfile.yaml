@@ -3,15 +3,34 @@
 version: '3'
 
 vars:
-  PIP_REQUIREMENTS_FILE: '{{.ROOT_DIR}}/requirements.txt'
-  PYTHON_BIN: python3
+  PIP_REQUIREMENTS_FILE: '{{.ROOT_DIR}}/.taskfiles/workstation/resources/requirements.txt'
+  BREWFILE: '{{.ROOT_DIR}}/.taskfiles/workstation/resources/Brewfile'
 
 tasks:
 
-  venv:
-    desc: Set up virtual environment
+  brew:
+    desc: Set up Homebrew tools
+    cmd: brew bundle --file {{.BREWFILE}}
+    sources:
+      - '{{.BREWFILE}}'
+    generates:
+      - '{{.BREWFILE}}.lock.json'
+    preconditions:
+      - command -v brew
+      - test -f {{.BREWFILE}}
+
+  golang:
+    desc: Set up Go tools
+    deps: [brew]
+    cmd: go install github.com/drone/envsubst/cmd/envsubst@latest
+    preconditions:
+      - command -v go
+
+  python:
+    desc: Set up Python tools
+    deps: [brew]
     cmds:
-      - '{{.PYTHON_BIN}} -m venv {{.VIRTUAL_ENV}}'
+      - python3 -m venv {{.VIRTUAL_ENV}}
       - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade pip setuptools wheel'
       - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade --requirement "{{.PIP_REQUIREMENTS_FILE}}"'
     sources:
@@ -19,4 +38,5 @@ tasks:
     generates:
       - '{{.VIRTUAL_ENV}}/pyvenv.cfg'
     preconditions:
+      - command -v python3
       - test -f {{.PIP_REQUIREMENTS_FILE}}
