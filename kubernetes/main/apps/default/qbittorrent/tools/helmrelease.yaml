@@ -39,23 +39,18 @@ spec:
           tagging: &container
             image:
               repository: ghcr.io/buroa/qbtools
-              tag: v0.17.2@sha256:da8f233a7e3fcdb0aeef5973c4234f9b67161a670e36570837e49b25f3a6ef44
+              tag: v0.17.6@sha256:a248dc3e1d885838532830e15743846b73554b8af7e01fd728758f191458c10f
             env:
+              QBITTORRENT_HOST: qbittorrent.default.svc.cluster.local
+              QBITTORRENT_PORT: 80
               TZ: *timeZone
-              POD_NAMESPACE:
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.namespace
             args: [
               "tagging",
               "--added-on",
               "--expired",
               "--last-activity",
               "--sites",
-              "--unregistered",
-              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
-              "--port", "80",
-              "--config", "/config/config.yaml"
+              "--unregistered"
             ]
             securityContext:
               allowPrivilegeEscalation: false
@@ -74,10 +69,8 @@ spec:
               "--exclude-category", "manual",
               "--exclude-category", "music",
               "--exclude-tag", "added:24h",
-              "--include-tag", "unregistered",
+              "--include-tag", "unregistered"
               # "--dry-run",
-              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
-              "--port", "80"
             ]
           expired:
             <<: *container
@@ -86,10 +79,8 @@ spec:
               "--exclude-category", "manual",
               "--exclude-category", "music",
               "--exclude-tag", "added:24h",
-              "--include-tag", "expired", # defined in config.yaml
+              "--include-tag", "expired"
               # "--dry-run",
-              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
-              "--port", "80"
             ]
         pod:
           restartPolicy: OnFailure
@@ -104,10 +95,8 @@ spec:
             args: [
               "orphaned",
               "--exclude-pattern", "*_unpackerred*",
-              "--exclude-pattern", "*/manual/*",
+              "--exclude-pattern", "*/manual/*"
               # "--dry-run",
-              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
-              "--port", "80"
             ]
         pod:
           restartPolicy: OnFailure
@@ -117,9 +106,7 @@ spec:
             <<: *container
             args: [
               "reannounce",
-              "--process-seeding",
-              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
-              "--port", "80"
+              "--process-seeding"
             ]
     defaultPodOptions:
       securityContext:
