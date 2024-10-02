@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 63.1.0
+      version: 64.0.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
@@ -78,12 +78,11 @@ spec:
         pathType: Prefix
       prometheusSpec:
         scrapeInterval: 1m # Must match interval in Grafana Helm chart
-        podMonitorSelector: &selector
-          matchLabels: null
-        probeSelector: *selector
-        ruleSelector: *selector
-        scrapeConfigSelector: *selector
-        serviceMonitorSelector: *selector
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        ruleSelectorNilUsesHelmValues: false
+        scrapeConfigSelectorNilUsesHelmValues: false
+        serviceMonitorSelectorNilUsesHelmValues: false
         enableAdminAPI: true
         walCompression: true
         enableFeatures:
