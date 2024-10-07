@@ -36,10 +36,10 @@ spec:
           app:
             image:
               repository: ghcr.io/onedr0p/tautulli
-              tag: v2.14.5@sha256:c92ad83f59b877e89a7e22307d34273f539de1a6eaad35ff6672003892a24f5a
+              tag: v2.14.5@sha256:69d469967b08c2ab977d5b63f14cdbc85ac1f9ccaf0cf5c3669dac903db6b243
             env:
               TZ: America/New_York
-            args: ["/entrypoint.sh", "--port", "80"]
+              TAUTULLI__PORT: &port 80
             probes:
               liveness: &probes
                 enabled: true
@@ -47,7 +47,7 @@ spec:
                 spec:
                   httpGet:
                     path: /status
-                    port: &port 80
+                    port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
