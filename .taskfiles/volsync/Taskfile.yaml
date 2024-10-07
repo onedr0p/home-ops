@@ -12,11 +12,12 @@ x-vars: &vars
   APP: '{{.APP}}'
   CLAIM: '{{.CLAIM}}'
   CONTROLLER: '{{.CONTROLLER}}'
-  JOB: '{{.JOB}}'
   NS: '{{.NS}}'
   PGID: '{{.PGID}}'
   PREVIOUS: '{{.PREVIOUS}}'
   PUID: '{{.PUID}}'
+  CLASS_NAME: '{{.CLASS_NAME}}'
+  ACCESS_MODES: '{{.ACCESS_MODES}}'
 
 vars:
   VOLSYNC_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/volsync/resources'
@@ -47,13 +48,12 @@ tasks:
       APP: Application to list snapshots for (required)
     cmds:
       - $GOPATH/bin/envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/list.tmpl.yaml) | kubectl apply -f -
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
-      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container main
-      - kubectl --namespace {{.NS}} delete job {{.JOB}}
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh volsync-list-{{.APP}} {{.NS}}
+      - kubectl --namespace {{.NS}} wait job/volsync-list-{{.APP}} --for condition=complete --timeout=1m
+      - kubectl --namespace {{.NS}} logs job/volsync-list-{{.APP}} --container main
+      - kubectl --namespace {{.NS}} delete job volsync-list-{{.APP}}
     vars:
       NS: '{{.NS | default "default"}}'
-      JOB: volsync-list-{{.APP}}
     env: *vars
     requires:
       vars: ['CLUSTER', 'APP']
@@ -71,14 +71,13 @@ tasks:
       APP: Application to unlock (required)
     cmds:
       - $GOPATH/bin/envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/unlock.tmpl.yaml) | kubectl apply -f -
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
-      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container minio
-      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container r2
-      - kubectl --namespace {{.NS}} delete job {{.JOB}}
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh volsync-unlock-{{.APP}} {{.NS}}
+      - kubectl --namespace {{.NS}} wait job/volsync-unlock-{{.APP}} --for condition=complete --timeout=1m
+      - kubectl --namespace {{.NS}} logs job/volsync-unlock-{{.APP}} --container minio
+      - kubectl --namespace {{.NS}} logs job/volsync-unlock-{{.APP}} --container r2
+      - kubectl --namespace {{.NS}} delete job volsync-unlock-{{.APP}}
     vars:
       NS: '{{.NS | default "default"}}'
-      JOB: volsync-unlock-{{.APP}}
     env: *vars
     requires:
       vars: ['CLUSTER', 'APP']
@@ -98,12 +97,11 @@ tasks:
       APP: Application to snapshot (required)
     cmds:
       - kubectl --namespace {{.NS}} patch replicationsources {{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"{{.NOW}}"}}}'
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=120m
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh volsync-src-{{.APP}} {{.NS}}
+      - kubectl --namespace {{.NS}} wait job/volsync-src-{{.APP}} --for condition=complete --timeout=120m
     vars:
       NOW: '{{now | date "150405"}}'
       NS: '{{.NS | default "default"}}'
-      JOB: volsync-src-{{.APP}}
       CONTROLLER:
         sh: '{{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh {{.APP}} {{.NS}}'
     env: *vars
@@ -131,6 +129,8 @@ tasks:
     vars:
       NS: '{{.NS | default "default"}}'
       PREVIOUS: '{{.PREVIOUS | default 2}}'
+      CLASS_NAME: '{{.CLASS_NAME | default "cephblock"}}'
+      ACCESS_MODES: '{{.ACCESS_MODES | default "ReadWriteOnce"}}'
       CONTROLLER:
         sh: '{{.VOLSYNC_RESOURCES_DIR}}/which-controller.sh {{.APP}} {{.NS}}'
       CLAIM:
@@ -188,12 +188,10 @@ tasks:
     internal: true
     cmds:
       - $GOPATH/bin/envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/wipe.tmpl.yaml) | kubectl apply -f -
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=120m
-      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container main
-      - kubectl --namespace {{.NS}} delete job {{.JOB}}
-    vars:
-      job: volsync-wipe-{{.APP}}
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh volsync-wipe-{{.APP}} {{.NS}}
+      - kubectl --namespace {{.NS}} wait job/volsync-wipe-{{.APP}} --for condition=complete --timeout=120m
+      - kubectl --namespace {{.NS}} logs job/volsync-wipe-{{.APP}} --container main
+      - kubectl --namespace {{.NS}} delete job volsync-wipe-{{.APP}}
     env: *vars
     preconditions:
       - test -f $GOPATH/bin/envsubst
@@ -205,11 +203,9 @@ tasks:
     internal: true
     cmds:
       - $GOPATH/bin/envsubst < <(cat {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.tmpl.yaml) | kubectl apply -f -
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=120m
-      - kubectl --namespace {{.NS}} delete replicationdestination {{.JOB}}
-    vars:
-      job: volsync-dst-{{.APP}}
+      - bash {{.VOLSYNC_RESOURCES_DIR}}/wait-for-job.sh volsync-dst-{{.APP}} {{.NS}}
+      - kubectl --namespace {{.NS}} wait job/volsync-dst-{{.APP}} --for condition=complete --timeout=120m
+      - kubectl --namespace {{.NS}} delete replicationdestination volsync-dst-{{.APP}}
     env: *vars
     preconditions:
       - test -f $GOPATH/bin/envsubst

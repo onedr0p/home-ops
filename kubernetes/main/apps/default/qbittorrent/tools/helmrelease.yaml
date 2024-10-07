@@ -62,7 +62,7 @@ spec:
               limits:
                 memory: 256M
         containers:
-          unregistered:
+          prune-unregistered:
             <<: *container
             args: [
               "prune",
@@ -72,7 +72,7 @@ spec:
               "--include-tag", "unregistered",
               "--dry-run"
             ]
-          expired:
+          prune-expired:
             <<: *container
             args: [
               "prune",
@@ -88,7 +88,7 @@ spec:
         type: cronjob
         cronjob:
           <<: *cronJobSpec
-          schedule: "@daily"
+          schedule: "@weekly"
         containers:
           app:
             <<: *container

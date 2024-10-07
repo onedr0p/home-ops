@@ -2,7 +2,7 @@
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
-  name: ${JOB}
+  name: volsync-dst-${APP}
   namespace: ${NS}
 spec:
   trigger:
@@ -11,9 +11,8 @@ spec:
     repository: ${APP}-volsync-secret
     destinationPVC: ${CLAIM}
     copyMethod: Direct
-    storageClassName: ceph-block
-    # storageClassName: ceph-filesystem
-    # accessModes: ["ReadWriteMany"]
+    storageClassName: ${CLASS_NAME:-cephblock}
+    accessModes: ["${ACCESS_MODES:-ReadWriteOnce}"]
     # IMPORTANT NOTE:
     #   Set to the last X number of snapshots to restore from
     previous: ${PREVIOUS}
