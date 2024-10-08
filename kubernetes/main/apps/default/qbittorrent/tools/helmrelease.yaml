@@ -39,11 +39,15 @@ spec:
           tagging: &container
             image:
               repository: ghcr.io/buroa/qbtools
-              tag: v0.18.2@sha256:c778cca1c844e604850716c6d702f0b0b1239e0c538d07ae8521361ff11c875e
+              tag: v0.19.0@sha256:c8968cc2c075c19cb4a790dfab328ac221a87640580420771b34fc20c60ff839
             env:
               QBITTORRENT_HOST: qbittorrent.default.svc.cluster.local
               QBITTORRENT_PORT: 80
+              SABNZBD_HOST: sabnzbd.default.svc.cluster.local
               TZ: *timeZone
+            envFrom:
+              - secretRef:
+                  name: qbtools-secret
             args: [
               "tagging",
               "--added-on",
@@ -108,6 +112,17 @@ spec:
               "reannounce",
               "--process-seeding"
             ]
+      limiter:
+        containers:
+          app:
+            <<: *container
+            args: [
+              "limiter",
+              "--max-line-speed-mbps", "100",
+              "--max-percent", "0.8",
+              "--limit-percent", "0.4",
+              "--interval", "5"
+            ]
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -117,7 +132,7 @@ spec:
     persistence:
       secret-file:
         type: secret
-        name: qbtools-secret
+        name: qbtools-config-secret
         globalMounts:
           - path: /config/config.yaml
             subPath: config.yaml
