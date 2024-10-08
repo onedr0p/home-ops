@@ -3,6 +3,28 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: &app nginx-certificates
+  namespace: flux-system
+spec:
+  targetNamespace: network
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: external-secrets-stores
+  path: ./kubernetes/main/apps/network/nginx/certificates
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: home-kubernetes
+  wait: true
+  interval: 30m
+  timeout: 5m
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: &app nginx-external
   namespace: flux-system
 spec:
@@ -11,7 +33,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: certificates
+    - name: nginx-certificates
     - name: external-secrets-stores
   path: ./kubernetes/main/apps/network/nginx/external
   prune: false
@@ -34,7 +56,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: certificates
+    - name: nginx-certificates
   path: ./kubernetes/main/apps/network/nginx/internal
   prune: false
   sourceRef:
