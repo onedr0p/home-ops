@@ -4,10 +4,12 @@
 set -euo pipefail
 
 # User-defined variables
+CROSS_SEED_ENABLED="${CROSS_SEED_ENABLED:-false}"
 CROSS_SEED_HOST="${CROSS_SEED_HOST:-required}"
 CROSS_SEED_PORT="${CROSS_SEED_PORT:-required}"
 CROSS_SEED_API_KEY="${CROSS_SEED_API_KEY:-required}"
 CROSS_SEED_SLEEP_INTERVAL="${CROSS_SEED_SLEEP_INTERVAL:-30}"
+PUSHOVER_ENABLED="${PUSHOVER_ENABLED:-false}"
 PUSHOVER_USER_KEY="${PUSHOVER_USER_KEY:-required}"
 PUSHOVER_TOKEN="${PUSHOVER_TOKEN:-required}"
 
@@ -106,10 +108,14 @@ main() {
     chmod -R 750 "${RELEASE_DIR}"
 
     # Send pushover notification
-    send_pushover_notification
+    if [[ "${PUSHOVER_ENABLED}" == "true" ]]; then
+        send_pushover_notification
+    fi
 
     # Search for cross-seed
-    search_cross_seed
+    if [[ "${CROSS_SEED_ENABLED}" == "true" ]]; then
+        search_cross_seed
+    fi
 }
 
 main "$@"
