@@ -25,7 +25,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app certificates
+  name: &app certificates-export
   namespace: flux-system
 spec:
   targetNamespace: cert-manager
@@ -36,11 +36,11 @@ spec:
     - name: certificates-import
     - name: cert-manager-issuers
     - name: external-secrets-stores
-  path: ./kubernetes/main/apps/cert-manager/certificates/app
+  path: ./kubernetes/main/apps/cert-manager/certificates/export
   prune: false
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
-  wait: true
+  wait: false
   interval: 30m
   timeout: 5m
