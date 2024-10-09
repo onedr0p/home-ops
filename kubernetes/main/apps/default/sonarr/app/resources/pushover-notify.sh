@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2154
-
 set -euo pipefail
 
 # User defined variables for pushover
