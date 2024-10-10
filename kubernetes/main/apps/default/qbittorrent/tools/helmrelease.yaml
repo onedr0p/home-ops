@@ -36,7 +36,7 @@ spec:
           successfulJobsHistory: 1
           failedJobsHistory: 1
         initContainers:
-          tagging: &container
+          tag: &container
             image:
               repository: ghcr.io/buroa/qbtools
               tag: v0.19.2@sha256:98b84b4b0e1e5f4fcff3cd2e6b5c5fe2168d415bccd38169dc80b161139c955f
@@ -67,25 +67,25 @@ spec:
               limits:
                 memory: 256M
         containers:
-          prune-unregistered:
+          unregistered:
             <<: *container
             args: [
               "prune",
               "--exclude-category", "manual",
               "--exclude-category", "music",
               "--exclude-tag", "added:1d",
-              "--include-tag", "unregistered",
-              "--dry-run"
+              "--include-tag", "unregistered"
+              # "--dry-run"
             ]
-          prune-expired:
+          expired:
             <<: *container
             args: [
               "prune",
               "--exclude-category", "manual",
               "--exclude-category", "music",
               "--exclude-tag", "added:1d",
-              "--include-tag", "expired",
-              "--dry-run"
+              "--include-tag", "expired"
+              # "--dry-run"
             ]
         pod:
           restartPolicy: OnFailure
@@ -100,8 +100,8 @@ spec:
             args: [
               "orphaned",
               "--exclude-pattern", "*_unpackerred*",
-              "--exclude-pattern", "*/manual/*",
-              "--dry-run"
+              "--exclude-pattern", "*/manual/*"
+              # "--dry-run"
             ]
         pod:
           restartPolicy: OnFailure
