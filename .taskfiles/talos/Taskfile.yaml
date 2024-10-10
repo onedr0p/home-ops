@@ -31,6 +31,7 @@ tasks:
     requires:
       vars: ['CLUSTER', 'HOSTNAME']
     preconditions:
+      - test -f $GOPATH/bin/envsubst
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
