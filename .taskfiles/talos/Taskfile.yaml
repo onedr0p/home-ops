@@ -39,7 +39,7 @@ tasks:
     desc: Upgrade Talos on a node
     cmds:
       - until kubectl wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
-      - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.TALOS_SCHEMATIC_ID}}:{{.TALOS_VERSION}}" --wait=true --timeout=10m --preserve=true
+      - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.TALOS_SCHEMATIC_ID}}:{{.TALOS_VERSION}}" --timeout=10m
       - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
       - until kubectl wait --timeout=5m --for=jsonpath=.status.ceph.health=HEALTH_OK cephcluster --all --all-namespaces; do sleep 10; done
     vars: *vars
