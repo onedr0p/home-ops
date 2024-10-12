@@ -16,6 +16,7 @@ vars:
   HOME_SERVICE_ADDR: voyager.internal # Ref: https://github.com/onedr0p/home-service
   HOME_SERVICE_USER: devin
   HOME_SERVICE_MATCHBOX_DIR: /var/opt/home-service/apps/matchbox/data/config
+  MINIJINJA_CMD: '{{.ROOT_DIR}}/.bin/minijinja --env --trim-blocks --lstrip-blocks --autoescape=none'
 
 tasks:
 
@@ -23,7 +24,7 @@ tasks:
     desc: Apply Talos configuration to a node
     cmd: |
       sops --decrypt {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml | \
-          $GOPATH/bin/envsubst | \
+          {{.MINIJINJA_CMD}} - | \
               talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "no-reboot"}}'
@@ -31,7 +32,6 @@ tasks:
     requires:
       vars: ['CLUSTER', 'HOSTNAME']
     preconditions:
-      - test -f $GOPATH/bin/envsubst
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
@@ -97,7 +97,7 @@ tasks:
           curl -skL https://factory.talos.dev/image/{{.TALOS_SCHEMATIC_ID}}/{{.TALOS_VERSION}}/{{.ITEM}} | \
               curl -skT - -u "{{.HOME_SERVICE_USER}}:" \
                   sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/{{.ITEM}}
-      - find {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/assets -type f | xargs -I{} sh -c "sops --decrypt {} | $GOPATH/bin/envsubst | curl -skT - -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/\$(basename {} | sed 's/\.secret\.sops//')"
+      - find {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/assets -type f | xargs -I{} sh -c "sops --decrypt {} | {{.MINIJINJA_CMD}} - | curl -skT - -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/\$(basename {} | sed 's/\.secret\.sops//')"
       - find {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/groups -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/groups/
       - find {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/talos/profiles -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/profiles/
       - ssh -l {{.HOME_SERVICE_USER}} {{.HOME_SERVICE_ADDR}} "cd /var/opt/home-service ; go-task restart-matchbox"
@@ -105,5 +105,4 @@ tasks:
     requires:
       vars: ['CLUSTER']
     preconditions:
-      - test -f $GOPATH/bin/envsubst
-      # - host {{.HOME_SERVICE_ADDR}}
+      - ping -c1 {{.HOME_SERVICE_ADDR}}

@@ -2,27 +2,25 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: ${JOB}
-  namespace: ${NS:-default}
+  name: volsync-wipe-{{ ENV.APP }}
+  namespace: {{ ENV.NS }}
 spec:
   ttlSecondsAfterFinished: 3600
   template:
     spec:
       automountServiceAccountToken: false
-      restartPolicy: Never
-      nodeName: ${NODE}
+      restartPolicy: OnFailure
       containers:
         - name: main
           image: docker.io/library/alpine:latest
-          command: ["/bin/sh", "-c"]
-          args: ["rm -rf /mnt/host_var/lib/rook"]
+          command: ["/bin/sh", "-c", "cd /config; find . -delete"]
           volumeMounts:
-            - mountPath: /mnt/host_var
-              name: host-var
+            - name: config
+              mountPath: /config
           securityContext:
             privileged: true
           resources: {}
       volumes:
-        - name: host-var
-          hostPath:
-            path: /var
+        - name: config
+          persistentVolumeClaim:
+            claimName: {{ ENV.CLAIM }}

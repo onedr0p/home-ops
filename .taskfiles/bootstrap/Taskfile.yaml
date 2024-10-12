@@ -4,6 +4,7 @@ version: '3'
 
 vars:
   BOOTSTRAP_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/bootstrap/resources'
+  MINIJINJA_CMD: '{{.ROOT_DIR}}/.bin/minijinja --env --trim-blocks --lstrip-blocks --autoescape=none'
   TALOS_CONTROLLER:
     sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
 
@@ -93,8 +94,8 @@ tasks:
   rook-disk:
     internal: true
     cmds:
-      - $GOPATH/bin/envsubst < <(cat {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.tmpl.yaml) | kubectl apply -f -
-      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
+      - '{{.MINIJINJA_CMD}} {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-disk-job.yaml.j2 | kubectl apply -f -'
+      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/scripts/wait-for-job.sh {{.JOB}} {{.NS}}
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}}
       - kubectl --namespace {{.NS}} delete job {{.JOB}}
@@ -107,15 +108,14 @@ tasks:
       NODE: '{{.NODE}}'
       NS: '{{.NS}}'
     preconditions:
-      - test -f $GOPATH/bin/envsubst
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.tmpl.yaml
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/scripts/wait-for-job.sh
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-disk-job.yaml.j2
 
   rook-data:
     internal: true
     cmds:
-      - $GOPATH/bin/envsubst < <(cat {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.tmpl.yaml) | kubectl apply -f -
-      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh {{.JOB}} {{.NS}}
+      - '{{.MINIJINJA_CMD}} {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-data-job.yaml.j2 | kubectl apply -f -'
+      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/scripts/wait-for-job.sh {{.JOB}} {{.NS}}
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}}
       - kubectl --namespace {{.NS}} delete job {{.JOB}}
@@ -128,6 +128,5 @@ tasks:
       NODE: '{{.NODE}}'
       NS: '{{.NS}}'
     preconditions:
-      - test -f $GOPATH/bin/envsubst
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wait-for-job.sh
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.tmpl.yaml
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/scripts/wait-for-job.sh
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-data-job.yaml.j2

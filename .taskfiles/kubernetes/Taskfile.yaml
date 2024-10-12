@@ -28,13 +28,13 @@ tasks:
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/apps/{{.PATH}}/ks.yaml
 
   browse-pvc:
-    desc: Browse a PersistentVolumeClaim
+    desc: Exec into a container to browse a PersistentVolumeClaim
     summary: |
       CLUSTER: Cluster to run command against (default: main)
       NS: Namespace to browse PersistentVolumeClaims in (default: default)
       CLAIM: PersistentVolumeClaim to browse (required)
     interactive: true
-    cmd: kubectl browse-pvc --namespace {{.NS}} {{.CLAIM}}
+    cmd: kubectl browse-pvc --namespace {{.NS}} --image docker.io/library/alpine:latest {{.CLAIM}}
     vars:
       CLUSTER: '{{.CLUSTER}}'
       NS: '{{.NS | default "default"}}'
@@ -42,16 +42,6 @@ tasks:
       vars: ['CLAIM']
     preconditions:
       - kubectl --namespace {{.NS}} get persistentvolumeclaims {{.CLAIM}}
-
-  delete-failed-pods:
-    desc: Delete all pods with an Evicted/Failed/Succeeded status
-    summary: |
-      CLUSTER: Cluster to run command against (default: main)
-    cmds:
-      - for: ['Evicted', 'Failed', 'Succeeded']
-        cmd: kubectl delete pods --field-selector status.phase={{.ITEM}} -A --ignore-not-found=true
-    vars:
-      CLUSTER: '{{.CLUSTER}}'
 
   sync-secrets:
     desc: Sync ExternalSecret resources from provider
@@ -71,4 +61,4 @@ tasks:
       NS: '{{.NS | default "default"}}'
       CLUSTER: '{{.CLUSTER}}'
     preconditions:
-      - kubectl --namespace {{.NS}} get externalsecret {{.SECRET}}
+      - '{{if ne .SECRET ""}}kubectl --namespace {{.NS}} get externalsecret {{.SECRET}}{{end}}'

@@ -2,8 +2,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: volsync-unlock-${APP}
-  namespace: ${NS}
+  name: volsync-unlock-{{ ENV.APP') }}
+  namespace: {{ ENV.NS }}
 spec:
   ttlSecondsAfterFinished: 3600
   template:
@@ -16,12 +16,12 @@ spec:
           args: ["unlock", "--remove-all"]
           envFrom:
             - secretRef:
-                name: ${APP}-volsync-secret
+                name: {{ ENV.APP }}-volsync-secret
           resources: {}
         - name: r2
           image: docker.io/restic/restic:latest
           args: ["unlock", "--remove-all"]
           envFrom:
             - secretRef:
-                name: ${APP}-volsync-r2-secret
+                name: {{ ENV.APP }}-volsync-r2-secret
           resources: {}

@@ -21,14 +21,21 @@ tasks:
 
   golang:
     desc: Set up Go tools
-    deps: [brew]
+    deps: ['brew']
     cmd: go install github.com/drone/envsubst/cmd/envsubst@latest
     preconditions:
       - command -v go
 
+  krew:
+    desc: Set up Krew tools
+    deps: ['brew']
+    cmd: kubectl krew install cert-manager cnpg browse-pvc rook-ceph view-secret
+    preconditions:
+      - kubectl krew &>/dev/null
+
   python:
     desc: Set up Python tools
-    deps: [brew]
+    deps: ['brew']
     cmds:
       - python3 -m venv {{.VIRTUAL_ENV}}
       - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade pip setuptools wheel'
