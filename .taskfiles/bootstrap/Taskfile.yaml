@@ -4,7 +4,8 @@ version: '3'
 
 vars:
   BOOTSTRAP_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/bootstrap/resources'
-  MINIJINJA_CMD: '{{.ROOT_DIR}}/.bin/minijinja --env --trim-blocks --lstrip-blocks --autoescape=none'
+  MINIJINJA_CMD: '{{.ROOT_DIR}}/.bin/minijinja --env --trim-blocks --lstrip-blocks --autoescape=none --strict'
+  OP_CMD: op run --env-file {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/op.env --no-masking
   TALOS_CONTROLLER:
     sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
 
@@ -62,20 +63,17 @@ tasks:
     internal: true
     cmds:
       - kubectl apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/flux
-      - sops --decrypt {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/flux/age-key.secret.sops.yaml | kubectl apply --server-side --filename -
-      - sops --decrypt {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/flux/github-deploy-key.secret.sops.yaml | kubectl apply --server-side --filename -
-      - sops --decrypt {{.KUBERNETES_DIR}}/{{.CLUSTER}}/flux/vars/cluster-secrets.secret.sops.yaml | kubectl apply --server-side --filename -
+      - for: { var: BOOTSTRAP_TEMPLATES }
+        cmd: '{{.OP_CMD}} -- {{.MINIJINJA_CMD}} {{.ITEM}} | kubectl apply --server-side --filename -'
       - kubectl apply --server-side --filename {{.KUBERNETES_DIR}}/{{.CLUSTER}}/flux/vars/cluster-settings.yaml
       - kubectl apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.CLUSTER}}/flux/config
+    vars:
+      BOOTSTRAP_TEMPLATES:
+        sh: find {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap -type f -name '*.j2'
+    env:
+      VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
     preconditions:
-      - test -f {{.ROOT_DIR}}/age.key
-      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/flux/age-key.secret.sops.yaml
-      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/flux/github-deploy-key.secret.sops.yaml
-      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/flux/vars/cluster-secrets.secret.sops.yaml
       - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/flux/vars/cluster-settings.yaml
-      - sops filestatus {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/flux/age-key.secret.sops.yaml | jq --exit-status '.encrypted'
-      - sops filestatus {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/flux/github-deploy-key.secret.sops.yaml | jq --exit-status '.encrypted'
-      - sops filestatus {{.KUBERNETES_DIR}}/{{.CLUSTER}}/flux/vars/cluster-secrets.secret.sops.yaml | jq --exit-status '.encrypted'
 
   rook:
     internal: true
