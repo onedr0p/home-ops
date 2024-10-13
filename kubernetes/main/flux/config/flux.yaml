@@ -26,28 +26,32 @@ spec:
     kind: OCIRepository
     name: flux-manifests
   patches:
-    # Remove the network policies that does not work with k3s
+    # Remove image automation and image reflector controllers
+    - patch: |
+        $patch: delete
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: all
+      target:
+        kind: Deployment
+        name: (image-automation-controller|image-reflector-controller)
+    # Remove the built-in network policies
     - patch: |
         $patch: delete
         apiVersion: networking.k8s.io/v1
         kind: NetworkPolicy
         metadata:
-          name: not-used
+          name: all
       target:
         group: networking.k8s.io
         kind: NetworkPolicy
-    # Increase the number of reconciliations that can be performed in parallel and bump the resources limits
-    # Ref: https://fluxcd.io/flux/cheatsheets/bootstrap/#increase-the-number-of-workers
+    # Increase the number of workers and limits
+    # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#increase-the-number-of-workers-and-limits
     - patch: |
         - op: add
           path: /spec/template/spec/containers/0/args/-
-          value: --concurrent=12
-        - op: add
-          path: /spec/template/spec/containers/0/args/-
-          value: --kube-api-qps=500
-        - op: add
-          path: /spec/template/spec/containers/0/args/-
-          value: --kube-api-burst=1000
+          value: --concurrent=10
         - op: add
           path: /spec/template/spec/containers/0/args/-
           value: --requeue-dependency=5s
@@ -58,7 +62,7 @@ spec:
         apiVersion: apps/v1
         kind: Deployment
         metadata:
-          name: not-used
+          name: all
         spec:
           template:
             spec:
@@ -70,9 +74,12 @@ spec:
       target:
         kind: Deployment
         name: (kustomize-controller|helm-controller|source-controller)
-    # Enable in-memory-kustomize builds
+    # Enable in-memory kustomize builds
     # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#enable-in-memory-kustomize-builds
     - patch: |
+        - op: add
+          path: /spec/template/spec/containers/0/args/-
+          value: --concurrent=20
         - op: replace
           path: /spec/template/spec/volumes/0
           value:
@@ -82,8 +89,23 @@ spec:
       target:
         kind: Deployment
         name: kustomize-controller
-    # Enable Helm near OOM detection
-    # Ref: https://fluxcd.io/flux/cheatsheets/bootstrap/#enable-helm-near-oom-detection
+    # Enable Helm repositories caching
+    # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#enable-helm-repositories-caching
+    - patch: |
+        - op: add
+          path: /spec/template/spec/containers/0/args/-
+          value: --helm-cache-max-size=10
+        - op: add
+          path: /spec/template/spec/containers/0/args/-
+          value: --helm-cache-ttl=60m
+        - op: add
+          path: /spec/template/spec/containers/0/args/-
+          value: --helm-cache-purge-interval=5m
+      target:
+        kind: Deployment
+        name: source-controller
+    # Flux near OOM detection for Helm
+    # Ref: https://fluxcd.io/flux/installation/configuration/helm-oom-detection/
     - patch: |
         - op: add
           path: /spec/template/spec/containers/0/args/-

@@ -7,16 +7,99 @@ kind: Kustomization
 resources:
   - github.com/fluxcd/flux2/manifests/install?ref=v2.4.0
 patches:
+  # Remove image automation and image reflector controllers
+  - patch: |
+      $patch: delete
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: all
+    target:
+      kind: Deployment
+      name: (image-automation-controller|image-reflector-controller)
   # Remove the built-in network policies
-  - target:
-      group: networking.k8s.io
-      kind: NetworkPolicy
-    patch: |
+  - patch: |
       $patch: delete
       apiVersion: networking.k8s.io/v1
       kind: NetworkPolicy
       metadata:
-        name: not-used
+        name: all
+    target:
+      group: networking.k8s.io
+      kind: NetworkPolicy
+  # Increase the number of workers and limits
+  # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#increase-the-number-of-workers-and-limits
+  - patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --concurrent=10
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --requeue-dependency=5s
+    target:
+      kind: Deployment
+      name: (kustomize-controller|helm-controller|source-controller)
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: all
+      spec:
+        template:
+          spec:
+            containers:
+              - name: manager
+                resources:
+                  limits:
+                    memory: 2Gi
+    target:
+      kind: Deployment
+      name: (kustomize-controller|helm-controller|source-controller)
+  # Enable in-memory kustomize builds
+  # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#enable-in-memory-kustomize-builds
+  - patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --concurrent=20
+      - op: replace
+        path: /spec/template/spec/volumes/0
+        value:
+          name: temp
+          emptyDir:
+            medium: Memory
+    target:
+      kind: Deployment
+      name: kustomize-controller
+  # Enable Helm repositories caching
+  # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#enable-helm-repositories-caching
+  - patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --helm-cache-max-size=10
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --helm-cache-ttl=60m
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --helm-cache-purge-interval=5m
+    target:
+      kind: Deployment
+      name: source-controller
+  # Flux near OOM detection for Helm
+  # Ref: https://fluxcd.io/flux/installation/configuration/helm-oom-detection/
+  - patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --feature-gates=OOMWatch=true
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --oom-watch-memory-threshold=95
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --oom-watch-interval=500ms
+    target:
+      kind: Deployment
+      name: helm-controller
   # Resources renamed to match those installed by oci://ghcr.io/fluxcd/flux-manifests
   - target:
       kind: ResourceQuota
