@@ -5,7 +5,7 @@ version: '3'
 vars:
   BOOTSTRAP_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/bootstrap/resources'
   MINIJINJA_CMD: '{{.ROOT_DIR}}/.bin/minijinja --env --trim-blocks --lstrip-blocks --autoescape=none --strict'
-  OP_CMD: op run --env-file {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/op.env --no-masking
+  OP_CMD: op run --env-file {{.CLUSTER_DIR}}/bootstrap/op.env --no-masking
   TALOS_CONTROLLER:
     sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
 
@@ -32,48 +32,48 @@ tasks:
       vars: ['CLUSTER', 'NODES', 'DISK']
     preconditions:
       - talosctl config info &>/dev/null
-      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
+      - test -f {{.CLUSTER_DIR}}/talosconfig
 
   etcd:
     internal: true
     cmd: until talosctl --nodes {{.TALOS_CONTROLLER}} bootstrap; do sleep 10; done
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
+      - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
 
   apps:
     internal: true
     cmds:
       - until kubectl wait --for=condition=Ready=False nodes --all --timeout=10m; do sleep 10; done
-      - helmfile --quiet --file {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+      - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
       - until kubectl wait --for=condition=Ready nodes --all --timeout=10m; do sleep 10; done
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
-      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/helmfile.yaml
+      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - test -f {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml
       - talosctl config info &>/dev/null
 
   conf:
     internal: true
-    cmd: talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name {{.CLUSTER}} {{.KUBERNETES_DIR}}/{{.CLUSTER}}
+    cmd: talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name {{.CLUSTER}} {{.CLUSTER_DIR}}
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig
+      - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
 
   flux:
     internal: true
     cmds:
-      - kubectl apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap/flux
+      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/bootstrap/flux
       - for: { var: BOOTSTRAP_TEMPLATES }
         cmd: '{{.OP_CMD}} -- {{.MINIJINJA_CMD}} {{.ITEM}} | kubectl apply --server-side --filename -'
-      - kubectl apply --server-side --filename {{.KUBERNETES_DIR}}/{{.CLUSTER}}/flux/vars/cluster-settings.yaml
-      - kubectl apply --server-side --kustomize {{.KUBERNETES_DIR}}/{{.CLUSTER}}/flux/config
+      - kubectl apply --server-side --filename {{.CLUSTER_DIR}}/flux/vars/cluster-settings.yaml
+      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/flux/config
     vars:
       BOOTSTRAP_TEMPLATES:
-        sh: find {{.KUBERNETES_DIR}}/{{.CLUSTER}}/bootstrap -type f -name '*.j2'
+        sh: find {{.CLUSTER_DIR}}/bootstrap -type f -name '*.j2'
     env:
       VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
     preconditions:
-      - test -f {{.KUBERNETES_DIR}}/{{.CLUSTER}}/flux/vars/cluster-settings.yaml
+      - test -f {{.CLUSTER_DIR}}/flux/vars/cluster-settings.yaml
 
   rook:
     internal: true

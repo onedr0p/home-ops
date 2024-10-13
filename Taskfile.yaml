@@ -3,12 +3,12 @@
 version: '3'
 
 vars:
-  KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
   CLUSTER: '{{.CLUSTER | default "main"}}'
+  CLUSTER_DIR: '{{.ROOT_DIR}}/kubernetes/{{.CLUSTER}}'
 
 env:
-  KUBECONFIG: '{{.KUBERNETES_DIR}}/{{.CLUSTER}}/kubeconfig'
-  TALOSCONFIG: '{{.KUBERNETES_DIR}}/{{.CLUSTER}}/talosconfig'
+  KUBECONFIG: '{{.CLUSTER_DIR}}/kubeconfig'
+  TALOSCONFIG: '{{.CLUSTER_DIR}}/talosconfig'
   SOPS_AGE_KEY_FILE: '{{.ROOT_DIR}}/age.key'
   GOPATH: '{{.ROOT_DIR}}/.go'
   VIRTUAL_ENV: '{{.ROOT_DIR}}/.venv'
