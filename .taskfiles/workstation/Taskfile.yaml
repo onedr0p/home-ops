@@ -3,47 +3,49 @@
 version: '3'
 
 vars:
-  PIP_REQUIREMENTS_FILE: '{{.ROOT_DIR}}/.taskfiles/workstation/resources/requirements.txt'
-  BREWFILE: '{{.ROOT_DIR}}/.taskfiles/workstation/resources/Brewfile'
+  WORKSTATION_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/workstation/resources'
 
 tasks:
 
   brew:
     desc: Set up Homebrew tools
-    cmd: brew bundle --file {{.BREWFILE}}
+    cmds:
+      - brew bundle --file {{.WORKSTATION_RESOURCES_DIR}}/Brewfile
     sources:
-      - '{{.BREWFILE}}'
+      - '{{.WORKSTATION_RESOURCES_DIR}}/Brewfile'
     generates:
-      - '{{.BREWFILE}}.lock.json'
+      - '{{.WORKSTATION_RESOURCES_DIR}}/Brewfile.lock.json'
     preconditions:
       - command -v brew
-      - test -f {{.BREWFILE}}
+      - test -f {{.WORKSTATION_RESOURCES_DIR}}/Brewfile
 
   golang:
     desc: Set up Go tools
-    deps: ['brew']
-    cmd: go install github.com/drone/envsubst/cmd/envsubst@latest
+    deps: [brew]
+    cmds: []
     preconditions:
       - command -v go
 
   krew:
     desc: Set up Krew tools
-    deps: ['brew']
-    cmd: kubectl krew install cert-manager cnpg browse-pvc rook-ceph view-secret
+    deps: [brew]
+    cmds:
+      - kubectl krew install cert-manager cnpg browse-pvc rook-ceph view-secret
     preconditions:
+      - command -v kubectl
       - kubectl krew &>/dev/null
 
   python:
     desc: Set up Python tools
-    deps: ['brew']
+    deps: [brew]
     cmds:
       - python3 -m venv {{.VIRTUAL_ENV}}
-      - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade pip setuptools wheel'
-      - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade --requirement "{{.PIP_REQUIREMENTS_FILE}}"'
+      - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade pip'
+      - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade --requirement "{{.WORKSTATION_RESOURCES_DIR}}/requirements.txt"'
     sources:
-      - '{{.PIP_REQUIREMENTS_FILE}}'
+      - '{{.WORKSTATION_RESOURCES_DIR}}/requirements.txt'
     generates:
       - '{{.VIRTUAL_ENV}}/pyvenv.cfg'
     preconditions:
       - command -v python3
-      - test -f {{.PIP_REQUIREMENTS_FILE}}
+      - test -f {{.WORKSTATION_RESOURCES_DIR}}/requirements.txt

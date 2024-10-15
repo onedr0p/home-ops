@@ -4,8 +4,6 @@ version: '3'
 
 vars:
   BOOTSTRAP_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/bootstrap/resources'
-  MINIJINJA_CMD: '{{.ROOT_DIR}}/.bin/minijinja --env --trim-blocks --lstrip-blocks --autoescape=none --strict'
-  OP_CMD: op run --env-file {{.CLUSTER_DIR}}/bootstrap/op.env --no-masking
   TALOS_CONTROLLER:
     sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
 
@@ -14,7 +12,7 @@ tasks:
   kubernetes:
     desc: Bootstrap a Talos Kubernetes cluster backed by flux, sops, and rook
     prompt: Bootstrap a Talos Kubernetes cluster ... continue?
-    summary: |
+    summary: |-
       CLUSTER: Cluster to run command against (default: main)
       NODES: Nodes in the cluster to reset Rook on (required, comma delimited, e.g. k8s-0,k8s-1)
       DISK: Disk to reset Rook on (required, e.g. /dev/nvme0n1)
@@ -29,7 +27,7 @@ tasks:
       - { task: rook, vars: *vars }
       - { task: flux, vars: *vars }
     requires:
-      vars: ['CLUSTER', 'NODES', 'DISK']
+      vars: [CLUSTER, NODES, DISK]
     preconditions:
       - talosctl config info &>/dev/null
       - test -f {{.CLUSTER_DIR}}/talosconfig
@@ -64,12 +62,15 @@ tasks:
     cmds:
       - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/bootstrap/flux
       - for: { var: BOOTSTRAP_TEMPLATES }
-        cmd: '{{.OP_CMD}} -- {{.MINIJINJA_CMD}} {{.ITEM}} | kubectl apply --server-side --filename -'
+        cmd: >
+          op run --env-file {{.CLUSTER_DIR}}/bootstrap/op.env --no-masking --
+          minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.ITEM}}
+          | kubectl apply --server-side --filename -
       - kubectl apply --server-side --filename {{.CLUSTER_DIR}}/flux/vars/cluster-settings.yaml
       - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/flux/config
     vars:
       BOOTSTRAP_TEMPLATES:
-        sh: find {{.CLUSTER_DIR}}/bootstrap -type f -name '*.j2'
+        sh: ls {{.CLUSTER_DIR}}/bootstrap/**/*.j2
     env:
       VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
     preconditions:
@@ -92,7 +93,9 @@ tasks:
   rook-disk:
     internal: true
     cmds:
-      - '{{.MINIJINJA_CMD}} {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-disk-job.yaml.j2 | kubectl apply -f -'
+      - >
+        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-disk-job.yaml.j2
+        | kubectl apply --server-side --filename -
       - bash {{.BOOTSTRAP_RESOURCES_DIR}}/scripts/wait-for-job.sh {{.JOB}} {{.NS}}
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}}
@@ -112,7 +115,9 @@ tasks:
   rook-data:
     internal: true
     cmds:
-      - '{{.MINIJINJA_CMD}} {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-data-job.yaml.j2 | kubectl apply -f -'
+      - >
+        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-data-job.yaml.j2
+        | kubectl apply --server-side --filename -
       - bash {{.BOOTSTRAP_RESOURCES_DIR}}/scripts/wait-for-job.sh {{.JOB}} {{.NS}}
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}}

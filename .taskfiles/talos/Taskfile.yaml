@@ -16,20 +16,19 @@ vars:
   HOME_SERVICE_ADDR: voyager.internal # Ref: https://github.com/onedr0p/home-service
   HOME_SERVICE_USER: devin
   HOME_SERVICE_MATCHBOX_DIR: /var/opt/home-service/apps/matchbox/data/config
-  MINIJINJA_CMD: '{{.ROOT_DIR}}/.bin/minijinja --env --trim-blocks --lstrip-blocks --autoescape=none'
 
 tasks:
 
   apply-config:
     desc: Apply Talos configuration to a node
-    cmd: |
-      sops exec-file {{.CLUSTER_DIR}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml "{{.MINIJINJA_CMD}} {}" | \
-          talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
+    cmd: >
+      sops exec-file {{.CLUSTER_DIR}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml "minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {}"
+      | talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "no-reboot"}}'
     env: *vars
     requires:
-      vars: ['CLUSTER', 'HOSTNAME']
+      vars: [CLUSTER, HOSTNAME]
     preconditions:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - test -f {{.CLUSTER_DIR}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml
@@ -44,7 +43,7 @@ tasks:
       - until kubectl wait --timeout=5m --for=jsonpath=.status.ceph.health=HEALTH_OK cephcluster --all --all-namespaces; do sleep 10; done
     vars: *vars
     requires:
-      vars: ['CLUSTER', 'HOSTNAME']
+      vars: [CLUSTER, HOSTNAME]
     preconditions:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
@@ -57,7 +56,7 @@ tasks:
       - talosctl --nodes {{.TALOS_CONTROLLER}} upgrade-k8s --to {{.KUBERNETES_VERSION}}
     vars: *vars
     requires:
-      vars: ['CLUSTER']
+      vars: [CLUSTER]
     preconditions:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
@@ -68,7 +67,7 @@ tasks:
     prompt: Reset Talos '{{.HOSTNAME}}' node on the '{{.CLUSTER}}' cluster ... continue?
     cmd: talosctl reset --nodes {{.HOSTNAME}} --graceful=false
     requires:
-      vars: ['CLUSTER', 'HOSTNAME']
+      vars: [CLUSTER, HOSTNAME]
     preconditions:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
@@ -82,26 +81,32 @@ tasks:
       NODES:
         sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(",")'
     requires:
-      vars: ['CLUSTER']
+      vars: [CLUSTER]
     preconditions:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
       - talosctl --nodes {{.NODES}} get machineconfig &>/dev/null
 
   bootstrap-matchbox:
-    desc: Bootstrap required Matchbox configuration to PXE Boot machine
+    desc: Sync required Matchbox configuration to PXE Boot machine
     cmds:
-      - for: ['kernel-amd64', 'initramfs-amd64.xz']
-        cmd: |
-          curl -skL https://factory.talos.dev/image/{{.TALOS_SCHEMATIC_ID}}/{{.TALOS_VERSION}}/{{.ITEM}} | \
-              curl -skT - -u "{{.HOME_SERVICE_USER}}:" \
-                  sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/{{.ITEM}}
-      - find {{.CLUSTER_DIR}}/bootstrap/talos/assets -type f | xargs -I{} sh -c "sops --decrypt {} | {{.MINIJINJA_CMD}} - | curl -skT - -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/\$(basename {} | sed 's/\.secret\.sops//')"
-      - find {{.CLUSTER_DIR}}/bootstrap/talos/groups -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/groups/
-      - find {{.CLUSTER_DIR}}/bootstrap/talos/profiles -type f | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/profiles/
+      - for: [kernel-amd64, initramfs-amd64.xz]
+        cmd: >
+          curl -skL https://factory.talos.dev/image/{{.TALOS_SCHEMATIC_ID}}/{{.TALOS_VERSION}}/{{.ITEM}}
+          | curl -skT - -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/{{.ITEM}}
+      - >
+        find {{.CLUSTER_DIR}}/bootstrap/talos/assets -type f
+        | xargs -I{} sh -c "sops --decrypt {} | minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none -
+        | curl -skT - -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/assets/\$(basename {} | sed 's/\.secret\.sops//')"
+      - >
+        find {{.CLUSTER_DIR}}/bootstrap/talos/groups -type f
+        | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/groups/
+      - >
+        find {{.CLUSTER_DIR}}/bootstrap/talos/profiles -type f
+        | xargs -I{} curl -skT {} -u "{{.HOME_SERVICE_USER}}:" sftp://{{.HOME_SERVICE_ADDR}}/{{.HOME_SERVICE_MATCHBOX_DIR}}/profiles/
       - ssh -l {{.HOME_SERVICE_USER}} {{.HOME_SERVICE_ADDR}} "cd /var/opt/home-service ; go-task restart-matchbox"
     vars: *vars
     requires:
-      vars: ['CLUSTER']
+      vars: [CLUSTER]
     preconditions:
       - ping -c1 {{.HOME_SERVICE_ADDR}}
