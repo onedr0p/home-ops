@@ -57,9 +57,7 @@ tasks:
       - kubectl --namespace {{.NS}} delete job volsync-list-{{.APP}}
     vars:
       NS: '{{.NS | default "default"}}'
-    env:
-      APP: '{{.APP}}'
-      NS: '{{.NS | default "default"}}'
+    env: *vars
     requires:
       vars: [CLUSTER, APP]
     preconditions:
@@ -152,34 +150,6 @@ tasks:
       vars: [CLUSTER, APP]
     preconditions:
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/scripts/which-controller.sh
-
-  cleanup:
-    desc: Delete volume populator PVCs in all namespaces
-    summary: |-
-      CLUSTER: Cluster to run command against (required)
-    cmds:
-      - for: { var: DEST }
-        cmd: |
-          {{- $items := (split "/" .ITEM) }}
-          kubectl --namespace {{ $items._0 }} delete pvc {{ $items._1 }}
-      - for: { var: CACHE }
-        cmd: |
-          {{- $items := (split "/" .ITEM) }}
-          kubectl --namespace {{ $items._0 }} delete pvc {{ $items._1 }}
-      - for: { var: SNAPS }
-        cmd: |
-          {{- $items := (split "/" .ITEM) }}
-          kubectl --namespace {{ $items._0 }} delete volumesnapshot {{ $items._1 }}
-    vars:
-      DEST:
-        sh: kubectl get pvc --all-namespaces --no-headers | grep "dst-dest" | awk '{print $1 "/" $2}'
-      CACHE:
-        sh: kubectl get pvc --all-namespaces --no-headers | grep "dst-cache" | awk '{print $1 "/" $2}'
-      SNAPS:
-        sh: kubectl get volumesnapshot --all-namespaces --no-headers | grep "dst-dest" | awk '{print $1 "/" $2}'
-    env: *vars
-    requires:
-      vars: [CLUSTER]
 
   # Suspend the Flux ks and hr
   .suspend:

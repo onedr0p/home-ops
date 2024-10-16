@@ -35,10 +35,9 @@ tasks:
     interactive: true
     cmd: kubectl browse-pvc --namespace {{.NS}} --image docker.io/library/alpine:latest {{.CLAIM}}
     vars:
-      CLUSTER: '{{.CLUSTER}}'
       NS: '{{.NS | default "default"}}'
     requires:
-      vars: [CLAIM]
+      vars: [CLUSTER, CLAIM]
     preconditions:
       - kubectl --namespace {{.NS}} get persistentvolumeclaims {{.CLAIM}}
 
@@ -56,8 +55,9 @@ tasks:
       kubectl --namespace {{.NS}} annotate externalsecret {{.SECRET}} force-sync=$(date +%s) --overwrite
       {{end}}
     vars:
-      SECRET: '{{ .SECRET | default ""}}'
       NS: '{{.NS | default "default"}}'
-      CLUSTER: '{{.CLUSTER}}'
+      SECRET: '{{ .SECRET | default ""}}'
+    requires:
+      vars: [CLUSTER]
     preconditions:
       - '{{if ne .SECRET ""}}kubectl --namespace {{.NS}} get externalsecret {{.SECRET}}{{end}}'
