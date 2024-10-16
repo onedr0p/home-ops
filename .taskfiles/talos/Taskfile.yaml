@@ -26,10 +26,12 @@ tasks:
   upgrade:
     desc: Upgrade Talos on a node
     cmds:
+      - kubectl cnpg maintenance set --reusePVC --all-namespaces
       - until kubectl wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
       - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:{{.TALOS_VERSION}}" --timeout=10m
       - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
       - until kubectl wait --timeout=5m --for=jsonpath=.status.ceph.health=HEALTH_OK cephcluster --all --all-namespaces; do sleep 10; done
+      - kubectl cnpg maintenance unset --reusePVC --all-namespaces
     vars:
       SCHEMATIC_ID:
         sh: talosctl get nodeannotationspecs --nodes {{.NODE}} -o jsonpath='{.spec.value}'
@@ -39,6 +41,7 @@ tasks:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
+      - kubectl cnpg &>/dev/null
       - >
         curl -fsSL -H "Authorization: Bearer $(curl -fsSL 'https://ghcr.io/token?scope=repository:siderolabs/talos:pull' | jq -r '.token')"
         https://ghcr.io/v2/siderolabs/talos/manifests/{{.VERSION}} &>/dev/null
