@@ -33,7 +33,7 @@ tasks:
     cmds:
       - flux {{.STATE}} kustomization volsync
       - flux --namespace {{.NS}} {{.STATE}} helmrelease volsync
-      - kubectl --namespace {{.NS}} scale deployment volsync --replicas {{if eq "suspend" .STATE}}0{{else}}1{{end}}
+      - kubectl --namespace {{.NS}} scale deployment --all --replicas {{if eq "suspend" .STATE}}0{{else}}1{{end}}
     vars:
       NS: '{{.NS | default "volsync-system"}}'
       STATE: '{{index .MATCH 0}}'

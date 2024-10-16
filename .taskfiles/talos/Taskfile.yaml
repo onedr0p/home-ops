@@ -15,7 +15,7 @@ tasks:
       KUBERNETES_VERSION:
         sh: kubectl get node {{.HOSTNAME}} --output=jsonpath="{.status.nodeInfo.kubeletVersion}"
       TALOS_VERSION:
-        sh: kubectl get node {{.HOSTNAME}} --output=jsonpath='{.metadata.labels.feature\.node\.kubernetes\.io/system-os_release\.VERSION_ID}'
+        sh: kubectl get node {{.HOSTNAME}} --output=jsonpath="{.status.nodeInfo.osImage}" | awk -F'[()]' '{print $2}'
     requires:
       vars: [CLUSTER, HOSTNAME]
     preconditions:
@@ -23,18 +23,16 @@ tasks:
       - test -f {{.CLUSTER_DIR}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
 
-  upgrade:
-    desc: Upgrade Talos on a node
+  upgrade-node:
+    desc: Upgrade Talos on a single node
     cmds:
-      - kubectl cnpg maintenance set --reusePVC --all-namespaces
-      - until kubectl wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
-      - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:{{.TALOS_VERSION}}" --timeout=10m
+      - task: '{{if ne true .ROLLOUT}}down{{else}}noop{{end}}'
+      - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:{{.VERSION}}" --timeout=10m
       - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
-      - until kubectl wait --timeout=5m --for=jsonpath=.status.ceph.health=HEALTH_OK cephcluster --all --all-namespaces; do sleep 10; done
-      - kubectl cnpg maintenance unset --reusePVC --all-namespaces
+      - task: '{{if ne true .ROLLOUT}}up{{else}}noop{{end}}'
     vars:
       SCHEMATIC_ID:
-        sh: talosctl get nodeannotationspecs --nodes {{.NODE}} -o jsonpath='{.spec.value}'
+        sh: kubectl get node {{.HOSTNAME}} --output=jsonpath='{.metadata.annotations.extensions\.talos\.dev/schematic}'
     requires:
       vars: [CLUSTER, HOSTNAME, VERSION]
     preconditions:
@@ -42,15 +40,31 @@ tasks:
       - talosctl config info &>/dev/null
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
       - kubectl cnpg &>/dev/null
-      - >
-        curl -fsSL -H "Authorization: Bearer $(curl -fsSL 'https://ghcr.io/token?scope=repository:siderolabs/talos:pull' | jq -r '.token')"
-        https://ghcr.io/v2/siderolabs/talos/manifests/{{.VERSION}} &>/dev/null
+      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/talos/releases/tag/{{.VERSION}}
+
+  upgrade-cluster:
+    desc: Upgrade Talos on the whole cluster
+    cmds:
+      - task: down
+      - for: { var: HOSTNAMES }
+        task: upgrade-node
+        vars:
+          HOSTNAME: '{{.ITEM}}'
+          VERSION: '{{.VERSION}}'
+          ROLLOUT: true
+      - task: up
+    vars:
+      HOSTNAMES:
+        sh: kubectl get nodes --output=jsonpath='{.items[*].metadata.name}'
+    requires:
+      vars: [CLUSTER, VERSION]
 
   upgrade-k8s:
     desc: Upgrade Kubernetes
     cmds:
-      - until kubectl wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
+      - task: down
       - talosctl --nodes {{.CONTROLLER}} upgrade-k8s --to {{.VERSION}}
+      - task: up
     vars:
       CONTROLLER:
         sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
@@ -60,9 +74,8 @@ tasks:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
       - talosctl --nodes {{.CONTROLLER}} get machineconfig &>/dev/null
-      - >
-        curl -fsSL -H "Authorization: Bearer $(curl -fsSL 'https://ghcr.io/token?scope=repository:siderolabs/kubelet:pull' | jq -r '.token')"
-        https://ghcr.io/v2/siderolabs/kubelet/manifests/{{.VERSION}} &>/dev/null
+      - kubectl cnpg &>/dev/null
+      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/kubelet/releases/tag/{{.VERSION}}
 
   reset-node:
     desc: Reset a Talos node and shut it down
@@ -88,3 +101,24 @@ tasks:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
       - talosctl --nodes {{.NODES}} get machineconfig &>/dev/null
+
+  down:
+    internal: true
+    cmds:
+      - flux suspend kustomization --all --all-namespaces
+      - kubectl cnpg maintenance set --reusePVC --all-namespaces
+      - until kubectl wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
+      - kubectl --namespace volsync-system scale deployment --all --replicas 0
+
+  up:
+    internal: true
+    cmds:
+      - until kubectl wait --timeout=5m --for=jsonpath=.status.ceph.health=HEALTH_OK cephcluster --all --all-namespaces; do sleep 10; done
+      - defer: flux resume kustomization --all --all-namespaces
+      - defer: kubectl cnpg maintenance unset --all-namespaces
+      - defer: kubectl --namespace volsync-system scale deployment --all --replicas 1
+
+  noop:
+    internal: true
+    silent: true
+    cmd: noop() { :; }
