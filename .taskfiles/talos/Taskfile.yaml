@@ -89,9 +89,9 @@ tasks:
   reset-cluster:
     desc: Reset all the Talos nodes and shut 'em down
     prompt: Reset Talos on the '{{.CLUSTER}}' cluster ... continue?
-    cmd: talosctl reset --nodes {{.NODES}} --graceful=false
+    cmd: talosctl reset --nodes {{.HOSTNAMES}} --graceful=false
     vars:
-      NODES:
+      HOSTNAMES:
         sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(",")'
     requires:
       vars: [CLUSTER]
