@@ -16,7 +16,7 @@ tasks:
       --path {{.CLUSTER_DIR}}/apps/{{.PATH}}
       {{- if contains "not found" .KS }}--dry-run \{{ end }}
       | yq 'with(select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization"); .metadata.namespace = "{{.NS}}")' -
-      | kubectl apply --server-side --field-manager=kustomize-controller -f -
+      | kubectl apply --server-side --field-manager=kustomize-controller --filename -
     requires:
       vars: [CLUSTER, PATH]
     vars:
