@@ -69,6 +69,24 @@ tasks:
     desc: Unlock a Restic repository for an application
     summary: |-
       CLUSTER: Cluster to run command against (required)
+      NS: Namespace the application is in (default: default)
+      APP: Application to unlock (required)
+    cmds:
+      - kubectl --namespace {{.NS}} patch replicationsources {{.APP}} --type merge --patch '{"spec":{"restic":{"unlock":"{{.TS}}"}}}'
+      - kubectl --namespace {{.NS}} patch replicationsources {{.APP}}-r2 --type merge --patch '{"spec":{"restic":{"unlock":"{{.TS}}"}}}'
+    vars:
+      NS: '{{.NS | default "default"}}'
+      TS: '{{now | unixEpoch}}'
+    requires:
+      vars: [CLUSTER, APP]
+    preconditions:
+      - kubectl --namespace {{.NS}} get replicationsources {{.APP}} &>/dev/null
+      - kubectl --namespace {{.NS}} get replicationsources {{.APP}}-r2 &>/dev/null
+
+  unlock-legacy:
+    desc: Unlock a Restic repository for an application
+    summary: |-
+      CLUSTER: Cluster to run command against (required)
       NS: Namespace the PVC is in (default: default)
       APP: Application to unlock (required)
     cmds:
