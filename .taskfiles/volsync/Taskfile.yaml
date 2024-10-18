@@ -28,12 +28,13 @@ tasks:
   state-*:
     desc: Suspend or Resume Volsync
     summary: |-
-      CLUSTER: Cluster to run command against (required)
+      CLUSTER: Cluster to run command against (default: main)
       STATE: resume or suspend (required)
     cmds:
+      - until kubectl wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
       - flux {{.STATE}} kustomization volsync
       - flux --namespace {{.NS}} {{.STATE}} helmrelease volsync
-      - kubectl --namespace {{.NS}} scale deployment --all --replicas {{if eq "suspend" .STATE}}0{{else}}1{{end}}
+      - kubectl --namespace {{.NS}} scale deployment --all --replicas {{if eq .STATE "suspend"}}0{{else}}1{{end}}
     vars:
       NS: '{{.NS | default "volsync-system"}}'
       STATE: '{{index .MATCH 0}}'
@@ -44,7 +45,7 @@ tasks:
   list:
     desc: List snapshots for an application
     summary: |-
-      CLUSTER: Cluster to run command against (required)
+      CLUSTER: Cluster to run command against (default: main)
       NS: Namespace the PVC is in (default: default)
       APP: Application to list snapshots for (required)
     cmds:
@@ -66,27 +67,21 @@ tasks:
     silent: true
 
   unlock:
-    desc: Unlock a Restic repository for an application
+    desc: Unlock all Restic repositories
     summary: |-
-      CLUSTER: Cluster to run command against (required)
-      NS: Namespace the application is in (default: default)
-      APP: Application to unlock (required)
-    cmds:
-      - kubectl --namespace {{.NS}} patch --field-manager=flux-client-side-apply replicationsources {{.APP}} --type merge --patch '{"spec":{"restic":{"unlock":"{{.TS}}"}}}'
-      - kubectl --namespace {{.NS}} patch --field-manager=flux-client-side-apply replicationsources {{.APP}}-r2 --type merge --patch '{"spec":{"restic":{"unlock":"{{.TS}}"}}}'
+      CLUSTER: Cluster to run command against (default: main)
+    cmd: >
+      kubectl get replicationsources --all-namespaces --no-headers -A | awk '{print $1, $2}'
+      | xargs --max-procs=2 -l bash -c 'kubectl --namespace "$0" patch --field-manager=flux-client-side-apply replicationsources "$1" --type merge --patch "{\"spec\":{\"restic\":{\"unlock\":\"{{.TS}}\"}}}"'
     vars:
-      NS: '{{.NS | default "default"}}'
       TS: '{{now | unixEpoch}}'
     requires:
-      vars: [CLUSTER, APP]
-    preconditions:
-      - kubectl --namespace {{.NS}} get replicationsources {{.APP}} &>/dev/null
-      - kubectl --namespace {{.NS}} get replicationsources {{.APP}}-r2 &>/dev/null
+      vars: [CLUSTER]
 
-  unlock-legacy:
+  unlock-local:
     desc: Unlock a Restic repository for an application
     summary: |-
-      CLUSTER: Cluster to run command against (required)
+      CLUSTER: Cluster to run command against (default: main)
       NS: Namespace the PVC is in (default: default)
       APP: Application to unlock (required)
     cmds:
@@ -113,7 +108,7 @@ tasks:
   snapshot:
     desc: Snapshot a PVC for an application
     summary: |-
-      CLUSTER: Cluster to run command against (required)
+      CLUSTER: Cluster to run command against (default: main)
       NS: Namespace the PVC is in (default: default)
       APP: Application to snapshot (required)
     cmds:
@@ -138,7 +133,7 @@ tasks:
   restore:
     desc: Restore a PVC for an application
     summary: |-
-      CLUSTER: Cluster to run command against (required)
+      CLUSTER: Cluster to run command against (default: main)
       NS: Namespace the PVC is in (default: default)
       APP: Application to restore (required)
       PREVIOUS: Previous number of snapshots to restore (default: 2)

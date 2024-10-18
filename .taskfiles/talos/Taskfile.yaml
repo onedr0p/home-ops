@@ -6,6 +6,9 @@ tasks:
 
   apply-config:
     desc: Apply Talos configuration to a node
+    summary: |-
+      CLUSTER: Cluster to run command against (default: main)
+      HOSTNAME: Node to apply configuration to (required)
     cmd: >
       sops exec-file {{.CLUSTER_DIR}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml "minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {}"
       | talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
@@ -25,11 +28,16 @@ tasks:
 
   upgrade-node:
     desc: Upgrade Talos on a single node
+    prompt: Upgrade Talos node '{{.HOSTNAME}}' on the '{{.CLUSTER}}' cluster to {{.VERSION}} ... continue?
+    summary: |-
+      CLUSTER: Cluster to run command against (default: main)
+      HOSTNAME: Node to upgrade (required)
+      VERSION: Talos version to upgrade to (required)
     cmds:
-      - task: '{{if ne true .ROLLOUT}}down{{else}}noop{{end}}'
+      - task: '{{if ne .ROLLOUT true}}down{{else}}noop{{end}}'
       - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:{{.VERSION}}" --timeout=10m
       - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
-      - task: '{{if ne true .ROLLOUT}}up{{else}}noop{{end}}'
+      - task: '{{if ne .ROLLOUT true}}up{{else}}noop{{end}}'
     vars:
       SCHEMATIC_ID:
         sh: kubectl get node {{.HOSTNAME}} --output=jsonpath='{.metadata.annotations.extensions\.talos\.dev/schematic}'
@@ -43,6 +51,10 @@ tasks:
 
   upgrade-cluster:
     desc: Upgrade Talos on the whole cluster
+    prompt: Upgrade Talos cluster '{{.CLUSTER}}' to {{.VERSION}} ... continue?
+    summary: |-
+      CLUSTER: Cluster to run command against (default: main)
+      VERSION: Talos version to upgrade to (required)
     cmds:
       - task: down
       - for: { var: HOSTNAMES }
@@ -60,6 +72,10 @@ tasks:
 
   upgrade-k8s:
     desc: Upgrade Kubernetes
+    summary: |-
+      CLUSTER: Cluster to run command against (default: main)
+      VERSION: Kubernetes version to upgrade to (required)
+    prompt: Upgrade Kubernetes cluster '{{.CLUSTER}}' to {{.VERSION}} ... continue?
     cmds:
       - task: down
       - talosctl --nodes {{.CONTROLLER}} upgrade-k8s --to {{.VERSION}}
@@ -77,7 +93,10 @@ tasks:
 
   reset-node:
     desc: Reset a Talos node and shut it down
-    prompt: Reset Talos '{{.HOSTNAME}}' node on the '{{.CLUSTER}}' cluster ... continue?
+    summary: |-
+      CLUSTER: Cluster to run command against (default: main)
+      HOSTNAME: Node to reset (required)
+    prompt: Reset Talos node '{{.HOSTNAME}}' on the '{{.CLUSTER}}' cluster ... continue?
     cmd: talosctl reset --nodes {{.HOSTNAME}} --graceful=false
     requires:
       vars: [CLUSTER, HOSTNAME]
@@ -88,7 +107,9 @@ tasks:
 
   reset-cluster:
     desc: Reset all the Talos nodes and shut 'em down
-    prompt: Reset Talos on the '{{.CLUSTER}}' cluster ... continue?
+    summary: |-
+      CLUSTER: Cluster to run command against (default: main)
+    prompt: Reset Talos cluster '{{.CLUSTER}}' ... continue?
     cmd: talosctl reset --nodes {{.HOSTNAMES}} --graceful=false
     vars:
       HOSTNAMES:
@@ -116,7 +137,17 @@ tasks:
       - defer: kubectl cnpg maintenance unset --all-namespaces
       - defer: kubectl --namespace volsync-system scale deployment --all --replicas 1
 
+  # Ref: https://github.com/go-task/task/issues/608
   noop:
     internal: true
     silent: true
     cmd: noop() { :; }
+
+  test:
+    prompt: Test the Talos cluster?
+    cmd: echo hello
+
+  call-test:
+    prompt: Call the test task?
+    cmds:
+      - task: test
