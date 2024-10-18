@@ -61,7 +61,7 @@ spec:
     manual: restore-once
   restic:
     repository: "${APP}-volsync-secret"
-    copyMethod: Snapshot # must be Snapshot
+    copyMethod: Snapshot
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:-csi-ceph-blockpool}"
     cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:-openebs-hostpath}"
     cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:-ReadWriteOnce}"]
@@ -69,6 +69,7 @@ spec:
     storageClassName: "${VOLSYNC_STORAGECLASS:-ceph-block}"
     accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteOnce}"]
     capacity: "${VOLSYNC_CAPACITY}"
+    # enableFileDeletion: true # Uncomment on next Volsync release
     # cleanupCachePVC: true # Uncomment on next Volsync release
     # cleanupTempPVC: true # Uncomment on next Volsync release
     # moverSecurityContext: # Not needed due to privileged movers
