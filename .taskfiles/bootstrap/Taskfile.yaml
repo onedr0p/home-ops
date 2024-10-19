@@ -32,7 +32,7 @@ tasks:
 
   etcd:
     internal: true
-    cmd: until talosctl --nodes {{.TALOS_CONTROLLER}} bootstrap; do sleep 10; done
+    cmd: until talosctl --nodes {{.TALOS_CONTROLLER}} bootstrap; do sleep 5; done
     vars:
       TALOS_CONTROLLER:
         sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
@@ -53,9 +53,9 @@ tasks:
   apps:
     internal: true
     cmds:
-      - until kubectl wait --for=condition=Ready=False nodes --all --timeout=10m; do sleep 10; done
+      - until kubectl wait --for=condition=Ready=False nodes --all --timeout=10m; do sleep 5; done
       - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
-      - until kubectl wait --for=condition=Ready nodes --all --timeout=10m; do sleep 10; done
+      - until kubectl wait --for=condition=Ready nodes --all --timeout=10m; do sleep 5; done
     preconditions:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - test -f {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml
@@ -81,7 +81,7 @@ tasks:
       - >
         minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.yaml.j2
         | kubectl apply --server-side --filename -
-      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 1; done
+      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}}
       - kubectl --namespace {{.NS}} delete job {{.JOB}}
@@ -102,7 +102,7 @@ tasks:
       - >
         minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.yaml.j2
         | kubectl apply --server-side --filename -
-      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 1; done
+      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}}
       - kubectl --namespace {{.NS}} delete job {{.JOB}}

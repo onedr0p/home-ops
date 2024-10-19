@@ -126,13 +126,13 @@ tasks:
     cmds:
       - flux --namespace flux-system suspend kustomization --all
       - kubectl cnpg maintenance set --reusePVC --all-namespaces
-      - until kubectl wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
+      - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 5; done
       - kubectl --namespace volsync-system scale deployment --all --replicas 0
 
   up:
     internal: true
     cmds:
-      - until kubectl wait --timeout=10m --for=jsonpath=.status.ceph.health=HEALTH_OK cephcluster --all --all-namespaces; do sleep 10; done
+      - until kubectl wait cephcluster --for=jsonpath=.status.ceph.health=HEALTH_OK --timeout=10m --all --all-namespaces &>/dev/null; do sleep 5; done
       - defer: flux --namespace flux-system resume kustomization --all
       - defer: kubectl cnpg maintenance unset --all-namespaces
       - defer: kubectl --namespace volsync-system scale deployment --all --replicas 1
