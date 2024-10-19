@@ -10,6 +10,7 @@ version: '3'
 
 x-vars: &vars
   APP: '{{.APP}}'
+  JOB: '{{.JOB}}'
   CLAIM: '{{.CLAIM}}'
   CONTROLLER: '{{.CONTROLLER}}'
   NS: '{{.NS}}'
@@ -31,14 +32,13 @@ tasks:
       CLUSTER: Cluster to run command against (default: main)
       STATE: resume or suspend (required)
     cmds:
-      - until kubectl wait --timeout=5m --for=condition=Complete jobs --all --all-namespaces; do sleep 10; done
+      - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 1; done
       - flux {{.STATE}} kustomization volsync
       - flux --namespace {{.NS}} {{.STATE}} helmrelease volsync
       - kubectl --namespace {{.NS}} scale deployment --all --replicas {{if eq .STATE "suspend"}}0{{else}}1{{end}}
     vars:
       NS: '{{.NS | default "volsync-system"}}'
       STATE: '{{index .MATCH 0}}'
-    env: *vars
     requires:
       vars: [CLUSTER]
 
@@ -50,20 +50,20 @@ tasks:
       APP: Application to list snapshots for (required)
     cmds:
       - >
-        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/templates/list.yaml.j2
+        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/list.yaml.j2
         | kubectl apply --server-side --filename -
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/scripts/wait-for-job.sh volsync-list-{{.APP}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/volsync-list-{{.APP}} --for condition=complete --timeout=1m
-      - kubectl --namespace {{.NS}} logs job/volsync-list-{{.APP}} --container main
-      - kubectl --namespace {{.NS}} delete job volsync-list-{{.APP}}
+      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 1; done
+      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
+      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container main
+      - kubectl --namespace {{.NS}} delete job/{{.JOB}}
     vars:
       NS: '{{.NS | default "default"}}'
+      JOB: volsync-list-{{.APP}}
     env: *vars
     requires:
       vars: [CLUSTER, APP]
     preconditions:
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/scripts/wait-for-job.sh
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/templates/list.yaml.j2
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/list.yaml.j2
     silent: true
 
   unlock:
@@ -86,21 +86,21 @@ tasks:
       APP: Application to unlock (required)
     cmds:
       - >
-        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/templates/unlock.yaml.j2
+        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/unlock.yaml.j2
         | kubectl apply --server-side --filename -
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/scripts/wait-for-job.sh volsync-unlock-{{.APP}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/volsync-unlock-{{.APP}} --for condition=complete --timeout=1m
-      - kubectl --namespace {{.NS}} logs job/volsync-unlock-{{.APP}} --container minio
-      - kubectl --namespace {{.NS}} logs job/volsync-unlock-{{.APP}} --container r2
-      - kubectl --namespace {{.NS}} delete job volsync-unlock-{{.APP}}
+      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 1; done
+      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
+      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container minio
+      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container r2
+      - kubectl --namespace {{.NS}} delete job/{{.JOB}}
     vars:
       NS: '{{.NS | default "default"}}'
+      JOB: volsync-unlock-{{.APP}}
     env: *vars
     requires:
       vars: [CLUSTER, APP]
     preconditions:
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/scripts/wait-for-job.sh
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/templates/unlock.yaml.j2
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/unlock.yaml.j2
     silent: true
 
   # To run backup jobs in parallel for all replicationsources:
@@ -112,20 +112,15 @@ tasks:
       NS: Namespace the PVC is in (default: default)
       APP: Application to snapshot (required)
     cmds:
-      - kubectl --namespace {{.NS}} patch replicationsources {{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"{{.NOW}}"}}}'
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/scripts/wait-for-job.sh volsync-src-{{.APP}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/volsync-src-{{.APP}} --for condition=complete --timeout=120m
+      - kubectl --namespace {{.NS}} patch replicationsources {{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"{{.TS}}"}}}'
+      - until kubectl --namespace {{.NS}} get job/volsync-src-{{.APP}} &>/dev/null; do sleep 1; done
+      - kubectl --namespace {{.NS}} wait job/volsync-src-{{.APP}} --for=condition=complete --timeout=120m
     vars:
-      NOW: '{{now | date "150405"}}'
+      TS: '{{now | unixEpoch}}'
       NS: '{{.NS | default "default"}}'
-      CONTROLLER:
-        sh: '{{.VOLSYNC_RESOURCES_DIR}}/scripts/which-controller.sh {{.APP}} {{.NS}}'
-    env: *vars
     requires:
       vars: [CLUSTER, APP]
     preconditions:
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/scripts/which-controller.sh
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/scripts/wait-for-job.sh
       - kubectl --namespace {{.NS}} get replicationsources {{.APP}}
 
   # To run restore jobs in parallel for all replicationdestinations:
@@ -146,8 +141,6 @@ tasks:
       NS: '{{.NS | default "default"}}'
       PREVIOUS: '{{.PREVIOUS | default 2}}'
       RESTORE_AS_OF: '{{.RESTORE_AS_OF}}'
-      CONTROLLER:
-        sh: '{{.VOLSYNC_RESOURCES_DIR}}/scripts/which-controller.sh {{.APP}} {{.NS}}'
       CLAIM:
         sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.sourcePVC}"
       ACCESS_MODES:
@@ -158,11 +151,8 @@ tasks:
         sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.restic.moverSecurityContext.runAsUser}"
       PGID:
         sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
-    env: *vars
     requires:
       vars: [CLUSTER, APP]
-    preconditions:
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/scripts/which-controller.sh
 
   # Suspend the Flux ks and hr
   .suspend:
@@ -171,39 +161,43 @@ tasks:
       - flux --namespace flux-system suspend kustomization {{.APP}}
       - flux --namespace {{.NS}} suspend helmrelease {{.APP}}
       - kubectl --namespace {{.NS}} scale {{.CONTROLLER}} --replicas 0
-      - kubectl --namespace {{.NS}} wait pod --for delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=2m
-    env: *vars
+      - kubectl --namespace {{.NS}} wait pod --for delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=5m
+    vars:
+      CONTROLLER:
+        sh: kubectl --namespace {{.NS}} get deployment {{.APP}} &>/dev/null && echo deployment || echo statefulset
 
   # Wipe the PVC of all data
   .wipe:
     internal: true
     cmds:
       - >
-        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/templates/wipe.yaml.j2
+        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/wipe.yaml.j2
         | kubectl apply --server-side --filename -
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/scripts/wait-for-job.sh volsync-wipe-{{.APP}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/volsync-wipe-{{.APP}} --for condition=complete --timeout=120m
-      - kubectl --namespace {{.NS}} logs job/volsync-wipe-{{.APP}} --container main
-      - kubectl --namespace {{.NS}} delete job volsync-wipe-{{.APP}}
+      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 1; done
+      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
+      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container main
+      - kubectl --namespace {{.NS}} delete job/{{.JOB}}
+    vars:
+      JOB: volsync-wipe-{{.APP}}
     env: *vars
     preconditions:
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/templates/wipe.yaml.j2
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/scripts/wait-for-job.sh
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/wipe.yaml.j2
 
   # Create VolSync replicationdestination CR to restore data
   .restore:
     internal: true
     cmds:
       - >
-        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/templates/replicationdestination.yaml.j2
+        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.yaml.j2
         | kubectl apply --server-side --filename -
-      - bash {{.VOLSYNC_RESOURCES_DIR}}/scripts/wait-for-job.sh volsync-dst-{{.APP}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/volsync-dst-{{.APP}} --for condition=complete --timeout=120m
-      - kubectl --namespace {{.NS}} delete replicationdestination volsync-dst-{{.APP}}
+      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 1; done
+      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=120m
+      - kubectl --namespace {{.NS}} delete replicationdestination {{.JOB}}
+    vars:
+      JOB: volsync-dst-{{.APP}}
     env: *vars
     preconditions:
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/templates/replicationdestination.yaml.j2
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/scripts/wait-for-job.sh
+      - test -f {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.yaml.j2
 
   # Resume Flux ks and hr
   .resume:
@@ -211,4 +205,3 @@ tasks:
     cmds:
       - flux --namespace {{.NS}} resume helmrelease {{.APP}}
       - flux --namespace flux-system resume kustomization {{.APP}}
-    env: *vars

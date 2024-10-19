@@ -79,10 +79,10 @@ tasks:
     internal: true
     cmds:
       - >
-        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-disk-job.yaml.j2
+        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.yaml.j2
         | kubectl apply --server-side --filename -
-      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/scripts/wait-for-job.sh {{.JOB}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
+      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 1; done
+      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}}
       - kubectl --namespace {{.NS}} delete job {{.JOB}}
     vars:
@@ -94,17 +94,16 @@ tasks:
       NODE: '{{.NODE}}'
       NS: '{{.NS}}'
     preconditions:
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/scripts/wait-for-job.sh
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-disk-job.yaml.j2
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.yaml.j2
 
   rook-data:
     internal: true
     cmds:
       - >
-        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-data-job.yaml.j2
+        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.yaml.j2
         | kubectl apply --server-side --filename -
-      - bash {{.BOOTSTRAP_RESOURCES_DIR}}/scripts/wait-for-job.sh {{.JOB}} {{.NS}}
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for condition=complete --timeout=1m
+      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 1; done
+      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}}
       - kubectl --namespace {{.NS}} delete job {{.JOB}}
     vars:
@@ -116,8 +115,7 @@ tasks:
       NODE: '{{.NODE}}'
       NS: '{{.NS}}'
     preconditions:
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/scripts/wait-for-job.sh
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/templates/rook-data-job.yaml.j2
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.yaml.j2
 
   flux:
     internal: true
