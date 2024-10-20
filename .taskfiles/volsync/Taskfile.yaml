@@ -46,7 +46,7 @@ tasks:
     desc: List snapshots for an application
     summary: |-
       CLUSTER: Cluster to run command against (default: main)
-      NS: Namespace the PVC is in (default: default)
+      NS: Namespace the application is in (default: default)
       APP: Application to list snapshots for (required)
     cmds:
       - >
@@ -82,7 +82,7 @@ tasks:
     desc: Unlock a Restic repository for an application
     summary: |-
       CLUSTER: Cluster to run command against (default: main)
-      NS: Namespace the PVC is in (default: default)
+      NS: Namespace the application is in (default: default)
       APP: Application to unlock (required)
     cmds:
       - >
@@ -106,10 +106,10 @@ tasks:
   # To run backup jobs in parallel for all replicationsources:
   #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:snapshot APP=$0 NS=$1'
   snapshot:
-    desc: Snapshot a PVC for an application
+    desc: Snapshot an application
     summary: |-
       CLUSTER: Cluster to run command against (default: main)
-      NS: Namespace the PVC is in (default: default)
+      NS: Namespace the application is in (default: default)
       APP: Application to snapshot (required)
     cmds:
       - kubectl --namespace {{.NS}} patch replicationsources {{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"{{.TS}}"}}}'
@@ -126,10 +126,10 @@ tasks:
   # To run restore jobs in parallel for all replicationdestinations:
   #    - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore APP=$0 NS=$1'
   restore:
-    desc: Restore a PVC for an application
+    desc: Restore an application
     summary: |-
       CLUSTER: Cluster to run command against (default: main)
-      NS: Namespace the PVC is in (default: default)
+      NS: Namespace the application is in (default: default)
       APP: Application to restore (required)
       PREVIOUS: Previous number of snapshots to restore (default: 2)
     cmds:
