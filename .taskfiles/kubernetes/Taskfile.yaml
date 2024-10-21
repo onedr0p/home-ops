@@ -47,8 +47,6 @@ tasks:
       CLUSTER: Cluster to run command against (default: main)
     cmd: >
       kubectl get externalsecret --all-namespaces --no-headers -A | awk '{print $1, $2}'
-      | xargs --max-procs=2 -l bash -c 'kubectl --namespace "$0" annotate externalsecret "$1" force-sync={{.TS}} --overwrite'
-    vars:
-      TS: '{{now | unixEpoch}}'
+      | xargs --max-procs=2 -l bash -c 'kubectl --namespace "$0" annotate externalsecret "$1" force-sync="{{now | unixEpoch}}" --overwrite'
     requires:
       vars: [CLUSTER]

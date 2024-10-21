@@ -11,23 +11,9 @@ spec:
     repository: {{ ENV.APP }}-volsync-secret
     destinationPVC: {{ ENV.CLAIM }}
     copyMethod: Direct
-    storageClassName: {{ ENV.CLASS_NAME }}
+    storageClassName: {{ ENV.STORAGE_CLASS_NAME }}
     accessModes: {{ ENV.ACCESS_MODES }}
-    {% if ENV.RESTORE_AS_OF | default(None) %}
-    {#
-    On bootstrap set `restoreAsOf` to the time the old cluster was destroyed.
-    This will essentially prevent volsync from trying to restore a backup
-    from a application that started with default data in the PVC.
-    Do not restore snapshots made after the following RFC3339 Timestamp.
-    date --rfc-3339=seconds (--utc)
-    #}
-    restoreAsOf: {{ ENV.RESTORE_AS_OF }}
-    {% else %}
-    {#
-    Set to the last X number of snapshots to restore from
-    #}
     previous: {{ ENV.PREVIOUS }}
-    {% endif %}
     # enableFileDeletion: true # Uncomment on next Volsync release
     # cleanupCachePVC: true # Uncomment on next Volsync release
     # cleanupTempPVC: true # Uncomment on next Volsync release
