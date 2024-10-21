@@ -64,31 +64,6 @@ tasks:
     requires:
       vars: [CLUSTER]
 
-  unlock-local:
-    desc: Unlock a Restic repository for an application
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      NS: Namespace the application is in (default: default)
-      APP: Application to unlock (required)
-    cmds:
-      - minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/unlock.yaml.j2 | kubectl apply --server-side --filename -
-      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
-      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container minio
-      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container r2
-      - kubectl --namespace {{.NS}} delete job/{{.JOB}}
-    vars:
-      NS: '{{.NS | default "default"}}'
-      JOB: volsync-unlock-{{.APP}}
-    env:
-      NS: '{{.NS}}'
-      JOB: '{{.JOB}}'
-      APP: '{{.APP}}'
-    requires:
-      vars: [CLUSTER, APP]
-    preconditions:
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/unlock.yaml.j2
-
   # To run backup jobs in parallel for all replicationsources:
   #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:snapshot APP=$0 NS=$1'
   snapshot:
@@ -120,7 +95,6 @@ tasks:
       PREVIOUS: Previous number of snapshots to restore (default: 2)
     cmds:
       - task: .suspend
-      - task: .wipe
       - task: .restore
       - task: .resume
     requires:
@@ -138,27 +112,6 @@ tasks:
       APP: '{{.APP}}'
       CONTROLLER:
         sh: kubectl --namespace {{.NS}} get deployment {{.APP}} &>/dev/null && echo deployment || echo statefulset
-
-  # Wipe the PVC of all data
-  .wipe:
-    internal: true
-    cmds:
-      - minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/wipe.yaml.j2 | kubectl apply --server-side --filename -
-      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
-      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container main
-      - kubectl --namespace {{.NS}} delete job/{{.JOB}}
-    vars:
-      JOB: volsync-wipe-{{.APP}}
-      NS: '{{.NS | default "default"}}'
-      CLAIM:
-        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.sourcePVC}"
-    env:
-      NS: '{{.NS}}'
-      JOB: '{{.JOB}}'
-      CLAIM: '{{.CLAIM}}'
-    preconditions:
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/wipe.yaml.j2
 
   .restore:
     internal: true
