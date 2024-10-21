@@ -8,12 +8,17 @@ spec:
   interval: 30m
   chart:
     spec:
-      chart: volsync
-      version: 0.10.0
+      chart: ./helm/volsync
       sourceRef:
-        kind: HelmRepository
-        name: backube
+        kind: GitRepository
+        name: volsync
         namespace: flux-system
+      # chart: volsync
+      # version: 0.10.0
+      # sourceRef:
+      #   kind: HelmRepository
+      #   name: backube
+      #   namespace: flux-system
   install:
     remediation:
       retries: 3
@@ -31,3 +36,11 @@ spec:
     manageCRDs: true
     metrics:
       disableAuth: true
+    image: &image
+      repository: quay.io/backube/volsync
+      tag: release-0.11
+    rclone: *image
+    restic: *image
+    rsync: *image
+    rsync-tls: *image
+    syncthing: *image
