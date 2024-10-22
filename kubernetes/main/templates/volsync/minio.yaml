@@ -13,10 +13,10 @@ spec:
     template:
       engineVersion: v2
       data:
-        RESTIC_REPOSITORY: "s3:http://minio.default.svc.cluster.local:9000/volsync/${APP}"
+        RESTIC_REPOSITORY: "/repository/${APP}"
         RESTIC_PASSWORD: "{{ .RESTIC_PASSWORD }}"
-        AWS_ACCESS_KEY_ID: "{{ .MINIO_ROOT_USER }}"
-        AWS_SECRET_ACCESS_KEY: "{{ .MINIO_ROOT_PASSWORD }}"
+        # AWS_ACCESS_KEY_ID: "{{ .MINIO_ROOT_USER }}"
+        # AWS_SECRET_ACCESS_KEY: "{{ .MINIO_ROOT_PASSWORD }}"
   dataFrom:
     - extract:
         key: minio
@@ -69,9 +69,9 @@ spec:
     storageClassName: "${VOLSYNC_STORAGECLASS:-ceph-block}"
     accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteOnce}"]
     capacity: "${VOLSYNC_CAPACITY}"
-    # enableFileDeletion: true # TODO: enabled on next cluster rebuild
-    # cleanupCachePVC: true    # TODO: enabled on next cluster rebuild
-    # cleanupTempPVC: true     # TODO: enabled on next cluster rebuild
+    enableFileDeletion: true
+    cleanupCachePVC: true
+    cleanupTempPVC: true
     # moverSecurityContext: # Not needed due to privileged movers
     #   runAsUser: ${VOLSYNC_PUID:-568}
     #   runAsGroup: ${VOLSYNC_PGID:-568}
