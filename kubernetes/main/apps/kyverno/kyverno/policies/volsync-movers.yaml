@@ -3,14 +3,16 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: volsync-pod-failure-policy
+  name: volsync-movers
   annotations:
-    policies.kyverno.io/title: Set pod failure policy for Volsync mover jobs
+    policies.kyverno.io/title: Set custom config on the Volsync mover Jobs
+    policies.kyverno.io/description: |
+      This policy sets custom configuration on the Volsync mover Jobs.
     policies.kyverno.io/subject: Pod
 spec:
   generateExistingOnPolicyUpdate: true
   rules:
-    - name: set-pod-failure-policy
+    - name: set-volsync-movers-custom-config
       match:
         any:
           - resources:
@@ -30,3 +32,16 @@ spec:
                     containerName: restic
                     operator: In
                     values: [11]
+            template:
+              spec:
+                containers:
+                  - name: restic
+                    volumeMounts:
+                      - name: repository
+                        mountPath: /respoitory
+                        readOnly: false
+                volumes:
+                  - name: repository
+                    nfs:
+                      server: expanse.internal
+                      path: /eros/Volsync
