@@ -74,7 +74,8 @@ spec:
               "--exclude-category", "manual",
               "--exclude-category", "music",
               "--exclude-tag", "added:1d",
-              "--include-tag", "unregistered"
+              "--include-tag", "unregistered",
+              "--with-data"
               # "--dry-run"
             ]
           expired:
@@ -84,7 +85,8 @@ spec:
               "--exclude-category", "manual",
               "--exclude-category", "music",
               "--exclude-tag", "added:1d",
-              "--include-tag", "expired"
+              "--include-tag", "expired",
+              "--with-data"
               # "--dry-run"
             ]
         pod:
@@ -94,13 +96,13 @@ spec:
         cronjob:
           <<: *cronJobSpec
           schedule: "@weekly"
+          suspend: true
         containers:
           app:
             <<: *container
             args: [
               "orphaned",
               "--exclude-pattern", "*_unpackerred*",
-              "--exclude-pattern", "*/manual/*"
               # "--dry-run"
             ]
         pod:
