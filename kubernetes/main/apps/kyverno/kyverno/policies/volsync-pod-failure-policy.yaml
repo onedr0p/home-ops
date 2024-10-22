@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kyverno.io/clusterpolicy_v1.json
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: volsync-pod-failure-policy
+  annotations:
+    policies.kyverno.io/title: Set pod failure policy for Volsync mover jobs
+    policies.kyverno.io/subject: Job
+spec:
+  generateExistingOnPolicyUpdate: true
+  rules:
+    - name: set-pod-failure-policy
+      match:
+        any:
+          - resources:
+              kinds: ["batch/v1/Job"]
+              namespaces: ["default"]
+              selector:
+                matchLabels:
+                  app.kubernetes.io/created-by: volsync
+      mutate:
+        patchStrategicMerge:
+          spec:
+            podFailurePolicy:
+              rules:
+                - action: FailJob
+                  onExitCodes:
+                    containerName: restic
+                    operator: In
+                    values: [11]
