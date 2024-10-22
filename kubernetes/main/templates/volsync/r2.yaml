@@ -48,14 +48,3 @@ spec:
       fsGroup: ${VOLSYNC_PGID:-568}
     retain:
       daily: 7
-    moverAffinity:
-      podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              topologyKey: kubernetes.io/hostname
-              labelSelector:
-                matchExpressions:
-                  - key: app.kubernetes.io/created-by
-                    operator: In
-                    values: ["volsync"]
