@@ -14,14 +14,13 @@ spec:
   rules:
     - name: set-volsync-movers-custom-config
       match:
-        resources:
-          kinds: ["batch/v1/Job"]
-          selector:
-            matchLabels:
-              app.kubernetes.io/created-by: volsync
-          namespaceSelector:
-            matchLabels:
-              volsync.backube/privileged-movers: "true"
+        any:
+          - resources:
+              kinds: ["batch/v1/Job"]
+              namespaces: ["*"]
+              selector:
+                matchLabels:
+                  app.kubernetes.io/created-by: volsync
       mutate:
         patchStrategicMerge:
           spec:
