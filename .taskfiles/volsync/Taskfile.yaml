@@ -19,7 +19,7 @@ tasks:
       CLUSTER: Cluster to run command against (default: main)
       STATE: resume or suspend (required)
     cmds:
-      - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 5; done
+      # - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 5; done
       - flux {{.STATE}} kustomization volsync
       - flux --namespace {{.NS}} {{.STATE}} helmrelease volsync
       - kubectl --namespace {{.NS}} scale deployment --all --replicas {{if eq .STATE "suspend"}}0{{else}}1{{end}}
@@ -28,31 +28,6 @@ tasks:
       STATE: '{{index .MATCH 0}}'
     requires:
       vars: [CLUSTER]
-
-  list:
-    desc: List snapshots for an application
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      NS: Namespace the application is in (default: default)
-      APP: Application to list snapshots for (required)
-    cmds:
-      - minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/list.yaml.j2 | kubectl apply --server-side --filename -
-      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
-      - kubectl --namespace {{.NS}} logs job/{{.JOB}} --container main
-      - kubectl --namespace {{.NS}} delete job/{{.JOB}}
-    vars:
-      NS: '{{.NS | default "default"}}'
-      JOB: volsync-list-{{.APP}}
-    env:
-      NS: '{{.NS}}'
-      JOB: '{{.JOB}}'
-      APP: '{{.APP}}'
-    requires:
-      vars: [CLUSTER, APP]
-    preconditions:
-      - test -f {{.VOLSYNC_RESOURCES_DIR}}/list.yaml.j2
-    silent: true
 
   unlock:
     desc: Unlock all Restic repositories

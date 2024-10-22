@@ -15,13 +15,9 @@ spec:
       data:
         RESTIC_REPOSITORY: "/repository/${APP}"
         RESTIC_PASSWORD: "{{ .RESTIC_PASSWORD }}"
-        # AWS_ACCESS_KEY_ID: "{{ .MINIO_ROOT_USER }}"
-        # AWS_SECRET_ACCESS_KEY: "{{ .MINIO_ROOT_PASSWORD }}"
   dataFrom:
     - extract:
-        key: minio
-    - extract:
-        key: volsync-minio-template
+        key: volsync-template
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationsource_v1alpha1.json
 apiVersion: volsync.backube/v1alpha1
@@ -48,8 +44,7 @@ spec:
       fsGroup: ${VOLSYNC_PGID:-568}
     retain:
       hourly: 24
-      daily: 7
-      weekly: 5
+      daily: 14
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationdestination_v1alpha1.json
 apiVersion: volsync.backube/v1alpha1
@@ -69,10 +64,10 @@ spec:
     storageClassName: "${VOLSYNC_STORAGECLASS:-ceph-block}"
     accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteOnce}"]
     capacity: "${VOLSYNC_CAPACITY}"
+    moverSecurityContext:
+      runAsUser: ${VOLSYNC_PUID:-568}
+      runAsGroup: ${VOLSYNC_PGID:-568}
+      fsGroup: ${VOLSYNC_PGID:-568}
     enableFileDeletion: true
     cleanupCachePVC: true
     cleanupTempPVC: true
-    # moverSecurityContext: # Not needed due to privileged movers
-    #   runAsUser: ${VOLSYNC_PUID:-568}
-    #   runAsGroup: ${VOLSYNC_PGID:-568}
-    #   fsGroup: ${VOLSYNC_PGID:-568}
