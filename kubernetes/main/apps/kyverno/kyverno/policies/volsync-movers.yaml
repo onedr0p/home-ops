@@ -34,6 +34,10 @@ spec:
                     values: [11]
             template:
               spec:
+                initContainers:
+                  - name: jitter
+                    image: docker.io/library/busybox:latest
+                    command: ['sh', '-c', 'sleep $(shuf -i 0-60 -n 1)']
                 containers:
                   - name: restic
                     volumeMounts:
