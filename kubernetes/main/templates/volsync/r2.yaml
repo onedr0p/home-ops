@@ -31,13 +31,13 @@ metadata:
 spec:
   sourcePVC: "${APP}"
   trigger:
-    schedule: "0 0 * * *"
+    schedule: "30 0 * * *"
   restic:
     copyMethod: "${VOLSYNC_COPYMETHOD:-Snapshot}"
-    pruneIntervalDays: 7
+    pruneIntervalDays: 14
     repository: "${APP}-volsync-r2-secret"
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:-csi-ceph-blockpool}"
-    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-4Gi}"
+    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-10Gi}"
     cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:-openebs-hostpath}"
     cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:-ReadWriteOnce}"]
     storageClassName: "${VOLSYNC_STORAGECLASS:-ceph-block}"
