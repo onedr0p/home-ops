@@ -1,0 +1,146 @@
+version: v1alpha1
+debug: false
+persist: true
+machine:
+  type: worker
+  token: ENC[AES256_GCM,data:03lFvHsC9d1SskFPeMQ/sr927tEh55w=,iv:YNjw0aEDPDT6s96FPB85MykCL8EnI/ay9YIqlDc89Bw=,tag:x3cYCCFHCuaiK5F5bkiBdg==,type:str]
+  ca:
+    crt: ENC[AES256_GCM,data:tba9juyVQUd3N4igg048Um1QGhmYClAiJOgLfMP7nSHGxcN/71qyGFAUMagaYzs07ILNsqhAkr5W0ldjsJYS2stCVBGM45hrbdr/NHBq4g+st5lVGGtqC7ST7u6PtTjUjIJstAU0TQGIOcVFblY4RT3eOmb3/baZNAVa06pTkn58pvAoaJDxXVa6/K/lXLa2BaaWPLBWT173VvmI9bmq/Q0dknnBXuw0e8ZjxFWX9WHXHoXa/D8vrW8rojUj8LCJJPmD6Ck9VU+oZ5bRb0q283cytAxg6HG6AYQXCappN6siLqQhkHFr09g20DUUYVoO/9E0JM6oFAyjV6L5rahkCVeIclhp6Cl49PtBRexnCpFVOk5fetL/AgaE7B93Zt4mwzKh1TBA5amRFJjxOlafVp7ai1f+m+OUbmHiQquS4awG+jSs1l+0yiBsbmaHTz2L9F9zi48H1GXhX3oLDjSl4zqcIecpPuuHj992qdXzhbdEm65+CXDGfgyOTcAgc/W70xn6/p4XOltIfJtpNBD+xjMhjG9gymDT99K06Deyp5FTvJNU9DuAed5ih9jp29U3nm/IXJxgmMZmh88lfTDozZV1+hzRAqZs/jKJ2CmYDpwrFU7A34rM2Px1a/iraGkMmGeQy+uBH4nMJO8fQvbOVRBpsT+QOFUNZZrtx0ANzA6U5yJAFCKpV6uteUC7AbXBSFJ4T9Gde9DeZFcRbITzOzGUX/I9n+2Pg1mMQdYAZNFIYDdAwrs68drLHsZxaVo16ED/I0UKK++NLoU/c5dx0MHkZ4AoUwlKlB7umA1jTKlkhDKyrzke3FsbcajUqOYsq8LPsZS7QpTSPVOEwrs/pP9/G/Dr0KNhQVFl4t9Z3Gp/gx3S,iv:cFubxQicDO2+KiBcqrriaTiJF8bMR0tMNj9T+6h5vr4=,tag:s3gcUPUPwhVMdIgd+F2LGg==,type:str]
+    key: ""
+  certSANs:
+    - 127.0.0.1
+    - 192.168.42.120
+  kubelet:
+    image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
+    extraArgs:
+      rotate-server-certificates: "true"
+    extraMounts:
+      - destination: /var/openebs/local
+        type: bind
+        source: /var/openebs/local
+        options:
+          - bind
+          - rshared
+          - rw
+    defaultRuntimeSeccompProfileEnabled: true
+    nodeIP:
+      validSubnets:
+        - 192.168.42.0/24
+    disableManifestsDirectory: true
+  network:
+    hostname: k8s-5
+    interfaces:
+      - deviceSelector:
+          hardwareAddr: 00:30:93:12:*
+          driver: atlantic
+        mtu: 9000
+        dhcp: true
+  install:
+    diskSelector:
+      model: Samsung SSD 870
+    extraKernelArgs:
+      - mitigations=off
+      - module_blacklist=e1000e
+    image: factory.talos.dev/installer/d715f723f882b1e1e8063f1b89f237dcc0e3bd000f9f970243af59c8baae0100:{{ ENV.TALOS_VERSION }}
+    wipe: false
+  files:
+    - content: |
+        [plugins."io.containerd.grpc.v1.cri"]
+          enable_unprivileged_ports = true
+          enable_unprivileged_icmp = true
+        [plugins."io.containerd.grpc.v1.cri".containerd]
+          discard_unpacked_layers = false
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+          discard_unpacked_layers = false
+      permissions: 0
+      path: /etc/cri/conf.d/20-customization.part
+      op: create
+    - content: |
+        [ NFSMount_Global_Options ]
+        nfsvers=4.2
+        hard=True
+        noatime=True
+        nodiratime=True
+        rsize=131072
+        wsize=131072
+        nconnect=8
+      permissions: 420
+      path: /etc/nfsmount.conf
+      op: overwrite
+  sysctls:
+    fs.inotify.max_queued_events: "65536"
+    fs.inotify.max_user_instances: "8192"
+    fs.inotify.max_user_watches: "524288"
+    net.core.rmem_max: "7500000"
+    net.core.wmem_max: "7500000"
+  features:
+    rbac: true
+    stableHostname: true
+    apidCheckExtKeyUsage: true
+    diskQuotaSupport: true
+    kubePrism:
+      enabled: true
+      port: 7445
+    hostDNS:
+      enabled: true
+      resolveMemberNames: true
+      forwardKubeDNSToHost: false
+  udev:
+    rules:
+      # Thunderbolt
+      - ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
+      # Intel GPU
+      - SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
+      # Google Coral USB Accelerator
+      - SUBSYSTEMS=="usb", ATTRS{idVendor}=="1a6e", ATTRS{idProduct}=="089a", GROUP="20", MODE="0660"
+      - SUBSYSTEMS=="usb", ATTRS{idVendor}=="18d1", ATTRS{idProduct}=="9302", GROUP="20", MODE="0660"
+  nodeLabels:
+    topology.kubernetes.io/region: main
+    topology.kubernetes.io/zone: w
+cluster:
+  id: ENC[AES256_GCM,data:a0qmRyqZESJE0pPBEjeyEV4/KE3oh7ymPOrhaX3F+MlogK8OPF6xxmSjadg=,iv:FU5Hezq0Jk/IhBYeL9vyLb9ECm9ONC1KzyBJQXpNZiw=,tag:iRdvZL/HLXgIM0FIby6QTA==,type:str]
+  secret: ENC[AES256_GCM,data:HC04rvXD9iwImR2G3O+Es9pCQSUGfjU8Q7VCC6assqAtlSW3xacZbCJbYT0=,iv:1mdqqhXWH4JBiqI6GO0DHiecPBwg3sNZhjP46hcGfnw=,tag:QBoA8sVt7ojuWetYEG4ztw==,type:str]
+  controlPlane:
+    endpoint: https://192.168.42.120:6443
+  network:
+    cni:
+      name: none
+    dnsDomain: cluster.local
+    podSubnets:
+      - 10.42.0.0/16
+    serviceSubnets:
+      - 10.43.0.0/16
+  coreDNS:
+    disabled: true
+  token: ENC[AES256_GCM,data:01tZfVdRQMV4v/JQf80Cnv1OE1p7Nmc=,iv:3qi+AJjhbiGjNFlHRd6CRtTsz0EmIToMQc/fz3Qcmfc=,tag:exWwjB9Uv88Vusl71ryEiQ==,type:str]
+  ca:
+    crt: ENC[AES256_GCM,data:QISmWAAeeK4hELl/Gl9TZre2psWEvGim/WZ/H0rzKKjB85tbIniX/Dbs0lajQh3RcfINzthWf8/hR5/PiA1RKBHe8kLXCRG/8qKL8mvSPGvIi3cFbM3zdJAog34Lr15hpYEvPtIdOVlemWcPzRfqrhWlsZNPaP+zXnhKcSafCD+34GuXw6hakmzMp2Huavrk77cr8dWGDD5mV10wY1kLALGYO6Djfnj10rtugm2ybBybfqToINNhiWzibqIpj60+szMzvLFiB4pUaaTmXeYLmOmp/ZJhCfkDYTdqEta252RX9bwlv6HhCen4soO2WhnitcpRuhERl7SMlf5ph8HlM8qEXjLPdDq0znHCdeSKAgzqMZWOzUequ3uuk+1MXxJ4pWmPNt27sZvhi8z3dzP45SwfrstCHbuyRGFVgzhHNfuhVLLl8REiKkX0SM4qi02pbLmnB+j+QOlgNYl06i4Ua2F4vvEuXcMc2+dDsW2rKWeiuL8yYp8z34pVqD0AIJfj/NerSI1GxHU5I04mxdAq+tVU+uYlBfANq2KYBe0FPj74nBbLHoEkZz0OniGWDJlydpyYGnh4NU6eNxmlK/xMP+t2WpDEsJ5Bk6jb1/2T1q+/NJ4SIb+frJTx7zUt1LVMGGi5q//L9iRMsG6acEIN1mE8hG9wWGs/HqDXkq6qsWXJbC+HZEn+1ygbJBWoMpmbCCl7I2MF2XJOeCG/E94ZfYwU6vZgl7+3pFgY2eFecGTT5vnXtihV9Qq+IbrOtx4owOFPXhHapvov4bgsmubj28nxUYIlatgY5Em4Qg6pckCv9ywekHKVI2acvc0yONKD16TlJD+X7llkYIH0UnJDSHUy40YYBhPFM3hZF4Hf7X1YKu0k8bQODXVJTBe2hSMd3i02aDkH+AXsC3UTO+dFOuc1VhDNsxiF3Lle7WZUFlt3RnV4xLjqx4SIcNs27BMVPDSAxCBYMjEXXXxMGUbRWX5vTy10UjYRiDvt5SFlh8V8ArpZqLqa9AvIgaKd08I0M0Zs3R65A5vcWjM9x9cgm7vOSk6Lyf5lcPMFRg==,iv:wpE0pMBdkGrLdr+6x+OAbLgx7uCUWjIv5mTCGh1edaE=,tag:z/C8OH27P9M+rQYWdp0Eog==,type:str]
+    key: ""
+  discovery:
+    enabled: true
+    registries:
+      kubernetes:
+        disabled: false
+      service:
+        disabled: true
+sops:
+  kms: []
+  gcp_kms: []
+  azure_kv: []
+  hc_vault: []
+  age:
+    - recipient: age15uzrw396e67z9wdzsxzdk7ka0g2gr3l460e0slaea563zll3hdfqwqxdta
+      enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBJNGpnNXJ6NFNsclZlTjFR
+        bkllSVB6OU85SnZReDNrMDI1Y0ltM1RoY21FCm1KU3F6N0xtMTJXWmVoNTZSVThP
+        R3M2OHBxcU9ET0N1THQ5RGFpSGF5QzQKLS0tIHdKdjVwQmFTTEowaGRyekk0ZjZ5
+        dVBXZHA1Ym00Rit5Uk9nL3lqTEZBYzAKwQ8c0RunLnObYAGJe2zJvTNuOKnm++MU
+        0+wPvdJjTzuqgxYtIpktzWmiI9mc3Bnh6Kp7QiURIzjpLR9o/OJ56w==
+        -----END AGE ENCRYPTED FILE-----
+  lastmodified: "2024-10-24T19:23:50Z"
+  mac: ENC[AES256_GCM,data:2Aq7DAF1SX9I6xZ1uO+4Cm5MKA8lkLyKSWdWWTVd0Y+Sm21EN5FCYhGAHTiZ3CQoWlfP+a0EFTShrCZLxf6w+awh0s2htmKzmRiw5c697rXo5xM0kmCI/Ti55ZBJnqMHgQNP0Z/i/Cke/FtCM4zlMWBHF0IJzfmoaDXh3mzHFIU=,iv:HCEnBIjJoZQn9RSn1U2RIyf2t7nmB2TPBKOH2WGyTLc=,tag:NdICgu1jOa0OPNn7D+7MtA==,type:str]
+  pgp: []
+  encrypted_regex: ^(token|crt|key|id|secret|secretboxEncryptionSecret|ca)$
+  mac_only_encrypted: true
+  version: 3.9.1

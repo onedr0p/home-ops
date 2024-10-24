@@ -6,77 +6,74 @@ tasks:
 
   apply-config:
     desc: Apply Talos config to a node [CLUSTER=main] [HOSTNAME=required] [MODE=auto|no-reboot|reboot]
+    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmd: >
-      sops exec-file {{.CLUSTER_DIR}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml "minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {}"
+      sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {}"
       | talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "auto"}}'
-    env:
-      KUBERNETES_VERSION:
-        sh: kubectl get node {{.HOSTNAME}} --output=jsonpath="{.status.nodeInfo.kubeletVersion}"
-      TALOS_VERSION:
-        sh: kubectl get node {{.HOSTNAME}} --output=jsonpath="{.status.nodeInfo.osImage}" | awk -F'[()]' '{print $2}'
     requires:
       vars: [CLUSTER, HOSTNAME]
     preconditions:
+      - test -f {{.CLUSTER_DIR}}/cluster.env
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - test -f {{.CLUSTER_DIR}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml
+      - test -f {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
+
+  upgrade-k8s:
+    desc: Upgrade Kubernetes across the whole cluster [CLUSTER=main] [VERSION=required]
+    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
+    cmds:
+      - task: down
+      - talosctl --nodes {{.CONTROLLER}} upgrade-k8s --to $KUBERNETES_VERSION
+      - task: up
+    vars:
+      CONTROLLER:
+        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
+    requires:
+      vars: [CLUSTER]
+    preconditions:
+      - test -f {{.CLUSTER_DIR}}/cluster.env
+      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - talosctl config info &>/dev/null
+      - talosctl --nodes {{.CONTROLLER}} get machineconfig &>/dev/null
+      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/kubelet/releases/tag/$KUBERNETES_VERSION
 
   upgrade-node:
     desc: Upgrade Talos on a single node [CLUSTER=main] [HOSTNAME=required] [VERSION=required]
-    prompt: Upgrade Talos node '{{.HOSTNAME}}' on the '{{.CLUSTER}}' cluster to {{.VERSION}} ... continue?
+    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmds:
       - task: '{{if ne .ROLLOUT true}}down{{else}}noop{{end}}'
-      - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:{{.VERSION}}" --timeout=10m
+      - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:$TALOS_VERSION" --timeout=10m
       - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
       - task: '{{if ne .ROLLOUT true}}up{{else}}noop{{end}}'
     vars:
       SCHEMATIC_ID:
         sh: kubectl get node {{.HOSTNAME}} --output=jsonpath='{.metadata.annotations.extensions\.talos\.dev/schematic}'
     requires:
-      vars: [CLUSTER, HOSTNAME, VERSION]
+      vars: [CLUSTER, HOSTNAME]
     preconditions:
+      - test -f {{.CLUSTER_DIR}}/cluster.env
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
-      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/talos/releases/tag/{{.VERSION}}
+      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/talos/releases/tag/$TALOS_VERSION
 
   upgrade-cluster:
     desc: Upgrade Talos across the whole cluster [CLUSTER=main] [VERSION=required]
-    prompt: Upgrade Talos cluster '{{.CLUSTER}}' to {{.VERSION}} ... continue?
     cmds:
       - task: down
       - for: { var: HOSTNAMES }
         task: upgrade-node
         vars:
           HOSTNAME: '{{.ITEM}}'
-          VERSION: '{{.VERSION}}'
           ROLLOUT: true
       - task: up
     vars:
       HOSTNAMES:
         sh: kubectl get nodes --output=jsonpath='{.items[*].metadata.name}'
     requires:
-      vars: [CLUSTER, VERSION]
-
-  upgrade-k8s:
-    desc: Upgrade Kubernetes across the whole cluster [CLUSTER=main] [VERSION=required]
-    prompt: Upgrade Kubernetes cluster '{{.CLUSTER}}' to {{.VERSION}} ... continue?
-    cmds:
-      - task: down
-      - talosctl --nodes {{.CONTROLLER}} upgrade-k8s --to {{.VERSION}}
-      - task: up
-    vars:
-      CONTROLLER:
-        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
-    requires:
-      vars: [CLUSTER, VERSION]
-    preconditions:
-      - test -f {{.CLUSTER_DIR}}/talosconfig
-      - talosctl config info &>/dev/null
-      - talosctl --nodes {{.CONTROLLER}} get machineconfig &>/dev/null
-      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/kubelet/releases/tag/{{.VERSION}}
+      vars: [CLUSTER]
 
   reset-node:
     desc: Reset Talos on a single node [CLUSTER=main] [HOSTNAME=required]

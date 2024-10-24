@@ -50,11 +50,11 @@ tasks:
     internal: true
     cmds:
       - until kubectl wait --for=condition=Ready=False nodes --all --timeout=10m; do sleep 5; done
-      - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+      - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
       - until kubectl wait --for=condition=Ready nodes --all --timeout=10m; do sleep 5; done
     preconditions:
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - test -f {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml
+      - test -f {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml
       - talosctl config info &>/dev/null
 
   rook:
@@ -116,17 +116,17 @@ tasks:
   flux:
     internal: true
     cmds:
-      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/bootstrap/flux
+      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/bootstrap/apps
       - for: { var: TEMPLATES }
         cmd: >
-          op run --env-file {{.CLUSTER_DIR}}/bootstrap/config.env --no-masking --
+          op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking --
           minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.ITEM}}
           | kubectl apply --server-side --filename -
       - kubectl apply --server-side --filename {{.CLUSTER_DIR}}/flux/vars/cluster-settings.yaml
       - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/flux/config
     vars:
       TEMPLATES:
-        sh: ls {{.CLUSTER_DIR}}/bootstrap/flux/*.j2
+        sh: ls {{.CLUSTER_DIR}}/bootstrap/apps/*.j2
     env:
       VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
     preconditions:
@@ -135,12 +135,12 @@ tasks:
   # Ref: https://github.com/onedr0p/home-service
   matchbox:
     desc: Sync required Matchbox config to PXEBoot machine [CLUSTER=main]
-    dotenv: ['{{.CLUSTER_DIR}}/bootstrap/config.env']
+    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmds:
       - for: { var: ASSETS }
         cmd: >
-          sops exec-file {{.ITEM}} "minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {}
-          | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/assets/{{base .ITEM | replace ".secret.sops" ""}}"
+          sops exec-file --input-type yaml --output-type yaml {{.ITEM}} "minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {}
+          | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/assets/{{base .ITEM | replace ".sops.yaml.j2" ".yaml"}}"
       - for: { var: GROUPS }
         cmd: >
           minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.ITEM}}
@@ -152,11 +152,11 @@ tasks:
       - ssh -l devin voyager.internal "cd /var/opt/home-service ; go-task restart-matchbox"
     vars:
       ASSETS:
-        sh: ls {{.CLUSTER_DIR}}/bootstrap/talos/assets/*.yaml
+        sh: ls {{.CLUSTER_DIR}}/talos/*.yaml.j2
       GROUPS:
-        sh: ls {{.CLUSTER_DIR}}/bootstrap/talos/groups/*.json
+        sh: ls {{.CLUSTER_DIR}}/bootstrap/matchbox/groups/*.json
       PROFILES:
-        sh: ls {{.CLUSTER_DIR}}/bootstrap/talos/profiles/*.json
+        sh: ls {{.CLUSTER_DIR}}/bootstrap/matchbox/profiles/*.json
     requires:
       vars: [CLUSTER]
     preconditions:
