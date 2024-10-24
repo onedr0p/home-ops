@@ -8,12 +8,8 @@ vars:
 tasks:
 
   kubernetes:
-    desc: Bootstrap a Talos Kubernetes cluster backed by flux, sops, and rook
-    prompt: Bootstrap a Talos Kubernetes cluster ... continue?
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      NODES: Nodes in the cluster (default: k8s-0,k8s-1,k8s-2,k8s-3,k8s-4,k8s-5)
-      ROOK_DISK: Rook disk to reset (default: /dev/nvme0n1)
+    desc: Bootstrap a Kubernetes cluster [CLUSTER=main] [NODES=k8s-0,k8s-1,...] [ROOK_DISK=/dev/nvme0n1]
+    prompt: Bootstrap a Kubernetes cluster ... continue?
     vars: &vars
       CLUSTER: '{{.CLUSTER}}'
       NODES: '{{.NODES | default "k8s-0,k8s-1,k8s-2,k8s-3,k8s-4,k8s-5"}}'
@@ -138,9 +134,7 @@ tasks:
 
   # Ref: https://github.com/onedr0p/home-service
   matchbox:
-    desc: Sync required Matchbox configuration to PXE Boot machine
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
+    desc: Sync required Matchbox config to PXEBoot machine [CLUSTER=main]
     dotenv: ['{{.CLUSTER_DIR}}/bootstrap/config.env']
     cmds:
       - for: { var: ASSETS }

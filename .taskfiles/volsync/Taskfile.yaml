@@ -14,39 +14,26 @@ vars:
 tasks:
 
   state-*:
-    desc: Suspend or Resume Volsync
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      STATE: resume or suspend (required)
+    desc: Suspend or resume Volsync [CLUSTER=main]
     cmds:
-      # - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 5; done
       - flux {{.STATE}} kustomization volsync
-      - flux --namespace {{.NS}} {{.STATE}} helmrelease volsync
-      - kubectl --namespace {{.NS}} scale deployment --all --replicas {{if eq .STATE "suspend"}}0{{else}}1{{end}}
+      - flux --namespace volsync-system {{.STATE}} helmrelease volsync
+      - kubectl --namespace volsync-system scale deployment --all --replicas {{if eq .STATE "suspend"}}0{{else}}1{{end}}
     vars:
-      NS: '{{.NS | default "volsync-system"}}'
       STATE: '{{index .MATCH 0}}'
     requires:
       vars: [CLUSTER]
 
   unlock:
-    desc: Unlock all Restic repositories
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
+    desc: Unlock all Restic repos [CLUSTER=main]
     cmd: >
       kubectl get replicationsources --all-namespaces --no-headers -A | awk '{print $1, $2}'
       | xargs --max-procs=2 -l bash -c 'kubectl --namespace "$0" patch --field-manager=flux-client-side-apply replicationsources "$1" --type merge --patch "{\"spec\":{\"restic\":{\"unlock\":\"{{now | unixEpoch}}\"}}}"'
     requires:
       vars: [CLUSTER]
 
-  # To run backup jobs in parallel for all replicationsources:
-  #   - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:snapshot APP=$0 NS=$1'
   snapshot:
-    desc: Snapshot an application
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      NS: Namespace the application is in (default: default)
-      APP: Application to snapshot (required)
+    desc: Snapshot an app [CLUSTER=main] [NS=default] [APP=required]
     cmds:
       - kubectl --namespace {{.NS}} patch replicationsources {{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"{{now | unixEpoch}}"}}}'
       - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
@@ -59,46 +46,34 @@ tasks:
     preconditions:
       - kubectl --namespace {{.NS}} get replicationsources {{.APP}}
 
-  # To run restore jobs in parallel for all replicationdestinations:
-  #    - kubectl get replicationsources --all-namespaces --no-headers | awk '{print $2, $1}' | xargs --max-procs=4 -l bash -c 'task volsync:restore APP=$0 NS=$1'
   restore:
-    desc: Restore an application
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      NS: Namespace the application is in (default: default)
-      APP: Application to restore (required)
-      PREVIOUS: Previous number of snapshots to restore (default: 2)
+    desc: Restore an app [CLUSTER=main] [NS=default] [APP=required] [PREVIOUS=required]
     cmds:
-      - task: .suspend
-      - task: .restore
-      - task: .resume
-    requires:
-      vars: [CLUSTER, APP]
-
-  .suspend:
-    internal: true
-    cmds:
+      # Suspend
       - flux --namespace flux-system suspend kustomization {{.APP}}
       - flux --namespace {{.NS}} suspend helmrelease {{.APP}}
       - kubectl --namespace {{.NS}} scale {{.CONTROLLER}}/{{.APP}} --replicas 0
       - kubectl --namespace {{.NS}} wait pod --for=delete --selector="app.kubernetes.io/name={{.APP}}" --timeout=5m
-    vars:
-      NS: '{{.NS | default "default"}}'
-      APP: '{{.APP}}'
-      CONTROLLER:
-        sh: kubectl --namespace {{.NS}} get deployment {{.APP}} &>/dev/null && echo deployment || echo statefulset
-
-  .restore:
-    internal: true
-    cmds:
+      # Restore
       - minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.yaml.j2 | kubectl apply --server-side --filename -
       - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=120m
       - kubectl --namespace {{.NS}} delete replicationdestination {{.JOB}}
+      # Resume
+      - flux --namespace {{.NS}} resume helmrelease {{.APP}}
+      - flux --namespace flux-system resume kustomization {{.APP}}
+      - kubectl --namespace {{.NS}} scale {{.CONTROLLER}}/{{.APP}} --replicas 1
+      - kubectl --namespace {{.NS}} wait pod --for=condition=ready --selector="app.kubernetes.io/name={{.APP}}" --timeout=5m
     vars:
       NS: '{{.NS | default "default"}}'
       JOB: volsync-dst-{{.APP}}
-      PREVIOUS: '{{.PREVIOUS | default 2}}'
+      CONTROLLER:
+        sh: kubectl --namespace {{.NS}} get deployment {{.APP}} &>/dev/null && echo deployment || echo statefulset
+    env:
+      NS: '{{.NS}}'
+      APP: '{{.APP}}'
+      PREVIOUS: '{{.PREVIOUS}}'
+      JOB: '{{.JOB}}'
       CLAIM:
         sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.sourcePVC}"
       ACCESS_MODES:
@@ -109,28 +84,7 @@ tasks:
         sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.restic.moverSecurityContext.runAsUser}"
       PGID:
         sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
-    env:
-      NS: '{{.NS}}'
-      JOB: '{{.JOB}}'
-      APP: '{{.APP}}'
-      PREVIOUS: '{{.PREVIOUS}}'
-      CLAIM: '{{.CLAIM}}'
-      ACCESS_MODES: '{{.ACCESS_MODES}}'
-      STORAGE_CLASS_NAME: '{{.STORAGE_CLASS_NAME}}'
-      PUID: '{{.PUID}}'
-      PGID: '{{.PGID}}'
+    requires:
+      vars: [CLUSTER, APP, PREVIOUS]
     preconditions:
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.yaml.j2
-
-  .resume:
-    internal: true
-    cmds:
-      - flux --namespace {{.NS}} resume helmrelease {{.APP}}
-      - flux --namespace flux-system resume kustomization {{.APP}}
-      - kubectl --namespace {{.NS}} scale {{.CONTROLLER}}/{{.APP}} --replicas 1
-      - kubectl --namespace {{.NS}} wait pod --for=condition=ready --selector="app.kubernetes.io/name={{.APP}}" --timeout=5m
-    vars:
-      NS: '{{.NS | default "default"}}'
-      APP: '{{.APP}}'
-      CONTROLLER:
-        sh: kubectl --namespace {{.NS}} get deployment {{.APP}} &>/dev/null && echo deployment || echo statefulset

@@ -5,11 +5,7 @@ version: '3'
 tasks:
 
   apply-ks:
-    desc: Apply a Flux Kustomization resource for a cluster
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      PATH: Path to the Flux Kustomization resource from the apps base dir (required, e.g. default/plex)
-      NS: Namespace the Flux Kustomization exists in (default: flux-system)
+    desc: Apply a Flux Kustomization resource for a cluster [CLUSTER=main] [PATH=required] [NS=flux-system]
     cmd: >
       flux build --namespace {{.NS}} ks {{base .PATH}}
       --kustomization-file {{.CLUSTER_DIR}}/apps/{{.PATH}}/ks.yaml
@@ -27,11 +23,7 @@ tasks:
       - test -f {{.CLUSTER_DIR}}/apps/{{.PATH}}/ks.yaml
 
   browse-pvc:
-    desc: Exec into a container to browse a PersistentVolumeClaim
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      NS: Namespace to browse PersistentVolumeClaims in (default: default)
-      CLAIM: PersistentVolumeClaim to browse (required)
+    desc: Mount PVC to an temp container for browsing [CLUSTER=main] [NS=default] [CLAIM=required]
     interactive: true
     cmd: kubectl browse-pvc --namespace {{.NS}} --image docker.io/library/alpine:latest {{.CLAIM}}
     vars:
@@ -42,9 +34,7 @@ tasks:
       - kubectl --namespace {{.NS}} get persistentvolumeclaims {{.CLAIM}}
 
   sync-secrets:
-    desc: Sync all ExternalSecrets
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
+    desc: Sync all ExternalSecrets [CLUSTER=main]
     cmd: >
       kubectl get externalsecret --all-namespaces --no-headers -A | awk '{print $1, $2}'
       | xargs --max-procs=2 -l bash -c 'kubectl --namespace "$0" annotate externalsecret "$1" force-sync="{{now | unixEpoch}}" --overwrite'

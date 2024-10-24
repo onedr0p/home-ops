@@ -5,15 +5,12 @@ version: '3'
 tasks:
 
   apply-config:
-    desc: Apply Talos configuration to a node
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      HOSTNAME: Node to apply configuration to (required)
+    desc: Apply Talos config to a node [CLUSTER=main] [HOSTNAME=required] [MODE=auto|no-reboot|reboot]
     cmd: >
       sops exec-file {{.CLUSTER_DIR}}/bootstrap/talos/assets/{{.HOSTNAME}}.secret.sops.yaml "minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {}"
       | talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
     vars:
-      MODE: '{{.MODE | default "no-reboot"}}'
+      MODE: '{{.MODE | default "auto"}}'
     env:
       KUBERNETES_VERSION:
         sh: kubectl get node {{.HOSTNAME}} --output=jsonpath="{.status.nodeInfo.kubeletVersion}"
@@ -27,12 +24,8 @@ tasks:
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
 
   upgrade-node:
-    desc: Upgrade Talos on a single node
+    desc: Upgrade Talos on a single node [CLUSTER=main] [HOSTNAME=required] [VERSION=required]
     prompt: Upgrade Talos node '{{.HOSTNAME}}' on the '{{.CLUSTER}}' cluster to {{.VERSION}} ... continue?
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      HOSTNAME: Node to upgrade (required)
-      VERSION: Talos version to upgrade to (required)
     cmds:
       - task: '{{if ne .ROLLOUT true}}down{{else}}noop{{end}}'
       - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:{{.VERSION}}" --timeout=10m
@@ -50,11 +43,8 @@ tasks:
       - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/talos/releases/tag/{{.VERSION}}
 
   upgrade-cluster:
-    desc: Upgrade Talos on the whole cluster
+    desc: Upgrade Talos across the whole cluster [CLUSTER=main] [VERSION=required]
     prompt: Upgrade Talos cluster '{{.CLUSTER}}' to {{.VERSION}} ... continue?
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      VERSION: Talos version to upgrade to (required)
     cmds:
       - task: down
       - for: { var: HOSTNAMES }
@@ -71,10 +61,7 @@ tasks:
       vars: [CLUSTER, VERSION]
 
   upgrade-k8s:
-    desc: Upgrade Kubernetes
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      VERSION: Kubernetes version to upgrade to (required)
+    desc: Upgrade Kubernetes across the whole cluster [CLUSTER=main] [VERSION=required]
     prompt: Upgrade Kubernetes cluster '{{.CLUSTER}}' to {{.VERSION}} ... continue?
     cmds:
       - task: down
@@ -92,10 +79,7 @@ tasks:
       - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/kubelet/releases/tag/{{.VERSION}}
 
   reset-node:
-    desc: Reset a Talos node and shut it down
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
-      HOSTNAME: Node to reset (required)
+    desc: Reset Talos on a single node [CLUSTER=main] [HOSTNAME=required]
     prompt: Reset Talos node '{{.HOSTNAME}}' on the '{{.CLUSTER}}' cluster ... continue?
     cmd: talosctl reset --nodes {{.HOSTNAME}} --graceful=false
     requires:
@@ -106,9 +90,7 @@ tasks:
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
 
   reset-cluster:
-    desc: Reset all the Talos nodes and shut 'em down
-    summary: |-
-      CLUSTER: Cluster to run command against (default: main)
+    desc: Reset Talos across the whole cluster [CLUSTER=main]
     prompt: Reset Talos cluster '{{.CLUSTER}}' ... continue?
     cmd: talosctl reset --nodes {{.HOSTNAMES}} --graceful=false
     vars:
