@@ -74,9 +74,7 @@ tasks:
   rook-disk:
     internal: true
     cmds:
-      - >
-        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.yaml.j2
-        | kubectl apply --server-side --filename -
+      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.yaml.j2 | kubectl apply --server-side --filename -
       - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}}
@@ -95,9 +93,7 @@ tasks:
   rook-data:
     internal: true
     cmds:
-      - >
-        minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.yaml.j2
-        | kubectl apply --server-side --filename -
+      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.yaml.j2 | kubectl apply --server-side --filename -
       - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
       - kubectl --namespace {{.NS}} logs job/{{.JOB}}
@@ -118,10 +114,7 @@ tasks:
     cmds:
       - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/bootstrap/apps
       - for: { var: TEMPLATES }
-        cmd: >
-          op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking --
-          minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.ITEM}}
-          | kubectl apply --server-side --filename -
+        cmd: op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking -- minijinja-cli {{.ITEM}} | kubectl apply --server-side --filename -
       - kubectl apply --server-side --filename {{.CLUSTER_DIR}}/flux/vars/cluster-settings.yaml
       - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/flux/config
     vars:
@@ -138,17 +131,11 @@ tasks:
     dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmds:
       - for: { var: ASSETS }
-        cmd: >
-          sops exec-file --input-type yaml --output-type yaml {{.ITEM}} "minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {}
-          | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/assets/{{base .ITEM | replace ".sops.yaml.j2" ".yaml"}}"
+        cmd: sops exec-file --input-type yaml --output-type yaml {{.ITEM}} "minijinja-cli {} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/assets/{{base .ITEM | replace ".sops.yaml.j2" ".yaml"}}"
       - for: { var: GROUPS }
-        cmd: >
-          minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.ITEM}}
-          | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/groups/{{base .ITEM}}
+        cmd: minijinja-cli {{.ITEM}} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/groups/{{base .ITEM}}
       - for: { var: PROFILES }
-        cmd: >
-          minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {{.ITEM}}
-          | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/profiles/{{base .ITEM}}
+        cmd: minijinja-cli {{.ITEM}} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/profiles/{{base .ITEM}}
       - ssh -l devin voyager.internal "cd /var/opt/home-service ; go-task restart-matchbox"
     vars:
       ASSETS:

@@ -7,9 +7,7 @@ tasks:
   apply-config:
     desc: Apply Talos config to a node [CLUSTER=main] [HOSTNAME=required] [MODE=auto|no-reboot|reboot]
     dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
-    cmd: >
-      sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli --env --trim-blocks --lstrip-blocks --autoescape=none {}"
-      | talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
+    cmd: sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli {}" | talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "auto"}}'
     requires:
