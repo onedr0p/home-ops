@@ -16,9 +16,10 @@ tasks:
   state-*:
     desc: Suspend or resume Volsync [CLUSTER=main]
     cmds:
-      - flux {{.STATE}} kustomization volsync
+      - flux --namespace flux-system {{.STATE}} kustomization volsync
       - flux --namespace volsync-system {{.STATE}} helmrelease volsync
-      - kubectl --namespace volsync-system scale deployment --all --replicas {{if eq .STATE "suspend"}}0{{else}}1{{end}}
+      - '{{if eq .STATE "suspend"}}kubectl --namespace volsync-system scale deployment volsync --replicas 0{{end}}'
+      - '{{if eq .STATE "resume"}}flux --namespace volsync-system reconcile helmrelease volsync --force{{end}}'
     vars:
       STATE: '{{index .MATCH 0}}'
     requires:
@@ -60,9 +61,9 @@ tasks:
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=120m
       - kubectl --namespace {{.NS}} delete replicationdestination {{.JOB}}
       # Resume
-      - flux --namespace {{.NS}} resume helmrelease {{.APP}}
       - flux --namespace flux-system resume kustomization {{.APP}}
-      - kubectl --namespace {{.NS}} scale {{.CONTROLLER}}/{{.APP}} --replicas 1
+      - flux --namespace {{.NS}} resume helmrelease {{.APP}}
+      - flux --namespace {{.NS}} reconcile helmrelease {{.APP}} --force
       - kubectl --namespace {{.NS}} wait pod --for=condition=ready --selector="app.kubernetes.io/name={{.APP}}" --timeout=5m
     vars:
       NS: '{{.NS | default "default"}}'

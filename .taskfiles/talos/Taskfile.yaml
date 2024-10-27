@@ -101,16 +101,16 @@ tasks:
   down:
     internal: true
     cmds:
-      - flux --namespace flux-system suspend kustomization --all
       - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 5; done
-      - kubectl --namespace volsync-system scale deployment --all --replicas 0
+      - flux --namespace flux-system suspend kustomization --all
+      - task: :volsync:state-suspend
 
   up:
     internal: true
     cmds:
       - until kubectl wait cephcluster --for=jsonpath=.status.ceph.health=HEALTH_OK --timeout=10m --all --all-namespaces &>/dev/null; do sleep 5; done
-      - defer: flux --namespace flux-system resume kustomization --all
-      - defer: kubectl --namespace volsync-system scale deployment --all --replicas 1
+      - flux --namespace flux-system resume kustomization --all
+      - task: :volsync:state-resume
 
   # Ref: https://github.com/go-task/task/issues/608
   noop:
