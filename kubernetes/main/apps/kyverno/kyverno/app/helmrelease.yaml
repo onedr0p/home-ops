@@ -28,35 +28,29 @@ spec:
     grafana:
       enabled: true
     admissionController:
-      replicas: 3
-      rbac:
-        clusterRole:
-          extraResources:
-            - apiGroups:
-                - ""
-              resources:
-                - pods
-              verbs:
-                - create
-                - update
-                - delete
+      clusterRole:
+        extraResources:
+          - apiGroups:
+              - '*'
+            resources:
+              - '*'
+            verbs:
+              - get
+              - list
+              - watch
       serviceMonitor:
         enabled: true
     backgroundController:
-      rbac:
-        clusterRole:
-          extraResources:
-            - apiGroups:
-                - ""
-              resources:
-                - pods
-              verbs:
-                - create
-                - update
-                - patch
-                - delete
-                - get
-                - list
+      clusterRole:
+        extraResources:
+          - apiGroups:
+              - '*'
+            resources:
+              - '*'
+            verbs:
+              - get
+              - list
+              - watch
       resources:
         requests:
           cpu: 100m
@@ -64,9 +58,19 @@ spec:
           memory: 1Gi
       serviceMonitor:
         enabled: true
-    cleanupController:
+    reportsController:
+      clusterRole:
+        extraResources:
+          - apiGroups:
+              - '*'
+            resources:
+              - '*'
+            verbs:
+              - get
+              - list
+              - watch
       serviceMonitor:
         enabled: true
-    reportsController:
+    cleanupController:
       serviceMonitor:
         enabled: true
