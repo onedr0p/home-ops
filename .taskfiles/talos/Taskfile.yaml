@@ -4,12 +4,18 @@ version: '3'
 
 tasks:
 
-  apply-config:
+  apply-node:
     desc: Apply Talos config to a node [CLUSTER=main] [HOSTNAME=required] [MODE=auto|no-reboot|reboot]
     dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
-    cmd: sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli {}" | talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
+    cmds:
+      - task: '{{if eq .MODE "reboot"}}down{{else}}noop{{end}}'
+      - '{{if eq .MODE "reboot"}}kubectl drain {{.HOSTNAME}} --ignore-daemonsets --delete-emptydir-data --force{{end}}'
+      - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli {}" | talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
+      - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
+      - '{{if eq .MODE "reboot"}}kubectl uncordon {{.HOSTNAME}}{{end}}'
+      - task: '{{if eq .MODE "reboot"}}up{{else}}noop{{end}}'
     vars:
-      MODE: '{{.MODE | default "auto"}}'
+      MODE: '{{.MODE | default "no-reboot"}}'
     requires:
       vars: [CLUSTER, HOSTNAME]
     preconditions:
@@ -17,6 +23,26 @@ tasks:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - test -f {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
+
+  upgrade-node:
+    desc: Upgrade Talos on a single node [CLUSTER=main] [HOSTNAME=required]
+    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
+    cmds:
+      - task: down
+      - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:$TALOS_VERSION" --timeout=10m
+      - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
+      - task: up
+    vars:
+      SCHEMATIC_ID:
+        sh: kubectl get node {{.HOSTNAME}} --output=jsonpath='{.metadata.annotations.extensions\.talos\.dev/schematic}'
+    requires:
+      vars: [CLUSTER, HOSTNAME]
+    preconditions:
+      - test -f {{.CLUSTER_DIR}}/cluster.env
+      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - talosctl config info &>/dev/null
+      - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
+      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/talos/releases/tag/$TALOS_VERSION
 
   upgrade-k8s:
     desc: Upgrade Kubernetes across the whole cluster [CLUSTER=main] [VERSION=required]
@@ -37,17 +63,13 @@ tasks:
       - talosctl --nodes {{.CONTROLLER}} get machineconfig &>/dev/null
       - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/kubelet/releases/tag/$KUBERNETES_VERSION
 
-  upgrade-node:
-    desc: Upgrade Talos on a single node [CLUSTER=main] [HOSTNAME=required] [VERSION=required]
-    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
+  reboot-node:
+    desc: Reboot Talos on a single node [CLUSTER=main] [HOSTNAME=required]
     cmds:
-      - task: '{{if ne .ROLLOUT true}}down{{else}}noop{{end}}'
-      - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:$TALOS_VERSION" --timeout=10m
+      - task: down
+      - talosctl --nodes {{.HOSTNAME}} reboot
       - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
-      - task: '{{if ne .ROLLOUT true}}up{{else}}noop{{end}}'
-    vars:
-      SCHEMATIC_ID:
-        sh: kubectl get node {{.HOSTNAME}} --output=jsonpath='{.metadata.annotations.extensions\.talos\.dev/schematic}'
+      - task: up
     requires:
       vars: [CLUSTER, HOSTNAME]
     preconditions:
@@ -55,23 +77,6 @@ tasks:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
-      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/talos/releases/tag/$TALOS_VERSION
-
-  upgrade-cluster:
-    desc: Upgrade Talos across the whole cluster [CLUSTER=main] [VERSION=required]
-    cmds:
-      - task: down
-      - for: { var: HOSTNAMES }
-        task: upgrade-node
-        vars:
-          HOSTNAME: '{{.ITEM}}'
-          ROLLOUT: true
-      - task: up
-    vars:
-      HOSTNAMES:
-        sh: kubectl get nodes --output=jsonpath='{.items[*].metadata.name}'
-    requires:
-      vars: [CLUSTER]
 
   reset-node:
     desc: Reset Talos on a single node [CLUSTER=main] [HOSTNAME=required]
@@ -101,14 +106,14 @@ tasks:
   down:
     internal: true
     cmds:
-      - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 5; done
       - flux --namespace flux-system suspend kustomization --all
+      - until kubectl wait cephcluster --for=jsonpath=.status.ceph.health=HEALTH_OK --timeout=10m --all --all-namespaces &>/dev/null; do sleep 5; done
+      - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 5; done
       - task: :volsync:state-suspend
 
   up:
     internal: true
     cmds:
-      - until kubectl wait cephcluster --for=jsonpath=.status.ceph.health=HEALTH_OK --timeout=10m --all --all-namespaces &>/dev/null; do sleep 5; done
       - flux --namespace flux-system resume kustomization --all
       - task: :volsync:state-resume
 
