@@ -40,3 +40,13 @@ tasks:
       | xargs --max-procs=2 -l bash -c 'kubectl --namespace "$0" annotate externalsecret "$1" force-sync="{{now | unixEpoch}}" --overwrite'
     requires:
       vars: [CLUSTER]
+
+  delete-failed-pods:
+    desc: Delete pods in all namespaces with a Failed/Succeeded/Pending phase [CLUSTER=main]
+    cmds:
+      - for:
+          matrix:
+            PHASE: [Failed, Succeeded, Pending]
+        cmd: kubectl delete pods --field-selector status.phase={{.ITEM.PHASE}} -A --ignore-not-found=true
+    requires:
+      vars: [CLUSTER]
