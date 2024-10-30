@@ -23,5 +23,18 @@ spec:
       strategy: rollback
       retries: 3
   values:
-    feature:
-      enableFSGroupPolicy: true
+    storageClass:
+      create: true
+      name: nfs-slow
+      parameters:
+        server: expanse.internal
+        share: /eros/Kubernetes
+      mountOptions:
+        - nfsvers=4.2
+        - nconnect=8
+        - hard
+        - noatime
+        - rsize=131072
+        - wsize=131072
+      reclaimPolicy: Delete
+      volumeBindingMode: Immediate
