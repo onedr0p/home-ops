@@ -79,6 +79,17 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       nodeSelector:
         topology.kubernetes.io/zone: w
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values: ["sabnzbd"]
+                topologyKey: kubernetes.io/hostname
       terminationGracePeriodSeconds: 300
     service:
       app:
@@ -108,6 +119,8 @@ spec:
     persistence:
       config:
         existingClaim: qbittorrent
+      tmp:
+        type: emptyDir
       scripts:
         type: configMap
         name: qbittorrent-scripts
