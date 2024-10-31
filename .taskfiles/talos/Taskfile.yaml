@@ -8,11 +8,11 @@ tasks:
     desc: Apply Talos config to a node [CLUSTER=main] [HOSTNAME=required]
     dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmds:
-      - task: '{{if eq .MODE "reboot"}}down{{else}}noop{{end}}'
+      - task: down
       - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.HOSTNAME}} apply-config --mode=staged --file /dev/stdin
       - talosctl --nodes {{.HOSTNAME}} reboot
       - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
-      - task: '{{if eq .MODE "reboot"}}up{{else}}noop{{end}}'
+      - task: up
     requires:
       vars: [CLUSTER, HOSTNAME]
     preconditions:
@@ -111,14 +111,9 @@ tasks:
   up:
     internal: true
     cmds:
-      - task: :kubernetes:delete-failed-pods
+      - defer:
+          task: :kubernetes:delete-failed-pods
       - flux --namespace flux-system resume kustomization --all
       - until kubectl wait cephcluster --for=jsonpath=.status.ceph.health=HEALTH_OK --timeout=10m --all --all-namespaces &>/dev/null; do sleep 5; done
       - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 5; done
       - task: :volsync:state-resume
-
-  # Ref: https://github.com/go-task/task/issues/608
-  noop:
-    internal: true
-    silent: true
-    cmd: noop() { :; }
