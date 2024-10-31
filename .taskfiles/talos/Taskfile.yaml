@@ -5,17 +5,14 @@ version: '3'
 tasks:
 
   apply-node:
-    desc: Apply Talos config to a node [CLUSTER=main] [HOSTNAME=required] [MODE=auto|no-reboot|reboot]
+    desc: Apply Talos config to a node [CLUSTER=main] [HOSTNAME=required]
     dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmds:
       - task: '{{if eq .MODE "reboot"}}down{{else}}noop{{end}}'
-      - '{{if eq .MODE "reboot"}}kubectl drain {{.HOSTNAME}} --ignore-daemonsets --delete-emptydir-data --force{{end}}'
-      - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli {}" | talosctl apply-config --mode={{.MODE}} --nodes {{.HOSTNAME}} --file /dev/stdin
+      - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.HOSTNAME}} apply-config --mode=staged --file /dev/stdin
+      - talosctl --nodes {{.HOSTNAME}} reboot
       - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
-      - '{{if eq .MODE "reboot"}}kubectl uncordon {{.HOSTNAME}}{{end}}'
       - task: '{{if eq .MODE "reboot"}}up{{else}}noop{{end}}'
-    vars:
-      MODE: '{{.MODE | default "no-reboot"}}'
     requires:
       vars: [CLUSTER, HOSTNAME]
     preconditions:
