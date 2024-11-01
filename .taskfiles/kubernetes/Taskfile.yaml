@@ -23,7 +23,7 @@ tasks:
       - test -f {{.CLUSTER_DIR}}/apps/{{.PATH}}/ks.yaml
 
   browse-pvc:
-    desc: Mount PVC to an temp container for browsing [CLUSTER=main] [NS=default] [CLAIM=required]
+    desc: Mount a PVC to an temp container [CLUSTER=main] [NS=default] [CLAIM=required]
     interactive: true
     cmd: kubectl browse-pvc --namespace {{.NS}} --image docker.io/library/alpine:latest {{.CLAIM}}
     vars:
@@ -37,15 +37,16 @@ tasks:
     desc: Sync all ExternalSecrets [CLUSTER=main]
     cmds:
       - for: { var: SECRETS, split: "\n" }
-        cmd: kubectl --namespace {{splitList "," .ITEM | first}} annotate externalsecret {{splitList "," .ITEM | last}} force-sync="{{now | unixEpoch}}" --overwrite
+        cmd: kubectl --namespace {{splitList "," .ITEM | first}} annotate externalsecret {{splitList "," .ITEM | last}} force-sync="{{.TS}}" --overwrite
     vars:
+      TS: '{{now | unixEpoch}}'
       SECRETS:
         sh: kubectl get externalsecret --all-namespaces --no-headers --output=jsonpath='{range .items[*]}{.metadata.namespace},{.metadata.name}{"\n"}{end}'
     requires:
       vars: [CLUSTER]
 
   delete-failed-pods:
-    desc: Delete pods in all namespaces with a Failed/Pending/Succeeded phase [CLUSTER=main]
+    desc: Delete pods with a Failed/Pending/Succeeded phase [CLUSTER=main]
     cmds:
       - for:
           matrix:
