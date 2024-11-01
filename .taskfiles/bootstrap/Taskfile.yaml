@@ -59,55 +59,17 @@ tasks:
 
   rook:
     internal: true
-    vars: &vars
-      CLUSTER: '{{.CLUSTER}}'
-      NODE: '{{.ITEM}}'
-      ROOK_DISK: '{{.ROOK_DISK}}'
     cmds:
-      - for: { var: NODES }
-        task: rook-data
-        vars: *vars
-      - for: { var: NODES }
-        task: rook-disk
-        vars: *vars
-
-  rook-disk:
-    internal: true
-    cmds:
-      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.yaml.j2 | kubectl apply --server-side --filename -
-      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
-      - kubectl --namespace {{.NS}} logs job/{{.JOB}}
-      - kubectl --namespace {{.NS}} delete job {{.JOB}}
-    vars:
-      JOB: wipe-disk-{{.NODE}}
-      NS: '{{.NS | default "default"}}'
+      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-job.yaml.j2 | kubectl apply --server-side --filename -
+      - until kubectl --namespace default get job/wipe-rook &>/dev/null; do sleep 5; done
+      - kubectl --namespace default wait job/wipe-rook --for=condition=complete --timeout=5m
+      - kubectl --namespace default logs job/wipe-rook
+      - kubectl --namespace default delete job wipe-rook
     env:
+      TOTAL_NODES: '{{len (splitList "," .NODES)}}'
       ROOK_DISK: '{{.ROOK_DISK}}'
-      JOB: '{{.JOB}}'
-      NODE: '{{.NODE}}'
-      NS: '{{.NS}}'
     preconditions:
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/rook-disk-job.yaml.j2
-
-  rook-data:
-    internal: true
-    cmds:
-      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.yaml.j2 | kubectl apply --server-side --filename -
-      - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
-      - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=5m
-      - kubectl --namespace {{.NS}} logs job/{{.JOB}}
-      - kubectl --namespace {{.NS}} delete job {{.JOB}}
-    vars:
-      JOB: wipe-data-{{.NODE}}
-      NS: '{{.NS | default "default"}}'
-    env:
-      ROOK_DISK: '{{.ROOK_DISK}}'
-      JOB: '{{.JOB}}'
-      NODE: '{{.NODE}}'
-      NS: '{{.NS}}'
-    preconditions:
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/rook-data-job.yaml.j2
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-job.yaml.j2
 
   flux:
     internal: true
