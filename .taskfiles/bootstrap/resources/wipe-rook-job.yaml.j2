@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: *app
 spec:
-  parallelism: {{ ENV.TOTAL_NODES }}
+  parallelism: {{ ENV.NODES }}
   template:
     metadata:
       labels:
@@ -21,10 +21,10 @@ spec:
           args:
             - apk add --no-cache sgdisk util-linux util-linux-misc parted device-mapper;
               rm -rf /mnt/host_var/lib/rook;
-              sgdisk --zap-all {{ ENV.ROOK_DISK }};
-              dd if=/dev/zero of={{ ENV.ROOK_DISK }} bs=1M count=100 oflag=direct;
-              blkdiscard {{ ENV.ROOK_DISK }};
-              partprobe {{ ENV.ROOK_DISK }};
+              sgdisk --zap-all {{ ENV.DISK }};
+              dd if=/dev/zero of={{ ENV.DISK }} bs=1M count=100 oflag=direct;
+              blkdiscard {{ ENV.DISK }};
+              partprobe {{ ENV.DISK }};
           volumeMounts:
             - name: host-var
               mountPath: /mnt/host_var

@@ -5,7 +5,7 @@ version: '3'
 tasks:
 
   apply-ks:
-    desc: Apply a Flux Kustomization resource for a cluster [CLUSTER=main] [PATH=required] [NS=flux-system]
+    desc: Apply a Flux KS for a cluster [CLUSTER=main] [PATH=required] [NS=flux-system]
     cmd: >
       flux build --namespace {{.NS}} ks {{base .PATH}}
       --kustomization-file {{.CLUSTER_DIR}}/apps/{{.PATH}}/ks.yaml
@@ -45,7 +45,7 @@ tasks:
     requires:
       vars: [CLUSTER]
 
-  delete-failed-pods:
+  delete-pods:
     desc: Delete pods with a Failed/Pending/Succeeded phase [CLUSTER=main]
     cmds:
       - for:

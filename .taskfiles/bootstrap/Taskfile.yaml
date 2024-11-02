@@ -7,58 +7,23 @@ vars:
 
 tasks:
 
-  kubernetes:
-    desc: Bootstrap a Kubernetes cluster [CLUSTER=main] [NODES=k8s-0,k8s-1,...] [ROOK_DISK=/dev/nvme0n1]
-    prompt: Bootstrap a Kubernetes cluster ... continue?
-    vars: &vars
-      CLUSTER: '{{.CLUSTER}}'
-      NODES: '{{.NODES | default "k8s-0,k8s-1,k8s-2,k8s-3,k8s-4,k8s-5"}}'
-      ROOK_DISK: '{{.ROOK_DISK | default "/dev/nvme0n1"}}'
+  talos:
+    desc: Bootstrap Talos [CLUSTER=main]
     cmds:
-      - { task: etcd, vars: *vars }
-      - { task: conf, vars: *vars }
-      - { task: apps, vars: *vars }
-      - { task: rook, vars: *vars }
-      - { task: flux, vars: *vars }
+      - until talosctl --nodes {{.TALOS_CONTROLLER}} bootstrap; do sleep 5; done
+      - talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name {{.CLUSTER}} {{.CLUSTER_DIR}}
+    vars:
+      TALOS_CONTROLLER:
+        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
     requires:
       vars: [CLUSTER]
     preconditions:
-      - talosctl config info &>/dev/null
-      - test -f {{.CLUSTER_DIR}}/talosconfig
-
-  etcd:
-    internal: true
-    cmd: until talosctl --nodes {{.TALOS_CONTROLLER}} bootstrap; do sleep 5; done
-    vars:
-      TALOS_CONTROLLER:
-        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
-    preconditions:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - talosctl config info &>/dev/null
 
-  conf:
-    internal: true
-    cmd: talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name {{.CLUSTER}} {{.CLUSTER_DIR}}
-    vars:
-      TALOS_CONTROLLER:
-        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
-    preconditions:
-      - test -f {{.CLUSTER_DIR}}/talosconfig
-      - talosctl config info &>/dev/null
-
-  apps:
-    internal: true
-    cmds:
-      - until kubectl wait --for=condition=Ready=False nodes --all --timeout=10m; do sleep 5; done
-      - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
-      - until kubectl wait --for=condition=Ready nodes --all --timeout=10m; do sleep 5; done
-    preconditions:
-      - test -f {{.CLUSTER_DIR}}/talosconfig
-      - test -f {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml
-      - talosctl config info &>/dev/null
-
+  # NOTE: Expects all nodes are part of the Ceph cluster and have the same Ceph disk path
   rook:
-    internal: true
+    desc: Bootstrap Rook-Ceph [CLUSTER=main] [DISK=/dev/nvme0n1]
     cmds:
       - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-job.yaml.j2 | kubectl apply --server-side --filename -
       - until kubectl --namespace default get job/wipe-rook &>/dev/null; do sleep 5; done
@@ -66,13 +31,29 @@ tasks:
       - kubectl --namespace default logs job/wipe-rook
       - kubectl --namespace default delete job wipe-rook
     env:
-      TOTAL_NODES: '{{len (splitList "," .NODES)}}'
-      ROOK_DISK: '{{.ROOK_DISK}}'
+      DISK: '{{.DISK | default "/dev/nvme0n1"}}'
+      NODES:
+        sh: talosctl config info --output json | jq --raw-output '.nodes | length'
+    requires:
+      vars: [CLUSTER]
     preconditions:
       - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-job.yaml.j2
 
+  apps:
+    desc: Bootstrap Apps [CLUSTER=main]
+    cmds:
+      - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
+      - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+      - until kubectl wait nodes --for=condition=Ready --all --timeout=10m; do sleep 5; done
+    requires:
+      vars: [CLUSTER]
+    preconditions:
+      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - test -f {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml
+      - talosctl config info &>/dev/null
+
   flux:
-    internal: true
+    desc: Bootstrap Flux [CLUSTER=main]
     cmds:
       - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/bootstrap/apps
       - for: { var: TEMPLATES }
@@ -84,6 +65,8 @@ tasks:
         sh: ls {{.CLUSTER_DIR}}/bootstrap/apps/*.j2
     env:
       VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
+    requires:
+      vars: [CLUSTER]
     preconditions:
       - test -f {{.CLUSTER_DIR}}/flux/vars/cluster-settings.yaml
 
@@ -95,17 +78,17 @@ tasks:
       - for: { var: ASSETS }
         cmd: sops exec-file --input-type yaml --output-type yaml {{.ITEM}} "minijinja-cli {} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/assets/{{base .ITEM | replace ".sops.yaml.j2" ".yaml"}}"
       - for: { var: GROUPS }
-        cmd: minijinja-cli {{.ITEM}} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/groups/{{base .ITEM}}
+        cmd: minijinja-cli {{.ITEM}} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/groups/{{base .ITEM | replace ".json.j2" ".json"}}
       - for: { var: PROFILES }
-        cmd: minijinja-cli {{.ITEM}} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/profiles/{{base .ITEM}}
+        cmd: minijinja-cli {{.ITEM}} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/profiles/{{base .ITEM | replace ".json.j2" ".json"}}
       - ssh -l devin voyager.internal "cd /var/opt/home-service ; go-task restart-matchbox"
     vars:
       ASSETS:
         sh: ls {{.CLUSTER_DIR}}/talos/*.yaml.j2
       GROUPS:
-        sh: ls {{.CLUSTER_DIR}}/bootstrap/matchbox/groups/*.json
+        sh: ls {{.CLUSTER_DIR}}/bootstrap/matchbox/groups/*.json.j2
       PROFILES:
-        sh: ls {{.CLUSTER_DIR}}/bootstrap/matchbox/profiles/*.json
+        sh: ls {{.CLUSTER_DIR}}/bootstrap/matchbox/profiles/*.json.j2
     requires:
       vars: [CLUSTER]
     preconditions:

@@ -111,8 +111,6 @@ tasks:
   up:
     internal: true
     cmds:
-      - defer:
-          task: :kubernetes:delete-failed-pods
       - flux --namespace flux-system resume kustomization --all
       - until kubectl wait cephcluster --for=jsonpath=.status.ceph.health=HEALTH_OK --timeout=10m --all --all-namespaces &>/dev/null; do sleep 5; done
       - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 5; done
