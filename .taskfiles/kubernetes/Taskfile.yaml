@@ -5,20 +5,18 @@ version: '3'
 tasks:
 
   apply-ks:
-    desc: Apply a Flux KS for a cluster [CLUSTER=main] [PATH=required] [NS=flux-system]
+    desc: Apply a Flux KS for a cluster [CLUSTER=main] [PATH=required]
     cmd: >
-      flux build --namespace {{.NS}} ks {{base .PATH}}
+      flux build --namespace flux-system ks {{base .PATH}}
       --kustomization-file {{.CLUSTER_DIR}}/apps/{{.PATH}}/ks.yaml
-      --path {{.CLUSTER_DIR}}/apps/{{.PATH}}
-      {{- if contains "not found" .KS }}--dry-run \{{ end }}
-      | yq 'with(select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization"); .metadata.namespace = "{{.NS}}")' -
+      --path {{.CLUSTER_DIR}}/apps/{{.PATH}}{{if contains .KUSTOMIZATION "not found"}} --dry-run{{end}}
+      | yq 'with(select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization"); .metadata.namespace = "flux-system")' -
       | kubectl apply --server-side --field-manager=kustomize-controller --filename -
     requires:
       vars: [CLUSTER, PATH]
     vars:
-      NS: '{{.NS | default "flux-system"}}'
-      KS:
-        sh: flux --namespace {{.NS}} get kustomizations {{base .PATH}} 2>&1
+      KUSTOMIZATION:
+        sh: flux --namespace flux-system get kustomizations {{base .PATH}} 2>&1
     preconditions:
       - test -f {{.CLUSTER_DIR}}/apps/{{.PATH}}/ks.yaml
 
@@ -37,20 +35,19 @@ tasks:
     desc: Sync all ExternalSecrets [CLUSTER=main]
     cmds:
       - for: { var: SECRETS, split: "\n" }
-        cmd: kubectl --namespace {{splitList "," .ITEM | first}} annotate externalsecret {{splitList "," .ITEM | last}} force-sync="{{.TS}}" --overwrite
+        cmd: kubectl --namespace {{splitList "," .ITEM | first}} annotate externalsecret {{splitList "," .ITEM | last}} force-sync="{{now | unixEpoch}}" --overwrite
     vars:
-      TS: '{{now | unixEpoch}}'
       SECRETS:
         sh: kubectl get externalsecret --all-namespaces --no-headers --output=jsonpath='{range .items[*]}{.metadata.namespace},{.metadata.name}{"\n"}{end}'
     requires:
       vars: [CLUSTER]
 
-  delete-pods:
-    desc: Delete pods with a Failed/Pending/Succeeded phase [CLUSTER=main]
+  cleanse-pods:
+    desc: Cleanse pods with a Failed/Pending/Succeeded phase [CLUSTER=main]
     cmds:
       - for:
           matrix:
             PHASE: [Failed, Pending, Succeeded]
-        cmd: kubectl delete pods --field-selector status.phase={{.ITEM.PHASE}} -A --ignore-not-found=true
+        cmd: kubectl delete pods --all-namespaces --field-selector status.phase={{.ITEM.PHASE}} --ignore-not-found=true
     requires:
       vars: [CLUSTER]

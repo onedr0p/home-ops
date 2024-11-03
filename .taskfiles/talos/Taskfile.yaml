@@ -75,6 +75,20 @@ tasks:
       - talosctl config info &>/dev/null
       - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
 
+  shutdown-cluster:
+    desc: Shutdown Talos across the whole cluster [CLUSTER=main]
+    prompt: Shutdown the Talos cluster '{{.CLUSTER}}' ... continue?
+    cmd: talosctl shutdown --nodes {{.HOSTNAMES}} --force
+    vars:
+      HOSTNAMES:
+        sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(",")'
+    requires:
+      vars: [CLUSTER]
+    preconditions:
+      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - talosctl config info &>/dev/null
+      - talosctl --nodes {{.NODES}} get machineconfig &>/dev/null
+
   reset-node:
     desc: Reset Talos on a single node [CLUSTER=main] [HOSTNAME=required]
     prompt: Reset Talos node '{{.HOSTNAME}}' on the '{{.CLUSTER}}' cluster ... continue?
@@ -88,7 +102,7 @@ tasks:
 
   reset-cluster:
     desc: Reset Talos across the whole cluster [CLUSTER=main]
-    prompt: Reset Talos cluster '{{.CLUSTER}}' ... continue?
+    prompt: Reset the Talos cluster '{{.CLUSTER}}' ... continue?
     cmd: talosctl reset --nodes {{.HOSTNAMES}} --graceful=false
     vars:
       HOSTNAMES:
