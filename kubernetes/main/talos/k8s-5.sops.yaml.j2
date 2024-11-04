@@ -36,8 +36,6 @@ machine:
     diskSelector:
       model: Samsung SSD 870
     extraKernelArgs:
-      - cpufreq.default_governor=performance
-      - intel_pstate=disable
       - mitigations=off
       - module_blacklist=e1000e
     image: factory.talos.dev/installer/d715f723f882b1e1e8063f1b89f237dcc0e3bd000f9f970243af59c8baae0100:{{ ENV.TALOS_VERSION }}
@@ -75,9 +73,9 @@ machine:
     net.ipv4.tcp_wmem: 4096 65536 33554432
     net.ipv4.tcp_tw_reuse: 1
     net.ipv4.tcp_window_scaling: 1
+    vm.nr_hugepages: 1024
   sysfs:
     block.nvme0n1.queue.scheduler: none
-    devices.system.cpu.cpufreq.boost: 0
   features:
     rbac: true
     stableHostname: true
@@ -96,9 +94,6 @@ machine:
       - ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
       # Intel GPU
       - SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
-      # Google Coral USB Accelerator
-      - SUBSYSTEMS=="usb", ATTRS{idVendor}=="1a6e", ATTRS{idProduct}=="089a", GROUP="20", MODE="0660"
-      - SUBSYSTEMS=="usb", ATTRS{idVendor}=="18d1", ATTRS{idProduct}=="9302", GROUP="20", MODE="0660"
   nodeLabels:
     topology.kubernetes.io/region: main
     topology.kubernetes.io/zone: w
