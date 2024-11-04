@@ -16,7 +16,7 @@ tasks:
     generates:
       - '{{.WORKSTATION_RESOURCES_DIR}}/Brewfile.lock.json'
     preconditions:
-      - command -v brew
+      - which brew
       - test -f {{.WORKSTATION_RESOURCES_DIR}}/Brewfile
 
   golang:
@@ -24,7 +24,7 @@ tasks:
     deps: [brew]
     cmds: []
     preconditions:
-      - command -v go
+      - which go
 
   krew:
     desc: Set up Krew tools
@@ -32,8 +32,8 @@ tasks:
     cmds:
       - kubectl krew install cert-manager cnpg browse-pvc rook-ceph view-secret
     preconditions:
-      - command -v kubectl
-      - kubectl krew &>/dev/null
+      - kubectl krew version
+      - which kubectl
 
   python:
     desc: Set up Python tools
@@ -47,5 +47,5 @@ tasks:
     generates:
       - '{{.VIRTUAL_ENV}}/pyvenv.cfg'
     preconditions:
-      - command -v python3
+      - which python3
       - test -f {{.WORKSTATION_RESOURCES_DIR}}/requirements.txt

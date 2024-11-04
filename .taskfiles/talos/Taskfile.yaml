@@ -9,17 +9,17 @@ tasks:
     dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmds:
       - task: down
-      - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.HOSTNAME}} apply-config --mode=staged --file /dev/stdin
-      - talosctl --nodes {{.HOSTNAME}} reboot
+      - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.HOSTNAME}} apply-config --file /dev/stdin
       - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
       - task: up
     requires:
       vars: [CLUSTER, HOSTNAME]
     preconditions:
+      - talosctl --nodes {{.HOSTNAME}} get machineconfig
       - test -f {{.CLUSTER_DIR}}/cluster.env
-      - test -f {{.CLUSTER_DIR}}/talosconfig
       - test -f {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2
-      - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
+      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - which minijinja-cli sops talosctl
 
   upgrade-node:
     desc: Upgrade Talos on a single node [CLUSTER=main] [HOSTNAME=required]
@@ -35,11 +35,12 @@ tasks:
     requires:
       vars: [CLUSTER, HOSTNAME]
     preconditions:
+      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/talos/releases/tag/$TALOS_VERSION
+      - talosctl --nodes {{.HOSTNAME}} get machineconfig
+      - talosctl config info
       - test -f {{.CLUSTER_DIR}}/cluster.env
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - talosctl config info &>/dev/null
-      - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
-      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/talos/releases/tag/$TALOS_VERSION
+      - which kubectl talosctl
 
   upgrade-k8s:
     desc: Upgrade Kubernetes across the whole cluster [CLUSTER=main] [VERSION=required]
@@ -54,11 +55,12 @@ tasks:
     requires:
       vars: [CLUSTER]
     preconditions:
+      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/kubelet/releases/tag/$KUBERNETES_VERSION
+      - talosctl --nodes {{.CONTROLLER}} get machineconfig
+      - talosctl config info
       - test -f {{.CLUSTER_DIR}}/cluster.env
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - talosctl config info &>/dev/null
-      - talosctl --nodes {{.CONTROLLER}} get machineconfig &>/dev/null
-      - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/kubelet/releases/tag/$KUBERNETES_VERSION
+      - which talosctl
 
   reboot-node:
     desc: Reboot Talos on a single node [CLUSTER=main] [HOSTNAME=required]
@@ -70,10 +72,11 @@ tasks:
     requires:
       vars: [CLUSTER, HOSTNAME]
     preconditions:
+      - talosctl --nodes {{.HOSTNAME}} get machineconfig
+      - talosctl config info
       - test -f {{.CLUSTER_DIR}}/cluster.env
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - talosctl config info &>/dev/null
-      - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
+      - which talosctl
 
   shutdown-cluster:
     desc: Shutdown Talos across the whole cluster [CLUSTER=main]
@@ -85,9 +88,10 @@ tasks:
     requires:
       vars: [CLUSTER]
     preconditions:
+      - talosctl --nodes {{.NODES}} get machineconfig
+      - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - talosctl config info &>/dev/null
-      - talosctl --nodes {{.NODES}} get machineconfig &>/dev/null
+      - which jq talosctl
 
   reset-node:
     desc: Reset Talos on a single node [CLUSTER=main] [HOSTNAME=required]
@@ -96,9 +100,9 @@ tasks:
     requires:
       vars: [CLUSTER, HOSTNAME]
     preconditions:
+      - talosctl --nodes {{.HOSTNAME}} get machineconfig
+      - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - talosctl config info &>/dev/null
-      - talosctl --nodes {{.HOSTNAME}} get machineconfig &>/dev/null
 
   reset-cluster:
     desc: Reset Talos across the whole cluster [CLUSTER=main]
@@ -110,9 +114,23 @@ tasks:
     requires:
       vars: [CLUSTER]
     preconditions:
+      - talosctl --nodes {{.NODES}} get machineconfig
+      - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - talosctl config info &>/dev/null
-      - talosctl --nodes {{.NODES}} get machineconfig &>/dev/null
+      - which jq talosctl
+
+  kubeconfig:
+    desc: Generate the kubeconfig for a Talos cluster [CLUSTER=main]
+    cmd: talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name {{.CLUSTER}} {{.CLUSTER_DIR}}
+    vars:
+      TALOS_CONTROLLER:
+        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
+    requires:
+      vars: [CLUSTER]
+    preconditions:
+      - talosctl config info
+      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - which talosctl
 
   down:
     internal: true
@@ -121,6 +139,8 @@ tasks:
       - until kubectl wait cephcluster --for=jsonpath=.status.ceph.health=HEALTH_OK --timeout=10m --all --all-namespaces &>/dev/null; do sleep 5; done
       - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 5; done
       - task: :volsync:state-suspend
+    preconditions:
+      - which flux kubectl
 
   up:
     internal: true
@@ -129,3 +149,5 @@ tasks:
       - until kubectl wait cephcluster --for=jsonpath=.status.ceph.health=HEALTH_OK --timeout=10m --all --all-namespaces &>/dev/null; do sleep 5; done
       - until kubectl wait jobs --all --all-namespaces --for=condition=complete --timeout=5m &>/dev/null; do sleep 5; done
       - task: :volsync:state-resume
+    preconditions:
+      - which flux kubectl

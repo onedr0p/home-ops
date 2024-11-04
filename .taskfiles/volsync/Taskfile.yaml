@@ -24,6 +24,7 @@ tasks:
       vars: [CLUSTER]
     preconditions:
       - '[[ "{{.STATE}}" == "suspend" || "{{.STATE}}" == "resume" ]]'
+      - which flux kubectl
 
   unlock:
     desc: Unlock all restic source repos [CLUSTER=main]
@@ -35,6 +36,8 @@ tasks:
         sh: kubectl get replicationsources --all-namespaces --no-headers --output=jsonpath='{range .items[*]}{.metadata.namespace},{.metadata.name}{"\n"}{end}'
     requires:
       vars: [CLUSTER]
+    preconditions:
+      - which kubectl
 
   snapshot:
     desc: Snapshot an app [CLUSTER=main] [NS=default] [APP=required]
@@ -49,6 +52,7 @@ tasks:
       vars: [CLUSTER, APP]
     preconditions:
       - kubectl --namespace {{.NS}} get replicationsources {{.APP}}
+      - which kubectl
 
   restore:
     desc: Restore an app [CLUSTER=main] [NS=default] [APP=required] [PREVIOUS=required]
@@ -90,3 +94,4 @@ tasks:
       vars: [CLUSTER, APP, PREVIOUS]
     preconditions:
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.yaml.j2
+      - which flux kubectl minijinja-cli

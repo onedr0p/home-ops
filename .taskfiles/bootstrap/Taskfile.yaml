@@ -18,8 +18,9 @@ tasks:
     requires:
       vars: [CLUSTER]
     preconditions:
+      - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - talosctl config info &>/dev/null
+      - which talosctl
 
   # NOTE: Expects all nodes are part of the Ceph cluster and have the same Ceph disk path
   rook:
@@ -38,6 +39,7 @@ tasks:
       vars: [CLUSTER]
     preconditions:
       - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-job.yaml.j2
+      - which kubectl minijinja-cli talosctl
 
   apps:
     desc: Bootstrap Apps [CLUSTER=main]
@@ -48,9 +50,10 @@ tasks:
     requires:
       vars: [CLUSTER]
     preconditions:
+      - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - test -f {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml
-      - talosctl config info &>/dev/null
+      - which helmfile kubectl
 
   flux:
     desc: Bootstrap Flux [CLUSTER=main]
@@ -65,11 +68,14 @@ tasks:
         sh: ls {{.CLUSTER_DIR}}/bootstrap/apps/*.j2
     env:
       VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
+      FLUX_GITHUB_PUBLIC_KEYS:
+        sh: ssh-keyscan github.com | grep -v '^#'
     requires:
       vars: [CLUSTER]
     preconditions:
-      - test -f {{.CLUSTER_DIR}}/flux/vars/cluster-settings.yaml
       - op user get --me
+      - test -f {{.CLUSTER_DIR}}/flux/vars/cluster-settings.yaml
+      - which flux kubectl ls op ssh-keyscan
 
   # Ref: https://github.com/onedr0p/home-service
   matchbox:
@@ -94,3 +100,4 @@ tasks:
       vars: [CLUSTER]
     preconditions:
       - ping -c1 voyager.internal
+      - which curl ls minijinja-cli sops ssh

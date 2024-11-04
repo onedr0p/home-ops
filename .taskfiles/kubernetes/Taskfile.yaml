@@ -19,6 +19,7 @@ tasks:
         sh: flux --namespace flux-system get kustomizations {{base .PATH}} 2>&1
     preconditions:
       - test -f {{.CLUSTER_DIR}}/apps/{{.PATH}}/ks.yaml
+      - which flux kubectl yq
 
   browse-pvc:
     desc: Mount a PVC to an temp container [CLUSTER=main] [NS=default] [CLAIM=required]
@@ -30,6 +31,8 @@ tasks:
       vars: [CLUSTER, CLAIM]
     preconditions:
       - kubectl --namespace {{.NS}} get persistentvolumeclaims {{.CLAIM}}
+      - kubectl browse-pvc --version
+      - which kubectl
 
   sync-secrets:
     desc: Sync all ExternalSecrets [CLUSTER=main]
@@ -41,6 +44,8 @@ tasks:
         sh: kubectl get externalsecret --all-namespaces --no-headers --output=jsonpath='{range .items[*]}{.metadata.namespace},{.metadata.name}{"\n"}{end}'
     requires:
       vars: [CLUSTER]
+    preconditions:
+      - which kubectl
 
   cleanse-pods:
     desc: Cleanse pods with a Failed/Pending/Succeeded phase [CLUSTER=main]
@@ -51,3 +56,5 @@ tasks:
         cmd: kubectl delete pods --all-namespaces --field-selector status.phase={{.ITEM.PHASE}} --ignore-not-found=true
     requires:
       vars: [CLUSTER]
+    preconditions:
+      - which kubectl
