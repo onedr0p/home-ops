@@ -58,11 +58,11 @@ tasks:
   flux:
     desc: Bootstrap Flux [CLUSTER=main]
     cmds:
-      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/bootstrap/apps
       - for: { var: TEMPLATES }
-        cmd: op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking -- minijinja-cli {{.ITEM}} | kubectl apply --server-side --filename -
-      - kubectl apply --server-side --filename {{.CLUSTER_DIR}}/flux/vars/cluster-settings.yaml
-      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/flux/config
+        cmd: >
+          op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking -- minijinja-cli {{.ITEM}}
+          | kubectl apply --server-side --filename -
+      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/flux/instance
     vars:
       TEMPLATES:
         sh: ls {{.CLUSTER_DIR}}/bootstrap/apps/*.j2
@@ -75,7 +75,7 @@ tasks:
     preconditions:
       - op user get --me
       - test -f {{.CLUSTER_DIR}}/flux/vars/cluster-settings.yaml
-      - which flux kubectl ls op ssh-keyscan
+      - which flux kubectl op ssh-keyscan
 
   # Ref: https://github.com/onedr0p/home-service
   matchbox:
