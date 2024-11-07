@@ -63,6 +63,7 @@ tasks:
           op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking -- minijinja-cli {{.ITEM}}
           | kubectl apply --server-side --filename -
       - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/apps/flux-system/flux-operator/instance
+      - until kubectl wait fluxinstance --for=condition=Ready --timeout=10m --all --all-namespaces &>/dev/null; do sleep 5; done
       - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/flux/cluster
     vars:
       TEMPLATES:
