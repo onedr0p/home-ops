@@ -39,7 +39,6 @@ releases:
     values:
       - ../apps/kube-system/coredns/app/helm-values.yaml
     needs:
-      - observability/prometheus-operator-crds
       - kube-system/cilium
 
   - name: kubelet-csr-approver
@@ -49,8 +48,6 @@ releases:
     values:
       - ../apps/kube-system/kubelet-csr-approver/app/helm-values.yaml
     needs:
-      - observability/prometheus-operator-crds
-      - kube-system/cilium
       - kube-system/coredns
 
   - name: spegel
@@ -60,7 +57,13 @@ releases:
     values:
       - ../apps/kube-system/spegel/app/helm-values.yaml
     needs:
-      - observability/prometheus-operator-crds
-      - kube-system/cilium
-      - kube-system/coredns
       - kube-system/kubelet-csr-approver
+
+  - name: flux-operator
+    namespace: flux-system
+    chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
+    version: v0.10.0
+    values:
+      - ../apps/flux-system/flux-operator/app/helm-values.yaml
+    needs:
+      - kube-system/spegel
