@@ -16,35 +16,8 @@ spec:
     # exclude all
     /*
     # include dirs
-    !/kubernetes/main
     !/kubernetes/repos
----
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: cluster
-  namespace: flux-system
-spec:
-  interval: 30m
-  path: ./kubernetes/main/flux
-  prune: true
-  wait: false
-  sourceRef:
-    kind: GitRepository
-    name: home-kubernetes
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
-  postBuild:
-    substituteFrom:
-      - name: cluster-settings
-        kind: ConfigMap
-        optional: true
-      - name: cluster-secrets
-        kind: Secret
-        optional: true
+    !/kubernetes/main
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -54,9 +27,24 @@ metadata:
   namespace: flux-system
 spec:
   interval: 30m
-  dependsOn:
-    - name: cluster
   path: ./kubernetes/repos
+  prune: true
+  wait: false
+  sourceRef:
+    kind: GitRepository
+    name: home-kubernetes
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster
+  namespace: flux-system
+spec:
+  interval: 30m
+  dependsOn:
+    - name: cluster-repos
+  path: ./kubernetes/main/flux
   prune: true
   wait: false
   sourceRef:
