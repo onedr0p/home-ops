@@ -16,9 +16,9 @@ spec:
     # exclude all
     /*
     # include dirs
-    !/kubernetes/settings
-    !/kubernetes/repos
     !/kubernetes/main
+    !/kubernetes/repos
+    !/kubernetes/settings
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -30,7 +30,7 @@ spec:
   interval: 30m
   path: ./kubernetes/settings
   prune: true
-  wait: false
+  wait: true
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
@@ -43,11 +43,9 @@ metadata:
   namespace: flux-system
 spec:
   interval: 30m
-  dependsOn:
-    - name: cluster-settings
   path: ./kubernetes/repos
   prune: true
-  wait: false
+  wait: true
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
@@ -62,6 +60,7 @@ spec:
   interval: 30m
   dependsOn:
     - name: cluster-repos
+    - name: cluster-settings
   path: ./kubernetes/main/flux
   prune: true
   wait: false
