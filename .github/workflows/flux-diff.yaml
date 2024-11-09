@@ -36,6 +36,7 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           files: kubernetes/**
+          files_ignore: kubernetes/shared/**
           dir_names: true
           dir_names_max_depth: 2
           matrix: true
@@ -93,13 +94,18 @@ jobs:
       - name: Generate Diff
         id: diff
         run: |
-          echo "diff<<EOF" >> $GITHUB_OUTPUT
-          cat diff.patch >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          echo "### Diff" >> $GITHUB_STEP_SUMMARY
-          echo '```diff' >> $GITHUB_STEP_SUMMARY
-          cat diff.patch >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat diff.patch;
+          {
+            echo 'diff<<EOF'
+            cat diff.patch
+            echo EOF
+          } >> "$GITHUB_OUTPUT";
+          {
+            echo "### Diff"
+            echo '```diff'
+            cat diff.patch
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - if: ${{ steps.diff.outputs.diff != '' }}
         name: Add comment
