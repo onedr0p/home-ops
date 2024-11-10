@@ -84,6 +84,7 @@ This Git repository contains the following directories under [Kubernetes](./kube
 │   ├── 📁 bootstrap      # bootstrap procedures
 │   ├── 📁 flux           # core flux configuration
 │   └── 📁 templates      # re-useable components
+├── 📁 shared          # shared cluster resources
 └── 📁 ...             # other clusters
 ```
 
