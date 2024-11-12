@@ -26,6 +26,16 @@ connectivity:
     target: 1.1.1.1:53
     interval: 1m
 endpoints:
+  - name: status
+    group: external
+    url: https://status.devbu.io
+    interval: 1m
+    client:
+      dns-resolver: tcp://1.1.1.1:53
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: pushover
   - name: flux-webhook
     group: external
     url: https://flux-webhook.devbu.io
