@@ -27,10 +27,10 @@ tasks:
     desc: Bootstrap Rook-Ceph [CLUSTER=main] [DISK=/dev/nvme0n1]
     cmds:
       - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-job.yaml.j2 | kubectl apply --server-side --filename -
-      - until kubectl --namespace default get job/wipe-rook-disks &>/dev/null; do sleep 5; done
-      - kubectl --namespace default wait job/wipe-rook-disks --for=condition=complete --timeout=5m
-      - kubectl --namespace default logs job/wipe-rook-disks
-      - kubectl --namespace default delete job wipe-rook-disks
+      - until kubectl --namespace default get job/wipe-rook &>/dev/null; do sleep 5; done
+      - kubectl --namespace default wait job/wipe-rook --for=condition=complete --timeout=5m
+      - kubectl --namespace default logs job/wipe-rook
+      - kubectl --namespace default delete job wipe-rook
     env:
       DISK: '{{.DISK | default "/dev/nvme0n1"}}'
       NODES:
@@ -68,12 +68,12 @@ tasks:
     env:
       VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
       FLUX_GITHUB_PUBLIC_KEYS:
-        sh: curl -fsSL https://api.github.com/meta | jq --raw-output '"github.com "+.ssh_keys[]'
+        sh: ssh-keyscan github.com | grep -v '^#'
     requires:
       vars: [CLUSTER]
     preconditions:
       - op user get --me
-      - which curl flux kubectl ls op
+      - which flux kubectl ls op ssh-keyscan
 
   # Ref: https://github.com/onedr0p/home-service
   matchbox:
