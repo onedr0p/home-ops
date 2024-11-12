@@ -36,8 +36,10 @@ machine:
     diskSelector:
       model: Samsung SSD 870
     extraKernelArgs:
+      - apparmor=0
       - mitigations=off
       - module_blacklist=e1000e
+      - security=none
     image: factory.talos.dev/installer/d715f723f882b1e1e8063f1b89f237dcc0e3bd000f9f970243af59c8baae0100:{{ ENV.TALOS_VERSION }}
     wipe: false
   files:
@@ -59,7 +61,7 @@ machine:
         nfsvers=4.2
         async=True
         hard=True
-        nconnect=4
+        nconnect=16
         noatime=True
         rsize=1048576
         wsize=1048576
@@ -73,9 +75,8 @@ machine:
     net.ipv4.tcp_wmem: 4096 65536 33554432
     net.ipv4.tcp_tw_reuse: 1
     net.ipv4.tcp_window_scaling: 1
+    net.ipv4.tcp_congestion_control: bbr
     vm.nr_hugepages: 1024
-  sysfs:
-    block.nvme0n1.queue.scheduler: none
   features:
     rbac: true
     stableHostname: true
