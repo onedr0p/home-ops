@@ -22,23 +22,26 @@ tasks:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - which talosctl
 
-  # NOTE: Expects all nodes are part of the Ceph cluster and have the same Ceph disk path
+  # NOTE: Nodes must all be part of the Ceph cluster and Ceph disks must share the same disk model
   rook:
-    desc: Bootstrap Rook-Ceph [CLUSTER=main] [DISK=/dev/nvme0n1]
+    desc: Bootstrap Rook-Ceph [CLUSTER=main] [MODEL=required]
     cmds:
-      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-job.yaml.j2 | kubectl apply --server-side --filename -
-      - until kubectl --namespace default get job/wipe-rook-disks &>/dev/null; do sleep 5; done
-      - kubectl --namespace default wait job/wipe-rook-disks --for=condition=complete --timeout=5m
-      - kubectl --namespace default logs job/wipe-rook-disks
-      - kubectl --namespace default delete job wipe-rook-disks
+      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-data.yaml.j2 | kubectl apply --server-side --filename -
+      - until kubectl --namespace default get job/wipe-rook-data &>/dev/null; do sleep 5; done
+      - kubectl --namespace default wait job/wipe-rook-data --for=condition=complete --timeout=5m
+      - kubectl --namespace default logs job/wipe-rook-data
+      - kubectl --namespace default delete job wipe-rook-data
+      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-disk.yaml.j2 | kubectl apply --server-side --filename -
+      - until kubectl --namespace default get job/wipe-rook-disk &>/dev/null; do sleep 5; done
+      - kubectl --namespace default wait job/wipe-rook-disk --for=condition=complete --timeout=5m
+      - kubectl --namespace default logs job/wipe-rook-disk
+      - kubectl --namespace default delete job wipe-rook-disk
     env:
-      DISK: '{{.DISK | default "/dev/nvme0n1"}}'
       NODES:
         sh: talosctl config info --output json | jq --raw-output '.nodes | length'
-    requires:
-      vars: [CLUSTER]
     preconditions:
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-job.yaml.j2
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-data.yaml.j2
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-disk.yaml.j2
       - which kubectl minijinja-cli talosctl
 
   apps:

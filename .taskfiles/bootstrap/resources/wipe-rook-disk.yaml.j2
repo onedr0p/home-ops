@@ -1,0 +1,46 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: &app wipe-rook-disk
+  namespace: default
+  labels:
+    app.kubernetes.io/name: *app
+spec:
+  parallelism: {{ ENV.NODES }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: *app
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: main
+          image: docker.io/library/alpine:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              DISK=$(find /dev/disk/by-id/ -iname "*{{ ENV.MODEL }}*" -not -name "*-part[0-9+]");
+              apk add --no-cache device-mapper findutils parted sgdisk util-linux util-linux-misc;
+              sgdisk --zap-all $DISK;
+              dd if=/dev/zero of="$DISK" bs=1M count=100 oflag=direct;
+              blkdiscard $DISK;
+              partprobe $DISK;
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: host-dev
+              mountPath: /dev/disk/by-id
+          resources: {}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: *app
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+      volumes:
+        - name: host-dev
+          hostPath:
+            path: /dev/disk/by-id
+            type: Directory
