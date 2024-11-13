@@ -20,8 +20,8 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              DISK=$(find /dev/disk/by-id/ -iname "*{{ ENV.MODEL }}*" -not -name "*-part[0-9+]");
               apk add --no-cache device-mapper findutils parted sgdisk util-linux util-linux-misc;
+              DISK=$(find /dev/disk/by-id/ -iname "*{{ ENV.MODEL }}*" -not -name "*-part[0-9+]");
               sgdisk --zap-all $DISK;
               dd if=/dev/zero of="$DISK" bs=1M count=100 oflag=direct;
               blkdiscard $DISK;
