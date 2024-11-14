@@ -152,9 +152,8 @@ In my cluster there are two [ExternalDNS](https://github.com/kubernetes-sigs/ext
 |-----------------------------|-------|--------------|------------------------------|------|------------------|-------------------------|
 | Intel NUC8i5BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)         | 64GB | Talos            | Kubernetes Controllers  |
 | Intel NUC8i7BEH             | 3     | 1TB SSD      | 1TB NVMe (rook-ceph)         | 64GB | Talos            | Kubernetes Workers      |
-| PowerEdge T340              | 1     | 2TB SSD      |                              | 64GB | Ubuntu 22.04     | NFS + Backup Server     |
-| Lenovo SA120                | 1     | -            | 10x22TB ZFS (mirrored vdevs) | -    | -                | DAS                     |
-| PiKVM (RasPi 4)             | 1     | 64GB (SD)    | -                            | 4GB  | PiKVM (Arch)     | KVM                     |
+| PowerEdge T340              | 1     | 2TB SSD      | 8x22TB ZFS (mirrored vdevs)  | 64GB | Ubuntu 24.04     | NFS + Backup Server     |
+| PiKVM (RasPi 4)             | 1     | 64GB (SD)    | -                            | 4GB  | PiKVM            | KVM                     |
 | TESmart 8 Port KVM Switch   | 1     | -            | -                            | -    | -                | Network KVM (for PiKVM) |
 | UniFi UDMP Max              | 1     | -            | 2x12TB HDD                   | -    | -                | Router & NVR            |
 | UniFi US-16-XG              | 1     | -            | -                            | -    | -                | 10Gb Core Switch        |
