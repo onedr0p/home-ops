@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: *app
 spec:
-  parallelism: {{ ENV.NODES }}
+  parallelism: {{ ENV.NODE_COUNT }}
   template:
     metadata:
       labels:
@@ -22,6 +22,7 @@ spec:
             - |
               apk add --no-cache device-mapper findutils parted sgdisk util-linux util-linux-misc;
               DISK=$(find /dev/disk/by-id/ -iname "*{{ ENV.MODEL }}*" -not -name "*-part[0-9+]");
+              echo "=== Wiping $DISK ===";
               sgdisk --zap-all $DISK;
               dd if=/dev/zero of="$DISK" bs=1M count=100 oflag=direct;
               blkdiscard $DISK;

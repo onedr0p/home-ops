@@ -7,20 +7,24 @@ vars:
 
 tasks:
 
-  talos:
-    desc: Bootstrap Talos [CLUSTER=main]
-    cmds:
-      - until talosctl --nodes {{.TALOS_CONTROLLER}} bootstrap; do sleep 5; done
-      - talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name {{.CLUSTER}} {{.CLUSTER_DIR}}
-    vars:
-      TALOS_CONTROLLER:
-        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
-    requires:
-      vars: [CLUSTER]
-    preconditions:
-      - talosctl config info
-      - test -f {{.CLUSTER_DIR}}/talosconfig
-      - which talosctl
+  # talos:
+  #   desc: Bootstrap Talos [CLUSTER=main]
+  #   dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
+  #   cmds:
+  #     # - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/k8s-2.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes 192.168.1.249 apply-config --insecure --file /dev/stdin
+  #     - until talosctl --nodes 192.168.42.10 bootstrap; do sleep 5; done
+  #     # - talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name {{.CLUSTER}} {{.CLUSTER_DIR}}
+  #   vars:
+  #     TALOS_CONTROLLER:
+  #       sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
+  #     TALOS_NODES:
+  #       sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(",")'
+  #   requires:
+  #     vars: [CLUSTER]
+  #   preconditions:
+  #     - talosctl config info
+  #     - test -f {{.CLUSTER_DIR}}/talosconfig
+  #     - which minijinja-cli sops talosctl
 
   # NOTE: Nodes must all be part of the Ceph cluster and Ceph disks must share the same disk model
   rook:
@@ -37,8 +41,11 @@ tasks:
       - kubectl --namespace default logs job/wipe-rook-disk
       - kubectl --namespace default delete job wipe-rook-disk
     env:
-      NODES:
+      MODEL: '{{.MODEL}}'
+      NODE_COUNT:
         sh: talosctl config info --output json | jq --raw-output '.nodes | length'
+    requires:
+      vars: [CLUSTER, MODEL]
     preconditions:
       - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-data.yaml.j2
       - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-disk.yaml.j2
@@ -78,27 +85,27 @@ tasks:
       - op user get --me
       - which curl flux kubectl ls op
 
-  # Ref: https://github.com/onedr0p/home-service
-  matchbox:
-    desc: Sync required Matchbox config to PXEBoot machine [CLUSTER=main]
-    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
-    cmds:
-      - for: { var: ASSETS }
-        cmd: sops exec-file --input-type yaml --output-type yaml {{.ITEM}} "minijinja-cli {} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/assets/{{base .ITEM | replace ".sops.yaml.j2" ".yaml"}}"
-      - for: { var: GROUPS }
-        cmd: minijinja-cli {{.ITEM}} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/groups/{{base .ITEM | replace ".json.j2" ".json"}}
-      - for: { var: PROFILES }
-        cmd: minijinja-cli {{.ITEM}} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/profiles/{{base .ITEM | replace ".json.j2" ".json"}}
-      - ssh -l devin voyager.internal "cd /var/opt/home-service ; go-task restart-matchbox"
-    vars:
-      ASSETS:
-        sh: ls {{.CLUSTER_DIR}}/talos/*.yaml.j2
-      GROUPS:
-        sh: ls {{.CLUSTER_DIR}}/bootstrap/matchbox/groups/*.json.j2
-      PROFILES:
-        sh: ls {{.CLUSTER_DIR}}/bootstrap/matchbox/profiles/*.json.j2
-    requires:
-      vars: [CLUSTER]
-    preconditions:
-      - ping -c1 voyager.internal
-      - which curl ls minijinja-cli sops ssh
+  # # Ref: https://github.com/onedr0p/home-service
+  # matchbox:
+  #   desc: Sync required Matchbox config to PXEBoot machine [CLUSTER=main]
+  #   dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
+  #   cmds:
+  #     - for: { var: ASSETS }
+  #       cmd: sops exec-file --input-type yaml --output-type yaml {{.ITEM}} "minijinja-cli {} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/assets/{{base .ITEM | replace ".sops.yaml.j2" ".yaml"}}"
+  #     - for: { var: GROUPS }
+  #       cmd: minijinja-cli {{.ITEM}} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/groups/{{base .ITEM | replace ".json.j2" ".json"}}
+  #     - for: { var: PROFILES }
+  #       cmd: minijinja-cli {{.ITEM}} | curl -skT - -u "devin:" sftp://voyager.internal//var/opt/home-service/apps/matchbox/data/config/profiles/{{base .ITEM | replace ".json.j2" ".json"}}
+  #     - ssh -l devin voyager.internal "cd /var/opt/home-service ; go-task restart-matchbox"
+  #   vars:
+  #     ASSETS:
+  #       sh: ls {{.CLUSTER_DIR}}/talos/*.yaml.j2
+  #     GROUPS:
+  #       sh: ls {{.CLUSTER_DIR}}/bootstrap/matchbox/groups/*.json.j2
+  #     PROFILES:
+  #       sh: ls {{.CLUSTER_DIR}}/bootstrap/matchbox/profiles/*.json.j2
+  #   requires:
+  #     vars: [CLUSTER]
+  #   preconditions:
+  #     - ping -c1 voyager.internal
+  #     - which curl ls minijinja-cli sops ssh

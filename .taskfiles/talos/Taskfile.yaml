@@ -9,9 +9,11 @@ tasks:
     dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmds:
       - task: down
-      - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.HOSTNAME}} apply-config --file /dev/stdin
+      - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.HOSTNAME}} apply-config --mode={{.MODE}} --file /dev/stdin
       - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
       - task: up
+    vars:
+      MODE: '{{.MODE | default "auto"}}'
     requires:
       vars: [CLUSTER, HOSTNAME]
     preconditions:
