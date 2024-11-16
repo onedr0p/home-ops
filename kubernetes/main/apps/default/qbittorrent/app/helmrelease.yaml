@@ -130,3 +130,20 @@ spec:
         globalMounts:
           - path: /media/Downloads/qbittorrent
             subPath: Downloads/qbittorrent
+      incomplete:
+        type: custom
+        volumeSpec:
+          ephemeral:
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                storageClassName: openebs-hostpath
+                resources:
+                  requests:
+                    storage: 100Gi
+        advancedMounts:
+          qbittorrent:
+            app:
+              - path: /incomplete
+                subPath: incomplete
