@@ -1,0 +1,51 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: irqbalance
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      irqbalance:
+        type: daemonset
+        containers:
+          app:
+            image:
+              repository: ghcr.io/buroa/irqbalance
+              tag: 1.9.4@sha256:cb2490b830d60508507f99458a2beb32e9175ed2222f1b225342f58ae8cf2d40
+            env:
+              IRQBALANCE_BANNED_CPULIST: 8-17 # These are E-cores
+            resources:
+              requests:
+                cpu: 25m
+                memory: 128Mi
+              limits:
+                memory: 128Mi
+            securityContext:
+              privileged: true
+    defaultPodOptions:
+      hostIPC: true
+      hostPID: true
+    persistence:
+      run:
+        type: emptyDir
+        globalMounts:
+          - path: /run/irqbalance
