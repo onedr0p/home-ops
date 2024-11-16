@@ -40,9 +40,11 @@ machine:
     diskSelector:
       model: Samsung SSD 870
     extraKernelArgs:
+      - i915.force_probe=7d55 # TODO: Remove this once the kernel is updated to 6.8.0
       - apparmor=0
       - mitigations=off
       - module_blacklist=igc
+      - security=none
     image: factory.talos.dev/installer/de3b865124c5616da8084826167f8c0b0fbc9b905b146290db797024e84097fc:{{ ENV.TALOS_VERSION }}
       # siderolabs/i915-ucode
       # siderolabs/intel-ucode
@@ -111,6 +113,7 @@ machine:
       - SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
   kernel:
     modules:
+      - name: nbd
       - name: thunderbolt
       - name: thunderbolt_net
   nodeLabels:
