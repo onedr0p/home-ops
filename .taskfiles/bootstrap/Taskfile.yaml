@@ -33,16 +33,11 @@ tasks:
   rook:
     desc: Bootstrap Rook-Ceph [CLUSTER=main] [MODEL=required]
     cmds:
-      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-data.yaml.j2 | kubectl apply --server-side --filename -
-      - until kubectl --namespace default get job/wipe-rook-data &>/dev/null; do sleep 5; done
-      - kubectl --namespace default wait job/wipe-rook-data --for=condition=complete --timeout=5m
-      - kubectl --namespace default logs job/wipe-rook-data
-      - kubectl --namespace default delete job wipe-rook-data
-      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-disk.yaml.j2 | kubectl apply --server-side --filename -
-      - until kubectl --namespace default get job/wipe-rook-disk &>/dev/null; do sleep 5; done
-      - kubectl --namespace default wait job/wipe-rook-disk --for=condition=complete --timeout=5m
-      - kubectl --namespace default logs job/wipe-rook-disk
-      - kubectl --namespace default delete job wipe-rook-disk
+      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook.yaml.j2 | kubectl apply --server-side --filename -
+      - until kubectl --namespace default get job/wipe-rook &>/dev/null; do sleep 5; done
+      - kubectl --namespace default wait job/wipe-rook --for=condition=complete --timeout=5m
+      - stern --namespace default job/wipe-rook --no-follow
+      - kubectl --namespace default delete job wipe-rook
     env:
       MODEL: '{{.MODEL}}'
       NODE_COUNT:
@@ -50,9 +45,8 @@ tasks:
     requires:
       vars: [CLUSTER, MODEL]
     preconditions:
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-data.yaml.j2
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook-disk.yaml.j2
-      - which kubectl minijinja-cli talosctl
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook.yaml.j2
+      - which kubectl minijinja-cli stern talosctl
 
   apps:
     desc: Bootstrap Apps [CLUSTER=main]

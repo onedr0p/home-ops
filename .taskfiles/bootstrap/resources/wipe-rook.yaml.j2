@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: &app wipe-rook-disk
+  name: &app wipe-rook
   namespace: default
   labels:
     app.kubernetes.io/name: *app
@@ -14,8 +14,19 @@ spec:
         app.kubernetes.io/name: *app
     spec:
       restartPolicy: Never
+      initContainers:
+        - name: data
+          image: docker.io/library/alpine:latest
+          command: ["/bin/sh", "-c"]
+          args: ["rm -rf /mnt/host_var/lib/rook"]
+          volumeMounts:
+            - mountPath: /mnt/host_var
+              name: host-var
+          securityContext:
+            privileged: true
+          resources: {}
       containers:
-        - name: main
+        - name: disk
           image: docker.io/library/alpine:latest
           command: ["/bin/sh", "-c"]
           args:
@@ -33,6 +44,14 @@ spec:
             - name: host-dev
               mountPath: /dev/disk/by-id
           resources: {}
+      volumes:
+        - name: host-var
+          hostPath:
+            path: /var
+        - name: host-dev
+          hostPath:
+            path: /dev/disk/by-id
+            type: Directory
       topologySpreadConstraints:
         - maxSkew: 1
           labelSelector:
@@ -40,8 +59,3 @@ spec:
               app.kubernetes.io/name: *app
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: DoNotSchedule
-      volumes:
-        - name: host-dev
-          hostPath:
-            path: /dev/disk/by-id
-            type: Directory
