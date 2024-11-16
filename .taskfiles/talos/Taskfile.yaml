@@ -5,40 +5,40 @@ version: '3'
 tasks:
 
   apply-node:
-    desc: Apply Talos config to a node [CLUSTER=main] [HOSTNAME=required]
+    desc: Apply Talos config to a node [CLUSTER=main] [IP=required]
     dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmds:
       - task: down
-      - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.HOSTNAME}} apply-config --mode={{.MODE}} --file /dev/stdin
-      - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
+      - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.IP}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.IP}} apply-config --mode={{.MODE}} --file /dev/stdin
+      - talosctl --nodes {{.IP}} health --wait-timeout=10m --server=false
       - task: up
     vars:
       MODE: '{{.MODE | default "auto"}}'
     requires:
-      vars: [CLUSTER, HOSTNAME]
+      vars: [CLUSTER, IP]
     preconditions:
-      - talosctl --nodes {{.HOSTNAME}} get machineconfig
+      - talosctl --nodes {{.IP}} get machineconfig
       - test -f {{.CLUSTER_DIR}}/cluster.env
-      - test -f {{.CLUSTER_DIR}}/talos/{{.HOSTNAME}}.sops.yaml.j2
+      - test -f {{.CLUSTER_DIR}}/talos/{{.IP}}.sops.yaml.j2
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - which minijinja-cli sops talosctl
 
   upgrade-node:
-    desc: Upgrade Talos on a single node [CLUSTER=main] [HOSTNAME=required]
+    desc: Upgrade Talos on a single node [CLUSTER=main] [IP=required]
     dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmds:
       - task: down
-      - talosctl --nodes {{.HOSTNAME}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:$TALOS_VERSION" --timeout=10m
-      - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
+      - talosctl --nodes {{.IP}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:$TALOS_VERSION" --timeout=10m
+      - talosctl --nodes {{.IP}} health --wait-timeout=10m --server=false
       - task: up
     vars:
       SCHEMATIC_ID:
-        sh: kubectl get node {{.HOSTNAME}} --output=jsonpath='{.metadata.annotations.extensions\.talos\.dev/schematic}'
+        sh: kubectl get nodes --output json | jq --raw-output '.items[] | select(.status.addresses[] | select(.type == "InternalIP" and .address == "{{.IP}}")) | .metadata.annotations."extensions.talos.dev/schematic"'
     requires:
-      vars: [CLUSTER, HOSTNAME]
+      vars: [CLUSTER, IP]
     preconditions:
       - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/talos/releases/tag/$TALOS_VERSION
-      - talosctl --nodes {{.HOSTNAME}} get machineconfig
+      - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/cluster.env
       - test -f {{.CLUSTER_DIR}}/talosconfig
@@ -65,16 +65,16 @@ tasks:
       - which talosctl
 
   reboot-node:
-    desc: Reboot Talos on a single node [CLUSTER=main] [HOSTNAME=required]
+    desc: Reboot Talos on a single node [CLUSTER=main] [IP=required]
     cmds:
       - task: down
-      - talosctl --nodes {{.HOSTNAME}} reboot
-      - talosctl --nodes {{.HOSTNAME}} health --wait-timeout=10m --server=false
+      - talosctl --nodes {{.IP}} reboot
+      - talosctl --nodes {{.IP}} health --wait-timeout=10m --server=false
       - task: up
     requires:
-      vars: [CLUSTER, HOSTNAME]
+      vars: [CLUSTER, IP]
     preconditions:
-      - talosctl --nodes {{.HOSTNAME}} get machineconfig
+      - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/cluster.env
       - test -f {{.CLUSTER_DIR}}/talosconfig
@@ -96,13 +96,13 @@ tasks:
       - which jq talosctl
 
   reset-node:
-    desc: Reset Talos on a single node [CLUSTER=main] [HOSTNAME=required]
-    prompt: Reset Talos node '{{.HOSTNAME}}' on the '{{.CLUSTER}}' cluster ... continue?
-    cmd: talosctl reset --nodes {{.HOSTNAME}} --graceful=false
+    desc: Reset Talos on a single node [CLUSTER=main] [IP=required]
+    prompt: Reset Talos node '{{.IP}}' on the '{{.CLUSTER}}' cluster ... continue?
+    cmd: talosctl reset --nodes {{.IP}} --graceful=false
     requires:
-      vars: [CLUSTER, HOSTNAME]
+      vars: [CLUSTER, IP]
     preconditions:
-      - talosctl --nodes {{.HOSTNAME}} get machineconfig
+      - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
 

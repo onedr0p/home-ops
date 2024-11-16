@@ -7,9 +7,7 @@ machine:
   ca:
     crt: ENC[AES256_GCM,data:4OodxwmjjdevjRDiruSINO+ret6FbWgXoWzL4DA7AOa7yWqA8HTckj/bSpDFU459S/UDiJ+1rCm0ScEPC4/KGRs5ImnbsniiuZCja6QdI/cT98zNIGphz3wIappq0IqeE59Z985wVScXQzj7s10v3ohFhVv6sNFnMzTEqA5qfSL7dLVcNCQozTQBXiViUktDNOGM8fAbctIglX8Kj6MwJGs0AhMyFoY5cDtUJlcOQehmWg5jMJobpJpfbiuPu56wBtDLjDTuSOG8RMlNQUBax2NAYhQ4B9TNEfzavDviYgU66eHOhl/RijAb2IbzBeULiJVxURWf7pIhqqHnt+Tbtiq5JidIw3/gVG/o8qQ1MD+JAdx6uZUkNtri7/512ELHCweUEPG/5pbgDITRQl20h+1dvH05RgfAT/KN8fB8dBbV8103+XqbX4YYLhJLmJh1Vm9onzTENb7naos7s1eq5vrtgKFOwXsJaOaBwvEJyGKOJmeEV6mWC/UoeuVxD3gmaKCCXP2eYk/0Fsp8l+ifwvBKQdOkQxbx+/2Gs3eu3iTasP0wMjHp2fdL/75bT7WbZKOsMY6L6nClRRSYoVyuj7yxN1cE7bDiO3iC3LCTjW+0qCp7Gt/bltFWMylLkT8CVOphUoDAq4MXMGNIODfost1NTfkfdC03g/QB54OHTeEK9LHPHppvJ8IsL+vqWVenF2PJ7X3iClzxAw2eGNoX65T77m0ACZ9/DEYYOI9TLMPxAOaum4Il6UwdDpRoqyLAFw411AoLKU11pIs39sXb3VnL4xUO75uSEl0IMh2Jr/00cuAG4zU7XrFuMvbUG3oo7hLQPuKGvkU+Q0LwMk4sA5IqhZGGBcFn1ULNlrKyMY1wP1j0,iv:xEhiscimEe7aYIj8PV9pFrFNSDxAQua+qBtzD2kdA+E=,tag:uZhUWvEJ9jpgMnnrd8n4dg==,type:str]
     key: ENC[AES256_GCM,data:4yK6phXF/Nt7vK9C5KG//uXbhxngtQZhcfShV87BkwtFYxVp6eeUvwf6ckxB2oF3psjlx8jxtfHuMu4pp2f3r2rN8bV7b/hyOb06qVBk9PbrcmycPeVv6eIDB18UBUF5W0cxNwdDrBE4q7YI2I9IowP5gtOYYdQwsSd8ISRIuYB6h3S0W2t7gHKdssh73PV9mmKx8eN82Z5eRFjtJqdwdmkJ21uVCyFSZDjUeGbn6WIcGMJZ,iv:h8fhrzTE4Hh4HeFaolirIpDxen0BY4tnFbo5ZgENj5Q=,tag:wan4linX46tYdK5y8MHG3A==,type:str]
-  certSANs:
-    - 127.0.0.1
-    - 192.168.42.120
+  certSANs: ["127.0.0.1", "192.168.42.120"]
   kubelet:
     image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
     extraArgs:
@@ -23,8 +21,7 @@ machine:
        options: ["bind", "rshared", "rw"]
     defaultRuntimeSeccompProfileEnabled: true
     nodeIP:
-      validSubnets:
-        - 192.168.42.0/24
+      validSubnets: ["192.168.42.0/24"]
     disableManifestsDirectory: true
   network:
     hostname: k8s-0
@@ -92,10 +89,8 @@ machine:
     stableHostname: true
     kubernetesTalosAPIAccess:
       enabled: true
-      allowedRoles:
-        - os:admin
-      allowedKubernetesNamespaces:
-        - system-upgrade
+      allowedRoles: ["os:admin"]
+      allowedKubernetesNamespaces: ["system-upgrade"]
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
     kubePrism:
@@ -129,10 +124,8 @@ cluster:
     cni:
       name: none
     dnsDomain: cluster.local
-    podSubnets:
-      - 10.42.0.0/16
-    serviceSubnets:
-      - 10.43.0.0/16
+    podSubnets: ["10.42.0.0/16"]
+    serviceSubnets: ["10.43.0.0/16"]
   coreDNS:
     disabled: true
   token: ENC[AES256_GCM,data:oZXQcwOh+lbvKWV2fpUsvoWYkcKRRWc=,iv:/AFF60PJLM/DPF7/TiIwjdGBg+o+YVnPkMb8ZTewWmg=,tag:cYEIfULg0jzlQWIiCCJOyg==,type:str]
@@ -147,9 +140,7 @@ cluster:
     key: ENC[AES256_GCM,data:akOr7oagliAbfUX3mdd+D6Tn/7eME8v+3ls7/ja4zI0xltAdvh9pq4UL9PpAWiVOKE3jNC5vJHmMVCtJZRsIdt+kJbEBuRKX/bd6W4DXkd6Ri/cXikBkF0SSSrXME1L33UmrNcOT4jFGCsr3Qy10gIjalpmvI0bIHZxF0wFs2YWZneMbeLR+58GVUsFueEHSrnnVKkpd2ZPUM5w38RoQHfoWv8R7/T13dXofa9aSgPZ8HQ63NZF/8GslF6/82R22MWSLdXUHoUQhsSUmHbhDLQ5aSfGWMIiU2klmYI6kb48yTtm+9B5Xd0A4NtXTZQ8uBhkB/GGzmTJyx+vKmtPS2VFQGJpLh2IkaicVqr/GAc+r74Ahdxg4Vz5B0ueEFACew7plCAGUUz6UJ/tE++hy8w==,iv:3FbFJ09BPXA++YhtHbOuyR9tBziGFnKnazUX1sVklzM=,tag:bE6473jL29Xrx2I+MFvghA==,type:str]
   apiServer:
     image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
-    certSANs:
-      - 127.0.0.1
-      - 192.168.42.120
+    certSANs: ["127.0.0.1", "192.168.42.120"]
     disablePodSecurityPolicy: true
     auditPolicy:
       apiVersion: audit.k8s.io/v1
@@ -192,8 +183,7 @@ cluster:
       key: ENC[AES256_GCM,data:sGHBWsYG3WoaIy1qQL5BKARIShEQiZFWKuFyp+YuhmUFju7Y/4NXR6+sEBk06E6b21xFoRxa/VKFXXQgcQiLvUpTzCmkwjZb4iu5EE6eda3/cjSPmNTun5SME1tx8mKRBCfExKrau5znfe84YAVPFdddOQpB35HRqGDBh8vERpjIRqMMfXxdJccpxv8rZFtdIimso1fhdqNUjH3vnKSQ21R5H1xz1T8tcBPMHzGZleK9/N9jQoSiAMRKT4fAXlJ22ftEhMqiRtUSc/dGKRM+DyCBDzNtC/q9q5tsqmOVuWJTQSDh2ukNnlxjkyWMYJiNkVO4THi6d6o9cDTJb99tApBEUj5DTL/hnJjHPGz2+JtZRuX+t0ElTB7G3WIA7vFIYQ+gvKK3rvIKs27bbFlGdQ==,iv:FGEnfn4ZfHy8N0yllwIKEcZLjKDCVPArJDosFWWVpAs=,tag:q3KCJ9oOiP3U9jgUytOGQQ==,type:str]
     extraArgs:
       listen-metrics-urls: http://0.0.0.0:2381
-    advertisedSubnets:
-      - 192.168.42.0/24
+    advertisedSubnets: ["192.168.42.0/24"]
   allowSchedulingOnMasters: true
 sops:
   kms: []
