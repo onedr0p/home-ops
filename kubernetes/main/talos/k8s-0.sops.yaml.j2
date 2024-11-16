@@ -14,11 +14,13 @@ machine:
     image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
     extraArgs:
       rotate-server-certificates: "true"
+    extraConfig:
+      maxPods: 150
     extraMounts:
-      - destination: /var/openebs/local
-        type: bind
-        source: /var/openebs/local
-        options: ["bind", "rshared", "rw"]
+     - destination: /var/mnt/extra
+       type: bind
+       source: /var/mnt/extra
+       options: ["bind", "rshared", "rw"]
     defaultRuntimeSeccompProfileEnabled: true
     nodeIP:
       validSubnets:
@@ -40,10 +42,17 @@ machine:
     extraKernelArgs:
       - apparmor=0
       - mitigations=off
-      - module_blacklist=e1000e
-      - security=none
-    image: factory.talos.dev/installer/d715f723f882b1e1e8063f1b89f237dcc0e3bd000f9f970243af59c8baae0100:{{ ENV.TALOS_VERSION }}
+      - module_blacklist=igc
+    image: factory.talos.dev/installer/de3b865124c5616da8084826167f8c0b0fbc9b905b146290db797024e84097fc:{{ ENV.TALOS_VERSION }}
+      # siderolabs/i915-ucode
+      # siderolabs/intel-ucode
+      # siderolabs/mei
+      # siderolabs/thunderbolt
     wipe: false
+  disks:
+    - device: /dev/disk/by-id/nvme-Corsair_MP600_MICRO_A828B4420085JH
+      partitions:
+        - mountpoint: /var/mnt/extra
   files:
     - op: create
       path: /etc/cri/conf.d/20-customization.part
@@ -100,6 +109,10 @@ machine:
       - ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
       # Intel GPU
       - SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
+  kernel:
+    modules:
+      - name: thunderbolt
+      - name: thunderbolt_net
   nodeLabels:
     topology.kubernetes.io/region: main
     topology.kubernetes.io/zone: m

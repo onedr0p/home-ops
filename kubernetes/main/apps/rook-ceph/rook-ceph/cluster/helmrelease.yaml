@@ -50,6 +50,9 @@ spec:
     cephClusterSpec:
       crashCollector:
         disable: false
+      csi:
+        readAffinity:
+          enabled: true
       dashboard:
         enabled: true
         urlPrefix: /
@@ -66,7 +69,7 @@ spec:
       storage:
         useAllNodes: true
         useAllDevices: false
-        devicePathFilter: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_.*
+        devicePathFilter: /dev/disk/by-id/nvme-ad1920GBD60M2P_.*
         config:
           osdsPerDevice: "1"
       placement:
@@ -118,7 +121,7 @@ spec:
           volumeBindingMode: Immediate
           parameters:
             imageFormat: "2"
-            imageFeatures: layering # TODO: append on next cluster rebuild ,fast-diff,object-map,deep-flatten,exclusive-lock
+            imageFeatures: layering,fast-diff,object-map,deep-flatten,exclusive-lock
             csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
             csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
             csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
