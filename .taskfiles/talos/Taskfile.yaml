@@ -28,12 +28,14 @@ tasks:
     dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmds:
       - task: down
-      - talosctl --nodes {{.IP}} upgrade --image="factory.talos.dev/installer/{{.SCHEMATIC_ID}}:$TALOS_VERSION" --timeout=10m
+      - talosctl --nodes {{.IP}} upgrade --image="factory.talos.dev/installer{{if eq .TALOS_SECUREBOOT "true"}}-secureboot{{end}}/{{.TALOS_SCHEMATIC_ID}}:$TALOS_VERSION" --timeout=10m
       - talosctl --nodes {{.IP}} health --wait-timeout=10m --server=false
       - task: up
     vars:
-      SCHEMATIC_ID:
+      TALOS_SCHEMATIC_ID:
         sh: kubectl get nodes --output json | jq --raw-output '.items[] | select(.status.addresses[] | select(.type == "InternalIP" and .address == "{{.IP}}")) | .metadata.annotations."extensions.talos.dev/schematic"'
+      TALOS_SECUREBOOT:
+        sh: talosctl --nodes {{.IP}} get securitystate --output=jsonpath='{.spec.secureBoot}'
     requires:
       vars: [CLUSTER, IP]
     preconditions:
@@ -49,16 +51,16 @@ tasks:
     dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
     cmds:
       - task: down
-      - talosctl --nodes {{.CONTROLLER}} upgrade-k8s --to $KUBERNETES_VERSION
+      - talosctl --nodes {{.TALOS_CONTROLLER}} upgrade-k8s --to $KUBERNETES_VERSION
       - task: up
     vars:
-      CONTROLLER:
+      TALOS_CONTROLLER:
         sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
     requires:
       vars: [CLUSTER]
     preconditions:
       - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/kubelet/releases/tag/$KUBERNETES_VERSION
-      - talosctl --nodes {{.CONTROLLER}} get machineconfig
+      - talosctl --nodes {{.TALOS_CONTROLLER}} get machineconfig
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/cluster.env
       - test -f {{.CLUSTER_DIR}}/talosconfig
@@ -83,9 +85,9 @@ tasks:
   shutdown-cluster:
     desc: Shutdown Talos across the whole cluster [CLUSTER=main]
     prompt: Shutdown the Talos cluster '{{.CLUSTER}}' ... continue?
-    cmd: talosctl shutdown --nodes {{.HOSTNAMES}} --force
+    cmd: talosctl shutdown --nodes {{.IPS}} --force
     vars:
-      HOSTNAMES:
+      IPS:
         sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(",")'
     requires:
       vars: [CLUSTER]
@@ -109,9 +111,9 @@ tasks:
   reset-cluster:
     desc: Reset Talos across the whole cluster [CLUSTER=main]
     prompt: Reset the Talos cluster '{{.CLUSTER}}' ... continue?
-    cmd: talosctl reset --nodes {{.HOSTNAMES}} --graceful=false
+    cmd: talosctl reset --nodes {{.IPS}} --graceful=false
     vars:
-      HOSTNAMES:
+      IPS:
         sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(",")'
     requires:
       vars: [CLUSTER]
