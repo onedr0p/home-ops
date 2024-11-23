@@ -148,17 +148,17 @@ In my cluster there are two [ExternalDNS](https://github.com/kubernetes-sigs/ext
   <img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/rack.png" align="center" width="200px" alt="dns"/>
 </details>
 
-| Device                      | Num | OS Disk Size | Data Disk Size                | Ram  | OS           | Function                |
-|-----------------------------|-----|--------------|-------------------------------|------|--------------|-------------------------|
-| ASUS NUC 14 Pro CU 5 125H   | 3   | 250GB SSD    | 1TB (Local) / 2TB (rook-ceph) | 96GB | Talos        | Kubernetes              |
-| PowerEdge T340              | 1   | 2TB SSD      | 8x22TB ZFS (mirrored vdevs)   | 64GB | Ubuntu 24.04 | NFS + Backup Server     |
-| PiKVM (RasPi 4)             | 1   | 64GB (SD)    | -                             | 4GB  | PiKVM        | KVM                     |
-| TESmart 8 Port KVM Switch   | 1   | -            | -                             | -    | -            | Network KVM (for PiKVM) |
-| UniFi UDMP Max              | 1   | -            | 2x12TB HDD                    | -    | -            | Router & NVR            |
-| UniFi US-16-XG              | 1   | -            | -                             | -    | -            | 10Gb Core Switch        |
-| UniFi USW-Enterprise-24-PoE | 1   | -            | -                             | -    | -            | 2.5Gb PoE Switch        |
-| UniFi USP PDU Pro           | 1   | -            | -                             | -    | -            | PDU                     |
-| APC SMT1500RM2U             | 1   | -            | -                             | -    | -            | UPS                     |
+| Device                      | Num | OS Disk Size | Data Disk Size                  | Ram  | OS           | Function                |
+|-----------------------------|-----|--------------|---------------------------------|------|--------------|-------------------------|
+| ASUS NUC 14 Pro CU 5 125H   | 3   | 1TB SSD      | 1TB (local) / 800GB (rook-ceph) | 96GB | Talos        | Kubernetes              |
+| PowerEdge T340              | 1   | 2TB SSD      | 8x22TB ZFS (mirrored vdevs)     | 64GB | Ubuntu 24.04 | NFS + Backup Server     |
+| PiKVM (RasPi 4)             | 1   | 64GB (SD)    | -                               | 4GB  | PiKVM        | KVM                     |
+| TESmart 8 Port KVM Switch   | 1   | -            | -                               | -    | -            | Network KVM (for PiKVM) |
+| UniFi UDMP Max              | 1   | -            | 2x12TB HDD                      | -    | -            | Router & NVR            |
+| UniFi US-16-XG              | 1   | -            | -                               | -    | -            | 10Gb Core Switch        |
+| UniFi USW-Enterprise-24-PoE | 1   | -            | -                               | -    | -            | 2.5Gb PoE Switch        |
+| UniFi USP PDU Pro           | 1   | -            | -                               | -    | -            | PDU                     |
+| APC SMT1500RM2U             | 1   | -            | -                               | -    | -            | UPS                     |
 
 ---
 
