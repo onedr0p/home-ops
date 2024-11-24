@@ -1,6 +1,8 @@
 # NAS
 
-My NAS configuration as documentation currently using Ubuntu 22.04
+```admonish warning
+I am no longer use Ubuntu for my NAS therefore this document will likely not be updated anymore.
+```
 
 ## Packages
 

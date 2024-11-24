@@ -35,7 +35,7 @@ spec:
             env:
               TZ: America/New_York
               FB_DATABASE: /config/filebrowser.db
-              FB_ROOT: /eros
+              FB_ROOT: /media
               FB_LOG: stdout
               FB_NOAUTH: true
             probes:
@@ -67,7 +67,6 @@ spec:
         runAsGroup: 568
         fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [10000]
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
@@ -90,9 +89,9 @@ spec:
     persistence:
       config:
         existingClaim: filebrowser
-      eros:
+      media:
         type: nfs
         server: expanse.internal
-        path: /eros
+        path: /mnt/eros/Media
         globalMounts:
-          - path: /eros
+          - path: /media

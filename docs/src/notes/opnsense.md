@@ -1,7 +1,7 @@
 # Opnsense
 
 ```admonish warning
-I am no longer use Opnsense therefor this document will likely not be updated anymore.
+I am no longer use Opnsense for my router therefore this document will likely not be updated anymore.
 ```
 
 ## BGP
