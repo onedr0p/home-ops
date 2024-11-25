@@ -31,14 +31,11 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              apk add --no-cache device-mapper findutils nvme-cli parted sgdisk util-linux util-linux-misc;
+              apk add --no-cache findutils nvme-cli;
               DISK=$(find /dev/disk/by-id/ -iname "*{{ ENV.MODEL }}*" -not -name "*-part[0-9+]");
               echo "=== Wiping $DISK ===";
-              sgdisk --zap-all $DISK;
-              dd if=/dev/zero of="$DISK" bs=1M count=100 oflag=direct;
-              blkdiscard $DISK;
-              partprobe $DISK;
               nvme format --lbaf=1 $DISK;
+              nvme format --block-size=4096 $DISK;
           securityContext:
             privileged: true
           volumeMounts:
