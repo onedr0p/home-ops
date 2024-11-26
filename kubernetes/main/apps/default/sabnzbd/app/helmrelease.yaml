@@ -83,17 +83,6 @@ spec:
         fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                labelSelector:
-                  matchExpressions:
-                    - key: app.kubernetes.io/name
-                      operator: In
-                      values: ["qbittorrent"]
-                topologyKey: kubernetes.io/hostname
     service:
       app:
         controller: sabnzbd
@@ -130,20 +119,3 @@ spec:
         globalMounts:
           - path: /media/Downloads/sabnzbd
             subPath: Downloads/sabnzbd
-      incomplete:
-        type: custom
-        volumeSpec:
-          ephemeral:
-            volumeClaimTemplate:
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                storageClassName: openebs-hostpath
-                resources:
-                  requests:
-                    storage: 100Gi
-        advancedMounts:
-          sabnzbd:
-            app:
-              - path: /incomplete
-                subPath: incomplete
