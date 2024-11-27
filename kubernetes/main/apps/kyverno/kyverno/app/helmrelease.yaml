@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app kyverno
+  name: kyverno
 spec:
   interval: 30m
   chart:
@@ -31,14 +31,9 @@ spec:
       replicas: 3
       clusterRole:
         extraResources: &extraResources
-          - apiGroups:
-              - '*'
-            resources:
-              - '*'
-            verbs:
-              - get
-              - list
-              - watch
+          - apiGroups: ["*"]
+            resources: ["*"]
+            verbs: ["get", "list", "watch"]
       serviceMonitor:
         enabled: true
     backgroundController:
