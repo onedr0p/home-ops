@@ -28,8 +28,9 @@ spec:
     grafana:
       enabled: true
     admissionController:
+      replicas: 3
       clusterRole:
-        extraResources:
+        extraResources: &extraResources
           - apiGroups:
               - '*'
             resources:
@@ -42,15 +43,7 @@ spec:
         enabled: true
     backgroundController:
       clusterRole:
-        extraResources:
-          - apiGroups:
-              - '*'
-            resources:
-              - '*'
-            verbs:
-              - get
-              - list
-              - watch
+        extraResources: &extraResources
       resources:
         requests:
           cpu: 100m
@@ -60,15 +53,7 @@ spec:
         enabled: true
     reportsController:
       clusterRole:
-        extraResources:
-          - apiGroups:
-              - '*'
-            resources:
-              - '*'
-            verbs:
-              - get
-              - list
-              - watch
+        extraResources: &extraResources
       serviceMonitor:
         enabled: true
     cleanupController:
