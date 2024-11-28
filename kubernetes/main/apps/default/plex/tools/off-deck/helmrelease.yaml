@@ -31,16 +31,18 @@ spec:
         type: cronjob
         cronjob:
           schedule: "@hourly"
-          timeZone: &timeZone America/New_York
+          backoffLimit: 0
+          concurrencyPolicy: Forbid
           successfulJobsHistory: 1
           failedJobsHistory: 1
+          ttlSecondsAfterFinished: 3600
         containers:
           app:
             image:
               repository: ghcr.io/onedr0p/jbops
               tag: 1.0.893@sha256:c4782519e0dd5f8f2fca893225e088d705013da3c9b6e67126f8f545c37f3fcd
             env:
-              TZ: *timeZone
+              TZ: America/New_York
               JBOPS__SCRIPT_PATH: utility/off_deck.py
             args: ["--markWatched", "--playlists", "Toons", "SleepMix"]
     persistence:

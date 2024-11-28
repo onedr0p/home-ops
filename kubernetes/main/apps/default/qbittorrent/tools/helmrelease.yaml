@@ -31,10 +31,11 @@ spec:
         type: cronjob
         cronjob: &cronJobSpec
           schedule: "@hourly"
-          timeZone: &timeZone America/New_York
+          backoffLimit: 0
           concurrencyPolicy: Forbid
           successfulJobsHistory: 1
           failedJobsHistory: 1
+          ttlSecondsAfterFinished: 3600
         initContainers:
           tag: &container
             image:
@@ -45,7 +46,7 @@ spec:
               QBITTORRENT_PORT: 80
               SABNZBD_HOST: sabnzbd.default.svc.cluster.local
               SABNZBD_PORT: 80
-              TZ: *timeZone
+              TZ: America/New_York
             envFrom:
               - secretRef:
                   name: qbtools-secret
