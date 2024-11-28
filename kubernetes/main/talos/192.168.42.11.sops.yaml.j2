@@ -73,16 +73,16 @@ machine:
         nconnect=16
         noatime=True
   sysctls:
-    fs.inotify.max_user_watches: 1048576
-    fs.inotify.max_user_instances: 8192
+    fs.inotify.max_user_watches: 1048576   # Watchdog
+    fs.inotify.max_user_instances: 8192    # Watchdog
     net.core.default_qdisc: fq             # 10Gb/s
     net.core.rmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
     net.core.wmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
-    net.ipv4.tcp_mtu_probing: 1            # 10Gb/s
+    net.ipv4.tcp_mtu_probing: 1            # 10Gb/s | Jumbo frames
     net.ipv4.tcp_rmem: 4096 87380 33554432 # 10Gb/s
     net.ipv4.tcp_wmem: 4096 65536 33554432 # 10Gb/s
     net.ipv4.tcp_window_scaling: 1         # 10Gb/s
-    vm.nr_hugepages: 1024
+    vm.nr_hugepages: 1024                  # PostgreSQL
   sysfs:
     devices.system.cpu.intel_pstate.hwp_dynamic_boost: 1
     devices.system.cpu.cpu0.cpufreq.energy_performance_preference: balance_performance
