@@ -23,38 +23,39 @@ spec:
       strategy: rollback
       retries: 3
   values:
-    replicas: 3
+    replicas: 2
     kind: Deployment
     deschedulerPolicyAPIVersion: descheduler/v1alpha2
     deschedulerPolicy:
       profiles:
-        - name: fit
+        - name: Default
           pluginConfig:
             - name: DefaultEvictor
               args:
+                evictFailedBarePods: true
+                evictLocalStoragePods: true
+                evictSystemCriticalPods: true
                 nodeFit: true
+            - name: RemovePodsViolatingInterPodAntiAffinity
+            - name: RemovePodsViolatingNodeAffinity
+              args:
+                nodeAffinityType:
+                  - requiredDuringSchedulingIgnoredDuringExecution
+            - name: RemovePodsViolatingNodeTaints
             - name: RemovePodsViolatingTopologySpreadConstraint
               args:
                 constraints:
+                  - DoNotSchedule
                   - ScheduleAnyway
           plugins:
             balance:
               enabled:
                 - RemovePodsViolatingTopologySpreadConstraint
-        - name: nofit
-          pluginConfig:
-            - name: DefaultEvictor
-              args:
-                nodeFit: false
-            - name: RemovePodsViolatingTopologySpreadConstraint
-              args:
-                constraints:
-                  - DoNotSchedule
-                topologyBalanceNodeFit: false
-          plugins:
-            balance:
+            deschedule:
               enabled:
-                - RemovePodsViolatingTopologySpreadConstraint
+                - RemovePodsViolatingInterPodAntiAffinity
+                - RemovePodsViolatingNodeAffinity
+                - RemovePodsViolatingNodeTaints
     service:
       enabled: true
     serviceMonitor:
