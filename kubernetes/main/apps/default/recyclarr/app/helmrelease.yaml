@@ -28,19 +28,25 @@ spec:
   values:
     controllers:
       recyclarr:
+        type: cronjob
         annotations:
           reloader.stakater.com/auto: "true"
+        cronjob:
+          schedule: "@daily"
+          timeZone: &timeZone America/New_York
+          successfulJobsHistory: 1
+          failedJobsHistory: 1
         containers:
           app:
             image:
               repository: ghcr.io/recyclarr/recyclarr
               tag: 7.4.0@sha256:619c3b8920a179f2c578acd0f54e9a068f57c049aff840469eed66e93a4be2cf
             env:
-              CRON_SCHEDULE: "@daily"
-              TZ: America/New_York
+              TZ: *timeZone
             envFrom:
               - secretRef:
                   name: recyclarr-secret
+            args: ["sync"]
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
