@@ -29,20 +29,20 @@ spec:
     controllers:
       recyclarr:
         type: cronjob
-        annotations:
-          reloader.stakater.com/auto: "true"
         cronjob:
           schedule: "@daily"
-          timeZone: &timeZone America/New_York
+          backoffLimit: 0
+          concurrencyPolicy: Forbid
           successfulJobsHistory: 1
           failedJobsHistory: 1
+          ttlSecondsAfterFinished: 86400
         containers:
           app:
             image:
               repository: ghcr.io/recyclarr/recyclarr
               tag: 7.4.0@sha256:619c3b8920a179f2c578acd0f54e9a068f57c049aff840469eed66e93a4be2cf
             env:
-              TZ: *timeZone
+              TZ: America/New_York
             envFrom:
               - secretRef:
                   name: recyclarr-secret
@@ -56,6 +56,8 @@ spec:
                 cpu: 10m
               limits:
                 memory: 128Mi
+        pod:
+          restartPolicy: Never
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
