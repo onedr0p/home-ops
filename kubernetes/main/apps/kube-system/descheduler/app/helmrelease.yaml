@@ -28,34 +28,33 @@ spec:
     deschedulerPolicyAPIVersion: descheduler/v1alpha2
     deschedulerPolicy:
       profiles:
-        - name: Default
+        - name: fit
           pluginConfig:
             - name: DefaultEvictor
               args:
-                evictFailedBarePods: true
-                evictLocalStoragePods: true
-                evictSystemCriticalPods: true
                 nodeFit: true
-            - name: RemovePodsViolatingInterPodAntiAffinity
-            - name: RemovePodsViolatingNodeAffinity
-              args:
-                nodeAffinityType:
-                  - requiredDuringSchedulingIgnoredDuringExecution
-            - name: RemovePodsViolatingNodeTaints
             - name: RemovePodsViolatingTopologySpreadConstraint
               args:
                 constraints:
-                  - DoNotSchedule
                   - ScheduleAnyway
           plugins:
             balance:
               enabled:
                 - RemovePodsViolatingTopologySpreadConstraint
-            deschedule:
+        - name: nofit
+          pluginConfig:
+            - name: DefaultEvictor
+              args:
+                nodeFit: false
+            - name: RemovePodsViolatingTopologySpreadConstraint
+              args:
+                constraints:
+                  - DoNotSchedule
+                topologyBalanceNodeFit: false
+          plugins:
+            balance:
               enabled:
-                - RemovePodsViolatingInterPodAntiAffinity
-                - RemovePodsViolatingNodeAffinity
-                - RemovePodsViolatingNodeTaints
+                - RemovePodsViolatingTopologySpreadConstraint
     service:
       enabled: true
     serviceMonitor:
