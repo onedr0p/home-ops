@@ -39,14 +39,13 @@ machine:
     extraKernelArgs:
       - i915.force_probe=7d55 # TODO: Remove this once the kernel is updated to 6.8.0
       - apparmor=0
+      - init_on_alloc=0
+      - init_on_free=0
       - mitigations=off
       - module_blacklist=igc
       - security=none
+    # i915-ucode, intel-ucode, mei, thunderbolt
     image: factory.talos.dev/installer/de3b865124c5616da8084826167f8c0b0fbc9b905b146290db797024e84097fc:{{ ENV.TALOS_VERSION }}
-      # siderolabs/i915-ucode
-      # siderolabs/intel-ucode
-      # siderolabs/mei
-      # siderolabs/thunderbolt
     wipe: false
   disks:
     - device: /dev/disk/by-id/nvme-Corsair_MP600_MICRO_A828B442008B7C
