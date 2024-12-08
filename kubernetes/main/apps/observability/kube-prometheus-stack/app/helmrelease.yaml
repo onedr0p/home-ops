@@ -77,6 +77,10 @@ spec:
         hosts: ["prometheus.devbu.io"]
         pathType: Prefix
       prometheusSpec:
+        image:
+          registry: quay.io
+          repository: prometheus/prometheus
+          tag: v3.0.1
         scrapeInterval: 1m # Must match interval in Grafana Helm chart
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false
@@ -86,9 +90,7 @@ spec:
         enableAdminAPI: true
         walCompression: true
         enableFeatures:
-          - auto-gomemlimit
           - memory-snapshot-on-shutdown
-          - new-service-discovery-manager
         retention: 14d
         retentionSize: 50GB
         resources:
