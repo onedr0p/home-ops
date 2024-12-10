@@ -93,6 +93,12 @@ spec:
       app:
         annotations:
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+          nginx.ingress.kubernetes.io/server-snippet: |
+            location ~ ^/library/streams {
+              proxy_set_header        Range "";
+              proxy_pass              http://plex.default.svc.cluster.local:32400;
+              proxy_http_version      1.1;
+            }
         className: external
         hosts:
           - host: "{{ .Release.Name }}.devbu.io"
