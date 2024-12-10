@@ -25,18 +25,6 @@ spec:
   values:
     controllers:
       atuin:
-        replicas: 2
-        strategy: RollingUpdate
-        annotations:
-          reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 16
-            envFrom: &envFrom
-              - secretRef:
-                  name: atuin-secret
         containers:
           app:
             image:
@@ -50,7 +38,6 @@ spec:
               ATUIN_METRICS__HOST: 0.0.0.0
               ATUIN_METRICS__PORT: &metricsPort 8080
               ATUIN_TLS__ENABLE: "false"
-            envFrom: *envFrom
             args: ["server", "start"]
             probes:
               liveness: &probes
@@ -77,8 +64,10 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 65534
-        runAsGroup: 65534
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
@@ -110,4 +99,6 @@ spec:
                   port: http
     persistence:
       config:
-        type: emptyDir
+        existingClaim: atuin
+        globalMounts:
+          - path: /config
