@@ -67,12 +67,14 @@ tasks:
       - which jq talosctl
 
   reboot-node:
-    desc: Reboot Talos on a single node [CLUSTER=main] [IP=required]
+    desc: Reboot Talos on a single node [CLUSTER=main] [IP=required] [MODE=default]
     cmds:
       - task: down
-      - talosctl --nodes {{.IP}} reboot
+      - talosctl --nodes {{.IP}} reboot --mode={{.MODE}}
       - talosctl --nodes {{.IP}} health --wait-timeout=10m --server=false
       - task: up
+    vars:
+      MODE: '{{.MODE | default "default"}}'
     requires:
       vars: [CLUSTER, IP]
     preconditions:
@@ -138,7 +140,7 @@ tasks:
       - which jq talosctl
 
   apply-cluster:
-    desc: Apply Talos config across the whole cluster [CLUSTER=main]
+    desc: Apply Talos config across the whole cluster [CLUSTER=main] [MODE=default]
     cmds:
       - for: { var: IP_ADDRS }
         task: apply-node
@@ -172,12 +174,13 @@ tasks:
       - which jq talosctl
 
   reboot-cluster:
-    desc: Reboot Talos on a single node [CLUSTER=main] [IP=required]
+    desc: Reboot Talos on a single node [CLUSTER=main] [IP=required] [MODE=default]
     cmds:
       - for: { var: IP_ADDRS }
         task: reboot-node
         vars:
           IP: '{{.ITEM}}'
+          MODE: '{{.MODE}}'
           CLUSTER: '{{.CLUSTER}}'
     vars:
       IP_ADDRS:
