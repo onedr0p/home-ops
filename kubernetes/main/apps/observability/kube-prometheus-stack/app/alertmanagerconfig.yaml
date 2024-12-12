@@ -51,8 +51,15 @@ spec:
         - html: true
           message: |-
             {{- range .Alerts }}
-              {{- $desc := default "Alert description not available" (or .Annotations.description .Annotations.summary .Annotations.message) }}
-              {{ $desc }}
+              {{- if ne .Annotations.description "" }}
+                {{ .Annotations.description }}
+              {{- else if ne .Annotations.summary "" }}
+                {{ .Annotations.summary }}
+              {{- else if ne .Annotations.message "" }}
+                {{ .Annotations.message }}
+              {{- else }}
+                Alert description not available
+              {{- end }}
               {{- if gt (len .Labels.SortedPairs) 0 }}
                 <small>
                   {{- range .Labels.SortedPairs }}
