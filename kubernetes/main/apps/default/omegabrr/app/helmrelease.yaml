@@ -34,6 +34,10 @@ spec:
               tag: v1.16.0@sha256:fe529c331217e0624c505a1aa47d2a089314e8a284d38a621135b848eeef64ad
             env:
               TZ: America/New_York
+              OMEGABRR_PORT: &port 80
+            envFrom:
+              - secretRef:
+                  name: omegabrr-secret
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -54,11 +58,11 @@ spec:
         controller: omegabrr
         ports:
           http:
-            port: 80
+            port: *port
     persistence:
-      config-file:
-        type: secret
-        name: omegabrr-secret
+      config:
+        type: configMap
+        name: omegabrr-configmap
         globalMounts:
           - path: /config/config.yaml
             subPath: config.yaml
