@@ -46,8 +46,6 @@ spec:
       bdev_async_discard = true
       osd_class_update_on_start = false
     cephClusterSpec:
-      cephVersion:
-        image: quay.io/ceph/ceph:v19.2.0 # TODO: Remove when Rook is updated >= v19.2.0
       crashCollector:
         disable: false
       csi:
@@ -98,6 +96,7 @@ spec:
           reclaimPolicy: Delete
           allowVolumeExpansion: true
           volumeBindingMode: Immediate
+          mountOptions: ["discard"]
           parameters:
             imageFormat: "2"
             imageFeatures: layering,fast-diff,object-map,deep-flatten,exclusive-lock
