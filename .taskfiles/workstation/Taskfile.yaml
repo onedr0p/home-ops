@@ -19,13 +19,6 @@ tasks:
       - which brew
       - test -f {{.WORKSTATION_RESOURCES_DIR}}/Brewfile
 
-  golang:
-    desc: Set up Go tools
-    deps: [brew]
-    cmds: []
-    preconditions:
-      - which go
-
   krew:
     desc: Set up Krew tools
     deps: [brew]
@@ -34,18 +27,3 @@ tasks:
     preconditions:
       - kubectl krew version
       - which kubectl
-
-  python:
-    desc: Set up Python tools
-    deps: [brew]
-    cmds:
-      - python3 -m venv {{.VIRTUAL_ENV}}
-      - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade pip'
-      - '{{.VIRTUAL_ENV}}/bin/python3 -m pip install --upgrade --requirement "{{.WORKSTATION_RESOURCES_DIR}}/requirements.txt"'
-    sources:
-      - '{{.WORKSTATION_RESOURCES_DIR}}/requirements.txt'
-    generates:
-      - '{{.VIRTUAL_ENV}}/pyvenv.cfg'
-    preconditions:
-      - which python3
-      - test -f {{.WORKSTATION_RESOURCES_DIR}}/requirements.txt
