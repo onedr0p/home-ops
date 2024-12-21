@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app zigbee2mqtt
+  name: &app zigbee
   namespace: flux-system
 spec:
   targetNamespace: default
@@ -14,7 +14,7 @@ spec:
     - name: emqx-cluster
     - name: external-secrets-stores
     - name: volsync
-  path: ./kubernetes/main/apps/default/zigbee2mqtt/app
+  path: ./kubernetes/main/apps/default/zigbee/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -25,9 +25,4 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_SUBDOMAIN: zigbee
       VOLSYNC_CAPACITY: 1Gi
-      VOLSYNC_ACCESSMODES: ReadWriteMany
-      VOLSYNC_STORAGECLASS: ceph-filesystem
-      VOLSYNC_SNAPSHOTCLASS: csi-ceph-filesystem
-      VOLSYNC_SNAP_ACCESSMODES: ReadOnlyMany # CephFS shallow snapshot

@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: zigbee2mqtt
+  name: zigbee
 spec:
   interval: 30m
   chart:
@@ -27,7 +27,7 @@ spec:
       namespace: rook-ceph
   values:
     controllers:
-      zigbee2mqtt:
+      zigbee:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -67,7 +67,7 @@ spec:
               # DEBUG: "zigbee-herdsman*"
             envFrom:
               - secretRef:
-                  name: zigbee2mqtt-secret
+                  name: zigbee-secret
             probes:
               liveness:
                 enabled: true
@@ -97,7 +97,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: zigbee2mqtt
+        controller: zigbee
         ports:
           http:
             port: *port
@@ -105,7 +105,7 @@ spec:
       app:
         className: internal
         hosts:
-          - host: zigbee.devbu.io
+          - host: "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
                 service:
@@ -113,4 +113,4 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: zigbee2mqtt
+        existingClaim: zigbee
