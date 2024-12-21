@@ -4,17 +4,18 @@ version: '3'
 
 tasks:
 
-  apply-ks:
+  ks-*:
     desc: Apply a Flux KS for a cluster [CLUSTER=main] [PATH=required]
     cmd: >
       flux build --namespace flux-system ks {{base .PATH}}
       --kustomization-file {{.CLUSTER_DIR}}/apps/{{.PATH}}/ks.yaml
       --path {{.CLUSTER_DIR}}/apps/{{.PATH}}{{if contains .KUSTOMIZATION "not found"}} --dry-run{{end}}
       | yq 'with(select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization"); .metadata.namespace = "flux-system")' -
-      | kubectl apply --server-side --field-manager=kustomize-controller --filename -
+      | kubectl {{.OPERATION}} {{if eq .OPERATION "apply"}}--server-side  --field-manager=kustomize-controller{{end}} --filename -
     requires:
       vars: [CLUSTER, PATH]
     vars:
+      OPERATION: "{{index .MATCH 0}}"
       KUSTOMIZATION:
         sh: flux --namespace flux-system get kustomizations {{base .PATH}}
     preconditions:
