@@ -27,14 +27,6 @@ spec:
       autobrr:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 16
-            envFrom: &envFrom
-              - secretRef:
-                  name: autobrr-secret
         containers:
           app:
             image:
@@ -45,7 +37,9 @@ spec:
               AUTOBRR__HOST: 0.0.0.0
               AUTOBRR__PORT: &port 80
               AUTOBRR__LOG_LEVEL: INFO
-            envFrom: *envFrom
+            envFrom:
+              - secretRef:
+                  name: autobrr-secret
             probes:
               liveness: &probes
                 enabled: true
@@ -91,5 +85,11 @@ spec:
                   identifier: app
                   port: http
     persistence:
+      config:
+        existingClaim: autobrr
+      log:
+        type: emptyDir
+        globalMounts:
+          - path: /config/log
       tmp:
         type: emptyDir
