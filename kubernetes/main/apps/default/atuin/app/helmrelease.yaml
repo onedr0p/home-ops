@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app atuin
+  name: atuin
 spec:
   interval: 30m
   chart:
@@ -22,36 +22,25 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   values:
     controllers:
       atuin:
-        replicas: 2
-        strategy: RollingUpdate
-        annotations:
-          reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 16
-            envFrom: &envFrom
-              - secretRef:
-                  name: atuin-secret
         containers:
           app:
             image:
-              repository: ghcr.io/atuinsh/atuin
-              tag: 18.3.0@sha256:678def8e9d59652a502759ca431f9c5b54ebdd5e9361507c7fcf24705c9862e0
+              repository: ghcr.io/onedr0p/atuin-server-sqlite
+              tag: main@sha256:1a4070373a39f1c0729f3e4371e31a3433cc6f36201a85fa0857dab6430d7a29
             env:
-              ATUIN_HOST: 0.0.0.0
               ATUIN_PORT: &port 80
               ATUIN_OPEN_REGISTRATION: "true"
               ATUIN_METRICS__ENABLE: "true"
               ATUIN_METRICS__HOST: 0.0.0.0
               ATUIN_METRICS__PORT: &metricsPort 8080
               ATUIN_TLS__ENABLE: "false"
-            envFrom: *envFrom
-            args: ["server", "start"]
+              TZ: America/New_York
             probes:
               liveness: &probes
                 enabled: true
@@ -79,6 +68,8 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
@@ -110,4 +101,4 @@ spec:
                   port: http
     persistence:
       config:
-        type: emptyDir
+        existingClaim: atuin
