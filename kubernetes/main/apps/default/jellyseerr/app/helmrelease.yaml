@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: overseerr
+  name: jellyseerr
 spec:
   interval: 30m
   chart:
@@ -27,14 +27,14 @@ spec:
       namespace: rook-ceph
   values:
     controllers:
-      overseerr:
+      jellyseerr:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/sct/overseerr
-              tag: develop@sha256:568f126f69663cf764d12bf19ba5a250be2246cca49852e556f363d0acac2603
+              repository: docker.io/fallenbagel/jellyseerr
+              tag: 2.1.0@sha256:af5563771964282e5bfb6a4f30b05c75c8d30661a920f0399086f575217d0573
             env:
               TZ: America/New_York
               LOG_LEVEL: "info"
@@ -71,7 +71,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: overseerr
+        controller: jellyseerr
         ports:
           http:
             port: *port
@@ -87,11 +87,11 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: overseerr
+        existingClaim: jellyseerr
         globalMounts:
           - path: /app/config
       cache:
-        existingClaim: overseerr-cache
+        existingClaim: jellyseerr-cache
         globalMounts:
           - path: /app/config/cache
       logs:
