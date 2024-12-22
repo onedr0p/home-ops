@@ -89,10 +89,10 @@ jobs:
       - if: ${{ github.event.inputs.clusterName != '' && github.event.inputs.helmRepoNamespace != '' && github.event.inputs.helmRepoName != '' }}
         name: Sync Helm Repository
         env:
-          KUBECONFIG: ${{ steps.kubeconfig.outputs.filePath }}
+          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
         run: |
           flux \
               --context ${{ github.event.inputs.clusterName }} \
               --namespace ${{ github.event.inputs.helmRepoNamespace }} \
-              reconcile source helm ${{ github.event.inputs.helmRepoName }}
+              reconcile source helm ${{ github.event.inputs.helmRepoName }} || true
