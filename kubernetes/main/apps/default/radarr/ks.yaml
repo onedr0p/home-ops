@@ -11,8 +11,8 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: cloudnative-pg-cluster
     - name: external-secrets-stores
+    - name: volsync
   path: ./kubernetes/main/apps/default/radarr/app
   prune: true
   sourceRef:
@@ -24,3 +24,4 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      VOLSYNC_CAPACITY: 5Gi

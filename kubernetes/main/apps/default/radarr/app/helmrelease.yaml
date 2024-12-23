@@ -30,14 +30,6 @@ spec:
       radarr:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/onedr0p/postgres-init
-              tag: 16
-            envFrom: &envFrom
-              - secretRef:
-                  name: radarr-secret
         containers:
           app:
             image:
@@ -53,7 +45,9 @@ spec:
               RADARR__SERVER__PORT: &port 80
               RADARR__UPDATE__BRANCH: develop
               TZ: America/New_York
-            envFrom: *envFrom
+            envFrom:
+              - secretRef:
+                  name: radarr-secret
             probes:
               liveness: &probes
                 enabled: true
@@ -103,6 +97,10 @@ spec:
     persistence:
       config:
         existingClaim: radarr
+      cache:
+        existingClaim: radarr-cache
+        globalMounts:
+          - path: /config/MediaCover
       scripts:
         type: configMap
         name: radarr-configmap
