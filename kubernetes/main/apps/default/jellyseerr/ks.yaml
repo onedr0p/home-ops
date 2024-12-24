@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app miniflux
+  name: &app jellyseerr
   namespace: flux-system
 spec:
   targetNamespace: default
@@ -11,9 +11,8 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: cloudnative-pg-cluster
-    - name: external-secrets-stores
-  path: ./kubernetes/main/apps/default/miniflux/app
+    - name: volsync
+  path: ./kubernetes/main/apps/default/jellyseerr/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -24,3 +23,6 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      GATUS_SUBDOMAIN: requests
+      GATUS_PATH: /api/v1/status
+      VOLSYNC_CAPACITY: 5Gi
