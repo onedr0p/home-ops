@@ -53,7 +53,7 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-            securityContext:
+            securityContext: &securityContext
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
@@ -61,7 +61,22 @@ spec:
               requests:
                 cpu: 10m
               limits:
-                memory: 4Gi
+                memory: 1Gi
+          subcleaner:
+            image:
+              repository: registry.k8s.io/git-sync/git-sync
+              tag: v4.4.0@sha256:0330739a707a2969d617e859f096659ab6d149212658ac0ad7e550b59482ebf0
+            env:
+              GITSYNC_REPO: https://github.com/KBlixt/subcleaner
+              GITSYNC_REF: master
+              GITSYNC_PERIOD: 24h
+              GITSYNC_ROOT: /subcleaner
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
+            securityContext: *securityContext
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -80,14 +95,14 @@ spec:
       app:
         className: internal
         hosts:
-          - host: bazarr.devbu.io
+          - host: "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
                 service:
                   identifier: app
                   port: http
     persistence:
-      add-ons:
+      subcleaner:
         type: emptyDir
       cache:
         type: emptyDir
@@ -105,5 +120,13 @@ spec:
         path: /mnt/eros/Media
         globalMounts:
           - path: /media
+      scripts:
+        type: configMap
+        name: bazarr-scripts
+        defaultMode: 0775
+        globalMounts:
+          - path: /scripts/subcleaner.sh
+            subPath: subcleaner.sh
+            readOnly: true
       tmp:
         type: emptyDir
