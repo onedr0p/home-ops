@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.5.1
+      version: 3.6.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -34,7 +34,7 @@ spec:
           app:
             image:
               repository: ghcr.io/onedr0p/bazarr
-              tag: 1.4.5@sha256:a7bceefd6339f906b2955adf66dd8ada7c9d91b363b1389474652af9f7dd5840
+              tag: 1.5.0@sha256:5eb3ff2384c470fa351ff486b1b61660914a2ba144e908258cf111555a583356
             env:
               TZ: America/New_York
             envFrom:
@@ -70,7 +70,7 @@ spec:
               GITSYNC_REPO: https://github.com/KBlixt/subcleaner
               GITSYNC_REF: master
               GITSYNC_PERIOD: 24h
-              GITSYNC_ROOT: /add-ons
+              GITSYNC_ROOT: /subcleaner
             resources:
               requests:
                 cpu: 10m
@@ -95,14 +95,14 @@ spec:
       app:
         className: internal
         hosts:
-          - host: bazarr.devbu.io
+          - host: "{{ .Release.Name }}.devbu.io"
             paths:
               - path: /
                 service:
                   identifier: app
                   port: http
     persistence:
-      add-ons:
+      subcleaner:
         type: emptyDir
       cache:
         type: emptyDir
@@ -125,6 +125,8 @@ spec:
         name: bazarr-scripts
         defaultMode: 0775
         globalMounts:
-          - readOnly: true
+          - path: /scripts/subcleaner.sh
+            subPath: subcleaner.sh
+            readOnly: true
       tmp:
         type: emptyDir
