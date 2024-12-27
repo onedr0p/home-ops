@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "Prepull Images"
+name: "Pre-pull Images"
 
 on:
   pull_request:
@@ -127,9 +127,9 @@ jobs:
           echo "### Images" >> $GITHUB_STEP_SUMMARY
           echo "${images}" | jq -r 'to_entries[] | "* \(.value)"' >> $GITHUB_STEP_SUMMARY
 
-  prepull-images:
+  pre-pull-images:
     if: ${{ needs.extract-images.outputs.matrix != '[]' }}
-    name: Prepull images
+    name: Pre-pull Images
     runs-on: ["gha-runner-scale-set"]
     needs: ["extract-images"]
     strategy:
@@ -152,7 +152,7 @@ jobs:
           encodedString: "${{ secrets.TALOSCONFIG }}"
           fileName: talosconfig
 
-      - name: Prepull Image
+      - name: Pre-pull Image
         env:
           TALOSCONFIG: "${{ steps.talosconfig.outputs.filePath }}"
         run: |
@@ -162,8 +162,8 @@ jobs:
   # Summarize matrix https://github.community/t/status-check-for-a-matrix-jobs/127354/7
   prepull-images-success:
     if: ${{ always() }}
-    needs: ["prepull-images"]
-    name: Prepull Images Successful
+    needs: ["pre-pull-images"]
+    name: Pre-pull Images Successful
     runs-on: ["gha-runner-scale-set"]
     steps:
       - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
