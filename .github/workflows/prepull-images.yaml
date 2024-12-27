@@ -160,10 +160,10 @@ jobs:
           talosctl -n $NODE image pull ${{ matrix.images }}
 
   # Summarize matrix https://github.community/t/status-check-for-a-matrix-jobs/127354/7
-  test-images-success:
+  prepull-images-success:
     if: ${{ always() }}
     needs: ["prepull-images"]
-    name: Test Images Successful
+    name: Prepull Images Successful
     runs-on: ["gha-runner-scale-set"]
     steps:
       - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
