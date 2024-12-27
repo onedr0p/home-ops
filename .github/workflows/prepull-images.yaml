@@ -138,6 +138,13 @@ jobs:
       max-parallel: 4
       fail-fast: false
     steps:
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Setup Workflow Tools
+        shell: bash
+        run: brew install jq siderolabs/tap/talosctl
+
       - name: Write talosconfig
         id: talosconfig
         uses: timheuer/base64-to-file@v1
