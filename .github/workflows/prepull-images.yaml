@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "Prefetch Images"
+name: "Prepull Images"
 
 on:
   pull_request:
@@ -148,7 +148,9 @@ jobs:
       - name: Prepull Image
         env:
           TALOSCONFIG: "${{ steps.talosconfig.outputs.filePath }}"
-        run: talosctl -n 192.168.42.10 image pull ${{ matrix.images }}
+        run: |
+          NODE=$(talosctl config info --output json | jq --raw-output '.nodes[]' | shuf -n 1)
+          talosctl -n $NODE image pull ${{ matrix.images }}
 
   # Summarize matrix https://github.community/t/status-check-for-a-matrix-jobs/127354/7
   test-images-success:
