@@ -138,8 +138,17 @@ jobs:
       max-parallel: 4
       fail-fast: false
     steps:
-      - name: Inspect Image
-        run: docker buildx imagetools inspect ${{ matrix.images }}
+      - name: Write talosconfig
+        id: talosconfig
+        uses: timheuer/base64-to-file@v1
+        with:
+          encodedString: "${{ secrets.TALOSCONFIG }}"
+          fileName: talosconfig
+
+      - name: Prepull Image
+        env:
+          TALOSCONFIG: "${{ steps.talosconfig.outputs.filePath }}"
+        run: talosctl -n 192.168.42.10 image pull ${{ matrix.images }}
 
   # Summarize matrix https://github.community/t/status-check-for-a-matrix-jobs/127354/7
   test-images-success:
