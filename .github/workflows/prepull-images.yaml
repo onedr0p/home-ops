@@ -127,7 +127,7 @@ jobs:
           echo "### Images" >> $GITHUB_STEP_SUMMARY
           echo "${images}" | jq -r 'to_entries[] | "* \(.value)"' >> $GITHUB_STEP_SUMMARY
 
-  test-images:
+  prepull-images:
     if: ${{ needs.extract-images.outputs.matrix != '[]' }}
     name: Test images
     runs-on: ["gha-runner-scale-set"]
@@ -162,7 +162,7 @@ jobs:
   # Summarize matrix https://github.community/t/status-check-for-a-matrix-jobs/127354/7
   test-images-success:
     if: ${{ always() }}
-    needs: ["test-images"]
+    needs: ["prepull-images"]
     name: Test Images Successful
     runs-on: ["gha-runner-scale-set"]
     steps:
