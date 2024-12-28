@@ -22,7 +22,7 @@ on:
 
 jobs:
   sync:
-    name: Flux Helm Repository Sync
+    name: Helm Repository Sync
     runs-on: ["gha-runner-scale-set"]
     steps:
       - name: Generate Token
@@ -45,13 +45,6 @@ jobs:
         shell: bash
         run: brew install fluxcd/tap/flux yq
 
-      - name: Write kubeconfig
-        id: kubeconfig
-        uses: timheuer/base64-to-file@v1
-        with:
-          encodedString: "${{ secrets.KUBECONFIG }}"
-          fileName: kubeconfig
-
       - if: ${{ github.event.inputs.clusterName == '' && github.event.inputs.helmRepoNamespace == '' && github.event.inputs.helmRepoName == '' }}
         name: Get Changed Files
         id: changed-files
@@ -66,8 +59,6 @@ jobs:
 
       - if: ${{ github.event.inputs.clusterName == '' && github.event.inputs.helmRepoNamespace == '' && github.event.inputs.helmRepoName == '' }}
         name: Sync Helm Repository
-        env:
-          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
         run: |
           declare -a repos=()
@@ -88,8 +79,6 @@ jobs:
 
       - if: ${{ github.event.inputs.clusterName != '' && github.event.inputs.helmRepoNamespace != '' && github.event.inputs.helmRepoName != '' }}
         name: Sync Helm Repository
-        env:
-          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
         run: |
           flux \
