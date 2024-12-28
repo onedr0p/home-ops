@@ -73,7 +73,6 @@ jobs:
           for r in "${repos[@]}"; do
               IFS=':' read -r cluster_name repo_namespace repo_name <<< "${r}"
               flux \
-                  --context ${cluster_name} \
                   --namespace ${repo_namespace} \
                   reconcile source helm ${repo_name} || true
           done
@@ -83,6 +82,5 @@ jobs:
         shell: bash
         run: |
           flux \
-              --context ${{ github.event.inputs.clusterName }} \
               --namespace ${{ github.event.inputs.helmRepoNamespace }} \
               reconcile source helm ${{ github.event.inputs.helmRepoName }} || true
