@@ -65,12 +65,12 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
-      - name: Setup Workflow Tools
-        shell: bash
-        run: brew install jo yq
+      - name: Setup mise
+        uses: jdx/mise-action@v2
+        with:
+          mise_toml: |
+            [tools]
+            "aqua:mikefarah/yq" = "latest"
 
       - name: Checkout Default Branch
         uses: actions/checkout@v4
@@ -121,11 +121,11 @@ jobs:
         id: extract-images
         shell: bash
         run: |
-          images=$(jo -a $(grep -vf default.txt pull.txt))
+          images=$(jq --raw-input --null-input '[inputs]' < <(grep -vf default.txt pull.txt))
           echo "images=${images}" >> $GITHUB_OUTPUT
           echo "${images}"
           echo "### Images" >> $GITHUB_STEP_SUMMARY
-          echo "${images}" | jq -r 'to_entries[] | "* \(.value)"' >> $GITHUB_STEP_SUMMARY
+          echo "${images}" | jq --raw-output 'to_entries[] | "* \(.value)"' >> $GITHUB_STEP_SUMMARY
 
   pre-pull-images:
     if: ${{ needs.extract-images.outputs.matrix != '[]' }}
@@ -138,12 +138,12 @@ jobs:
       max-parallel: 4
       fail-fast: false
     steps:
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
-      - name: Setup Workflow Tools
-        shell: bash
-        run: brew install siderolabs/tap/talosctl
+      - name: Setup mise
+        uses: jdx/mise-action@v2
+        with:
+          mise_toml: |
+            [tools]
+            "aqua:siderolabs/talos" = "latest"
 
       - name: Pre-pull Image
         run: talosctl -n $NODE_IP image pull ${{ matrix.images }}
