@@ -30,12 +30,13 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Setup mise
-        uses: jdx/mise-action@v2
-        with:
-          mise_toml: |
-            [tools]
-            "aqua:kubernetes/kubectl" = "latest"
+      # TODO: mise won't work due to subshell nonsense in crd-extractor.sh
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Setup Workflow Tools
+        shell: bash
+        run: brew install kubectl
 
       - name: Setup Python
         uses: actions/setup-python@v5

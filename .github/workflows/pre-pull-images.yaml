@@ -12,49 +12,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  changed-clusters:
-    name: Changed Clusters
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.changed-clusters.outputs.all_changed_and_modified_files }}
-    steps:
-      - name: Generate Token
-        uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: "${{ secrets.BOT_APP_ID }}"
-          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: "${{ steps.app-token.outputs.token }}"
-          fetch-depth: 0
-
-      - name: Get Changed Clusters
-        id: changed-clusters
-        uses: tj-actions/changed-files@v45
-        with:
-          files: kubernetes/**
-          files_ignore: kubernetes/shared/**
-          dir_names: true
-          dir_names_max_depth: 2
-          matrix: true
-
-      - name: List All Changed Clusters
-        run: echo "${{ steps.changed-clusters.outputs.all_changed_and_modified_files }}"
-
   extract-images:
     name: Extract Images
     runs-on: ubuntu-latest
-    needs: ["changed-clusters"]
     permissions:
       pull-requests: write
-    strategy:
-      matrix:
-        paths: ${{ fromJSON(needs.changed-clusters.outputs.matrix) }}
-      max-parallel: 4
-      fail-fast: false
     outputs:
       matrix: ${{ steps.extract-images.outputs.images }}
     steps:
@@ -90,7 +52,7 @@ jobs:
         with:
           args: >-
             get cluster
-            --path /github/workspace/default/${{ matrix.paths }}/flux
+            --path /github/workspace/default/kubernetes/main/flux
             --enable-images
             --output yaml
             --output-file default.yaml
@@ -100,7 +62,7 @@ jobs:
         with:
           args: >-
             get cluster
-            --path /github/workspace/pull/${{ matrix.paths }}/flux
+            --path /github/workspace/pull/kubernetes/main/flux
             --enable-images
             --output yaml
             --output-file pull.yaml
