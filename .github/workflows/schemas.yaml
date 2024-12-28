@@ -35,7 +35,7 @@ jobs:
 
       - name: Setup Workflow Tools
         shell: bash
-        run: brew install kubernetes-cli
+        run: brew install kubectl
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -47,16 +47,7 @@ jobs:
         with:
           node-version: 18.x
 
-      - name: Write kubeconfig
-        id: kubeconfig
-        uses: timheuer/base64-to-file@v1
-        with:
-          encodedString: "${{ secrets.KUBECONFIG }}"
-          fileName: kubeconfig
-
       - name: Download and run crd-extractor
-        env:
-          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
         shell: bash
         run: |
           curl -fsSL -o $GITHUB_WORKSPACE/crd-extractor.sh \
