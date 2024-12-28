@@ -121,7 +121,7 @@ jobs:
         id: extract-images
         shell: bash
         run: |
-          images=$(jq --raw-input --null-input '[inputs]' < <(grep -vf default.txt pull.txt))
+          images=$(jq --compact-output --raw-input --null-input '[inputs]' < <(grep -vf default.txt pull.txt))
           echo "images=${images}" >> $GITHUB_OUTPUT
           echo "${images}"
           echo "### Images" >> $GITHUB_STEP_SUMMARY
