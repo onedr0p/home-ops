@@ -37,7 +37,7 @@ machine:
     diskSelector:
       model: Samsung SSD 870
     extraKernelArgs:
-      - i915.enable_guc=3    # Meteor Lake CPU
+      - i915.enable_guc=3    # Meteor Lake CPU / iGPU
       - apparmor=0           # Less security, faster puter
       - init_on_alloc=0      # Less security, faster puter
       - init_on_free=0       # Less security, faster puter
@@ -71,6 +71,7 @@ machine:
   sysctls:
     fs.inotify.max_user_watches: 1048576   # Watchdog
     fs.inotify.max_user_instances: 8192    # Watchdog
+    kernel.kexec_load_disabled: 1          # Meteor Lake CPU / iGPU
     net.core.default_qdisc: fq             # 10Gb/s
     net.core.rmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
     net.core.wmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
