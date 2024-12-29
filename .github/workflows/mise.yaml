@@ -38,6 +38,11 @@ jobs:
         shell: bash
         run: |
           IFS=$'\n' read -r -d '' -a CRD_LIST < <(kubectl get crds 2>&1 | sed -n '/NAME/,$p' | tail -n +2 && printf '\0')
+          # If no CRDs exist in the cluster, exit
+          if [ ${#CRD_LIST[@]} == 0 ]; then
+              printf "No CRDs found in the cluster, exiting...\n"
+              exit 0
+          fi
           FETCHED_CRDS=0
           for crd in "${CRD_LIST[@]}"; do
               printf "Fetching CRD %s/%s...\n" $((FETCHED_CRDS + 1)) ${#CRD_LIST[@]}
