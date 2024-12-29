@@ -37,15 +37,17 @@ machine:
     diskSelector:
       model: Samsung SSD 870
     extraKernelArgs:
-      - i915.enable_guc=3    # Meteor Lake CPU / iGPU
-      - apparmor=0           # Less security, faster puter
-      - init_on_alloc=0      # Less security, faster puter
-      - init_on_free=0       # Less security, faster puter
-      - intel_iommu=on       # PCI Passthrough
-      - iommu=pt             # PCI Passthrough
-      - mitigations=off      # Less security, faster puter
-      - module_blacklist=igc # Disable onboard NIC
-      - security=none        # Less security, faster puter
+    extraKernelArgs:
+      - i915.enable_guc=3                   # Meteor Lake CPU / iGPU
+      - apparmor=0                          # Less security, faster puter
+      - init_on_alloc=0                     # Less security, faster puter
+      - init_on_free=0                      # Less security, faster puter
+      - intel_iommu=on                      # PCI Passthrough
+      - iommu=pt                            # PCI Passthrough
+      - mitigations=off                     # Less security, faster puter
+      - module_blacklist=igc                # Disable onboard NIC
+      - security=none                       # Less security, faster puter
+      - sysctl.kernel.kexec_load_disabled=1 # Meteor Lake CPU / iGPU
     # i915-ucode, intel-ucode, mei, thunderbolt
     image: factory.talos.dev/installer/de3b865124c5616da8084826167f8c0b0fbc9b905b146290db797024e84097fc:{{ ENV.TALOS_VERSION }}
     wipe: false
@@ -71,7 +73,6 @@ machine:
   sysctls:
     fs.inotify.max_user_watches: 1048576   # Watchdog
     fs.inotify.max_user_instances: 8192    # Watchdog
-    kernel.kexec_load_disabled: 1          # Meteor Lake CPU / iGPU
     net.core.default_qdisc: fq             # 10Gb/s
     net.core.rmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
     net.core.wmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
