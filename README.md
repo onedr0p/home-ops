@@ -162,7 +162,13 @@ In my cluster there are two instances of [ExternalDNS](https://github.com/kubern
 
 <div align="center">
 
-[![Star History Chart](https://api.star-history.com/svg?repos=onedr0p/home-ops&type=Date)](https://star-history.com/#onedr0p/home-ops&Date)
+<a href="https://star-history.com/#onedr0p/home-ops&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=onedr0p/home-ops&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=onedr0p/home-ops&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=onedr0p/home-ops&type=Date" />
+  </picture>
+</a>
 
 </div>
 
