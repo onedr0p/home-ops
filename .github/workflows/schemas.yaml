@@ -30,12 +30,12 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Setup mise
-        uses: jdx/mise-action@v2
-        with:
-          mise_toml: |
-            [tools]
-            "aqua:kubernetes/kubectl" = "latest"
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Setup Workflow Tools
+        shell: bash
+        run: brew install kubectl
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -46,6 +46,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
+
+      - name: Install Python Dependencies
+        run: pip install pyyaml
 
       - name: Download and run crd-extractor
         shell: bash
