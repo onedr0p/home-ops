@@ -1,111 +1,98 @@
 #!/usr/bin/env bash
 
-# Source: https://github.com/datreeio/CRDs-catalog/blob/main/Utilities/crd-extractor.sh
+set -euo pipefail
 
+# Function to fetch a CRD
 fetch_crd() {
-    filename=${1%% *}
-    kubectl get crds "$filename" -o yaml >"$TMP_CRD_DIR/$filename.yaml" 2>&1
+    local crd="$1"
+    local crd_file="$TMP_CRD_DIR/$crd.yaml"
+    if ! kubectl get crds "$crd" -o yaml >"$crd_file" 2>/dev/null; then
+        printf "Failed to fetch CRD: %s\n" "$crd"
+        return 1
+    fi
 }
 
-# Check if python3 is installed
-if ! command -v python3 &>/dev/null; then
-    printf "python3 is required for this utility, and is not installed on your machine"
-    printf "please visit https://www.python.org/downloads/ to install it"
-    exit 1
-fi
+# Directories
+TMP_CRD_DIR="$HOME/.datree/crds"
+SCHEMAS_DIR="$HOME/.datree/crdSchemas"
 
-# Check if kubectl is installed
-if ! command -v kubectl &>/dev/null; then
-    printf "kubectl is required for this utility, and is not installed on your machine"
-    printf "please visit https://kubernetes.io/docs/tasks/tools/#kubectl to install it"
-    exit 1
-fi
+# Initialize directories
+mkdir -p "$TMP_CRD_DIR" "$SCHEMAS_DIR"
+cd "$SCHEMAS_DIR" || { echo "Failed to change to schemas directory"; exit 1; }
 
-# Check if the pyyaml module is installed
-if ! echo 'import yaml' | python3 &>/dev/null; then
-    printf "the python3 module 'yaml' is required, and is not installed on your machine.\n"
-
-    while true; do
-        read -p -r "Do you wish to install this program? (y/n) " yn
-        case $yn in
-        [Yy])
-            pip3 install pyyaml
-            break
-            ;;
-        "")
-            pip3 install pyyaml
-            break
-            ;;
-        [Nn])
-            echo "Exiting..."
-            exit
-            ;;
-        *) echo "Please answer 'y' (yes) or 'n' (no)." ;;
-        esac
-    done
-fi
-
-# Create temp folder for CRDs
-TMP_CRD_DIR=$HOME/.datree/crds
-mkdir -p "$TMP_CRD_DIR"
-
-# Create final schemas directory
-SCHEMAS_DIR=$HOME/.datree/crdSchemas
-mkdir -p "$SCHEMAS_DIR"
-cd "$SCHEMAS_DIR" || exit 1
-
-# Get a list of all CRDs
+# Fetch list of CRDs
 printf "Fetching list of CRDs...\n"
-IFS=$'\n' read -r -d '' -a CRD_LIST < <(kubectl get crds 2>&1 | sed -n '/NAME/,$p' | tail -n +2 && printf '\0')
+kubectl get crds | awk 'NR>1 {print $1}' >"$TMP_CRD_DIR/crd_list.txt"
 
-# If no CRDs exist in the cluster, exit
-if [ ${#CRD_LIST[@]} == 0 ]; then
+# Read CRDs into an array
+CRD_LIST=()
+while IFS= read -r line; do
+    CRD_LIST+=("$line")
+done <"$TMP_CRD_DIR/crd_list.txt"
+
+# Check if there are any CRDs
+if [ "${#CRD_LIST[@]}" -eq 0 ]; then
     printf "No CRDs found in the cluster, exiting...\n"
     exit 0
 fi
 
-# Extract CRDs from cluster
+# Fetch CRDs in parallel
 FETCHED_CRDS=0
 PARALLELISM=10
 for crd in "${CRD_LIST[@]}"; do
-    printf "Fetching CRD %s/%s...\n" $((FETCHED_CRDS + 1)) ${#CRD_LIST[@]}
+    printf "Fetching CRD %d/%d: %s\n" $((FETCHED_CRDS + 1)) "${#CRD_LIST[@]}" "$crd"
 
-    # Fetch CRD
     fetch_crd "$crd" &
 
-    # allow to execute up to $PARALLELISM jobs in parallel
-    if [[ $(jobs -r -p | wc -l) -ge $PARALLELISM ]]; then
-        # now there are $PARALLELISM jobs already running, so wait here for any job
-        # to be finished so there is a place to start next one.
+    # Ensure a maximum of $PARALLELISM jobs run in parallel
+    while [ "$(jobs -r | wc -l)" -ge "$PARALLELISM" ]; do
         wait -n
-    fi
-    ((++FETCHED_CRDS))
+    done
+
+    FETCHED_CRDS=$((FETCHED_CRDS + 1))
 done
 
+# Wait for all background jobs to finish
+wait
+
 # Download converter script
-curl https://raw.githubusercontent.com/yannh/kubeconform/master/scripts/openapi2jsonschema.py --output "$TMP_CRD_DIR/openapi2jsonschema.py" 2>/dev/null
+CONVERTER_SCRIPT="$TMP_CRD_DIR/openapi2jsonschema.py"
+printf "Downloading OpenAPI to JSON schema converter script...\n"
+if ! curl -sSL "https://raw.githubusercontent.com/yannh/kubeconform/master/scripts/openapi2jsonschema.py" -o "$CONVERTER_SCRIPT"; then
+    printf "Failed to download converter script\n"
+    exit 1
+fi
 
-# Convert crds to jsonSchema
-FILENAME_FORMAT="{fullgroup}_{kind}_{version}" python3 "$TMP_CRD_DIR/openapi2jsonschema.py" "$TMP_CRD_DIR"/*.yaml
-conversionResult=$?
+# Convert CRDs to JSON schema
+printf "Converting CRDs to JSON schema...\n"
+if ! FILENAME_FORMAT="{fullgroup}_{kind}_{version}" python3 "$CONVERTER_SCRIPT" "$TMP_CRD_DIR"/*.yaml; then
+    printf "Failed to convert CRDs to JSON schema\n"
+    exit 1
+fi
 
-# Copy and rename files to support kubeval
+# Prepare master-standalone directory
 rm -rf "$SCHEMAS_DIR/master-standalone"
 mkdir -p "$SCHEMAS_DIR/master-standalone"
-cp "$SCHEMAS_DIR"/*.json "$SCHEMAS_DIR/master-standalone"
-find "$SCHEMAS_DIR/master-standalone" -name '*json' -exec bash -c ' mv -f $0 ${0/\_/-stable-}' {} \;
+
+# Rename and copy JSON files
+for json_file in "$SCHEMAS_DIR"/*.json; do
+    base_name=$(basename "$json_file")
+    new_name=${base_name//_/-stable-}
+    cp "$json_file" "$SCHEMAS_DIR/master-standalone/$new_name"
+done
 
 # Organize schemas by group
 for schema in "$SCHEMAS_DIR"/*.json; do
-    crdFileName=$(basename "$schema")
-    crdGroup=$(echo "$crdFileName" | cut -d"_" -f1)
-    outName=$(echo "$crdFileName" | cut -d"_" -f2-)
-    mkdir -p "$crdGroup"
-    mv "$schema" "./$crdGroup/$outName"
+    crd_file_name=$(basename "$schema")
+    crd_group="${crd_file_name%%_*}"
+    out_name="${crd_file_name#*_}"
+    group_dir="$SCHEMAS_DIR/$crd_group"
+    mkdir -p "$group_dir"
+    mv "$schema" "$group_dir/$out_name"
 done
 
-if [ $conversionResult == 0 ]; then
-    printf "Successfully converted %s CRDs to JSON schema\n" $FETCHED_CRDS
-fi
+# Print success message
+printf "Successfully converted %d CRDs to JSON schema\n" "$FETCHED_CRDS"
 
+# Cleanup
 rm -rf "$TMP_CRD_DIR"
