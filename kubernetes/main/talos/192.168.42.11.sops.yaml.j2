@@ -37,15 +37,16 @@ machine:
     diskSelector:
       model: Samsung SSD 870
     extraKernelArgs:
-      - i915.enable_guc=3    # Meteor Lake CPU
-      - apparmor=0           # Less security, faster puter
-      - init_on_alloc=0      # Less security, faster puter
-      - init_on_free=0       # Less security, faster puter
-      - intel_iommu=on       # PCI Passthrough
-      - iommu=pt             # PCI Passthrough
-      - mitigations=off      # Less security, faster puter
-      - module_blacklist=igc # Disable onboard NIC
-      - security=none        # Less security, faster puter
+      - i915.enable_guc=3                   # Meteor Lake CPU / iGPU
+      - apparmor=0                          # Less security, faster puter
+      - init_on_alloc=0                     # Less security, faster puter
+      - init_on_free=0                      # Less security, faster puter
+      - intel_iommu=on                      # PCI Passthrough
+      - iommu=pt                            # PCI Passthrough
+      - mitigations=off                     # Less security, faster puter
+      - module_blacklist=igc                # Disable onboard NIC
+      - security=none                       # Less security, faster puter
+      - sysctl.kernel.kexec_load_disabled=1 # Meteor Lake CPU / iGPU
     # i915-ucode, intel-ucode, mei, thunderbolt
     image: factory.talos.dev/installer/de3b865124c5616da8084826167f8c0b0fbc9b905b146290db797024e84097fc:{{ ENV.TALOS_VERSION }}
     wipe: false
