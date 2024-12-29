@@ -27,7 +27,7 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Setup mise
+      - name: Setup Workflow Tools
         uses: jdx/mise-action@v2
         with:
           mise_toml: |
@@ -83,7 +83,7 @@ jobs:
         id: extract-images
         shell: bash
         run: |
-          images=$(jq --compact-output --raw-input --null-input '[inputs]' < <(grep -vf default.txt pull.txt))
+          images=$(jo -a $(grep -vf default.txt pull.txt))
           echo "images=${images}" >> $GITHUB_OUTPUT
           echo "${images}"
           echo "### Images" >> $GITHUB_STEP_SUMMARY
@@ -100,7 +100,7 @@ jobs:
       max-parallel: 4
       fail-fast: false
     steps:
-      - name: Setup mise
+      - name: Setup Workflow Tools
         uses: jdx/mise-action@v2
         with:
           mise_toml: |
