@@ -107,7 +107,7 @@ machine:
     kubernetesTalosAPIAccess:
       enabled: true
       allowedRoles: ["os:admin"]
-      allowedKubernetesNamespaces: ["kube-system"]
+      allowedKubernetesNamespaces: ["actions-runner-system", "kube-system"]
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
     kubePrism:
@@ -119,10 +119,10 @@ machine:
       forwardKubeDNSToHost: false
   udev:
     rules:
-      # Thunderbolt
-      - ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
-      # Intel GPU
-      - SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
+      - # Intel GPU
+        SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
+      - # Thunderbolt
+        ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
   kernel:
     modules:
       - name: nbd
