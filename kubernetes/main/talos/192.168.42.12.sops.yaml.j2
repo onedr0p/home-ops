@@ -158,8 +158,6 @@ cluster:
     key: ENC[AES256_GCM,data:h7iur1YK24hF9etfo6IvT7bXzfjMTuj/YMVIXn9N1YMfCX3KDig6FJrZxfUspz3vfbfUpFM9xeAdFoK5DtQ3nCv/ZqlZk9oP2kq3AMXPzhlMsENI+DyLx+BaK/GKvPCtmHC8DdjE7u9kx8zfKB4wDKKjrCXE4YMMQ2q6+7NEUMUnWhwPSGPzZQD6AZR1KC03Ip9N7n2C2lwzNy3DriVZu/m4cq0qw9AxHH4FlWznoHj+I6OgJ9/Sn+EyyCMkFuUD32dzAsmhtcK0BuL6uBwN5p++xG4GpQCAyOd1fjeXHCpFzG2FAZrkCzPv6FT4IgkAMswUu07G8IFpZVpqhaGONJDDg7xUHpLBKrEpOrC2JKk7x2pmYo6/QdJ9Maq+Rdh6khhbINJCrFWGiMq+/HfxRQ==,iv:PAS7TMVFiZ3WNZwp1boLDzSS79yttBYz/9p5gCUHCps=,tag:jip1CNc5W4UqOsayAi9ymw==,type:str]
   apiServer:
     image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
-    extraArgs:
-      feature-gates: AuthorizeNodeWithSelectors=false
     certSANs: ["127.0.0.1", "192.168.42.120"]
     disablePodSecurityPolicy: true
     auditPolicy:
@@ -194,13 +192,6 @@ cluster:
                   - maxSkew: 1
                     topologyKey: kubernetes.io/hostname
                     whenUnsatisfiable: ScheduleAnyway
-  discovery:
-    enabled: true
-    registries:
-      kubernetes:
-        disabled: false
-      service:
-        disabled: true
   etcd:
     ca:
       crt: ENC[AES256_GCM,data:XMzaRa4h4Ynakf28Shxbc9ltXkb9jRaVmeJ5+M5bObjRp5xARsuY0frE1Q5EM3Y4ee6yEps6MkC1QirWIx/xVT47/NOu7kAw4S9cBwofnRxpeZf0rI1zIJQKervYam43CxczcyV/xUQ1HLdcSWuBEpuTvfEPY75eDR1YiozXs85KKN9soW2FI8vO/76iNFQIsI+gf3qULgXH57Be3VLCVUzRMUUQweAQEqv+6wuK5S+VflLMTjE8Ei3g1xn1TW7ClH0DQso+xlhuYFXoGf22mfwF4E7u2uX1IyxTtoxAgE6gRmqTbp68B2jq02EAfA4BCiGsRD+53JU0RD2Sg6blBGybPGZQz92+xSf1KdZJLg3seYm2sbhYhDcPgSV4+Le3PUJxvK3IwAUtS+Q/992h6vww9wGH0M18ZwQhiniWG68rEmJmTHNsqGVkJbJh0sVRIqh99v0ZlwKfgA8DWexHM/tBwZpYNpRaE+/HkNUTdktTLfQm3UF/jSFgOCIWx+3zg4VVDCxf0VvSuG/Dh6UQ1PfJLmNJDr2M3A9iyuOtF4E9ijeFJpiOQK1P/t9U1dk8m/JcNuGbJPevN/I4cuMQNtf/dSmJccA9rtzNJlV+po8+1HhNIaMH5tHiD5uboZn4tMyeHpj6/2jncAsNNkzg7rP286ACglDJUJ+2bK24nyE5l+eyRr+P6IIT3KoTIgEWJl2Ad/+RuY2DCMxg3IpndF5zONtfXGI/fSKBm5wLyPMYJcLDenaPZEf0qzTRTWQFfGQot3B7DeQB1IRE5e0RyqCvtUfdchtSxMlxYwW93zU1a2TJNqf+0Xk9KqXpJYGqi8KAkTksbEAcUpxXlwh9+twxfeeyk5AJ/u9HuY/5uG439xIzywAnXslyO4VFDDRCn3uFkJTcEjizQkfFBouo/HvBoMOc7Yg2swWI9OinlY8d5KJPSwzozmfTDJ7x2lR2nWdJdlXnpJ9zgJPUHdz4Rjnbk4+q8tEDSMkVjgrM5FXPTN95bq21zyYRxEQp5bgWvMHAtw==,iv:u4Yku38S8cbWrf/pm0W/f+KrFHs1v/Hy08vbi2nKrlg=,tag:EoeZbmB8ICJV08ewizPDYQ==,type:str]
