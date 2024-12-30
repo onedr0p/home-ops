@@ -1,0 +1,67 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: silence-operator
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: silence-operator
+      version: 0.0.7
+      sourceRef:
+        kind: HelmRepository
+        name: wiremind
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: silence-operator-crds
+      namespace: observability
+  values:
+    image:
+      name: quay.io/giantswarm/silence-operator
+    extraDeply:
+      - apiVersion: monitoring.giantswarm.io/v1alpha1
+        kind: Silence
+        metadata:
+          name: ceph-node-nfsmount-diskspace-warning
+        spec:
+          matchers:
+            - name: alertname
+              value: CephNodeDiskspaceWarning
+              isRegex: false
+            - name: mountpoint
+              value: /etc/nfsmount.conf
+              isRegex: false
+      - apiVersion: monitoring.giantswarm.io/v1alpha1
+        kind: Silence
+        metadata:
+          name: ceph-node-local-diskspace-warning
+        spec:
+          matchers:
+            - name: alertname
+              value: CephNodeDiskspaceWarning
+              isRegex: false
+            - name: device
+              value: /dev/sd.*
+              isRegex: true
+      - apiVersion: monitoring.giantswarm.io/v1alpha1
+        kind: Silence
+        metadata:
+          name: expanse-memory-high-utilization
+        spec:
+          matchers:
+            - name: alertname
+              value: NodeMemoryHighUtilization
+              isRegex: false
+            - name: instance
+              value: expanse.internal:9100
+              isRegex: false
