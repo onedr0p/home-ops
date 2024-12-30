@@ -59,3 +59,17 @@ tasks:
       vars: [CLUSTER]
     preconditions:
       - which kubectl
+
+  # https://docs.github.com/en/enterprise-cloud@latest/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/deploying-runner-scale-sets-with-actions-runner-controller#upgrading-arc
+  upgrade-arc:
+    desc: Upgrade the ARC [CLUSTER=main]
+    cmds:
+      - helm -n actions-runner-system uninstall gha-runner-scale-set
+      - helm -n actions-runner-system uninstall gha-runner-scale-set-controller
+      - sleep 5
+      - flux -n actions-runner-system reconcile hr gha-runner-scale-set-controller
+      - flux -n actions-runner-system reconcile hr gha-runner-scale-set
+    requires:
+      vars: [CLUSTER]
+    preconditions:
+      - which flux helm
