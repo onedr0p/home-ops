@@ -145,7 +145,7 @@ jobs:
         id: extract-images
         shell: bash
         run: |
-          images=$(jq --null-input \
+          images=$(jq --compact-output --null-input \
               --argjson f1 '${{ needs.default-images.outputs.images }}' \
               --argjson f2 '${{ needs.pull-request-images.outputs.images }}' \
               '($f1 - $f2) + ($f2 - $f1)' \
