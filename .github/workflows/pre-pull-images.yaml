@@ -73,12 +73,12 @@ jobs:
         run: |
           cat images.txt
 
-
       - name: Output Images
         id: images
         shell: bash
         run: |
-          echo "images=$(cat images.txt)" >> $GITHUB_OUTPUT
+          images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt
+          echo "images=$images" >> $GITHUB_OUTPUT
 
   pull-request-images:
     name: Pull Request Images
@@ -137,7 +137,8 @@ jobs:
         id: images
         shell: bash
         run: |
-          echo "images=$(cat images.txt)" >> $GITHUB_OUTPUT
+          images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt
+          echo "images=$images" >> $GITHUB_OUTPUT
 
   extract-images:
     name: Extract Images
