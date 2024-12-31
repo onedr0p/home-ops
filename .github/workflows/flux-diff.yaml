@@ -63,16 +63,16 @@ jobs:
 
       - name: Diff Resources
         shell: bash
-        run: |
-            flux-local diff ${{ matrix.resources }}
-            --unified 6
-            --path ./pull/kubernetes/main/flux
-            --path-orig ./default/kubernetes/main/flux
-            --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
-            --limit-bytes 10000
-            --all-namespaces
-            --sources "home-kubernetes"
-            > diff.patch
+        run: >
+          flux-local diff ${{ matrix.resources }}
+          --unified 6
+          --path ./pull/kubernetes/main/flux
+          --path-orig ./default/kubernetes/main/flux
+          --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
+          --limit-bytes 10000
+          --all-namespaces
+          --sources "home-kubernetes"
+          > diff.patch
 
       - name: Generate Diff
         id: diff
