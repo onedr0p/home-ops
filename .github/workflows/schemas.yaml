@@ -10,9 +10,9 @@ on:
     branches: ["main"]
     paths: [".github/workflows/schemas.yaml"]
 
-env:
-  HOMEBREW_NO_ANALYTICS: "1"
-  UV_SYSTEM_PYTHON: "1"
+# env:
+#   HOMEBREW_NO_ANALYTICS: "1"
+#   UV_SYSTEM_PYTHON: "1"
 
 jobs:
   publish:
@@ -34,27 +34,41 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-        with:
-          stable: true
+      # - name: Setup Homebrew
+      #   uses: Homebrew/actions/setup-homebrew@master
+      #   with:
+      #     stable: true
+
+      # - name: Setup Workflow Tools
+      #   shell: bash
+      #   run: brew install kubectl uv
+
+      # - name: Setup Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: 3.12.x
+
+      # - name: Setup Node
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 18.x
 
       - name: Setup Workflow Tools
-        shell: bash
-        run: brew install kubectl uv
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: jdx/mise-action@v2
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         with:
-          python-version: 3.12.x
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
+          mise_toml: |
+            [tools]
+            python = "3.12"
+            node = "20"
+            "aqua:astral-sh/uv" = "latest"
+            "aqua:kubernetes/kubectl" = "latest"
 
       - name: Install Python Dependencies
         run: uv pip install pyyaml
+        env:
+          UV_SYSTEM_PYTHON: "1"
 
       - name: Download and run crd-extractor
         shell: bash

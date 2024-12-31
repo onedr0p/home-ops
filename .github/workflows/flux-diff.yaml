@@ -14,9 +14,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
-env:
-  HOMEBREW_NO_ANALYTICS: "1"
-  UV_SYSTEM_PYTHON: "1"
+# env:
+#   HOMEBREW_NO_ANALYTICS: "1"
+#   UV_SYSTEM_PYTHON: "1"
 
 jobs:
   flux-diff:
@@ -50,23 +50,37 @@ jobs:
           ref: "${{ github.event.repository.default_branch }}"
           path: default
 
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-        with:
-          stable: true
-
       - name: Setup Workflow Tools
-        shell: bash
-        run: brew install fluxcd/tap/flux helm kustomize uv
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: jdx/mise-action@v2
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         with:
-          python-version: 3.12.x
+          mise_toml: |
+            [tools]
+            python = "3.12"
+            "aqua:astral-sh/uv" = "latest"
+            "aqua:fluxcd/flux2" = "latest"
+            "aqua:helm/helm" = "latest"
+            "aqua:kubernetes-sigs/kustomize" = "latest"
+            "pipx:flux-local" = "latest"
 
-      - name: Install Python Dependencies
-        shell: bash
-        run: uv pip install flux-local
+      # - name: Setup Homebrew
+      #   uses: Homebrew/actions/setup-homebrew@master
+      #   with:
+      #     stable: true
+
+      # - name: Setup Workflow Tools
+      #   shell: bash
+      #   run: brew install fluxcd/tap/flux helm kustomize uv
+
+      # - name: Setup Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: 3.12.x
+
+      # - name: Install Python Dependencies
+      #   shell: bash
+      #   run: uv pip install flux-local
 
       - name: Diff Resources
         shell: bash

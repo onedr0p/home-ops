@@ -16,8 +16,8 @@ on:
     branches: ["main"]
     paths: ["kubernetes/**/helmrelease.yaml"]
 
-env:
-  HOMEBREW_NO_ANALYTICS: "1"
+# env:
+#   HOMEBREW_NO_ANALYTICS: "1"
 
 jobs:
   sync:
@@ -37,14 +37,24 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
           fetch-depth: 0
 
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-        with:
-          stable: true
-
       - name: Setup Workflow Tools
-        shell: bash
-        run: brew install fluxcd/tap/flux yq
+        uses: jdx/mise-action@v2
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+        with:
+          mise_toml: |
+            [tools]
+            "aqua:fluxcd/flux2" = "latest"
+            "aqua:mikefarah/yq" = "latest"
+
+      # - name: Setup Homebrew
+      #   uses: Homebrew/actions/setup-homebrew@master
+      #   with:
+      #     stable: true
+
+      # - name: Setup Workflow Tools
+      #   shell: bash
+      #   run: brew install fluxcd/tap/flux yq
 
       - if: ${{ github.event.inputs.helmRepoNamespace == '' && github.event.inputs.helmRepoName == '' }}
         name: Get Changed Files

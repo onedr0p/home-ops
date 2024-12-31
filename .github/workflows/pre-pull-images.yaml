@@ -14,9 +14,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
-env:
-  HOMEBREW_NO_ANALYTICS: "1"
-  UV_SYSTEM_PYTHON: "1"
+# env:
+#   HOMEBREW_NO_ANALYTICS: "1"
+#   UV_SYSTEM_PYTHON: "1"
 
 jobs:
   extract-images:
@@ -47,23 +47,38 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
           path: pull
 
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-        with:
-          stable: true
+      # - name: Setup Homebrew
+      #   uses: Homebrew/actions/setup-homebrew@master
+      #   with:
+      #     stable: true
+
+      # - name: Setup Workflow Tools
+      #   shell: bash
+      #   run: brew install fluxcd/tap/flux helm jo kustomize uv yq
+
+      # - name: Setup Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: 3.12.x
+
+      # - name: Install Python Dependencies
+      #   shell: bash
+      #   run: uv pip install flux-local
 
       - name: Setup Workflow Tools
-        shell: bash
-        run: brew install fluxcd/tap/flux helm jo kustomize uv yq
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: jdx/mise-action@v2
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         with:
-          python-version: 3.12.x
-
-      - name: Install Python Dependencies
-        shell: bash
-        run: uv pip install flux-local
+          mise_toml: |
+            [tools]
+            python = "3.12"
+            "aqua:astral-sh/uv" = "latest"
+            "aqua:fluxcd/flux2" = "latest"
+            "aqua:helm/helm" = "latest"
+            "aqua:kubernetes-sigs/kustomize" = "latest"
+            "aqua:mikefarah/yq" = "latest"
+            "pipx:flux-local" = "latest"
 
       - name: Gather Images in Default Branch
         shell: bash
@@ -99,7 +114,7 @@ jobs:
         id: extract-images
         shell: bash
         run: |
-          images=$(jo -a $(grep -vf default.txt pull.txt))
+          images=$(jq --compact-output --raw-input --null-input '[inputs]' < <(grep -vf default.txt pull.txt))
           echo "images=${images}" >> $GITHUB_OUTPUT
           echo "${images}"
           echo "### Images" >> $GITHUB_STEP_SUMMARY
@@ -116,14 +131,30 @@ jobs:
       max-parallel: 4
       fail-fast: false
     steps:
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+      - name: Generate Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
         with:
-          stable: true
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
       - name: Setup Workflow Tools
-        shell: bash
-        run: brew install siderolabs/tap/talosctl
+        uses: jdx/mise-action@v2
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+        with:
+          mise_toml: |
+            [tools]
+            "aqua:siderolabs/talos" = "latest"
+
+      # - name: Setup Homebrew
+      #   uses: Homebrew/actions/setup-homebrew@master
+      #   with:
+      #     stable: true
+
+      # - name: Setup Workflow Tools
+      #   shell: bash
+      #   run: brew install siderolabs/tap/talosctl
 
       - name: Pre-pull Image
         run: talosctl -n $NODE_IP image pull ${{ matrix.images }}
