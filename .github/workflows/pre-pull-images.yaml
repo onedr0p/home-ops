@@ -68,16 +68,14 @@ jobs:
           yq -r '[.. | .images? | select(. != null)] | flatten | sort | unique | .[]' \
               images.yaml > images.txt
 
-      - name: Show Images
-        shell: bash
-        run: |
-          cat images.txt
-
       - name: Output Images
         id: images
         shell: bash
         run: |
-          echo "images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt)" >> $GITHUB_OUTPUT
+          cat images.txt
+          images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt)
+          echo "${images}"
+          echo "images=${images}" >> $GITHUB_OUTPUT
 
   pull-request-images:
     name: Pull Request Images
@@ -127,16 +125,14 @@ jobs:
           yq -r '[.. | .images? | select(. != null)] | flatten | sort | unique | .[]' \
               images.yaml > images.txt
 
-      - name: Show Images
-        shell: bash
-        run: |
-          cat images.txt
-
       - name: Output Images
         id: images
         shell: bash
         run: |
-          echo "images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt)" >> $GITHUB_OUTPUT
+          cat images.txt
+          images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt)
+          echo "${images}"
+          echo "images=${images}" >> $GITHUB_OUTPUT
 
   extract-images:
     name: Extract Images
