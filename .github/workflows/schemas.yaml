@@ -10,6 +10,10 @@ on:
     branches: ["main"]
     paths: [".github/workflows/schemas.yaml"]
 
+env:
+  HOMEBREW_NO_ANALYTICS: "1"
+  UV_SYSTEM_PYTHON: "1"
+
 jobs:
   publish:
     name: Schemas
@@ -32,15 +36,17 @@ jobs:
 
       - name: Setup Homebrew
         uses: Homebrew/actions/setup-homebrew@master
+        with:
+          stable: true
 
       - name: Setup Workflow Tools
         shell: bash
-        run: brew install kubectl
+        run: brew install kubectl uv
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: 3.12.x
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -48,7 +54,7 @@ jobs:
           node-version: 18.x
 
       - name: Install Python Dependencies
-        run: pip install pyyaml
+        run: uv pip install pyyaml
 
       - name: Download and run crd-extractor
         shell: bash

@@ -53,7 +53,6 @@ jobs:
       - name: Setup Homebrew
         uses: Homebrew/actions/setup-homebrew@master
         with:
-          brew-gh-api-token: "${{ steps.app-token.outputs.token }}"
           stable: true
 
       - name: Setup Workflow Tools
@@ -69,47 +68,33 @@ jobs:
         shell: bash
         run: uv pip install flux-local
 
-      # - name: Setup Workflow Tools
-      #   uses: jdx/mise-action@v2
-      #   env:
-      #     GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-      #   with:
-      #     mise_toml: |
-      #       [tools]
-      #       python = "3.12"
-      #       "uv" = "latest"
-      #       "pipx:flux-local" = "latest"
-      #       "aqua:fluxcd/flux2" = "latest"
-      #       "aqua:helm/helm" = "latest"
-      #       "aqua:kubernetes-sigs/kustomize" = "latest"
-
       - name: Diff Resources
         shell: bash
         run: >
           flux-local diff ${{ matrix.resources }}
-          --unified 6
-          --path ${{ github.workspace }}/pull/kubernetes/main/flux
-          --path-orig ${{ github.workspace }}/default/kubernetes/main/flux
-          --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
-          --limit-bytes 10000
-          --all-namespaces
-          --sources "home-kubernetes"
-          > diff.patch
+              --unified 6
+              --path ${{ github.workspace }}/pull/kubernetes/main/flux
+              --path-orig ${{ github.workspace }}/default/kubernetes/main/flux
+              --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
+              --limit-bytes 10000
+              --all-namespaces
+              --sources "home-kubernetes"
+              --output-file diff.patch
 
       - name: Generate Diff
         id: diff
         run: |
           cat diff.patch;
           {
-            echo 'diff<<EOF'
-            cat diff.patch
-            echo EOF
+              echo 'diff<<EOF'
+              cat diff.patch
+              echo EOF
           } >> "$GITHUB_OUTPUT";
           {
-            echo "### Diff"
-            echo '```diff'
-            cat diff.patch
-            echo '```'
+              echo "### Diff"
+              echo '```diff'
+              cat diff.patch
+              echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - if: ${{ steps.diff.outputs.diff != '' }}

@@ -14,6 +14,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  HOMEBREW_NO_ANALYTICS: "1"
+
 jobs:
   extract-images:
     name: Extract Images
@@ -30,13 +33,6 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
-      - name: Setup Workflow Tools
-        shell: bash
-        run: brew install jo yq
-
       - name: Checkout Default Branch
         uses: actions/checkout@v4
         with:
@@ -50,25 +46,41 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
           path: pull
 
-      - name: Gather Images in Default Branch
-        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
         with:
-          args: >-
-            get cluster
-            --path /github/workspace/default/kubernetes/main/flux
-            --enable-images
-            --output yaml
-            --output-file default.yaml
+          stable: true
+
+      - name: Setup Workflow Tools
+        shell: bash
+        run: brew install jo yq
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12.x
+
+      - name: Install Python Dependencies
+        shell: bash
+        run: uv pip install flux-local
+
+      - name: Gather Images in Default Branch
+        shell: bash
+        run: >
+          flux-local get cluster
+              --path ${{ github.workspace }}/default/kubernetes/main/flux
+              --enable-images
+              --output yaml
+              --output-file default.yaml
 
       - name: Gather Images in Pull Request Branch
-        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1
-        with:
-          args: >-
-            get cluster
-            --path /github/workspace/pull/kubernetes/main/flux
-            --enable-images
-            --output yaml
-            --output-file pull.yaml
+        shell: bash
+        run: >
+          flux-local get cluster
+              --path ${{ github.workspace }}/pull/kubernetes/main/flux
+              --enable-images
+              --output yaml
+              --output-file pull.yaml
 
       - name: Filter Default Branch Results
         shell: bash
@@ -105,6 +117,8 @@ jobs:
     steps:
       - name: Setup Homebrew
         uses: Homebrew/actions/setup-homebrew@master
+        with:
+          stable: true
 
       - name: Setup Workflow Tools
         shell: bash
