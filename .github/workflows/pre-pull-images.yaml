@@ -145,7 +145,7 @@ jobs:
           echo "images=${images}" >> $GITHUB_OUTPUT
 
   pre-pull-images:
-    if: ${{ needs.extract-images.outputs.matrix != '[]' }}
+    if: ${{ needs.extract-images.outputs.matrix != '[]' && fromJSON(needs.extract-images.outputs.matrix).length <= 10 }}
     name: Pre-pull Images
     runs-on: ["gha-runner-scale-set"]
     needs: ["extract-images"]
