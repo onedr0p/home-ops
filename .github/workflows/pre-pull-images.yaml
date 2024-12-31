@@ -14,14 +14,20 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  HOMEBREW_NO_ANALYTICS: "1"
+
 jobs:
   extract-images:
     name: Extract Images
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
+    strategy:
+      matrix:
+        branches: ["default", "pull"]
+      fail-fast: false
     outputs:
-      matrix: ${{ steps.extract-images.outputs.images }}
+      default: ${{ steps.extract-images.outputs.default }}
+      pull: ${{ steps.extract-images.outputs.pull }}
     steps:
       - name: Generate Token
         uses: actions/create-github-app-token@v1
@@ -30,76 +36,57 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
-      - name: Setup Workflow Tools
-        shell: bash
-        run: brew install jo yq
-
-      - name: Checkout Default Branch
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
-          ref: "${{ github.event.repository.default_branch }}"
-          path: default
+          ref: "${{ matrix.branches == 'default' && github.event.repository.default_branch || '' }}"
 
-      - name: Checkout Pull Request Branch
-        uses: actions/checkout@v4
-        with:
-          token: "${{ steps.app-token.outputs.token }}"
-          path: pull
-
-      - name: Gather Images in Default Branch
-        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1
+      - name: Gather Images
+        uses: docker://ghcr.io/allenporter/flux-local:v7.0.0
         with:
           args: >-
             get cluster
-            --path /github/workspace/default/kubernetes/main/flux
+            --path /github/workspace/kubernetes/main/flux
             --enable-images
             --output yaml
-            --output-file default.yaml
+            --output-file images.yaml
 
-      - name: Gather Images in Pull Request Branch
-        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1
-        with:
-          args: >-
-            get cluster
-            --path /github/workspace/pull/kubernetes/main/flux
-            --enable-images
-            --output yaml
-            --output-file pull.yaml
-
-      - name: Filter Default Branch Results
-        shell: bash
-        run: |
-          yq -r '[.. | .images? | select(. != null)] | flatten | sort | unique | .[]' \
-              default.yaml > default.txt
-
-      - name: Filter Pull Request Branch Results
-        shell: bash
-        run: |
-          yq -r '[.. | .images? | select(. != null)] | flatten | sort | unique | .[]' \
-              pull.yaml > pull.txt
-
-      - name: Compare Default and Pull Request Images
+      - name: Extract Images
         id: extract-images
         shell: bash
         run: |
-          images=$(jo -a $(grep -vf default.txt pull.txt))
+          images=$(yq --indent=0 --output-format=json \
+              '[.. | .images? | select(. != null)] | flatten | sort | unique' images.yaml \
+          )
+          echo "${{ matrix.branches }}=${images}" >> $GITHUB_OUTPUT
+
+  compare-images:
+    name: Compare Images
+    runs-on: ubuntu-latest
+    needs: ["extract-images"]
+    outputs:
+      images: ${{ steps.compare-images.outputs.images }}
+    steps:
+      - name: Compare Images
+        id: compare-images
+        shell: bash
+        run: |
+          images=$(jq --compact-output --null-input \
+              --argjson f1 '${{ needs.extract-images.outputs.default }}' \
+              --argjson f2 '${{ needs.extract-images.outputs.pull }}' \
+              '$f2 - $f1' \
+          )
           echo "images=${images}" >> $GITHUB_OUTPUT
-          echo "${images}"
-          echo "### Images" >> $GITHUB_STEP_SUMMARY
-          echo "${images}" | jq --raw-output 'to_entries[] | "* \(.value)"' >> $GITHUB_STEP_SUMMARY
 
   pre-pull-images:
-    if: ${{ needs.extract-images.outputs.matrix != '[]' }}
+    if: ${{ needs.compare-images.outputs.images != '[]' }}
     name: Pre-pull Images
     runs-on: ["gha-runner-scale-set"]
-    needs: ["extract-images"]
+    needs: ["compare-images"]
     strategy:
       matrix:
-        images: ${{ fromJSON(needs.extract-images.outputs.matrix) }}
+        images: ${{ fromJSON(needs.compare-images.outputs.images) }}
       max-parallel: 4
       fail-fast: false
     steps:
