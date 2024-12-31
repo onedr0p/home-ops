@@ -53,7 +53,7 @@ jobs:
 
       - name: Setup Workflow Tools
         shell: bash
-        run: brew install jo yq
+        run: brew install jo uv yq
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -66,20 +66,20 @@ jobs:
 
       - name: Gather Images in Default Branch
         shell: bash
-        run: >
-          flux-local get cluster
-              --path ${{ github.workspace }}/default/kubernetes/main/flux
-              --enable-images
-              --output yaml
+        run: |
+          flux-local get cluster \
+              --path ${{ github.workspace }}/default/kubernetes/main/flux \
+              --enable-images \
+              --output yaml \
               --output-file default.yaml
 
       - name: Gather Images in Pull Request Branch
         shell: bash
-        run: >
-          flux-local get cluster
-              --path ${{ github.workspace }}/pull/kubernetes/main/flux
-              --enable-images
-              --output yaml
+        run: |
+          flux-local get cluster \
+              --path ${{ github.workspace }}/pull/kubernetes/main/flux \
+              --enable-images \
+              --output yaml \
               --output-file pull.yaml
 
       - name: Filter Default Branch Results

@@ -70,15 +70,15 @@ jobs:
 
       - name: Diff Resources
         shell: bash
-        run: >
-          flux-local diff ${{ matrix.resources }}
-              --unified 6
-              --path ${{ github.workspace }}/pull/kubernetes/main/flux
-              --path-orig ${{ github.workspace }}/default/kubernetes/main/flux
-              --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
-              --limit-bytes 10000
-              --all-namespaces
-              --sources "home-kubernetes"
+        run: |
+          flux-local diff ${{ matrix.resources }} \
+              --unified 6 \
+              --path ${{ github.workspace }}/pull/kubernetes/main/flux \
+              --path-orig ${{ github.workspace }}/default/kubernetes/main/flux \
+              --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart" \
+              --limit-bytes 10000 \
+              --all-namespaces \
+              --sources "home-kubernetes" \
               --output-file diff.patch
 
       - name: Generate Diff
