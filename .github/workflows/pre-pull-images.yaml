@@ -62,11 +62,17 @@ jobs:
               --output yaml \
               --output-file images.yaml
 
-      - name: Filter Image
+      - name: Filter Images
         shell: bash
         run: |
           yq -r '[.. | .images? | select(. != null)] | flatten | sort | unique | .[]' \
               images.yaml > images.txt
+
+      - name: Show Images
+        shell: bash
+        run: |
+          cat images.txt
+
 
       - name: Output Images
         id: images
@@ -116,11 +122,16 @@ jobs:
               --output yaml \
               --output-file images.yaml
 
-      - name: Filter Image
+      - name: Filter Images
         shell: bash
         run: |
           yq -r '[.. | .images? | select(. != null)] | flatten | sort | unique | .[]' \
               images.yaml > images.txt
+
+      - name: Show Images
+        shell: bash
+        run: |
+          cat images.txt
 
       - name: Output Images
         id: images
