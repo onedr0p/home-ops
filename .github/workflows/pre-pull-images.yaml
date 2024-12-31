@@ -77,8 +77,7 @@ jobs:
         id: images
         shell: bash
         run: |
-          images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt)
-          echo "images=$images" >> $GITHUB_OUTPUT
+          echo "images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt)" >> $GITHUB_OUTPUT
 
   pull-request-images:
     name: Pull Request Images
@@ -137,8 +136,7 @@ jobs:
         id: images
         shell: bash
         run: |
-          images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt)
-          echo "images=$images" >> $GITHUB_OUTPUT
+          echo "images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt)" >> $GITHUB_OUTPUT
 
   extract-images:
     name: Extract Images
@@ -151,9 +149,11 @@ jobs:
         id: extract-images
         shell: bash
         run: |
-          echo "${{ steps.default-images.outputs.images }}" > default.txt
-          echo "${{ steps.pull-request-images.outputs.images }}" > pull.txt
-          images=$(jq --compact-output --raw-input --null-input '[inputs]' < <(grep -vf default.txt pull.txt))
+          images=$(jq --null-input \
+              --argfile "${{ needs.default-images.outputs.images }}" \
+              --argfile "${{ needs.pull-request-images.outputs.images }}" \
+              '($f1 - $f2) + ($f2 - $f1)' \
+          )
           echo "images=${images}" >> $GITHUB_OUTPUT
           echo "${images}"
           echo "### Images" >> $GITHUB_STEP_SUMMARY
