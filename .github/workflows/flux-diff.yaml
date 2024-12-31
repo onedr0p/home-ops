@@ -14,6 +14,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  HOMEBREW_NO_ANALYTICS: "1"
+  UV_SYSTEM_PYTHON: "1"
+
 jobs:
   flux-diff:
     name: Flux Diff
@@ -46,32 +50,19 @@ jobs:
           ref: "${{ github.event.repository.default_branch }}"
           path: default
 
-      - name: Setup Workflow Tools
-        uses: jdx/mise-action@v2
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-        with:
-          mise_toml: |
-            [tools]
-            python = "latest"
-            "aqua:astral-sh/uv" = "latest"
-            "aqua:fluxcd/flux2" = "latest"
-            "aqua:helm/helm" = "latest"
-            "aqua:kubernetes-sigs/kustomize" = "latest"
-            "pipx:flux-local" = "latest"
-
       - name: Diff Resources
-        shell: bash
-        run: |
-          flux-local diff ${{ matrix.resources }} \
-              --unified 6 \
-              --path ${{ github.workspace }}/pull/kubernetes/main/flux \
-              --path-orig ${{ github.workspace }}/default/kubernetes/main/flux \
-              --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart" \
-              --limit-bytes 10000 \
-              --all-namespaces \
-              --sources "home-kubernetes" \
-              --output-file diff.patch
+        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1@sha256:3196af20e76a73149be83dc21b63a51e86d3c1fbb2764c2acb5f72d057484344
+        with:
+          args: >-
+            diff ${{ matrix.resources }}
+            --unified 6
+            --path /github/workspace/pull/kubernetes/main/flux
+            --path-orig /github/workspace/default/kubernetes/main/flux
+            --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
+            --limit-bytes 10000
+            --all-namespaces
+            --sources "home-kubernetes"
+            --output-file diff.patch
 
       - name: Generate Diff
         id: diff

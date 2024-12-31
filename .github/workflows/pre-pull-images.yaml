@@ -14,6 +14,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  HOMEBREW_NO_ANALYTICS: "1"
+  UV_SYSTEM_PYTHON: "1"
+
 jobs:
   default-images:
     name: Default Images
@@ -34,29 +38,15 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
           ref: "${{ github.event.repository.default_branch }}"
 
-      - name: Setup Workflow Tools
-        uses: jdx/mise-action@v2
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-        with:
-          mise_toml: |
-            [tools]
-            python = "latest"
-            "aqua:astral-sh/uv" = "latest"
-            "aqua:fluxcd/flux2" = "latest"
-            "aqua:helm/helm" = "latest"
-            "aqua:kubernetes-sigs/kustomize" = "latest"
-            "aqua:mikefarah/yq" = "latest"
-            "pipx:flux-local" = "latest"
-
       - name: Gather Images
-        shell: bash
-        run: |
-          flux-local get cluster \
-              --path ${{ github.workspace }}/kubernetes/main/flux \
-              --enable-images \
-              --output yaml \
-              --output-file images.yaml
+        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1@sha256:3196af20e76a73149be83dc21b63a51e86d3c1fbb2764c2acb5f72d057484344
+        with:
+          args: >-
+            get cluster
+            --path /github/workspace/kubernetes/main/flux
+            --enable-images
+            --output yaml
+            --output-file images.yaml
 
       - name: Filter Images
         shell: bash
@@ -89,29 +79,15 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Setup Workflow Tools
-        uses: jdx/mise-action@v2
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-        with:
-          mise_toml: |
-            [tools]
-            python = "latest"
-            "aqua:astral-sh/uv" = "latest"
-            "aqua:fluxcd/flux2" = "latest"
-            "aqua:helm/helm" = "latest"
-            "aqua:kubernetes-sigs/kustomize" = "latest"
-            "aqua:mikefarah/yq" = "latest"
-            "pipx:flux-local" = "latest"
-
       - name: Gather Images
-        shell: bash
-        run: |
-          flux-local get cluster \
-              --path ${{ github.workspace }}/kubernetes/main/flux \
-              --enable-images \
-              --output yaml \
-              --output-file images.yaml
+        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1@sha256:3196af20e76a73149be83dc21b63a51e86d3c1fbb2764c2acb5f72d057484344
+        with:
+          args: >-
+            get cluster
+            --path /github/workspace/kubernetes/main/flux
+            --enable-images
+            --output yaml
+            --output-file images.yaml
 
       - name: Filter Images
         shell: bash
@@ -162,14 +138,12 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
       - name: Setup Workflow Tools
-        uses: jdx/mise-action@v2
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-        with:
-          mise_toml: |
-            [tools]
-            "aqua:siderolabs/talos" = "latest"
+        shell: bash
+        run: brew install siderolabs/tap/talosctl
 
       - name: Pre-pull Image
         run: talosctl -n $NODE_IP image pull ${{ matrix.images }}
