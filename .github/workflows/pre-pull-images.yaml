@@ -14,14 +14,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  HOMEBREW_NO_ANALYTICS: "1"
+
 jobs:
-  extract-images:
-    name: Extract Images
+  default-images:
+    name: Default Images
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     outputs:
-      matrix: ${{ steps.extract-images.outputs.images }}
+      images: ${{ steps.extract-images.outputs.images }}
     steps:
       - name: Generate Token
         uses: actions/create-github-app-token@v1
@@ -30,70 +31,96 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
-      - name: Setup Workflow Tools
-        shell: bash
-        run: brew install jo yq
-
-      - name: Checkout Default Branch
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
           ref: "${{ github.event.repository.default_branch }}"
-          path: default
 
-      - name: Checkout Pull Request Branch
+      - name: Gather Images
+        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1@sha256:3196af20e76a73149be83dc21b63a51e86d3c1fbb2764c2acb5f72d057484344
+        with:
+          args: >-
+            get cluster
+            --path /github/workspace/kubernetes/main/flux
+            --enable-images
+            --output yaml
+            --output-file images.yaml
+
+      - name: Filter Images
+        shell: bash
+        run: |
+          yq -r '[.. | .images? | select(. != null)] | flatten | sort | unique | .[]' \
+              images.yaml > images.txt
+
+      - name: Extract Images
+        id: extract-images
+        shell: bash
+        run: |
+          images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt)
+          echo "images=${images}" >> $GITHUB_OUTPUT
+
+  pull-request-images:
+    name: Pull Request Images
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.extract-images.outputs.images }}
+    steps:
+      - name: Generate Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
-          path: pull
 
-      - name: Gather Images in Default Branch
-        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1
+      - name: Gather Images
+        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1@sha256:3196af20e76a73149be83dc21b63a51e86d3c1fbb2764c2acb5f72d057484344
         with:
           args: >-
             get cluster
-            --path /github/workspace/default/kubernetes/main/flux
+            --path /github/workspace/kubernetes/main/flux
             --enable-images
             --output yaml
-            --output-file default.yaml
+            --output-file images.yaml
 
-      - name: Gather Images in Pull Request Branch
-        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1
-        with:
-          args: >-
-            get cluster
-            --path /github/workspace/pull/kubernetes/main/flux
-            --enable-images
-            --output yaml
-            --output-file pull.yaml
-
-      - name: Filter Default Branch Results
+      - name: Filter Images
         shell: bash
         run: |
           yq -r '[.. | .images? | select(. != null)] | flatten | sort | unique | .[]' \
-              default.yaml > default.txt
+              images.yaml > images.txt
 
-      - name: Filter Pull Request Branch Results
+      - name: Extract Images
+        id: extract-images
         shell: bash
         run: |
-          yq -r '[.. | .images? | select(. != null)] | flatten | sort | unique | .[]' \
-              pull.yaml > pull.txt
+          images=$(jq --compact-output --raw-input --null-input '[inputs]' images.txt)
+          echo "images=${images}" >> $GITHUB_OUTPUT
 
+  extract-images:
+    name: Extract Images
+    runs-on: ubuntu-latest
+    needs: ["default-images", "pull-request-images"]
+    outputs:
+      matrix: ${{ steps.extract-images.outputs.images }}
+    steps:
       - name: Compare Default and Pull Request Images
         id: extract-images
         shell: bash
         run: |
-          images=$(jo -a $(grep -vf default.txt pull.txt))
+          images=$(jq --compact-output --null-input \
+              --argjson f1 '${{ needs.default-images.outputs.images }}' \
+              --argjson f2 '${{ needs.pull-request-images.outputs.images }}' \
+              '$f2 - $f1' \
+          )
           echo "images=${images}" >> $GITHUB_OUTPUT
-          echo "${images}"
-          echo "### Images" >> $GITHUB_STEP_SUMMARY
-          echo "${images}" | jq --raw-output 'to_entries[] | "* \(.value)"' >> $GITHUB_STEP_SUMMARY
 
   pre-pull-images:
-    if: ${{ needs.extract-images.outputs.matrix != '[]' }}
+    if: ${{ needs.extract-images.outputs.matrix != '[]' && fromJSON(needs.extract-images.outputs.matrix).length <= 8 }}
     name: Pre-pull Images
     runs-on: ["gha-runner-scale-set"]
     needs: ["extract-images"]
@@ -103,6 +130,13 @@ jobs:
       max-parallel: 4
       fail-fast: false
     steps:
+      - name: Generate Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
       - name: Setup Homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
