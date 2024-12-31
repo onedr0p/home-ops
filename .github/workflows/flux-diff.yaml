@@ -46,19 +46,34 @@ jobs:
           ref: "${{ github.event.repository.default_branch }}"
           path: default
 
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
       - name: Setup Workflow Tools
-        uses: jdx/mise-action@v2
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+        shell: bash
+        run: brew install fluxcd/tap/flux helm kustomize uv
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          mise_toml: |
-            [tools]
-            python = "3.12"
-            "uv" = "latest"
-            "pipx:flux-local" = "latest"
-            "aqua:fluxcd/flux2" = "latest"
-            "aqua:helm/helm" = "latest"
-            "aqua:kubernetes-sigs/kustomize" = "latest"
+          python-version: 3.12.x
+
+      - name: Install Python Dependencies
+        run: uv pip install flux-local
+
+      # - name: Setup Workflow Tools
+      #   uses: jdx/mise-action@v2
+      #   env:
+      #     GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+      #   with:
+      #     mise_toml: |
+      #       [tools]
+      #       python = "3.12"
+      #       "uv" = "latest"
+      #       "pipx:flux-local" = "latest"
+      #       "aqua:fluxcd/flux2" = "latest"
+      #       "aqua:helm/helm" = "latest"
+      #       "aqua:kubernetes-sigs/kustomize" = "latest"
 
       - name: Diff Resources
         shell: bash
