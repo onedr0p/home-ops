@@ -95,6 +95,6 @@ jobs:
     name: Flux Diff Successful
     runs-on: ubuntu-latest
     steps:
-      - if: ${{ !contains(needs.*.result, 'success') }}
+      - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
         name: Check matrix status
         run: exit 1
