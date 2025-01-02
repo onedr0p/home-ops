@@ -59,6 +59,7 @@ spec:
         ssl: false
         prometheusEndpoint: http://prometheus-operated.observability.svc.cluster.local:9090
       mgr:
+        allowMultiplePerNode: false
         modules:
           - name: insights
             enabled: true
@@ -66,6 +67,8 @@ spec:
             enabled: true
           - name: rook
             enabled: true
+      mon:
+        allowMultiplePerNode: false
       network:
         provider: host
         connections:
@@ -76,15 +79,6 @@ spec:
         devicePathFilter: /dev/disk/by-id/nvme-Micron_7450_MTFDKBA800TFS_.*
         config:
           osdsPerDevice: "1"
-      placement:
-        mgr: &placement
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-                - matchExpressions:
-                    - key: node-role.kubernetes.io/control-plane
-                      operator: Exists
-        mon: *placement
     cephBlockPools:
       - name: ceph-blockpool
         spec:
