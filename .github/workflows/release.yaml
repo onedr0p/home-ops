@@ -29,12 +29,16 @@ jobs:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         run: |
           # Retrieve previous release tag
-          previous_tag="$(gh release list --limit 1 | awk '{ print $1 }')"
-          previous_major="${previous_tag%%\.*}"
-          previous_minor="${previous_tag#*.}"
-          previous_minor="${previous_minor%.*}"
-          previous_patch="${previous_tag##*.}"
-          # Determine next release tag
+          previous_tag="$(gh release list --limit 1 --json tagName --jq '.[0].tagName')"
+          if [[ -z "${previous_tag}" ]]; then
+              echo "No previous release found. Starting with the first release of the year and month."
+              previous_tag="0.0.0"
+          fi
+          # Parse previous release tag into components
+          previous_major=$(cut -d. -f1 <<<"${previous_tag}")
+          previous_minor=$(cut -d. -f2 <<<"${previous_tag}")
+          previous_patch=$(cut -d. -f3 <<<"${previous_tag}")
+          # Determine next release tag components
           next_major_minor="$(date +'%Y').$(date +'%-m')"
           if [[ "${previous_major}.${previous_minor}" == "${next_major_minor}" ]]; then
               echo "Month release already exists for year, incrementing patch number by 1"
