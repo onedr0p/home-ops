@@ -59,11 +59,10 @@ jobs:
         with:
           github-token: "${{ steps.app-token.outputs.token }}"
           script: |
-            const releaseTag = ${{ steps.determine-next-tag.outputs.result }};
             await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: releaseTag,
+              tag_name: "${{ steps.determine-next-tag.outputs.result }}",
               name: releaseTag,
               generate_release_notes: true,
             });
