@@ -55,14 +55,8 @@ jobs:
             return `${nextMajorMinor}.${nextPatch}`;
 
       - name: Create Release
-        uses: actions/github-script@v7
+        uses: ncipollo/release-action@v1
         with:
-          github-token: "${{ steps.app-token.outputs.token }}"
-          script: |
-            await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: "${{ steps.determine-next-tag.outputs.result }}",
-              name: "${{ steps.determine-next-tag.outputs.result }}",
-              generate_release_notes: true,
-            });
+          generateReleaseNotes: true
+          tag: "${{ steps.determine-next-tag.outputs.result }}"
+          token: "${{ steps.app-token.outputs.token }}"
