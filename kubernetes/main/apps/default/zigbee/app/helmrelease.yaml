@@ -34,7 +34,7 @@ spec:
           app:
             image:
               repository: ghcr.io/koenkk/zigbee2mqtt
-              tag: 1.42.0@sha256:732ae43d714610040bd049487b60af3b2dbcfdefb5f169897455b60d715e2131
+              tag: 2.0.0@sha256:6105a3a01a66bbfb98909a7c309d0707ec7b41728ac15d399747077225231545
             env:
               TZ: America/New_York
               ZIGBEE2MQTT_DATA: /config
@@ -81,7 +81,9 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              capabilities:
+                drop: ["ALL"]
+                add: ["NET_BIND_SERVICE"]
             resources:
               requests:
                 cpu: 10m
