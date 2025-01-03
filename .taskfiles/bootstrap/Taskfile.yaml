@@ -27,7 +27,7 @@ tasks:
     preconditions:
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - which ls minijinja-cli sops talosctl
+      - which jq ls minijinja-cli sops talosctl
 
   apps:
     desc: Bootstrap Apps [CLUSTER=main]
@@ -60,7 +60,7 @@ tasks:
       vars: [CLUSTER, MODEL]
     preconditions:
       - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook.yaml.j2
-      - which kubectl minijinja-cli stern talosctl
+      - which jq kubectl minijinja-cli stern talosctl
 
   flux:
     desc: Bootstrap Flux [CLUSTER=main]
@@ -80,4 +80,4 @@ tasks:
       vars: [CLUSTER]
     preconditions:
       - op user get --me
-      - which curl flux kubectl ls op
+      - which curl flux jq kubectl ls op
