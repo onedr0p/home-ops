@@ -52,10 +52,10 @@ spec:
       type: kubernetes
       kubernetesModeWorkVolumeClaim:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: ceph-block
+        storageClassName: openebs-hostpath
         resources:
           requests:
-            storage: 20Gi
+            storage: 25Gi
     template:
       spec:
         containers:
@@ -73,8 +73,6 @@ spec:
               - mountPath: /var/run/secrets/talos.dev
                 name: talos
                 readOnly: true
-        securityContext:
-          fsGroup: 123
         serviceAccountName: actions-runner
         volumes:
           - name: talos
