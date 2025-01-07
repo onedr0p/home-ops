@@ -47,7 +47,7 @@ jobs:
           path: default
 
       - name: Diff Resources
-        uses: docker://ghcr.io/allenporter/flux-local:v6.1.1
+        uses: docker://ghcr.io/allenporter/flux-local:v7.0.0@sha256:abf237e31d20de26f8a4b08e588cc927cb0a9f0ecf90d04bada00f393b919354
         with:
           args: >-
             diff ${{ matrix.resources }}
@@ -65,15 +65,15 @@ jobs:
         run: |
           cat diff.patch;
           {
-            echo 'diff<<EOF'
-            cat diff.patch
-            echo EOF
+              echo 'diff<<EOF'
+              cat diff.patch
+              echo EOF
           } >> "$GITHUB_OUTPUT";
           {
-            echo "### Diff"
-            echo '```diff'
-            cat diff.patch
-            echo '```'
+              echo "### Diff"
+              echo '```diff'
+              cat diff.patch
+              echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - if: ${{ steps.diff.outputs.diff != '' }}

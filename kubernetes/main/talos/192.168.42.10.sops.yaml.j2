@@ -10,8 +10,6 @@ machine:
   certSANs: ["127.0.0.1", "192.168.42.120"]
   kubelet:
     image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
-    extraArgs:
-      rotate-server-certificates: "true"
     extraConfig:
       maxPods: 150
     extraMounts:
@@ -158,8 +156,6 @@ cluster:
     key: ENC[AES256_GCM,data:akOr7oagliAbfUX3mdd+D6Tn/7eME8v+3ls7/ja4zI0xltAdvh9pq4UL9PpAWiVOKE3jNC5vJHmMVCtJZRsIdt+kJbEBuRKX/bd6W4DXkd6Ri/cXikBkF0SSSrXME1L33UmrNcOT4jFGCsr3Qy10gIjalpmvI0bIHZxF0wFs2YWZneMbeLR+58GVUsFueEHSrnnVKkpd2ZPUM5w38RoQHfoWv8R7/T13dXofa9aSgPZ8HQ63NZF/8GslF6/82R22MWSLdXUHoUQhsSUmHbhDLQ5aSfGWMIiU2klmYI6kb48yTtm+9B5Xd0A4NtXTZQ8uBhkB/GGzmTJyx+vKmtPS2VFQGJpLh2IkaicVqr/GAc+r74Ahdxg4Vz5B0ueEFACew7plCAGUUz6UJ/tE++hy8w==,iv:3FbFJ09BPXA++YhtHbOuyR9tBziGFnKnazUX1sVklzM=,tag:bE6473jL29Xrx2I+MFvghA==,type:str]
   apiServer:
     image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
-    extraArgs:
-      feature-gates: AuthorizeNodeWithSelectors=false
     certSANs: ["127.0.0.1", "192.168.42.120"]
     disablePodSecurityPolicy: true
     auditPolicy:
@@ -182,6 +178,10 @@ cluster:
       kind: KubeSchedulerConfiguration
       profiles:
         - schedulerName: default-scheduler
+          plugins:
+            score:
+              disabled:
+                - name: ImageLocality
           pluginConfig:
             - name: PodTopologySpread
               args:
@@ -190,13 +190,6 @@ cluster:
                   - maxSkew: 1
                     topologyKey: kubernetes.io/hostname
                     whenUnsatisfiable: ScheduleAnyway
-  discovery:
-    enabled: true
-    registries:
-      kubernetes:
-        disabled: false
-      service:
-        disabled: true
   etcd:
     ca:
       crt: ENC[AES256_GCM,data:CNnfhUYEwXqryrg/k6F9LCethTV5mC5u+6h5wR0VNJIpTEuQCLuSXnLGOyzwpb7Vh1ppQ9484vRISG1daIbUwuISnIZ8E840wxTaMFC8yGTQW3LszwgQ6P/DGznJXbEaEDxLLj7E3hpxVivV7RW5YFo4pybhCGah7VA47Z3GAIxszl3Qh5MZmCPB2V8GUnURIgxl60wiZUGoAriTFzIJWfB0SXIcwUM09vT0g0AQW1nCqisISKYT09+Q5fdKs2AhKRc8LD6I1CNoXnzuQc0BenFt6oKCbzMnickjpLf2JWbO5V5hFCdigtAWUFqKgAJHA1fds1ehVkoO2cORe4a6igmC1Y9fCFSjuaDM91dtb75uPYu0nRzblyT67qGdE5T/TWzdO5UStccUXHJJxwHTtdK8NLOhO5kgOcLp2zmT27v3SglLm//EvSYyMhph19tkH7grDn2bUbt2PkqUrg7bf3GR4NE2AQ8ehnJ791FFAx5buUgDbodJMb+B4212HF++BD8NXDZVozuDAiaGtkTnwDT3RWzcm1F2RsGUpZDrs/Vr97W1W64ektxO8eGSXujRO8LhaPhcDb1J8gnqKGFo9xas3Gy0cDwRo1NG2svPdmsSDs5glQuBy/bcw3BLIkZPBW9M2xA9YlfjYSQkhJSjXLtO3wPjoX2YsgnmEskinOMl7fKa16Qe4Wg3aKbbGyPDePw4ZBr3MLUVMODHWAtQhOKpHl2Q+PBDgcBsHde49jHLA3iIQb4ic9AGCtcOiBkwrmPfwGA6/3Kq3R0cfw4Kmb/Uf8+t9nJl0mQVcq593fLLUjdPgXKQYQKUDx7oAP3c/PTVbBtXFPU1VVnXYiaZnvCwOkU7NVAmOaJPdNK4BocEB3lPbjAQYPDsCi28vfYVexOsywPOrCP5ucs8xT5Y5SZESbVLUsWs/TGOUbLI4x0fySK0rcwOWNMIlh8/6bhLlVb9Tsxp9NbhaTzUBAI9ED39Spk98TRCI4zruKoRCaaZCGzTcYuuizvW/Gp3/lFYNjZBbQ==,iv:pAf/7pi0GxQJRPzJJxN4qrrHzOWwu8+YSOZH+JWJlqo=,tag:xTU2uxtrpTDDyiqkoVmkVw==,type:str]
@@ -204,7 +197,7 @@ cluster:
     extraArgs:
       listen-metrics-urls: http://0.0.0.0:2381
     advertisedSubnets: ["192.168.42.0/24"]
-  allowSchedulingOnMasters: true
+  allowSchedulingOnControlPlanes: true
 sops:
   kms: []
   gcp_kms: []

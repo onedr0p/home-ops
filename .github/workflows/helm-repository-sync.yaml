@@ -16,6 +16,9 @@ on:
     branches: ["main"]
     paths: ["kubernetes/**/helmrelease.yaml"]
 
+env:
+  HOMEBREW_NO_ANALYTICS: "1"
+
 jobs:
   sync:
     name: Helm Repository Sync
@@ -32,14 +35,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
-          fetch-depth: 0
 
       - name: Setup Homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
       - name: Setup Workflow Tools
-        shell: bash
-        run: brew install fluxcd/tap/flux yq
+        run: brew install fluxcd/tap/flux
 
       - if: ${{ github.event.inputs.helmRepoNamespace == '' && github.event.inputs.helmRepoName == '' }}
         name: Get Changed Files
@@ -51,7 +52,6 @@ jobs:
 
       - if: ${{ github.event.inputs.helmRepoNamespace == '' && github.event.inputs.helmRepoName == '' }}
         name: Sync Helm Repository
-        shell: bash
         run: |
           declare -a repos=()
           for f in ${{ steps.changed-files.outputs.all_changed_and_modified_files }}; do
@@ -68,7 +68,6 @@ jobs:
 
       - if: ${{ github.event.inputs.helmRepoNamespace != '' && github.event.inputs.helmRepoName != '' }}
         name: Sync Helm Repository
-        shell: bash
         run: |
           flux --namespace ${{ github.event.inputs.helmRepoNamespace }} \
               reconcile source helm ${{ github.event.inputs.helmRepoName }} || true

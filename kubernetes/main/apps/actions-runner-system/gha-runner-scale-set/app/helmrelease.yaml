@@ -27,6 +27,8 @@ spec:
   dependsOn:
     - name: gha-runner-scale-set-controller
       namespace: actions-runner-system
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   valuesFrom:
     - targetPath: githubConfigSecret.github_app_id
       kind: Secret
@@ -47,15 +49,22 @@ spec:
     minRunners: 1
     maxRunners: 3
     containerMode:
-      type: dind
+      type: kubernetes
+      kubernetesModeWorkVolumeClaim:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: openebs-hostpath
+        resources:
+          requests:
+            storage: 25Gi
     template:
       spec:
-        automountServiceAccountToken: true
         containers:
           - name: runner
-            image: ghcr.io/onedr0p/actions-runner:2.321.0@sha256:3665cbbcd2a3b7e1626e6100a6924d316d501650b9863a24b5639aee68bdb110
+            image: ghcr.io/onedr0p/actions-runner:2.321.0@sha256:68a510e470e2c5b38ffc46e85823fdc36b721bf7af310f4d64fd93cd0e1e9184
             command: ["/home/runner/run.sh"]
             env:
+              - name: ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER
+                value: "false"
               - name: NODE_IP
                 valueFrom:
                   fieldRef:
