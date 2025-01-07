@@ -34,7 +34,7 @@ spec:
           app:
             image:
               repository: ghcr.io/onedr0p/home-assistant
-              tag: 2025.1.0@sha256:a3e6b1301107c5ca4dd3e1e7fa25edd0618acc9f812c75674cce7481fb05c759
+              tag: 2025.1.1@sha256:927198fc12979546cb68cf10a742255b6d5cf0f462958192182df86488ab1fe9
             env:
               TZ: America/New_York
               HASS_HTTP_TRUSTED_PROXY_1: 192.168.42.0/24
@@ -107,6 +107,10 @@ spec:
         existingClaim: home-assistant
         globalMounts:
           - path: /config
+      cache:
+        existingClaim: home-assistant-cache
+        globalMounts:
+          - path: /config/.venv
       logs:
         type: emptyDir
         globalMounts:
@@ -119,7 +123,3 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-      venv:
-        type: emptyDir
-        globalMounts:
-          - path: /config/.venv
