@@ -33,7 +33,8 @@ releases:
       - commonLabels:
           helm.toolkit.fluxcd.io/name: cilium
           helm.toolkit.fluxcd.io/namespace: kube-system
-    needs: ["observability/kube-prometheus-stack-crds"]
+    needs:
+      - observability/kube-prometheus-stack-crds
 
   - name: coredns
     namespace: kube-system
@@ -44,7 +45,8 @@ releases:
       - customLabels:
           helm.toolkit.fluxcd.io/name: coredns
           helm.toolkit.fluxcd.io/namespace: kube-system
-    needs: ["kube-system/cilium"]
+    needs:
+      - kube-system/cilium
 
   - name: spegel
     namespace: kube-system
@@ -56,4 +58,31 @@ releases:
       # - commonLabels:
       #     helm.toolkit.fluxcd.io/name: spegel
       #     helm.toolkit.fluxcd.io/namespace: kube-system
-    needs: ["kube-system/coredns"]
+    needs:
+      - kube-system/cilium
+
+  - name: flux
+    namespace: flux-system
+    chart: oci://ghcr.io/fluxcd-community/charts/flux2
+    version: 2.14.0
+    values:
+      - ../../apps/flux-system/flux/app/helm-values.yaml
+      - helmController:
+          labels:
+            helm.toolkit.fluxcd.io/name: flux
+            helm.toolkit.fluxcd.io/namespace: flux-system
+      - kustomizeController:
+          labels:
+            helm.toolkit.fluxcd.io/name: flux
+            helm.toolkit.fluxcd.io/namespace: flux-system
+      - notificationController:
+          labels:
+            helm.toolkit.fluxcd.io/name: flux
+            helm.toolkit.fluxcd.io/namespace: flux-system
+      - sourceController:
+          labels:
+            helm.toolkit.fluxcd.io/name: flux
+            helm.toolkit.fluxcd.io/namespace: flux-system
+    needs:
+      - kube-system/coredns
+      - kube-system/spegel

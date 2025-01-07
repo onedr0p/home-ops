@@ -1,0 +1,69 @@
+---
+helmController:
+  container:
+    additionalArgs:
+      # Increase the number of workers and limits
+      # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#increase-the-number-of-workers-and-limits
+      - --concurrent=10
+      - --requeue-dependency=5s
+      # Flux near OOM detection for Helm
+      # Ref: https://fluxcd.io/flux/installation/configuration/helm-oom-detection/
+      - --feature-gates=OOMWatch=true
+      - --oom-watch-memory-threshold=95
+      - --oom-watch-interval=500ms
+  resources:
+    requests:
+      cpu: 100m
+    limits:
+      memory: 2Gi
+
+imageAutomationController:
+  create: false
+
+imageReflectionController:
+  create: false
+
+kustomizeController:
+  container:
+    additionalArgs:
+      # Increase the number of workers and limits
+      # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#increase-the-number-of-workers-and-limits
+      - --concurrent=10
+      - --requeue-dependency=5s
+  resources:
+    requests:
+      cpu: 100m
+    limits:
+      memory: 2Gi
+
+notificationController:
+  resources:
+    requests:
+      cpu: 100m
+    limits:
+      memory: 2Gi
+
+sourceController:
+  container:
+    additionalArgs:
+      # Enable Helm repositories caching
+      # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#enable-helm-repositories-caching
+      - --helm-cache-max-size=10
+      - --helm-cache-ttl=60m
+      - --helm-cache-purge-interval=5m
+      # Increase the number of workers and limits
+      # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#increase-the-number-of-workers-and-limits
+      - --concurrent=10
+      - --requeue-dependency=5s
+  resources:
+    requests:
+      cpu: 100m
+    limits:
+      memory: 2Gi
+
+policies:
+  create: false
+
+prometheus:
+  podMonitor:
+    create: true
