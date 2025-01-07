@@ -30,9 +30,6 @@ releases:
     version: 1.16.5
     values:
       - ../../apps/kube-system/cilium/app/helm-values.yaml
-      - commonLabels:
-          helm.toolkit.fluxcd.io/name: cilium
-          helm.toolkit.fluxcd.io/namespace: kube-system
     needs:
       - observability/kube-prometheus-stack-crds
 
@@ -42,9 +39,6 @@ releases:
     version: 1.37.0
     values:
       - ../../apps/kube-system/coredns/app/helm-values.yaml
-      - customLabels:
-          helm.toolkit.fluxcd.io/name: coredns
-          helm.toolkit.fluxcd.io/namespace: kube-system
     needs:
       - kube-system/cilium
 
@@ -54,10 +48,6 @@ releases:
     version: v0.0.28
     values:
       - ../../apps/kube-system/spegel/app/helm-values.yaml
-      # TODO: https://github.com/spegel-org/spegel/pull/678
-      # - commonLabels:
-      #     helm.toolkit.fluxcd.io/name: spegel
-      #     helm.toolkit.fluxcd.io/namespace: kube-system
     needs:
       - kube-system/cilium
 
@@ -67,22 +57,6 @@ releases:
     version: 2.14.0
     values:
       - ../../apps/flux-system/flux/app/helm-values.yaml
-      - helmController:
-          labels:
-            helm.toolkit.fluxcd.io/name: flux
-            helm.toolkit.fluxcd.io/namespace: flux-system
-      - kustomizeController:
-          labels:
-            helm.toolkit.fluxcd.io/name: flux
-            helm.toolkit.fluxcd.io/namespace: flux-system
-      - notificationController:
-          labels:
-            helm.toolkit.fluxcd.io/name: flux
-            helm.toolkit.fluxcd.io/namespace: flux-system
-      - sourceController:
-          labels:
-            helm.toolkit.fluxcd.io/name: flux
-            helm.toolkit.fluxcd.io/namespace: flux-system
     needs:
       - kube-system/coredns
       - kube-system/spegel
