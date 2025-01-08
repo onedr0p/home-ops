@@ -48,6 +48,7 @@ jobs:
 
       - name: Create GitRepository
         run: |
+          yq -i 'del(. | select(di == 0))' ./default/kubernetes/main/flux/config/cluster.yaml
           CONTENT=$(cat <<EOF
           ---
           apiVersion: source.toolkit.fluxcd.io/v1
