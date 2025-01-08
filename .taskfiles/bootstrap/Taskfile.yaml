@@ -29,6 +29,26 @@ tasks:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - which jq ls minijinja-cli sops talosctl
 
+  # NOTE: Nodes must all be part of the Ceph cluster and Ceph disks must share the same disk model
+  rook:
+    desc: Bootstrap Rook-Ceph [CLUSTER=main] [MODEL=required]
+    cmds:
+      - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
+      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook.yaml.j2 | kubectl apply --server-side --filename -
+      - until kubectl --namespace default get job/wipe-rook &>/dev/null; do sleep 5; done
+      - kubectl --namespace default wait job/wipe-rook --for=condition=complete --timeout=5m
+      - stern --namespace default job/wipe-rook --no-follow
+      - kubectl --namespace default delete job wipe-rook
+    env:
+      MODEL: '{{.MODEL}}'
+      NODE_COUNT:
+        sh: talosctl config info --output json | jq --raw-output '.nodes | length'
+    requires:
+      vars: [CLUSTER, MODEL]
+    preconditions:
+      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook.yaml.j2
+      - which jq kubectl minijinja-cli stern talosctl
+
   apps:
     desc: Bootstrap Apps [CLUSTER=main]
     cmds:
@@ -52,22 +72,3 @@ tasks:
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - test -f {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml
       - which curl flux jq helmfile kubectl op
-
-  # NOTE: Nodes must all be part of the Ceph cluster and Ceph disks must share the same disk model
-  rook:
-    desc: Bootstrap Rook-Ceph [CLUSTER=main] [MODEL=required]
-    cmds:
-      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook.yaml.j2 | kubectl apply --server-side --filename -
-      - until kubectl --namespace default get job/wipe-rook &>/dev/null; do sleep 5; done
-      - kubectl --namespace default wait job/wipe-rook --for=condition=complete --timeout=5m
-      - stern --namespace default job/wipe-rook --no-follow
-      - kubectl --namespace default delete job wipe-rook
-    env:
-      MODEL: '{{.MODEL}}'
-      NODE_COUNT:
-        sh: talosctl config info --output json | jq --raw-output '.nodes | length'
-    requires:
-      vars: [CLUSTER, MODEL]
-    preconditions:
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook.yaml.j2
-      - which jq kubectl minijinja-cli stern talosctl
