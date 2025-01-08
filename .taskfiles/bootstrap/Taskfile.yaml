@@ -47,7 +47,6 @@ tasks:
   rook:
     desc: Bootstrap Rook-Ceph [CLUSTER=main] [MODEL=required]
     cmds:
-      - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
       - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook.yaml.j2 | kubectl apply --server-side --filename -
       - until kubectl --namespace default get job/wipe-rook &>/dev/null; do sleep 5; done
       - kubectl --namespace default wait job/wipe-rook --for=condition=complete --timeout=5m
