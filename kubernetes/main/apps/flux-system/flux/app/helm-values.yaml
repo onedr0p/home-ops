@@ -1,6 +1,11 @@
 ---
+# Graceful Helmfile to HelmRelease takeover
+x-shared-labels: &labels
+  helm.toolkit.fluxcd.io/name: flux
+  helm.toolkit.fluxcd.io/namespace: flux-system
+
 crds:
-  annotations: 
+  annotations:
     helm.sh/resource-policy: keep
 
 helmController:
@@ -15,6 +20,7 @@ helmController:
       - --feature-gates=OOMWatch=true
       - --oom-watch-memory-threshold=95
       - --oom-watch-interval=500ms
+  labels: *labels
   resources:
     requests:
       cpu: 100m
@@ -34,6 +40,7 @@ kustomizeController:
       # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#increase-the-number-of-workers-and-limits
       - --concurrent=10
       - --requeue-dependency=5s
+  labels: *labels
   resources:
     requests:
       cpu: 100m
@@ -41,6 +48,7 @@ kustomizeController:
       memory: 2Gi
 
 notificationController:
+  labels: *labels
   resources:
     requests:
       cpu: 100m
@@ -48,6 +56,7 @@ notificationController:
       memory: 2Gi
 
 sourceController:
+  labels: *labels
   container:
     additionalArgs:
       # Enable Helm repositories caching
