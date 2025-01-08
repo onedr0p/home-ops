@@ -33,15 +33,25 @@ tasks:
     desc: Bootstrap Apps [CLUSTER=main]
     cmds:
       - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
+      - for: { var: TEMPLATES }
+        cmd: op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking -- minijinja-cli {{.ITEM}} | kubectl apply --server-side --filename -
       - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
       - until kubectl wait nodes --for=condition=Ready --all --timeout=10m; do sleep 5; done
+    vars:
+      TEMPLATES:
+        sh: ls {{.CLUSTER_DIR}}/bootstrap/apps/*.j2
+    env:
+      VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
+      FLUX_GITHUB_PUBLIC_KEYS:
+        sh: curl -fsSL https://api.github.com/meta | jq --raw-output '"github.com "+.ssh_keys[]'
     requires:
       vars: [CLUSTER]
     preconditions:
+      - op user get --me
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - test -f {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml
-      - which helmfile kubectl
+      - which curl flux jq helmfile kubectl op
 
   # NOTE: Nodes must all be part of the Ceph cluster and Ceph disks must share the same disk model
   rook:
@@ -61,22 +71,3 @@ tasks:
     preconditions:
       - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook.yaml.j2
       - which jq kubectl minijinja-cli stern talosctl
-
-  flux:
-    desc: Bootstrap Flux [CLUSTER=main]
-    cmds:
-      - for: { var: TEMPLATES }
-        cmd: op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking -- minijinja-cli {{.ITEM}} | kubectl apply --server-side --filename -
-      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/flux/config
-    vars:
-      TEMPLATES:
-        sh: ls {{.CLUSTER_DIR}}/bootstrap/apps/*.j2
-    env:
-      VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
-      FLUX_GITHUB_PUBLIC_KEYS:
-        sh: curl -fsSL https://api.github.com/meta | jq --raw-output '"github.com "+.ssh_keys[]'
-    requires:
-      vars: [CLUSTER]
-    preconditions:
-      - op user get --me
-      - which curl flux jq kubectl ls op
