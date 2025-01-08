@@ -50,23 +50,11 @@ jobs:
         run: |
           CONTENT=$(cat <<EOF
           ---
+          apiVersion: source.toolkit.fluxcd.io/v1
           kind: GitRepository
           metadata:
             name: home-kubernetes
             namespace: flux-system
-          spec:
-            interval: 30m
-            url: ssh://git@github.com/onedr0p/home-ops
-            ref:
-              branch: main
-            secretRef:
-              name: github-deploy-key
-            ignore: |
-              # exclude all
-              /*
-              # include dirs
-              !/kubernetes/main
-              !/kubernetes/shared
           EOF
           )
           echo "${CONTENT}" | \
