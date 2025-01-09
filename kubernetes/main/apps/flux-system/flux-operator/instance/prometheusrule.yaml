@@ -3,30 +3,28 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: flux-rules
+  name: flux-instance-rules
   namespace: flux-system
 spec:
   groups:
-    - name: flux.rules
+    - name: flux-instance.rules
       rules:
-        - alert: FluxComponentAbsent
-          annotations:
-            summary: Flux component has disappeared from Prometheus target discovery.
-          expr: |
-            absent(up{job=~".*flux-system.*"} == 1)
+        - alert: FluxInstanceAbsent
+          expr: absent(flux_instance_info{exported_namespace="flux-system", name="flux"})
           for: 15m
+          annotations:
+            summary: Flux instance metric is missing
+            description: |
+              The flux_instance_info metric for the Flux instance in namespace {{ $labels.exported_namespace }} is not available.
           labels:
             severity: critical
-        - alert: FluxReconciliationFailure
-          annotations:
-            summary: >-
-              {{ $labels.kind }} {{ $labels.namespace }}/{{ $labels.name }} reconciliation
-              has been failing for more than 15 minutes.
-          expr: |
-            max(gotk_reconcile_condition{status="False",type="Ready"}) by (namespace, name, kind)
-              +
-            on(namespace, name, kind) (max(gotk_reconcile_condition{status="Deleted"})
-              by (namespace, name, kind)) * 2 == 1
+        - alert: FluxInstanceNotReady
+          expr: flux_instance_info{exported_namespace="flux-system", name="flux", ready!="True"}
           for: 15m
+          annotations:
+            summary: Flux instance {{ $labels.name }} is not ready
+            description: |
+              The Flux instance in namespace {{ $labels.exported_namespace }} is not ready.
+              Reason: {{ $labels.reason }}
           labels:
             severity: critical
