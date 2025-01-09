@@ -6,7 +6,6 @@ kubeVersion: v1.32.0
 
 helmDefaults:
   force: true
-  recreatePods: true
   timeout: 600
   wait: true
   waitForJobs: true
@@ -23,8 +22,6 @@ releases:
     namespace: observability
     chart: oci://ghcr.io/prometheus-community/charts/prometheus-operator-crds
     version: 17.0.2
-    labels:
-      tier: core
 
   - name: cilium
     namespace: kube-system
@@ -34,8 +31,6 @@ releases:
       - ../../apps/kube-system/cilium/app/helm-values.yaml
     needs:
       - observability/kube-prometheus-stack-crds
-    labels:
-      tier: core
 
   - name: coredns
     namespace: kube-system
@@ -45,8 +40,6 @@ releases:
       - ../../apps/kube-system/coredns/app/helm-values.yaml
     needs:
       - kube-system/cilium
-    labels:
-      tier: core
 
   - name: spegel
     namespace: kube-system
@@ -56,8 +49,24 @@ releases:
       - ../../apps/kube-system/spegel/app/helm-values.yaml
     needs:
       - kube-system/cilium
-    labels:
-      tier: core
+
+  - name: wipe-rook
+    namespace: default
+    chart: oci://ghcr.io/bjw-s/helm/app-template
+    version: 3.6.0
+    values:
+      - wipe-rook-values.yaml
+      - controllers:
+          main:
+            job:
+              parallelism: {{ requiredEnv "NODE_COUNT" }}
+            containers:
+              disk:
+                env:
+                  MODEL: '{{ requiredEnv "MODEL" }}'
+    needs:
+      - kube-system/coredns
+      - kube-system/spegel
 
   - name: flux-operator
     namespace: flux-system
@@ -66,10 +75,7 @@ releases:
     values:
       - ../../apps/flux-system/flux-operator/app/helm-values.yaml
     needs:
-      - kube-system/coredns
-      - kube-system/spegel
-    labels:
-      tier: core
+      - default/wipe-rook
 
   - name: flux-instance
     namespace: flux-system
@@ -80,5 +86,3 @@ releases:
       - ../../apps/flux-system/flux-operator/instance/helm-values.yaml
     needs:
       - flux-system/flux-operator
-    labels:
-      tier: apps

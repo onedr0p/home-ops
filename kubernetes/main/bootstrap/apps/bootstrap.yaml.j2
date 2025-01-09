@@ -1,0 +1,64 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: external-secrets
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: onepassword-connect-secret
+  namespace: external-secrets
+stringData:
+  1password-credentials.json: {{ ENV.ONEPASSWORD_CREDENTIALS }}
+  token: {{ ENV.ONEPASSWORD_CONNECT_TOKEN }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flux-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-deploy-key
+  namespace: flux-system
+stringData:
+  identity: |
+    {{ ENV.FLUX_GITHUB_DEPLOY_KEY | indent(4) }}
+  known_hosts: |
+    {{ ENV.FLUX_GITHUB_PUBLIC_KEYS | indent(4) }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sops-age
+  namespace: flux-system
+stringData:
+  age.agekey: {{ ENV.FLUX_SOPS_PRIVATE_KEY | indent(4) }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: network
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: devbu-io-tls
+  namespace: network
+  annotations:
+    cert-manager.io/alt-names: '*.devbu.io,devbu.io'
+    cert-manager.io/certificate-name: devbu-io
+    cert-manager.io/common-name: devbu.io
+    cert-manager.io/ip-sans: ""
+    cert-manager.io/issuer-group: ""
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-production
+    cert-manager.io/uri-sans: ""
+  labels:
+    controller.cert-manager.io/fao: "true"
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ ENV.INGRESS_NGINX_TLS_CRT }}
+  tls.key: {{ ENV.INGRESS_NGINX_TLS_KEY }}
