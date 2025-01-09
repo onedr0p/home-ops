@@ -3,14 +3,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app flux
+  name: &app flux-operator
   namespace: flux-system
 spec:
   targetNamespace: flux-system
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/main/apps/flux-system/flux/app
+  path: ./kubernetes/main/apps/flux-system/flux-operator/app
   prune: false # never should be deleted
   sourceRef:
     kind: GitRepository
@@ -23,7 +23,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app flux-github
+  name: &app flux-instance
   namespace: flux-system
 spec:
   targetNamespace: flux-system
@@ -31,9 +31,9 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: external-secrets-stores
-  path: ./kubernetes/main/apps/flux-system/flux/github
-  prune: false # revert to true
+    - name: flux-operator
+  path: ./kubernetes/main/apps/flux-system/flux-operator/instance
+  prune: false # never should be deleted
   sourceRef:
     kind: GitRepository
     name: home-kubernetes

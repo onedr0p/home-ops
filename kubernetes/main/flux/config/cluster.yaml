@@ -1,24 +1,4 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/gitrepository_v1.json
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
-metadata:
-  name: home-kubernetes
-  namespace: flux-system
-spec:
-  interval: 30m
-  url: ssh://git@github.com/onedr0p/home-ops
-  ref:
-    branch: main
-  secretRef:
-    name: github-deploy-key
-  ignore: |
-    # exclude all
-    /*
-    # include dirs
-    !/kubernetes/main
-    !/kubernetes/shared
----
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -33,20 +13,43 @@ spec:
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cluster
+  name: cluster-settings
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./kubernetes/main/flux/settings
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: home-kubernetes
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cluster-apps
   namespace: flux-system
 spec:
   interval: 30m
   dependsOn:
     - name: cluster-shared
-  path: ./kubernetes/main/flux
-  prune: false # revert to true
-  wait: false
+    - name: cluster-settings
+  path: ./kubernetes/main/apps
+  prune: true
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
@@ -62,3 +65,26 @@ spec:
       - name: cluster-secrets
         kind: Secret
         optional: true
+  patches:
+    - patch: |-
+        apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: not-used
+        spec:
+          decryption:
+            provider: sops
+            secretRef:
+              name: sops-age
+          postBuild:
+            substituteFrom:
+              - name: cluster-settings
+                kind: ConfigMap
+                optional: true
+              - name: cluster-secrets
+                kind: Secret
+                optional: true
+      target:
+        group: kustomize.toolkit.fluxcd.io
+        kind: Kustomization
+        labelSelector: substitution.flux.home.arpa/disabled notin (true)

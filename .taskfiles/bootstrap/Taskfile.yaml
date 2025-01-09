@@ -2,9 +2,6 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
-vars:
-  BOOTSTRAP_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/bootstrap/resources'
-
 tasks:
 
   talos:
@@ -27,56 +24,30 @@ tasks:
     preconditions:
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - which jq ls minijinja-cli sops talosctl
+      - which jq minijinja-cli sops talosctl
 
   apps:
-    desc: Bootstrap Apps [CLUSTER=main]
+    desc: Bootstrap Apps [CLUSTER=main] [MODEL=required]
+    prompt: Bootstrap apps into the Talos cluster?
     cmds:
       - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
+      - op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking -- minijinja-cli {{.CLUSTER_DIR}}/bootstrap/apps/templates/resources.yaml.j2 | kubectl apply --server-side --filename -
       - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
-      - until kubectl wait nodes --for=condition=Ready --all --timeout=10m; do sleep 5; done
-    requires:
-      vars: [CLUSTER]
-    preconditions:
-      - talosctl config info
-      - test -f {{.CLUSTER_DIR}}/talosconfig
-      - test -f {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml
-      - which helmfile kubectl
-
-  # NOTE: Nodes must all be part of the Ceph cluster and Ceph disks must share the same disk model
-  rook:
-    desc: Bootstrap Rook-Ceph [CLUSTER=main] [MODEL=required]
-    cmds:
-      - minijinja-cli {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook.yaml.j2 | kubectl apply --server-side --filename -
-      - until kubectl --namespace default get job/wipe-rook &>/dev/null; do sleep 5; done
-      - kubectl --namespace default wait job/wipe-rook --for=condition=complete --timeout=5m
-      - stern --namespace default job/wipe-rook --no-follow
-      - kubectl --namespace default delete job wipe-rook
+      - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml destroy --selector release=wipe-rook
     env:
+      FLUX_GITHUB_PUBLIC_KEYS:
+        sh: curl -fsSL https://api.github.com/meta | jq --raw-output '"github.com "+.ssh_keys[]'
       MODEL: '{{.MODEL}}'
       NODE_COUNT:
         sh: talosctl config info --output json | jq --raw-output '.nodes | length'
+      VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
     requires:
       vars: [CLUSTER, MODEL]
     preconditions:
-      - test -f {{.BOOTSTRAP_RESOURCES_DIR}}/wipe-rook.yaml.j2
-      - which jq kubectl minijinja-cli stern talosctl
-
-  flux:
-    desc: Bootstrap Flux [CLUSTER=main]
-    cmds:
-      - for: { var: TEMPLATES }
-        cmd: op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking -- minijinja-cli {{.ITEM}} | kubectl apply --server-side --filename -
-      - kubectl apply --server-side --kustomize {{.CLUSTER_DIR}}/flux/config
-    vars:
-      TEMPLATES:
-        sh: ls {{.CLUSTER_DIR}}/bootstrap/apps/*.j2
-    env:
-      VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
-      FLUX_GITHUB_PUBLIC_KEYS:
-        sh: curl -fsSL https://api.github.com/meta | jq --raw-output '"github.com "+.ssh_keys[]'
-    requires:
-      vars: [CLUSTER]
-    preconditions:
       - op user get --me
-      - which curl flux jq kubectl ls op
+      - talosctl config info
+      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - test -f {{.CLUSTER_DIR}}/bootstrap/apps/helmfile.yaml
+      - test -f {{.CLUSTER_DIR}}/bootstrap/apps/templates/resources.yaml.j2
+      - test -f {{.CLUSTER_DIR}}/bootstrap/apps/templates/wipe-rook.yaml.gotmpl
+      - which curl jq helmfile kubectl op talosctl

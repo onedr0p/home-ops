@@ -1,12 +1,8 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/helmfile
 
-# renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
-kubeVersion: v1.32.0
-
 helmDefaults:
   force: true
-  recreatePods: true
   timeout: 600
   wait: true
   waitForJobs: true
@@ -49,14 +45,32 @@ releases:
     values:
       - ../../apps/kube-system/spegel/app/helm-values.yaml
     needs:
-      - kube-system/cilium
-
-  - name: flux
-    namespace: flux-system
-    chart: oci://ghcr.io/fluxcd-community/charts/flux2
-    version: 2.14.1
-    values:
-      - ../../apps/flux-system/flux/app/helm-values.yaml
-    needs:
       - kube-system/coredns
+
+  - name: wipe-rook
+    namespace: kube-system
+    chart: oci://ghcr.io/bjw-s/helm/app-template
+    version: 3.6.0
+    values:
+      - ./templates/wipe-rook.yaml.gotmpl
+    needs:
       - kube-system/spegel
+
+  - name: flux-operator
+    namespace: flux-system
+    chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
+    version: 0.12.0
+    values:
+      - ../../apps/flux-system/flux-operator/app/helm-values.yaml
+    needs:
+      - kube-system/wipe-rook
+
+  - name: flux-instance
+    namespace: flux-system
+    chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
+    version: 0.12.0
+    wait: false
+    values:
+      - ../../apps/flux-system/flux-operator/instance/helm-values.yaml
+    needs:
+      - flux-system/flux-operator
