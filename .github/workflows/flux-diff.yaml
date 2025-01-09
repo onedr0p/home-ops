@@ -46,23 +46,6 @@ jobs:
           ref: "${{ github.event.repository.default_branch }}"
           path: default
 
-      - name: Create GitRepository
-        run: |
-          yq -i 'del(. | select(di == 0))' ./default/kubernetes/main/flux/config/cluster.yaml
-          CONTENT=$(cat <<EOF
-          ---
-          apiVersion: source.toolkit.fluxcd.io/v1
-          kind: GitRepository
-          metadata:
-            name: home-kubernetes
-            namespace: flux-system
-          EOF
-          )
-          echo "${CONTENT}" | \
-              tee -a \
-              ./pull/kubernetes/main/flux/config/cluster.yaml \
-              ./default/kubernetes/main/flux/config/cluster.yaml
-
       - name: Diff Resources
         uses: docker://ghcr.io/allenporter/flux-local:v7.0.0@sha256:abf237e31d20de26f8a4b08e588cc927cb0a9f0ecf90d04bada00f393b919354
         with:
