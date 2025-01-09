@@ -6,13 +6,17 @@ controllers:
       helm.sh/hook-delete-policy: "before-hook-creation"
     job:
       backoffLimit: 0
+      parallelism: {{ requiredEnv "NODE_COUNT" }}
     initContainers:
       data:
         image:
           repository: docker.io/library/alpine
           tag: latest
-        command: ["/bin/sh", "-c"]
-        args: ["rm -rf /mnt/host_var/lib/rook"]
+        command:
+          - /bin/sh
+          - -c
+        args:
+          - rm -rf /mnt/host_var/lib/rook
         securityContext:
           privileged: true
     containers:
@@ -20,7 +24,11 @@ controllers:
         image:
           repository: docker.io/library/alpine
           tag: latest
-        command: ["/bin/sh", "-c"]
+        env:
+          MODEL: {{ requiredEnv "MODEL" | quote }}
+        command:
+          - /bin/sh
+          - -c
         args:
           - |
             apk add --no-cache findutils nvme-cli;
