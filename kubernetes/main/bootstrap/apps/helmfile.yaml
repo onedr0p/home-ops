@@ -1,9 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/helmfile
 
-# renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
-kubeVersion: v1.32.0
-
 helmDefaults:
   force: true
   timeout: 600
@@ -48,7 +45,7 @@ releases:
     values:
       - ../../apps/kube-system/spegel/app/helm-values.yaml
     needs:
-      - kube-system/cilium
+      - kube-system/coredns
 
   - name: wipe-rook
     namespace: default
@@ -65,7 +62,6 @@ releases:
                 env:
                   MODEL: '{{ requiredEnv "MODEL" }}'
     needs:
-      - kube-system/coredns
       - kube-system/spegel
 
   - name: flux-operator
