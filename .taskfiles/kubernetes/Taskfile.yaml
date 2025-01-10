@@ -5,7 +5,7 @@ version: '3'
 tasks:
 
   ks-*:
-    desc: Apply a Flux KS for a cluster [CLUSTER=main] [PATH=required]
+    desc: Apply a Flux KS for a cluster [PATH=required]
     cmd: >
       flux build --namespace flux-system ks {{base .PATH}}
       --kustomization-file {{.CLUSTER_DIR}}/apps/{{.PATH}}/ks.yaml
@@ -13,7 +13,7 @@ tasks:
       | yq 'with(select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization"); .metadata.namespace = "flux-system")' -
       | kubectl {{.OPERATION}} {{if eq .OPERATION "apply"}}--server-side  --field-manager=kustomize-controller{{end}} --filename -
     requires:
-      vars: [CLUSTER, PATH]
+      vars: [PATH]
     vars:
       OPERATION: '{{index .MATCH 0}}'
       KUSTOMIZATION:
@@ -23,53 +23,47 @@ tasks:
       - which flux kubectl yq
 
   browse-pvc:
-    desc: Mount a PVC to an temp container [CLUSTER=main] [NS=default] [CLAIM=required]
+    desc: Mount a PVC to an temp container [NS=default] [CLAIM=required]
     interactive: true
     cmd: kubectl browse-pvc --namespace {{.NS}} --image docker.io/library/alpine:latest {{.CLAIM}}
     vars:
       NS: '{{.NS | default "default"}}'
     requires:
-      vars: [CLUSTER, CLAIM]
+      vars: [CLAIM]
     preconditions:
       - kubectl --namespace {{.NS}} get persistentvolumeclaims {{.CLAIM}}
       - kubectl browse-pvc --version
       - which kubectl
 
   sync-secrets:
-    desc: Sync all ExternalSecrets [CLUSTER=main]
+    desc: Sync all ExternalSecrets
     cmds:
       - for: { var: SECRETS, split: "\n" }
         cmd: kubectl --namespace {{splitList "," .ITEM | first}} annotate externalsecret {{splitList "," .ITEM | last}} force-sync="{{now | unixEpoch}}" --overwrite
     vars:
       SECRETS:
         sh: kubectl get externalsecret --all-namespaces --no-headers --output=jsonpath='{range .items[*]}{.metadata.namespace},{.metadata.name}{"\n"}{end}'
-    requires:
-      vars: [CLUSTER]
     preconditions:
       - which kubectl
 
   cleanse-pods:
-    desc: Cleanse pods with a Failed/Pending/Succeeded phase [CLUSTER=main]
+    desc: Cleanse pods with a Failed/Pending/Succeeded phase
     cmds:
       - for:
           matrix:
             PHASE: [Failed, Pending, Succeeded]
         cmd: kubectl delete pods --all-namespaces --field-selector status.phase={{.ITEM.PHASE}} --ignore-not-found=true
-    requires:
-      vars: [CLUSTER]
     preconditions:
       - which kubectl
 
   # https://docs.github.com/en/enterprise-cloud@latest/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/deploying-runner-scale-sets-with-actions-runner-controller#upgrading-arc
   upgrade-arc:
-    desc: Upgrade the ARC [CLUSTER=main]
+    desc: Upgrade the ARC
     cmds:
       - helm -n actions-runner-system uninstall gha-runner-scale-set
       - helm -n actions-runner-system uninstall gha-runner-scale-set-controller
       - sleep 5
       - flux -n actions-runner-system reconcile hr gha-runner-scale-set-controller
       - flux -n actions-runner-system reconcile hr gha-runner-scale-set
-    requires:
-      vars: [CLUSTER]
     preconditions:
       - which flux helm
