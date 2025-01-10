@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./externalsecret.yaml
+  - ./helmrelease.yaml
+  - ../../../../templates/volsync
+configMapGenerator:
+  - name: recyclarr-configmap
+    files:
+      - recyclarr.yml=./resources/recyclarr.yml
+generatorOptions:
+  disableNameSuffixHash: true

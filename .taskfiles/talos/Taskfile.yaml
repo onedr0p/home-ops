@@ -5,27 +5,27 @@ version: '3'
 tasks:
 
   apply-node:
-    desc: Apply Talos config to a node [CLUSTER=main] [IP=required]
-    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
+    desc: Apply Talos config to a node [IP=required]
+    dotenv: ['{{.BOOTSTRAP_DIR}}/.cluster.env']
     cmds:
       - task: down
-      - sops exec-file --input-type yaml --output-type yaml {{.CLUSTER_DIR}}/talos/{{.IP}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.IP}} apply-config --mode={{.MODE}} --file /dev/stdin
+      - sops exec-file --input-type yaml --output-type yaml {{.BOOTSTRAP_DIR}}/talos/{{.IP}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.IP}} apply-config --mode={{.MODE}} --file /dev/stdin
       - talosctl --nodes {{.IP}} health
       - task: up
     vars:
       MODE: '{{.MODE | default "auto"}}'
     requires:
-      vars: [CLUSTER, IP]
+      vars: [IP]
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
-      - test -f {{.CLUSTER_DIR}}/cluster.env
-      - test -f {{.CLUSTER_DIR}}/talos/{{.IP}}.sops.yaml.j2
+      - test -f {{.BOOTSTRAP_DIR}}/.cluster.env
+      - test -f {{.BOOTSTRAP_DIR}}/talos/{{.IP}}.sops.yaml.j2
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - which minijinja-cli sops talosctl
 
   upgrade-node:
-    desc: Upgrade Talos on a single node [CLUSTER=main] [IP=required]
-    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
+    desc: Upgrade Talos on a single node [IP=required]
+    dotenv: ['{{.BOOTSTRAP_DIR}}/.cluster.env']
     cmds:
       - task: down
       - talosctl --nodes {{.IP}} upgrade --image="factory.talos.dev/installer/{{.TALOS_SCHEMATIC_ID}}:$TALOS_VERSION" --timeout=10m
@@ -35,18 +35,18 @@ tasks:
       TALOS_SCHEMATIC_ID:
         sh: talosctl --nodes {{.IP}} get nodeannotationspecs --output json | jq --raw-output '.spec | select(.key == "extensions.talos.dev/schematic") | .value'
     requires:
-      vars: [CLUSTER, IP]
+      vars: [IP]
     preconditions:
       - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/talos/releases/tag/$TALOS_VERSION
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
-      - test -f {{.CLUSTER_DIR}}/cluster.env
+      - test -f {{.BOOTSTRAP_DIR}}/.cluster.env
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - which jq kubectl talosctl
 
   upgrade-k8s:
-    desc: Upgrade Kubernetes across the whole cluster [CLUSTER=main] [VERSION=required]
-    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
+    desc: Upgrade Kubernetes across the whole cluster [VERSION=required]
+    dotenv: ['{{.BOOTSTRAP_DIR}}/.cluster.env']
     cmds:
       - task: down
       - talosctl --nodes {{.TALOS_CONTROLLER}} upgrade-k8s --to $KUBERNETES_VERSION
@@ -54,18 +54,16 @@ tasks:
     vars:
       TALOS_CONTROLLER:
         sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
-    requires:
-      vars: [CLUSTER]
     preconditions:
       - curl -fsSL -o /dev/null --fail https://github.com/siderolabs/kubelet/releases/tag/$KUBERNETES_VERSION
       - talosctl --nodes {{.TALOS_CONTROLLER}} get machineconfig
       - talosctl config info
-      - test -f {{.CLUSTER_DIR}}/cluster.env
+      - test -f {{.BOOTSTRAP_DIR}}/.cluster.env
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - which jq talosctl
 
   reboot-node:
-    desc: Reboot Talos on a single node [CLUSTER=main] [IP=required] [MODE=default]
+    desc: Reboot Talos on a single node [IP=required] [MODE=default]
     cmds:
       - task: down
       - talosctl --nodes {{.IP}} reboot --mode={{.MODE}}
@@ -74,23 +72,21 @@ tasks:
     vars:
       MODE: '{{.MODE | default "default"}}'
     requires:
-      vars: [CLUSTER, IP]
+      vars: [IP]
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
-      - test -f {{.CLUSTER_DIR}}/cluster.env
+      - test -f {{.BOOTSTRAP_DIR}}/.cluster.env
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - which talosctl
 
   shutdown-cluster:
-    desc: Shutdown Talos across the whole cluster [CLUSTER=main]
-    prompt: Shutdown the Talos cluster '{{.CLUSTER}}' ... continue?
+    desc: Shutdown Talos across the whole cluster
+    prompt: Shutdown the Talos cluster ... continue?
     cmd: talosctl shutdown --nodes {{.IP_ADDRS}} --force
     vars:
       IP_ADDRS:
         sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(",")'
-    requires:
-      vars: [CLUSTER]
     preconditions:
       - talosctl --nodes {{.NODES}} get machineconfig
       - talosctl config info
@@ -98,11 +94,11 @@ tasks:
       - which jq talosctl
 
   reset-node:
-    desc: Reset Talos on a single node [CLUSTER=main] [IP=required]
-    prompt: Reset Talos node '{{.IP}}' on the '{{.CLUSTER}}' cluster ... continue?
+    desc: Reset Talos on a single node [IP=required]
+    prompt: Reset Talos node '{{.IP}}' ... continue?
     cmd: talosctl reset --nodes {{.IP}} --graceful=false
     requires:
-      vars: [CLUSTER, IP]
+      vars: [IP]
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
@@ -110,14 +106,12 @@ tasks:
       - which talosctl
 
   reset-cluster:
-    desc: Reset Talos across the whole cluster [CLUSTER=main]
-    prompt: Reset the Talos cluster '{{.CLUSTER}}' ... continue?
+    desc: Reset Talos across the whole cluster
+    prompt: Reset the Talos cluster ... continue?
     cmd: talosctl reset --nodes {{.IP_ADDRS}} --graceful=false
     vars:
       IP_ADDRS:
         sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(",")'
-    requires:
-      vars: [CLUSTER]
     preconditions:
       - talosctl --nodes {{.NODES}} get machineconfig
       - talosctl config info
@@ -125,66 +119,55 @@ tasks:
       - which jq talosctl
 
   kubeconfig:
-    desc: Generate the kubeconfig for a Talos cluster [CLUSTER=main]
-    cmd: talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name {{.CLUSTER}} {{.CLUSTER_DIR}}
+    desc: Generate the kubeconfig for a Talos cluster
+    cmd: talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name main {{.CLUSTER_DIR}}
     vars:
       TALOS_CONTROLLER:
         sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
-    requires:
-      vars: [CLUSTER]
     preconditions:
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - which jq talosctl
 
   apply-cluster:
-    desc: Apply Talos config across the whole cluster [CLUSTER=main] [MODE=default]
+    desc: Apply Talos config across the whole cluster [MODE=default]
     cmds:
       - for: { var: IP_ADDRS }
         task: apply-node
         vars:
           IP: '{{.ITEM}}'
           MODE: '{{.MODE}}'
-          CLUSTER: '{{.CLUSTER}}'
     vars:
       MODE: '{{.MODE | default "auto"}}'
       IP_ADDRS:
         sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(" ")'
-    requires:
-      vars: [CLUSTER]
     preconditions:
       - which jq talosctl
 
   upgrade-cluster:
-    desc: Upgrade Talos across the whole cluster [CLUSTER=main]
+    desc: Upgrade Talos across the whole cluster
     cmds:
       - for: { var: IP_ADDRS }
         task: upgrade-node
         vars:
           IP: '{{.ITEM}}'
-          CLUSTER: '{{.CLUSTER}}'
     vars:
       IP_ADDRS:
         sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(" ")'
-    requires:
-      vars: [CLUSTER]
     preconditions:
       - which jq talosctl
 
   reboot-cluster:
-    desc: Reboot Talos on a single node [CLUSTER=main] [IP=required] [MODE=default]
+    desc: Reboot Talos on a single node [IP=required] [MODE=default]
     cmds:
       - for: { var: IP_ADDRS }
         task: reboot-node
         vars:
           IP: '{{.ITEM}}'
           MODE: '{{.MODE}}'
-          CLUSTER: '{{.CLUSTER}}'
     vars:
       IP_ADDRS:
         sh: talosctl config info --output json | jq --join-output '[.nodes[]] | join(" ")'
-    requires:
-      vars: [CLUSTER]
     preconditions:
       - which jq talosctl
 

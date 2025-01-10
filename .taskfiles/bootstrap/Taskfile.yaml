@@ -5,49 +5,47 @@ version: '3'
 tasks:
 
   talos:
-    desc: Bootstrap Talos [CLUSTER=main]
-    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
+    desc: Bootstrap Talos
+    dotenv: ['{{.BOOTSTRAP_DIR}}/.cluster.env']
     cmds:
       - for: { var: TALOS_NODES }
         cmd: >
           sops exec-file --input-type yaml --output-type yaml {{.ITEM}} "minijinja-cli {}"
           | talosctl --nodes {{base .ITEM | replace ".sops.yaml.j2" ""}} apply-config --insecure --file /dev/stdin
       - until talosctl --nodes {{.TALOS_CONTROLLER}} bootstrap; do sleep 5; done
-      - talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name {{.CLUSTER}} {{.CLUSTER_DIR}}
+      - talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name main {{.CLUSTER_DIR}}
     vars:
       TALOS_CONTROLLER:
         sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
       TALOS_NODES:
-        sh: ls {{.CLUSTER_DIR}}/talos/*.j2
-    requires:
-      vars: [CLUSTER]
+        sh: ls {{.BOOTSTRAP_DIR}}/talos/*.j2
     preconditions:
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
       - which jq minijinja-cli sops talosctl
 
   apps:
-    desc: Bootstrap Apps [CLUSTER=main] [MODEL=required]
+    desc: Bootstrap Apps [MODEL=required]
     prompt: Bootstrap apps into the Talos cluster?
     cmds:
       - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
-      - op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking -- minijinja-cli {{.CLUSTER_DIR}}/bootstrap/templates/resources.yaml.j2 | kubectl apply --server-side --filename -
-      - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
-      - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml destroy --selector release=wipe-rook
+      - op run --env-file {{.BOOTSTRAP_DIR}}/.secrets.env --no-masking -- minijinja-cli {{.BOOTSTRAP_DIR}}/apps/templates/resources.yaml.j2 | kubectl apply --server-side --filename -
+      - helmfile --quiet --file {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+      - helmfile --quiet --file {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml destroy --selector name=wipe-rook
     env:
       FLUX_GITHUB_PUBLIC_KEYS:
         sh: curl -fsSL https://api.github.com/meta | jq --raw-output '"github.com "+.ssh_keys[]'
       MODEL: '{{.MODEL}}'
       NODE_COUNT:
         sh: talosctl config info --output json | jq --raw-output '.nodes | length'
-      VAULT: '{{if eq .CLUSTER "main"}}kubernetes{{else}}{{.CLUSTER}}{{end}}' # ¯\_(ツ)_/¯
+      VAULT: kubernetes
     requires:
-      vars: [CLUSTER, MODEL]
+      vars: [MODEL]
     preconditions:
       - op user get --me
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - test -f {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml
-      - test -f {{.CLUSTER_DIR}}/bootstrap/templates/resources.yaml.j2
-      - test -f {{.CLUSTER_DIR}}/bootstrap/templates/wipe-rook.yaml.gotmpl
+      - test -f {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml
+      - test -f {{.BOOTSTRAP_DIR}}/apps/templates/resources.yaml.j2
+      - test -f {{.BOOTSTRAP_DIR}}/apps/templates/wipe-rook.yaml.gotmpl
       - which curl jq helmfile kubectl op talosctl
