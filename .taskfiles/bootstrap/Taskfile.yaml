@@ -6,7 +6,7 @@ tasks:
 
   talos:
     desc: Bootstrap Talos
-    dotenv: ['{{.CLUSTER_DIR}}/cluster.env']
+    dotenv: ['{{.BOOTSTRAP_DIR}}/.cluster.env']
     cmds:
       - for: { var: TALOS_NODES }
         cmd: >
@@ -18,7 +18,7 @@ tasks:
       TALOS_CONTROLLER:
         sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
       TALOS_NODES:
-        sh: ls {{.CLUSTER_DIR}}/talos/*.j2
+        sh: ls {{.BOOTSTRAP_DIR}}/talos/*.j2
     preconditions:
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
@@ -29,9 +29,9 @@ tasks:
     prompt: Bootstrap apps into the Talos cluster?
     cmds:
       - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
-      - op run --env-file {{.CLUSTER_DIR}}/bootstrap/bootstrap.env --no-masking -- minijinja-cli {{.CLUSTER_DIR}}/bootstrap/templates/resources.yaml.j2 | kubectl apply --server-side --filename -
-      - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
-      - helmfile --quiet --file {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml destroy --selector release=wipe-rook
+      - op run --env-file {{.BOOTSTRAP_DIR}}/.secrets.env --no-masking -- minijinja-cli {{.BOOTSTRAP_DIR}}/apps/templates/resources.yaml.j2 | kubectl apply --server-side --filename -
+      - helmfile --quiet --file {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+      - helmfile --quiet --file {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml destroy --selector name=wipe-rook
     env:
       FLUX_GITHUB_PUBLIC_KEYS:
         sh: curl -fsSL https://api.github.com/meta | jq --raw-output '"github.com "+.ssh_keys[]'
@@ -45,7 +45,7 @@ tasks:
       - op user get --me
       - talosctl config info
       - test -f {{.CLUSTER_DIR}}/talosconfig
-      - test -f {{.CLUSTER_DIR}}/bootstrap/helmfile.yaml
-      - test -f {{.CLUSTER_DIR}}/bootstrap/templates/resources.yaml.j2
-      - test -f {{.CLUSTER_DIR}}/bootstrap/templates/wipe-rook.yaml.gotmpl
+      - test -f {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml
+      - test -f {{.BOOTSTRAP_DIR}}/apps/templates/resources.yaml.j2
+      - test -f {{.BOOTSTRAP_DIR}}/apps/templates/wipe-rook.yaml.gotmpl
       - which curl jq helmfile kubectl op talosctl

@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./externalsecret.yaml
+  - ./pvc.yaml
+  - ./helmrelease.yaml
+  - ../../../../templates/gatus/guarded
+  - ../../../../templates/volsync
+configMapGenerator:
+  - name: radarr-configmap
+    files:
+      - pushover-notifier.sh=./resources/pushover-notifier.sh
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
