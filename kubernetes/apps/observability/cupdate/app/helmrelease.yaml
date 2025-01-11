@@ -1,0 +1,108 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cupdate
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.6.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+  values:
+    controllers:
+      cupdate:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/alexgustafsson/cupdate
+              tag: 0.14.1@sha256:de69a6f797e24c716716dfc3b56d29d3f54e364f987dceb4d79ad02f49e85e5f
+            env:
+              CUPDATE_API_ADDRESS: 0.0.0.0
+              CUPDATE_API_PORT: &port 80
+              CUPDATE_CACHE_PATH: /var/run/data/cachev1.boltdb
+              CUPDATE_DB_PATH: /var/run/data/dbv1.sqlite
+              TZ: America/New_York
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /livez
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /readyz
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: cupdate
+        ports:
+          http:
+            primary: true
+            port: *port
+    ingress:
+      app:
+        className: internal
+        hosts:
+          - host: cupdate.devbu.io
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+    serviceAccount:
+      create: true
+      name: cupdate
+    persistence:
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /var/run/data
+      tmp:
+        type: emptyDir
