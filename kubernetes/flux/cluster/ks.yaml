@@ -10,13 +10,13 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  interval: 30m
   path: ./kubernetes/flux/meta
   prune: true
-  wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
+  wait: true
+  interval: 30m
   decryption:
     provider: sops
     secretRef:
@@ -29,7 +29,6 @@ metadata:
   name: cluster-apps
   namespace: flux-system
 spec:
-  interval: 30m
   dependsOn:
     - name: cluster-meta
   path: ./kubernetes/apps
@@ -37,6 +36,8 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+  wait: false
+  interval: 30m
   decryption:
     provider: sops
     secretRef:

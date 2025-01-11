@@ -5,6 +5,15 @@ kind: Kustomization
 resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
+  - ../../templates/flux
   # Flux-Kustomizations
   - ./snapshot-controller/ks.yaml
   - ./volsync/ks.yaml
+transformers:
+  - |-
+    apiVersion: builtin
+    kind: NamespaceTransformer
+    metadata:
+      name: not-used
+      namespace: volsync-system
+    unsetOnly: true

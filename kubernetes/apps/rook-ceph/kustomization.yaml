@@ -5,5 +5,14 @@ kind: Kustomization
 resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
+  - ../../templates/flux
   # Flux-Kustomizations
   - ./rook-ceph/ks.yaml
+transformers:
+  - |-
+    apiVersion: builtin
+    kind: NamespaceTransformer
+    metadata:
+      name: not-used
+      namespace: rook-ceph
+    unsetOnly: true
