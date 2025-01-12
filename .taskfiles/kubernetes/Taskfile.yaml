@@ -35,6 +35,17 @@ tasks:
       - kubectl browse-pvc --version
       - which kubectl
 
+  node-shell:
+    desc: Open a shell to a node [NODE=required]
+    interactive: true
+    cmd: kubectl node-shell -n kube-system -x {{.NODE}}
+    requires:
+      vars: [NODE]
+    preconditions:
+      - kubectl get nodes {{.NODE}}
+      - kubectl node-shell --version
+      - which kubectl
+
   sync-secrets:
     desc: Sync all ExternalSecrets
     cmds:
