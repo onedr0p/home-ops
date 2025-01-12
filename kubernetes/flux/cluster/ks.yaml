@@ -56,15 +56,17 @@ spec:
             secretRef:
               name: sops-age
         - op: add
-          path: /spec/postBuild
+          path: /spec/postBuild/substituteFrom/-
           value:
-            substituteFrom:
-              - name: cluster-settings
-                kind: ConfigMap
-                optional: true
-              - name: cluster-secrets
-                kind: Secret
-                optional: true
+            name: cluster-settings
+            kind: ConfigMap
+            optional: true
+        - op: add
+          path: /spec/postBuild/substituteFrom/-
+          value:
+            name: cluster-secrets
+            kind: Secret
+            optional: true
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization
