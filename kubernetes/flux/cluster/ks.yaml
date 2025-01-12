@@ -48,17 +48,16 @@ spec:
         kind: Secret
         optional: true
   patches:
-    - patch: |-
-        apiVersion: kustomize.toolkit.fluxcd.io/v1
-        kind: Kustomization
-        metadata:
-          name: not-used
-        spec:
-          decryption:
+    - patch: |
+        - op: add
+          path: /spec/decryption
+          value:
             provider: sops
             secretRef:
               name: sops-age
-          postBuild:
+        - op: add
+          path: /spec/postBuild
+          value:
             substituteFrom:
               - name: cluster-settings
                 kind: ConfigMap
