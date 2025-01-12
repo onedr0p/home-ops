@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/clustersecretstore_v1beta1.json
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: onepassword-connect
+spec:
+  provider:
+    onepassword:
+      connectHost: http://onepassword-connect.external-secrets.svc.cluster.local
+      vaults:
+        Kubernetes: 1
+      auth:
+        secretRef:
+          connectTokenSecretRef:
+            name: onepassword-connect-secret
+            key: token
+            namespace: external-secrets
