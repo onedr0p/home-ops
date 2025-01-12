@@ -1,0 +1,38 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: volsync-nfs
+provisioner: nfs
+parameters:
+  archiveOnDelete: "false"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: volsync-nfs
+spec:
+  storageClassName: volsync-nfs
+  capacity:
+    storage: 1Mi # Size does not matter
+  accessModes: ["ReadWriteMany"]
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: expanse.internal
+    path: /mnt/eros/Volsync
+  mountOptions:
+    - nfsvers=4.2
+    - hard=True
+    - nconnect=16
+    - noatime=True
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: volsync-nfs
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: volsync-nfs
+  resources:
+    requests:
+      storage: 1Mi # Size does not matter
