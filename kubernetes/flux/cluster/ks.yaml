@@ -48,25 +48,24 @@ spec:
         kind: Secret
         optional: true
   patches:
-    - patch: |
-        - op: add
-          path: /spec/decryption
-          value:
+    - patch: |-
+        apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: not-used
+        spec:
+          decryption:
             provider: sops
             secretRef:
               name: sops-age
-        - op: add
-          path: /spec/postBuild/substituteFrom/-/
-          value:
-            name: cluster-settings
-            kind: ConfigMap
-            optional: true
-        - op: add
-          path: /spec/postBuild/substituteFrom/-/
-          value:
-            name: cluster-secrets
-            kind: Secret
-            optional: true
+          postBuild:
+            substituteFrom:
+              - name: cluster-settings
+                kind: ConfigMap
+                optional: true
+              - name: cluster-secrets
+                kind: Secret
+                optional: true
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization
