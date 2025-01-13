@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: gha-runner-scale-set
+  name: &name home-ops-runner
 spec:
   interval: 30m
   chart:
@@ -14,8 +14,6 @@ spec:
         kind: HelmRepository
         name: actions-runner-controller
         namespace: flux-system
-  driftDetection:
-    mode: enabled
   install:
     remediation:
       retries: 3
@@ -25,26 +23,26 @@ spec:
       strategy: rollback
       retries: 3
   dependsOn:
-    - name: gha-runner-scale-set-controller
+    - name: actions-runner-controller
       namespace: actions-runner-system
     - name: openebs
       namespace: openebs-system
   valuesFrom:
     - targetPath: githubConfigSecret.github_app_id
       kind: Secret
-      name: actions-runner-controller-auth-secret
+      name: actions-runner-controller-secret
       valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_APP_ID
     - targetPath: githubConfigSecret.github_app_installation_id
       kind: Secret
-      name: actions-runner-controller-auth-secret
+      name: actions-runner-controller-secret
       valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_INSTALLATION_ID
     - targetPath: githubConfigSecret.github_app_private_key
       kind: Secret
-      name: actions-runner-controller-auth-secret
+      name: actions-runner-controller-secret
       valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_PRIVATE_KEY
   values:
-    nameOverride: gha-runner-scale-set
-    runnerScaleSetName: gha-runner-scale-set
+    nameOverride: *name
+    runnerScaleSetName: *name
     githubConfigUrl: https://github.com/onedr0p/home-ops
     minRunners: 1
     maxRunners: 3
@@ -79,5 +77,5 @@ spec:
             secret:
               secretName: actions-runner
     controllerServiceAccount:
-      name: gha-runner-scale-set-controller
+      name: actions-runner-controller
       namespace: actions-runner-system
