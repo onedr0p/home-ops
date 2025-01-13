@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: nginx-external
+  name: &app ingress-nginx
 spec:
   interval: 30m
   chart:
@@ -23,7 +23,7 @@ spec:
       strategy: rollback
       retries: 3
   values:
-    fullnameOverride: nginx-external
+    fullnameOverride: *app
     controller:
       replicaCount: 2
       service:

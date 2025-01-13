@@ -3,16 +3,16 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app network-external-dns
+  name: &app cloudflare-ingress-nginx
   namespace: flux-system
 spec:
-  targetNamespace: network
+  targetNamespace: cloudflare
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: external-secrets-stores
-  path: ./kubernetes/apps/network/external-dns/app
+    - name: cert-manager-tls
+  path: ./kubernetes/apps/cloudflare/ingress-nginx/app
   prune: true
   sourceRef:
     kind: GitRepository
