@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cert-manager.io/clusterissuer_v1.json
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: devin.kray@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-production
+    solvers:
+      - dns01:
+          cloudflare:
+            email: devin.kray@gmail.com
+            apiKeySecretRef:
+              name: cloudflare-issuer-secret
+              key: CLOUDFLARE_API_KEY
+        selector:
+          dnsZones: ["devbu.io"]
