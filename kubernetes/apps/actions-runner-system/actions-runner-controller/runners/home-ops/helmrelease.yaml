@@ -54,6 +54,9 @@ spec:
         resources:
           requests:
             storage: 25Gi
+    controllerServiceAccount:
+      name: actions-runner-controller
+      namespace: actions-runner-system
     template:
       spec:
         containers:
@@ -71,11 +74,8 @@ spec:
               - mountPath: /var/run/secrets/talos.dev
                 name: talos
                 readOnly: true
-        serviceAccountName: actions-runner
+        serviceAccountName: *name
         volumes:
           - name: talos
             secret:
-              secretName: actions-runner
-    controllerServiceAccount:
-      name: actions-runner-controller
-      namespace: actions-runner-system
+              secretName: *name
