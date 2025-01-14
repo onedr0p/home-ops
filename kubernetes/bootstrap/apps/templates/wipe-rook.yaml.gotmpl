@@ -24,15 +24,13 @@ controllers:
         image:
           repository: docker.io/library/alpine
           tag: latest
-        env:
-          ROOK_DISK: {{ requiredEnv "ROOK_DISK" | quote }}
         command:
           - /bin/sh
           - -c
         args:
           - |
             apk add --no-cache findutils nvme-cli;
-            DISK=$(find /dev/disk/by-id/ -iname "*$(ROOK_DISK)*" -not -name "*_[0-9]" -not -name "*-part[0-9]");
+            DISK=$(find /dev/disk/by-id/ -iname "*{{ requiredEnv "ROOK_DISK" }}*" -not -name "*_[0-9]" -not -name "*-part[0-9]");
             echo "=== Wiping $DISK ===";
             nvme format --lbaf=1 $DISK --force;
             nvme format --block-size=4096 $DISK --force;
