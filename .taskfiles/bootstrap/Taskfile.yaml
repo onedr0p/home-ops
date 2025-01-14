@@ -25,7 +25,9 @@ tasks:
       - which jq minijinja-cli sops talosctl
 
   apps:
-    desc: Bootstrap Apps [MODEL=required]
+    desc: Bootstrap Apps [ROOK_DISK=required]
+    summary: |
+      IMPORTANT: All nodes will be used for OSDs and ROOK_DISK must be set to a value that matches the disk model on all nodes (e.g. Micron_7450)
     prompt: Bootstrap apps into the Talos cluster?
     cmds:
       - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
@@ -33,12 +35,12 @@ tasks:
       - helmfile --quiet --file {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
       - helmfile --quiet --file {{.BOOTSTRAP_DIR}}/apps/helmfile.yaml destroy --selector name=wipe-rook
     env:
-      MODEL: '{{.MODEL}}'
       NODE_COUNT:
         sh: talosctl config info --output json | jq --raw-output '.nodes | length'
+      ROOK_DISK: '{{.ROOK_DISK}}'
       VAULT: kubernetes
     requires:
-      vars: [MODEL]
+      vars: [ROOK_DISK]
     preconditions:
       - op user get --me
       - talosctl config info

@@ -25,14 +25,14 @@ controllers:
           repository: docker.io/library/alpine
           tag: latest
         env:
-          MODEL: {{ requiredEnv "MODEL" | quote }}
+          ROOK_DISK: {{ requiredEnv "ROOK_DISK" | quote }}
         command:
           - /bin/sh
           - -c
         args:
           - |
             apk add --no-cache findutils nvme-cli;
-            DISK=$(find /dev/disk/by-id/ -iname "*$(MODEL)*" -not -name "*_[0-9]");
+            DISK=$(find /dev/disk/by-id/ -iname "*$(ROOK_DISK)*" -not -name "*_[0-9]" -not -name "*-part[0-9]");
             echo "=== Wiping $DISK ===";
             nvme format --lbaf=1 $DISK --force;
             nvme format --block-size=4096 $DISK --force;
@@ -47,7 +47,7 @@ defaultPodOptions:
       whenUnsatisfiable: DoNotSchedule
       labelSelector:
         matchLabels:
-          app.kubernetes.io/name: wipe-disk-job
+          app.kubernetes.io/name: wipe-rook
 persistence:
   host-var:
     type: hostPath
