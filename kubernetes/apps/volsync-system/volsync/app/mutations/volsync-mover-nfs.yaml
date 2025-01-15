@@ -20,11 +20,13 @@ spec:
         operations: ["CREATE", "UPDATE"]
         resources: ["jobs"]
   matchConditions:
-    - name: has-name
-      expression: object.metadata.name.startsWith("volsync-")
-    - name: has-labels
-      expression: object.metadata.labels["app.kubernetes.io/created-by"] == "volsync"
-    - name: volume-not-present
+    - name: has-volsync-job-name-prefix
+      expression: >
+        object.metadata.name.startsWith("volsync-")
+    - name: has-volsync-created-by-labels
+      expression: >
+        object.metadata.labels["app.kubernetes.io/created-by"] == "volsync"
+    - name: repository-volume-does-not-exist
       expression: >
         !object.spec.template.spec.volumes.exists(item, item.name == "repository")
   failurePolicy: Fail
