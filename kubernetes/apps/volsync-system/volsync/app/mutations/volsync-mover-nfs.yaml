@@ -1,0 +1,54 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.32.0/mutatingadmissionpolicybinding-admissionregistration-v1alpha1.json
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: volsync-mover-nfs
+spec:
+  policyName: volsync-mover-nfs
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.32.0/mutatingadmissionpolicy-admissionregistration-v1alpha1.json
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: MutatingAdmissionPolicy
+metadata:
+  name: volsync-mover-nfs
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["batch"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["jobs"]
+  matchConditions:
+    - name: has-name
+      expression: object.metadata.name.startsWith("volsync-")
+    - name: has-labels
+      expression: object.metadata.labels["app.kubernetes.io/created-by"] == "volsync"
+    - name: volume-not-present
+      expression: >
+        !object.spec.template.spec.volumes.exists(item, item.name == "repository")
+  failurePolicy: Fail
+  reinvocationPolicy: IfNeeded
+  mutations:
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: >
+          [
+            JSONPatch{
+              op: "add", path: "/spec/template/spec/containers/0/volumeMounts/-",
+              value: Object.spec.template.spec.containers.volumeMounts{
+                name: "repository",
+                mountPath: "/repository"
+              }
+            },
+            JSONPatch{
+              op: "add", path: "/spec/template/spec/volumes/-",
+              value: Object.spec.template.spec.volumes{
+                name: "repository",
+                nfs: Object.spec.template.spec.volumes.nfs{
+                  server: "expanse.internal",
+                  path: "/mnt/eros/Volsync"
+                }
+              }
+            }
+          ]

@@ -156,6 +156,9 @@ cluster:
     key: ENC[AES256_GCM,data:akOr7oagliAbfUX3mdd+D6Tn/7eME8v+3ls7/ja4zI0xltAdvh9pq4UL9PpAWiVOKE3jNC5vJHmMVCtJZRsIdt+kJbEBuRKX/bd6W4DXkd6Ri/cXikBkF0SSSrXME1L33UmrNcOT4jFGCsr3Qy10gIjalpmvI0bIHZxF0wFs2YWZneMbeLR+58GVUsFueEHSrnnVKkpd2ZPUM5w38RoQHfoWv8R7/T13dXofa9aSgPZ8HQ63NZF/8GslF6/82R22MWSLdXUHoUQhsSUmHbhDLQ5aSfGWMIiU2klmYI6kb48yTtm+9B5Xd0A4NtXTZQ8uBhkB/GGzmTJyx+vKmtPS2VFQGJpLh2IkaicVqr/GAc+r74Ahdxg4Vz5B0ueEFACew7plCAGUUz6UJ/tE++hy8w==,iv:3FbFJ09BPXA++YhtHbOuyR9tBziGFnKnazUX1sVklzM=,tag:bE6473jL29Xrx2I+MFvghA==,type:str]
   apiServer:
     image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
+    extraArgs:
+      runtime-config: admissionregistration.k8s.io/v1alpha1=true
+      feature-gates: MutatingAdmissionPolicy=true
     certSANs: ["127.0.0.1", "192.168.42.120"]
     disablePodSecurityPolicy: true
     auditPolicy:
