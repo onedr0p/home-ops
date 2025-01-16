@@ -22,9 +22,6 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  dependsOn:
-    - name: rook-ceph-cluster
-      namespace: rook-ceph
   values:
     controllers:
       beets:
@@ -85,7 +82,7 @@ spec:
                   port: http
     persistence:
       config:
-        existingClaim: beets
+        type: emptyDir
       media:
         type: nfs
         server: expanse.internal
