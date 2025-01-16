@@ -102,15 +102,13 @@ spec:
                   identifier: app
                   port: http
     persistence:
-      subcleaner:
-        type: emptyDir
-      cache:
+      config:
+        existingClaim: bazarr
+      config-cache:
         type: emptyDir
         globalMounts:
           - path: /config/cache
-      config:
-        existingClaim: bazarr
-      log:
+      config-log:
         type: emptyDir
         globalMounts:
           - path: /config/log
@@ -128,5 +126,7 @@ spec:
           - path: /scripts/subcleaner.sh
             subPath: subcleaner.sh
             readOnly: true
+      subcleaner:
+        type: emptyDir
       tmp:
         type: emptyDir
