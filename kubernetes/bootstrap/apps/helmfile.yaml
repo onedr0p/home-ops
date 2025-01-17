@@ -14,6 +14,9 @@ repositories:
   - name: coredns
     url: https://coredns.github.io/helm
 
+  - name: jetstack
+    url: https://charts.jetstack.io
+
 releases:
   - name: kube-prometheus-stack-crds
     namespace: observability
@@ -38,12 +41,12 @@ releases:
     needs:
       - kube-system/cilium
 
-  - name: spegel
-    namespace: kube-system
-    chart: oci://ghcr.io/spegel-org/helm-charts/spegel
-    version: v0.0.29
+  - name: cert-manager
+    namespace: cert-manager
+    chart: jetstack/cert-manager
+    version: v1.16.3
     values:
-      - ../apps/kube-system/spegel/app/helm-values.yaml
+      - ../apps/cert-manager/cert-manager/app/helm-values.yaml
     needs:
       - kube-system/coredns
 
@@ -54,7 +57,7 @@ releases:
     values:
       - ./templates/wipe-rook.yaml.gotmpl
     needs:
-      - kube-system/spegel
+      - kube-system/cert-manager
 
   - name: flux-operator
     namespace: flux-system
