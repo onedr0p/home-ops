@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: onepassword-connect
+  name: onepassword
 spec:
   interval: 30m
   chart:
@@ -24,7 +24,7 @@ spec:
       retries: 3
   values:
     controllers:
-      onepassword-connect:
+      onepassword:
         strategy: RollingUpdate
         replicas: 1
         annotations:
@@ -42,7 +42,7 @@ spec:
               OP_SESSION:
                 valueFrom:
                   secretKeyRef:
-                    name: onepassword-connect-secret
+                    name: onepassword-secret
                     key: 1password-credentials.json
             probes:
               liveness:
@@ -84,7 +84,7 @@ spec:
               OP_SESSION:
                 valueFrom:
                   secretKeyRef:
-                    name: onepassword-connect-secret
+                    name: onepassword-secret
                     key: 1password-credentials.json
             probes:
               liveness:
@@ -117,7 +117,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: onepassword-connect
+        controller: onepassword
         ports:
           http:
             port: *apiPort
