@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: cert-manager-issuers
+  name: cert-manager-tls
 spec:
   interval: 30m
   chart:
@@ -26,9 +26,9 @@ spec:
     - name: cert-manager
       namespace: cert-manager
   valuesFrom:
-    - name: cert-manager-cluster-issuers-values
+    - name: cert-manager-tls-values
       kind: ConfigMap
-      valuesKey: externalsecret.yaml
-    - name: cert-manager-cluster-issuers-values
+      valuesKey: certificate.yaml
+    - name: cert-manager-tls-values
       kind: ConfigMap
-      valuesKey: clusterissuer.yaml
+      valuesKey: pushsecret.yaml
