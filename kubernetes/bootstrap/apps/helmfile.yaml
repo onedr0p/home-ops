@@ -14,6 +14,9 @@ repositories:
   - name: coredns
     url: https://coredns.github.io/helm
 
+  - name: external-secrets
+    url: https://charts.external-secrets.io
+
   - name: jetstack
     url: https://charts.jetstack.io
 
@@ -50,6 +53,15 @@ releases:
     needs:
       - kube-system/coredns
 
+  - name: external-secrets
+    namespace: external-secrets
+    chart: external-secrets/external-secrets
+    version: 0.12.1
+    values:
+      - ../apps/external-secrets/external-secrets/app/helm-values.yaml
+    needs:
+      - kube-system/coredns
+
   - name: wipe-rook
     namespace: kube-system
     chart: oci://ghcr.io/bjw-s/helm/app-template
@@ -57,7 +69,7 @@ releases:
     values:
       - ./templates/wipe-rook.yaml.gotmpl
     needs:
-      - kube-system/cert-manager
+      - kube-system/coredns
 
   - name: flux-operator
     namespace: flux-system
