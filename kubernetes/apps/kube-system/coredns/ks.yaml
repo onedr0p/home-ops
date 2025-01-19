@@ -6,16 +6,16 @@ metadata:
   name: &app coredns
   namespace: flux-system
 spec:
-  targetNamespace: kube-system
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  interval: 30m
   path: ./kubernetes/apps/kube-system/coredns/app
-  prune: false # never should be deleted
+  prune: false
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
-  interval: 30m
+  targetNamespace: kube-system
   timeout: 5m
+  wait: false

@@ -6,7 +6,6 @@ metadata:
   name: &app zigbee
   namespace: flux-system
 spec:
-  targetNamespace: default
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
@@ -14,16 +13,17 @@ spec:
     - name: emqx-cluster
     - name: onepassword-store
     - name: volsync
+  interval: 30m
   path: ./kubernetes/apps/default/zigbee/app
+  postBuild:
+    substitute:
+      APP: *app
+      VOLSYNC_CAPACITY: 1Gi
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
-  interval: 30m
+  targetNamespace: default
   timeout: 5m
-  postBuild:
-    substitute:
-      APP: *app
-      VOLSYNC_CAPACITY: 1Gi
+  wait: false

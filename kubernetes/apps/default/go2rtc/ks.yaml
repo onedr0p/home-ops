@@ -6,19 +6,19 @@ metadata:
   name: &app go2rtc
   namespace: flux-system
 spec:
-  targetNamespace: default
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  interval: 30m
   path: ./kubernetes/apps/default/go2rtc/app
+  postBuild:
+    substitute:
+      APP: *app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
-  interval: 30m
+  targetNamespace: default
   timeout: 5m
-  postBuild:
-    substitute:
-      APP: *app
+  wait: false
