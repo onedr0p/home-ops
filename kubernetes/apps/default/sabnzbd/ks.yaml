@@ -6,24 +6,24 @@ metadata:
   name: &app sabnzbd
   namespace: flux-system
 spec:
-  targetNamespace: default
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: onepassword-store
     - name: volsync
-  path: ./kubernetes/apps/default/sabnzbd/app
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-    namespace: flux-system
-  wait: false
   interval: 30m
-  timeout: 5m
+  path: ./kubernetes/apps/default/sabnzbd/app
   postBuild:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: sab
       VOLSYNC_CAPACITY: 1Gi
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: default
+  timeout: 5m
+  wait: false

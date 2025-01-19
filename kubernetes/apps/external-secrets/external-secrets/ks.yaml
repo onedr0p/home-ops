@@ -6,16 +6,16 @@ metadata:
   name: &app external-secrets
   namespace: flux-system
 spec:
-  targetNamespace: external-secrets
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  interval: 30m
   path: ./kubernetes/apps/external-secrets/external-secrets/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
-  interval: 30m
+  targetNamespace: external-secrets
   timeout: 5m
+  wait: false

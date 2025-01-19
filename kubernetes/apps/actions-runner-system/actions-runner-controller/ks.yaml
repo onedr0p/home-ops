@@ -6,21 +6,21 @@ metadata:
   name: &app actions-runner-controller
   namespace: flux-system
 spec:
-  targetNamespace: actions-runner-system
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: onepassword-store
+  interval: 30m
   path: ./kubernetes/apps/actions-runner-system/actions-runner-controller/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
-  interval: 30m
+  targetNamespace: actions-runner-system
   timeout: 5m
+  wait: false
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -29,16 +29,16 @@ metadata:
   name: &app actions-runner-controller-runners
   namespace: flux-system
 spec:
-  targetNamespace: actions-runner-system
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  interval: 30m
   path: ./kubernetes/apps/actions-runner-system/actions-runner-controller/runners
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
-  interval: 30m
+  targetNamespace: actions-runner-system
   timeout: 5m
+  wait: false

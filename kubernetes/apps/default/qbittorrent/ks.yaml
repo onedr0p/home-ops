@@ -6,31 +6,31 @@ metadata:
   name: &app qbittorrent
   namespace: flux-system
 spec:
-  targetNamespace: default
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: onepassword-store
     - name: volsync
+  interval: 30m
   path: ./kubernetes/apps/default/qbittorrent/app
+  postBuild:
+    substitute:
+      APP: *app
+      GATUS_SUBDOMAIN: qb
+      VOLSYNC_ACCESSMODES: ReadWriteMany
+      VOLSYNC_CAPACITY: 2Gi
+      VOLSYNC_SNAPSHOTCLASS: csi-ceph-filesystem
+      VOLSYNC_SNAP_ACCESSMODES: ReadOnlyMany
+      VOLSYNC_STORAGECLASS: ceph-filesystem
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
-  interval: 30m
+  targetNamespace: default
   timeout: 5m
-  postBuild:
-    substitute:
-      APP: *app
-      GATUS_SUBDOMAIN: qb
-      VOLSYNC_CAPACITY: 2Gi
-      VOLSYNC_ACCESSMODES: ReadWriteMany
-      VOLSYNC_STORAGECLASS: ceph-filesystem
-      VOLSYNC_SNAPSHOTCLASS: csi-ceph-filesystem
-      VOLSYNC_SNAP_ACCESSMODES: ReadOnlyMany # CephFS shallow snapshot
+  wait: false
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -39,22 +39,22 @@ metadata:
   name: &app qbittorrent-tools
   namespace: flux-system
 spec:
-  targetNamespace: default
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: onepassword-store
-  path: ./kubernetes/apps/default/qbittorrent/tools
   decryption:
     provider: sops
     secretRef:
       name: sops-age
+  dependsOn:
+    - name: onepassword-store
+  interval: 30m
+  path: ./kubernetes/apps/default/qbittorrent/tools
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
-  interval: 30m
+  targetNamespace: default
   timeout: 5m
+  wait: false

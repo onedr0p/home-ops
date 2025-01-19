@@ -6,19 +6,19 @@ metadata:
   name: &app cilium
   namespace: flux-system
 spec:
-  targetNamespace: kube-system
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  interval: 30m
   path: ./kubernetes/apps/kube-system/cilium/app
-  prune: false # never should be deleted
+  prune: false
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: true
-  interval: 30m
+  targetNamespace: kube-system
   timeout: 5m
+  wait: true
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -27,18 +27,18 @@ metadata:
   name: &app cilium-config
   namespace: flux-system
 spec:
-  targetNamespace: kube-system
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: cilium
+  interval: 30m
   path: ./kubernetes/apps/kube-system/cilium/config
-  prune: false # never should be deleted
+  prune: false
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
-  interval: 30m
+  targetNamespace: kube-system
   timeout: 5m
+  wait: false
