@@ -77,19 +77,13 @@ spec:
             port: *port
     persistence:
       config:
-        type: emptyDir
+        existingClaim: cross-seed
       secret-file:
         type: secret
         name: cross-seed-secret
         globalMounts:
           - path: /config/config.js
             subPath: config.js
-            readOnly: true
-      qbittorrent:
-        existingClaim: qbittorrent
-        globalMounts:
-          - path: /qbittorrent/qBittorrent/BT_backup
-            subPath: qBittorrent/BT_backup
             readOnly: true
       media:
         type: nfs
