@@ -10,11 +10,11 @@ data:
     endpoints:
       - name: "${APP}"
         group: external
-        url: "https://${GATUS_SUBDOMAIN:-${APP}}.devbu.io${GATUS_PATH:-/}"
+        url: "https://${GATUS_SUBDOMAIN:=${APP}}.devbu.io${GATUS_PATH:=/}"
         interval: 1m
         client:
           dns-resolver: tcp://1.1.1.1:53
         conditions:
-          - "[STATUS] == ${GATUS_STATUS:-200}"
+          - "[STATUS] == ${GATUS_STATUS:=200}"
         alerts:
           - type: pushover
