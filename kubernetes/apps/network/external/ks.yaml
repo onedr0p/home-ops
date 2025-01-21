@@ -11,7 +11,9 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: external-external-dns
+      namespace: network
     - name: onepassword-store
+      namespace: external-secrets
   interval: 30m
   path: ./kubernetes/apps/network/external/cloudflared
   prune: false # revert after merge
@@ -58,6 +60,7 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: cert-manager-tls
+      namespace: cert-manager
   interval: 30m
   path: ./kubernetes/apps/network/external/ingress-nginx
   prune: false # revert after merge
