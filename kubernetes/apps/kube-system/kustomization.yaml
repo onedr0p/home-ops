@@ -4,9 +4,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: kube-system
 resources:
-  # Pre Flux-Kustomizations
-  - ./namespace.yaml
-  # Flux-Kustomizations
   - ./cilium/ks.yaml
   - ./coredns/ks.yaml
   - ./csi-driver-nfs/ks.yaml
@@ -20,3 +17,11 @@ resources:
 components:
   - ../../flux/components/alerts
   - ../../flux/components/sops
+  - ../../flux/components/namespace
+patches:
+  - patch: |
+      - op: add
+        path: /metadata/name
+        value: kube-system
+    target:
+      kind: Namespace
