@@ -6,9 +6,13 @@ metadata:
   name: cluster-meta
   namespace: flux-system
 spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   interval: 30m
   path: ./kubernetes/flux/meta
-  prune: false # revert after merge
+  prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -34,7 +38,7 @@ spec:
       namespace: flux-system
   interval: 30m
   path: ./kubernetes/apps
-  prune: false # revert after merge
+  prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -42,13 +46,10 @@ spec:
   timeout: 5m
   wait: false
   patches:
-    - patch: |-
-        apiVersion: kustomize.toolkit.fluxcd.io/v1
-        kind: Kustomization
-        metadata:
-          name: not-used
-        spec:
-          decryption:
+    - patch: |
+        - op: add
+          path: /spec/decryption
+          value:
             provider: sops
             secretRef:
               name: sops-age
