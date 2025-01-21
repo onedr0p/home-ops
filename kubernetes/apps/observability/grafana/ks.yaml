@@ -4,15 +4,16 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app grafana
-  namespace: flux-system
+  namespace: &namespace observability
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../components/gatus/guarded
+    - ../../../../flux/components/gatus/guarded
   dependsOn:
     - name: onepassword-store
+      namespace: external-secrets
   interval: 30m
   path: ./kubernetes/apps/observability/grafana/app
   postBuild:
@@ -23,6 +24,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: observability
+  targetNamespace: *namespace
   timeout: 5m
   wait: false

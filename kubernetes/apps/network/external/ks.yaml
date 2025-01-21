@@ -4,14 +4,16 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app external-cloudflared
-  namespace: flux-system
+  namespace: &namespace network
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: external-external-dns
+      namespace: network
     - name: onepassword-store
+      namespace: external-secrets
   interval: 30m
   path: ./kubernetes/apps/network/external/cloudflared
   prune: false # revert after merge
@@ -19,7 +21,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: network
+  targetNamespace: *namespace
   timeout: 5m
   wait: false
 ---
@@ -28,7 +30,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app external-external-dns
-  namespace: flux-system
+  namespace: &namespace network
 spec:
   commonMetadata:
     labels:
@@ -42,7 +44,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: network
+  targetNamespace: *namespace
   timeout: 5m
   wait: true
 ---
@@ -51,13 +53,14 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app external-ingress-nginx
-  namespace: flux-system
+  namespace: &namespace network
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: cert-manager-tls
+      namespace: cert-manager
   interval: 30m
   path: ./kubernetes/apps/network/external/ingress-nginx
   prune: false # revert after merge
@@ -65,6 +68,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: network
+  targetNamespace: *namespace
   timeout: 5m
   wait: false

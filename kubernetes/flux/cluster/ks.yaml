@@ -27,6 +27,7 @@ metadata:
 spec:
   dependsOn:
     - name: cluster-meta
+      namespace: flux-system
   interval: 30m
   path: ./kubernetes/apps
   prune: false # revert after merge
@@ -36,3 +37,17 @@ spec:
     namespace: flux-system
   timeout: 5m
   wait: false
+  patches:
+    - patch: |-
+        apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: not-used
+        spec:
+          decryption:
+            provider: sops
+            secretRef:
+              name: sops-age
+      target:
+        group: kustomize.toolkit.fluxcd.io
+        kind: Kustomization

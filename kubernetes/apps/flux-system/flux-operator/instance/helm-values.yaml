@@ -20,6 +20,17 @@ instance:
       app.kubernetes.io/name: flux
   kustomize:
     patches:
+      # Add Sops decryption to Kustomizations
+      - patch: |
+          - op: add
+            path: /spec/decryption
+            value:
+              provider: sops
+              secretRef:
+                name: sops-age
+        target:
+          group: kustomize.toolkit.fluxcd.io
+          kind: Kustomization
       # Increase the number of workers and limits
       # Ref: https://fluxcd.io/flux/installation/configuration/vertical-scaling/#increase-the-number-of-workers-and-limits
       - patch: |

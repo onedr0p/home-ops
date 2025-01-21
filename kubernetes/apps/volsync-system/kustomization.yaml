@@ -2,6 +2,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: volsync-system
 resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
@@ -9,12 +10,5 @@ resources:
   - ./snapshot-controller/ks.yaml
   - ./volsync/ks.yaml
 components:
-  - ../../components/alerts
-transformers:
-  - |-
-    apiVersion: builtin
-    kind: NamespaceTransformer
-    metadata:
-      name: not-used
-      namespace: volsync-system
-    unsetOnly: true
+  - ../../flux/components/alerts
+  - ../../flux/components/sops
