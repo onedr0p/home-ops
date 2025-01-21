@@ -4,10 +4,15 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: actions-runner-system
 resources:
-  # Pre Flux-Kustomizations
-  - ./namespace.yaml
-  # Flux-Kustomizations
   - ./actions-runner-controller/ks.yaml
 components:
   - ../../flux/components/alerts
   - ../../flux/components/sops
+  - ../../flux/components/namespace
+patches:
+  - patch: |
+      - op: add
+        path: /metadata/name
+        value: actions-runner-system
+    target:
+      kind: Namespace

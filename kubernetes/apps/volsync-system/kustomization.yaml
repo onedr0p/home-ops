@@ -4,11 +4,16 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: volsync-system
 resources:
-  # Pre Flux-Kustomizations
-  - ./namespace.yaml
-  # Flux-Kustomizations
   - ./snapshot-controller/ks.yaml
   - ./volsync/ks.yaml
 components:
   - ../../flux/components/alerts
   - ../../flux/components/sops
+  - ../../flux/components/namespace
+patches:
+  - patch: |
+      - op: add
+        path: /metadata/name
+        value: volsync-system
+    target:
+      kind: Namespace
