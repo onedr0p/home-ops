@@ -4,7 +4,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app cert-manager
-  namespace: flux-system
+  namespace: &namespace cert-manager
 spec:
   commonMetadata:
     labels:
@@ -16,7 +16,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: cert-manager
+  targetNamespace: *namespace
   timeout: 5m
   wait: false
 ---
@@ -25,7 +25,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app cert-manager-issuers
-  namespace: flux-system
+  namespace: &namespace cert-manager
 spec:
   commonMetadata:
     labels:
@@ -39,7 +39,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: cert-manager
+  targetNamespace: *namespace
   timeout: 5m
   wait: true
 ---
@@ -48,7 +48,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app cert-manager-tls
-  namespace: flux-system
+  namespace: &namespace cert-manager
 spec:
   commonMetadata:
     labels:
@@ -63,6 +63,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: cert-manager
+  targetNamespace: *namespace
   timeout: 5m
   wait: true

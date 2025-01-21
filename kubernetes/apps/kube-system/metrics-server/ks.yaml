@@ -4,7 +4,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app metrics-server
-  namespace: flux-system
+  namespace: &namespace kube-system
 spec:
   commonMetadata:
     labels:
@@ -16,6 +16,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: kube-system
+  targetNamespace: *namespace
   timeout: 5m
   wait: false

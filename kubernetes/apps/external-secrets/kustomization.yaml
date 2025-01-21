@@ -2,6 +2,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: external-secrets
 resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
@@ -10,11 +11,4 @@ resources:
   - ./onepassword/ks.yaml
 components:
   - ../../components/alerts
-transformers:
-  - |-
-    apiVersion: builtin
-    kind: NamespaceTransformer
-    metadata:
-      name: not-used
-      namespace: external-secrets
-    unsetOnly: true
+  - ../../components/sops

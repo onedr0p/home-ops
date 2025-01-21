@@ -4,7 +4,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app kube-prometheus-stack
-  namespace: flux-system
+  namespace: &namespace observability
 spec:
   commonMetadata:
     labels:
@@ -24,7 +24,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: observability
+  targetNamespace: *namespace
   timeout: 5m
   wait: false
 ---
@@ -33,7 +33,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app kube-prometheus-stack-crds
-  namespace: flux-system
+  namespace: &namespace observability
 spec:
   commonMetadata:
     labels:
@@ -45,6 +45,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: observability
+  targetNamespace: *namespace
   timeout: 5m
   wait: false
