@@ -4,24 +4,6 @@ version: '3'
 
 tasks:
 
-  ks-*:
-    desc: Apply a Flux KS for a cluster [PATH=required]
-    cmd: >
-      flux build --namespace flux-system ks {{base .PATH}}
-      --kustomization-file {{.CLUSTER_DIR}}/apps/{{.PATH}}/ks.yaml
-      --path {{.CLUSTER_DIR}}/apps/{{.PATH}}{{if contains .KUSTOMIZATION "not found"}} --dry-run{{end}}
-      | yq 'with(select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization"); .metadata.namespace = "flux-system")' -
-      | kubectl {{.OPERATION}} {{if eq .OPERATION "apply"}}--server-side  --field-manager=kustomize-controller{{end}} --filename -
-    requires:
-      vars: [PATH]
-    vars:
-      OPERATION: '{{index .MATCH 0}}'
-      KUSTOMIZATION:
-        sh: flux --namespace flux-system get kustomizations {{base .PATH}}
-    preconditions:
-      - test -f {{.CLUSTER_DIR}}/apps/{{.PATH}}/ks.yaml
-      - which flux kubectl yq
-
   browse-pvc:
     desc: Mount a PVC to an temp container [NS=default] [CLAIM=required]
     interactive: true
