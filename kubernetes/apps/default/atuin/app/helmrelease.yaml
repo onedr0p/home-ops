@@ -27,7 +27,7 @@ spec:
       namespace: rook-ceph
   values:
     controllers:
-      atuin:
+      main:
         type: statefulset
         containers:
           app:
@@ -69,21 +69,21 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
     service:
-      app:
-        controller: atuin
+      main:
+        controller: main
         ports:
           http:
             primary: true
             port: *port
     ingress:
-      app:
+      main:
         className: internal
         hosts:
           - host: sh.devbu.io
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: main
                   port: http
     persistence:
       config:
