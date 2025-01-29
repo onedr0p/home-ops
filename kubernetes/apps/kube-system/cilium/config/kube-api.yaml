@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-api
+  annotations:
+    io.cilium/lb-ipam-ips: 192.168.42.120
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster
+  selector:
+    k8s-app: kube-apiserver
+    tier: control-plane
+  ports:
+    - name: https
+      port: 6443
+      protocol: TCP
+      targetPort: 6443
