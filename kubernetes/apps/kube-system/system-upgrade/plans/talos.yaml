@@ -6,17 +6,13 @@ metadata:
   name: talos
 spec:
   version: ${TALOS_VERSION}
+  concurrency: 1
+  exclusive: true
   serviceAccountName: system-upgrade
   secrets:
     - name: system-upgrade
       path: /var/run/secrets/talos.dev
       ignoreUpdates: true
-  concurrency: 1
-  exclusive: true
-  tolerations:
-    - key: node-role.kubernetes.io/control-plane
-      operator: Exists
-      effect: NoSchedule
   prepare:
     image: ghcr.io/siderolabs/talosctl:${TALOS_VERSION}
     envs: &envs
