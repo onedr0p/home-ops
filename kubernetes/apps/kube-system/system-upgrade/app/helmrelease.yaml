@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app system-upgrade-controller
+  name: &app system-upgrade
 spec:
   interval: 30m
   chart:
@@ -24,7 +24,7 @@ spec:
       retries: 3
   values:
     controllers:
-      system-upgrade-controller:
+      system-upgrade:
         strategy: RollingUpdate
         containers:
           app:
@@ -69,7 +69,7 @@ spec:
           operator: Exists
           effect: NoSchedule
     serviceAccount:
-      name: system-upgrade
+      name: *app
       create: true
     persistence:
       host-etc-ssl:
