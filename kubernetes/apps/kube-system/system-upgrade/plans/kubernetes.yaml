@@ -20,17 +20,16 @@ spec:
   prepare: &prepare
     image: ghcr.io/siderolabs/talosctl:${TALOS_VERSION}
     envs:
-      - name: NODE_IP
+      - name: NODE
         valueFrom:
           fieldRef:
             fieldPath: status.hostIP
     args:
-      - --nodes=$(NODE_IP)
+      - --nodes=$(NODE)
       - health
-      - --server=false
   upgrade:
     <<: *prepare
     args:
-      - --nodes=$(NODE_IP)
+      - --nodes=$(NODE)
       - upgrade-k8s
       - --to=$(SYSTEM_UPGRADE_PLAN_LATEST_VERSION)
