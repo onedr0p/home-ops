@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/upgrade.cattle.io/plan_v1.json
+apiVersion: upgrade.cattle.io/v1
+kind: Plan
+metadata:
+  name: kubernetes
+spec:
+  version: ${KUBERNETES_VERSION}
+  serviceAccountName: system-upgrade
+  secrets:
+    - name: talos
+      path: /var/run/secrets/talos.dev
+      ignoreUpdates: true
+  concurrency: 1
+  exclusive: true
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  prepare: &prepare
+    image: ghcr.io/siderolabs/talosctl:${TALOS_VERSION}
+    envs:
+      - name: NODE
+        valueFrom:
+          fieldRef:
+            fieldPath: status.hostIP
+    args:
+      - --nodes=$(NODE)
+      - health
+  upgrade:
+    <<: *prepare
+    args:
+      - --nodes=$(NODE)
+      - upgrade-k8s
+      - --to=$(SYSTEM_UPGRADE_PLAN_LATEST_VERSION)
