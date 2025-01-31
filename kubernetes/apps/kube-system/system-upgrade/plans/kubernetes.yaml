@@ -17,18 +17,13 @@ spec:
     matchExpressions:
       - key: node-role.kubernetes.io/control-plane
         operator: Exists
-  prepare: &prepare
+  upgrade:
     image: ghcr.io/siderolabs/talosctl:${TALOS_VERSION}
     envs:
       - name: NODE
         valueFrom:
           fieldRef:
             fieldPath: status.hostIP
-    args:
-      - --nodes=$(NODE)
-      - health
-  upgrade:
-    <<: *prepare
     args:
       - --nodes=$(NODE)
       - upgrade-k8s
