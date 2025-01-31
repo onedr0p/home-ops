@@ -13,19 +13,13 @@ spec:
     - name: system-upgrade
       path: /var/run/secrets/talos.dev
       ignoreUpdates: true
-  prepare:
-    image: ghcr.io/siderolabs/talosctl:${TALOS_VERSION}
-    envs: &envs
+  upgrade:
+    image: ghcr.io/jfroy/tnu:0.2.1
+    envs:
       - name: NODE
         valueFrom:
           fieldRef:
             fieldPath: spec.nodeName
-    args:
-      - --nodes=$(NODE)
-      - health
-  upgrade:
-    image: ghcr.io/jfroy/tnu:0.2.1
-    envs: *envs
     args:
       - --node=$(NODE)
       - --tag=$(SYSTEM_UPGRADE_PLAN_LATEST_VERSION)
