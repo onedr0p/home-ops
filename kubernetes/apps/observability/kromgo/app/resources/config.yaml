@@ -15,6 +15,11 @@ metrics:
     label: git_version
     title: Kubernetes
 
+  - name: flux_version
+    query: label_replace(flux_instance_info, "revision", "$1", "revision", "(.+)@sha256:.+")
+    label: revision
+    title: Flux
+
   - name: cluster_node_count
     query: count(count by (node) (kube_node_status_condition{condition="Ready"}))
     colors:
