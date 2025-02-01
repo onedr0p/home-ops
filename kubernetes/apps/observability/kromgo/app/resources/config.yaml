@@ -6,17 +6,17 @@ badge:
 
 metrics:
   - name: talos_version
-    query: node_os_info{name="Talos"}
+    query: label_replace(node_os_info{name="Talos"}, "version_id", "$1", "version_id", "v(.+)")
     label: version_id
     title: Talos
 
   - name: kubernetes_version
-    query: kubernetes_build_info{service="kubernetes"}
+    query: label_replace(kubernetes_build_info{service="kubernetes"}, "git_version", "$1", "git_version", "v(.+)")
     label: git_version
     title: Kubernetes
 
   - name: flux_version
-    query: label_replace(flux_instance_info, "revision", "$1", "revision", "(.+)@sha256:.+")
+    query: label_replace(flux_instance_info, "revision", "$1", "revision", "v(.+)@sha256:.+")
     label: revision
     title: Flux
 
