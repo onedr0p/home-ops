@@ -8,7 +8,7 @@ tasks:
     desc: Apply Talos config to a node [IP=required]
     cmds:
       - task: down
-      - sops exec-file --input-type yaml --output-type yaml {{.BOOTSTRAP_DIR}}/talos/{{.IP}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.IP}} apply-config --mode={{.MODE}} --file /dev/stdin
+      - sops exec-file --input-type yaml --output-type yaml {{.KUBERNETES_DIR}}/bootstrap/talos/{{.IP}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.IP}} apply-config --mode={{.MODE}} --file /dev/stdin
       - talosctl --nodes {{.IP}} health
       - task: up
     vars:
@@ -17,9 +17,9 @@ tasks:
       vars: [IP]
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
-      - test -f {{.BOOTSTRAP_DIR}}/.cluster.env
-      - test -f {{.BOOTSTRAP_DIR}}/talos/{{.IP}}.sops.yaml.j2
-      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - test -f {{.KUBERNETES_DIR}}/bootstrap/.cluster.env
+      - test -f {{.KUBERNETES_DIR}}/bootstrap/talos/{{.IP}}.sops.yaml.j2
+      - test -f {{.KUBERNETES_DIR}}/talosconfig
       - which minijinja-cli sops talosctl
 
   upgrade-node:
@@ -31,15 +31,15 @@ tasks:
       - task: up
     vars:
       TALOS_IMAGE:
-        sh: yq '.machine.install.image' {{.BOOTSTRAP_DIR}}/talos/{{.IP}}.sops.yaml.j2 | minijinja-cli
+        sh: yq '.machine.install.image' {{.KUBERNETES_DIR}}/bootstrap/talos/{{.IP}}.sops.yaml.j2 | minijinja-cli
     requires:
       vars: [IP]
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
-      - test -f {{.BOOTSTRAP_DIR}}/.cluster.env
-      - test -f {{.BOOTSTRAP_DIR}}/talos/{{.IP}}.sops.yaml.j2
-      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - test -f {{.KUBERNETES_DIR}}/bootstrap/.cluster.env
+      - test -f {{.KUBERNETES_DIR}}/bootstrap/talos/{{.IP}}.sops.yaml.j2
+      - test -f {{.KUBERNETES_DIR}}/talosconfig
       - which minijinja-cli talosctl yq
 
   upgrade-k8s:
@@ -54,8 +54,8 @@ tasks:
     preconditions:
       - talosctl --nodes {{.TALOS_CONTROLLER}} get machineconfig
       - talosctl config info
-      - test -f {{.BOOTSTRAP_DIR}}/.cluster.env
-      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - test -f {{.KUBERNETES_DIR}}/bootstrap/.cluster.env
+      - test -f {{.KUBERNETES_DIR}}/talosconfig
       - which jq talosctl
 
   reboot-node:
@@ -72,8 +72,8 @@ tasks:
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
-      - test -f {{.BOOTSTRAP_DIR}}/.cluster.env
-      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - test -f {{.KUBERNETES_DIR}}/bootstrap/.cluster.env
+      - test -f {{.KUBERNETES_DIR}}/talosconfig
       - which talosctl
 
   shutdown-cluster:
@@ -86,7 +86,7 @@ tasks:
     preconditions:
       - talosctl --nodes {{.NODES}} get machineconfig
       - talosctl config info
-      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - test -f {{.KUBERNETES_DIR}}/talosconfig
       - which jq talosctl
 
   reset-node:
@@ -98,7 +98,7 @@ tasks:
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
-      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - test -f {{.KUBERNETES_DIR}}/talosconfig
       - which talosctl
 
   reset-cluster:
@@ -111,18 +111,18 @@ tasks:
     preconditions:
       - talosctl --nodes {{.NODES}} get machineconfig
       - talosctl config info
-      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - test -f {{.KUBERNETES_DIR}}/talosconfig
       - which jq talosctl
 
   kubeconfig:
     desc: Generate the kubeconfig for a Talos cluster
-    cmd: talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name main {{.CLUSTER_DIR}}
+    cmd: talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name main {{.KUBERNETES_DIR}}
     vars:
       TALOS_CONTROLLER:
         sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
     preconditions:
       - talosctl config info
-      - test -f {{.CLUSTER_DIR}}/talosconfig
+      - test -f {{.KUBERNETES_DIR}}/talosconfig
       - which jq talosctl
 
   apply-cluster:
