@@ -30,10 +30,6 @@ tasks:
     prompt: Bootstrap apps into the Talos cluster?
     cmds:
       - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
-      - kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply --server-side --filename -
-      - sops exec-file {{.KUBERNETES_DIR}}/flux/components/sops/secret.sops.yaml "kubectl --namespace flux-system apply --server-side --filename {}"
-      - sops exec-file {{.KUBERNETES_DIR}}/flux/components/substitutions/cluster-secrets.sops.yaml "kubectl --namespace flux-system apply --server-side --filename {}"
-      - kubectl --namespace flux-system apply --server-side --filename {{.KUBERNETES_DIR}}/flux/components/substitutions/cluster-settings.yaml
       - op run --env-file {{.KUBERNETES_DIR}}/bootstrap/apps/.secrets.env --no-masking -- minijinja-cli {{.KUBERNETES_DIR}}/bootstrap/apps/templates/resources.yaml.j2 | kubectl apply --server-side --filename -
       - helmfile --quiet --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
       - helmfile --quiet --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml destroy --selector name=wipe-rook
@@ -41,7 +37,6 @@ tasks:
       NODE_COUNT:
         sh: talosctl config info --output json | jq --raw-output '.nodes | length'
       ROOK_DISK: '{{.ROOK_DISK}}'
-      VAULT: kubernetes
     requires:
       vars: [ROOK_DISK]
     preconditions:
