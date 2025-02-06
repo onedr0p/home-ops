@@ -9,16 +9,18 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 69.0.0
+      version: 68.5.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
         namespace: flux-system
   install:
+    crds: Skip
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
+    crds: Skip
     remediation:
       strategy: rollback
       retries: 3
@@ -29,9 +31,7 @@ spec:
       namespace: rook-ceph
   values:
     crds:
-      enabled: true
-      upgradeJob:
-        enabled: true
+      enabled: false
     cleanPrometheusOperatorObjectNames: true
     alertmanager:
       ingress:
