@@ -15,10 +15,13 @@ repositories:
     url: https://charts.jetstack.io
 
 releases:
-  - name: kube-prometheus-stack-crds
-    namespace: observability
+  - name: prometheus-operator-crds
+    namespace: kube-system
     chart: oci://ghcr.io/prometheus-community/charts/prometheus-operator-crds
     version: 17.0.2
+    values:
+      - annotations:
+          helm.sh/resource-policy: keep
 
   - name: cilium
     namespace: kube-system
@@ -29,7 +32,7 @@ releases:
       - events: ["postsync"]
         command: bash
         args: ['{{ requiredEnv "KUBERNETES_DIR" }}/bootstrap/apps/scripts/cilium-postsync.sh']
-    needs: ['observability/kube-prometheus-stack-crds']
+    needs: ['kube-system/prometheus-operator-crds']
 
   - name: coredns
     namespace: kube-system
