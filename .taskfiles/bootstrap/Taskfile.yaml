@@ -32,8 +32,7 @@ tasks:
       - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
       - op run --env-file {{.KUBERNETES_DIR}}/bootstrap/apps/.secrets.env --no-masking -- minijinja-cli {{.KUBERNETES_DIR}}/bootstrap/apps/templates/resources.yaml.j2 | kubectl apply --server-side --filename -
       - helmfile --quiet --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
-      - for: ['prometheus-operator-crds', 'wipe-rook']
-        cmd: helmfile --quiet --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml destroy --selector name={{.ITEM}}
+      - helmfile --quiet --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml destroy --selector name=wipe-rook
     env:
       NODE_COUNT:
         sh: talosctl config info --output json | jq --raw-output '.nodes | length'
