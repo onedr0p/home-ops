@@ -5,23 +5,23 @@ PROMETHEUS_OPERATOR_VERSION="v0.80.0"
 
 install_prometheus_crds() {
     local crds=(
-        "monitoring.coreos.com_alertmanagerconfigs.yaml"
-        "monitoring.coreos.com_alertmanagers.yaml"
-        "monitoring.coreos.com_podmonitors.yaml"
-        "monitoring.coreos.com_probes.yaml"
-        "monitoring.coreos.com_prometheusagents.yaml"
-        "monitoring.coreos.com_prometheuses.yaml"
-        "monitoring.coreos.com_prometheusrules.yaml"
-        "monitoring.coreos.com_scrapeconfigs.yaml"
-        "monitoring.coreos.com_servicemonitors.yaml"
-        "monitoring.coreos.com_thanosrulers.yaml"
+        "alertmanagerconfigs"
+        "alertmanagers"
+        "podmonitors"
+        "probes"
+        "prometheusagents"
+        "prometheuses"
+        "prometheusrules"
+        "scrapeconfigs"
+        "servicemonitors"
+        "thanosrulers"
     )
 
     for crd in "${crds[@]}"; do
         kubectl apply \
             --server-side \
             --filename \
-            "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/${PROMETHEUS_OPERATOR_VERSION}/example/prometheus-operator-crd/${crd}"
+            "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/${PROMETHEUS_OPERATOR_VERSION}/example/prometheus-operator-crd/monitoring.coreos.com_${crd}.yaml"
     done
 }
 
