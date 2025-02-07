@@ -20,7 +20,6 @@ install_prometheus_crds() {
     for crd in "${crds[@]}"; do
         kubectl apply \
             --server-side \
-            --field-manager=kustomize-controller \
             --filename \
             "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/${PROMETHEUS_OPERATOR_VERSION}/example/prometheus-operator-crd/${crd}"
     done
