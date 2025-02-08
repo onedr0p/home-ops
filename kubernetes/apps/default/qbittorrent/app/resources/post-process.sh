@@ -20,7 +20,7 @@ set_sab_vars() {
     RELEASE_CAT="${SAB_CAT:-}"
     RELEASE_SIZE="${SAB_BYTES:-}"
     RELEASE_STATUS="${SAB_PP_STATUS:-}"
-    RELEASE_INDEXER="${SAB_URL:-}"
+    RELEASE_INDEXER="${SAB_URL:-Unknown}"
     RELEASE_TYPE="NZB"
 }
 
