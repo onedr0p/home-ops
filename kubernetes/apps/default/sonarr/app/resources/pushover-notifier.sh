@@ -25,15 +25,17 @@ fi
 if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
     printf -v PUSHOVER_TITLE \
         "Episode %s" \
-            "$( [[ "${sonarr_isupgrade}" == "True" ]] && echo "Upgraded" || echo "Downloaded" )"
+            "$( [[ "${sonarr_isupgrade}" == "True" ]] && echo "Upgraded" || echo "Imported" )"
     printf -v PUSHOVER_MESSAGE \
-        "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Quality:</b> %s</small><small>\n<b>Client:</b> %s</small>" \
+        "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Quality:</b> %s</small><small>\n<b>Size:</b> %s</small><small>\n<b>Client:</b> %s</small><small>\n<b>Indexer:</b> %s</small>" \
             "${sonarr_series_title}" \
             "${sonarr_episodefile_seasonnumber}" \
             "${sonarr_episodefile_episodenumbers}" \
             "${sonarr_episodefile_episodetitles}" \
             "${sonarr_episodefile_quality:-Unknown}" \
-            "${sonarr_download_client:-Unknown}"
+            "$(numfmt --to iec --format "%8.2f" "${sonarr_release_size:-0}")" \
+            "${sonarr_download_client:-Unknown}" \
+            "${sonarr_release_indexer:-Unknown}"
     printf -v PUSHOVER_URL \
         "%s/series/%s" \
             "${sonarr_applicationurl:-localhost}" \
