@@ -25,7 +25,7 @@ fi
 if [[ "${sonarr_eventtype:-}" == "Download" ]]; then
     printf -v PUSHOVER_TITLE \
         "Episode %s" \
-            "$( [[ "${sonarr_isupgrade}" == "True" ]] && echo "Upgraded" || echo "Downloaded" )"
+            "$( [[ "${sonarr_isupgrade}" == "True" ]] && echo "Upgraded" || echo "Imported" )"
     printf -v PUSHOVER_MESSAGE \
         "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Quality:</b> %s</small><small>\n<b>Client:</b> %s</small><small>\n<b>Indexer:</b> %s</small>" \
             "${sonarr_series_title}" \
