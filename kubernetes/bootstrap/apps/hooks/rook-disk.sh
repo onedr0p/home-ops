@@ -7,7 +7,7 @@ get_nodes() {
 get_disk() {
     local node=$1
     talosctl --nodes "${node}" get disks --output json \
-        | jq --raw-output --slurp '. | map(select(.spec.model == env.CSI_DISK) | .metadata.id) | join(" ")'
+        | jq --raw-output --slurp '. | map(select(.spec.model == env.ROOK_DISK) | .metadata.id) | join(" ")'
 }
 
 wipe_disk() {
