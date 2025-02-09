@@ -1,17 +1,5 @@
 #!/usr/bin/env bash
 
-is_node_ready() {
-    local node=$1
-    local ready_status
-    ready_status=$(talosctl get nodestatus --output json \
-        | jq --raw-output --slurp ".[] | select(.node == \"$node\") | .spec.nodeReady")
-    if [ "${ready_status}" == "true" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 get_nodes() {
     talosctl config info --output json \
         | jq --raw-output '.nodes | .[]'
@@ -28,12 +16,8 @@ wipe_disk() {
     local disk=$2
 
     if [[ -n "${disk}" ]]; then
-        if ! is_node_ready "${node}"; then
-            printf "Wiping disk %s on %s\n" "${disk}" "${node}"
-            talosctl --nodes "${node}" get disk "${disk}"
-        else
-            printf "Node %s is already ready\n" "${node}"
-        fi
+        printf "Wiping disk %s on %s\n" "${disk}" "${node}"
+        talosctl --nodes "${node}" get disk "${disk}"
     else
         printf "No matching disk found on %s\n" "${node}"
     fi
@@ -41,6 +25,11 @@ wipe_disk() {
 
 main() {
     local node disk
+
+    if kubectl --namespace rook-ceph get kustomization rook-ceph &>/dev/null; then
+        printf "Rook is already installed\n"
+        return
+    fi
 
     for node in $(get_nodes); do
         printf "Getting disk id for %s\n" "${node}"
