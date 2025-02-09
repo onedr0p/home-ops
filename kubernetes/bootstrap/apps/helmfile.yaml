@@ -15,12 +15,10 @@ repositories:
     url: https://charts.jetstack.io
 
 hooks:
-  - # Apply the Prometheus Operator CRDs
-    events: ['prepare']
+  - events: ['prepare']
     command: bash
     args: ['{{ requiredEnv "KUBERNETES_DIR" }}/bootstrap/apps/hooks/prometheus-operator-crds.sh']
-  - # Wipe disks for CSI
-    events: ['prepare']
+  - events: ['prepare']
     command: bash
     args: ['{{ requiredEnv "KUBERNETES_DIR" }}/bootstrap/apps/hooks/wipe-csi-disk.sh']
 
@@ -31,8 +29,7 @@ releases:
     version: 1.17.0
     values: ['{{ requiredEnv "KUBERNETES_DIR" }}/apps/kube-system/cilium/app/helm-values.yaml']
     hooks:
-      - # Apply the Cilium LB Pools, L2/L3 Policies
-        events: ['postsync']
+      - events: ['postsync']
         command: bash
         args: ['{{ requiredEnv "KUBERNETES_DIR" }}/bootstrap/apps/hooks/cilium-config.sh']
 
