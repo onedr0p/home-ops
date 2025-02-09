@@ -18,6 +18,7 @@ apply_prometheus_operator_crds() {
     )
 
     for crd in "${crds[@]}"; do
+        echo "Applying ${crd} CRD..."
         kubectl apply \
             --server-side \
             --filename \

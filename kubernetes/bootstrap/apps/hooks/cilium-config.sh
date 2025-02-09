@@ -9,12 +9,14 @@ wait_for_cilium_crds() {
 
     for crd in "${crds[@]}"; do
         until kubectl get crd "$crd" &>/dev/null; do
+            echo "Waiting for ${crd} CRD to be available..."
             sleep 5
         done
     done
 }
 
 apply_cilium_config() {
+    echo "Applying Cilium config..."
     kubectl apply \
         --namespace=kube-system \
         --server-side \
