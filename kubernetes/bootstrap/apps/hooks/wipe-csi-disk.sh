@@ -17,7 +17,7 @@ wipe_disk() {
 
     if [[ -n "${disk}" ]]; then
         printf "Wiping disk %s on %s\n" "${disk}" "${node}"
-        talosctl --nodes "${node}" get disk "${disk}"
+        talosctl --nodes "${node}" get disk "${disk}" # TODO: change to wipe
     else
         printf "No matching disk found on %s\n" "${node}"
     fi
