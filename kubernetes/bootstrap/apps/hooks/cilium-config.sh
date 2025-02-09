@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-wait_for_cilium_crds() {
+wait_for_crds() {
     local crds=(
         "ciliuml2announcementpolicies.cilium.io"
         "ciliumbgppeeringpolicies.cilium.io"
@@ -15,7 +15,7 @@ wait_for_cilium_crds() {
     done
 }
 
-apply_cilium_config() {
+apply_config() {
     echo "Applying Cilium config..."
     kubectl apply \
         --namespace=kube-system \
@@ -26,8 +26,8 @@ apply_cilium_config() {
 }
 
 main() {
-    wait_for_cilium_crds
-    apply_cilium_config
+    wait_for_crds
+    apply_config
 }
 
 main
