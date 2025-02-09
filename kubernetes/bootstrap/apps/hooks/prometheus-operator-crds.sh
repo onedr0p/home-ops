@@ -3,7 +3,7 @@
 # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
 PROMETHEUS_OPERATOR_VERSION="v0.80.0"
 
-install_prometheus_crds() {
+apply_prometheus_operator_crds() {
     local crds=(
         "alertmanagerconfigs"
         "alertmanagers"
@@ -26,7 +26,7 @@ install_prometheus_crds() {
 }
 
 main() {
-    install_prometheus_crds
+    apply_prometheus_operator_crds
 }
 
 main
