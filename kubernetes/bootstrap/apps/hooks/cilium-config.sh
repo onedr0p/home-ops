@@ -14,6 +14,7 @@ function wait_for_crds() {
     )
 
     for crd in "${crds[@]}"; do
+        log "Waiting for CRD '${crd}'..."
         until kubectl get crd "$crd" &>/dev/null; do
             log "Waiting for CRD '${crd}'..."
             sleep 5

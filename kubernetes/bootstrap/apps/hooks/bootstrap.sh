@@ -9,6 +9,7 @@ function log() {
 
 # Wait for all nodes to become ready
 function wait_for_nodes() {
+    log "Waiting for Talos nodes to be ready..."
     until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m &>/dev/null; do
         log "Waiting for Talos nodes to be ready..."
         sleep 5
