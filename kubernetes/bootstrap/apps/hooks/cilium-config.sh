@@ -27,7 +27,7 @@ function apply_config() {
         --kustomize \
         "${KUBERNETES_DIR}/apps/kube-system/cilium/config" &>/dev/null;
     then
-        log "Cilium config is up to date. Skipping..."
+        log "Cilium config is up-to-date. Skipping..."
     else
         log "Applying Cilium config..."
         kubectl apply \
