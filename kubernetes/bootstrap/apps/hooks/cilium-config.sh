@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+function log() {
+    echo -e "\033[0;32m[$(date --iso-8601=seconds)] (${FUNCNAME[1]}) $*\033[0m"
+}
+
 function wait_for_crds() {
     local -r crds=(
         "ciliuml2announcementpolicies.cilium.io"
@@ -11,22 +15,21 @@ function wait_for_crds() {
 
     for crd in "${crds[@]}"; do
         until kubectl get crd "$crd" &>/dev/null; do
-            echo "Waiting for CRD '${crd}'..."
+            log "Waiting for Cilium CRD '${crd}'..."
             sleep 5
         done
     done
 }
 
 function apply_config() {
-    echo "Checking if Cilium config needs to be applied..."
     if kubectl diff \
         --namespace=kube-system \
         --kustomize \
         "${KUBERNETES_DIR}/apps/kube-system/cilium/config" &>/dev/null;
     then
-        echo "Cilium config is up to date. Skipping..."
+        log "Cilium config is up to date. Skipping..."
     else
-        echo "Applying Cilium config..."
+        log "Applying Cilium config..."
         kubectl apply \
             --namespace=kube-system \
             --server-side \

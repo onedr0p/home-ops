@@ -24,25 +24,18 @@ tasks:
       - which jq minijinja-cli sops talosctl
 
   apps:
-    desc: Bootstrap Apps [CSI_DISK=required]
+    desc: Bootstrap Apps [ROOK_DISK=required]
     summary: |
-      IMPORTANT: CSI_DISK must be set to the disk model used across all the nodes (e.g. Micron_7450_MTFDKBA800TFS)
+      IMPORTANT: ROOK_DISK must be set to the disk model used across all the nodes (e.g. Micron_7450_MTFDKBA800TFS)
     prompt: Bootstrap apps into the Talos cluster?
-    cmds:
-      - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
-      - op run --env-file {{.KUBERNETES_DIR}}/bootstrap/apps/.secrets.env --no-masking -- minijinja-cli {{.KUBERNETES_DIR}}/bootstrap/apps/templates/resources.yaml.j2 | kubectl apply --server-side --filename -
-      - helmfile --quiet --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+    cmd: helmfile --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
     env:
-      CSI_DISK: '{{.CSI_DISK}}'
+      ROOK_DISK: '{{.ROOK_DISK}}'
     requires:
-      vars: [CSI_DISK]
+      vars: [ROOK_DISK]
     preconditions:
       - op user get --me
       - talosctl config info
       - test -f {{.KUBERNETES_DIR}}/talosconfig
       - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml
-      - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/hooks/cilium-config.sh
-      - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/hooks/prometheus-operator-crds.sh
-      - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/hooks/wipe-csi-disk.sh
-      - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/templates/resources.yaml.j2
       - which curl jq helmfile kubectl op talosctl
