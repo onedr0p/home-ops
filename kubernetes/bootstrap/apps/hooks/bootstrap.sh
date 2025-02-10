@@ -53,7 +53,9 @@ function apply_bootstrap_config() {
     local -r env_file="${KUBERNETES_DIR}/bootstrap/apps/.secrets.env"
     local -r template="${KUBERNETES_DIR}/bootstrap/apps/templates/resources.yaml.j2"
 
-    if op run --env-file "${env_file}" --no-masking -- minijinja-cli "${template}" | kubectl diff --filename - &>/dev/null; then
+    if op run --env-file "${env_file}" --no-masking -- minijinja-cli "${template}" \
+        | kubectl diff --filename - &>/dev/null;
+    then
         log "Bootstrap resources are up-to-date. Skipping..."
         return
     fi

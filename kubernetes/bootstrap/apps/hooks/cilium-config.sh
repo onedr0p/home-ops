@@ -22,20 +22,15 @@ function wait_for_crds() {
 }
 
 function apply_config() {
-    if kubectl diff \
-        --namespace=kube-system \
-        --kustomize \
+    if kubectl --namespace kube-system diff --kustomize \
         "${KUBERNETES_DIR}/apps/kube-system/cilium/config" &>/dev/null;
     then
         log "Cilium config is up-to-date. Skipping..."
     else
         log "Applying Cilium config..."
-        kubectl apply \
-            --namespace=kube-system \
-            --server-side \
-            --field-manager=kustomize-controller \
-            --kustomize \
-            "${KUBERNETES_DIR}/apps/kube-system/cilium/config"
+        kubectl apply --namespace kube-system --server-side \
+            --field-manager kustomize-controller \
+            --kustomize "${KUBERNETES_DIR}/apps/kube-system/cilium/config"
     fi
 }
 
