@@ -7,10 +7,14 @@ function log() {
     echo -e "\033[0;32m[$(date --iso-8601=seconds)] (${FUNCNAME[1]}) $*\033[0m"
 }
 
-# Wait for all nodes to become ready
+# Wait for all nodes to be up
 function wait_for_nodes() {
+    if kubectl wait nodes --for=condition=Ready --all --timeout=10s &>/dev/null; then
+        log "All nodes are ready. Skipping..."
+        return
+    fi
     until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m &>/dev/null; do
-        log "Waiting for all Talos nodes to be ready..."
+        log "Waiting for all nodes to be up..."
         sleep 5
     done
 }
