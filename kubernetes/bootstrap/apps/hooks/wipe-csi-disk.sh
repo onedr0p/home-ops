@@ -20,7 +20,7 @@ function wipe_disks() {
 
     if [[ -n "${disks}" ]]; then
         echo "Wiping disk(s) '${disks}' on node '${node}'..."
-        talosctl --nodes "${node}" get disk "${disks}"
+        talosctl --nodes "${node}" wipe disk "${disks}"
     else
         echo "No matching disk found on node '${node}'"
     fi
