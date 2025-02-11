@@ -16,7 +16,7 @@ repositories:
 
 hooks:
   - events: ['prepare']
-    command: '{{ requiredEnv "KUBERNETES_DIR" }}/bootstrap/apps/hooks/bootstrap.sh'
+    command: '{{ requiredEnv "KUBERNETES_DIR" }}/bootstrap/apps/resources/prepare.sh'
     showlogs: true
 
 releases:
@@ -25,10 +25,6 @@ releases:
     chart: cilium/cilium
     version: 1.17.0
     values: ['{{ requiredEnv "KUBERNETES_DIR" }}/apps/kube-system/cilium/app/helm-values.yaml']
-    hooks:
-      - events: ['postsync']
-        command: '{{ requiredEnv "KUBERNETES_DIR" }}/bootstrap/apps/hooks/cilium-config.sh'
-        showlogs: true
 
   - name: coredns
     namespace: kube-system

@@ -1,10 +1,5 @@
 ---
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: cert-manager
----
-apiVersion: v1
 kind: Secret
 metadata:
   name: devbu-io-tls
@@ -22,13 +17,8 @@ metadata:
     controller.cert-manager.io/fao: "true"
 type: kubernetes.io/tls
 data:
-  tls.crt: {{ ENV.INGRESS_NGINX_TLS_CRT }}
-  tls.key: {{ ENV.INGRESS_NGINX_TLS_KEY }}
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: external-secrets
+  tls.crt: op://kubernetes/devbu-io-tls/tls.crt
+  tls.key: op://kubernetes/devbu-io-tls/tls.key
 ---
 apiVersion: v1
 kind: Secret
@@ -36,13 +26,8 @@ metadata:
   name: onepassword-secret
   namespace: external-secrets
 stringData:
-  1password-credentials.json: {{ ENV.ONEPASSWORD_CREDENTIALS }}
-  token: {{ ENV.ONEPASSWORD_CONNECT_TOKEN }}
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: flux-system
+  1password-credentials.json: op://kubernetes/1password/OP_CREDENTIALS_JSON
+  token: op://kubernetes/1password/OP_CONNECT_TOKEN
 ---
 apiVersion: v1
 kind: Secret
@@ -50,5 +35,4 @@ metadata:
   name: sops-age
   namespace: flux-system
 stringData:
-  age.agekey: |
-    {{ ENV.FLUX_SOPS_PRIVATE_KEY | indent(4) }}
+  age.agekey: op://kubernetes/sops/SOPS_PRIVATE_KEY
