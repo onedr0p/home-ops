@@ -17,7 +17,7 @@ function wait_for_nodes() {
 
     # Wait for all nodes to be 'Ready=False'
     until kubectl wait nodes --for=condition=Ready=False --all --timeout=10s &>/dev/null; do
-        gum "${LOG_ARGS[@]}" info "Nodes are not available, waiting for nodes to be available"
+        gum "${LOG_ARGS[@]}" info "Nodes are not available, waiting for nodes to be available. Retrying in 10 seconds..."
         sleep 10
     done
 }

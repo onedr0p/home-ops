@@ -28,7 +28,9 @@ tasks:
     summary: |
       IMPORTANT: ROOK_DISK must be set to the disk model used across all the nodes (e.g. Micron_7450_MTFDKBA800TFS)
     prompt: Bootstrap apps into the Talos cluster?
-    cmd: helmfile --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+    cmds:
+      - bash {{.KUBERNETES_DIR}}/bootstrap/apps/resources/prepare.sh
+      - helmfile --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
     env:
       ROOK_DISK: '{{.ROOK_DISK}}'
     requires:
@@ -39,4 +41,4 @@ tasks:
       - test -f {{.KUBERNETES_DIR}}/talosconfig
       - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml
       - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/resources/prepare.sh
-      - which curl gum jq helmfile kubectl kustomize op talosctl yq
+      - which gum jq helmfile kubectl kustomize op talosctl yq
