@@ -7,6 +7,7 @@ metadata:
 spec:
   version: ${KUBERNETES_VERSION}
   concurrency: 1
+  postCompleteDelay: 30s
   exclusive: true
   serviceAccountName: system-upgrade
   secrets:
@@ -19,12 +20,7 @@ spec:
         operator: Exists
   upgrade:
     image: ghcr.io/siderolabs/talosctl:${TALOS_VERSION}
-    envs:
-      - name: NODE
-        valueFrom:
-          fieldRef:
-            fieldPath: status.hostIP
     args:
-      - --nodes=$(NODE)
+      - --nodes=$(SYSTEM_UPGRADE_NODE_NAME)
       - upgrade-k8s
       - --to=$(SYSTEM_UPGRADE_PLAN_LATEST_VERSION)
