@@ -17,9 +17,12 @@ function check_dependencies() {
     done
 
     if [ ${#missing[@]} -ne 0 ]; then
-        printf "Missing required dependencies: %s\n" "${missing[*]}"
-        printf "Please install them and try again.\n"
-        exit 1
+        if ! command -v gum &>/dev/null; then
+            printf "%s \033[1;95m%s\033[0m Missing required dependencies \033[0;30mdependencies=\033[0m\"%s\"\n" \
+                "$(date --iso-8601=seconds)" "FATAL" "${missing[*]}"
+            exit 1
+        fi
+        gum "${LOG_ARGS[@]}" fatal "Missing required dependencies" dependencies "${missing[*]}"
     fi
 
     gum "${LOG_ARGS[@]}" debug "Dependencies are installed" dependencies "${deps[*]}"
@@ -175,6 +178,10 @@ function wipe_rook_disks() {
     done
 }
 
+function success() {
+    gum "${LOG_ARGS[@]}" info "Cluster is ready for installing helmfile apps"
+}
+
 function main() {
     check_dependencies
     wait_for_nodes
@@ -182,6 +189,7 @@ function main() {
     apply_namespaces
     apply_secrets
     wipe_rook_disks
+    success
 }
 
 main "$@"
