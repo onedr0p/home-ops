@@ -5,6 +5,26 @@ set -euo pipefail
 # Set default values for the 'gum log' command
 readonly LOG_ARGS=("log" "--time=rfc3339" "--formatter=text" "--structured" "--level")
 
+# Verify required CLI tools are installed
+function check_dependencies() {
+    local deps=("gum" "jq" "kubectl" "kustomize" "op" "talosctl" "yq")
+    local missing=()
+
+    for dep in "${deps[@]}"; do
+        if ! command -v "${dep}" &>/dev/null; then
+            missing+=("${dep}")
+        fi
+    done
+
+    if [ ${#missing[@]} -ne 0 ]; then
+        printf "Missing required dependencies: %s\n" "${missing[*]}"
+        printf "Please install them and try again.\n"
+        exit 1
+    fi
+
+    gum "${LOG_ARGS[@]}" debug "Dependencies are installed" dependencies "${deps[*]}"
+}
+
 # Talos requires the nodes to be 'Ready=False' before applying resources
 function wait_for_nodes() {
     gum "${LOG_ARGS[@]}" debug "Waiting for nodes to be available"
@@ -132,7 +152,7 @@ function wipe_rook_disks() {
         gum "${LOG_ARGS[@]}" fatal "No Talos nodes found"
     fi
 
-    gum "${LOG_ARGS[@]}" debug "Discovered Talos nodes" nodes "${nodes}"
+    gum "${LOG_ARGS[@]}" debug "Talos nodes discovered" nodes "${nodes}"
 
     # Wipe disks on each node that match the ROOK_DISK environment variable
     for node in ${nodes}; do
@@ -142,8 +162,9 @@ function wipe_rook_disks() {
             gum "${LOG_ARGS[@]}" fatal "No disks found" node "${node}" model "${ROOK_DISK:-}"
         fi
 
-        gum "${LOG_ARGS[@]}" debug "Discovered Talos node and disk" node "${node}" disks "${disks}"
+        gum "${LOG_ARGS[@]}" debug "Talos node and disk discovered" node "${node}" disks "${disks}"
 
+        # Wipe each disk on the node
         for disk in ${disks}; do
             if talosctl --nodes "${node}" wipe disk "${disk}" &>/dev/null; then
                 gum "${LOG_ARGS[@]}" info "Disk wiped" node "${node}" disk "${disk}"
@@ -155,6 +176,7 @@ function wipe_rook_disks() {
 }
 
 function main() {
+    check_dependencies
     wait_for_nodes
     apply_prometheus_crds
     apply_namespaces
