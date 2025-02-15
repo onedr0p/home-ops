@@ -8,7 +8,7 @@ tasks:
     desc: Apply Talos config to a node [IP=required]
     cmds:
       - task: down
-      - sops exec-file --input-type yaml --output-type yaml {{.KUBERNETES_DIR}}/bootstrap/talos/{{.IP}}.sops.yaml.j2 "minijinja-cli {}" | talosctl --nodes {{.IP}} apply-config --mode={{.MODE}} --file /dev/stdin
+      - minijinja-cli {{.KUBERNETES_DIR}}/bootstrap/talos/{{.IP}}.yaml.j2 | op inject | talosctl --nodes {{.IP}} apply-config --mode={{.MODE}} --file /dev/stdin
       - talosctl --nodes {{.IP}} health
       - task: up
     vars:
@@ -18,9 +18,9 @@ tasks:
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - test -f {{.KUBERNETES_DIR}}/bootstrap/.cluster.env
-      - test -f {{.KUBERNETES_DIR}}/bootstrap/talos/{{.IP}}.sops.yaml.j2
+      - test -f {{.KUBERNETES_DIR}}/bootstrap/talos/{{.IP}}.yaml.j2
       - test -f {{.KUBERNETES_DIR}}/talosconfig
-      - which minijinja-cli sops talosctl
+      - which minijinja-cli op talosctl
 
   upgrade-node:
     desc: Upgrade Talos on a single node [IP=required]

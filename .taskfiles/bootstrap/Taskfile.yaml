@@ -8,9 +8,7 @@ tasks:
     desc: Bootstrap Talos
     cmds:
       - for: { var: TALOS_NODES }
-        cmd: >
-          sops exec-file --input-type yaml --output-type yaml {{.ITEM}} "minijinja-cli {}"
-          | talosctl --nodes {{base .ITEM | replace ".sops.yaml.j2" ""}} apply-config --insecure --file /dev/stdin
+        cmd: minijinja-cli {{.ITEM}} | op inject | talosctl --nodes {{base .ITEM | replace ".yaml.j2" ""}} apply-config --insecure --file /dev/stdin
       - until talosctl --nodes {{.TALOS_CONTROLLER}} bootstrap; do sleep 5; done
       - talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name main {{.KUBERNETES_DIR}}
     vars:
@@ -19,9 +17,10 @@ tasks:
       TALOS_NODES:
         sh: ls {{.KUBERNETES_DIR}}/bootstrap/talos/*.j2
     preconditions:
+      - op user get --me
       - talosctl config info
       - test -f {{.KUBERNETES_DIR}}/talosconfig
-      - which jq minijinja-cli sops talosctl
+      - which jq minijinja-cli op talosctl
 
   apps:
     desc: Bootstrap Apps [ROOK_DISK=required]
