@@ -7,9 +7,7 @@ machine:
   ca:
     crt: op://kubernetes/talos/MACHINE_CA_CRT
     key: op://kubernetes/talos/MACHINE_CA_KEY
-  certSANs:
-    - 127.0.0.1
-    - 192.168.42.120
+  certSANs: ["127.0.0.1", "192.168.42.120"]
   kubelet:
     image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
     extraConfig:
@@ -18,17 +16,12 @@ machine:
       - destination: /var/mnt/extra
         type: bind
         source: /var/mnt/extra
-        options:
-          - bind
-          - rshared
-          - rw
+        options: ["bind", "rshared", "rw"]
     defaultRuntimeSeccompProfileEnabled: true
     nodeIP:
-      validSubnets:
-        - 192.168.42.0/24
+      validSubnets: ["192.168.42.0/24"]
     disableManifestsDirectory: true
   network:
-    hostname: k8s-1
     interfaces:
       - deviceSelector:
           hardwareAddr: 00:30:93:12:*
@@ -55,10 +48,6 @@ machine:
     # i915-ucode, intel-ucode, mei, thunderbolt
     image: factory.talos.dev/installer/de3b865124c5616da8084826167f8c0b0fbc9b905b146290db797024e84097fc:{{ ENV.TALOS_VERSION }}
     wipe: false
-  disks:
-    - device: /dev/disk/by-id/nvme-Corsair_MP600_MICRO_A828B442008B7C
-      partitions:
-        - mountpoint: /var/mnt/extra
   files:
     - # Spegel
       op: create
@@ -98,11 +87,8 @@ machine:
     stableHostname: true
     kubernetesTalosAPIAccess:
       enabled: true
-      allowedRoles:
-        - os:admin
-      allowedKubernetesNamespaces:
-        - actions-runner-system
-        - kube-system
+      allowedRoles: ["os:admin"]
+      allowedKubernetesNamespaces: ["actions-runner-system", "kube-system"]
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
     kubePrism:
@@ -136,10 +122,8 @@ cluster:
     cni:
       name: none
     dnsDomain: cluster.local
-    podSubnets:
-      - 10.42.0.0/16
-    serviceSubnets:
-      - 10.43.0.0/16
+    podSubnets: ["10.42.0.0/16"]
+    serviceSubnets: ["10.43.0.0/16"]
   coreDNS:
     disabled: true
   token: op://kubernetes/talos/CLUSTER_TOKEN
@@ -158,9 +142,7 @@ cluster:
       enable-aggregator-routing: true
       feature-gates: MutatingAdmissionPolicy=true
       runtime-config: admissionregistration.k8s.io/v1alpha1=true
-    certSANs:
-      - 127.0.0.1
-      - 192.168.42.120
+    certSANs: ["127.0.0.1", "192.168.42.120"]
     disablePodSecurityPolicy: true
     auditPolicy:
       apiVersion: audit.k8s.io/v1
@@ -201,6 +183,5 @@ cluster:
       key: op://kubernetes/talos/CLUSTER_ETCD_CA_KEY
     extraArgs:
       listen-metrics-urls: http://0.0.0.0:2381
-    advertisedSubnets:
-      - 192.168.42.0/24
+    advertisedSubnets: ["192.168.42.0/24"]
   allowSchedulingOnControlPlanes: true
