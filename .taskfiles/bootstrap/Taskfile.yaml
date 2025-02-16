@@ -4,40 +4,17 @@ version: '3'
 
 tasks:
 
-  talos:
-    desc: Bootstrap Talos
-    cmds:
-      - for: { var: TALOS_CONTROLLERS }
-        cmd: minijinja-cli {{.TALOS_DIR}}/controlplane.yaml.j2 | op inject | talosctl --nodes {{.ITEM}} apply-config --config-patch @{{.TALOS_DIR}}/controlplane/{{.ITEM}}.yaml --insecure --file /dev/stdin
-      - until talosctl --nodes {{.RANDOM_CONTROLLER}} bootstrap; do sleep 5; done
-      - talosctl kubeconfig --nodes {{.RANDOM_CONTROLLER}} --force --force-context-name main {{.ROOT_DIR}}
-    vars:
-      RANDOM_CONTROLLER:
-        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
-      TALOS_CONTROLLERS:
-        sh: talosctl config info --output json | jq --raw-output '.endpoints[]'
-    preconditions:
-      - op user get --me
-      - talosctl config info
-      - test -f {{.ROOT_DIR}}/talosconfig
-      - which jq minijinja-cli op talosctl
-
-  apps:
-    desc: Bootstrap Apps [ROOK_DISK=required]
+  default:
+    desc: Bootstrap Talos nodes and Cluster apps [ROOK_DISK=required]
     summary: |
       IMPORTANT: ROOK_DISK must be set to the disk model used across all the nodes (e.g. Micron_7450_MTFDKBA800TFS)
-    prompt: Bootstrap apps into the Talos cluster?
-    cmds:
-      - bash {{.BOOTSTRAP_DIR}}/resources/prepare.sh
-      - helmfile --file {{.BOOTSTRAP_DIR}}/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+    prompt: Bootstrap the Talos cluster?
+    cmd: bash {{.SCRIPTS_DIR}}/installation.sh
     env:
       ROOK_DISK: '{{.ROOK_DISK}}'
     requires:
       vars: [ROOK_DISK]
     preconditions:
-      - op user get --me
       - talosctl config info
       - test -f {{.ROOT_DIR}}/talosconfig
-      - test -f {{.BOOTSTRAP_DIR}}/helmfile.yaml
-      - test -f {{.BOOTSTRAP_DIR}}/resources/prepare.sh
-      - which helmfile op talosctl
+      - test -f {{.SCRIPTS_DIR}}/installation.sh

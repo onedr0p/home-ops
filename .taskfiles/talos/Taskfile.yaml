@@ -8,7 +8,7 @@ tasks:
     desc: Apply Talos config to a node [IP=required] [MODE=auto]
     cmds:
       - task: down
-      - minijinja-cli {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}.yaml.j2 | op inject | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} --config-patch @{{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}/{{.IP}}.yaml --file /dev/stdin
+      - minijinja-cli {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}.yaml.j2 | op inject | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} --config-patch @{{.TALOS_DIR}}/patches/{{.IP}}.yaml --file /dev/stdin
       - talosctl --nodes {{.IP}} health
       - task: up
     vars:
