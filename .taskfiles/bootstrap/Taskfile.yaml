@@ -7,21 +7,20 @@ tasks:
   talos:
     desc: Bootstrap Talos
     cmds:
-      - for: { var: TALOS_NODES }
-        cmd: >
-          sops exec-file --input-type yaml --output-type yaml {{.ITEM}} "minijinja-cli {}"
-          | talosctl --nodes {{base .ITEM | replace ".sops.yaml.j2" ""}} apply-config --insecure --file /dev/stdin
-      - until talosctl --nodes {{.TALOS_CONTROLLER}} bootstrap; do sleep 5; done
-      - talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force --force-context-name main {{.KUBERNETES_DIR}}
+      - for: { var: TALOS_CONTROLLERS }
+        cmd: minijinja-cli {{.TALOS_DIR}}/controlplane.yaml.j2 | op inject | talosctl --nodes {{.ITEM}} apply-config --config-patch @{{.TALOS_DIR}}/controlplane/{{.ITEM}}.yaml --insecure --file /dev/stdin
+      - until talosctl --nodes {{.RANDOM_CONTROLLER}} bootstrap; do sleep 5; done
+      - talosctl kubeconfig --nodes {{.RANDOM_CONTROLLER}} --force --force-context-name main {{.ROOT_DIR}}
     vars:
-      TALOS_CONTROLLER:
+      RANDOM_CONTROLLER:
         sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
-      TALOS_NODES:
-        sh: ls {{.KUBERNETES_DIR}}/bootstrap/talos/*.j2
+      TALOS_CONTROLLERS:
+        sh: talosctl config info --output json | jq --raw-output '.endpoints[]'
     preconditions:
+      - op user get --me
       - talosctl config info
-      - test -f {{.KUBERNETES_DIR}}/talosconfig
-      - which jq minijinja-cli sops talosctl
+      - test -f {{.ROOT_DIR}}/talosconfig
+      - which jq minijinja-cli op talosctl
 
   apps:
     desc: Bootstrap Apps [ROOK_DISK=required]
@@ -29,8 +28,8 @@ tasks:
       IMPORTANT: ROOK_DISK must be set to the disk model used across all the nodes (e.g. Micron_7450_MTFDKBA800TFS)
     prompt: Bootstrap apps into the Talos cluster?
     cmds:
-      - bash {{.KUBERNETES_DIR}}/bootstrap/apps/resources/prepare.sh
-      - helmfile --file {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+      - bash {{.BOOTSTRAP_DIR}}/resources/prepare.sh
+      - helmfile --file {{.BOOTSTRAP_DIR}}/helmfile.yaml apply --skip-diff-on-install --suppress-diff
     env:
       ROOK_DISK: '{{.ROOK_DISK}}'
     requires:
@@ -38,7 +37,7 @@ tasks:
     preconditions:
       - op user get --me
       - talosctl config info
-      - test -f {{.KUBERNETES_DIR}}/talosconfig
-      - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/helmfile.yaml
-      - test -f {{.KUBERNETES_DIR}}/bootstrap/apps/resources/prepare.sh
+      - test -f {{.ROOT_DIR}}/talosconfig
+      - test -f {{.BOOTSTRAP_DIR}}/helmfile.yaml
+      - test -f {{.BOOTSTRAP_DIR}}/resources/prepare.sh
       - which helmfile op talosctl
