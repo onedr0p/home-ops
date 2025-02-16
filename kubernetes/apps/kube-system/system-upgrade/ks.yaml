@@ -36,11 +36,9 @@ spec:
   interval: 30m
   path: ./kubernetes/apps/kube-system/system-upgrade/plans
   postBuild:
-    substitute:
-      # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-      TALOS_VERSION: v1.9.4
-      # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
-      KUBERNETES_VERSION: v1.32.2
+    substituteFrom:
+      - name: system-upgrade-versions
+        kind: ConfigMap
   prune: true
   sourceRef:
     kind: GitRepository
