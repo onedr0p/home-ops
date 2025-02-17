@@ -125,6 +125,14 @@ cluster:
     serviceSubnets: ["10.43.0.0/16"]
   coreDNS:
     disabled: true
+  extraManifests:
+    {% for crd in [
+        "alertmanagerconfigs", "alertmanagers", "podmonitors", "probes", "prometheusagents",
+        "prometheuses", "prometheusrules", "scrapeconfigs", "servicemonitors", "thanosrulers"
+    ] %}
+    - # renovate: datasource=docker depName=ghcr.io/prometheus-operator/prometheus-operator
+      https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.80.0/example/prometheus-operator-crd/monitoring.coreos.com_{{ crd }}.yaml
+    {% endfor %}
   token: op://kubernetes/talos/CLUSTER_TOKEN
   secretboxEncryptionSecret: op://kubernetes/talos/CLUSTER_SECRETBOXENCRYPTIONSECRET
   ca:

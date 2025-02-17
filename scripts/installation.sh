@@ -4,7 +4,6 @@ set -euo pipefail
 
 # shellcheck disable=SC2155
 export ROOT_DIR="$(git rev-parse --show-toplevel)"
-
 # shellcheck disable=SC1091
 source "$(dirname "${0}")/lib/common.sh"
 
@@ -12,24 +11,28 @@ source "$(dirname "${0}")/lib/common.sh"
 function apply_talos_config() {
     log debug "Applying Talos configuration"
 
-    local -r talos_machine_files=(
-        "${ROOT_DIR}/talos/controlplane.yaml.j2"
-        "${ROOT_DIR}/talos/worker.yaml.j2"
-    )
+    local talos_controlplane_file="${ROOT_DIR}/talos/controlplane.yaml.j2"
+    local talos_worker_file="${ROOT_DIR}/talos/worker.yaml.j2"
 
-    for file in "${talos_machine_files[@]}"; do
-        if [[ ! -f "${file}" ]]; then
-            log warn "File does not exist" "file=${file}"
-            continue
-        fi
+    if [[ ! -f ${talos_controlplane_file} ]]; then
+        log fatal "No Talos machine files found for controlplane" "file=${talos_controlplane_file}"
+    fi
 
+    # Skip worker configuration if no worker file is found
+    if [[ ! -f ${talos_worker_file} ]]; then
+        log warn "No Talos machine files found for worker" "file=${talos_worker_file}"
+        talos_worker_file=""
+    fi
+
+    # Apply the Talos configuration to the controlplane and worker nodes
+    for file in ${talos_controlplane_file} ${talos_worker_file}; do
         if ! nodes=$(talosctl config info --output json 2>/dev/null | jq --exit-status --raw-output '.nodes | join(" ")') || [[ -z "${nodes}" ]]; then
             log fatal "No Talos nodes found"
         fi
 
         log debug "Talos nodes discovered" "nodes=${nodes}"
 
-        # Inject secrets into the talos node template
+        # Inject secrets into the talos node templates
         if ! resources=$(minijinja-cli "${file}" | op inject 2>/dev/null) || [[ -z "${resources}" ]]; then
             log fatal "Failed to inject secrets" "file=${file}"
         fi
@@ -38,7 +41,13 @@ function apply_talos_config() {
         for node in ${nodes}; do
             log debug "Applying Talos node configuration" "node=${node}"
 
-            if ! output=$(echo "${resources}" | talosctl --nodes "${node}" apply-config --config-patch "@${ROOT_DIR}/talos/patches/${node}.yaml" --insecure --file /dev/stdin 2>&1);
+            node_patch_file="${ROOT_DIR}/talos/nodes/${node}.yaml"
+
+            if [[ ! -f ${node_patch_file} ]]; then
+                log fatal "No Talos node file found" "file=${node_patch_file}"
+            fi
+
+            if ! output=$(echo "${resources}" | talosctl --nodes "${node}" apply-config --config-patch "@${node_patch_file}" --insecure --file /dev/stdin 2>&1);
             then
                 if [[ "${output}" == *"certificate required"* ]]; then
                     log warn "Talos node is already configured, skipping apply of config" "node=${node}"
@@ -70,6 +79,7 @@ function bootstrap_talos() {
             return
         fi
 
+        # Set bootstrapped to false after the first attempt
         bootstrapped=false
 
         log info "Talos bootstrap failed, retrying in 10 seconds..." "controller=${controller}"
@@ -109,93 +119,33 @@ function wait_for_nodes() {
     done
 }
 
-# Applications in the helmfile require Prometheus custom resources (e.g. servicemonitors)
-function apply_prometheus_crds() {
-    log debug "Applying Prometheus CRDs"
+# Resources to be applied before the helmfile charts are installed
+function apply_resources() {
+    log debug "Applying resources"
 
-    local resources crds
-
-    # Fetch resources using kustomize build
-    if ! resources=$(kustomize build "https://github.com/prometheus-operator/prometheus-operator/?ref=${PROMETHEUS_OPERATOR_VERSION}" 2>/dev/null) || [[ -z "${resources}" ]]; then
-        log fatal "Failed to fetch Prometheus CRDs, check the version or the repository URL"
-    fi
-
-    # Extract only CustomResourceDefinitions
-    if ! crds=$(echo "${resources}" | yq '. | select(.kind == "CustomResourceDefinition")' 2>/dev/null) || [[ -z "${crds}" ]]; then
-        log fatal "No CustomResourceDefinitions found in the fetched resources"
-    fi
-
-    # Check if the CRDs are up-to-date
-    if echo "${crds}" | kubectl diff --filename - &>/dev/null; then
-        log info "Prometheus CRDs are up-to-date"
-        return
-    fi
-
-    # Apply the CRDs
-    if echo "${crds}" | kubectl apply --server-side --filename - &>/dev/null; then
-        log info "Prometheus CRDs applied successfully"
-    else
-        log fatal "Failed to apply Prometheus CRDs"
-    fi
-}
-
-# The application namespaces are created before applying the resources
-function apply_namespaces() {
-    log debug "Applying namespaces"
-
-    local -r apps_dir="${ROOT_DIR}/kubernetes/apps"
-
-    if [[ ! -d "${apps_dir}" ]]; then
-        log fatal "Directory does not exist" "directory=${apps_dir}"
-    fi
-
-    for app in "${apps_dir}"/*/; do
-        namespace=$(basename "${app}")
-
-        # Check if the namespace resources are up-to-date
-        if kubectl get namespace "${namespace}" &>/dev/null; then
-            log info "Namespace resource is up-to-date" "resource=${namespace}"
-            continue
-        fi
-
-        # Apply the namespace resources
-        if kubectl create namespace "${namespace}" --dry-run=client --output=yaml \
-            | kubectl apply --server-side --filename - &>/dev/null;
-        then
-            log info "Namespace resource applied" "resource=${namespace}"
-        else
-            log fatal "Failed to apply namespace resource" "resource=${namespace}"
-        fi
-    done
-}
-
-# Secrets to be applied before the helmfile charts are installed
-function apply_secrets() {
-    log debug "Applying secrets"
-
-    local -r secrets_file="${ROOT_DIR}/bootstrap/secrets.yaml.tpl"
+    local -r resources_file="${ROOT_DIR}/bootstrap/resources.yaml.j2"
     local resources
 
-    if [[ ! -f "${secrets_file}" ]]; then
-        log fatal "File does not exist" "file=${secrets_file}"
+    if [[ ! -f "${resources_file}" ]]; then
+        log fatal "File does not exist" "file=${resources_file}"
     fi
 
-    # Inject secrets into the template
-    if ! resources=$(op inject --in-file "${secrets_file}" 2>/dev/null) || [[ -z "${resources}" ]]; then
-        log fatal "Failed to inject secrets" "file=${secrets_file}"
+    # Inject secrets into the resources template
+    if ! resources=$(minijinja-cli "${resources_file}" | op inject 2>/dev/null) || [[ -z "${resources}" ]]; then
+        log fatal "Failed to inject resources" "file=${resources_file}"
     fi
 
-    # Check if the secret resources are up-to-date
+    # Check if the resources are up-to-date
     if echo "${resources}" | kubectl diff --filename - &>/dev/null; then
-        log info "Secret resources are up-to-date"
+        log info "Resources are up-to-date"
         return
     fi
 
-    # Apply secret resources
+    # Apply resources
     if echo "${resources}" | kubectl apply --server-side --filename - &>/dev/null; then
-        log info "Secret resources applied"
+        log info "Resources applied"
     else
-        log fatal "Failed to apply secret resources"
+        log fatal "Failed to apply resources"
     fi
 }
 
@@ -204,7 +154,7 @@ function wipe_rook_disks() {
     log debug "Wiping Rook disks"
 
     # Skip disk wipe if Rook is detected running in the cluster
-    # TODO: Better way to detect Rook?
+    # TODO: Is there a better way to detect Rook / OSDs?
     if kubectl --namespace rook-ceph get kustomization rook-ceph &>/dev/null; then
         log warn "Rook is detected running in the cluster, skipping disk wipe"
         return
@@ -256,8 +206,8 @@ function apply_helm_releases() {
 
 function main() {
     # Verifications before bootstrapping the cluster
-    check_env KUBERNETES_VERSION PROMETHEUS_OPERATOR_VERSION ROOK_DISK TALOS_VERSION
-    check_cli helmfile jq kubectl kustomize op talosctl yq
+    check_env KUBERNETES_VERSION ROOK_DISK TALOS_VERSION
+    check_cli helmfile jq kubectl kustomize minijinja-cli op talosctl yq
 
     if ! op user get --me &>/dev/null; then
         log fatal "Failed to authenticate with 1Password CLI"
@@ -268,15 +218,13 @@ function main() {
     bootstrap_talos
     fetch_kubeconfig
 
-    # Wait for the nodes to be available
+    # Apply resources and Helm releases
     wait_for_nodes
-
-    # Bootstrap the cluster configuration
-    apply_prometheus_crds
-    apply_namespaces
-    apply_secrets
     wipe_rook_disks
+    apply_resources
     apply_helm_releases
+
+    log info "Congrats! The cluster is bootstrapped and Flux is syncing the Git repository"
 }
 
 main "$@"
