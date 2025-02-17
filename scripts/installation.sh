@@ -154,7 +154,7 @@ function apply_prometheus_operator_crds() {
 function apply_resources() {
     log debug "Applying resources"
 
-    local -r resources_file="${ROOT_DIR}/bootstrap/resources.yaml.tpl"
+    local -r resources_file="${ROOT_DIR}/bootstrap/resources.yaml.j2"
     local resources
 
     if [[ ! -f "${resources_file}" ]]; then
@@ -162,7 +162,7 @@ function apply_resources() {
     fi
 
     # Inject secrets into the resources template
-    if ! resources=$(op inject --in-file "${resources_file}" 2>/dev/null) || [[ -z "${resources}" ]]; then
+    if ! resources=$(minijinja-cli "${resources_file}" | op inject 2>/dev/null) || [[ -z "${resources}" ]]; then
         log fatal "Failed to inject resources" "file=${resources_file}"
     fi
 
@@ -238,7 +238,7 @@ function apply_helm_releases() {
 function main() {
     # Verifications before bootstrapping the cluster
     check_env KUBERNETES_VERSION PROMETHEUS_OPERATOR_VERSION ROOK_DISK TALOS_VERSION
-    check_cli helmfile jq kubectl kustomize op talosctl yq
+    check_cli helmfile jq kubectl kustomize minijinja-cli op talosctl yq
 
     if ! op user get --me &>/dev/null; then
         log fatal "Failed to authenticate with 1Password CLI"
@@ -258,7 +258,7 @@ function main() {
     # Apply resources, Helm releases and sync Git repo with Flux
     apply_prometheus_operator_crds
     apply_resources
-    apply_helm_releases
+    # apply_helm_releases
 
     log info "Cluster bootstrapped successfully"
 }
