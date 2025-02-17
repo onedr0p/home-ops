@@ -119,37 +119,6 @@ function wait_for_nodes() {
     done
 }
 
-# Applications in the helmfile require Prometheus custom resources (e.g. servicemonitors)
-# TODO: Remove if installing prometheus operator crds via 'cluster.extraManifests' in talos config works
-function apply_prometheus_operator_crds() {
-    log debug "Applying Prometheus CRDs"
-
-    local resources crds
-
-    # Fetch resources using kustomize build
-    if ! resources=$(kustomize build "https://github.com/prometheus-operator/prometheus-operator/?ref=${PROMETHEUS_OPERATOR_VERSION}" 2>/dev/null) || [[ -z "${resources}" ]]; then
-        log fatal "Failed to fetch Prometheus Operator CRDs, check the version or the repository URL"
-    fi
-
-    # Extract only CustomResourceDefinitions
-    if ! crds=$(echo "${resources}" | yq '. | select(.kind == "CustomResourceDefinition")' 2>/dev/null) || [[ -z "${crds}" ]]; then
-        log fatal "No CustomResourceDefinitions found in the fetched resources"
-    fi
-
-    # Check if the CRDs are up-to-date
-    if echo "${crds}" | kubectl diff --filename - &>/dev/null; then
-        log info "Prometheus Operator CRDs are up-to-date"
-        return
-    fi
-
-    # Apply the CRDs
-    if echo "${crds}" | kubectl apply --server-side --filename - &>/dev/null; then
-        log info "Prometheus Operator CRDs applied successfully"
-    else
-        log fatal "Failed to apply Prometheus Operator CRDs"
-    fi
-}
-
 # Resources to be applied before the helmfile charts are installed
 function apply_resources() {
     log debug "Applying resources"
@@ -237,7 +206,7 @@ function apply_helm_releases() {
 
 function main() {
     # Verifications before bootstrapping the cluster
-    check_env KUBERNETES_VERSION PROMETHEUS_OPERATOR_VERSION ROOK_DISK TALOS_VERSION
+    check_env KUBERNETES_VERSION ROOK_DISK TALOS_VERSION
     check_cli helmfile jq kubectl kustomize minijinja-cli op talosctl yq
 
     if ! op user get --me &>/dev/null; then
@@ -256,11 +225,10 @@ function main() {
     wipe_rook_disks
 
     # Apply resources, Helm releases and sync Git repo with Flux
-    apply_prometheus_operator_crds
     apply_resources
-    # apply_helm_releases
+    apply_helm_releases
 
-    log info "Cluster bootstrapped successfully"
+    log info "Congrats! The cluster is bootstrapped and Flux is syncing the Git repository"
 }
 
 main "$@"

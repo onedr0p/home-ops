@@ -23,16 +23,16 @@ function wait_for_crds() {
 function apply_config() {
     log debug "Applying Cilium config"
 
-    local -r cilium_config_file="${ROOT_DIR}/kubernetes/apps/kube-system/cilium/config"
+    local -r cilium_config_dir="${ROOT_DIR}/kubernetes/apps/kube-system/cilium/config"
 
-    if [[ ! -f "${cilium_config_file}" ]]; then
-        log fatal "No Cilium config file found" "file=${cilium_config_file}"
+    if [[ ! -d "${cilium_config_dir}" ]]; then
+        log fatal "No Cilium config directory found" "file=${cilium_config_dir}"
     fi
 
-    if kubectl --namespace kube-system diff --kustomize "${cilium_config_file}" &>/dev/null; then
+    if kubectl --namespace kube-system diff --kustomize "${cilium_config_dir}" &>/dev/null; then
         log info "Cilium config is up-to-date, skipping apply of Cilium config"
     else
-        if kubectl apply --namespace kube-system --server-side --field-manager kustomize-controller --kustomize "${cilium_config_file}" &>/dev/null; then
+        if kubectl apply --namespace kube-system --server-side --field-manager kustomize-controller --kustomize "${cilium_config_dir}" &>/dev/null; then
             log info "Cilium config applied successfully"
         else
             log fatal "Failed to apply Cilium config"
