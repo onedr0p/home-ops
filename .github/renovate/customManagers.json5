@@ -5,8 +5,8 @@
       "customType": "regex",
       "description": ["Process YAML custom dependencies"],
       "fileMatch": [
-        "(^|/)kubernetes/.+\\.env$",
-        "(^|/)kubernetes/.+\\.ya?ml$"
+        "(^|/).+\\.env$",
+        "(^|/).+\\.ya?ml$"
       ],
       "matchStrings": [
         // # renovate: datasource=github-releases depName=k3s-io/k3s
@@ -21,13 +21,6 @@
         "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+/(?<currentValue>(v|\\d)[^/]+)"
       ],
       "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}"
-    },
-    {
-      "customType": "regex",
-      "description": ["Process any imageName keys in YAML files (cloudnative-pg)"],
-      "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml$"],
-      "matchStrings": ["imageName: (?<depName>[^\\s:]+):(?<currentValue>\\S+)(@(?<currentDigest>sha256:\\S+)?)"],
-      "datasourceTemplate": "docker"
     }
   ]
 }

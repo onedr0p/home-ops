@@ -9,6 +9,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/system-upgrade
   interval: 30m
   path: ./kubernetes/apps/kube-system/system-upgrade/app
   prune: true
@@ -36,11 +38,9 @@ spec:
   interval: 30m
   path: ./kubernetes/apps/kube-system/system-upgrade/plans
   postBuild:
-    substitute:
-      # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-      TALOS_VERSION: v1.9.4
-      # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
-      KUBERNETES_VERSION: v1.32.2
+    substituteFrom:
+      - kind: ConfigMap
+        name: system-upgrade-plan-versions
   prune: true
   sourceRef:
     kind: GitRepository

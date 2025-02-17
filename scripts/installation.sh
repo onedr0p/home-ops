@@ -113,12 +113,10 @@ function wait_for_nodes() {
 function apply_prometheus_crds() {
     log debug "Applying Prometheus CRDs"
 
-    # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
-    local -r version=v0.80.0
     local resources crds
 
     # Fetch resources using kustomize build
-    if ! resources=$(kustomize build "https://github.com/prometheus-operator/prometheus-operator/?ref=${version}" 2>/dev/null) || [[ -z "${resources}" ]]; then
+    if ! resources=$(kustomize build "https://github.com/prometheus-operator/prometheus-operator/?ref=${PROMETHEUS_OPERATOR_VERSION}" 2>/dev/null) || [[ -z "${resources}" ]]; then
         log fatal "Failed to fetch Prometheus CRDs, check the version or the repository URL"
     fi
 
@@ -258,7 +256,7 @@ function apply_helm_releases() {
 
 function main() {
     # Verifications before bootstrapping the cluster
-    check_env ROOK_DISK
+    check_env KUBERNETES_VERSION PROMETHEUS_OPERATOR_VERSION ROOK_DISK TALOS_VERSION
     check_cli helmfile jq kubectl kustomize op talosctl yq
 
     if ! op user get --me &>/dev/null; then
