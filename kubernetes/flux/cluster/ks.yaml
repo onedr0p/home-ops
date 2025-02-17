@@ -46,7 +46,7 @@ spec:
   timeout: 5m
   wait: false
   patches:
-    - # Add Sops decryption and postBuild substitutions to child Kustomizations
+    - # Add Sops decryption to child Kustomizations
       patch: |-
         apiVersion: kustomize.toolkit.fluxcd.io/v1
         kind: Kustomization
@@ -57,14 +57,6 @@ spec:
             provider: sops
             secretRef:
               name: sops-age
-          postBuild:
-            substituteFrom:
-              - name: cluster-settings
-                kind: ConfigMap
-                optional: true
-              - name: cluster-secrets
-                kind: Secret
-                optional: true
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization
