@@ -235,10 +235,6 @@ function apply_helm_releases() {
     log info "Helm releases applied successfully"
 }
 
-function success() {
-    log info "Cluster bootstrapped successfully"
-}
-
 function main() {
     # Verifications before bootstrapping the cluster
     check_env KUBERNETES_VERSION PROMETHEUS_OPERATOR_VERSION ROOK_DISK TALOS_VERSION
@@ -262,8 +258,9 @@ function main() {
     # Apply resources, Helm releases and sync Git repo with Flux
     apply_prometheus_operator_crds
     apply_resources
-    # apply_helm_releases
-    success
+    apply_helm_releases
+
+    log info "Cluster bootstrapped successfully"
 }
 
 main "$@"
