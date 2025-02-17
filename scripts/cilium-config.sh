@@ -30,7 +30,7 @@ function apply_config() {
     fi
 
     if kubectl --namespace kube-system diff --kustomize "${cilium_config_dir}" &>/dev/null; then
-        log info "Cilium config is up-to-date, skipping apply of Cilium config"
+        log info "Cilium config is up-to-date"
     else
         if kubectl apply --namespace kube-system --server-side --field-manager kustomize-controller --kustomize "${cilium_config_dir}" &>/dev/null; then
             log info "Cilium config applied successfully"
