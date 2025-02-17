@@ -218,13 +218,9 @@ function main() {
     bootstrap_talos
     fetch_kubeconfig
 
-    # Wait for the nodes to be available
+    # Apply resources and Helm releases
     wait_for_nodes
-
-    # Wipe disks in use by Rook
     wipe_rook_disks
-
-    # Apply resources, Helm releases and sync Git repo with Flux
     apply_resources
     apply_helm_releases
 
