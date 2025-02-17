@@ -76,7 +76,7 @@ function bootstrap_talos() {
     until output=$(talosctl --nodes "${controller}" bootstrap 2>&1); do
         if [[ "${bootstrapped}" == true && "${output}" == *"AlreadyExists"* ]]; then
             log info "Talos is bootstrapped" "controller=${controller}"
-            return
+            break
         fi
 
         # Set bootstrapped to false after the first attempt
