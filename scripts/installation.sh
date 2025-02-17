@@ -113,7 +113,7 @@ function wait_for_nodes() {
 function apply_prometheus_crds() {
     log debug "Applying Prometheus CRDs"
 
-    local resources
+    local resources crds
 
     # Fetch resources using kustomize build
     if ! resources=$(kustomize build "https://github.com/prometheus-operator/prometheus-operator/?ref=${PROMETHEUS_OPERATOR_VERSION}" 2>/dev/null) || [[ -z "${resources}" ]]; then
