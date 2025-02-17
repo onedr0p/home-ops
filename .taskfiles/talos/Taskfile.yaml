@@ -19,9 +19,8 @@ tasks:
       vars: [IP]
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
-      - test -f {{.ROOT_DIR}}/.talos.env
       - test -f {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}.yaml.j2
-      - test -f {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}/{{.IP}}.yaml
+      - test -f {{.TALOS_DIR}}/nodes/{{.IP}}.yaml
       - test -f {{.ROOT_DIR}}/talosconfig
       - which minijinja-cli op talosctl
 
@@ -42,9 +41,8 @@ tasks:
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
-      - test -f {{.ROOT_DIR}}/.talos.env
       - test -f {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}.yaml.j2
-      - test -f {{.TALOS_DIR}}/{{.TALOS_MACHINE_TYPE}}/{{.IP}}.yaml
+      - test -f {{.TALOS_DIR}}/nodes/{{.IP}}.yaml
       - test -f {{.ROOT_DIR}}/talosconfig
       - which minijinja-cli talosctl yq
 
@@ -60,7 +58,6 @@ tasks:
     preconditions:
       - talosctl --nodes {{.RANDOM_CONTROLLER}} get machineconfig
       - talosctl config info
-      - test -f {{.ROOT_DIR}}/.talos.env
       - test -f {{.ROOT_DIR}}/talosconfig
       - which jq talosctl
 
@@ -78,7 +75,6 @@ tasks:
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
-      - test -f {{.ROOT_DIR}}/.talos.env
       - test -f {{.ROOT_DIR}}/talosconfig
       - which talosctl
 
