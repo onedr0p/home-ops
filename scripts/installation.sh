@@ -185,7 +185,7 @@ function wipe_rook_disks() {
     log debug "Wiping Rook disks"
 
     # Skip disk wipe if Rook is detected running in the cluster
-    # TODO: Better way to detect Rook?
+    # TODO: Is there a better way to detect Rook / OSDs?
     if kubectl --namespace rook-ceph get kustomization rook-ceph &>/dev/null; then
         log warn "Rook is detected running in the cluster, skipping disk wipe"
         return
