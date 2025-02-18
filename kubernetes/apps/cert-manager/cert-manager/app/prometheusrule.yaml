@@ -13,7 +13,7 @@ spec:
             absent(up{job="cert-manager"})
           for: 5m
           annotations:
-            summary: >
+            summary: >-
               Cert Manager has dissapeared from Prometheus service discovery
           labels:
             severity: critical
@@ -25,7 +25,7 @@ spec:
             avg by (exported_namespace, namespace, name) (certmanager_certificate_expiration_timestamp_seconds - time()) < (21 * 24 * 3600)
           for: 5m
           annotations:
-            summary: >
+            summary: >-
               The cert {{ $labels.name }} is {{ $value | humanizeDuration }} from expiry, it should have renewed over a week ago
           labels:
             severity: critical
@@ -35,7 +35,7 @@ spec:
             max by (name, exported_namespace, namespace, condition) (certmanager_certificate_ready_status{condition!="True"} == 1)
           for: 5m
           annotations:
-            summary: >
+            summary: >-
               The cert {{ $labels.name }} is not ready to serve traffic
           labels:
             severity: critical
@@ -45,7 +45,7 @@ spec:
             sum by (host) (rate(certmanager_http_acme_client_request_count{status="429"}[5m])) > 0
           for: 5m
           annotations:
-            summary: >
+            summary: >-
               Cert manager hitting LetsEncrypt rate limits
           labels:
             severity: critical
