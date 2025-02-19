@@ -4,7 +4,7 @@ groups:
     rules:
       - alert: ProwlarrDatabaseIsLocked
         expr: |
-          count_over_time({app=~"prowlarr"} |~ "(?i)database is locked"[5m]) > 0
+          sum by (app) (count_over_time({app=~"prowlarr"} |~ "(?i)database is locked"[5m])) > 0
         for: 5m
         annotations:
           summary: >-
@@ -14,7 +14,7 @@ groups:
 
       - alert: ProwlarrDatabaseIsMalformed
         expr: |
-          count_over_time({app=~"prowlarr"} |~ "(?i)database disk image is malformed"[5m]) > 0
+          sum by (app) (count_over_time({app=~"prowlarr"} |~ "(?i)database disk image is malformed"[5m])) > 0
         for: 5m
         annotations:
           summary: >-

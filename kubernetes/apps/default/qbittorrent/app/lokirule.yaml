@@ -4,7 +4,7 @@ groups:
     rules:
       - alert: QbittorrentFastResumeRejected
         expr: |
-          count_over_time({app="qbittorrent"} |~ "(?i)fast resume rejected"[5m]) > 0
+          sum by (app) (count_over_time({app="qbittorrent"} |~ "(?i)fast resume rejected"[5m])) > 0
         for: 5m
         annotations:
           summary: >-
