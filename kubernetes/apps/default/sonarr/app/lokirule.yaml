@@ -4,8 +4,8 @@ groups:
     rules:
       - alert: SonarrDatabaseIsLocked
         expr: |
-          sum by (app) (count_over_time({app=~"sonarr"} |~ "(?i)database is locked"[5m])) > 0
-        for: 5m
+          count_over_time({app=~"sonarr"} |~ "(?i)database is locked"[5m]) > 0
+        for: 2m
         annotations:
           summary: >-
             {{ $labels.app }} is experiencing database issues
@@ -14,8 +14,8 @@ groups:
 
       - alert: SonarrDatabaseIsMalformed
         expr: |
-          sum by (app) (count_over_time({app=~"sonarr"} |~ "(?i)database disk image is malformed"[5m])) > 0
-        for: 5m
+          count_over_time({app=~"sonarr"} |~ "(?i)database disk image is malformed"[5m]) > 0
+        for: 2m
         annotations:
           summary: >-
             {{ $labels.app }} is experiencing database issues

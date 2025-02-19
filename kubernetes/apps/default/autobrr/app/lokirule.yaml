@@ -1,10 +1,10 @@
 ---
 groups:
-  - name: plex
+  - name: autobrr
     rules:
-      - alert: PlexDatabaseIsBusy
+      - alert: AutobrrDatabaseIsMalformed
         expr: |
-          count_over_time({app="plex"} |~ "(?i)retry busy DB"[5m]) > 0
+          count_over_time({app=~"autobrr"} |~ "(?i)database image malformed"[5m]) > 0
         for: 2m
         annotations:
           summary: >-
