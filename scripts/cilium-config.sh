@@ -26,7 +26,7 @@ function apply_config() {
     local -r cilium_config_dir="${ROOT_DIR}/kubernetes/apps/kube-system/cilium/config"
 
     if [[ ! -d "${cilium_config_dir}" ]]; then
-        log fatal "No Cilium config directory found" "file=${cilium_config_dir}"
+        log fatal "No Cilium config directory found" "directory=${cilium_config_dir}"
     fi
 
     if kubectl --namespace kube-system diff --kustomize "${cilium_config_dir}" &>/dev/null; then
