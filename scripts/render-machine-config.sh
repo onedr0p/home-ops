@@ -32,7 +32,7 @@ function main() {
     check_cli minijinja-cli op yq
 
     if [[ -z "${NODE_BASE}" || -z "${NODE_PATCH}" ]]; then
-        log error "Both NODE_BASE and NODE_PATCH are required"
+        log error "Missing arguments"
     fi
 
     if ! op user get --me &>/dev/null; then
@@ -54,7 +54,7 @@ function main() {
 
     # shellcheck disable=SC2016
     if ! machine_config=$(echo "${base}" | yq --exit-status eval-all '. as $item ireduce ({}; . * $item )' - "${TMPFILE}" 2>/dev/null) || [[ -z "${machine_config}" ]]; then
-        log error "Failed to merge configs"
+        log error "Failed to merge configs" "base=$(basename "${NODE_BASE}")" "patch=$(basename "${NODE_PATCH}")"
     fi
 
     echo "${machine_config}"
