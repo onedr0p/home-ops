@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2154
-
-set -euo pipefail
+set -Eeuo pipefail
 
 # User-defined variables
 CROSS_SEED_ENABLED="${CROSS_SEED_ENABLED:-false}"

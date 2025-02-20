@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
+set -Eeuo pipefail
 
-set -euo pipefail
-
-# shellcheck disable=SC2155
-export ROOT_DIR="$(git rev-parse --show-toplevel)"
-# shellcheck disable=SC1091
 source "$(dirname "${0}")/lib/common.sh"
+
+export LOG_LEVEL="debug"
+export ROOT_DIR="$(git rev-parse --show-toplevel)"
 
 # Apply the Talos configuration to all the nodes
 function apply_talos_config() {
@@ -15,7 +14,7 @@ function apply_talos_config() {
     local talos_worker_file="${ROOT_DIR}/talos/worker.yaml.j2"
 
     if [[ ! -f ${talos_controlplane_file} ]]; then
-        log fatal "No Talos machine files found for controlplane" "file=${talos_controlplane_file}"
+        log error "No Talos machine files found for controlplane" "file=${talos_controlplane_file}"
     fi
 
     # Skip worker configuration if no worker file is found
@@ -27,33 +26,28 @@ function apply_talos_config() {
     # Apply the Talos configuration to the controlplane and worker nodes
     for file in ${talos_controlplane_file} ${talos_worker_file}; do
         if ! nodes=$(talosctl config info --output json 2>/dev/null | jq --exit-status --raw-output '.nodes | join(" ")') || [[ -z "${nodes}" ]]; then
-            log fatal "No Talos nodes found"
+            log error "No Talos nodes found"
         fi
 
         log debug "Talos nodes discovered" "nodes=${nodes}"
-
-        # Inject secrets into the talos node templates
-        if ! resources=$(minijinja-cli "${file}" | op inject 2>/dev/null) || [[ -z "${resources}" ]]; then
-            log fatal "Failed to inject secrets" "file=${file}"
-        fi
 
         # Apply the Talos configuration
         for node in ${nodes}; do
             log debug "Applying Talos node configuration" "node=${node}"
 
-            node_patch_file="${ROOT_DIR}/talos/nodes/${node}.yaml"
-
-            if [[ ! -f ${node_patch_file} ]]; then
-                log fatal "No Talos node file found" "file=${node_patch_file}"
+            if ! machine_config=$(bash "${ROOT_DIR}/scripts/render-machine-config.sh" "${file}" "${ROOT_DIR}/talos/nodes/${node}.yaml.j2") || [[ -z "${machine_config}" ]]; then
+                exit 1
             fi
 
-            if ! output=$(echo "${resources}" | talosctl --nodes "${node}" apply-config --config-patch "@${node_patch_file}" --insecure --file /dev/stdin 2>&1);
+            log info "Talos node configuration rendered successfully" "node=${node}"
+
+            if ! output=$(echo "${machine_config}" | talosctl --nodes "${node}" apply-config --insecure --file /dev/stdin 2>&1);
             then
                 if [[ "${output}" == *"certificate required"* ]]; then
                     log warn "Talos node is already configured, skipping apply of config" "node=${node}"
                     continue
                 fi
-                log fatal "Failed to apply Talos node configuration" "node=${node}" "output=${output}"
+                log error "Failed to apply Talos node configuration" "node=${node}" "output=${output}"
             fi
 
             log info "Talos node configuration applied successfully" "node=${node}"
@@ -68,7 +62,7 @@ function bootstrap_talos() {
     local bootstrapped=true
 
     if ! controller=$(talosctl config info --output json | jq --exit-status --raw-output '.endpoints[]' | shuf -n 1) || [[ -z "${controller}" ]]; then
-        log fatal "No Talos controller found"
+        log error "No Talos controller found"
     fi
 
     log debug "Talos controller discovered" "controller=${controller}"
@@ -92,11 +86,11 @@ function fetch_kubeconfig() {
     log debug "Fetching kubeconfig"
 
     if ! controller=$(talosctl config info --output json | jq --exit-status --raw-output '.endpoints[]' | shuf -n 1) || [[ -z "${controller}" ]]; then
-        log fatal "No Talos controller found"
+        log error "No Talos controller found"
     fi
 
     if ! talosctl kubeconfig --nodes "${controller}" --force --force-context-name main "$(basename "${KUBECONFIG}")" &>/dev/null; then
-        log fatal "Failed to fetch kubeconfig"
+        log error "Failed to fetch kubeconfig"
     fi
 
     log info "Kubeconfig fetched successfully"
@@ -124,28 +118,20 @@ function apply_resources() {
     log debug "Applying resources"
 
     local -r resources_file="${ROOT_DIR}/bootstrap/resources.yaml.j2"
-    local resources
 
-    if [[ ! -f "${resources_file}" ]]; then
-        log fatal "File does not exist" "file=${resources_file}"
+    if ! output=$(render_template "${resources_file}") || [[ -z "${output}" ]]; then
+        exit 1
     fi
 
-    # Inject secrets into the resources template
-    if ! resources=$(minijinja-cli "${resources_file}" | op inject 2>/dev/null) || [[ -z "${resources}" ]]; then
-        log fatal "Failed to inject resources" "file=${resources_file}"
-    fi
-
-    # Check if the resources are up-to-date
-    if echo "${resources}" | kubectl diff --filename - &>/dev/null; then
+    if echo "${output}" | kubectl diff --filename - &>/dev/null; then
         log info "Resources are up-to-date"
         return
     fi
 
-    # Apply resources
-    if echo "${resources}" | kubectl apply --server-side --filename - &>/dev/null; then
+    if echo "${output}" | kubectl apply --server-side --filename - &>/dev/null; then
         log info "Resources applied"
     else
-        log fatal "Failed to apply resources"
+        log error "Failed to apply resources"
     fi
 }
 
@@ -161,7 +147,7 @@ function wipe_rook_disks() {
     fi
 
     if ! nodes=$(talosctl config info --output json 2>/dev/null | jq --exit-status --raw-output '.nodes | join(" ")') || [[ -z "${nodes}" ]]; then
-        log fatal "No Talos nodes found"
+        log error "No Talos nodes found"
     fi
 
     log debug "Talos nodes discovered" "nodes=${nodes}"
@@ -171,7 +157,7 @@ function wipe_rook_disks() {
         if ! disks=$(talosctl --nodes "${node}" get disk --output json 2>/dev/null \
             | jq --exit-status --raw-output --slurp '. | map(select(.spec.model == env.ROOK_DISK) | .metadata.id) | join(" ")') || [[ -z "${nodes}" ]];
         then
-            log fatal "No disks found" node "${node}" "model=${ROOK_DISK}"
+            log error "No disks found" node "${node}" "model=${ROOK_DISK}"
         fi
 
         log debug "Talos node and disk discovered" "node=${node}" "disks=${disks}"
@@ -181,7 +167,7 @@ function wipe_rook_disks() {
             if talosctl --nodes "${node}" wipe disk "${disk}" &>/dev/null; then
                 log info "Disk wiped" "node=${node}" "disk=${disk}"
             else
-                log fatal "Failed to wipe disk" "node=${node}" "disk=${disk}"
+                log error "Failed to wipe disk" "node=${node}" "disk=${disk}"
             fi
         done
     done
@@ -194,23 +180,22 @@ function apply_helm_releases() {
     local -r helmfile_file="${ROOT_DIR}/bootstrap/helmfile.yaml"
 
     if [[ ! -f "${helmfile_file}" ]]; then
-        log fatal "File does not exist" "file=${helmfile_file}"
+        log error "File does not exist" "file=${helmfile_file}"
     fi
 
     if ! helmfile --file "${helmfile_file}" apply --hide-notes --skip-diff-on-install --suppress-diff --suppress-secrets; then
-        log fatal "Failed to apply Helm releases"
+        log error "Failed to apply Helm releases"
     fi
 
     log info "Helm releases applied successfully"
 }
 
 function main() {
-    # Verifications before bootstrapping the cluster
     check_env KUBERNETES_VERSION ROOK_DISK TALOS_VERSION
     check_cli helmfile jq kubectl kustomize minijinja-cli op talosctl yq
 
     if ! op user get --me &>/dev/null; then
-        log fatal "Failed to authenticate with 1Password CLI"
+        log error "Failed to authenticate with 1Password CLI"
     fi
 
     # Bootstrap the Talos node configuration
