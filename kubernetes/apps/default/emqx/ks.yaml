@@ -36,6 +36,11 @@ spec:
   dependsOn:
     - name: emqx
       namespace: default
+  healthCheckExprs:
+    - apiVersion: apps.emqx.io/v2beta1
+      kind: EMQX
+      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   interval: 30m
   path: ./kubernetes/apps/default/emqx/cluster
   prune: true
