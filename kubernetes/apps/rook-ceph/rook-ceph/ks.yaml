@@ -38,6 +38,20 @@ spec:
   dependsOn:
     - name: onepassword-store
       namespace: external-secrets
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: rook-ceph-cluster
+      namespace: *namespace
+    - apiVersion: ceph.rook.io/v1
+      kind: CephCluster
+      name: rook-ceph
+      namespace: *namespace
+  healthCheckExprs:
+    - apiVersion: ceph.rook.io/v1
+      kind: CephCluster
+      failed: status.ceph.health == 'HEALTH_ERR'
+      current: status.ceph.health == 'HEALTH_OK'
   interval: 30m
   path: ./kubernetes/apps/rook-ceph/rook-ceph/cluster
   postBuild:
@@ -51,4 +65,3 @@ spec:
     namespace: flux-system
   targetNamespace: *namespace
   timeout: 15m
-  wait: false
