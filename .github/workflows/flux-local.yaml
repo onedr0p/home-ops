@@ -107,12 +107,15 @@ jobs:
             ${{ steps.diff.outputs.diff }}
             ```
 
-  flux-local-success:
+  flux-local-status:
     needs: ["test", "diff"]
-    if: ${{ always() }}
-    name: Flux Local successful
+    name: Flux Local Success
     runs-on: ubuntu-latest
+    if: ${{ always() }}
     steps:
-      - name: Check flux-local status
-        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+      - name: Any jobs failed?
+        if: ${{ contains(needs.*.result, 'failure') }}
         run: exit 1
+      - name: All jobs passed or skipped
+        if: ${{ !(contains(needs.*.result, 'failure')) }}
+        run: echo "All jobs passed or skipped" && echo "${{ toJSON(needs.*.result) }}"
