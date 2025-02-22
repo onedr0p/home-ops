@@ -5,29 +5,34 @@ name: "Flux Local"
 on:
   pull_request:
     branches: ["main"]
-    paths:
-      - kubernetes/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Flux Local Test
+  pre-job:
     runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
-      - name: Generate Token
-        uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: "${{ secrets.BOT_APP_ID }}"
-          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
-
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
         with:
-          token: "${{ steps.app-token.outputs.token }}"
+          files: kubernetes/**
+
+  test:
+    name: Flux Local Test
+    needs: pre-job
+    runs-on: ubuntu-latest
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Run flux-local test
         uses: docker://ghcr.io/allenporter/flux-local:v7.0.0
@@ -36,6 +41,7 @@ jobs:
 
   diff:
     name: Flux Local Diff
+    needs: pre-job
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -44,24 +50,16 @@ jobs:
         resources: ["helmrelease", "kustomization"]
       max-parallel: 4
       fail-fast: false
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
     steps:
-      - name: Generate Token
-        uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: "${{ secrets.BOT_APP_ID }}"
-          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
-
       - name: Checkout Pull Request Branch
         uses: actions/checkout@v4
         with:
-          token: "${{ steps.app-token.outputs.token }}"
           path: pull
 
       - name: Checkout Default Branch
         uses: actions/checkout@v4
         with:
-          token: "${{ steps.app-token.outputs.token }}"
           ref: "${{ github.event.repository.default_branch }}"
           path: default
 
@@ -95,8 +93,16 @@ jobs:
               echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - if: ${{ steps.diff.outputs.diff != '' }}
-        name: Add Comment
+      - name: Generate Token
+        if: ${{ steps.diff.outputs.diff != '' }}
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Add Comment
+        if: ${{ steps.diff.outputs.diff != '' }}
         uses: mshick/add-pr-comment@v2
         with:
           repo-token: "${{ steps.app-token.outputs.token }}"
@@ -108,8 +114,8 @@ jobs:
             ```
 
   flux-local-status:
-    needs: ["test", "diff"]
     name: Flux Local Success
+    needs: ["test", "diff"]
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
