@@ -5,8 +5,6 @@ name: "Pre-pull Images"
 on:
   pull_request:
     branches: ["main"]
-    paths:
-      - kubernetes/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -16,9 +14,25 @@ env:
   HOMEBREW_NO_ANALYTICS: "1"
 
 jobs:
+  pre-job:
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: kubernetes/**
+
   extract-images:
     name: Extract Images
+    needs: pre-job
     runs-on: ubuntu-latest
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
     strategy:
       matrix:
         branches: ["default", "pull"]
@@ -27,17 +41,9 @@ jobs:
       default: ${{ steps.extract-images.outputs.default }}
       pull: ${{ steps.extract-images.outputs.pull }}
     steps:
-      - name: Generate Token
-        uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: "${{ secrets.BOT_APP_ID }}"
-          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          token: "${{ steps.app-token.outputs.token }}"
           ref: "${{ matrix.branches == 'default' && github.event.repository.default_branch || '' }}"
 
       - name: Gather Images
@@ -62,9 +68,10 @@ jobs:
   compare-images:
     name: Compare Images
     runs-on: ubuntu-latest
-    needs: ["extract-images"]
+    needs: ["pre-job", "extract-images"]
     outputs:
       images: ${{ steps.compare-images.outputs.images }}
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
     steps:
       - name: Compare Images
         id: compare-images
@@ -77,15 +84,15 @@ jobs:
           echo "images=${images}" >> $GITHUB_OUTPUT
 
   pre-pull-images:
-    if: ${{ needs.compare-images.outputs.images != '[]' }}
     name: Pre-pull Images
     runs-on: ["home-ops-runner"]
-    needs: ["compare-images"]
+    needs: ["pre-job", "compare-images"]
     strategy:
       matrix:
         images: ${{ fromJSON(needs.compare-images.outputs.images) }}
       max-parallel: 4
       fail-fast: false
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.compare-images.outputs.images != '[]' }}
     steps:
       - name: Setup Homebrew
         uses: Homebrew/actions/setup-homebrew@master
