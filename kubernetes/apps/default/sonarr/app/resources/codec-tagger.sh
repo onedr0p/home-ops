@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-
 set -Eeuo pipefail
 
-CURL_CMD=(curl -fsSL --header "X-Api-Key: ${SONARR__AUTH__APIKEY:-}")
+CURL_CMD=("curl" "-fsSL" "--header" "X-Api-Key: ${SONARR__AUTH__APIKEY:-}")
 SONARR_API_URL="http://localhost:${SONARR__SERVER__PORT:-}/api/v3"
 
 # Cache existing tags once at the start
@@ -71,7 +70,7 @@ update_series_tags() {
     # Identify tags to add
     for codec in $codecs; do
         tag_id=$(get_or_create_tag_id "${codec}")
-        if ! echo "${series_tags}" | jq ". | index(${tag_id})" &> /dev/null; then
+        if ! echo "${series_tags}" | jq --exit-status ". | index(${tag_id})" &> /dev/null; then
             tags_to_add+=("$tag_id")
         fi
     done
