@@ -44,12 +44,8 @@ jobs:
       - name: Install Python Dependencies
         run: uv pip install pyyaml
 
-      - name: Download and run crd-extractor
-        run: |
-          curl -fsSL -o $GITHUB_WORKSPACE/crd-extractor.sh \
-              https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/Utilities/crd-extractor.sh
-          chmod +x $GITHUB_WORKSPACE/crd-extractor.sh
-          bash $GITHUB_WORKSPACE/crd-extractor.sh
+      - name: Run crd-extractor
+        run: curl -fsSL https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/Utilities/crd-extractor.sh | bash
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
