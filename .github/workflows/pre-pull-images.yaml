@@ -10,9 +10,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
-env:
-  HOMEBREW_NO_ANALYTICS: "1"
-
 jobs:
   pre-job:
     name: Pre-pull Images Pre-Job
@@ -95,11 +92,8 @@ jobs:
       fail-fast: false
     if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.compare-images.outputs.images != '[]' }}
     steps:
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
-      - name: Setup Workflow Tools
-        run: brew install siderolabs/tap/talosctl
+      - name: Install talosctl
+        run: curl -fsSL https://talos.dev/install | sh
 
       - name: Pre-pull Image
         run: talosctl --nodes $NODE image pull ${{ matrix.images }}
