@@ -25,9 +25,7 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v45
         with:
-          files: |
-            **/helmrelease.yaml
-          safe_output: false # Using an env var to store the output
+          files: kubernetes/**/helmrelease.yaml
 
   helm-repository-sync:
     name: Helm Repository Sync
@@ -42,9 +40,10 @@ jobs:
         run: curl -fsSL https://fluxcd.io/install.sh | bash
 
       - name: Sync Helm Repository
+        env:
+          FILTER: '.spec.chart.spec.sourceRef | [{"name": .name, "namespace": .namespace}] | unique_by(.name)'
         run: |
-          filter='[{"name": .spec.chart.spec.sourceRef.name, "namespace": .spec.chart.spec.sourceRef.namespace}] | unique_by(.name)'
-          yq eval-all --no-doc "${filter}" ${{ needs.pre-job.outputs.all_changed_and_modified_files }} \
+          yq eval-all --no-doc "${FILTER}" ${{ needs.pre-job.outputs.all_changed_and_modified_files }} \
             | yq '.[] | .namespace + " " + .name' \
             | xargs -l bash -c 'flux --namespace $0 reconcile source helm $1'
 
@@ -57,6 +56,7 @@ jobs:
       - name: Any jobs failed?
         if: ${{ contains(needs.*.result, 'failure') }}
         run: exit 1
-      - name: All jobs passed or skipped
+
+      - name: All jobs passed or skipped?
         if: ${{ !(contains(needs.*.result, 'failure')) }}
         run: echo "All jobs passed or skipped" && echo "${{ toJSON(needs.*.result) }}"

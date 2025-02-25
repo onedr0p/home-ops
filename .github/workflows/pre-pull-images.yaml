@@ -99,7 +99,7 @@ jobs:
         run: talosctl --nodes $NODE image pull ${{ matrix.images }}
 
   pre-pull-images-status:
-    needs: ["pre-pull-images"]
+    needs: pre-pull-images
     name: Pre-pull Images Success
     runs-on: ubuntu-latest
     if: ${{ always() }}
@@ -107,6 +107,7 @@ jobs:
       - name: Any jobs failed?
         if: ${{ contains(needs.*.result, 'failure') }}
         run: exit 1
-      - name: All jobs passed or skipped
+
+      - name: All jobs passed or skipped?
         if: ${{ !(contains(needs.*.result, 'failure')) }}
         run: echo "All jobs passed or skipped" && echo "${{ toJSON(needs.*.result) }}"
