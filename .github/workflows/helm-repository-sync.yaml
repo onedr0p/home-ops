@@ -49,17 +49,10 @@ jobs:
 
       - name: Sync Helm Repository
         run: |
-          declare -A repos=()
-          for f in ${{ steps.changed-files.outputs.all_changed_and_modified_files }}; do
-              repo_namespace="$(yq -r '.spec.chart.spec.sourceRef.namespace' "${f}")"
-              repo_name="$(yq -r '.spec.chart.spec.sourceRef.name' "${f}")"
-              repos["${repo_namespace}:${repo_name}"]=1
-          done
-          for r in "${!repos[@]}"; do
-              IFS=':' read -r repo_namespace repo_name <<< "${r}"
-              flux --namespace ${repo_namespace} \
-                  reconcile source helm ${repo_name} || true
-          done
+          filter='[{"name": .spec.chart.spec.sourceRef.name, "namespace": .spec.chart.spec.sourceRef.namespace}] | unique_by(.name)'
+          yq eval-all --no-doc "${filter}" ${{ steps.changed-files.outputs.all_changed_and_modified_files }} \
+            | yq '.[] | .namespace + " " + .name' \
+            | xargs -l bash -c 'flux --namespace $0 reconcile source helm $1'
 
   helm-repository-sync-status:
     needs: helm-repository-sync
