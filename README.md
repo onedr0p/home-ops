@@ -139,7 +139,7 @@ In my cluster there are two instances of [ExternalDNS](https://github.com/kubern
 <details>
   <summary>Click here to see my server rack</summary>
 
-  <img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/rack.png" align="center" width="200px" alt="dns"/>
+  <img width="273" alt="Image" src="https://github.com/user-attachments/assets/5bd67299-a809-4e53-ba39-707cac8d3852" />
 </details>
 
 | Device                      | Num | OS Disk Size | Data Disk Size                  | Ram  | OS            | Function                |
