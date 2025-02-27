@@ -1,0 +1,62 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumloadbalancerippool_v2alpha1.json
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: pool
+spec:
+  allowFirstLastIPs: "No"
+  blocks:
+    - cidr: 192.168.42.0/24
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliuml2announcementpolicy_v2alpha1.json
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: l2-policy
+spec:
+  loadBalancerIPs: true
+  interfaces: ["^enp.*"]
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumbgppeeringpolicy_v2alpha1.json
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPPeeringPolicy
+metadata:
+  name: l3-policy
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux
+  virtualRouters:
+    - localASN: 64514
+      exportPodCIDR: false
+      serviceSelector:
+        matchExpressions:
+          - key: thisFakeSelector
+            operator: NotIn
+            values:
+              - will-match-and-announce-all-services
+      neighbors:
+        - peerAddress: 192.168.1.1/32
+          peerASN: 64513
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-api
+  annotations:
+    io.cilium/lb-ipam-ips: 192.168.42.120
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster
+  selector:
+    k8s-app: kube-apiserver
+    tier: control-plane
+  ports:
+    - name: https
+      port: 6443
+      protocol: TCP
+      targetPort: 6443

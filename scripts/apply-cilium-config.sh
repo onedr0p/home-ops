@@ -7,23 +7,23 @@ export LOG_LEVEL="debug"
 export ROOT_DIR="$(git rev-parse --show-toplevel)"
 
 function apply_config() {
-    check_cli kubectl kustomize
+    check_cli kubectl
 
-    log debug "Applying Cilium config"
+    log debug "Applying Cilium networks"
 
-    local -r cilium_config_dir="${ROOT_DIR}/kubernetes/apps/kube-system/cilium/config"
+    local -r cilium_networks_file="${ROOT_DIR}/kubernetes/apps/kube-system/cilium/app/networks.yaml"
 
-    if [[ ! -d "${cilium_config_dir}" ]]; then
-        log error "No Cilium config directory found" "directory=${cilium_config_dir}"
+    if [[ ! -d "${cilium_networks_file}" ]]; then
+        log error "No Cilium networks file found" "file=${cilium_networks_file}"
     fi
 
-    if kubectl --namespace kube-system diff --kustomize "${cilium_config_dir}" &>/dev/null; then
-        log info "Cilium config is up-to-date"
+    if kubectl --namespace kube-system diff --file "${cilium_networks_file}" &>/dev/null; then
+        log info "Cilium networks are up-to-date"
     else
-        if kubectl apply --namespace kube-system --server-side --field-manager kustomize-controller --kustomize "${cilium_config_dir}" &>/dev/null; then
-            log info "Cilium config applied successfully"
+        if kubectl apply --namespace kube-system --server-side --field-manager kustomize-controller --file "${cilium_networks_file}" &>/dev/null; then
+            log info "Cilium networks applied successfully"
         else
-            log error "Failed to apply Cilium config"
+            log error "Failed to apply Cilium networks"
         fi
     fi
 }
