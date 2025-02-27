@@ -22,15 +22,6 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  dependsOn:
-    - name: snapshot-controller
-      namespace: volsync-system
-  values:
-    manageCRDs: true
-    replicaCount: 1
-    metrics:
-      disableAuth: true
-    podSecurityContext:
-      runAsNonRoot: true
-      runAsUser: 1000
-      runAsGroup: 1000
+  valuesFrom:
+    - kind: ConfigMap
+      name: volsync-values
