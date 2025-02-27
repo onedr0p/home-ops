@@ -27,13 +27,15 @@ releases:
     version: 1.17.1
     values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/kube-system/cilium/app/helm/values.yaml']
     hooks:
-      - events: ['postsync']
+      - # Wait for cilium CRDs to be available
+        events: ['postsync']
         command: bash
         args:
           - -c
           - until kubectl get crd ciliumbgppeeringpolicies.cilium.io ciliuml2announcementpolicies.cilium.io ciliumloadbalancerippools.cilium.io &>/dev/null; do sleep 10; done
         showlogs: true
-      - events: ['postsync']
+      - # Apply cilium network configuration
+        events: ['postsync']
         command: kubectl
         args:
           - apply
@@ -77,14 +79,15 @@ releases:
     version: 0.12.0-rc.2
     values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/volsync-system/volsync/app/helm/values.yaml']
     hooks:
-      - events: ['postsync']
+      - # Apply volsync mover mutating admission policies
+        events: ['postsync']
         command: kubectl
         args:
           - apply
           - --namespace=volsync-system
           - --server-side
           - --field-manager=kustomize-controller
-          - --filename={{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/volsync-system/volsync/app/mover-policies.yaml
+          - --filename={{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/volsync-system/volsync/app/mutatingadmissionpolicy.yaml
         showlogs: true
     needs: ['kube-system/snapshot-controller']
 
