@@ -8,17 +8,11 @@ helmDefaults:
   # waitRetries: 3 # Not supported by Helm yet
 
 repositories:
-  - name: backube
-    url: https://backube.github.io/helm-charts
-
   - name: cilium
     url: https://helm.cilium.io
 
   - name: jetstack
     url: https://charts.jetstack.io
-
-  - name: piraeus
-    url: https://piraeus.io/helm-charts
 
 releases:
   - name: cilium
@@ -66,37 +60,12 @@ releases:
     values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/external-secrets/external-secrets/app/helm/values.yaml']
     needs: ['cert-manager/cert-manager']
 
-  - name: snapshot-controller
-    namespace: kube-system
-    chart: piraeus/snapshot-controller
-    version: 4.0.1
-    values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/kube-system/snapshot-controller/app/helm/values.yaml']
-    needs: ['kube-system/coredns']
-
-  - name: volsync
-    namespace: volsync-system
-    chart: backube/volsync
-    version: 0.12.0-rc.2
-    values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/volsync-system/volsync/app/helm/values.yaml']
-    hooks:
-      - # Apply volsync mover mutating admission policies
-        events: ['postsync']
-        command: kubectl
-        args:
-          - apply
-          - --namespace=volsync-system
-          - --server-side
-          - --field-manager=kustomize-controller
-          - --filename={{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/volsync-system/volsync/app/mutatingadmissionpolicy.yaml
-        showlogs: true
-    needs: ['kube-system/snapshot-controller']
-
   - name: flux-operator
     namespace: flux-system
     chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
     version: 0.16.0
     values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/flux-system/flux-operator/app/helm/values.yaml']
-    needs: ['external-secrets/external-secrets', 'volsync-system/volsync']
+    needs: ['external-secrets/external-secrets']
 
   - name: flux-instance
     namespace: flux-system
