@@ -115,6 +115,26 @@ function wait_for_crds() {
     done
 }
 
+# Apply a config file using kubectl
+function apply_config_file() {
+    local -r namespace="${1}"
+    local -r file="${2}"
+
+    if [[ ! -d "${file}" ]]; then
+        log error "No config file found" "file=${file}"
+    fi
+
+    if kubectl --namespace "${namespace}" diff --file "${file}" &>/dev/null; then
+        log info "Config file is up-to-date"
+    else
+        if kubectl apply --namespace "${namespace}" --server-side --field-manager kustomize-controller --file "${file}" &>/dev/null; then
+            log info "Config file applied successfully"
+        else
+            log error "Failed to apply config file"
+        fi
+    fi
+}
+
 # Render a template using minijinja and inject secrets using op
 function render_template() {
     local -r file="${1}"
