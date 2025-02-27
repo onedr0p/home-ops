@@ -26,6 +26,22 @@ releases:
     chart: cilium/cilium
     version: 1.17.1
     values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/kube-system/cilium/app/helm/values.yaml']
+    hooks:
+      - events: ['postsync']
+        command: bash
+        args:
+          - -c
+          - until kubectl get crd ciliumbgppeeringpolicies.cilium.io ciliuml2announcementpolicies.cilium.io ciliumloadbalancerippools.cilium.io &>/dev/null; do sleep 10; done
+        showlogs: true
+      - events: ['postsync']
+        command: kubectl
+        args:
+          - apply
+          - --namespace=kube-system
+          - --server-side
+          - --field-manager=kustomize-controller
+          - --filename={{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/kube-system/cilium/app/networks.yaml
+        showlogs: true
 
   - name: coredns
     namespace: kube-system
@@ -60,7 +76,17 @@ releases:
     chart: backube/volsync
     version: 0.12.0-rc.2
     values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/volsync-system/volsync/app/helm/values.yaml']
-    needs: ['volsync-system/snapshot-controller']
+    hooks:
+      - events: ['postsync']
+        command: kubectl
+        args:
+          - apply
+          - --namespace=volsync-system
+          - --server-side
+          - --field-manager=kustomize-controller
+          - --filename={{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/volsync-system/volsync/app/mover-policies.yaml
+        showlogs: true
+    needs: ['kube-system/snapshot-controller']
 
   - name: flux-operator
     namespace: flux-system
