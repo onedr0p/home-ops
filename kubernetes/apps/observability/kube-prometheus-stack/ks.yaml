@@ -16,13 +16,14 @@ spec:
       namespace: rook-ceph
     - name: onepassword
       namespace: external-secrets
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/observability/kube-prometheus-stack/app
   postBuild:
     substitute:
       APP: kube-prometheus-stack
       GATUS_SUBDOMAIN: prometheus
   prune: true
+  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system

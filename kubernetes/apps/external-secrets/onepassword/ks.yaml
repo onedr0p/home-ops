@@ -14,9 +14,10 @@ spec:
       kind: ClusterSecretStore
       failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
       current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/external-secrets/onepassword/app
   prune: true
+  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system

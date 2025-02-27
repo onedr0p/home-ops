@@ -12,9 +12,10 @@ spec:
   dependsOn:
     - name: onepassword
       namespace: external-secrets
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/rook-ceph/rook-ceph/app
   prune: false # let's not make happy accidents
+  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -49,13 +50,14 @@ spec:
       kind: CephCluster
       failed: status.ceph.health == 'HEALTH_ERR'
       current: status.ceph.health in ['HEALTH_OK', 'HEALTH_WARN']
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps/rook-ceph/rook-ceph/cluster
   postBuild:
     substitute:
       APP: *app
       GATUS_SUBDOMAIN: rook
   prune: false # let's not make happy accidents
+  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system

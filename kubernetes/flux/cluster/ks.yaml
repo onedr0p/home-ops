@@ -10,9 +10,10 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/flux/meta
   prune: true
+  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -35,9 +36,10 @@ spec:
   dependsOn:
     - name: cluster-meta
       namespace: flux-system
-  interval: 30m
+  interval: 1h
   path: ./kubernetes/apps
   prune: true
+  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
