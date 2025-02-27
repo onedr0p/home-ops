@@ -9,7 +9,7 @@ export ROOT_DIR="$(git rev-parse --show-toplevel)"
 function main() {
     check_cli kubectl
 
-    wait_for_crds "ciliuml2announcementpolicies.cilium.io" "ciliumbgppeeringpolicies.cilium.io" "ciliumloadbalancerippools.cilium.io"
+    wait_for_crds "ciliumbgppeeringpolicies.cilium.io"  "ciliuml2announcementpolicies.cilium.io" "ciliumloadbalancerippools.cilium.io"
     apply_config_file "kube-system" "${ROOT_DIR}/kubernetes/apps/kube-system/cilium/app/networks.yaml"
 }
 
