@@ -26,10 +26,20 @@ spec:
       retries: 3
   values:
     master:
-      replicaCount: 1
+      replicaCount: 2
     worker:
       config:
         core:
           labelSources: ["pci", "system", "usb"]
+      sources:
+        custom:
+          - name: intel-gpu-device
+            labels:
+              intel.feature.node.kubernetes.io/gpu: "true"
+            matchFeatures:
+              - feature: pci.device
+                matchExpressions:
+                  class: { op: In, value: ["0300", "0380"] }
+                  vendor: { op: In, value: ["8086"] }
     prometheus:
       enable: true
