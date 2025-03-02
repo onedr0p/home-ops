@@ -75,9 +75,6 @@ machine:
     vm.nr_hugepages: 1024                  # PostgreSQL
   sysfs:
     devices.system.cpu.intel_pstate.hwp_dynamic_boost: 1
-    {% for i in range(0, 18) %}
-    devices.system.cpu.cpu{{ i }}.cpufreq.energy_performance_preference: balance_performance
-    {% endfor %}
   features:
     rbac: true
     stableHostname: true
@@ -124,10 +121,7 @@ cluster:
   coreDNS:
     disabled: true
   extraManifests:
-    {% for crd in [
-        "alertmanagerconfigs", "alertmanagers", "podmonitors", "probes", "prometheusagents",
-        "prometheuses", "prometheusrules", "scrapeconfigs", "servicemonitors", "thanosrulers"
-    ] %}
+    {% for crd in ["alertmanagerconfigs", "alertmanagers", "podmonitors", "probes", "prometheusagents", "prometheuses", "prometheusrules", "scrapeconfigs", "servicemonitors", "thanosrulers"] %}
     - # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
       https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.80.1/example/prometheus-operator-crd/monitoring.coreos.com_{{ crd }}.yaml
     {% endfor %}
