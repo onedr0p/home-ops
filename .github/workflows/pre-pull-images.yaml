@@ -51,17 +51,19 @@ jobs:
             get cluster
             --all-namespaces
             --path /github/workspace/kubernetes/flux/cluster
-            --enable-images
-            --output yaml
-            --output-file images.yaml
+            --only-images
+            --output json
+            --output-file images.json
 
       - name: Extract Images
         id: extract-images
         run: |
-          images=$(yq --indent=0 --output-format=json \
-              '[.. | .images? | select(. != null)] | flatten | sort | unique' images.yaml \
-          )
-          echo "${{ matrix.branches }}=${images}" >> $GITHUB_OUTPUT
+          cat images.json
+        # run: |
+        #   images=$(yq --indent=0 --output-format=json \
+        #       '[.. | .images? | select(. != null)] | flatten | sort | unique' images.yaml \
+        #   )
+        #   echo "${{ matrix.branches }}=${images}" >> $GITHUB_OUTPUT
 
   compare-images:
     name: Compare Images
