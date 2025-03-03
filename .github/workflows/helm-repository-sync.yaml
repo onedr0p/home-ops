@@ -40,6 +40,7 @@ jobs:
         run: curl -fsSL https://fluxcd.io/install.sh | bash
 
       - name: Sync Helm Repository
+        continue-on-error: true
         env:
           FILTER: '[.spec.chart.spec.sourceRef] | unique | .[] | "\(.namespace) \(.name)"'
         run: |
