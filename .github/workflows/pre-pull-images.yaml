@@ -36,8 +36,8 @@ jobs:
         branches: ["default", "pull"]
       fail-fast: false
     outputs:
-      default: ${{ steps.extract-images.outputs.default }}
-      pull: ${{ steps.extract-images.outputs.pull }}
+      default: ${{ steps.output-images.outputs.default }}
+      pull: ${{ steps.output-images.outputs.pull }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,16 +52,13 @@ jobs:
             --all-namespaces
             --path /github/workspace/kubernetes/flux/cluster
             --enable-images
-            --output yaml
-            --output-file images.yaml
+            --only-images
+            --output json
+            --output-file images.json
 
-      - name: Extract Images
-        id: extract-images
-        run: |
-          images=$(yq --indent=0 --output-format=json \
-              '[.. | .images? | select(. != null)] | flatten | sort | unique' images.yaml \
-          )
-          echo "${{ matrix.branches }}=${images}" >> $GITHUB_OUTPUT
+      - name: Output Images
+        id: output-images
+        run: echo "${{ matrix.branches }}=$(jq --compact-output '.' images.json)" >> $GITHUB_OUTPUT
 
   compare-images:
     name: Compare Images
