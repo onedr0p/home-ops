@@ -2,12 +2,12 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+components:
+  - ../../../components/configurations/values-from
 resources:
   - ./helmrelease.yaml
   - ./networks.yaml
 configMapGenerator:
   - name: cilium-values
     files:
-      - values.yaml=./helm/values.yaml
-configurations:
-  - ./helm/kustomizeconfig.yaml
+      - values.yaml=./helmvalues.yaml
