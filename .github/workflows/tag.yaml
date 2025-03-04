@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "Release"
+name: "Tag"
 
 on:
   workflow_dispatch:
@@ -8,8 +8,8 @@ on:
     - cron: "0 0 1 * *" # 1st of every month at midnight
 
 jobs:
-  release:
-    name: Release
+  tag:
+    name: Tag
     runs-on: ubuntu-latest
     steps:
       - name: Generate Token
@@ -19,14 +19,14 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Get Previous Release Tag and Determine Next Tag
+      - name: Get Previous Tag and Determine Next Tag
         id: determine-next-tag
         uses: actions/github-script@v7
         with:
           github-token: "${{ steps.app-token.outputs.token }}"
           result-encoding: string
           script: |
-            const { data: releases } = await github.rest.repos.listReleases({
+            const { data: releases } = await github.rest.repos.listTags({
               owner: context.repo.owner,
               repo: context.repo.repo,
               per_page: 1,
@@ -54,9 +54,14 @@ jobs:
 
             return `${nextMajorMinor}.${nextPatch}`;
 
-      - name: Create Release
-        uses: ncipollo/release-action@v1
+      - name: Create Tag
+        uses: actions/github-script@v7
         with:
-          generateReleaseNotes: true
-          tag: "${{ steps.determine-next-tag.outputs.result }}"
-          token: "${{ steps.app-token.outputs.token }}"
+          github-token: "${{ steps.app-token.outputs.token }}"
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: refs/tags/${{ steps.determine-next-tag.outputs.result }},
+              sha: context.sha
+            })
