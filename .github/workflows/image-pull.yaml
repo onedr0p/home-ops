@@ -109,13 +109,12 @@ jobs:
         with:
           image: ${{ matrix.images }}
           fail-build: false
-          output-format: json
 
       - name: Scan Results
         run: |
           echo '## Security scan results' >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
-          jq '.' ${{ steps.scan.outputs.json }} >> $GITHUB_STEP_SUMMARY
+          jq '.' ${{ steps.scan.outputs.sarif }} >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Pull Image
