@@ -41,7 +41,7 @@ jobs:
       - name: Extract Repos
         id: extract
         env:
-          FILTER: '[.spec.chart.spec.sourceRef] | unique | map("\(.namespace)/\(.name)") | flatten | unique'
+          FILTER: '[.spec.chart.spec.sourceRef] | unique | map("\(.namespace)/\(.name)") | flatten'
         run: |
           repos=$(yq --indent 0 --output-format json eval-all "${FILTER}" ${{ needs.pre-job.outputs.all_changed_and_modified_files }})
           echo "repos=${repos}" >> $GITHUB_OUTPUT
