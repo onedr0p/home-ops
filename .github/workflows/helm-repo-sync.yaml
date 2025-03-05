@@ -27,50 +27,24 @@ jobs:
         with:
           files: kubernetes/**/helmrelease.yaml
 
-  extract:
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
-    name: Helm Repo Sync - Extract Helm Repos
+  sync:
+    name: Helm Repo Sync - Sync Helm Repos
     needs: pre-job
-    runs-on: ubuntu-latest
-    outputs:
-      repos: ${{ steps.extract.outputs.repos }}
+    runs-on: home-ops-runner
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract Repos
-        id: extract
-        env:
-          FILTER: '[.spec.chart.spec.sourceRef] | unique | .[] | ["\(.namespace)/\(.name)"]'
-        run: |
-          repos=$(yq --indent 0 --output-format json eval-all "${FILTER}" \
-              ${{ needs.pre-job.outputs.all_changed_and_modified_files }}
-          )
-          echo "repos=${repos}" >> $GITHUB_OUTPUT
-
-          echo '## Helm Repos' >> $GITHUB_STEP_SUMMARY
-          echo '```json' >> $GITHUB_STEP_SUMMARY
-          echo $repos | jq >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
-  sync:
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.extract.outputs.repos != '[]' }}
-    name: Helm Repo Sync - Sync Helm Repos
-    needs: ["pre-job", "extract"]
-    runs-on: home-ops-runner
-    strategy:
-      matrix:
-        repos: ${{ fromJSON(needs.extract.outputs.repos) }}
-      max-parallel: 4
-      fail-fast: false
-    steps:
       - name: Install flux
         run: curl -fsSL https://fluxcd.io/install.sh | bash
 
-      - name: Sync Repo
+      - name: Sync Helm Repos
+        env:
+          FILTER: '[.spec.chart.spec.sourceRef] | unique | .[] | "\(.namespace) \(.name)"'
         run: |
-          IFS='/' read -r ns repo <<< "${{ matrix.repos }}"
-          flux --namespace ${ns} reconcile source helm ${repo}
+          yq eval-all "${FILTER}" ${{ needs.pre-job.outputs.all_changed_and_modified_files }} \
+            | xargs -l -r bash -c 'flux --namespace $0 reconcile source helm $1'
 
   status:
     if: ${{ always() }}
