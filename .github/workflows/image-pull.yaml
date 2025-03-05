@@ -60,12 +60,11 @@ jobs:
         id: images
         run: |
           echo "${{ matrix.branches }}=$(jq --compact-output '.' images.json)" >> $GITHUB_OUTPUT
-          echo "## Branch ${{ matrix.branches }} images" >> $GITHUB_STEP_SUMMARY
-          echo "```json" >> $GITHUB_STEP_SUMMARY
-          echo "text<<EOF" >> $GITHUB_STEP_SUMMARY
-          echo "$(cat images.json)" >> $GITHUB_STEP_SUMMARY
-          echo "EOF" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+
+          echo '## Branch ${{ matrix.branches }} images' >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat images.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   compare:
     if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.extract.outputs.default != needs.extract.outputs.pull }}
@@ -84,12 +83,11 @@ jobs:
               '$f2 - $f1' \
           )
           echo "images=${images}" >> $GITHUB_OUTPUT
-          echo "## Images" >> $GITHUB_STEP_SUMMARY
-          echo "```json" >> $GITHUB_STEP_SUMMARY
-          echo "text<<EOF" >> $GITHUB_STEP_SUMMARY
-          echo "${images}" >> $GITHUB_STEP_SUMMARY
-          echo "EOF" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+
+          echo '## Images' >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          echo $images >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   pull:
     if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.compare.outputs.images != '[]' }}
