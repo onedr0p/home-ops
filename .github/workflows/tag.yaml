@@ -32,25 +32,14 @@ jobs:
               per_page: 1,
             });
 
-            let previousTag = "0.0.0"; // Default if no previous release exists
-            if (tags.length > 0) {
-              previousTag = tags[0].name;
-            }
+            const prevTag = tags[0]?.name || "0.0.0"; // Default to "0.0.0" if no tags exist
+            const [prevMajor, prevMinor, prevPatch] = prevTag.split('.').map(Number);
+            const now = new Date();
+            const nextMajorMinor = `${now.getFullYear()}.${now.getMonth() + 1}`; // Months are 0-indexed in JavaScript
+            const nextPatch = `${prevMajor}.${prevMinor}` === nextMajorMinor ? prevPatch + 1 : 0;
 
-            const [previousMajor, previousMinor, previousPatch] = previousTag.split('.').map(Number);
-            const currentYear = new Date().getFullYear();
-            const currentMonth = new Date().getMonth() + 1; // Months are 0-indexed in JavaScript
-
-            const nextMajorMinor = `${currentYear}.${currentMonth}`;
-            let nextPatch;
-
-            if (`${previousMajor}.${previousMinor}` === nextMajorMinor) {
-              console.log("Month release already exists for the year. Incrementing patch number by 1.");
-              nextPatch = previousPatch + 1;
-            } else {
-              console.log("Month release does not exist for the year. Starting with patch number 0.");
-              nextPatch = 0;
-            }
+            console.log(`Previous tag: ${prevTag}`);
+            console.log(`Next tag: ${nextMajorMinor}.${nextPatch}`);
 
             return `${nextMajorMinor}.${nextPatch}`;
 
@@ -68,11 +57,11 @@ jobs:
               message: tagName,
               object: context.sha,
               type: "commit"
-            })
+            });
 
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: `refs/tags/${tagName}`,
               sha: tag.data.sha
-            })
+            });
