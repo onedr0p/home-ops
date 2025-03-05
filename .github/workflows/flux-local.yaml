@@ -81,14 +81,14 @@ jobs:
       - name: Generate Diff
         id: diff
         run: |
-          echo "diff<<EOF" >> $GITHUB_OUTPUT
-          echo "$(cat diff.patch)" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo 'diff<<EOF' >> $GITHUB_OUTPUT
+          cat diff.patch >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
-          echo "## Flux ${{ matrix.resources }} diff" >> $GITHUB_STEP_SUMMARY
-          echo "```diff" >> $GITHUB_STEP_SUMMARY
-          echo "$(cat diff.patch)" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo '## Flux ${{ matrix.resources }} diff' >> $GITHUB_STEP_SUMMARY
+          echo '```diff' >> $GITHUB_STEP_SUMMARY
+          cat diff.patch >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Generate Token
         if: ${{ steps.diff.outputs.diff != '' }}

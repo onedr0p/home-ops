@@ -63,7 +63,7 @@ jobs:
 
           echo '## Branch ${{ matrix.branches }} images' >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
-          cat images.json >> $GITHUB_STEP_SUMMARY
+          jq images.json >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
   compare:
@@ -84,9 +84,9 @@ jobs:
           )
           echo "images=${images}" >> $GITHUB_OUTPUT
 
-          echo '## Images' >> $GITHUB_STEP_SUMMARY
+          echo '## Comparison images' >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
-          echo $images >> $GITHUB_STEP_SUMMARY
+          echo $images | jq >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
   pull:
