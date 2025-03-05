@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "Flux Local"
+name: Flux Local
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   pre-job:
-    name: Flux Local Pre-Job
+    name: Flux Local - Pre-Job
     runs-on: ubuntu-latest
     outputs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
@@ -27,10 +27,10 @@ jobs:
           files: kubernetes/**
 
   test:
-    name: Flux Local Test
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
+    name: Flux Local - Test
     needs: pre-job
     runs-on: ubuntu-latest
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,7 +41,8 @@ jobs:
           args: test --enable-helm --all-namespaces --path /github/workspace/kubernetes/flux/cluster -v
 
   diff:
-    name: Flux Local Diff
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
+    name: Flux Local - Diff
     needs: pre-job
     runs-on: ubuntu-latest
     permissions:
@@ -51,7 +52,6 @@ jobs:
         resources: ["helmrelease", "kustomization"]
       max-parallel: 4
       fail-fast: false
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
     steps:
       - name: Checkout Pull Request Branch
         uses: actions/checkout@v4
@@ -81,18 +81,14 @@ jobs:
       - name: Generate Diff
         id: diff
         run: |
-          cat diff.patch;
-          {
-              echo 'diff<<EOF'
-              cat diff.patch
-              echo EOF
-          } >> "$GITHUB_OUTPUT";
-          {
-              echo "### Diff"
-              echo '```diff'
-              cat diff.patch
-              echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo 'diff<<EOF' >> $GITHUB_OUTPUT
+          cat diff.patch >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
+          echo '## Flux ${{ matrix.resources }} diff' >> $GITHUB_STEP_SUMMARY
+          echo '```diff' >> $GITHUB_STEP_SUMMARY
+          cat diff.patch >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Generate Token
         if: ${{ steps.diff.outputs.diff != '' }}
@@ -115,11 +111,11 @@ jobs:
             ${{ steps.diff.outputs.diff }}
             ```
 
-  flux-local-status:
-    name: Flux Local Success
+  status:
+    if: ${{ always() }}
+    name: Flux Local - Success
     needs: ["test", "diff"]
     runs-on: ubuntu-latest
-    if: ${{ always() }}
     steps:
       - name: Any jobs failed?
         if: ${{ contains(needs.*.result, 'failure') }}

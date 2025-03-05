@@ -1,0 +1,87 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Helm Repo Sync
+
+on:
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-job:
+    name: Helm Repo Sync - Pre-Job
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+      all_changed_and_modified_files: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: kubernetes/**/helmrelease.yaml
+
+  extract:
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
+    name: Helm Repo Sync - Extract Helm Repos
+    needs: pre-job
+    runs-on: ubuntu-latest
+    outputs:
+      repos: ${{ steps.extract.outputs.repos }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract Repos
+        id: extract
+        env:
+          FILTER: '[.spec.chart.spec.sourceRef] | unique | .[] | ["\(.namespace)/\(.name)"]'
+        run: |
+          repos=$(yq --indent 0 --output-format json eval-all "${FILTER}" \
+              ${{ needs.pre-job.outputs.all_changed_and_modified_files }}
+          )
+          echo "repos=${repos}" >> $GITHUB_OUTPUT
+
+          echo '## Helm Repos' >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          echo $repos | jq >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  sync:
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.extract.outputs.repos != '[]' }}
+    name: Helm Repo Sync - Sync Helm Repos
+    needs: ["pre-job", "extract"]
+    runs-on: home-ops-runner
+    strategy:
+      matrix:
+        repos: ${{ fromJSON(needs.extract.outputs.repos) }}
+      max-parallel: 4
+      fail-fast: false
+    steps:
+      - name: Install flux
+        run: curl -fsSL https://fluxcd.io/install.sh | bash
+
+      - name: Sync Repo
+        run: |
+          IFS='/' read -r ns repo <<< "${{ matrix.repos }}"
+          flux --namespace ${ns} reconcile source helm ${repo}
+
+  status:
+    if: ${{ always() }}
+    name: Helm Repo Sync - Success
+    needs: sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Any jobs failed?
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: exit 1
+
+      - name: All jobs passed or skipped?
+        if: ${{ !(contains(needs.*.result, 'failure')) }}
+        run: echo "All jobs passed or skipped" && echo "${{ toJSON(needs.*.result) }}"

@@ -1,11 +1,11 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "Schemas"
+name: Schemas
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *" # Every day at midnight
+    - cron: "0 0 * * *"
   push:
     branches: ["main"]
     paths: [".github/workflows/schemas.yaml"]
@@ -15,7 +15,7 @@ env:
   UV_SYSTEM_PYTHON: "1"
 
 jobs:
-  publish:
+  main:
     name: Schemas
     runs-on: home-ops-runner
     permissions:
@@ -47,7 +47,7 @@ jobs:
       - name: Run crd-extractor
         run: curl -fsSL https://raw.githubusercontent.com/datreeio/CRDs-catalog/43e4407642d4c37683c88711f37caa6c9c20ca40/Utilities/crd-extractor.sh | bash
 
-      - name: Deploy to Cloudflare Pages
+      - name: Publish Schemas
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: "${{ secrets.CLOUDFLARE_API_TOKEN }}"

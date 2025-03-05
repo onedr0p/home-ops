@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "Pre-pull Images"
+name: Image Pull
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   pre-job:
-    name: Pre-pull Images Pre-Job
+    name: Image Pull - Pre-Job
     runs-on: ubuntu-latest
     outputs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
@@ -26,18 +26,18 @@ jobs:
         with:
           files: kubernetes/**
 
-  extract-images:
-    name: Extract Images
+  extract:
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
+    name: Image Pull - Extract Images
     needs: pre-job
     runs-on: ubuntu-latest
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
     strategy:
       matrix:
         branches: ["default", "pull"]
       fail-fast: false
     outputs:
-      default: ${{ steps.output-images.outputs.default }}
-      pull: ${{ steps.output-images.outputs.pull }}
+      default: ${{ steps.images.outputs.default }}
+      pull: ${{ steps.images.outputs.pull }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,49 +57,60 @@ jobs:
             --output-file images.json
 
       - name: Output Images
-        id: output-images
-        run: echo "${{ matrix.branches }}=$(jq --compact-output '.' images.json)" >> $GITHUB_OUTPUT
+        id: images
+        run: |
+          echo "${{ matrix.branches }}=$(jq --compact-output '.' images.json)" >> $GITHUB_OUTPUT
 
-  compare-images:
-    name: Compare Images
+          echo '## Branch ${{ matrix.branches }} images' >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          jq '.' images.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  compare:
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.extract.outputs.default != needs.extract.outputs.pull }}
+    name: Image Pull - Compare Images
     runs-on: ubuntu-latest
-    needs: ["pre-job", "extract-images"]
+    needs: ["pre-job", "extract"]
     outputs:
-      images: ${{ steps.compare-images.outputs.images }}
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.extract-images.outputs.default != needs.extract-images.outputs.pull }}
+      images: ${{ steps.compare.outputs.images }}
     steps:
       - name: Compare Images
-        id: compare-images
+        id: compare
         run: |
           images=$(jq --compact-output --null-input \
-              --argjson f1 '${{ needs.extract-images.outputs.default }}' \
-              --argjson f2 '${{ needs.extract-images.outputs.pull }}' \
+              --argjson f1 '${{ needs.extract.outputs.default }}' \
+              --argjson f2 '${{ needs.extract.outputs.pull }}' \
               '$f2 - $f1' \
           )
           echo "images=${images}" >> $GITHUB_OUTPUT
 
-  pre-pull-images:
-    name: Pre-pull Images
+          echo '## New images to Pull' >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          echo $images | jq >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  pull:
+    if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.compare.outputs.images != '[]' }}
+    name: Image Pull - Pull Images
     runs-on: home-ops-runner
-    needs: ["pre-job", "compare-images"]
+    needs: ["pre-job", "compare"]
     strategy:
       matrix:
-        images: ${{ fromJSON(needs.compare-images.outputs.images) }}
+        images: ${{ fromJSON(needs.compare.outputs.images) }}
       max-parallel: 4
       fail-fast: false
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.compare-images.outputs.images != '[]' }}
     steps:
       - name: Install talosctl
         run: curl -fsSL https://talos.dev/install | sh
 
-      - name: Pre-pull Image
+      - name: Pull Image
         run: talosctl --nodes $NODE image pull ${{ matrix.images }}
 
-  pre-pull-images-status:
-    needs: pre-pull-images
-    name: Pre-pull Images Success
-    runs-on: ubuntu-latest
+  status:
     if: ${{ always() }}
+    name: Image Pull - Success
+    needs: pull
+    runs-on: ubuntu-latest
     steps:
       - name: Any jobs failed?
         if: ${{ contains(needs.*.result, 'failure') }}
