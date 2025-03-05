@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   pre-job:
-    name: ${{ github.workflow }} - Pre-Job
+    name: Image Pull - Pre-Job
     runs-on: ubuntu-latest
     outputs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
@@ -28,7 +28,7 @@ jobs:
 
   extract:
     if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
-    name: ${{ github.workflow }} - Extract Images
+    name: Image Pull - Extract Images
     needs: pre-job
     runs-on: ubuntu-latest
     strategy:
@@ -67,7 +67,7 @@ jobs:
 
   compare:
     if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.extract.outputs.default != needs.extract.outputs.pull }}
-    name: ${{ github.workflow }} - Compare Images
+    name: Image Pull - Compare Images
     runs-on: ubuntu-latest
     needs: ["pre-job", "extract"]
     outputs:
@@ -89,7 +89,7 @@ jobs:
 
   pull:
     if: ${{ needs.pre-job.outputs.any_changed == 'true' && needs.compare.outputs.images != '[]' }}
-    name: ${{ github.workflow }} - Pull Images
+    name: Image Pull - Pull Images
     runs-on: home-ops-runner
     needs: ["pre-job", "compare"]
     strategy:
@@ -106,7 +106,7 @@ jobs:
 
   status:
     if: ${{ always() }}
-    name: ${{ github.workflow }} - Success
+    name: Image Pull - Success
     needs: pull
     runs-on: ubuntu-latest
     steps:
