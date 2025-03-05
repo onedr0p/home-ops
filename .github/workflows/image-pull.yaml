@@ -84,7 +84,7 @@ jobs:
           )
           echo "images=${images}" >> $GITHUB_OUTPUT
 
-          echo '## Comparison images' >> $GITHUB_STEP_SUMMARY
+          echo '## New images to Pull' >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
           echo $images | jq >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
@@ -102,6 +102,11 @@ jobs:
     steps:
       - name: Install talosctl
         run: curl -fsSL https://talos.dev/install | sh
+
+      - name: Scan image
+        uses: anchore/scan-action@v6
+        with:
+          image: ${{ matrix.images }}
 
       - name: Pull Image
         run: talosctl --nodes $NODE image pull ${{ matrix.images }}
