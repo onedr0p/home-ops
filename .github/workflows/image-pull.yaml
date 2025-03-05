@@ -104,10 +104,14 @@ jobs:
         run: curl -fsSL https://talos.dev/install | sh
 
       - name: Scan image
+        id: scan
         uses: anchore/scan-action@v6
         with:
           image: ${{ matrix.images }}
           fail-build: false
+
+      - name: Report image
+        run: cat ${{ steps.scan.outputs.sarif }} >> $GITHUB_STEP_SUMMARY
 
       - name: Pull Image
         run: talosctl --nodes $NODE image pull ${{ matrix.images }}
