@@ -1,6 +1,6 @@
 # Onepassword Connect
 
-## For deployment outside of the cluster
+## Deployment
 
 ```yaml
 services:
