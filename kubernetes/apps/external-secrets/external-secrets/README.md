@@ -9,8 +9,6 @@ services:
   onepassword-api:
     container_name: onepassword-api
     environment:
-      OP_BUS_PEERS: localhost:11221
-      OP_BUS_PORT: 11220
       OP_HTTP_PORT: 7070
       OP_SESSION: aHVudGVyMgo=
       XDG_DATA_HOME: /config
@@ -22,8 +20,6 @@ services:
   onepassword-sync:
     container_name: onepassword-sync
     environment:
-      OP_BUS_PEERS: localhost:11221
-      OP_BUS_PORT: 11220
       OP_HTTP_PORT: 7071
       OP_SESSION: aHVudGVyMgo=
       XDG_DATA_HOME: /config
