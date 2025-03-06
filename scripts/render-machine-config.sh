@@ -35,7 +35,7 @@ function main() {
         log error "Missing arguments"
     fi
 
-    if ! op user get --me &>/dev/null; then
+    if ! op whoami --format=json &>/dev/null; then
         log error "Failed to authenticate with 1Password CLI"
     fi
 
