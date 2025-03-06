@@ -86,6 +86,24 @@ releases:
     chart: external-secrets/external-secrets
     version: 0.14.3
     values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/external-secrets/external-secrets/app/helm/values.yaml']
+    hooks:
+      - # Wait for external-secrets CRDs to be available
+        events: ['postsync']
+        command: bash
+        args:
+          - -c
+          - until kubectl get crd clustersecretstores.external-secrets.io &>/dev/null; do sleep 10; done
+        showlogs: true
+      - # Apply cluster secret store configuration
+        events: ['postsync']
+        command: kubectl
+        args:
+          - apply
+          - --namespace=external-secrets
+          - --server-side
+          - --field-manager=kustomize-controller
+          - --filename={{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/external-secrets/external-secrets/app/clustersecretstore.yaml
+        showlogs: true
     needs: ['cert-manager/cert-manager']
 
   - name: flux-operator
