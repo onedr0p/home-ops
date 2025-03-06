@@ -1,6 +1,8 @@
-# Onepassword Connect
+# external-secrets
 
-## Deployment
+## NAS Deployments
+
+### onepassword
 
 ```yaml
 services:
