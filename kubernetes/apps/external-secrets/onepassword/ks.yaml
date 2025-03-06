@@ -9,11 +9,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  healthChecks:
-    - apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      name: onepassword
-      namespace: *namespace
   healthCheckExprs:
     - apiVersion: external-secrets.io/v1beta1
       kind: ClusterSecretStore
@@ -29,3 +24,4 @@ spec:
     namespace: flux-system
   targetNamespace: *namespace
   timeout: 15m
+  wait: true
