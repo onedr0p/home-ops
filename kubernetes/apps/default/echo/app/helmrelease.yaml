@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: echo-server
+  name: echo
 spec:
   interval: 1h
   chartRef:
@@ -20,7 +20,7 @@ spec:
       retries: 3
   values:
     controllers:
-      echo-server:
+      echo:
         replicas: 2
         strategy: RollingUpdate
         containers:
@@ -62,13 +62,13 @@ spec:
         runAsGroup: 1000
     service:
       app:
-        controller: echo-server
+        controller: echo
         ports:
           http:
             port: *port
     serviceMonitor:
       app:
-        serviceName: echo-server
+        serviceName: echo
         endpoints:
           - port: http
     ingress:
