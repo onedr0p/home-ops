@@ -1,9 +1,19 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/helmrepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: ingress-nginx-cloudflare
+  namespace: cloudflare # Required for Renovate lookups
+spec:
+  interval: 12h
+  url: https://kubernetes.github.io/ingress-nginx
+---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app internal-ingress-nginx
+  name: &app ingress-nginx-cloudflare
 spec:
   interval: 1h
   chart:
@@ -12,8 +22,8 @@ spec:
       version: 4.12.0
       sourceRef:
         kind: HelmRepository
-        name: ingress-nginx
-        namespace: flux-system
+        name: ingress-nginx-cloudflare
+        namespace: cloudflare
   install:
     remediation:
       retries: 3
@@ -28,18 +38,18 @@ spec:
       replicaCount: 2
       service:
         annotations:
-          external-dns.alpha.kubernetes.io/hostname: &hostname internal.devbu.io
-          lbipam.cilium.io/ips: 192.168.42.121
+          external-dns.alpha.kubernetes.io/hostname: &hostname external.devbu.io
+          lbipam.cilium.io/ips: 192.168.42.126
       ingressClassResource:
-        name: internal
-        default: true
-        controllerValue: k8s.io/internal
+        name: external
+        default: false
+        controllerValue: k8s.io/external
       admissionWebhooks:
         objectSelector:
           matchExpressions:
             - key: ingress-class
               operator: In
-              values: ["internal"]
+              values: ["external"]
       config:
         allow-snippet-annotations: true
         annotations-risk-level: Critical

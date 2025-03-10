@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: cloudflared
+  name: cloudflare-tunnel
 spec:
   interval: 1h
   chartRef:
@@ -19,7 +19,7 @@ spec:
       retries: 3
   values:
     controllers:
-      cloudflared:
+      cloudflare-tunnel:
         replicas: 2
         strategy: RollingUpdate
         annotations:
@@ -71,26 +71,26 @@ spec:
         runAsGroup: 1000
     service:
       app:
-        controller: cloudflared
+        controller: cloudflare-tunnel
         ports:
           http:
             port: *port
     serviceMonitor:
       app:
-        serviceName: cloudflared
+        serviceName: cloudflare-tunnel
         endpoints:
           - port: http
     persistence:
       config-file:
         type: configMap
-        name: cloudflared-configmap
+        name: cloudflare-tunnel-configmap
         globalMounts:
           - path: /etc/cloudflared/config/config.yaml
             subPath: config.yaml
             readOnly: true
       secret-file:
         type: secret
-        name: cloudflared-tunnel-secret
+        name: cloudflare-tunnel-secret
         globalMounts:
           - path: /etc/cloudflared/creds/credentials.json
             subPath: credentials.json
