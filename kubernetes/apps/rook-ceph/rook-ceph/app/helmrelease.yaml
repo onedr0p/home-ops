@@ -1,4 +1,14 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/helmrepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: rook-ceph
+  namespace: rook-ceph # Required for Renovate lookups
+spec:
+  interval: 12h
+  url: https://charts.rook.io/release
+---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -14,7 +24,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: rook-ceph
-        namespace: flux-system
+        namespace: rook-ceph
   install:
     remediation:
       retries: 3
