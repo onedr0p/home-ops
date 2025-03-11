@@ -78,23 +78,24 @@ spec:
             port: 32400
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.devbu.io"]
+        hostnames:
+          - "{{ .Release.Name }}.devbu.io"
         parentRefs:
           - name: external
             namespace: kube-system
             sectionName: https
         rules:
-          - matches:
-              - path:
-                  type: PathPrefix
-                  value: /library/streams
+          - backendRefs:
+              - name: *app
+                port: *port
             filters:
               - type: RequestHeaderModifier
                 requestHeaderModifier:
                   remove: ["Range"]
-            backendRefs:
-              - name: *app
-                port: *port
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /library/streams
           - backendRefs:
               - name: *app
                 port: *port
