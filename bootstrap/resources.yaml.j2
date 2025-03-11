@@ -1,31 +1,10 @@
-{% for namespace in ["cert-manager", "external-secrets", "flux-system"] %}
+{% for namespace in ["external-secrets", "flux-system"] %}
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ namespace }}
 {% endfor %}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: devbu-io-tls
-  namespace: cert-manager
-  annotations:
-    cert-manager.io/alt-names: '*.devbu.io,devbu.io'
-    cert-manager.io/certificate-name: devbu-io
-    cert-manager.io/common-name: devbu.io
-    cert-manager.io/ip-sans: ""
-    cert-manager.io/issuer-group: ""
-    cert-manager.io/issuer-kind: ClusterIssuer
-    cert-manager.io/issuer-name: letsencrypt-production
-    cert-manager.io/uri-sans: ""
-  labels:
-    controller.cert-manager.io/fao: "true"
-type: kubernetes.io/tls
-data:
-  tls.crt: op://kubernetes/devbu-io-tls/tls.crt
-  tls.key: op://kubernetes/devbu-io-tls/tls.key
 ---
 apiVersion: v1
 kind: Secret
@@ -42,3 +21,24 @@ metadata:
   namespace: flux-system
 stringData:
   age.agekey: op://kubernetes/sops/SOPS_PRIVATE_KEY
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: devbu-io-tls
+  namespace: kube-system
+  annotations:
+    cert-manager.io/alt-names: '*.devbu.io,devbu.io'
+    cert-manager.io/certificate-name: devbu-io
+    cert-manager.io/common-name: devbu.io
+    cert-manager.io/ip-sans: ""
+    cert-manager.io/issuer-group: ""
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-production
+    cert-manager.io/uri-sans: ""
+  labels:
+    controller.cert-manager.io/fao: "true"
+type: kubernetes.io/tls
+data:
+  tls.crt: op://kubernetes/devbu-io-tls/tls.crt
+  tls.key: op://kubernetes/devbu-io-tls/tls.key
