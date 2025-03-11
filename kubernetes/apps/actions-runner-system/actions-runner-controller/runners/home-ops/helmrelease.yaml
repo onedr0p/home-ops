@@ -1,4 +1,18 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1beta2.json
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: gha-runner-scale-set
+spec:
+  interval: 1h
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: 0.10.1
+  url: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -6,14 +20,9 @@ metadata:
   name: &name home-ops-runner
 spec:
   interval: 1h
-  chart:
-    spec:
-      chart: gha-runner-scale-set
-      version: 0.10.1
-      sourceRef:
-        kind: HelmRepository
-        name: actions-runner-controller
-        namespace: actions-runner-system
+  chartRef:
+    kind: OCIRepository
+    name: gha-runner-scale-set
   install:
     remediation:
       retries: 3

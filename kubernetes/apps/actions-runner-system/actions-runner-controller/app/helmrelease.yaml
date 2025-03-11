@@ -1,14 +1,17 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/helmrepository_v1.json
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1beta2.json
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
 metadata:
-  name: actions-runner-controller
-  namespace: actions-runner-system # Required for Renovate lookups
+  name: gha-runner-scale-set-controller
 spec:
   interval: 1h
-  type: oci
-  url: oci://ghcr.io/actions/actions-runner-controller-charts
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: 0.10.1
+  url: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -17,14 +20,9 @@ metadata:
   name: &name actions-runner-controller
 spec:
   interval: 1h
-  chart:
-    spec:
-      chart: gha-runner-scale-set-controller
-      version: 0.10.1
-      sourceRef:
-        kind: HelmRepository
-        name: actions-runner-controller
-        namespace: actions-runner-system
+  chartRef:
+    kind: OCIRepository
+    name: gha-runner-scale-set-controller
   install:
     crds: CreateReplace
     remediation:
@@ -38,3 +36,14 @@ spec:
   values:
     fullnameOverride: *name
     replicaCount: 1
+  # TODO: Remove on 0.11.0
+  # Ref: https://github.com/actions/actions-runner-controller/pull/3729
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+            patch: |
+              - op: replace
+                path: /spec/template/metadata/labels/app.kubernetes.io~1version
+                value: 0.10.1
