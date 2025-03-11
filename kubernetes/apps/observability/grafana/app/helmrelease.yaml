@@ -261,10 +261,15 @@ spec:
       - vonage-status-panel
     serviceMonitor:
       enabled: true
-    ingress:
-      enabled: true
-      ingressClassName: internal
-      hosts: ["grafana.devbu.io"]
+    route:
+      main:
+        enabled: true
+        hostnames:
+          - "{{ .Release.Name }}.devbu.io"
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
     persistence:
       enabled: false
     testFramework:

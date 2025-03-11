@@ -1,0 +1,10 @@
+---
+originRequest:
+  matchSNItoHost: true
+
+ingress:
+  - hostname: devbu.io
+    service: &svc https://cilium-gateway-external.kube-system.svc.cluster.local
+  - hostname: "*.devbu.io"
+    service: *svc
+  - service: http_status:404

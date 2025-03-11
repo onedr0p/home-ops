@@ -3,17 +3,17 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app ingress-nginx-unifi
+  name: &app cloudflare-tunnel
   namespace: &namespace network
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: cert-manager-tls
-      namespace: cert-manager
+    - name: cloudflare-dns
+      namespace: *namespace
   interval: 1h
-  path: ./kubernetes/apps/network/ingress-nginx-unifi/app
+  path: ./kubernetes/apps/network/cloudflare-tunnel/app
   prune: true
   retryInterval: 2m
   sourceRef:
