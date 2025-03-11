@@ -43,22 +43,6 @@ spec:
                 cpu: 10m
               limits:
                 memory: 2Gi
-          code-server:
-            image:
-              repository: ghcr.io/coder/code-server
-              tag: 4.97.2@sha256:6ff0e9cf5a553b3961ece200be75e21e8c887ed0ae28a7c28213722dccf74b0c
-            args: [
-              "--auth", "none",
-              "--user-data-dir", "/config/.vscode",
-              "--extensions-dir", "/config/.vscode",
-              "--port", "12321",
-              "/config"
-            ]
-            resources:
-              requests:
-                cpu: 10m
-              limits:
-                memory: 512Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -72,9 +56,6 @@ spec:
         ports:
           http:
             port: &port 8123
-          code-server:
-            port: &codePort 12321
-
     route:
       app:
         hostnames: ["hass.devbu.io"]
@@ -86,17 +67,6 @@ spec:
           - backendRefs:
               - name: *app
                 port: *port
-      code-server:
-        hostnames:
-          - hass-config.devbu.io
-        parentRefs:
-          - name: internal
-            namespace: kube-system
-            sectionName: https
-        rules:
-          - backendRefs:
-              - name: *app
-                port: *codePort
     persistence:
       config:
         existingClaim: home-assistant
