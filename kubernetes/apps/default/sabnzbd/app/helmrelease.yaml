@@ -36,7 +36,8 @@ spec:
                 sabnzbd.default.svc,
                 sabnzbd.default.svc.cluster,
                 sabnzbd.default.svc.cluster.local,
-                sab.devbu.io
+                sab.devbu.io,
+                sabnzbd.devbu.io
               CROSS_SEED_ENABLED: false
               CROSS_SEED_HOST: cross-seed.default.svc.cluster.local
               CROSS_SEED_PORT: 80
@@ -82,7 +83,9 @@ spec:
             port: *port
     route:
       app:
-        hostnames: ["sab.devbu.io"]
+        hostnames:
+          - "{{ .Release.Name }}.devbu.io"
+          - sab.devbu.io
         parentRefs:
           - name: internal
             namespace: kube-system
