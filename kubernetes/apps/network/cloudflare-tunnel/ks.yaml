@@ -3,22 +3,17 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app external-dns-cloudflare
-  namespace: &namespace cloudflare
+  name: &app cloudflare-tunnel
+  namespace: &namespace network
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  healthChecks:
-    - apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      name: *app
+  dependsOn:
+    - name: cloudflare-dns
       namespace: *namespace
-    - apiVersion: apiextensions.k8s.io/v1
-      kind: CustomResourceDefinition
-      name: dnsendpoints.externaldns.k8s.io
   interval: 1h
-  path: ./kubernetes/apps/cloudflare/external-dns-cloudflare/app
+  path: ./kubernetes/apps/network/cloudflare-tunnel/app
   prune: true
   retryInterval: 2m
   sourceRef:
@@ -27,3 +22,4 @@ spec:
     namespace: flux-system
   targetNamespace: *namespace
   timeout: 5m
+  wait: false

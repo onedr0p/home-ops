@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: plex
+  name: &app plex
 spec:
   interval: 1h
   chartRef:
@@ -38,7 +38,7 @@ spec:
                 spec:
                   httpGet:
                     path: /identity
-                    port: 32400
+                    port: &port 32400
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
@@ -76,24 +76,28 @@ spec:
         ports:
           http:
             port: 32400
-    ingress:
+    route:
       app:
-        annotations:
-          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-          nginx.ingress.kubernetes.io/server-snippet: |
-            location ~ ^/library/streams {
-              proxy_set_header        Range "";
-              proxy_pass              http://plex.default.svc.cluster.local:32400;
-              proxy_http_version      1.1;
-            }
-        className: external
-        hosts:
-          - host: "{{ .Release.Name }}.devbu.io"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+        hostnames: ["{{ .Release.Name }}.devbu.io"]
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /library/streams
+            filters:
+              - type: RequestHeaderModifier
+                requestHeaderModifier:
+                  remove: ["Range"]
+            backendRefs:
+              - name: *app
+                port: *port
+          - backendRefs:
+              - name: *app
+                port: *port
     persistence:
       config:
         existingClaim: plex

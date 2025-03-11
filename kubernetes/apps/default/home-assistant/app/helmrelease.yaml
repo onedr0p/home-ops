@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: home-assistant
+  name: &app home-assistant
 spec:
   interval: 1h
   chartRef:
@@ -43,22 +43,6 @@ spec:
                 cpu: 10m
               limits:
                 memory: 2Gi
-          code-server:
-            image:
-              repository: ghcr.io/coder/code-server
-              tag: 4.97.2@sha256:6ff0e9cf5a553b3961ece200be75e21e8c887ed0ae28a7c28213722dccf74b0c
-            args: [
-              "--auth", "none",
-              "--user-data-dir", "/config/.vscode",
-              "--extensions-dir", "/config/.vscode",
-              "--port", "12321",
-              "/config"
-            ]
-            resources:
-              requests:
-                cpu: 10m
-              limits:
-                memory: 512Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -71,28 +55,18 @@ spec:
         controller: home-assistant
         ports:
           http:
-            port: 8123
-          code-server:
-            port: 12321
-    ingress:
+            port: &port 8123
+    route:
       app:
-        className: external
-        hosts:
-          - host: hass.devbu.io
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-      code-server:
-        className: internal
-        hosts:
-          - host: hass-code.devbu.io
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: code-server
+        hostnames: ["hass.devbu.io"]
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
     persistence:
       config:
         existingClaim: home-assistant

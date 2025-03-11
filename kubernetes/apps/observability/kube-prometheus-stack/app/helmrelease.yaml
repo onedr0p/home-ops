@@ -39,11 +39,14 @@ spec:
         forceConflicts: true
     cleanPrometheusOperatorObjectNames: true
     alertmanager:
-      ingress:
-        enabled: true
-        ingressClassName: internal
-        hosts: ["alertmanager.devbu.io"]
-        pathType: Prefix
+      route:
+        main:
+          enabled: true
+          hostnames: ["alertmanager.devbu.io"]
+          parentRefs:
+            - name: internal
+              namespace: kube-system
+              sectionName: https
       alertmanagerSpec:
         alertmanagerConfiguration:
           name: alertmanager
@@ -64,11 +67,14 @@ spec:
     kubeProxy:
       enabled: false
     prometheus:
-      ingress:
-        enabled: true
-        ingressClassName: internal
-        hosts: ["prometheus.devbu.io"]
-        pathType: Prefix
+      route:
+        main:
+          enabled: true
+          hostnames: ["prometheus.devbu.io"]
+          parentRefs:
+            - name: internal
+              namespace: kube-system
+              sectionName: https
       prometheusSpec:
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false

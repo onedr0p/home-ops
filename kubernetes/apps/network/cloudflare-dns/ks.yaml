@@ -3,17 +3,22 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app ingress-nginx-unifi
+  name: &app cloudflare-dns
   namespace: &namespace network
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: cert-manager-tls
-      namespace: cert-manager
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: *app
+      namespace: *namespace
+    - apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      name: dnsendpoints.externaldns.k8s.io
   interval: 1h
-  path: ./kubernetes/apps/network/ingress-nginx-unifi/app
+  path: ./kubernetes/apps/network/cloudflare-dns/app
   prune: true
   retryInterval: 2m
   sourceRef:
@@ -22,4 +27,3 @@ spec:
     namespace: flux-system
   targetNamespace: *namespace
   timeout: 5m
-  wait: false
