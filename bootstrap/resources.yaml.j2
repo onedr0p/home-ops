@@ -1,4 +1,4 @@
-{% for namespace in ["external-secrets", "flux-system"] %}
+{% for namespace in ["external-secrets", "flux-system", "network"] %}
 ---
 apiVersion: v1
 kind: Namespace
@@ -42,3 +42,11 @@ type: kubernetes.io/tls
 data:
   tls.crt: op://kubernetes/devbu-io-tls/tls.crt
   tls.key: op://kubernetes/devbu-io-tls/tls.key
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudflare-tunnel-id-secret
+  namespace: network
+stringData:
+  CLOUDFLARE_TUNNEL_ID: op://kubernetes/cloudflare/CLOUDFLARE_TUNNEL_ID
