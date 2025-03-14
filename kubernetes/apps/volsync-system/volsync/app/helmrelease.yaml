@@ -1,13 +1,19 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/helmrepository_v1.json
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1beta2.json
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
 metadata:
-  name: backube
-  namespace: volsync-system # Required for Renovate lookups
+  name: volsync
 spec:
-  interval: 12h
-  url: https://backube.github.io/helm-charts/
+  interval: 1h
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: 0.12.0
+  url: oci://ghcr.io/onedr0p/charts-mirror/volsync
+  verify:
+    provider: cosign
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -16,14 +22,9 @@ metadata:
   name: volsync
 spec:
   interval: 1h
-  chart:
-    spec:
-      chart: volsync
-      version: 0.12.0
-      sourceRef:
-        kind: HelmRepository
-        name: backube
-        namespace: volsync-system
+  chartRef:
+    kind: OCIRepository
+    name: volsync
   install:
     remediation:
       retries: 3

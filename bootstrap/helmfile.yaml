@@ -8,6 +8,10 @@ helmDefaults:
   # waitRetries: 3 # Not supported by Helm yet
 
 repositories:
+  - name: charts-mirror
+    url: ghcr.io/onedr0p/charts-mirror
+    oci: true
+
   - name: controlplaneio
     url: ghcr.io/controlplaneio-fluxcd/charts
     oci: true
@@ -16,11 +20,9 @@ repositories:
     url: ghcr.io/coredns/charts
     oci: true
 
-  - name: cilium
-    url: https://helm.cilium.io
-
-  - name: jetstack
-    url: https://charts.jetstack.io
+  - name: external-secrets
+    url: ghcr.io/external-secrets/charts
+    oci: true
 
   - name: spegel
     url: ghcr.io/spegel-org/helm-charts
@@ -30,7 +32,7 @@ releases:
   - name: cilium
     namespace: kube-system
     atomic: true
-    chart: cilium/cilium
+    chart: charts-mirror/cilium
     version: 1.17.1
     values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/kube-system/cilium/app/helm/values.yaml']
     hooks:
@@ -71,7 +73,7 @@ releases:
   - name: cert-manager
     namespace: cert-manager
     atomic: true
-    chart: jetstack/cert-manager
+    chart: charts-mirror/cert-manager
     version: v1.17.1
     values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/cert-manager/cert-manager/app/helm/values.yaml']
     needs: ['kube-system/spegel']
@@ -79,7 +81,7 @@ releases:
   - name: external-secrets
     namespace: external-secrets
     atomic: true
-    chart: oci://ghcr.io/external-secrets/charts/external-secrets
+    chart: external-secrets/external-secrets
     version: 0.14.4
     values: ['{{ requiredEnv "ROOT_DIR" }}/kubernetes/apps/external-secrets/external-secrets/app/helm/values.yaml']
     hooks:
