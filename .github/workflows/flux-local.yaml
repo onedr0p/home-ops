@@ -18,11 +18,11 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Get Changed Files
         id: changed-files
-        uses: tj-actions/changed-files@v45
+        uses: JJGadgets/tj-actions-changed-files@9200e69727eb73eb060652b19946b8a2fdfb654b
         with:
           files: kubernetes/**
 
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Run flux-local test
         uses: docker://ghcr.io/allenporter/flux-local:v7.2.1
@@ -54,12 +54,12 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout Pull Request Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           path: pull
 
       - name: Checkout Default Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           ref: "${{ github.event.repository.default_branch }}"
           path: default
@@ -92,7 +92,7 @@ jobs:
 
       - name: Generate Token
         if: ${{ steps.diff.outputs.diff != '' }}
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@21cfef2b496dd8ef5b904c159339626a10ad380e # v1
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
@@ -101,7 +101,7 @@ jobs:
       - name: Add Comment
         if: ${{ steps.diff.outputs.diff != '' }}
         continue-on-error: true
-        uses: mshick/add-pr-comment@v2
+        uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2.8.2
         with:
           repo-token: "${{ steps.app-token.outputs.token }}"
           message-id: "${{ github.event.pull_request.number }}/kubernetes/${{ matrix.resources }}"
