@@ -1,35 +1,36 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "customDatasources": {
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  customDatasources: {
     "grafana-dashboards": {
-      "defaultRegistryUrlTemplate": "https://grafana.com/api/dashboards/{{packageName}}",
-      "format": "json",
-      "transformTemplates": ["{\"releases\":[{\"version\": $string(revision)}]}"]
-    }
+      defaultRegistryUrlTemplate: "https://grafana.com/api/dashboards/{{packageName}}",
+      format: "json",
+      transformTemplates: ['{"releases":[{"version": $string(revision)}]}'],
+    },
   },
-  "customManagers": [
+  customManagers: [
     {
-      "customType": "regex",
-      "description": ["Process Grafana dashboards"],
-      "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml$"],
-      "matchStrings": ["depName=\"(?<depName>.*)\"\\n(?<indentation>\\s+)gnetId: (?<packageName>\\d+)\\n.+revision: (?<currentValue>\\d+)"],
-      "autoReplaceStringTemplate": "depName=\"{{{depName}}}\"\n{{{indentation}}}gnetId: {{{packageName}}}\n{{{indentation}}}revision: {{{newValue}}}",
-      "datasourceTemplate": "custom.grafana-dashboards",
-      "versioningTemplate": "regex:^(?<major>\\d+)$"
-    }
+      description: "Process Grafana dashboards",
+      customType: "regex",
+      fileMatch: ["(^|/)kubernetes/.+\\.ya?ml$"],
+      matchStrings: [
+        'depName="(?<depName>.*)"\\n(?<indentation>\\s+)gnetId: (?<packageName>\\d+)\\n.+revision: (?<currentValue>\\d+)'
+      ],
+      autoReplaceStringTemplate: 'depName="{{{depName}}}"\n{{{indentation}}}gnetId: {{{packageName}}}\n{{{indentation}}}revision: {{{newValue}}}',
+      datasourceTemplate: "custom.grafana-dashboards",
+      versioningTemplate: "regex:^(?<major>\\d+)$",
+    },
   ],
-  "packageRules": [
+  packageRules: [
     {
-      "addLabels": ["renovate/grafana-dashboard"],
-      "automerge": true,
-      "automergeType": "branch",
-      "commitMessageExtra": "( {{currentVersion}} → {{newVersion}} )",
-      "commitMessageTopic": "dashboard {{depName}}",
-      "ignoreTests": true,
-      "matchDatasources": ["custom.grafana-dashboards"],
-      "matchUpdateTypes": ["major"],
-      "semanticCommitScope": "grafana-dashboards",
-      "semanticCommitType": "chore"
-    }
-  ]
+      addLabels: ["renovate/grafana-dashboard"],
+      automerge: true,
+      automergeType: "branch",
+      commitMessageExtra: "({{currentVersion}} → {{newVersion}})",
+      commitMessageTopic: "dashboard {{depName}}",
+      matchDatasources: ["custom.grafana-dashboards"],
+      matchUpdateTypes: ["major"],
+      semanticCommitScope: "grafana-dashboards",
+      semanticCommitType: "chore",
+    },
+  ],
 }
