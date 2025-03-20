@@ -25,13 +25,15 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/jee-r/beets
-              tag: latest@sha256:6ec252f3f817d479cfe19f2b91ae187729c3bf7524fb6cf7088aa39a31624097
+              repository: ghcr.io/home-operations/beets
+              tag: v2.2.0@sha256:a272b20e66e142785e5275b0ad0cf2149a92c82b6040201919eb51c0e6966a3b
             env:
               BETANIN_HOST: 0.0.0.0
               BETANIN_PORT: &port 80
-              MODE: betanin
               TZ: America/New_York
+            envFrom:
+              - secretRef:
+                  name: beets-secret
             probes:
               liveness:
                 enabled: true
@@ -95,13 +97,6 @@ spec:
         globalMounts:
           - path: /config/.config/beets/config.yaml
             subPath: config.yaml
-            readOnly: true
-      secret-file:
-        type: secret
-        name: beets-secret
-        globalMounts:
-          - path: /config/.config/betanin/config.toml
-            subPath: config.toml
             readOnly: true
       tmp:
         type: emptyDir
