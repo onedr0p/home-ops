@@ -3,41 +3,36 @@
 name: Renovate
 
 on:
-  workflow_dispatch:
-    inputs:
-      dryRun:
-        description: Dry Run
-        default: "false"
-        required: false
-      logLevel:
-        description: Log Level
-        default: debug
-        required: false
-      version:
-        description: Renovate version
-        default: latest
-        required: false
-  schedule:
-    - cron: "0 * * * *"
   push:
     branches: ["main"]
     paths:
       - .renovaterc.json5
       - .renovate/**.json5
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: Dry Run
+        type: boolean
+        default: false
+        required: true
+      logLevel:
+        description: Log Level
+        type: choice
+        default: debug
+        options:
+          - debug
+          - info
+        required: true
+      version:
+        description: Renovate Version
+        default: latest
+        required: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
-
-env:
-  LOG_LEVEL: "${{ inputs.logLevel || 'debug' }}"
-  RENOVATE_AUTODISCOVER: true
-  RENOVATE_AUTODISCOVER_FILTER: "${{ github.repository }}"
-  RENOVATE_DRY_RUN: "${{ inputs.dryRun == true }}"
-  RENOVATE_INTERNAL_CHECKS_FILTER: strict
-  RENOVATE_PLATFORM: github
-  RENOVATE_PLATFORM_COMMIT: true
-  WORKFLOW_RENOVATE_VERSION: "${{ inputs.version || 'latest' }}"
 
 jobs:
   main:
@@ -58,6 +53,14 @@ jobs:
 
       - name: Run Renovate
         uses: renovatebot/github-action@08ed9fa83e24bfe6222557f9e221395c57972127 # v41.0.16
+        env:
+          LOG_LEVEL: "${{ inputs.logLevel }}"
+          RENOVATE_AUTODISCOVER: true
+          RENOVATE_AUTODISCOVER_FILTER: "${{ github.repository }}"
+          RENOVATE_DRY_RUN: "${{ inputs.dryRun }}"
+          RENOVATE_INTERNAL_CHECKS_FILTER: strict
+          RENOVATE_PLATFORM: github
+          RENOVATE_PLATFORM_COMMIT: true
         with:
           token: "${{ steps.app-token.outputs.token }}"
-          renovate-version: "${{ env.WORKFLOW_RENOVATE_VERSION }}"
+          renovate-version: "${{ inputs.version || 'latest' }}"
