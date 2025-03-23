@@ -1,0 +1,49 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: external-dns-rules
+spec:
+  groups:
+    - name: external-dns.rules
+      rules:
+        - alert: ExternalDNSRegistryError
+          expr: |
+            external_dns_registry_errors_total > 0
+          for: 5m
+          annotations:
+            summary: >-
+              {{ $labels.job }} has registry errors for more than 5 minutes
+          labels:
+            severity: critical
+
+        - alert: ExternalDNSSourceError
+          expr: |
+            external_dns_source_errors_total > 0
+          for: 5m
+          annotations:
+            summary: >-
+              {{ $labels.job }} has source errors for more than 5 minutes
+          labels:
+            severity: critical
+
+        - alert: ExternalDNSApplyChangesError
+          expr: |
+            external_dns_webhook_provider_applychanges_errors_total > 0
+          for: 5m
+          annotations:
+            summary: >-
+              {{ $labels.job }} has failed to apply changes for more than 5 minutes
+          labels:
+            severity: critical
+
+        - alert: ExternalDNSRecordsError
+          expr: |
+            external_dns_webhook_provider_records_errors_total > 0
+          for: 5m
+          annotations:
+            summary: >-
+              {{ $labels.job }} has failed to gather records for more than 5 minutes
+          labels:
+            severity: critical
