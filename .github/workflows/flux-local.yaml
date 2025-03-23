@@ -1,5 +1,4 @@
 ---
-# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Flux Local
 
 on:
@@ -11,25 +10,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pre-job:
-    name: Flux Local - Pre-Job
+  filter:
+    name: Flux Local - Filter
     runs-on: ubuntu-latest
     outputs:
-      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+      changed-files: ${{ steps.changed-files.outputs.changed_files }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
       - name: Get Changed Files
         id: changed-files
-        uses: tj-actions/changed-files@2f7c5bfce28377bc069a65ba478de0a74aa0ca32 # v46.0.1
+        uses: bjw-s-labs/action-changed-files@2cc35474e9d534ed0d743aa122fd142afbdaa0ad # v0.3.1
         with:
-          files: kubernetes/**
+          patterns: kubernetes/**/*
 
   test:
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
+    if: ${{ needs.filter.outputs.changed-files != '[]' }}
+    needs: filter
     name: Flux Local - Test
-    needs: pre-job
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,20 +34,24 @@ jobs:
       - name: Run flux-local test
         uses: docker://ghcr.io/allenporter/flux-local:v7.3.0
         with:
-          args: test --enable-helm --all-namespaces --path /github/workspace/kubernetes/flux/cluster -v
+          args: >-
+            test
+            --all-namespaces
+            --enable-helm
+            --path /github/workspace/kubernetes/flux/cluster
+            --verbose
 
   diff:
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
+    if: ${{ needs.filter.outputs.changed-files != '[]' }}
+    needs: filter
     name: Flux Local - Diff
-    needs: pre-job
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
     strategy:
       matrix:
-        resources: ["helmrelease", "kustomization"]
-      max-parallel: 4
+        resource: ["helmrelease", "kustomization"]
       fail-fast: false
     steps:
       - name: Checkout Pull Request Branch
@@ -69,7 +69,7 @@ jobs:
         uses: docker://ghcr.io/allenporter/flux-local:v7.3.0
         with:
           args: >-
-            diff ${{ matrix.resources }}
+            diff ${{ matrix.resource }}
             --unified 6
             --path /github/workspace/pull/kubernetes/flux/cluster
             --path-orig /github/workspace/default/kubernetes/flux/cluster
@@ -86,36 +86,29 @@ jobs:
           cat diff.patch >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
-          echo '## Flux ${{ matrix.resources }} diff' >> $GITHUB_STEP_SUMMARY
-          echo '```diff' >> $GITHUB_STEP_SUMMARY
-          cat diff.patch >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
-      - name: Generate Token
-        if: ${{ steps.diff.outputs.diff != '' }}
+      - if: ${{ steps.diff.outputs.diff != '' }}
+        name: Generate Token
         uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09 # v1.11.7
         id: app-token
         with:
-          app-id: "${{ secrets.BOT_APP_ID }}"
-          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
 
-      - name: Add Comment
-        if: ${{ steps.diff.outputs.diff != '' }}
-        continue-on-error: true
+      - if: ${{ steps.diff.outputs.diff != '' }}
+        name: Add Comment
         uses: marocchino/sticky-pull-request-comment@52423e01640425a022ef5fd42c6fb5f633a02728 # v2.9.1
-        env:
-          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
         with:
-          header: "${{ github.event.pull_request.number }}/kubernetes/${{ matrix.resources }}"
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          header: ${{ github.event.pull_request.number }}/kubernetes/${{ matrix.resource }}
           message: |
             ```diff
             ${{ steps.diff.outputs.diff }}
             ```
 
-  status:
+  success:
     if: ${{ !cancelled() }}
-    name: Flux Local - Success
     needs: ["test", "diff"]
+    name: Flux Local - Success
     runs-on: ubuntu-latest
     steps:
       - name: Any jobs failed?
