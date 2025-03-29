@@ -59,26 +59,18 @@ function apply_talos_config() {
 function bootstrap_talos() {
     log debug "Bootstrapping Talos"
 
-    local bootstrapped=true
-
     if ! controller=$(talosctl config info --output json | jq --exit-status --raw-output '.endpoints[]' | shuf -n 1) || [[ -z "${controller}" ]]; then
         log error "No Talos controller found"
     fi
 
     log debug "Talos controller discovered" "controller=${controller}"
 
-    until output=$(talosctl --nodes "${controller}" bootstrap 2>&1); do
-        if [[ "${bootstrapped}" == true && "${output}" == *"AlreadyExists"* ]]; then
-            log info "Talos is bootstrapped" "controller=${controller}"
-            break
-        fi
-
-        # Set bootstrapped to false after the first attempt
-        bootstrapped=false
-
-        log info "Talos bootstrap failed, retrying in 10 seconds..." "controller=${controller}"
+    until output=$(talosctl --nodes "${controller}" bootstrap 2>&1 || true) && [[ "${output}" == *"AlreadyExists"* ]]; do
+        log info "Talos bootstrap in progress, waiting 10 seconds..." "controller=${controller}"
         sleep 10
     done
+
+    log info "Talos is bootstrapped" "controller=${controller}"
 }
 
 # Fetch the kubeconfig from a controller node
