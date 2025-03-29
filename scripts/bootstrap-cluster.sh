@@ -65,17 +65,12 @@ function bootstrap_talos() {
 
     log debug "Talos controller discovered" "controller=${controller}"
 
-    while true; do
-        output=$(talosctl --nodes "${controller}" bootstrap 2>&1 || true)
-
-        if [[ "${output}" == *"AlreadyExists"* ]]; then
-            log info "Talos is bootstrapped" "controller=${controller}"
-            break
-        fi
-
+    until output=$(talosctl --nodes "${controller}" bootstrap 2>&1 || true) && [[ "${output}" == *"AlreadyExists"* ]]; do
         log info "Talos bootstrap in progress, waiting 10 seconds..." "controller=${controller}"
         sleep 10
     done
+
+    log info "Talos is bootstrapped" "controller=${controller}"
 }
 
 # Fetch the kubeconfig from a controller node
