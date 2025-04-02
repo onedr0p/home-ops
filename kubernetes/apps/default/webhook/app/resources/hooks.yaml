@@ -1,0 +1,20 @@
+---
+- id: radarr-notify-webhook
+  execute-command: /config/pushover-notifier.sh
+  command-working-directory: /config
+  pass-arguments-to-command:
+    - source: string
+      name: radarr
+    - source: string
+      name: '{{ getenv "PUSHOVER_RADARR_URI" }}'
+    - source: entire-payload
+
+- id: sonarr-notify-webhook
+  execute-command: /config/pushover-notifier.sh
+  command-working-directory: /config
+  pass-arguments-to-command:
+    - source: string
+      name: sonarr
+    - source: string
+      name: '{{ getenv "PUSHOVER_SONARR_URI" }}'
+    - source: entire-payload
