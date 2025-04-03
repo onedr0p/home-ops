@@ -19,32 +19,22 @@ spec:
   values:
     controllers:
       webhook:
+        replicas: 2
+        strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
               repository: ghcr.io/home-operations/webhook
-              tag: 2.8.2@sha256:e9989d6ec0f62de5997de15cfe53d285de8235903da28a4665d752a57fc6c1dd
+              tag: 2.8.2@sha256:052e3d82aa13091459faa75550943faf06309c0ca71253ea1cece7880b1d5faa
             env:
+              SONARR_URL: http://sonarr.default.svc.cluster.local
               WEBHOOK__PORT: &port 80
               TZ: America/New_York
             envFrom:
               - secretRef:
                   name: webhook-secret
-            probes:
-              liveness: &probes
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /
-                    port: *port
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -84,9 +74,4 @@ spec:
         name: webhook-configmap
         defaultMode: 0775
         globalMounts:
-          - path: /config/hooks.yaml
-            subPath: hooks.yaml
-            readOnly: true
-          - path: /config/pushover-notifier.sh
-            subPath: pushover-notifier.sh
-            readOnly: true
+          - readOnly: true

@@ -1,20 +1,42 @@
 ---
-- id: radarr-notify-webhook
-  execute-command: /config/pushover-notifier.sh
+- id: cross-seed-pushover
+  execute-command: /config/cross-seed-pushover.sh
   command-working-directory: /config
   pass-arguments-to-command:
     - source: string
-      name: radarr
-    - source: string
-      name: '{{ getenv "PUSHOVER_RADARR_URI" }}'
+      name: '{{ getenv "CROSS_SEED_PUSHOVER_URL" }}'
     - source: entire-payload
 
-- id: sonarr-notify-webhook
-  execute-command: /config/pushover-notifier.sh
+- id: jellyseerr-pushover
+  execute-command: /config/jellyseerr-pushover.sh
   command-working-directory: /config
   pass-arguments-to-command:
     - source: string
-      name: sonarr
+      name: '{{ getenv "JELLYSEERR_PUSHOVER_URL" }}'
+    - source: entire-payload
+
+- id: radarr-pushover
+  execute-command: /config/radarr-pushover.sh
+  command-working-directory: /config
+  pass-arguments-to-command:
     - source: string
-      name: '{{ getenv "PUSHOVER_SONARR_URI" }}'
+      name: '{{ getenv "RADARR_PUSHOVER_URL" }}'
+    - source: entire-payload
+
+- id: sonarr-pushover
+  execute-command: /config/sonarr-pushover.sh
+  command-working-directory: /config
+  pass-arguments-to-command:
+    - source: string
+      name: '{{ getenv "SONARR_PUSHOVER_URL" }}'
+    - source: entire-payload
+
+- id: sonarr-refresh-series
+  execute-command: /config/sonarr-refresh-series.sh
+  command-working-directory: /config
+  pass-arguments-to-command:
+    - source: string
+      name: '{{ getenv "SONARR_URL" }}'
+    - source: string
+      name: '{{ getenv "SONARR_API_KEY" }}'
     - source: entire-payload
