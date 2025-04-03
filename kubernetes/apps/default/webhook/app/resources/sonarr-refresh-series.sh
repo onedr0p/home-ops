@@ -32,7 +32,7 @@ function refresh() {
                 --header "X-Api-Key: ${SONARR_API_KEY}" \
                 --header "Content-Type: application/json" \
                 --data-binary "$(jo name=RefreshSeries seriesId="${series_id}")" \
-                "${SONARR_URL}/api/v3/command"
+                "${SONARR_URL}/api/v3/command" &>/dev/null
         fi
     fi
 }
