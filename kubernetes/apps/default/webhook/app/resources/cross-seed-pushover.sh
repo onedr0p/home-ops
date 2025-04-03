@@ -20,7 +20,7 @@ function notify() {
         printf -v pushover_priority "%s" "low"
     fi
 
-    if [[ "${event}" == "RESULT" && "${result}" == "INJECTED" ]]; then
+    if [[ "${event}" == "RESULTS" && "${result}" == "INJECTED" ]]; then
         printf -v pushover_title "Cross-Seed Injection"
         printf -v pushover_msg "<b>%s</b><small>\nFrom %s to %s</small>\n\n<b>Source:</b> %s</small>" \
             "$(_jq '.extra.name')" \

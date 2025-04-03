@@ -3,11 +3,9 @@ set -Eeuo pipefail
 
 SONARR_URL=${1:?}
 SONARR_API_KEY=${2:?}
-REMOTE_ADDR=${3:?}
-PAYLOAD=${4:?}
+PAYLOAD=${3:?}
 
 echo "[DEBUG] Payload: ${PAYLOAD}"
-echo "[DEBUG] Remote Addr: ${REMOTE_ADDR}"
 
 function _jq() {
     jq --raw-output "${1:?}" <<< "${PAYLOAD}"
