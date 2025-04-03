@@ -14,6 +14,7 @@ function _jq() {
 function refresh() {
     local event="$(_jq '.eventType')"
     local series_id="$(_jq '.series.id')"
+    local series_title="$(_jq '.series.title')"
 
     if [[ "${event}" == "Test" ]]; then
         echo "Test event received, nothing to do ..."
@@ -26,12 +27,12 @@ function refresh() {
         )
 
         if (( episodes > 0 )); then
-            echo "TBA/TBD episode titles found, refreshing series ${series_id} ..."
-            curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" \
-                --request POST \
+            echo "TBA/TBD episode titles found, refreshing series ${series_title} ..."
+            curl -fsSL --request POST \
+                --header "X-Api-Key: ${SONARR_API_KEY}" \
                 --header "Content-Type: application/json" \
-                --data-binary '{"name": "RefreshSeries", "seriesId": '"${series_id}"'}' \
-                "${SONARR_URL}/api/v3/command" &>/dev/null
+                --data-binary "$(jo name=RefreshSeries seriesId="${series_id}")" \
+                "${SONARR_URL}/api/v3/command"
         fi
     fi
 }
