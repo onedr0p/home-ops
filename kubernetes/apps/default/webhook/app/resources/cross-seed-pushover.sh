@@ -12,6 +12,7 @@ function _jq() {
 
 function notify() {
     local event="$(_jq '.extra.event')"
+    local result="$(_jq '.extra.result')"
 
     if [[ "${event}" == "TEST" ]]; then
         printf -v pushover_title "Test Notification"
@@ -19,8 +20,18 @@ function notify() {
         printf -v pushover_priority "%s" "low"
     fi
 
+    if [[ "${event}" == "RESULT" && "${result}" == "INJECTED" ]]; then
+        printf -v pushover_title "Cross-Seed Injection"
+        printf -v pushover_msg "<b>%s</b><small>\nFrom %s to %s</small>\n\n<b>Source:</b> %s</small>" \
+            "$(_jq '.extra.name')" \
+            "$(_jq '.extra.searchee.trackers[0]')" \
+            "$(_jq '.extra.trackers[0]')" \
+            "$(_jq '.extra.source')"
+        printf -v pushover_priority "%s" "low"
+    fi
+
     apprise -vv --title "${pushover_title}" --body "${pushover_msg}" \
-        "${PUSHOVER_URL}?priority=${pushover_priority}&format=html"
+        "${PUSHOVER_URL}?priority=${pushover_priority}&format=markdown"
 }
 
 function main() {
