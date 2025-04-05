@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-SONARR_URL=${1:?}
+SONARR_POD_IP=${1%%:*}
 SONARR_API_KEY=${2:?}
 PAYLOAD=${3:?}
 
@@ -16,7 +16,7 @@ declare -A TAG_CACHE
 
 # Function to cache existing tags
 function cache_existing_tags() {
-    existing_tags_cache=$(curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" "${SONARR_URL}/api/v3/tag")
+    existing_tags_cache=$(curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" "http://${SONARR_POD_IP}/api/v3/tag")
     while IFS=":" read -r id label; do
         TAG_CACHE["$id"]="$label"
     done < <(echo "${existing_tags_cache}" | jq --raw-output '.[] | "\(.id):\(.label)"')
@@ -28,7 +28,7 @@ function get_codec_tags() {
 
     # Extract and map codecs in one pass
     local codecs
-    codecs=$(curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" "${SONARR_URL}/api/v3/episodefile?seriesId=${series_id}" | jq --raw-output '
+    codecs=$(curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" "http://${SONARR_POD_IP}/api/v3/episodefile?seriesId=${series_id}" | jq --raw-output '
         [
             .[] |
             (.mediaInfo.videoCodec // "other" |
@@ -55,7 +55,7 @@ function get_or_create_tag_id() {
     # If tag doesn't exist, create it
     if [[ -z "${tag_id}" ]]; then
         local new_tag
-        new_tag=$(curl -fsSL --request POST --header "X-Api-Key: ${SONARR_API_KEY}" --header "Content-Type: application/json" --data "$(jo label="${tag_label}")" "${SONARR_URL}/api/v3/tag")
+        new_tag=$(curl -fsSL --request POST --header "X-Api-Key: ${SONARR_API_KEY}" --header "Content-Type: application/json" --data "$(jo label="${tag_label}")" "http://${SONARR_POD_IP}/api/v3/tag")
         tag_id=$(echo "${new_tag}" | jq --raw-output '.id')
 
         # Update cache
@@ -113,14 +113,14 @@ function tag() {
     local series_title="$(_jq '.series.title')"
 
     if [[ "${event}" == "Test" ]]; then
-        echo "Test event received, nothing to do ..."
+        echo "[DEBUG] test event received from ${SONARR_POD_IP}, nothing to do ..."
     fi
 
     if [[ "${event}" == "Download" ]]; then
         cache_existing_tags
 
         local orig_series_data
-        orig_series_data=$(curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" "${SONARR_URL}/api/v3/series/${series_id}")
+        orig_series_data=$(curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" "http://${SONARR_POD_IP}/api/v3/series/${series_id}")
 
         local series_episode_file_count
         series_episode_file_count=$(echo "${orig_series_data}" | jq --raw-output '.statistics.episodeFileCount')
@@ -143,16 +143,16 @@ function tag() {
         updated_tags=$(echo "${updated_series_data}" | jq --compact-output '.tags')
 
         if [[ "${orig_tags}" == "${updated_tags}" ]]; then
-            echo "Skipping ${series_title} (ID: ${series_id}, Tags: [${codecs//$'\n'/,}]) due to no changes"
+            echo "[INFO] skipping ${series_title} (ID: ${series_id}, Tags: [${codecs//$'\n'/,}]) due to no changes"
             exit 0
         fi
 
-        echo "Updating ${series_title} (ID: ${series_id}, Tags: [${codecs//$'\n'/,}])"
+        echo "[INFO] updating ${series_title} (ID: ${series_id}, Tags: [${codecs//$'\n'/,}])"
 
         curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" \
             --request PUT \
             --header "Content-Type: application/json" \
-            --data "${updated_series_data}" "${SONARR_URL}/api/v3/series" &>/dev/null
+            --data "${updated_series_data}" "http://${SONARR_POD_IP}/api/v3/series" &>/dev/null
     fi
 }
 

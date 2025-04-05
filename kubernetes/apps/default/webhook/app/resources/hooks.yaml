@@ -1,12 +1,4 @@
 ---
-- id: cross-seed-pushover
-  execute-command: /config/cross-seed-pushover.sh
-  command-working-directory: /config
-  pass-arguments-to-command:
-    - source: string
-      name: '{{ getenv "CROSS_SEED_PUSHOVER_URL" }}'
-    - source: entire-payload
-
 - id: jellyseerr-pushover
   execute-command: /config/jellyseerr-pushover.sh
   command-working-directory: /config
@@ -35,8 +27,8 @@
   execute-command: /config/sonarr-refresh-series.sh
   command-working-directory: /config
   pass-arguments-to-command:
-    - source: string
-      name: '{{ getenv "SONARR_URL" }}'
+    - source: request
+      name: remote-addr
     - source: string
       name: '{{ getenv "SONARR_API_KEY" }}'
     - source: entire-payload
@@ -45,8 +37,8 @@
   execute-command: /config/sonarr-tag-codecs.sh
   command-working-directory: /config
   pass-arguments-to-command:
-    - source: string
-      name: '{{ getenv "SONARR_URL" }}'
+    - source: request
+      name: remote-addr
     - source: string
       name: '{{ getenv "SONARR_API_KEY" }}'
     - source: entire-payload

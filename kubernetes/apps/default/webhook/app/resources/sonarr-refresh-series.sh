@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-SONARR_URL=${1:?}
+SONARR_POD_IP=${1%%:*}
 SONARR_API_KEY=${2:?}
 PAYLOAD=${3:?}
 
@@ -17,22 +17,22 @@ function refresh() {
     local series_title="$(_jq '.series.title')"
 
     if [[ "${event}" == "Test" ]]; then
-        echo "Test event received, nothing to do ..."
+        echo "[DEBUG] test event received from ${SONARR_POD_IP}, nothing to do ..."
     fi
 
     if [[ "${event}" == "Grab" ]]; then
         episodes=$(\
-            curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" "${SONARR_URL}/api/v3/episode?seriesId=${series_id}" \
+            curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" "http://${SONARR_POD_IP}/api/v3/episode?seriesId=${series_id}" \
                 | jq --raw-output '[.[] | select((.title == "TBA") or (.title == "TBD"))] | length' \
         )
 
         if (( episodes > 0 )); then
-            echo "TBA/TBD episode titles found, refreshing series ${series_title} ..."
+            echo "[INFO] episode titles found with TBA/TBD titles, refreshing series ${series_title} ..."
             curl -fsSL --request POST \
                 --header "X-Api-Key: ${SONARR_API_KEY}" \
                 --header "Content-Type: application/json" \
                 --data-binary "$(jo name=RefreshSeries seriesId="${series_id}")" \
-                "${SONARR_URL}/api/v3/command" &>/dev/null
+                "http://${SONARR_POD_IP}/api/v3/command" &>/dev/null
         fi
     fi
 }
