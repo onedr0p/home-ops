@@ -1,38 +1,24 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-SONARR_POD_IP=${1%%:*}
-SONARR_API_KEY=${2:?}
-PAYLOAD=${3:?}
-
-echo "[DEBUG] Payload: ${PAYLOAD}"
-
-function _jq() {
-    jq --raw-output "${1:?}" <<< "${PAYLOAD}"
-}
+# Remove the port from the IP address since Sonarr listens on port 80
+SONARR_REMOTE_ADDR=${SONARR_REMOTE_ADDR%%:*}
 
 function refresh() {
-    local event="$(_jq '.eventType')"
-    local series_id="$(_jq '.series.id')"
-    local series_title="$(_jq '.series.title')"
-
-    if [[ "${event}" == "Test" ]]; then
-        echo "[DEBUG] test event received from ${SONARR_POD_IP}, nothing to do ..."
-    fi
-
-    if [[ "${event}" == "Grab" ]]; then
-        episodes=$(\
-            curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" "http://${SONARR_POD_IP}/api/v3/episode?seriesId=${series_id}" \
-                | jq --raw-output '[.[] | select((.title == "TBA") or (.title == "TBD"))] | length' \
+    if [[ "${SONARR_EVENT_TYPE}" == "Test" ]]; then
+        echo "[DEBUG] test event received from ${SONARR_REMOTE_ADDR}, nothing to do ..."
+    elif [[ "${SONARR_EVENT_TYPE}" == "Grab" ]]; then
+        episodes=$(
+            curl -fsSL --header "X-Api-Key: ${SONARR_API_KEY}" "http://${SONARR_REMOTE_ADDR}/api/v3/episode?seriesId=${SERIES_ID}" |
+                jq --raw-output '[.[] | select((.title == "TBA") or (.title == "TBD"))] | length'
         )
-
-        if (( episodes > 0 )); then
-            echo "[INFO] episode titles found with TBA/TBD titles, refreshing series ${series_title} ..."
+        if ((episodes > 0)); then
+            echo "[INFO] episode titles found with TBA/TBD titles, refreshing series ${SONARR_SERIES_TITLE} ..."
             curl -fsSL --request POST \
                 --header "X-Api-Key: ${SONARR_API_KEY}" \
                 --header "Content-Type: application/json" \
-                --data-binary "$(jo name=RefreshSeries seriesId="${series_id}")" \
-                "http://${SONARR_POD_IP}/api/v3/command" &>/dev/null
+                --data-binary "$(jo name=RefreshSeries seriesId="${SERIES_ID}")" \
+                "http://${SONARR_REMOTE_ADDR}/api/v3/command" &>/dev/null
         fi
     fi
 }
