@@ -50,7 +50,7 @@ function main() {
     fi
 
     TMPFILE=$(mktemp)
-    echo "${patch}" > "${TMPFILE}"
+    echo "${patch}" >"${TMPFILE}"
 
     # shellcheck disable=SC2016
     if ! machine_config=$(echo "${base}" | yq --exit-status eval-all '. as $item ireduce ({}; . * $item )' - "${TMPFILE}" 2>/dev/null) || [[ -z "${machine_config}" ]]; then

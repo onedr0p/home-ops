@@ -22,7 +22,7 @@ function log() {
     local configured_priority=${level_priority[$configured_level]:-2}
 
     # Skip log messages below the configured log level
-    if (( current_priority < configured_priority )); then
+    if ((current_priority < configured_priority)); then
         return
     fi
 
@@ -59,7 +59,7 @@ function log() {
 
     # Print the log message
     printf "%s %b%s%b %s %b\n" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-        "${color}" "${level^^}" "\033[0m" "${msg}" "${data}" > "${output_stream}"
+        "${color}" "${level^^}" "\033[0m" "${msg}" "${data}" >"${output_stream}"
 
     # Exit if the log level is error
     if [[ "$level" == "error" ]]; then

@@ -41,8 +41,7 @@ function apply_talos_config() {
 
             log info "Talos node configuration rendered successfully" "node=${node}"
 
-            if ! output=$(echo "${machine_config}" | talosctl --nodes "${node}" apply-config --insecure --file /dev/stdin 2>&1);
-            then
+            if ! output=$(echo "${machine_config}" | talosctl --nodes "${node}" apply-config --insecure --file /dev/stdin 2>&1); then
                 if [[ "${output}" == *"certificate required"* ]]; then
                     log warn "Talos node is already configured, skipping apply of config" "node=${node}"
                     continue
@@ -172,9 +171,8 @@ function wipe_rook_disks() {
 
     # Wipe disks on each node that match the ROOK_DISK environment variable
     for node in ${nodes}; do
-        if ! disks=$(talosctl --nodes "${node}" get disk --output json 2>/dev/null \
-            | jq --exit-status --raw-output --slurp '. | map(select(.spec.model == env.ROOK_DISK) | .metadata.id) | join(" ")') || [[ -z "${nodes}" ]];
-        then
+        if ! disks=$(talosctl --nodes "${node}" get disk --output json 2>/dev/null |
+            jq --exit-status --raw-output --slurp '. | map(select(.spec.model == env.ROOK_DISK) | .metadata.id) | join(" ")') || [[ -z "${nodes}" ]]; then
             log error "No disks found" "node=${node}" "model=${ROOK_DISK}"
         fi
 
