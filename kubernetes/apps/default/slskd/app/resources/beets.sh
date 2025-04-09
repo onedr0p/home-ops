@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
 
-name=$(echo "$1" | awk -F'"localDirectoryName": "' '{print $2}' | awk -F'",' '{print $1}')
+name="$(jq --raw-output '.localDirectoryName' <<< $1)"
 
 wget -q -O/dev/null \
      --post-data "name=${name}&path=${name}" \
      --header="X-API-KEY: ${BETANIN_API_KEY}" \
-     --header="User-Agent: notify-beats.sh" \
+     --header="User-Agent: slskd/0.0" \
       "http://${BEETS_HOST}/api/torrents"
