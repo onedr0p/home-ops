@@ -22,12 +22,16 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/atuin-server-sqlite
-              tag: v18.3.0@sha256:9d8e8b983d8a8113d87a72111b158552d49ad050ef98ebfe3e7bdd12a5207466
+              repository: ghcr.io/conradludgate/atuin-server-sqlite
+              tag: v18.4.0@sha256:2b89387bbf532b37c65c73aa8feebd52dd220d2bf392cd7f40d88a7b2e99d4c8
             env:
+              ATUIN_CONFIG_DIR: /config
+              ATUIN_DB_URI: sqlite:///config/atuin.db
+              ATUIN_HOST: 0.0.0.0
               ATUIN_PORT: &port 80
               ATUIN_OPEN_REGISTRATION: "true"
               TZ: America/New_York
+            args: ["server", "start"]
             probes:
               liveness: &probes
                 enabled: true
