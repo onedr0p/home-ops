@@ -9,7 +9,7 @@ function notify() {
         printf -v PUSHOVER_URL_TITLE "Open %s" "${RADARR_INSTANCE_NAME}"
         printf -v PUSHOVER_PRIORITY "low"
     elif [[ "${RADARR_EVENT_TYPE}" == "ManualInteractionRequired" ]]; then
-        printf -v PUSHOVER_TITLE "Movie Import Requires Manual Interaction"
+        printf -v PUSHOVER_TITLE "Movie Requires Manual Interaction"
         printf -v PUSHOVER_MESSAGE "<b>%s (%s)</b><small>\n<b>Client:</b> %s</small>" \
             "${RADARR_MOVIE_TITLE}" \
             "${RADARR_MOVIE_YEAR}" \
