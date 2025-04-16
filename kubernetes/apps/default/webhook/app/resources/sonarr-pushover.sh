@@ -19,9 +19,8 @@ function notify() {
         printf -v PUSHOVER_PRIORITY "%s" "high"
     elif [[ "${SONARR_EVENT_TYPE}" == "Download" ]]; then
         printf -v PUSHOVER_TITLE "Episode %s" "Imported"
-        printf -v PUSHOVER_MESSAGE "<b>%s (%s) S%02dE%02d</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small><small>" \
+        printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small><small>" \
             "${SONARR_SERIES_TITLE}" \
-            "${SONARR_SERIES_YEAR}" \
             "${SONARR_EPISODE_SEASON_NUMBER}" \
             "${SONARR_EPISODE_NUMBER}" \
             "${SONARR_EPISODE_TITLE}" \
