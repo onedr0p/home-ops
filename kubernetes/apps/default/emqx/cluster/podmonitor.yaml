@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/podmonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: emqx
+spec:
+  selector:
+    matchLabels:
+      apps.emqx.io/instance: emqx
+      apps.emqx.io/managed-by: emqx-operator
+  podMetricsEndpoints:
+    - port: dashboard
+      path: /api/v5/prometheus/stats
+      relabelings:
+        - action: replace
+          # user-defined cluster name, requires unique
+          replacement: emqx5
+          targetLabel: cluster
+        - action: replace
+          # fix value, don't modify
+          replacement: emqx
+          targetLabel: from
+        - action: replace
+          # fix value, don't modify
+          sourceLabels:
+            - pod
+          targetLabel: instance
+        - action: replace
+          # for dashboards
+          replacement: emqx
+          targetLabel: job
