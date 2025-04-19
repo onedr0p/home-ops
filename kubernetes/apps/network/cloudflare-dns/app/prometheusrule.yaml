@@ -8,42 +8,12 @@ spec:
   groups:
     - name: external-dns.rules
       rules:
-        - alert: ExternalDNSRegistryError
+        - alert: ExternalDNSStale
           expr: |
-            external_dns_registry_errors_total > 0
+            time() - external_dns_controller_last_sync_timestamp_seconds > 60
           for: 5m
           annotations:
             summary: >-
-              {{ $labels.job }} has registry errors for more than 5 minutes
-          labels:
-            severity: critical
-
-        - alert: ExternalDNSSourceError
-          expr: |
-            external_dns_source_errors_total > 0
-          for: 5m
-          annotations:
-            summary: >-
-              {{ $labels.job }} has source errors for more than 5 minutes
-          labels:
-            severity: critical
-
-        - alert: ExternalDNSApplyChangesError
-          expr: |
-            external_dns_webhook_provider_applychanges_errors_total > 0
-          for: 5m
-          annotations:
-            summary: >-
-              {{ $labels.job }} has failed to apply changes for more than 5 minutes
-          labels:
-            severity: critical
-
-        - alert: ExternalDNSRecordsError
-          expr: |
-            external_dns_webhook_provider_records_errors_total > 0
-          for: 5m
-          annotations:
-            summary: >-
-              {{ $labels.job }} has failed to gather records for more than 5 minutes
+              ExternalDNS ({{ $labels.job }}) has not synced successfully in the last five minutes
           labels:
             severity: critical
