@@ -15,7 +15,7 @@ tasks:
   state-*:
     desc: Suspend or resume Volsync
     cmds:
-      - flux --namespace flux-system {{.STATE}} kustomization volsync
+      - flux --namespace volsync-system {{.STATE}} kustomization volsync
       - flux --namespace volsync-system {{.STATE}} helmrelease volsync
       - kubectl --namespace volsync-system scale deployment volsync --replicas {{if eq .STATE "suspend"}}0{{else}}1{{end}}
     vars:
