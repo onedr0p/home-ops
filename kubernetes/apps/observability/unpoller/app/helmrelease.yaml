@@ -34,10 +34,18 @@ spec:
               - secretRef:
                   name: unpoller-secret
             probes:
-              liveness:
+              liveness: &probes
                 enabled: true
-              readiness:
-                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &port 80
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -57,7 +65,7 @@ spec:
         controller: unpoller
         ports:
           http:
-            port: 80
+            port: *port
     serviceMonitor:
       app:
         serviceName: unpoller
