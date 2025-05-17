@@ -1,0 +1,76 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: mosquitto
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    controllers:
+      mosquitto:
+        containers:
+          app:
+            image:
+              repository: public.ecr.aws/docker/library/eclipse-mosquitto
+              tag: 2.0.21
+            env:
+              TZ: America/New_York
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 100Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: mosquitto
+        type: LoadBalancer
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: mosquitto.devbu.io
+          lbipam.cilium.io/ips: 192.168.42.129, ::ffff:192.168.42.129
+        ports:
+          http:
+            port: 1883
+    configMaps:
+      config:
+        data:
+          mosquitto.conf: |
+            allow_anonymous true
+            autosave_interval 60
+            connection_messages false
+            listener 1883
+            per_listener_settings false
+            persistence true
+            persistence_location /data
+    persistence:
+      data:
+        existingClaim: mosquitto-cache
+      config-file:
+        type: configMap
+        name: mosquitto
+        advancedMounts:
+          mosquitto:
+            app:
+              - path: /mosquitto/config/mosquitto.conf
+                subPath: mosquitto.conf
