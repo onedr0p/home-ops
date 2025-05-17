@@ -117,7 +117,7 @@ function apply_crds() {
 
     local -r crds=(
         # renovate: datasource=github-releases depName=kubernetes-sigs/external-dns
-        https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.17.0/charts/external-dns/crds/dnsendpoint.yaml
+        https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.17.0/config/crd/standard/dnsendpoint.yaml
         # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
         https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml
         # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
