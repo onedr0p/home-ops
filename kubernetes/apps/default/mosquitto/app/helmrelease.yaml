@@ -40,6 +40,8 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         controller: mosquitto
@@ -54,12 +56,17 @@ spec:
       config:
         data:
           mosquitto.conf: |
-            listener 1883
             allow_anonymous true
-            persistence false
+            autosave_interval 60
             connection_messages false
+            listener 1883
+            per_listener_settings false
+            persistence true
+            persistence_location /data
     persistence:
-      config:
+      data:
+        existingClaim: mosquitto-cache
+      config-file:
         type: configMap
         name: mosquitto
         advancedMounts:
