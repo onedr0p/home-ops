@@ -1,9 +1,9 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app beets
+  name: beets
 spec:
   interval: 1h
   chartRef:
@@ -11,7 +11,7 @@ spec:
     name: app-template
   install:
     remediation:
-      retries: -2
+      retries: -1
   upgrade:
     cleanupOnFail: true
     remediation:
@@ -71,7 +71,7 @@ spec:
             sectionName: https
         rules:
           - backendRefs:
-              - name: *app
+              - identifier: app
                 port: *port
     persistence:
       config:
