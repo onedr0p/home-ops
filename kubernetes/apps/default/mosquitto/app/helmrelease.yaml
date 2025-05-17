@@ -26,6 +26,20 @@ spec:
               tag: 2.0.21
             env:
               TZ: America/New_York
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 100Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
     service:
       app:
         controller: mosquitto
@@ -36,10 +50,6 @@ spec:
         ports:
           http:
             port: 1883
-    resources:
-      requests:
-        cpu: 10m
-        memory: 50Mi
     configMaps:
       config:
         data:
