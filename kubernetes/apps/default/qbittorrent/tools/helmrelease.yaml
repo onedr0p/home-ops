@@ -49,7 +49,8 @@ spec:
               "--expired",
               "--last-activity",
               "--sites",
-              "--unregistered"
+              "--unregistered",
+              "--not-linked"
             ]
             securityContext:
               allowPrivilegeEscalation: false
@@ -137,8 +138,6 @@ spec:
         type: nfs
         server: expanse.internal
         path: /mnt/eros/Media
-        advancedMounts:
-          orphaned:
-            app:
-              - path: /media/Downloads/qbittorrent
-                subPath: Downloads/qbittorrent
+        globalMounts:
+          - path: /media/Downloads/qbittorrent
+            subPath: Downloads/qbittorrent
