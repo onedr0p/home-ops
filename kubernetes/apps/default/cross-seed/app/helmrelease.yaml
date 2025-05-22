@@ -68,10 +68,6 @@ spec:
     persistence:
       config:
         existingClaim: cross-seed
-      config-cross-seeds:
-        type: emptyDir
-        globalMounts:
-          - path: /config/cross-seeds
       secret-file:
         type: secret
         name: cross-seed-secret
@@ -86,3 +82,10 @@ spec:
         globalMounts:
           - path: /media/Downloads
             subPath: Downloads
+      tmpfs:
+        type: emptyDir
+        advancedMounts:
+          cross-seed:
+            app:
+              - path: /config/cross-seeds
+                subPath: cross-seeds
