@@ -81,10 +81,6 @@ spec:
     persistence:
       config:
         existingClaim: pinchflat
-      yt-dlp:
-        type: emptyDir
-        globalMounts:
-          - path: /etc/yt-dlp
       media:
         type: nfs
         server: expanse.internal
@@ -94,5 +90,12 @@ spec:
             app:
               - path: /downloads
                 subPath: Library/YouTube
-      tmp:
+      tmpfs:
         type: emptyDir
+        advancedMounts:
+          pinchflat:
+            app:
+              - path: /etc/yt-dlp
+                subPath: yt-dlp
+              - path: /tmp
+                subPath: tmp
