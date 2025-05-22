@@ -77,19 +77,20 @@ spec:
     persistence:
       config:
         existingClaim: bazarr
-      config-cache:
-        type: emptyDir
-        globalMounts:
-          - path: /config/cache
-      config-log:
-        type: emptyDir
-        globalMounts:
-          - path: /config/log
       media:
         type: nfs
         server: expanse.internal
         path: /mnt/eros/Media
         globalMounts:
           - path: /media
-      tmp:
+      tmpfs:
         type: emptyDir
+        advancedMounts:
+          bazarr:
+            app:
+              - path: /config/cache
+                subPath: cache
+              - path: /config/log
+                subPath: log
+              - path: /tmp
+                subPath: tmp
