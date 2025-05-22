@@ -93,9 +93,12 @@ spec:
     persistence:
       config:
         existingClaim: autobrr
-      config-log:
+      tmpfs:
         type: emptyDir
-        globalMounts:
-          - path: /config/log
-      tmp:
-        type: emptyDir
+        advancedMounts:
+          autobrr:
+            app:
+              - path: /config/log
+                subPath: log
+              - path: /tmp
+                subPath: tmp
