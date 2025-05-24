@@ -21,6 +21,22 @@ spec:
       radarr:
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          nfs-probe:
+            image:
+              repository: public.ecr.aws/docker/library/busybox
+              tag: 1.37.0@sha256:f64ff79725d0070955b368a4ef8dc729bd8f3d8667823904adcb299fe58fc3da
+            args: ["/bin/sh", "-c", "sleep infinity"]
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: ["nc", "-zv", "expanse.internal", "2049"]
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+            restartPolicy: Always
         containers:
           app:
             image:
