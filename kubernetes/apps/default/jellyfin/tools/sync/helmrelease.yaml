@@ -1,0 +1,61 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: jellyfin-sync
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    controllers:
+      jellyfin-sync:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        type: cronjob
+        cronjob:
+          schedule: 0 * * * *
+          backoffLimit: 0
+          concurrencyPolicy: Forbid
+          successfulJobsHistory: 1
+          failedJobsHistory: 1
+          ttlSecondsAfterFinished: 3600
+        containers:
+          app:
+            image:
+              repository: ghcr.io/luigi311/jellyplex-watched
+              tag: 7.0.4@sha256:63e14670708c02a94ccd6afead064e9458d75333c5dfd935f76c9539ac241aff
+            envFrom:
+              - secretRef:
+                  name: jellyfin-sync-secret
+            env:
+              DEBUG_LEVEL: debug
+              DRYRUN: false
+              JELLYFIN_BASEURL: http://jellyfin.default.svc.cluster.local:8096
+              LOGFILE: /tmp/sync.log
+              MARK_FILE: /tmp/mark.log
+              PLEX_BASEURL: http://plex.default.svc.cluster.local:32400
+              RUN_ONLY_ONCE: true
+              TZ: America/New_York
+              USER_MAPPING: '{"onedr0p": "devin"}'
+              WHITELIST_LIBRARY: Movies,Shows
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
+        pod:
+          hostUsers: false
+          restartPolicy: Never
+    persistence:
+      tmp:
+        type: emptyDir
