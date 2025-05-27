@@ -27,7 +27,8 @@ spec:
               repository: ghcr.io/home-operations/sabnzbd
               tag: 4.5.1@sha256:fb8b35e47db0c5e03bdc3068476504dbc0ca47298a746718a139f52fab000993
             env:
-              TZ: America/New_York
+              CROSS_SEED_HOST: cross-seed.default.svc.cluster.local
+              CROSS_SEED_SLEEP_INTERVAL: 60
               SABNZBD__PORT: &port 80
               SABNZBD__HOST_WHITELIST_ENTRIES: >-
                 sabnzbd,
@@ -37,6 +38,7 @@ spec:
                 sabnzbd.default.svc.cluster.local,
                 sab.devbu.io,
                 sabnzbd.devbu.io
+              TZ: America/New_York
             envFrom:
               - secretRef:
                   name: sabnzbd-secret
@@ -98,5 +100,11 @@ spec:
         globalMounts:
           - path: /media/Downloads/sabnzbd
             subPath: Downloads/sabnzbd
+      scripts:
+        type: configMap
+        name: sabnzbd-scripts
+        defaultMode: 0775
+        globalMounts:
+          - readOnly: true
       tmp:
         type: emptyDir
