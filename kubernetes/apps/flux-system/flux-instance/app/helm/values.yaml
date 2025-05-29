@@ -21,17 +21,6 @@ instance:
       app.kubernetes.io/name: flux
   kustomize:
     patches:
-      - # Add Sops decryption to 'flux-system' Kustomization
-        patch: |
-          - op: add
-            path: /spec/decryption
-            value:
-              provider: sops
-              secretRef:
-                name: sops-age
-        target:
-          group: kustomize.toolkit.fluxcd.io
-          kind: Kustomization
       - # Increase the number of workers
         patch: |
           - op: add
