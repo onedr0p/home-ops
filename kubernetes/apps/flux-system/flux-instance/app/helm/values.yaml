@@ -91,13 +91,11 @@ instance:
         target:
           kind: Deployment
           name: helm-controller
-      # TODO: Enable on next Flux release
-      # REF: https://github.com/fluxcd/helm-controller/pull/1212
-      # - # Disable chart digest tracking
-      #   patch: |
-      #     - op: add
-      #       path: /spec/template/spec/containers/0/args/-
-      #       value: --feature-gates=DisableChartDigestTracking=true
-      #   target:
-      #     kind: Deployment
-      #     name: helm-controller
+      - # Disable chart digest tracking
+        patch: |
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --feature-gates=DisableChartDigestTracking=true
+        target:
+          kind: Deployment
+          name: helm-controller
