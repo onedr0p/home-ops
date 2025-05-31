@@ -40,3 +40,17 @@ spec:
     - name: instance
       value: expanse.internal:9100
       isRegex: false
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.giantswarm.io/silence_v1alpha1.json
+apiVersion: monitoring.giantswarm.io/v1alpha1
+kind: Silence
+metadata:
+  name: keda-hpa-maxed-out
+spec:
+  matchers:
+    - name: alertname
+      value: KubeHpaMaxedOut
+      isRegex: false
+    - name: horizontalpodautoscaler
+      value: keda-hpa-.*
+      isRegex: true
