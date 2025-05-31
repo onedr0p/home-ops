@@ -9,13 +9,13 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: ${APP}
-  pollingInterval: 5
+  cooldownPeriod: 0
   minReplicaCount: 0
   maxReplicaCount: 1
   triggers:
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-operated.observability.svc.cluster.local:9090
-        metricName: probe_success
-        query: probe_success{instance="expanse.internal"} == 1
+        query: up{job="node-exporter", instance="expanse.internal:9100"}
         threshold: "1"
+        ignoreNullValues: "0"
