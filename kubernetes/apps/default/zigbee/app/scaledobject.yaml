@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/keda.sh/scaledobject_v1alpha1.json
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: zigbee-controller-scaler
+spec:
+  cooldownPeriod: 0
+  minReplicaCount: 0
+  maxReplicaCount: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: zigbee
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-operated.observability.svc.cluster.local:9090
+        query: probe_success{instance=~"zigbee-controller.+"}
+        threshold: "1"
+        ignoreNullValues: "0"
