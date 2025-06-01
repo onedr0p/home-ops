@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/keda.sh/scaledobject_v1alpha1.json
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: zwave-controller-scaler
+spec:
+  cooldownPeriod: 0
+  minReplicaCount: 0
+  maxReplicaCount: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: zwave
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-operated.observability.svc.cluster.local:9090
+        query: probe_success{instance=~"zwave-controller.+"}
+        threshold: "1"
+        ignoreNullValues: "0"
