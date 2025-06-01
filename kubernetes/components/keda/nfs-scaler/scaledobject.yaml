@@ -5,17 +5,17 @@ kind: ScaledObject
 metadata:
   name: ${APP}-nfs-scaler
 spec:
+  cooldownPeriod: 0
+  minReplicaCount: 0
+  maxReplicaCount: 1
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: ${APP}
-  cooldownPeriod: 0
-  minReplicaCount: 0
-  maxReplicaCount: 1
   triggers:
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-operated.observability.svc.cluster.local:9090
-        query: up{job="node-exporter", instance="expanse.internal:9100"}
+        query: probe_success{instance=~".+:2049"}
         threshold: "1"
         ignoreNullValues: "0"
