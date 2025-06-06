@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# User-defined variables
+# Environment variables set by the user
 CROSS_SEED_HOST="${CROSS_SEED_HOST:?}"
 CROSS_SEED_API_KEY="${CROSS_SEED_API_KEY:?}"
-CROSS_SEED_SLEEP_INTERVAL="${CROSS_SEED_SLEEP_INTERVAL:?}"
+CROSS_SEED_SLEEP_INTERVAL="${CROSS_SEED_SLEEP_INTERVAL:-30}"
+
+# Environment variables set by sabnzbd
+SAB_COMPLETE_DIR="${SAB_COMPLETE_DIR:?}"
+SAB_PP_STATUS="${SAB_PP_STATUS:?}"
 
 # Function to search for cross-seed
 search() {
@@ -19,7 +23,7 @@ search() {
         "http://${CROSS_SEED_HOST}/api/webhook"
     )
 
-    printf "cross-seed search returned with HTTP status code %s and path %s\n" "${status_code}" "${RELEASE_DIR}" >&2
+    printf "cross-seed search returned with HTTP status code %s and path %s\n" "${status_code}" "${SAB_COMPLETE_DIR}" >&2
 
     sleep "${CROSS_SEED_SLEEP_INTERVAL}"
 }
