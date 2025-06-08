@@ -1,0 +1,39 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-duplicate-ingress-hosts
+  annotations:
+    policies.kyverno.io/title: Disallow Duplicate Ingress Hosts
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/subject: Ingress
+    policies.kyverno.io/description: >-
+      Ensures that a new Ingress does not use a hostname that is already in use by
+      another Ingress across the entire cluster. This requires an API call to list all
+      other Ingresses and is a good benchmark for `apiCall` performance.
+spec:
+  validationFailureAction: Audit
+  background: false
+  rules:
+    - name: check-for-duplicate-hosts
+      match:
+        any:
+          - resources:
+              kinds:
+                - Ingress
+      context:
+        # Get all hosts from all existing Ingresses in the cluster.
+        - name: allHosts
+          apiCall:
+            urlPath: "/apis/networking.k8s.io/v1/ingresses"
+            jmesPath: "items[].spec.rules[].host"
+      validate:
+        message: "The Ingress host {{element.host}} is already in use by another Ingress."
+        foreach:
+          - list: "request.object.spec.rules"
+            deny:
+              conditions:
+                any:
+                  # Check if the list of all existing hosts contains the host from the new Ingress.
+                  - key: "{{element.host}}"
+                    operator: AnyIn
+                    value: "{{allHosts}}"

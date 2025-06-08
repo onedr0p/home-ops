@@ -1,0 +1,51 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: generate-namespace-networkpolicy
+  annotations:
+    policies.kyverno.io/title: Generate Namespace Network Policy
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/subject: Namespace, NetworkPolicy
+    policies.kyverno.io/description: >-
+      For any new Namespace with the label 'netpol-group', this policy generates
+      a NetworkPolicy that allows ingress from all other Namespaces that have the
+      same 'netpol-group' label. This requires listing and filtering all namespaces.
+spec:
+  rules:
+    - name: generate-allow-same-group-policy
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+              # Only trigger for namespaces that have this specific label
+              selector:
+                matchLabels:
+                  netpol-group: "?*"
+      context:
+        # Get the value of the 'netpol-group' label from the newly created namespace
+        - name: groupName
+          variable:
+            jmesPath: "request.object.metadata.labels.\"netpol-group\""
+        # Get ALL namespaces in the cluster
+        - name: allNamespaces
+          apiCall:
+            urlPath: "/api/v1/namespaces"
+            jmesPath: "items[]"
+      generate:
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        name: "allow-{{groupName}}-group-ingress"
+        namespace: "{{request.object.metadata.name}}"
+        synchronize: true
+        data:
+          spec:
+            podSelector: {}
+            policyTypes:
+              - Ingress
+            ingress:
+              # This JMESPath query is the complex part.
+              # It filters the `allNamespaces` list to find only those namespaces
+              # that have the same `netpol-group` label value as the trigger namespace.
+              # The result is used to build the 'from' rules.
+              - from: "{{ to_array(allNamespaces[?metadata.labels.\"netpol-group\" == '{{groupName}}'].metadata.name) | [?@ != '{{request.object.metadata.name}}'] | mapped(@, &{namespaceSelector: {matchLabels: {'kubernetes.io/metadata.name': @}}}) }}"
