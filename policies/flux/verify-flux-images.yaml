@@ -1,0 +1,50 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-flux-images
+  annotations:
+    policies.kyverno.io/title: Verify Flux Images
+    policies.kyverno.io/category: Flux
+    policies.kyverno.io/severity: medium
+    kyverno.io/kyverno-version: 1.6.2
+    policies.kyverno.io/minversion: 1.6.0
+    kyverno.io/kubernetes-version: "1.23"
+    policies.kyverno.io/subject: GitRepository
+    policies.kyverno.io/description: >-
+      Ensures that container images used to run Flux controllers in the cluster
+      are signed with valid Cosign signatures. Prevents the deployment of untrusted
+      or potentially compromised Flux images. Protects the integrity and security 
+      of the Flux deployment process.
+spec:
+  validationFailureAction: Audit
+  background: false
+  rules:
+    - name: verify-cosign-signature
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/fluxcd/source-controller:*"
+            - "ghcr.io/fluxcd/kustomize-controller:*"
+            - "ghcr.io/fluxcd/helm-controller:*"
+            - "ghcr.io/fluxcd/notification-controller:*"
+            - "ghcr.io/fluxcd/image-reflector-controller:*"
+            - "ghcr.io/fluxcd/image-automation-controller:*"
+            - "docker.io/fluxcd/source-controller:*"
+            - "docker.io/fluxcd/kustomize-controller:*"
+            - "docker.io/fluxcd/helm-controller:*"
+            - "docker.io/fluxcd/notification-controller:*"
+            - "docker.io/fluxcd/image-reflector-controller:*"
+            - "docker.io/fluxcd/image-automation-controller:*"
+          mutateDigest: false
+          verifyDigest: false
+          attestors:
+            - entries:
+                - keyless:
+                    subject: "https://github.com/fluxcd/*"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: https://rekor.sigstore.dev
