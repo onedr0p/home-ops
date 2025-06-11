@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: go2rtc
+  name: &app go2rtc
 spec:
   interval: 1h
   chartRef:
@@ -57,21 +57,21 @@ spec:
         runAsGroup: 1000
     service:
       app:
-        controller: go2rtc
-        type: LoadBalancer
-        annotations:
-          external-dns.alpha.kubernetes.io/hostname: go2rtc-streams.devbu.io
-          lbipam.cilium.io/ips: 192.168.42.124, ::ffff:192.168.42.124
+        forceRename: *app
         ports:
           http:
-            primary: true
             port: *port
-          rtsp:
+      streams:
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: 192.168.42.124, ::ffff:192.168.42.124
+        ports:
+          streams-rtsp:
             port: 554
-          webrtc-tcp:
+          streams-webrtc-tcp:
             port: 8555
             protocol: TCP
-          webrtc-udp:
+          streams-webrtc-udp:
             port: 8555
             protocol: UDP
     route:
