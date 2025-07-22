@@ -90,9 +90,34 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    configMaps:
+      config:
+        data:
+          .qbt.toml: |
+            [qbittorrent]
+            addr = "http://localhost:80"
+          on-torrent-add.sh: |
+            #!/usr/bin/env bash
+            set -Eeuo pipefail
+            INFOHASH="${1:?}"
+            # Ref: https://github.com/buroa/qbr
+            /config/qbr --hash "${INFOHASH}"
+            # Ref: https://github.com/cross-seed/cross-seed/issues/945
+            qbt tag delete "cross-seed"
     persistence:
       config:
         existingClaim: qbittorrent
+      config-file:
+        type: configMap
+        name: qbittorrent
+        defaultMode: 0775
+        globalMounts:
+          - path: /config/.qbt.toml
+            subPath: .qbt.toml
+            readOnly: true
+          - path: /config/on-torrent-add.sh
+            subPath: on-torrent-add.sh
+            readOnly: true
       media:
         type: nfs
         server: expanse.internal
