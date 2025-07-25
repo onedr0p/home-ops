@@ -8,8 +8,6 @@ machine:
     crt: op://kubernetes/talos/MACHINE_CA_CRT
     key: op://kubernetes/talos/MACHINE_CA_KEY
   certSANs: ["127.0.0.1", "192.168.42.120"]
-  install:
-    image: factory.talos.dev/metal-installer/{{ ENV.TALOS_SCHEMATIC }}:{{ ENV.TALOS_VERSION }}
   kubelet:
     image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
     extraConfig:
@@ -30,6 +28,7 @@ machine:
   install:
     diskSelector:
       model: Samsung SSD 870
+    image: factory.talos.dev/metal-installer/{{ ENV.TALOS_SCHEMATIC }}:{{ ENV.TALOS_VERSION }}
     wipe: false
   files:
     - # Spegel
