@@ -38,7 +38,7 @@ spec:
               TZ: America/New_York
             envFrom:
               - secretRef:
-                  name: prowlarr-secret
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &probes
                 enabled: true
@@ -82,6 +82,6 @@ spec:
             sectionName: https
     persistence:
       config:
-        existingClaim: prowlarr
+        existingClaim: "{{ .Release.Name }}"
       tmp:
         type: emptyDir

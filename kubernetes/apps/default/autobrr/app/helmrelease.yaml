@@ -36,7 +36,7 @@ spec:
               AUTOBRR__LOG_LEVEL: INFO
             envFrom:
               - secretRef:
-                  name: autobrr-secret
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &probes
                 enabled: true
@@ -86,7 +86,7 @@ spec:
             sectionName: https
     persistence:
       config:
-        existingClaim: autobrr
+        existingClaim: "{{ .Release.Name }}"
       tmpfs:
         type: emptyDir
         advancedMounts:

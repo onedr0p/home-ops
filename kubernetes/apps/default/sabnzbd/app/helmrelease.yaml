@@ -40,7 +40,7 @@ spec:
               TZ: America/New_York
             envFrom:
               - secretRef:
-                  name: sabnzbd-secret
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &probes
                 enabled: true
@@ -86,7 +86,7 @@ spec:
             sectionName: https
     persistence:
       config:
-        existingClaim: sabnzbd
+        existingClaim: "{{ .Release.Name }}"
       media:
         type: nfs
         server: expanse.internal
@@ -96,7 +96,7 @@ spec:
             subPath: Downloads/sabnzbd
       scripts:
         type: configMap
-        name: sabnzbd-scripts
+        name: "{{ .Release.Name }}-scripts"
         defaultMode: 0775
         globalMounts:
           - readOnly: true
