@@ -16,7 +16,7 @@ function notify() {
     if [[ "${type}" == "TEST_NOTIFICATION" ]]; then
         printf -v PUSHOVER_TITLE "Test Notification"
         printf -v PUSHOVER_MESSAGE "Howdy this is a test notification from <b>%s</b>" "Jellyseerr"
-        printf -v PUSHOVER_URL "%s" "https://requests.devbu.io"
+        printf -v PUSHOVER_URL "%s" "https://requests.turbo.ac"
         printf -v PUSHOVER_URL_TITLE "Open %s" "Jellyseerr"
         printf -v PUSHOVER_PRIORITY "%s" "low"
     fi
