@@ -36,7 +36,7 @@ spec:
               SLSKD_SLSK_LISTEN_PORT: &soulseekPort 50300
             envFrom:
               - secretRef:
-                  name: slskd-secret
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &probes
                 enabled: true
@@ -69,7 +69,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        forceRename: *app
+        forceRename: "{{ .Release.Name }}"
         primary: true
         ports:
           http:
@@ -95,10 +95,10 @@ spec:
                 port: *port
     persistence:
       config:
-        existingClaim: slskd
+        existingClaim: "{{ .Release.Name }}"
       config-file:
         type: configMap
-        name: slskd-configmap
+        name: "{{ .Release.Name }}-configmap"
         defaultMode: 0775
         globalMounts:
           - path: /config/slskd.yml

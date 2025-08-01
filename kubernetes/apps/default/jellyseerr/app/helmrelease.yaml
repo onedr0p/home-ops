@@ -32,7 +32,7 @@ spec:
               PORT: &port 80
             envFrom:
               - secretRef:
-                  name: jellyseerr-secret
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &probes
                 enabled: true
@@ -78,11 +78,11 @@ spec:
             sectionName: https
     persistence:
       config:
-        existingClaim: jellyseerr
+        existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /app/config
       config-cache:
-        existingClaim: jellyseerr-cache
+        existingClaim: "{{ .Release.Name }}-cache"
         globalMounts:
           - path: /app/config/cache
       tmpfs:
