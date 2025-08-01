@@ -57,6 +57,8 @@ machine:
       content: |
         [plugins."io.containerd.cri.v1.images"]
           discard_unpacked_layers = false
+        [plugins."io.containerd.grpc.v1.cri"]
+          device_ownership_from_security_context = true
     - op: overwrite
       path: /etc/nfsmount.conf
       permissions: 0o644
@@ -103,8 +105,6 @@ machine:
       forwardKubeDNSToHost: false
   udev:
     rules:
-      - # Intel GPU
-        SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
       - # Thunderbolt
         ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
   kernel:
