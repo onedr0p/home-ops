@@ -9,13 +9,11 @@ machine:
   certSANs: ["127.0.0.1", "192.168.42.120"]
   kubelet:
     image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
+    extraArgs:
+      feature-gates: ImageVolume=true
     extraConfig:
+      maxPods: 512
       serializeImagePulls: false
-    extraMounts:
-      - destination: /var/mnt/extra
-        type: bind
-        source: /var/mnt/extra
-        options: ["bind", "rshared", "rw"]
     defaultRuntimeSeccompProfileEnabled: true
     nodeIP:
       validSubnets: ["192.168.42.0/24"]
@@ -32,21 +30,7 @@ machine:
   install:
     diskSelector:
       model: Samsung SSD 870
-    extraKernelArgs:
-      - -init_on_alloc                      # Less security, faster puter
-      - -init_on_free                       # Less security, faster puter
-      - -selinux                            # Less security, faster puter
-      - apparmor=0                          # Less security, faster puter
-      - i915.enable_guc=3                   # Meteor Lake CPU / iGPU
-      - init_on_alloc=0                     # Less security, faster puter
-      - init_on_free=0                      # Less security, faster puter
-      - intel_iommu=on                      # PCI Passthrough
-      - iommu=pt                            # PCI Passthrough
-      - mitigations=off                     # Less security, faster puter
-      - module_blacklist=igc                # Disable onboard NIC
-      - security=none                       # Less security, faster puter
-      - sysctl.kernel.kexec_load_disabled=1 # Meteor Lake CPU / iGPU
-      - talos.auditd.disabled=1             # Less security, faster puter
+    image: factory.talos.dev/metal-installer/{{ ENV.TALOS_SCHEMATIC }}:{{ ENV.TALOS_VERSION }}
     wipe: false
   files:
     - op: create
@@ -100,10 +84,6 @@ machine:
       enabled: true
       resolveMemberNames: true
       forwardKubeDNSToHost: false
-  udev:
-    rules:
-      - # Thunderbolt
-        ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
   kernel:
     modules:
       - name: nbd
@@ -141,7 +121,7 @@ cluster:
     image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
     extraArgs:
       enable-aggregator-routing: true
-      feature-gates: MutatingAdmissionPolicy=true
+      feature-gates: MutatingAdmissionPolicy=true,ImageVolume=true
       runtime-config: admissionregistration.k8s.io/v1alpha1=true
     certSANs: ["127.0.0.1", "192.168.42.120"]
     disablePodSecurityPolicy: true
@@ -186,3 +166,21 @@ cluster:
       listen-metrics-urls: http://0.0.0.0:2381
     advertisedSubnets: ["192.168.42.0/24"]
   allowSchedulingOnControlPlanes: true
+---
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: nfsrahead
+configFiles:
+  - content: |
+      [nfsrahead]
+      nfs4=15360
+      default=128
+    mountPath: /usr/local/etc/nfsrahead/nfs.conf
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: local-hostpath
+provisioning:
+  diskSelector:
+    match: disk.model == "Corsair MP600 MICRO" && !system_disk
+  minSize: 1TB
