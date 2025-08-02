@@ -33,8 +33,7 @@ machine:
     image: factory.talos.dev/metal-installer/{{ ENV.TALOS_SCHEMATIC }}:{{ ENV.TALOS_VERSION }}
     wipe: false
   files:
-    - # Spegel
-      op: create
+    - op: create
       path: /etc/cri/conf.d/20-customization.part
       content: |
         [plugins."io.containerd.cri.v1.images"]
@@ -50,12 +49,6 @@ machine:
         hard=True
         nconnect=16
         noatime=True
-    - op: create
-      path: /usr/local/etc/nfsrahead/nfs.conf
-      content: |
-        [nfsrahead]
-        nfs4=15360
-        default=128
   sysctls:
     fs.inotify.max_user_watches: "1048576"     # Watchdog
     fs.inotify.max_user_instances: "8192"      # Watchdog
@@ -173,6 +166,16 @@ cluster:
       listen-metrics-urls: http://0.0.0.0:2381
     advertisedSubnets: ["192.168.42.0/24"]
   allowSchedulingOnControlPlanes: true
+---
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: nfsrahead
+configFiles:
+  - content: |
+      [nfsrahead]
+      nfs4=15360
+      default=128
+    mountPath: /usr/local/etc/nfsrahead/nfs.conf
 ---
 apiVersion: v1alpha1
 kind: UserVolumeConfig
