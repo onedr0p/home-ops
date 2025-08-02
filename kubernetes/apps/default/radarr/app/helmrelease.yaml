@@ -38,7 +38,7 @@ spec:
               TZ: America/New_York
             envFrom:
               - secretRef:
-                  name: radarr-secret
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &probes
                 enabled: true
@@ -75,16 +75,16 @@ spec:
             port: *port
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.devbu.io"]
+        hostnames: ["{{ .Release.Name }}.turbo.ac"]
         parentRefs:
           - name: internal
             namespace: kube-system
             sectionName: https
     persistence:
       config:
-        existingClaim: radarr
+        existingClaim: "{{ .Release.Name }}"
       config-cache:
-        existingClaim: radarr-cache
+        existingClaim: "{{ .Release.Name }}-cache"
         globalMounts:
           - path: /config/MediaCover
       media:

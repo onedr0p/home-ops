@@ -19,13 +19,11 @@ spec:
   values:
     controllers:
       zwave:
-        annotations:
-          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
               repository: ghcr.io/zwave-js/zwave-js-ui
-              tag: 10.9.0@sha256:6db7cdfde1a037b5263e4434d0890619710772464ef72477d1be6c3c3c6b5419
+              tag: 11.0.1@sha256:9dfd81468f7b8d51b4fb6331601ca51f1e65b30a1ad4647eaee7319b555651f5
             env:
               TZ: America/New_York
               PORT: &port 80
@@ -42,22 +40,13 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
               limits:
                 memory: 512Mi
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
+        pod:
+          hostUsers: false
     service:
       app:
         ports:
@@ -67,18 +56,18 @@ spec:
             port: 3000
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.devbu.io"]
+        hostnames: ["{{ .Release.Name }}.turbo.ac"]
         parentRefs:
           - name: internal
             namespace: kube-system
             sectionName: https
     persistence:
       config:
-        existingClaim: zwave
+        existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /usr/src/app/store
       config-cache:
-        existingClaim: zwave-cache
+        existingClaim: "{{ .Release.Name }}-cache"
         globalMounts:
           - path: /usr/src/app/store/.config-db
       tmp:

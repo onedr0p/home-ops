@@ -38,7 +38,7 @@ spec:
               TZ: America/New_York
             envFrom:
               - secretRef:
-                  name: prowlarr-secret
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &probes
                 enabled: true
@@ -75,13 +75,13 @@ spec:
             port: *port
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.devbu.io"]
+        hostnames: ["{{ .Release.Name }}.turbo.ac"]
         parentRefs:
           - name: internal
             namespace: kube-system
             sectionName: https
     persistence:
       config:
-        existingClaim: prowlarr
+        existingClaim: "{{ .Release.Name }}"
       tmp:
         type: emptyDir

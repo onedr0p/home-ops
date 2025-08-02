@@ -36,7 +36,7 @@ spec:
               AUTOBRR__LOG_LEVEL: INFO
             envFrom:
               - secretRef:
-                  name: autobrr-secret
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &probes
                 enabled: true
@@ -79,14 +79,14 @@ spec:
           - port: metrics
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.devbu.io"]
+        hostnames: ["{{ .Release.Name }}.turbo.ac"]
         parentRefs:
           - name: internal
             namespace: kube-system
             sectionName: https
     persistence:
       config:
-        existingClaim: autobrr
+        existingClaim: "{{ .Release.Name }}"
       tmpfs:
         type: emptyDir
         advancedMounts:

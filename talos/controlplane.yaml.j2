@@ -1,7 +1,6 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/siderolabs/talos/refs/heads/release-1.10/website/content/v1.10/schemas/config.schema.json
 version: v1alpha1
-debug: false
-persist: true
 machine:
   token: op://kubernetes/talos/MACHINE_TOKEN
   ca:
@@ -10,13 +9,10 @@ machine:
   certSANs: ["127.0.0.1", "192.168.42.120"]
   kubelet:
     image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
+    extraArgs:
+      feature-gates: ImageVolume=true
     extraConfig:
       serializeImagePulls: false
-    extraMounts:
-      - destination: /var/mnt/extra
-        type: bind
-        source: /var/mnt/extra
-        options: ["bind", "rshared", "rw"]
     defaultRuntimeSeccompProfileEnabled: true
     nodeIP:
       validSubnets: ["192.168.42.0/24"]
@@ -33,21 +29,7 @@ machine:
   install:
     diskSelector:
       model: Samsung SSD 870
-    extraKernelArgs:
-      - -init_on_alloc                      # Less security, faster puter
-      - -init_on_free                       # Less security, faster puter
-      - -selinux                            # Less security, faster puter
-      - apparmor=0                          # Less security, faster puter
-      - i915.enable_guc=3                   # Meteor Lake CPU / iGPU
-      - init_on_alloc=0                     # Less security, faster puter
-      - init_on_free=0                      # Less security, faster puter
-      - intel_iommu=on                      # PCI Passthrough
-      - iommu=pt                            # PCI Passthrough
-      - mitigations=off                     # Less security, faster puter
-      - module_blacklist=igc                # Disable onboard NIC
-      - security=none                       # Less security, faster puter
-      - sysctl.kernel.kexec_load_disabled=1 # Meteor Lake CPU / iGPU
-      - talos.auditd.disabled=1             # Less security, faster puter
+    image: factory.talos.dev/metal-installer/{{ ENV.TALOS_SCHEMATIC }}:{{ ENV.TALOS_VERSION }}
     wipe: false
   files:
     - # Spegel
@@ -56,6 +38,8 @@ machine:
       content: |
         [plugins."io.containerd.cri.v1.images"]
           discard_unpacked_layers = false
+        [plugins."io.containerd.cri.v1.runtime"]
+          device_ownership_from_security_context = true
     - op: overwrite
       path: /etc/nfsmount.conf
       permissions: 0o644
@@ -65,22 +49,31 @@ machine:
         hard=True
         nconnect=16
         noatime=True
+    - op: create
+      path: /usr/local/etc/nfsrahead/nfs.conf
+      content: |
+        [nfsrahead]
+        nfs4=15360
+        default=128
   sysctls:
-    fs.inotify.max_user_watches: 1048576   # Watchdog
-    fs.inotify.max_user_instances: 8192    # Watchdog
-    net.core.default_qdisc: fq             # 10Gb/s
-    net.core.rmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
-    net.core.wmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
-    net.ipv4.tcp_congestion_control: bbr   # 10Gb/s
-    net.ipv4.tcp_fastopen: 3               # Send and accept data in the opening SYN packet
-    net.ipv4.tcp_mtu_probing: 1            # 10Gb/s | Jumbo frames
-    net.ipv4.tcp_rmem: 4096 87380 33554432 # 10Gb/s
-    net.ipv4.tcp_wmem: 4096 65536 33554432 # 10Gb/s
-    net.ipv4.tcp_window_scaling: 1         # 10Gb/s
-    sunrpc.tcp_slot_table_entries: 128     # 10Gb/s | NFS
-    sunrpc.tcp_max_slot_table_entries: 128 # 10Gb/s | NFS
-    user.max_user_namespaces: 11255        # User Namespaces
-    vm.nr_hugepages: 1024                  # PostgreSQL
+    fs.inotify.max_user_watches: "1048576"     # Watchdog
+    fs.inotify.max_user_instances: "8192"      # Watchdog
+    net.core.default_qdisc: fq                 # 10Gb/s
+    net.core.rmem_max: "67108864"              # 10Gb/s | Cloudflared / QUIC
+    net.core.wmem_max: "67108864"              # 10Gb/s | Cloudflared / QUIC
+    net.ipv4.neigh.default.gc_thresh1: "4096"  # Prevent ARP cache overflows
+    net.ipv4.neigh.default.gc_thresh2: "8192"  # Prevent ARP cache overflows
+    net.ipv4.neigh.default.gc_thresh3: "16384" # Prevent ARP cache overflows
+    net.ipv4.tcp_congestion_control: bbr       # 10Gb/s
+    net.ipv4.tcp_fastopen: "3"                 # Send and accept data in the opening SYN packet
+    net.ipv4.tcp_mtu_probing: "1"              # 10Gb/s | Jumbo frames
+    net.ipv4.tcp_rmem: 4096 87380 33554432     # 10Gb/s
+    net.ipv4.tcp_wmem: 4096 65536 33554432     # 10Gb/s
+    net.ipv4.tcp_window_scaling: "1"           # 10Gb/s
+    sunrpc.tcp_slot_table_entries: "128"       # 10Gb/s | NFS
+    sunrpc.tcp_max_slot_table_entries: "128"   # 10Gb/s | NFS
+    user.max_user_namespaces: "11255"          # User Namespaces
+    vm.nr_hugepages: "1024"                    # PostgreSQL
   features:
     rbac: true
     stableHostname: true
@@ -97,12 +90,6 @@ machine:
       enabled: true
       resolveMemberNames: true
       forwardKubeDNSToHost: false
-  udev:
-    rules:
-      - # Intel GPU
-        SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
-      - # Thunderbolt
-        ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
   kernel:
     modules:
       - name: nbd
@@ -140,7 +127,7 @@ cluster:
     image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
     extraArgs:
       enable-aggregator-routing: true
-      feature-gates: MutatingAdmissionPolicy=true
+      feature-gates: MutatingAdmissionPolicy=true,ImageVolume=true
       runtime-config: admissionregistration.k8s.io/v1alpha1=true
     certSANs: ["127.0.0.1", "192.168.42.120"]
     disablePodSecurityPolicy: true
@@ -185,3 +172,11 @@ cluster:
       listen-metrics-urls: http://0.0.0.0:2381
     advertisedSubnets: ["192.168.42.0/24"]
   allowSchedulingOnControlPlanes: true
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: local-hostpath
+provisioning:
+  diskSelector:
+    match: disk.model == "Corsair MP600 MICRO" && !system_disk
+  minSize: 1TB

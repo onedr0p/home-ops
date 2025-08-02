@@ -66,7 +66,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        forceRename: *app
+        forceRename: "{{ .Release.Name }}"
         primary: true
         ports:
           http:
@@ -82,8 +82,8 @@ spec:
     route:
       app:
         hostnames:
-          - "{{ .Release.Name }}.devbu.io"
-          - qb.devbu.io
+          - "{{ .Release.Name }}.turbo.ac"
+          - qb.turbo.ac
         parentRefs:
           - name: internal
             namespace: kube-system
@@ -100,10 +100,10 @@ spec:
             addr = "http://localhost:80"
     persistence:
       config:
-        existingClaim: qbittorrent
+        existingClaim: "{{ .Release.Name }}"
       config-file:
         type: configMap
-        name: qbittorrent
+        name: "{{ .Release.Name }}"
         globalMounts:
           - path: /config/.qbt.toml
             subPath: .qbt.toml

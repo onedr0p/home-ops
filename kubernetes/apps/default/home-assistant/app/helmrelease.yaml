@@ -25,14 +25,14 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/home-assistant
-              tag: 2025.7.3@sha256:d232ff8396fb0e9fc869a286af12b901f93a8f585bc7dab7bdf7a3f487b3014e
+              tag: 2025.7.4@sha256:0f7f057d1817c7bed5632ce510ffcc921799ff34e75c6a53346994ba6c7b14ab
             env:
               TZ: America/New_York
               HASS_HTTP_TRUSTED_PROXY_1: 192.168.42.0/24
               HASS_HTTP_TRUSTED_PROXY_2: 10.42.0.0/16
             envFrom:
               - secretRef:
-                  name: home-assistant-secret
+                  name: "{{ .Release.Name }}-secret"
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -57,19 +57,19 @@ spec:
     route:
       app:
         hostnames:
-          - "{{ .Release.Name }}.devbu.io"
-          - hass.devbu.io
+          - "{{ .Release.Name }}.turbo.ac"
+          - hass.turbo.ac
         parentRefs:
           - name: external
             namespace: kube-system
             sectionName: https
     persistence:
       config:
-        existingClaim: home-assistant
+        existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /config
       config-cache:
-        existingClaim: home-assistant-cache
+        existingClaim: "{{ .Release.Name }}-cache"
         globalMounts:
           - path: /config/.venv
       tmpfs:

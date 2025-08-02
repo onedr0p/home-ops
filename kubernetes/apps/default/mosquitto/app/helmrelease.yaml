@@ -46,7 +46,7 @@ spec:
       app:
         type: LoadBalancer
         annotations:
-          external-dns.alpha.kubernetes.io/hostname: mosquitto.devbu.io
+          external-dns.alpha.kubernetes.io/hostname: mosquitto.turbo.ac
           lbipam.cilium.io/ips: 192.168.42.129
         ports:
           http:
@@ -64,7 +64,7 @@ spec:
             persistence_location /data
     persistence:
       data:
-        existingClaim: mosquitto-cache
+        existingClaim: "{{ .Release.Name }}-cache"
       config-file:
         type: configMap
         name: mosquitto
