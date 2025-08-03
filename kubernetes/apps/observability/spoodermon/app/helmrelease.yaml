@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: gatus
+  name: spoodermon
 spec:
   interval: 1h
   chartRef:
@@ -18,27 +18,9 @@ spec:
       retries: 3
   values:
     controllers:
-      gatus:
+      spoodermon:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-config:
-            image:
-              repository: ghcr.io/home-operations/k8s-sidecar
-              tag: 1.30.7@sha256:3b6444d91c6e69a9e07c5e55419452d967d18c833d88b36277dc2021b708f621
-            env:
-              FOLDER: /config
-              LABEL: gatus.io/enabled
-              NAMESPACE: ALL
-              RESOURCE: both
-              UNIQUE_FILENAMES: true
-              METHOD: WATCH
-            restartPolicy: Always
-            resources:
-              requests:
-                cpu: 10m
-              limits:
-                memory: 128Mi
         containers:
           app:
             image:
@@ -49,6 +31,9 @@ spec:
               GATUS_CONFIG_PATH: /config
               GATUS_DELAY_START_SECONDS: 5
               GATUS_WEB_PORT: &port 80
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &probes
                 enabled: true
@@ -65,7 +50,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              capabilities: { add: ["NET_RAW"] }
             resources:
               requests:
                 cpu: 100m
@@ -76,46 +61,20 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         ports:
           http:
             port: *port
-    serviceMonitor:
-      app:
-        endpoints:
-          - port: http
     route:
       app:
         hostnames:
           - "{{ .Release.Name }}.turbo.ac"
-          - status.turbo.ac
         parentRefs:
           - name: external
             namespace: kube-system
             sectionName: https
-    rbac:
-      roles:
-        gatus:
-          type: ClusterRole
-          rules:
-            - apiGroups: [""]
-              resources: ["configmaps", "secrets"]
-              verbs: ["get", "watch", "list"]
-      bindings:
-        gatus:
-          type: ClusterRoleBinding
-          roleRef:
-            identifier: gatus
-          subjects:
-            - identifier: gatus
-    serviceAccount:
-      gatus: {}
     persistence:
-      config:
-        existingClaim: "{{ .Release.Name }}"
       config-file:
         type: configMap
         name: "{{ .Release.Name }}-configmap"
