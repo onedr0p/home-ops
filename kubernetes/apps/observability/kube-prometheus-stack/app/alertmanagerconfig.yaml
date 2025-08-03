@@ -44,9 +44,13 @@ spec:
     - name: "null"
     - name: heartbeat
       webhookConfigs:
-        - urlSecret:
-            name: &secret alertmanager-secret
-            key: ALERTMANAGER_HEARTBEAT_URL
+        - httpConfig:
+            bearerTokenSecret:
+              name: &secret alertmanager-secret
+              key: SPOODERMON_HEARTBEAT_TOKEN
+          urlSecret:
+            name: *secret
+            key: SPOODERMON_HEARTBEAT_URL
     - name: pushover
       pushoverConfigs:
         - html: true

@@ -1,0 +1,51 @@
+---
+web:
+  port: ${WEB_PORT}
+debug: false
+ui:
+  title: Status | Spoodermon
+  header: Status
+alerting:
+  pushover:
+    title: Spoodermon
+    application-token: ${SPOODERMON_PUSHOVER_TOKEN}
+    user-key: ${SPOODERMON_PUSHOVER_USER_KEY}
+    priority: 1
+    resolved-priority: 0
+    default-alert:
+      description: health-check failed
+      send-on-resolved: true
+      failure-threshold: 5
+      success-threshold: 3
+connectivity:
+  checker:
+    target: 1.1.1.1:53
+    interval: 1m
+endpoints:
+  - name: Status Page
+    url: https://${SPOODERMON_STATUS_HOSTNAME}
+    interval: 1m
+    ui:
+      hide-url: true
+      hide-hostname: true
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: pushover
+  - name: Ping
+    url: icmp://${SPOODERMON_DDNS_HOSTNAME}
+    interval: 1m
+    ui:
+      hide-url: true
+      hide-hostname: true
+    conditions:
+      - "[CONNECTED] == true"
+    alerts:
+      - type: pushover
+external-endpoints:
+  - name: Heartbeat
+    token: ${SPOODERMON_HEARTBEAT_TOKEN}
+    heartbeat:
+      interval: 10m
+    alerts:
+      - type: pushover
