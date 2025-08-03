@@ -114,16 +114,15 @@ While most of my infrastructure and workloads are self-hosted I do rely upon the
 
 Alternative solutions to the first two of these problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/); however, maintaining another cluster and monitoring another group of workloads would be more work and probably be more or equal out to the same costs as described below.
 
-| Service                                         | Use                                                               | Cost           |
-|-------------------------------------------------|-------------------------------------------------------------------|----------------|
-| [1Password](https://1password.com/)             | Secrets with [External Secrets](https://external-secrets.io/)     | ~$65/yr        |
-| [Cloudflare](https://www.cloudflare.com/)       | Domain and S3                                                     | ~$30/yr        |
-| [GCP](https://cloud.google.com/)                | Voice interactions with Home Assistant over Google Assistant      | Free           |
-| [GitHub](https://github.com/)                   | Hosting this repository and continuous integration/deployments    | Free           |
-| [Migadu](https://migadu.com/)                   | Email hosting                                                     | ~$20/yr        |
-| [Pushover](https://pushover.net/)               | Kubernetes Alerts and application notifications                   | $5 OTP         |
-| [UptimeRobot](https://uptimerobot.com/)         | Monitoring internet connectivity and external facing applications | ~$58/yr        |
-|                                                 |                                                                   | Total: ~$20/mo |
+| Service                                   | Use                                                            | Cost           |
+|-------------------------------------------|----------------------------------------------------------------|----------------|
+| [1Password](https://1password.com/)       | Secrets with [External Secrets](https://external-secrets.io/)  | ~$65/yr        |
+| [Cloudflare](https://www.cloudflare.com/) | Domain and S3                                                  | ~$50/yr        |
+| [GCP](https://cloud.google.com/)          | Voice interactions with Home Assistant over Google Assistant   | Free           |
+| [GitHub](https://github.com/)             | Hosting this repository and continuous integration/deployments | Free           |
+| [Migadu](https://migadu.com/)             | Email hosting                                                  | ~$20/yr        |
+| [Pushover](https://pushover.net/)         | Kubernetes Alerts and application notifications                | $5 OTP         |
+|                                           |                                                                | Total: ~$10/mo |
 
 ---
 
