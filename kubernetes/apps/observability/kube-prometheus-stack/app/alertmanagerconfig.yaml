@@ -44,7 +44,13 @@ spec:
     - name: "null"
     - name: heartbeat
       webhookConfigs:
-        - urlSecret:
+        - httpConfig:
+            authorization:
+              credentials:
+                name: *secret
+                key: ALERTMANAGER_HEARTBEAT_TOKEN
+              type: Bearer
+          urlSecret:
             name: &secret alertmanager-secret
             key: ALERTMANAGER_HEARTBEAT_URL
     - name: pushover
