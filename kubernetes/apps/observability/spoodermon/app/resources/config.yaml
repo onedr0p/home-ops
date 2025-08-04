@@ -20,6 +20,17 @@ alerting:
       success-threshold: 3
 
 endpoints:
+  - name: Ping
+    url: icmp://${SPOODERMON_DDNS_HOSTNAME}
+    interval: 1m
+    ui:
+      hide-url: true
+      hide-hostname: true
+    conditions:
+      - "[CONNECTED] == true"
+    alerts:
+      - type: pushover
+
   - name: Status Page
     url: https://${SPOODERMON_STATUS_HOSTNAME}
     interval: 1m
