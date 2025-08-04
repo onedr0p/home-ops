@@ -73,7 +73,7 @@ tasks:
   reset-node:
     desc: Reset Talos on a single node [IP=required]
     prompt: Reset Talos node '{{.IP}}' ... continue?
-    cmd: talosctl reset --nodes {{.IP}} --graceful=false --user-disks-to-wipe u-local-hostpath
+    cmd: talosctl reset --nodes {{.IP}} --graceful=false
     requires:
       vars: [IP]
     preconditions:
@@ -83,7 +83,7 @@ tasks:
   reset-cluster:
     desc: Reset Talos across the whole cluster
     prompt: Reset the Talos cluster ... continue?
-    cmd: talosctl reset --nodes {{.NODES}} --graceful=false --user-disks-to-wipe u-local-hostpath
+    cmd: talosctl reset --nodes {{.NODES}} --graceful=false
     vars:
       NODES:
         sh: talosctl config info --output json | jq --exit-status --join-output '[.nodes[]] | join(",")'
