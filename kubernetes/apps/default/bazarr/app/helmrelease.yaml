@@ -27,6 +27,7 @@ spec:
               repository: ghcr.io/home-operations/bazarr
               tag: 1.5.2@sha256:dbc87e5ce9e199709188e152e82b3ff5d33e6521a1b3d61e465aa75b4b739e7f
             env:
+              BAZARR__PORT: &port 80
               TZ: America/New_York
             probes:
               liveness: &probes
@@ -35,7 +36,7 @@ spec:
                 spec:
                   httpGet:
                     path: /health
-                    port: &port 6767
+                    port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
