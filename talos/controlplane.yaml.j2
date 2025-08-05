@@ -9,7 +9,7 @@ machine:
     key: op://kubernetes/talos/MACHINE_CA_KEY
   certSANs: ["127.0.0.1", "192.168.42.120"]
   kubelet:
-    image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
+    image: ghcr.io/siderolabs/kubelet:v1.33.3
     extraConfig:
       featureGates:
         ImageVolume: true
@@ -138,7 +138,7 @@ cluster:
   discovery:
     enabled: false
   apiServer:
-    image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
+    image: registry.k8s.io/kube-apiserver:v1.33.3
     extraArgs:
       enable-aggregator-routing: true
       feature-gates: ImageVolume=true,MutatingAdmissionPolicy=true
@@ -151,14 +151,14 @@ cluster:
       rules:
         - level: Metadata
   controllerManager:
-    image: registry.k8s.io/kube-controller-manager:{{ ENV.KUBERNETES_VERSION }}
+    image: registry.k8s.io/kube-controller-manager:v1.33.3
     extraArgs:
       bind-address: 0.0.0.0
   proxy:
     disabled: true
-    image: registry.k8s.io/kube-proxy:{{ ENV.KUBERNETES_VERSION }}
+    image: registry.k8s.io/kube-proxy:v1.33.3
   scheduler:
-    image: registry.k8s.io/kube-scheduler:{{ ENV.KUBERNETES_VERSION }}
+    image: registry.k8s.io/kube-scheduler:v1.33.3
     extraArgs:
       bind-address: 0.0.0.0
     config:

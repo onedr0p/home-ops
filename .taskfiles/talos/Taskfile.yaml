@@ -36,10 +36,12 @@ tasks:
 
   upgrade-k8s:
     desc: Upgrade Kubernetes across the whole cluster
-    cmd: talosctl --nodes {{.NODE}} upgrade-k8s --to $KUBERNETES_VERSION
+    cmd: talosctl --nodes {{.NODE}} upgrade-k8s --to {{.VERSION}}
     vars:
       NODE:
         sh: talosctl config info --output json | jq --exit-status --raw-output '.endpoints[]' | shuf -n 1
+    requires:
+      vars: [VERSION]
     preconditions:
       - talosctl --nodes {{.NODE}} get machineconfig
       - which jq talosctl
