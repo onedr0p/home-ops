@@ -14,11 +14,6 @@ machine:
       featureGates:
         ImageVolume: true
       serializeImagePulls: false
-    extraMounts:
-      - destination: /var/mnt/extra
-        type: bind
-        source: /var/mnt/extra
-        options: ["bind", "rshared", "rw"]
     defaultRuntimeSeccompProfileEnabled: true
     nodeIP:
       validSubnets: ["192.168.42.0/24"]
@@ -35,21 +30,7 @@ machine:
   install:
     diskSelector:
       model: Samsung SSD 870
-    extraKernelArgs:
-      - -init_on_alloc                      # Less security, faster puter
-      - -init_on_free                       # Less security, faster puter
-      - -selinux                            # Less security, faster puter
-      - apparmor=0                          # Less security, faster puter
-      - i915.enable_guc=3                   # Meteor Lake CPU / iGPU
-      - init_on_alloc=0                     # Less security, faster puter
-      - init_on_free=0                      # Less security, faster puter
-      - intel_iommu=on                      # PCI Passthrough
-      - iommu=pt                            # PCI Passthrough
-      - mitigations=off                     # Less security, faster puter
-      - module_blacklist=igc                # Disable onboard NIC
-      - security=none                       # Less security, faster puter
-      - sysctl.kernel.kexec_load_disabled=1 # Meteor Lake CPU / iGPU
-      - talos.auditd.disabled=1             # Less security, faster puter
+    image: factory.talos.dev/metal-installer/4c07b4dcf2cd2753e2ccc5ade6bd1c004222abdce248242f3b6711c9f5814c61:v1.11.0-beta.1
     wipe: false
   files:
     - op: create
@@ -186,3 +167,11 @@ cluster:
       listen-metrics-urls: http://0.0.0.0:2381
     advertisedSubnets: ["192.168.42.0/24"]
   allowSchedulingOnControlPlanes: true
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: local-hostpath
+provisioning:
+  diskSelector:
+    match: disk.model == "Corsair MP600 MICRO" && !system_disk
+  minSize: 1TB
