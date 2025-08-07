@@ -2,13 +2,16 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
+vars:
+  TALOS_SCHEMATIC_FILE: '{{.TALOS_DIR}}/schematic.yaml'
+
 tasks:
 
   apply-node:
     desc: Apply Talos config to a node [IP=required] [MODE=auto]
     cmd: |
       bash {{.SCRIPTS_DIR}}/render-machine-config.sh {{.TALOS_DIR}}/{{.MACHINE_TYPE}}.yaml.j2 {{.TALOS_DIR}}/nodes/{{.IP}}.yaml.j2 \
-        | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} --file /dev/stdin
+        | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} --dry-run --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "auto"}}'
       MACHINE_TYPE:
@@ -89,7 +92,7 @@ tasks:
       - talosctl --nodes {{.NODES}} get machineconfig
       - which jq talosctl
 
-  kubeconfig:
+  generate-kubeconfig:
     desc: Generate the kubeconfig for a Talos cluster
     cmd: talosctl kubeconfig --nodes {{.NODE}} --force --force-context-name main {{.ROOT_DIR}}
     vars:
@@ -98,3 +101,18 @@ tasks:
     preconditions:
       - talosctl --nodes {{.NODE}} get machineconfig
       - which jq talosctl
+
+  generate-schematic:
+    desc: Generate the Schematic ID for a Talos cluster [VERSION=required]
+    cmd: |
+      SCHEMATIC=$(curl --silent -X POST --data-binary @{{.TALOS_SCHEMATIC_FILE}} https://factory.talos.dev/schematics | jq --raw-output '.id')
+      echo "Talos Schematic: ${SCHEMATIC}"
+      if [[ ! -f {{.TALOS_DIR}}/talos-{{.VERSION}}-${SCHEMATIC:0:8}.iso ]]; then
+          curl -o {{.TALOS_DIR}}/talos-{{.VERSION}}-${SCHEMATIC:0:8}.iso \
+            "https://factory.talos.dev/image/${SCHEMATIC}/{{.VERSION}}/metal-amd64.iso"
+      fi
+    requires:
+      vars: [VERSION]
+    preconditions:
+      - test -f {{.TALOS_SCHEMATIC_FILE}}
+      - which curl jq
