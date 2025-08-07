@@ -29,11 +29,12 @@ tasks:
     vars:
       MODE: '{{.MODE | default "powercycle"}}'
       FACTORY_IMAGE:
-        sh: yq --exit-status '.machine.install.image' {{.TALOS_DIR}}/nodes/{{.IP}}.yaml
+        sh: yq --exit-status '.machine.install.image' {{.TALOS_DIR}}/controlplane.yaml
     requires:
       vars: [IP]
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
+      - tets -f {{.TALOS_DIR}}/controlplane.yaml
       - test -f {{.TALOS_DIR}}/nodes/{{.IP}}.yaml
       - which talosctl yq
 
