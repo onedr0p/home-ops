@@ -11,7 +11,7 @@ tasks:
     desc: Apply Talos config to a node [IP=required] [MODE=auto]
     cmd: |
       bash {{.SCRIPTS_DIR}}/render-machine-config.sh {{.TALOS_DIR}}/{{.MACHINE_TYPE}}.yaml.j2 {{.TALOS_DIR}}/nodes/{{.IP}}.yaml.j2 \
-        | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} --file /dev/stdin
+        | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} --dry-run --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "auto"}}'
       MACHINE_TYPE:
