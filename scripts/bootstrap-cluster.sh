@@ -10,8 +10,8 @@ export ROOT_DIR="$(git rev-parse --show-toplevel)"
 function apply_talos_config() {
     log debug "Applying Talos configuration"
 
-    local controlplane_file="${ROOT_DIR}/talos/controlplane.yaml.j2"
-    local worker_file="${ROOT_DIR}/talos/worker.yaml.j2"
+    local controlplane_file="${ROOT_DIR}/talos/controlplane.yaml"
+    local worker_file="${ROOT_DIR}/talos/worker.yaml"
 
     if [[ ! -f ${controlplane_file} ]]; then
         log error "No Talos machine files found for controlplane" "file=${controlplane_file}"
@@ -27,7 +27,7 @@ function apply_talos_config() {
 
     # Check that all nodes have a Talos configuration file
     for node in ${nodes}; do
-        local node_file="${ROOT_DIR}/talos/nodes/${node}.yaml.j2"
+        local node_file="${ROOT_DIR}/talos/nodes/${node}.yaml"
 
         if [[ ! -f "${node_file}" ]]; then
             log error "No Talos machine files found for node" "node=${node}" file="${node_file}"
@@ -36,14 +36,14 @@ function apply_talos_config() {
 
     # Apply the Talos configuration to the controlplane and worker nodes
     for node in ${nodes}; do
-        local node_file="${ROOT_DIR}/talos/nodes/${node}.yaml.j2"
+        local node_file="${ROOT_DIR}/talos/nodes/${node}.yaml"
 
         local machine_type
         machine_type=$(yq '.machine.type' "${node_file}")
 
         log debug "Applying Talos node configuration" "node=${node}" "machine_type=${machine_type}"
 
-        if ! machine_config=$(bash "${ROOT_DIR}/scripts/render-machine-config.sh" "${ROOT_DIR}/talos/${machine_type}.yaml.j2" "${node_file}") || [[ -z "${machine_config}" ]]; then
+        if ! machine_config=$(bash "${ROOT_DIR}/scripts/render-machine-config.sh" "${ROOT_DIR}/talos/${machine_type}.yaml" "${node_file}") || [[ -z "${machine_config}" ]]; then
             exit 1
         fi
 
@@ -141,7 +141,7 @@ function apply_crds() {
 function apply_resources() {
     log debug "Applying resources"
 
-    local -r resources_file="${ROOT_DIR}/bootstrap/resources.yaml.j2"
+    local -r resources_file="${ROOT_DIR}/bootstrap/resources.yaml"
 
     if ! output=$(render_template "${resources_file}") || [[ -z "${output}" ]]; then
         exit 1
@@ -177,8 +177,8 @@ function sync_helm_releases() {
 }
 
 function main() {
-    check_env KUBECONFIG KUBERNETES_VERSION
-    check_cli helmfile jq kubectl kustomize minijinja-cli op talosctl yq
+    check_env KUBECONFIG
+    check_cli helmfile jq kubectl kustomize op talosctl yq
 
     if ! op whoami --format=json &>/dev/null; then
         log error "Failed to authenticate with 1Password CLI"

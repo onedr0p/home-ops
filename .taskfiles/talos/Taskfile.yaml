@@ -10,7 +10,7 @@ tasks:
   apply-node:
     desc: Apply Talos config to a node [IP=required] [MODE=auto]
     cmd: |
-      bash {{.SCRIPTS_DIR}}/render-machine-config.sh {{.TALOS_DIR}}/{{.MACHINE_TYPE}}.yaml.j2 {{.TALOS_DIR}}/nodes/{{.IP}}.yaml.j2 \
+      bash {{.SCRIPTS_DIR}}/render-machine-config.sh {{.TALOS_DIR}}/{{.MACHINE_TYPE}}.yaml {{.TALOS_DIR}}/nodes/{{.IP}}.yaml \
         | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} --dry-run --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "auto"}}'
@@ -29,20 +29,23 @@ tasks:
     vars:
       MODE: '{{.MODE | default "powercycle"}}'
       FACTORY_IMAGE:
-        sh: minijinja-cli {{.TALOS_DIR}}/nodes/{{.IP}}.yaml.j2 | yq --exit-status '.machine.install.image'
+        sh: yq --exit-status '.machine.install.image' {{.TALOS_DIR}}/controlplane.yaml
     requires:
       vars: [IP]
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
-      - test -f {{.TALOS_DIR}}/nodes/{{.IP}}.yaml.j2
-      - which minijinja-cli talosctl yq
+      - tets -f {{.TALOS_DIR}}/controlplane.yaml
+      - test -f {{.TALOS_DIR}}/nodes/{{.IP}}.yaml
+      - which talosctl yq
 
   upgrade-k8s:
     desc: Upgrade Kubernetes across the whole cluster
-    cmd: talosctl --nodes {{.NODE}} upgrade-k8s --to $KUBERNETES_VERSION
+    cmd: talosctl --nodes {{.NODE}} upgrade-k8s --to {{.VERSION}}
     vars:
       NODE:
         sh: talosctl config info --output json | jq --exit-status --raw-output '.endpoints[]' | shuf -n 1
+    requires:
+      vars: [VERSION]
     preconditions:
       - talosctl --nodes {{.NODE}} get machineconfig
       - which jq talosctl

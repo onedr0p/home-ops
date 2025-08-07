@@ -9,7 +9,7 @@ set -Eeuo pipefail
 # 2. Path to the patch file for the machine configuration.
 #
 # Example Usage:
-#   ./render-machine-config.sh controlplane.yaml.j2 nodes/192.168.42.10.yaml.j2
+#   ./render-machine-config.sh controlplane.yaml nodes/192.168.42.10.yaml
 #
 # Output:
 # The merged Talos configuration is printed to standard output.
@@ -23,8 +23,7 @@ function main() {
     # shellcheck disable=SC2034
     local -r LOG_LEVEL="info"
 
-    check_env KUBERNETES_VERSION
-    check_cli minijinja-cli op talosctl
+    check_cli op talosctl
 
     if ! op whoami --format=json &>/dev/null; then
         log error "Failed to authenticate with 1Password CLI"
