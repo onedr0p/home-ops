@@ -104,9 +104,11 @@ tasks:
     desc: Generate the Schematic ID for a Talos cluster [VERSION=required]
     cmd: |
       SCHEMATIC=$(curl --silent -X POST --data-binary @{{.TALOS_SCHEMATIC_FILE}} https://factory.talos.dev/schematics | jq --raw-output '.id')
-      echo "${SCHEMATIC}"
-      curl -o {{.TALOS_DIR}}/talos-{{.VERSION}}-${SCHEMATIC:0:8}.iso \
-        "https://factory.talos.dev/image/${SCHEMATIC}/{{.VERSION}}/metal-amd64.iso"
+      echo "Talos Schematic: ${SCHEMATIC}"
+      if [[ ! -f {{.TALOS_DIR}}/talos-{{.VERSION}}-${SCHEMATIC:0:8}.iso ]]; then
+          curl -o {{.TALOS_DIR}}/talos-{{.VERSION}}-${SCHEMATIC:0:8}.iso \
+            "https://factory.talos.dev/image/${SCHEMATIC}/{{.VERSION}}/metal-amd64.iso"
+      fi
     requires:
       vars: [VERSION]
     preconditions:
