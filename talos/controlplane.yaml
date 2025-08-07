@@ -61,7 +61,7 @@ machine:
       featureGates:
         ImageVolume: true
       serializeImagePulls: false
-    image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
+    image: ghcr.io/siderolabs/kubelet:v1.33.3
     nodeIP:
       validSubnets:
         - 192.168.42.0/24
@@ -116,7 +116,7 @@ cluster:
       enable-aggregator-routing: "true"
       feature-gates: ImageVolume=true,MutatingAdmissionPolicy=true
       runtime-config: admissionregistration.k8s.io/v1alpha1=true
-    image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
+    image: registry.k8s.io/kube-apiserver:v1.33.3
   ca:
     crt: op://kubernetes/talos/CLUSTER_CA_CRT
     key: op://kubernetes/talos/CLUSTER_CA_KEY
@@ -126,7 +126,7 @@ cluster:
   controllerManager:
     extraArgs:
       bind-address: 0.0.0.0
-    image: registry.k8s.io/kube-controller-manager:{{ ENV.KUBERNETES_VERSION }}
+    image: registry.k8s.io/kube-controller-manager:v1.33.3
   coreDNS:
     disabled: true
   etcd:
@@ -148,7 +148,7 @@ cluster:
       - 10.43.0.0/16
   proxy:
     disabled: true
-    image: registry.k8s.io/kube-proxy:{{ ENV.KUBERNETES_VERSION }}
+    image: registry.k8s.io/kube-proxy:v1.33.3
   scheduler:
     config:
       apiVersion: kubescheduler.config.k8s.io/v1
@@ -169,7 +169,7 @@ cluster:
                     whenUnsatisfiable: ScheduleAnyway
     extraArgs:
       bind-address: 0.0.0.0
-    image: registry.k8s.io/kube-scheduler:{{ ENV.KUBERNETES_VERSION }}
+    image: registry.k8s.io/kube-scheduler:v1.33.3
   secret: op://kubernetes/talos/CLUSTER_SECRET
   secretboxEncryptionSecret: op://kubernetes/talos/CLUSTER_SECRETBOXENCRYPTIONSECRET
   serviceAccount:
