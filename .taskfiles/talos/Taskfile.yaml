@@ -8,33 +8,33 @@ vars:
 tasks:
 
   apply-node:
-    desc: Apply Talos config to a node [IP=required] [MODE=auto]
+    desc: Apply Talos config to a node [NODE=required] [MODE=auto]
     cmd: |
-      bash {{.SCRIPTS_DIR}}/render-machine-config.sh {{.TALOS_DIR}}/{{.MACHINE_TYPE}}.yaml {{.TALOS_DIR}}/nodes/{{.IP}}.yaml \
-        | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} --dry-run --file /dev/stdin
+      bash {{.SCRIPTS_DIR}}/render-machine-config.sh {{.TALOS_DIR}}/{{.MACHINE_TYPE}}.yaml {{.TALOS_DIR}}/nodes/{{.NODE}}.yaml \
+        | talosctl --nodes {{.NODE}} apply-config --mode {{.MODE}} --dry-run --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "auto"}}'
       MACHINE_TYPE:
-        sh: talosctl --nodes {{.IP}} get machinetypes --output=jsonpath='{.spec}'
+        sh: talosctl --nodes {{.NODE}} get machinetypes --output=jsonpath='{.spec}'
     requires:
-      vars: [IP]
+      vars: [NODE]
     preconditions:
-      - talosctl --nodes {{.IP}} get machineconfig
+      - talosctl --nodes {{.NODE}} get machineconfig
       - test -f {{.SCRIPTS_DIR}}/render-machine-config.sh
       - which talosctl
 
   upgrade-node:
-    desc: Upgrade Talos on a single node [IP=required] [MODE=powercycle]
-    cmd: talosctl --nodes {{.IP}} upgrade --image="{{.FACTORY_IMAGE}}" --reboot-mode={{.MODE}} --timeout=10m
+    desc: Upgrade Talos on a single node [NODE=required] [MODE=powercycle]
+    cmd: talosctl --nodes {{.NODE}} upgrade --image="{{.FACTORY_IMAGE}}" --reboot-mode={{.MODE}} --timeout=10m
     vars:
       MODE: '{{.MODE | default "powercycle"}}'
       FACTORY_IMAGE:
-        sh: yq --exit-status '.machine.install.image' {{.TALOS_DIR}}/nodes/{{.IP}}.yaml
+        sh: yq --exit-status '.machine.install.image' {{.TALOS_DIR}}/nodes/{{.NODE}}.yaml
     requires:
-      vars: [IP]
+      vars: [NODE]
     preconditions:
-      - talosctl --nodes {{.IP}} get machineconfig
-      - test -f {{.TALOS_DIR}}/nodes/{{.IP}}.yaml
+      - talosctl --nodes {{.NODE}} get machineconfig
+      - test -f {{.TALOS_DIR}}/nodes/{{.NODE}}.yaml
       - which talosctl yq
 
   upgrade-k8s:
@@ -50,14 +50,14 @@ tasks:
       - which jq talosctl
 
   reboot-node:
-    desc: Reboot Talos on a single node [IP=required] [MODE=powercycle]
-    cmd: talosctl --nodes {{.IP}} reboot --mode={{.MODE}}
+    desc: Reboot Talos on a single node [NODE=required] [MODE=powercycle]
+    cmd: talosctl --nodes {{.NODE}} reboot --mode={{.MODE}}
     vars:
       MODE: '{{.MODE | default "powercycle"}}'
     requires:
-      vars: [IP]
+      vars: [NODE]
     preconditions:
-      - talosctl --nodes {{.IP}} get machineconfig
+      - talosctl --nodes {{.NODE}} get machineconfig
       - which talosctl
 
   shutdown-cluster:
@@ -72,13 +72,13 @@ tasks:
       - which jq talosctl
 
   reset-node:
-    desc: Reset Talos on a single node [IP=required]
-    prompt: Reset Talos node '{{.IP}}' ... continue?
-    cmd: talosctl reset --nodes {{.IP}} --graceful=false
+    desc: Reset Talos on a single node [NODE=required]
+    prompt: Reset Talos node '{{.NODE}}' ... continue?
+    cmd: talosctl reset --nodes {{.NODE}} --graceful=false
     requires:
-      vars: [IP]
+      vars: [NODE]
     preconditions:
-      - talosctl --nodes {{.IP}} get machineconfig
+      - talosctl --nodes {{.NODE}} get machineconfig
       - which talosctl
 
   reset-cluster:
