@@ -142,7 +142,7 @@ function apply_resources() {
 
     local -r resources_file="${ROOT_DIR}/bootstrap/resources.yaml"
 
-    if ! output=$(render_template "${resources_file}") || [[ -z "${output}" ]]; then
+    if ! output=$(minijinja-cli "${resources_file}" | op inject 2>/dev/null) || [[ -z "${output}" ]]; then
         exit 1
     fi
 
