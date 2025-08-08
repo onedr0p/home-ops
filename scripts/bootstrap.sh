@@ -28,7 +28,7 @@ export ROOT_DIR="$(git rev-parse --show-toplevel)"
 function apply_talos_config() {
     log debug "Applying Talos configuration"
 
-    local controlplane_file="${ROOT_DIR}/talos/controlplane.yaml"
+    local controlplane_file="${ROOT_DIR}/talos/controlplane.yaml.j2"
 
     if [[ ! -f ${controlplane_file} ]]; then
         log error "No Talos machine files found for controlplane" "file=${controlplane_file}"
@@ -42,8 +42,8 @@ function apply_talos_config() {
     for node in ${controlplane_nodes}; do
         log debug "Applying Talos controlplane configuration" "node=${node}"
 
-        if ! machine_config=$(bash "${ROOT_DIR}/scripts/render-machine-config.sh" "${controlplane_file}" "${node}") || [[ -z "${machine_config}" ]]; then
-            exit 1
+        if ! machine_config=$(minijinja-cli --define hostname="${node}" "${controlplane_file}" | op inject 2>/dev/null) || [[ -z "${machine_config}" ]]; then
+            log error "Failed to render Talos controlplane configuration" "file=${controlplane_file}" "node=${node}"
         fi
 
         log info "Talos controlplane node configuration rendered successfully" "node=${node}"
@@ -177,7 +177,7 @@ function sync_helm_releases() {
 
 function main() {
     check_env KUBECONFIG
-    check_cli helmfile jq kubectl kustomize op talosctl yq
+    check_cli helmfile jq kubectl kustomize minijinja-cli op talosctl yq
 
     if ! op whoami --format=json &>/dev/null; then
         log error "Failed to authenticate with 1Password CLI"

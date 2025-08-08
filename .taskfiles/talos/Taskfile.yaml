@@ -10,18 +10,16 @@ tasks:
   apply-node:
     desc: Apply Talos config to a node [NODE=required] [MODE=auto]
     cmd: |
-      bash {{.SCRIPTS_DIR}}/render-machine-config.sh {{.TALOS_DIR}}/{{.MACHINE_TYPE}}.yaml {{.NODE}} \
+      minijinja-cli --define hostname={{.NODE}} {{.TALOS_DIR}}/controlplane.yaml.j2 \
+        | op inject \
         | talosctl --nodes {{.NODE}} apply-config --mode {{.MODE}} --dry-run --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "auto"}}'
-      MACHINE_TYPE:
-        sh: talosctl --nodes {{.NODE}} get machinetypes --output=jsonpath='{.spec}'
     requires:
       vars: [NODE]
     preconditions:
       - talosctl --nodes {{.NODE}} get machineconfig
-      - test -f {{.SCRIPTS_DIR}}/render-machine-config.sh
-      - which talosctl
+      - which minijinja-cli talosctl op
 
   upgrade-node:
     desc: Upgrade Talos on a single node [NODE=required] [MODE=powercycle]
