@@ -45,9 +45,6 @@ machine:
         nconnect=16
         noatime=True
   install:
-    diskSelector:
-      model: Samsung SSD 870
-    image: factory.talos.dev/metal-installer/4c07b4dcf2cd2753e2ccc5ade6bd1c004222abdce248242f3b6711c9f5814c61:v1.11.0-beta.1
     wipe: false
   kernel:
     modules:
@@ -65,17 +62,7 @@ machine:
     nodeIP:
       validSubnets:
         - 192.168.42.0/24
-  network:
-    interfaces:
-      - deviceSelector:
-          hardwareAddr: 00:30:93:12:*
-          driver: atlantic
-        mtu: 9000
-        dhcp: true
-        vip:
-          ip: 192.168.42.120
   nodeLabels:
-    intel.feature.node.kubernetes.io/gpu: "true"
     topology.kubernetes.io/region: main
   sysctls:
     fs.inotify.max_user_instances: "8192"
@@ -174,11 +161,3 @@ cluster:
   serviceAccount:
     key: op://kubernetes/talos/CLUSTER_SERVICEACCOUNT_KEY
   token: op://kubernetes/talos/CLUSTER_TOKEN
----
-apiVersion: v1alpha1
-kind: UserVolumeConfig
-name: local-hostpath
-provisioning:
-  diskSelector:
-    match: disk.model == "Corsair MP600 MICRO" && !system_disk
-  minSize: 1TB
