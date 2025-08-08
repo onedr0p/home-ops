@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# This script bootstraps a Talos-based Kubernetes cluster.
+# It renders and applies Talos machine configurations, bootstraps Talos on controller nodes,
+# fetches the kubeconfig, applies required CRDs and resources, and syncs Helm releases.
+#
+# Arguments:
+#   None
+#
+# Example Usage:
+#   ./bootstrap.sh
+#
+# Output:
+#   Logs the bootstrap process and status messages to standard output.
+#
+# Note:
+#   - This script is intended for clusters where all nodes have the same hardware configuration
+#     (disk models, network devices, etc.).
+#   - It does not support clusters with separate controller and worker node roles.
+
 source "$(dirname "${0}")/lib/common.sh"
 
 export LOG_LEVEL="debug"
@@ -11,53 +29,34 @@ function apply_talos_config() {
     log debug "Applying Talos configuration"
 
     local controlplane_file="${ROOT_DIR}/talos/controlplane.yaml"
-    local worker_file="${ROOT_DIR}/talos/worker.yaml"
 
     if [[ ! -f ${controlplane_file} ]]; then
         log error "No Talos machine files found for controlplane" "file=${controlplane_file}"
     fi
 
-    if [[ ! -f ${worker_file} ]]; then
-        log warn "No Talos machine files found for worker" "file=${worker_file}"
+    # Controlplane nodes are defined in talosconfig as endpoints
+    if ! controlplane_nodes=$(yq '.contexts.main.endpoints | join (" ")' "${ROOT_DIR}/talosconfig")|| [[ -z "${controlplane_nodes}" ]]; then
+        log error "No Talos controlplane nodes found"
     fi
 
-    if ! nodes=$(talosctl config info --output json 2>/dev/null | jq --exit-status --raw-output '.nodes | join(" ")') || [[ -z "${nodes}" ]]; then
-        log error "No Talos nodes found"
-    fi
+    for node in ${controlplane_nodes}; do
+        log debug "Applying Talos controlplane configuration" "node=${node}"
 
-    # Check that all nodes have a Talos configuration file
-    for node in ${nodes}; do
-        local node_file="${ROOT_DIR}/talos/nodes/${node}.yaml"
-
-        if [[ ! -f "${node_file}" ]]; then
-            log error "No Talos machine files found for node" "node=${node}" file="${node_file}"
-        fi
-    done
-
-    # Apply the Talos configuration to the controlplane and worker nodes
-    for node in ${nodes}; do
-        local node_file="${ROOT_DIR}/talos/nodes/${node}.yaml"
-
-        local machine_type
-        machine_type=$(yq '.machine.type' "${node_file}")
-
-        log debug "Applying Talos node configuration" "node=${node}" "machine_type=${machine_type}"
-
-        if ! machine_config=$(bash "${ROOT_DIR}/scripts/render-machine-config.sh" "${ROOT_DIR}/talos/${machine_type}.yaml" "${node_file}") || [[ -z "${machine_config}" ]]; then
+        if ! machine_config=$(bash "${ROOT_DIR}/scripts/render-machine-config.sh" "${controlplane_file}" "${node}") || [[ -z "${machine_config}" ]]; then
             exit 1
         fi
 
-        log info "Talos node configuration rendered successfully" "node=${node}"
+        log info "Talos controlplane node configuration rendered successfully" "node=${node}"
 
         if ! output=$(echo "${machine_config}" | talosctl --nodes "${node}" apply-config --insecure --file /dev/stdin 2>&1); then
             if [[ "${output}" == *"certificate required"* ]]; then
-                log warn "Talos node is already configured, skipping apply of config" "node=${node}"
+                log warn "Talos controlplane node is already configured, skipping apply of config" "node=${node}"
                 continue
             fi
-            log error "Failed to apply Talos node configuration" "node=${node}" "output=${output}"
+            log error "Failed to apply Talos controlplane node configuration" "node=${node}" "output=${output}"
         fi
 
-        log info "Talos node configuration applied successfully" "node=${node}"
+        log info "Talos controlplane node configuration applied successfully" "node=${node}"
     done
 }
 
