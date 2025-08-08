@@ -16,7 +16,7 @@ set -Eeuo pipefail
 #
 # Note:
 #   - This script is intended for clusters where all nodes have the same hardware configuration
-#     (disk models, network devices, etc.).
+#     (disk models, network devices, etc.) and schematic IDs.
 #   - It does not support clusters with separate controller and worker node roles.
 
 source "$(dirname "${0}")/lib/common.sh"
