@@ -95,13 +95,13 @@ tasks:
     desc: Bootstrap Resources
     cmd: |
       echo "Bootstrapping Resources..."
-      minijinja-cli {{.BOOTSTRAP_DIR}}/resources.yaml.j2 | op inject | kubectl apply --server-side --filename -
+      op inject --in-file {{.BOOTSTRAP_DIR}}/resources.yaml | kubectl apply --server-side --filename -
       echo "Resources bootstrapped [{{.ITEM}}]"
     status:
-      - minijinja-cli {{.BOOTSTRAP_DIR}}/resources.yaml.j2 | op inject | kubectl diff --filename -
+      - op inject --in-file {{.BOOTSTRAP_DIR}}/resources.yaml | kubectl diff --filename -
     preconditions:
       - op whoami
-      - test -f {{.BOOTSTRAP_DIR}}/resources.yaml.j2
+      - test -f {{.BOOTSTRAP_DIR}}/resources.yaml
       - which kubectl minijinja-cli op
     silent: true
 
