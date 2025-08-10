@@ -126,11 +126,10 @@ function apply_crds() {
             log info "CRDs are up-to-date" "crd" "${crd}"
             continue
         fi
-        if kubectl apply --server-side --filename "${crd}" &>/dev/null; then
-            log info "CRDs applied" "crd" "${crd}"
-        else
+        if ! kubectl apply --server-side --filename "${crd}" &>/dev/null; then
             log fatal "Failed to apply CRDs" "crd" "${crd}"
         fi
+        log info "CRDs applied" "crd" "${crd}"
     done
 }
 
@@ -149,11 +148,11 @@ function apply_resources() {
         return
     fi
 
-    if op inject --in-file "${resources_file}" | kubectl apply --server-side --filename - &>/dev/null; then
-        log info "Resources applied"
-    else
+    if ! op inject --in-file "${resources_file}" | kubectl apply --server-side --filename - &>/dev/null; then
         log fatal "Failed to apply resources"
     fi
+
+    log info "Resources applied"
 }
 
 # Sync Helm releases
