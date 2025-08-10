@@ -180,7 +180,7 @@ function main() {
     wait_for_nodes
     apply_crds
     apply_resources
-    # sync_apps
+    sync_apps
 }
 
 main "$@"
