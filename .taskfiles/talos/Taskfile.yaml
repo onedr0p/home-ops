@@ -10,16 +10,18 @@ tasks:
   apply-node:
     desc: Apply Talos config to a node [NODE=required] [MODE=auto]
     cmd: |
-      minijinja-cli --define hostname={{.NODE}} {{.TALOS_DIR}}/controlplane.yaml.j2 \
-        | op inject \
-        | talosctl --nodes {{.NODE}} apply-config --mode {{.MODE}} --file /dev/stdin
+      {{.SCRIPTS_DIR}}/render-machine-config.sh {{.TALOS_DIR}}/machineconfig.yaml.j2 {{.TALOS_DIR}}/nodes/{{.NODE}}.yaml.j2 \
+          | talosctl --nodes {{.NODE}} apply-config --mode {{.MODE}} --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "auto"}}'
     requires:
       vars: [NODE]
     preconditions:
       - talosctl --nodes {{.NODE}} get machineconfig
-      - which minijinja-cli talosctl op
+      - test -f {{.SCRIPTS_DIR}}/render-machine-config.sh
+      - test -f {{.TALOS_DIR}}/machineconfig.yaml.j2
+      - test -f {{.TALOS_DIR}}/nodes/{{.NODE}}.yaml.j2
+      - which minijinja-cli talosctl op yq
 
   upgrade-node:
     desc: Upgrade Talos on a single node [NODE=required] [MODE=powercycle]
@@ -27,25 +29,26 @@ tasks:
     vars:
       MODE: '{{.MODE | default "powercycle"}}'
       FACTORY_IMAGE:
-        sh: yq --exit-status '.machine.install.image' {{.TALOS_DIR}}/controlplane.yaml.j2
+        sh: yq --exit-status 'select(documentIndex == 0) | .machine.install.image' {{.TALOS_DIR}}/nodes/{{.NODE}}.yaml.j2
     requires:
       vars: [NODE]
     preconditions:
       - talosctl --nodes {{.NODE}} get machineconfig
-      - test -f {{.TALOS_DIR}}/controlplane.yaml.j2
+      - test -f {{.TALOS_DIR}}/machineconfig.yaml.j2
+      - test -f {{.TALOS_DIR}}/nodes/{{.NODE}}.yaml.j2
       - which talosctl yq
 
   upgrade-k8s:
     desc: Upgrade Kubernetes across the whole cluster
-    cmd: talosctl --nodes {{.NODE}} upgrade-k8s --to {{.VERSION}}
+    cmd: talosctl --nodes {{.CONTROLLER}} upgrade-k8s --to {{.VERSION}}
     vars:
-      NODE:
-        sh: talosctl config info --output json | jq --exit-status --raw-output '.endpoints[]' | shuf -n 1
+      CONTROLLER:
+        sh: talosctl config info --output yaml | yq --exit-status '.endpoints[0]'
     requires:
       vars: [VERSION]
     preconditions:
-      - talosctl --nodes {{.NODE}} get machineconfig
-      - which jq talosctl
+      - talosctl --nodes {{.CONTROLLER}} get machineconfig
+      - which talosctl yq
 
   reboot-node:
     desc: Reboot Talos on a single node [NODE=required] [MODE=powercycle]
@@ -64,10 +67,10 @@ tasks:
     cmd: talosctl shutdown --nodes {{.NODES}} --force
     vars:
       NODES:
-        sh: talosctl config info --output json | jq --exit-status --join-output '[.nodes[]] | join(",")'
+        sh: talosctl config info --output yaml | yq --exit-status '.nodes | join (",")'
     preconditions:
       - talosctl --nodes {{.NODES}} get machineconfig
-      - which jq talosctl
+      - which talosctl yq
 
   reset-node:
     desc: Reset Talos on a single node [NODE=required]
@@ -85,20 +88,20 @@ tasks:
     cmd: talosctl reset --nodes {{.NODES}} --graceful=false
     vars:
       NODES:
-        sh: talosctl config info --output json | jq --exit-status --join-output '[.nodes[]] | join(",")'
+        sh: talosctl config info --output yaml | yq --exit-status '.nodes | join (",")'
     preconditions:
       - talosctl --nodes {{.NODES}} get machineconfig
-      - which jq talosctl
+      - which talosctl yq
 
   generate-kubeconfig:
     desc: Generate the kubeconfig for a Talos cluster
-    cmd: talosctl kubeconfig --nodes {{.NODE}} --force --force-context-name main {{.ROOT_DIR}}
+    cmd: talosctl kubeconfig --nodes {{.CONTROLLER}} --force --force-context-name main {{.ROOT_DIR}}
     vars:
-      NODE:
-        sh: talosctl config info --output json | jq --exit-status --raw-output '.endpoints[]' | shuf -n 1
+      CONTROLLER:
+        sh: talosctl config info --output yaml | yq --exit-status '.endpoints[0]'
     preconditions:
-      - talosctl --nodes {{.NODE}} get machineconfig
-      - which jq talosctl
+      - talosctl --nodes {{.CONTROLLER}} get machineconfig
+      - which talosctl yq
 
   generate-schematic:
     desc: Generate the Schematic ID for a Talos cluster [VERSION=required]
