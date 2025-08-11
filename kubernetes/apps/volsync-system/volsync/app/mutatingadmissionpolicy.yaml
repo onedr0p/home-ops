@@ -1,0 +1,106 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.32.0/mutatingadmissionpolicybinding-admissionregistration-v1alpha1.json
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: volsync-mover-jitter
+spec:
+  policyName: volsync-mover-jitter
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.32.0/mutatingadmissionpolicy-admissionregistration-v1alpha1.json
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: MutatingAdmissionPolicy
+metadata:
+  name: volsync-mover-jitter
+  namespace: volsync-system
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["batch"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["jobs"]
+  matchConditions:
+    - name: has-volsync-job-name-prefix
+      expression: >
+        object.metadata.name.startsWith("volsync-src-")
+    - name: has-volsync-created-by-labels
+      expression: >
+        object.metadata.labels["app.kubernetes.io/created-by"] == "volsync"
+  failurePolicy: Fail
+  reinvocationPolicy: IfNeeded
+  mutations:
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: >
+          [
+            JSONPatch{
+              op: "add", path: "/spec/template/spec/initContainers",
+              value: []
+            },
+            JSONPatch{
+              op: "add", path: "/spec/template/spec/initContainers/-",
+              value: Object.spec.template.spec.initContainers{
+                name: "jitter",
+                image: "ghcr.io/home-operations/busybox:1.37.0@sha256:026ed7273270ec08f6902b4ae8334c23b473e5394bec3bbbdbfe580c710d50bc",
+                imagePullPolicy: "IfNotPresent",
+                command: ["sh", "-c", "sleep $(shuf -i 0-90 -n 1)"]
+              }
+            }
+          ]
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.32.0/mutatingadmissionpolicybinding-admissionregistration-v1alpha1.json
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: volsync-mover-nfs
+spec:
+  policyName: volsync-mover-nfs
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.32.0/mutatingadmissionpolicy-admissionregistration-v1alpha1.json
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: MutatingAdmissionPolicy
+metadata:
+  name: volsync-mover-nfs
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["batch"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["jobs"]
+  matchConditions:
+    - name: has-volsync-job-name-prefix
+      expression: >
+        object.metadata.name.startsWith("volsync-")
+    - name: has-volsync-created-by-labels
+      expression: >
+        object.metadata.labels["app.kubernetes.io/created-by"] == "volsync"
+    - name: repository-volume-does-not-exist
+      expression: >
+        !object.spec.template.spec.volumes.exists(item, item.name == "repository")
+  failurePolicy: Fail
+  reinvocationPolicy: IfNeeded
+  mutations:
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: >
+          [
+            JSONPatch{
+              op: "add", path: "/spec/template/spec/containers/0/volumeMounts/-",
+              value: Object.spec.template.spec.containers.volumeMounts{
+                name: "repository",
+                mountPath: "/repository"
+              }
+            },
+            JSONPatch{
+              op: "add", path: "/spec/template/spec/volumes/-",
+              value: Object.spec.template.spec.volumes{
+                name: "repository",
+                nfs: Object.spec.template.spec.volumes.nfs{
+                  server: "expanse.internal",
+                  path: "/mnt/eros/Volsync"
+                }
+              }
+            }
+          ]
