@@ -3,7 +3,7 @@
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
-  name: "${APP}"
+  name: "${APP}-dst"
   labels:
     kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
 spec:
@@ -20,5 +20,7 @@ spec:
       fsGroup: ${VOLSYNC_PGID:=1000}
     repository: ${APP}-volsync-secret
     repositoryPVC: volsync-nfs
+    sourceIdentity:
+      sourceName: ${APP}
     storageClassName: "${VOLSYNC_STORAGECLASS:=ceph-block}"
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=csi-ceph-blockpool}"
