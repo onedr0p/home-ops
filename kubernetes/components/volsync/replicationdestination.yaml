@@ -10,18 +10,17 @@ spec:
   trigger:
     manual: restore-once
   kopia:
-    repository: ${APP}-volsync-secret
-    copyMethod: Snapshot
-    volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=csi-ceph-blockpool}"
-    storageClassName: "${VOLSYNC_STORAGECLASS:=ceph-block}"
     accessModes: ["${VOLSYNC_ACCESSMODES:=ReadWriteOnce}"]
     capacity: "${VOLSYNC_CAPACITY:=5Gi}"
-    repositoryPVC: volsync-nfs
-    sourceIdentity:
-      sourceName: ${APP}
+    copyMethod: Snapshot
+    enableFileDeletion: true
     moverSecurityContext:
       runAsUser: ${VOLSYNC_PUID:=1000}
       runAsGroup: ${VOLSYNC_PGID:=1000}
       fsGroup: ${VOLSYNC_PGID:=1000}
-    enableFileDeletion: true
-    cleanupTempPVC: true
+    repository: ${APP}-volsync-secret
+    repositoryPVC: volsync-nfs
+    sourceIdentity:
+      sourceName: ${APP}
+    storageClassName: "${VOLSYNC_STORAGECLASS:=ceph-block}"
+    volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=csi-ceph-blockpool}"
