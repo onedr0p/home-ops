@@ -1,23 +1,17 @@
 ---
-web:
-  port: ${GATUS_WEB_PORT}
-
-ui:
-  title: Status | Spoodermon
-  header: Status
-
 alerting:
   pushover:
-    title: Spoodermon
     application-token: ${SPOODERMON_PUSHOVER_TOKEN}
-    user-key: ${SPOODERMON_PUSHOVER_USER_KEY}
-    priority: 1
-    resolved-priority: 0
     default-alert:
       description: health-check failed
-      send-on-resolved: true
       failure-threshold: 5
+      minimum-reminder-interval: 1h
+      send-on-resolved: true
       success-threshold: 3
+    priority: 1
+    resolved-priority: 0
+    title: Spoodermon
+    user-key: ${SPOODERMON_PUSHOVER_USER_KEY}
 
 endpoints:
   - name: Ping
@@ -30,7 +24,6 @@ endpoints:
       - "[CONNECTED] == true"
     alerts: &alerts
       - type: pushover
-        minimum-reminder-interval: 1h
 
   - name: Status Page
     url: https://${SPOODERMON_STATUS_HOSTNAME}
@@ -48,3 +41,10 @@ external-endpoints:
     heartbeat:
       interval: 10m
     alerts: *alerts
+
+ui:
+  title: Status | Spoodermon
+  header: Status
+
+web:
+  port: ${GATUS_WEB_PORT}
