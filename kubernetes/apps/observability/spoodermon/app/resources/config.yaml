@@ -28,8 +28,9 @@ endpoints:
       hide-hostname: true
     conditions:
       - "[CONNECTED] == true"
-    alerts:
+    alerts: &alerts
       - type: pushover
+        minimum-reminder-interval: 1h
 
   - name: Status Page
     url: https://${SPOODERMON_STATUS_HOSTNAME}
@@ -39,13 +40,11 @@ endpoints:
       hide-hostname: true
     conditions:
       - "[STATUS] == 200"
-    alerts:
-      - type: pushover
+    alerts: *alerts
 
 external-endpoints:
   - name: Heartbeat
     token: ${SPOODERMON_HEARTBEAT_TOKEN}
     heartbeat:
       interval: 10m
-    alerts:
-      - type: pushover
+    alerts: *alerts
