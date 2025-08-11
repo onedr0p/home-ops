@@ -10,10 +10,11 @@ spec:
     schedule: "0 * * * *"
   kopia:
     copyMethod: "${VOLSYNC_COPYMETHOD:=Snapshot}"
-    repository: volsync-repository-secret
+    repository: "${APP}-volsync-secret"
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=csi-ceph-blockpool}"
     storageClassName: "${VOLSYNC_STORAGECLASS:=ceph-block}"
     accessModes: ["${VOLSYNC_SNAP_ACCESSMODES:=ReadWriteOnce}"]
+    repositoryPVC: volsync-nfs
     moverSecurityContext:
       runAsUser: ${VOLSYNC_PUID:=1000}
       runAsGroup: ${VOLSYNC_PGID:=1000}
