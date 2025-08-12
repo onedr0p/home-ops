@@ -28,6 +28,7 @@ spec:
               tag: 0.21.1@sha256:24884f5e9e5f9c19746eddb51fb3449ceb4b6bb0ad6681e145bed53eb2d50125
             env:
               KOPIA_CHECK_FOR_UPDATES: false
+              KOPIA_CONFIG_PATH: /config/repository.config
             envFrom:
               - secretRef:
                   name: kopia-secret
@@ -37,13 +38,8 @@ spec:
               - --insecure
               - --address
               - 0.0.0.0:80
-              - --metrics-listen-addr
-              - 0.0.0.0:8080
               - --without-password
-              - --readonly
               - --disable-file-logging
-              - --config-file
-              - /app/config/repository.config
             probes:
               liveness: &probes
                 enabled: true
@@ -90,7 +86,7 @@ spec:
         type: configMap
         name: kopia-repository-configmap
         globalMounts:
-          - path: /app/config/repository.config
+          - path: /config/repository.config
             subPath: repository.config
             readOnly: true
       repository:
