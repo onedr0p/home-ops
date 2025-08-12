@@ -35,9 +35,11 @@ spec:
               - --insecure
               - --address
               - 0.0.0.0:80
-              - --without-password
               - --metrics-listen-addr
               - 0.0.0.0:8080
+              - --without-password
+              - --readonly
+              - --disable-file-logging
               - --config-file
               - /app/config/repository.config
             probes:
@@ -95,10 +97,3 @@ spec:
         path: /mnt/eros/VolsyncKopia
         globalMounts:
           - path: /repository
-      tmpfs:
-        type: emptyDir
-        advancedMounts:
-          kopia:
-            app:
-              - path: /app/logs
-                subPath: logs
