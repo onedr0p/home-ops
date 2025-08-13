@@ -68,13 +68,13 @@ tasks:
       CLAIM:
         sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.sourcePVC}'
       ACCESS_MODES:
-        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.restic.accessModes}'
+        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.kopia.accessModes}'
       STORAGE_CLASS_NAME:
-        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.restic.storageClassName}'
+        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.kopia.storageClassName}'
       PUID:
-        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.restic.moverSecurityContext.runAsUser}'
+        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.kopia.moverSecurityContext.runAsUser}'
       PGID:
-        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.restic.moverSecurityContext.runAsGroup}'
+        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.kopia.moverSecurityContext.runAsGroup}'
     requires:
       vars: [APP, PREVIOUS]
     preconditions:
