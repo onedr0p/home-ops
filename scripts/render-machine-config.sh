@@ -1,56 +1,60 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# This script renders and merges Talos machine configurations.
-# It uses templates and patches to generate a final configuration for Talos nodes.
+# Description:
+#   This script renders and merges Talos machine configurations using minijinja-cli, op and talosctl.
+#   It uses templates and patches to generate a final configuration for Talos nodes.
 #
 # Arguments:
-# 1. Path to the base Talos machine configuration file.
-# 2. Path to the patch file for the machine configuration.
+#   1. Path to the Talos machineconfig file.
+#   2. Path to the patch file for the machineconfig.
 #
 # Example Usage:
-#   ./render-machine-config.sh controlplane.yaml nodes/192.168.42.10.yaml
+#   ./render-maching-config.sh machineconfig.yaml.j2 nodes/k8s-0.yaml.j2
 #
 # Output:
-# The merged Talos configuration is printed to standard output.
+#   The merged Talos configuration is printed to standard output.
 
-source "$(dirname "${0}")/lib/common.sh"
-export ROOT_DIR="$(git rev-parse --show-toplevel)"
+readonly MACHINEBASE="${1:?}" MACHINEPATCH="${2:?}"
 
-readonly NODE_BASE="${1:?}" NODE_PATCH="${2:?}"
+# Log messages with structured output
+function log() {
+    local lvl="${1:?}" msg="${2:?}"
+    shift 2
+    gum log --time=rfc3339 --structured --level "${lvl}" "${msg}" "$@"
+}
 
 function main() {
-    # shellcheck disable=SC2034
-    local -r LOG_LEVEL="info"
 
-    check_cli op talosctl
+    local base patch type result
 
-    if ! op whoami --format=json &>/dev/null; then
-        log error "Failed to authenticate with 1Password CLI"
+    # Determine the machine type from the patch file
+    if ! type=$(yq --exit-status 'select(documentIndex == 0) | .machine.type' "${MACHINEPATCH}") || [[ -z "${type}" ]]; then
+        log fatal "Failed to determine machine type from patch file" "file" "${MACHINEPATCH}"
     fi
 
-    local base patch machine_config
-
-    if ! base=$(render_template "${NODE_BASE}") || [[ -z "${base}" ]]; then
-        exit 1
-    fi
-
-    if ! patch=$(render_template "${NODE_PATCH}") || [[ -z "${patch}" ]]; then
-        exit 1
+    # Render the base machine configurations
+    if ! base=$(minijinja-cli --define "machinetype=${type}" "${MACHINEBASE}" | op inject) || [[ -z "${base}" ]]; then
+        log fatal "Failed to render base machine configuration" "file" "${MACHINEBASE}"
     fi
 
     BASE_TMPFILE=$(mktemp)
     echo "${base}" >"${BASE_TMPFILE}"
 
+    # Render the patch machine configurations
+    if ! patch=$(minijinja-cli --define "machinetype=${type}" "${MACHINEPATCH}" | op inject) || [[ -z "${patch}" ]]; then
+        log fatal "Failed to render patch machine configuration" "file" "${MACHINEPATCH}"
+    fi
+
     PATCH_TMPFILE=$(mktemp)
     echo "${patch}" >"${PATCH_TMPFILE}"
 
-    # shellcheck disable=SC2016
-    if ! machine_config=$(echo "${base}" | talosctl machineconfig patch "${BASE_TMPFILE}" --patch "@${PATCH_TMPFILE}") || [[ -z "${machine_config}" ]]; then
-        log error "Failed to merge configs" "base=$(basename "${NODE_BASE}")" "patch=$(basename "${NODE_PATCH}")"
+    # Apply the patch to the base machine configuration
+    if ! result=$(talosctl machineconfig patch "${BASE_TMPFILE}" --patch "@${PATCH_TMPFILE}") || [[ -z "${result}" ]]; then
+        log fatal "Failed to apply patch to machine configuration" "base_file" "${BASE_TMPFILE}" "patch_file" "${PATCH_TMPFILE}"
     fi
 
-    echo "${machine_config}"
+    echo "${result}"
 }
 
 main "$@"

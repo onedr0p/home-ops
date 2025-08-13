@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app slskd
+  name: kopia
 spec:
   interval: 1h
   chartRef:
@@ -18,37 +18,41 @@ spec:
       retries: 3
   values:
     controllers:
-      slskd:
+      kopia:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/slskd/slskd
-              tag: 0.23.2@sha256:28df5325f301537ea8669b2ef90112a30cc9f2efd3eb714c9a778460b5dc6288
+              repository: docker.io/kopia/kopia
+              tag: 0.21.1@sha256:24884f5e9e5f9c19746eddb51fb3449ceb4b6bb0ad6681e145bed53eb2d50125
             env:
-              DOTNET_BUNDLE_EXTRACT_BASE_DIR: /tmp/.net
+              KOPIA_CHECK_FOR_UPDATES: false
+              KOPIA_CONFIG_PATH: /config/repository.config
               TZ: America/New_York
-              SLSKD_APP_DIR: /config
-              SLSKD_HTTP_PORT: &port 80
-              SLSKD_NO_AUTH: true
-              SLSKD_NO_HTTPS: true
-              SLSKD_SLSK_LISTEN_PORT: &soulseekPort 50300
             envFrom:
               - secretRef:
-                  name: "{{ .Release.Name }}-secret"
+                  name: kopia-secret
+            args:
+              - server
+              - start
+              - --insecure
+              - --address
+              - 0.0.0.0:80
+              - --without-password
+              - --disable-file-logging
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /health
-                    port: *port
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
+                    path: /
+                    port: &port 80
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 6
               readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
@@ -57,7 +61,6 @@ spec:
             resources:
               requests:
                 cpu: 10m
-                memory: 128Mi
               limits:
                 memory: 1Gi
     defaultPodOptions:
@@ -69,19 +72,9 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        forceRename: "{{ .Release.Name }}"
-        primary: true
         ports:
           http:
             port: *port
-      soulseek:
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 192.168.42.127
-        ports:
-          soulseek-tcp:
-            port: *soulseekPort
-            protocol: TCP
     route:
       app:
         hostnames: ["{{ .Release.Name }}.turbo.ac"]
@@ -89,27 +82,17 @@ spec:
           - name: internal
             namespace: kube-system
             sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
     persistence:
-      config:
-        existingClaim: "{{ .Release.Name }}"
       config-file:
         type: configMap
-        name: "{{ .Release.Name }}-configmap"
-        defaultMode: 0775
+        name: kopia-repository-configmap
         globalMounts:
-          - path: /config/slskd.yml
-            subPath: slskd.yml
+          - path: /config/repository.config
+            subPath: repository.config
             readOnly: true
-      media:
+      repository:
         type: nfs
         server: expanse.internal
-        path: /mnt/eros/Media
+        path: /mnt/eros/VolsyncKopia
         globalMounts:
-          - path: /media/Downloads/soulseek
-            subPath: Downloads/soulseek
-      tmp:
-        type: emptyDir
+          - path: /repository
