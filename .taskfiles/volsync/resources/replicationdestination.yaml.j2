@@ -7,15 +7,17 @@ metadata:
 spec:
   trigger:
     manual: restore-once
-  restic:
-    repository: {{ ENV.APP }}-volsync-secret
-    destinationPVC: {{ ENV.CLAIM }}
-    copyMethod: Direct
-    storageClassName: {{ ENV.STORAGE_CLASS_NAME }}
+  kopia:
     accessModes: {{ ENV.ACCESS_MODES }}
-    previous: {{ ENV.PREVIOUS }}
+    copyMethod: Direct
+    destinationPVC: {{ ENV.CLAIM }}
+    enableFileDeletion: true
     moverSecurityContext:
       runAsUser: {{ ENV.PUID }}
       runAsGroup: {{ ENV.PGID }}
       fsGroup: {{ ENV.PGID }}
-    enableFileDeletion: true
+    previous: {{ ENV.PREVIOUS }}
+    repository: {{ ENV.APP }}-volsync-secret
+    sourceIdentity:
+      sourceName: {{ ENV.APP }}
+    storageClassName: {{ ENV.STORAGE_CLASS_NAME }}
