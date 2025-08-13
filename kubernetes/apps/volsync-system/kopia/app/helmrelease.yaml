@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: cloudflare-tunnel
+  name: kopia
 spec:
   interval: 1h
   chartRef:
@@ -18,33 +18,31 @@ spec:
       retries: 3
   values:
     controllers:
-      cloudflare-tunnel:
-        strategy: RollingUpdate
+      kopia:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: docker.io/cloudflare/cloudflared
-              tag: 2025.8.0@sha256:eb5c9324efe3b8e8a48612423dd912f76fa93cf138923e7eda5d1a9805057757
+              repository: ghcr.io/home-operations/kopia
+              tag: 0.21.1@sha256:dfac7a9bcb2fd7833f5b947d332e70ff00f107bf85456b147940a000566f537b
             env:
-              NO_AUTOUPDATE: true
-              TUNNEL_METRICS: 0.0.0.0:8080
-              TUNNEL_ORIGIN_ENABLE_HTTP2: true
-              TUNNEL_POST_QUANTUM: true
-              TUNNEL_TRANSPORT_PROTOCOL: quic
+              KOPIA_WEB_ENABLED: true
+              KOPIA_WEB_PORT: &port 80
+              TZ: America/New_York
             envFrom:
               - secretRef:
-                  name: "{{ .Release.Name }}-secret"
-            args: ["tunnel", "run"]
+                  name: kopia-secret
+            args:
+              - --without-password
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /ready
-                    port: &port 8080
+                    path: /
+                    port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
@@ -58,26 +56,46 @@ spec:
               requests:
                 cpu: 10m
               limits:
-                memory: 256Mi
+                memory: 1Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         ports:
           http:
             port: *port
-    serviceMonitor:
+    route:
       app:
-        endpoints:
-          - port: http
+        hostnames: ["{{ .Release.Name }}.turbo.ac"]
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
     persistence:
       config-file:
         type: configMap
-        name: cloudflare-tunnel-configmap
+        name: kopia-repository-configmap
         globalMounts:
-          - path: /etc/cloudflared/config.yaml
-            subPath: config.yaml
+          - path: /config/repository.config
+            subPath: repository.config
             readOnly: true
+      repository:
+        type: nfs
+        server: expanse.internal
+        path: /mnt/eros/VolsyncKopia
+        globalMounts:
+          - path: /repository
+      tmpfs:
+        type: emptyDir
+        advancedMounts:
+          kopia:
+            app:
+              - path: /config/cache
+                subPath: cache
+              - path: /config/logs
+                subPath: logs
