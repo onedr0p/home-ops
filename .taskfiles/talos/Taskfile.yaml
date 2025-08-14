@@ -97,7 +97,7 @@ tasks:
       - which talosctl yq
 
   generate-kubeconfig:
-    desc: Generate the kubeconfig for a Talos cluster
+    desc: Generate kubeconfig
     cmd: talosctl kubeconfig --nodes {{.CONTROLLER}} --force --force-context-name main {{.ROOT_DIR}}
     vars:
       CONTROLLER:
@@ -107,16 +107,22 @@ tasks:
       - which talosctl yq
 
   generate-schematic:
-    desc: Generate the Schematic ID for a Talos cluster [VERSION=required]
-    cmd: |
-      SCHEMATIC=$(curl --silent -X POST --data-binary @{{.TALOS_SCHEMATIC_FILE}} https://factory.talos.dev/schematics | jq --raw-output '.id')
-      echo "Talos Schematic: ${SCHEMATIC}"
-      if [[ ! -f {{.TALOS_DIR}}/talos-{{.VERSION}}-${SCHEMATIC:0:8}.iso ]]; then
-          curl -o {{.TALOS_DIR}}/talos-{{.VERSION}}-${SCHEMATIC:0:8}.iso \
-            "https://factory.talos.dev/image/${SCHEMATIC}/{{.VERSION}}/metal-amd64.iso"
-      fi
-    requires:
-      vars: [VERSION]
+    desc: Generate a Schematic ID
+    cmd: curl --silent -X POST --data-binary @{{.TALOS_SCHEMATIC_FILE}} https://factory.talos.dev/schematics | jq --raw-output '.id'
     preconditions:
       - test -f {{.TALOS_SCHEMATIC_FILE}}
       - which curl jq
+
+  download-iso:
+    desc: Download Talos ISO [VERSION=required]
+    cmd: curl -o {{.TALOS_DIR}}/talos-{{.VERSION}}-{{substr 0 8 .SCHEMATIC}}.iso "https://factory.talos.dev/image/{{.SCHEMATIC}}/{{.VERSION}}/metal-amd64.iso"
+    vars:
+      SCHEMATIC:
+        sh: task --silent talos:generate-schematic
+    requires:
+      vars: [VERSION]
+    status:
+      - test -f {{.TALOS_DIR}}/talos-{{.VERSION}}-{{substr 0 8 .SCHEMATIC}}.iso
+    preconditions:
+      - test -f {{.TALOS_SCHEMATIC_FILE}}
+      - which curl
