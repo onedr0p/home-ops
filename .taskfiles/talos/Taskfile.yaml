@@ -107,10 +107,11 @@ tasks:
       - which talosctl yq
 
   generate-schematic:
-    desc: Generate Schematic ID and download ISO [VERSION=required]
+    desc: Generate Schematic ID [VERSION=required]
     cmd: |
       echo "Schematic ID: {{.SCHEMATIC}}"
-      curl -o {{.TALOS_DIR}}/talos-{{.VERSION}}-{{substr 0 8 .SCHEMATIC}}.iso "https://factory.talos.dev/image/{{.SCHEMATIC}}/{{.VERSION}}/metal-amd64.iso"
+      curl -o {{.TALOS_DIR}}/talos-{{.VERSION}}-{{substr 0 8 .SCHEMATIC}}.iso \
+          "https://factory.talos.dev/image/{{.SCHEMATIC}}/{{.VERSION}}/metal-amd64.iso"
     vars:
       SCHEMATIC:
         sh: curl --silent -X POST --data-binary @{{.TALOS_SCHEMATIC_FILE}} https://factory.talos.dev/schematics | jq --raw-output '.id'
