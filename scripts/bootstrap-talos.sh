@@ -142,7 +142,7 @@ function apply_resources() {
     log info "Resources applied"
 }
 
-# Sync Helm releases
+# Apply Custom Resource Definitions (CRDs)
 function apply_crds() {
     log info "Applying CRDs"
 
