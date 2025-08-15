@@ -34,32 +34,12 @@ releases:
     values: ['../kubernetes/apps/cert-manager/cert-manager/app/helm/values.yaml']
     needs: ['kube-system/spegel']
 
-  - name: external-secrets
-    namespace: external-secrets
-    chart: oci://ghcr.io/external-secrets/charts/external-secrets
-    version: 0.19.2
-    values: ['../kubernetes/apps/external-secrets/external-secrets/app/helm/values.yaml']
-    hooks:
-      - # Apply cluster secret store
-        events: ['postsync']
-        command: kubectl
-        args:
-          - apply
-          - --namespace=external-secrets
-          - --server-side
-          - --field-manager=kustomize-controller
-          - --filename
-          - ../kubernetes/apps/external-secrets/external-secrets/app/clustersecretstore.yaml
-          - --wait=true
-        showlogs: true
-    needs: ['cert-manager/cert-manager']
-
   - name: flux-operator
     namespace: flux-system
     chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
     version: 0.27.0
     values: ['../kubernetes/apps/flux-system/flux-operator/app/helm/values.yaml']
-    needs: ['external-secrets/external-secrets']
+    needs: ['cert-manager/cert-manager']
 
   - name: flux-instance
     namespace: flux-system
