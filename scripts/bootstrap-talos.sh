@@ -146,7 +146,7 @@ function apply_resources() {
 function apply_crds() {
     log info "Applying CRDs"
 
-    local helmfile_file="${ROOT_DIR}/bootstrap/crds/helmfile.yaml"
+    local -r helmfile_file="${ROOT_DIR}/bootstrap/crds/helmfile.yaml"
 
     if [[ ! -f "${helmfile_file}" ]]; then
         log fatal "File does not exist" "file" "${helmfile_file}"
@@ -172,7 +172,7 @@ function apply_crds() {
 function sync_apps() {
     log info "Syncing Helm releases"
 
-    local helmfile_file="${ROOT_DIR}/bootstrap/helmfile.yaml"
+    local -r helmfile_file="${ROOT_DIR}/bootstrap/helmfile.yaml"
 
     if [[ ! -f "${helmfile_file}" ]]; then
         log fatal "File does not exist" "file" "${helmfile_file}"
