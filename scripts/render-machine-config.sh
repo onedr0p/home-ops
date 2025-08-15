@@ -21,7 +21,7 @@ readonly MACHINEBASE="${1:?}" MACHINEPATCH="${2:?}"
 function log() {
     local lvl="${1:?}" msg="${2:?}"
     shift 2
-    gum log --time=rfc3339 --structured --level "${lvl}" "${msg}" "$@"
+    gum log --time=rfc3339 --structured --level "${lvl}" "[${FUNCNAME[1]}] ${msg}" "$@"
 }
 
 function main() {

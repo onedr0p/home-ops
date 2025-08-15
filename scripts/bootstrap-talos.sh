@@ -7,7 +7,7 @@ export ROOT_DIR="$(git rev-parse --show-toplevel)"
 function log() {
     local lvl="${1:?}" msg="${2:?}"
     shift 2
-    gum log --time=rfc3339 --structured --level "${lvl}" "${msg}" "$@"
+    gum log --time=rfc3339 --structured --level "${lvl}" "[${FUNCNAME[1]}] ${msg}" "$@"
 }
 
 # Apply the Talos configuration to all the nodes
@@ -108,6 +108,32 @@ function wait_for_nodes() {
     done
 }
 
+# Apply namespaces to the cluster
+function apply_namespaces() {
+    log debug "Applying namespaces"
+
+    local -r apps_dir="${ROOT_DIR}/kubernetes/apps"
+
+    if [[ ! -d "${apps_dir}" ]]; then
+        log error "Directory does not exist" "directory" "${apps_dir}"
+    fi
+
+    for app in "${apps_dir}"/*/; do
+        namespace=$(basename "${app}")
+
+        if kubectl get namespace "${namespace}" &>/dev/null; then
+            log info "Namespace is up-to-date" "namespace" "${namespace}"
+            continue
+        fi
+
+        if ! kubectl create namespace "${namespace}" --dry-run=client --output=yaml | kubectl apply --server-side --filename - &>/dev/null; then
+            log error "Failed to apply namespace" "namespace" "${namespace}"
+        fi
+
+        log info "Namespace applied successfully" "namespace" "${namespace}"
+    done
+}
+
 # Apply resources before the helmfile charts are installed
 function apply_resources() {
     log info "Applying resources"
@@ -178,6 +204,7 @@ function main() {
     install_kubernetes
     fetch_kubeconfig
     wait_for_nodes
+    apply_namespaces
     apply_resources
     apply_crds
     apply_apps
