@@ -10,6 +10,18 @@ function log() {
     gum log --time=rfc3339 --structured --level "${lvl}" "${msg}" "$@"
 }
 
+function sync_helmfile() {
+    local helmfile_file="${1:?}"
+
+    if [[ ! -f "${helmfile_file}" ]]; then
+        log fatal "File does not exist" "file" "${helmfile_file}"
+    fi
+
+    if ! helmfile --file "${helmfile_file}" sync --hide-notes; then
+        log fatal "Failed to sync Helm releases"
+    fi
+}
+
 # Apply the Talos configuration to all the nodes
 function install_talos() {
     log info "Installing Talos configuration"
@@ -131,31 +143,11 @@ function apply_resources() {
 }
 
 # Sync Helm releases
-function sync_crds() {
-    log info "Syncing Helm releases"
-
-    if [[ ! -f "${ROOT_DIR}/bootstrap/crds/helmfile.yaml" ]]; then
-        log fatal "File does not exist" "file" "${ROOT_DIR}/bootstrap/crds/helmfile.yaml"
-    fi
-
-    if ! helmfile --file "${ROOT_DIR}/bootstrap/crds/helmfile.yaml" sync --hide-notes; then
-        log fatal "Failed to sync Helm releases"
-    fi
-
-    log info "Helm releases synced successfully"
-}
-
-# Sync Helm releases
 function sync_apps() {
     log info "Syncing Helm releases"
 
-    if [[ ! -f "${ROOT_DIR}/bootstrap/helmfile.yaml" ]]; then
-        log fatal "File does not exist" "file" "${ROOT_DIR}/bootstrap/helmfile.yaml"
-    fi
-
-    if ! helmfile --file "${ROOT_DIR}/bootstrap/helmfile.yaml" sync --hide-notes; then
-        log fatal "Failed to sync Helm releases"
-    fi
+    sync_helmfile "${ROOT_DIR}/bootstrap/crds/helmfile.yaml"
+    sync_helmfile "${ROOT_DIR}/bootstrap/helmfile.yaml"
 
     log info "Helm releases synced successfully"
 }
@@ -167,7 +159,6 @@ function main() {
     wait_for_nodes
     apply_crds
     apply_resources
-    sync_crds
     sync_apps
 }
 
