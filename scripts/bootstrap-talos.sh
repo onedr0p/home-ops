@@ -10,6 +10,18 @@ function log() {
     gum log --time=rfc3339 --structured --level "${lvl}" "${msg}" "$@"
 }
 
+function sync_helmfile() {
+    local helmfile_file="${1:?}"
+
+    if [[ ! -f "${helmfile_file}" ]]; then
+        log fatal "File does not exist" "file" "${helmfile_file}"
+    fi
+
+    if ! helmfile --file "${helmfile_file}" sync --hide-notes; then
+        log fatal "Failed to sync Helm releases"
+    fi
+}
+
 # Apply the Talos configuration to all the nodes
 function install_talos() {
     log info "Installing Talos configuration"
@@ -108,31 +120,6 @@ function wait_for_nodes() {
     done
 }
 
-# CRDs to be applied before the helmfile charts are installed
-function apply_crds() {
-    log info "Applying CRDs"
-
-    local -r crds=(
-        # renovate: datasource=github-releases depName=kubernetes-sigs/external-dns
-        https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.18.0/config/crd/standard/dnsendpoints.externaldns.k8s.io.yaml
-        # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
-        https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml
-        # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
-        https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.84.1/stripped-down-crds.yaml
-    )
-
-    for crd in "${crds[@]}"; do
-        if kubectl diff --filename "${crd}" &>/dev/null; then
-            log info "CRDs are up-to-date" "crd" "${crd}"
-            continue
-        fi
-        if ! kubectl apply --server-side --filename "${crd}" &>/dev/null; then
-            log fatal "Failed to apply CRDs" "crd" "${crd}"
-        fi
-        log info "CRDs applied" "crd" "${crd}"
-    done
-}
-
 # Resources to be applied before the helmfile charts are installed
 function apply_resources() {
     log info "Applying resources"
@@ -153,6 +140,32 @@ function apply_resources() {
     fi
 
     log info "Resources applied"
+}
+
+# Apply Custom Resource Definitions (CRDs)
+function apply_crds() {
+    log info "Applying CRDs"
+
+    local -r helmfile_file="${ROOT_DIR}/bootstrap/crds/helmfile.yaml"
+
+    if [[ ! -f "${helmfile_file}" ]]; then
+        log fatal "File does not exist" "file" "${helmfile_file}"
+    fi
+
+    if ! crds=$(helmfile --file "${helmfile_file}" template --quiet) || [[ -z "${crds}" ]]; then
+        log fatal "Unable to render CRDs from Helmfile" "file" "${helmfile_file}"
+    fi
+
+    if ! echo "${crds}" | kubectl diff --filename - &>/dev/null; then
+        log info "CRDs are up-to-date"
+        return
+    fi
+
+    if ! echo "${crds}" | kubectl apply --server-side --filename - &>/dev/null; then
+        log fatal "Failed to apply CRDs"
+    fi
+
+    log info "CRDs applied successfully"
 }
 
 # Sync Helm releases
@@ -177,8 +190,8 @@ function main() {
     bootstrap_kubernetes
     fetch_kubeconfig
     wait_for_nodes
-    apply_crds
     apply_resources
+    apply_crds
     sync_apps
 }
 
