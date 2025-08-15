@@ -110,7 +110,7 @@ function wait_for_nodes() {
 
 # Apply namespaces to the cluster
 function apply_namespaces() {
-    log debug "Applying namespaces"
+    log info "Applying namespaces"
 
     local -r apps_dir="${ROOT_DIR}/kubernetes/apps"
 
