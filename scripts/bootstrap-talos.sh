@@ -131,7 +131,7 @@ function apply_resources() {
 }
 
 # Sync Helm releases
-function sync_apps() {
+function sync_crds() {
     log info "Syncing Helm releases"
 
     if [[ ! -f "${ROOT_DIR}/bootstrap/crds/helmfile.yaml" ]]; then
@@ -141,6 +141,13 @@ function sync_apps() {
     if ! helmfile --file "${ROOT_DIR}/bootstrap/crds/helmfile.yaml" sync --hide-notes; then
         log fatal "Failed to sync Helm releases"
     fi
+
+    log info "Helm releases synced successfully"
+}
+
+# Sync Helm releases
+function sync_apps() {
+    log info "Syncing Helm releases"
 
     if [[ ! -f "${ROOT_DIR}/bootstrap/helmfile.yaml" ]]; then
         log fatal "File does not exist" "file" "${ROOT_DIR}/bootstrap/helmfile.yaml"
@@ -160,6 +167,7 @@ function main() {
     wait_for_nodes
     apply_crds
     apply_resources
+    sync_crds
     sync_apps
 }
 
