@@ -134,13 +134,19 @@ function apply_resources() {
 function sync_apps() {
     log info "Syncing Helm releases"
 
-    local -r helmfile_file="${ROOT_DIR}/bootstrap/helmfile.yaml"
-
-    if [[ ! -f "${helmfile_file}" ]]; then
-        log fatal "File does not exist" "file" "${helmfile_file}"
+    if [[ ! -f "${ROOT_DIR}/bootstrap/crds/helmfile.yaml" ]]; then
+        log fatal "File does not exist" "file" "${ROOT_DIR}/bootstrap/crds/helmfile.yaml"
     fi
 
-    if ! helmfile --file "${helmfile_file}" sync --hide-notes; then
+    if ! helmfile --file "${ROOT_DIR}/bootstrap/crds/helmfile.yaml" sync --hide-notes; then
+        log fatal "Failed to sync Helm releases"
+    fi
+
+    if [[ ! -f "${ROOT_DIR}/bootstrap/helmfile.yaml" ]]; then
+        log fatal "File does not exist" "file" "${ROOT_DIR}/bootstrap/helmfile.yaml"
+    fi
+
+    if ! helmfile --file "${ROOT_DIR}/bootstrap/helmfile.yaml" sync --hide-notes; then
         log fatal "Failed to sync Helm releases"
     fi
 
