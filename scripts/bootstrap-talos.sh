@@ -108,31 +108,6 @@ function wait_for_nodes() {
     done
 }
 
-# CRDs to be applied before the helmfile charts are installed
-function apply_crds() {
-    log info "Applying CRDs"
-
-    local -r crds=(
-        # renovate: datasource=github-releases depName=kubernetes-sigs/external-dns
-        https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.18.0/config/crd/standard/dnsendpoints.externaldns.k8s.io.yaml
-        # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
-        https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml
-        # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
-        https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.84.1/stripped-down-crds.yaml
-    )
-
-    for crd in "${crds[@]}"; do
-        if kubectl diff --filename "${crd}" &>/dev/null; then
-            log info "CRDs are up-to-date" "crd" "${crd}"
-            continue
-        fi
-        if ! kubectl apply --server-side --filename "${crd}" &>/dev/null; then
-            log fatal "Failed to apply CRDs" "crd" "${crd}"
-        fi
-        log info "CRDs applied" "crd" "${crd}"
-    done
-}
-
 # Resources to be applied before the helmfile charts are installed
 function apply_resources() {
     log info "Applying resources"

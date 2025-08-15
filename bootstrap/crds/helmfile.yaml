@@ -1,0 +1,51 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/helmfile
+
+helmDefaults:
+  cleanupOnFail: true
+  reuseValues: true
+  wait: true
+  waitForJobs: true
+
+releases:
+  - name: cloudflare-dns
+    namespace: network
+    chart: oci://ghcr.io/home-operations/charts-mirror/external-dns
+    version: 1.18.0
+    postRenderer: yq
+    postRendererArgs: ['ea', 'select(.kind == "CustomResourceDefinition")', '-']
+
+  - name: gateway-api-crds
+    namespace: kube-system
+    chart: oci://ghcr.io/wiremind/wiremind-helm-charts/gateway-api-crds
+    version: 1.3.0
+    postRenderer: yq
+    postRendererArgs: ['ea', 'select(.kind == "CustomResourceDefinition")', '-']
+
+  # - name: intel-device-plugins-operator
+  #   namespace: kube-system
+  #   chart: oci://ghcr.io/home-operations/charts-mirror/intel-device-plugins-operator
+  #   version: 0.32.1
+  #   postRenderer: yq
+  #   postRendererArgs: ['ea', 'select(.kind == "CustomResourceDefinition")', '-']
+
+  - name: keda
+    namespace: kube-system
+    chart: oci://ghcr.io/home-operations/charts-mirror/keda
+    version: 2.17.2
+    postRenderer: yq
+    postRendererArgs: ['ea', 'select(.kind == "CustomResourceDefinition")', '-']
+
+  - name: kube-prometheus-stack
+    namespace: observability
+    chart: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
+    version: 76.3.0
+    postRenderer: yq
+    postRendererArgs: ['ea', 'select(.kind == "CustomResourceDefinition")', '-']
+
+  # - name: snapshot-controller
+  #   namespace: kube-system
+  #   chart: oci://ghcr.io/piraeusdatastore/helm-charts/snapshot-controller
+  #   version: 4.1.0
+  #   postRenderer: yq
+  #   postRendererArgs: ['ea', 'select(.kind == "CustomResourceDefinition")', '-']
