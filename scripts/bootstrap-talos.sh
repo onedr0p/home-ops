@@ -143,23 +143,56 @@ function apply_resources() {
 }
 
 # Sync Helm releases
+function apply_crds() {
+    log info "Applying CRDs"
+
+    local helmfile_file="${ROOT_DIR}/bootstrap/crds/helmfile.yaml"
+
+    if [[ ! -f "${helmfile_file}" ]]; then
+        log fatal "File does not exist" "file" "${helmfile_file}"
+    fi
+
+    if ! crds=$(helmfile --file "${helmfile_file}" template --quiet) || [[ -z "${crds}" ]]; then
+        log fatal "Unable to render CRDs from Helmfile" "file" "${helmfile_file}"
+    fi
+
+    if ! echo "${crds}" | kubectl diff --filename - &>/dev/null; then
+        log info "CRDs are up-to-date"
+        return
+    fi
+
+    if ! echo "${crds}" | kubectl apply --server-side --filename - &>/dev/null; then
+        log fatal "Failed to apply CRDs"
+    fi
+
+    log info "CRDs applied successfully"
+}
+
+# Sync Helm releases
 function sync_apps() {
     log info "Syncing Helm releases"
 
-    sync_helmfile "${ROOT_DIR}/bootstrap/crds/helmfile.yaml"
-    sync_helmfile "${ROOT_DIR}/bootstrap/helmfile.yaml"
+    local helmfile_file="${ROOT_DIR}/bootstrap/helmfile.yaml"
+
+    if [[ ! -f "${helmfile_file}" ]]; then
+        log fatal "File does not exist" "file" "${helmfile_file}"
+    fi
+
+    if ! helmfile --file "${helmfile_file}" sync --hide-notes; then
+        log fatal "Failed to sync Helm releases"
+    fi
 
     log info "Helm releases synced successfully"
 }
 
 function main() {
-    install_talos
-    bootstrap_kubernetes
-    fetch_kubeconfig
-    wait_for_nodes
+    # install_talos
+    # bootstrap_kubernetes
+    # fetch_kubeconfig
+    # wait_for_nodes
+    # apply_resources
     apply_crds
-    apply_resources
-    sync_apps
+    # sync_apps
 }
 
 main "$@"
