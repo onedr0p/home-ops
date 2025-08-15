@@ -24,23 +24,17 @@ spec:
         containers:
           app:
             image:
-              repository: docker.io/kopia/kopia
-              tag: 0.21.1@sha256:24884f5e9e5f9c19746eddb51fb3449ceb4b6bb0ad6681e145bed53eb2d50125
+              repository: ghcr.io/home-operations/kopia
+              tag: 0.21.1@sha256:f666b5f2c1ea4649cd2bd703507d4b81c2b515782e8476ba4a145b091a704a53
             env:
-              KOPIA_CHECK_FOR_UPDATES: false
-              KOPIA_CONFIG_PATH: /config/repository.config
+              KOPIA_WEB_ENABLED: true
+              KOPIA_WEB_PORT: &port 80
               TZ: America/New_York
             envFrom:
               - secretRef:
                   name: kopia-secret
             args:
-              - server
-              - start
-              - --insecure
-              - --address
-              - 0.0.0.0:80
               - --without-password
-              - --disable-file-logging
             probes:
               liveness: &probes
                 enabled: true
@@ -48,11 +42,11 @@ spec:
                 spec:
                   httpGet:
                     path: /
-                    port: &port 80
-                  initialDelaySeconds: 30
-                  periodSeconds: 30
-                  timeoutSeconds: 10
-                  failureThreshold: 6
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
               readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
@@ -96,3 +90,12 @@ spec:
         path: /mnt/eros/VolsyncKopia
         globalMounts:
           - path: /repository
+      tmpfs:
+        type: emptyDir
+        advancedMounts:
+          kopia:
+            app:
+              - path: /config/cache
+                subPath: cache
+              - path: /config/logs
+                subPath: logs
