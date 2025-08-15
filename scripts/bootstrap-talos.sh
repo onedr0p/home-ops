@@ -10,18 +10,6 @@ function log() {
     gum log --time=rfc3339 --structured --level "${lvl}" "${msg}" "$@"
 }
 
-function sync_helmfile() {
-    local helmfile_file="${1:?}"
-
-    if [[ ! -f "${helmfile_file}" ]]; then
-        log fatal "File does not exist" "file" "${helmfile_file}"
-    fi
-
-    if ! helmfile --file "${helmfile_file}" sync --hide-notes; then
-        log fatal "Failed to sync Helm releases"
-    fi
-}
-
 # Apply the Talos configuration to all the nodes
 function install_talos() {
     log info "Installing Talos configuration"
@@ -71,8 +59,8 @@ function install_talos() {
 }
 
 # Bootstrap Talos on a controller node
-function bootstrap_kubernetes() {
-    log info "Bootstrapping Kubernetes"
+function install_kubernetes() {
+    log info "Installing Kubernetes"
 
     if ! controller=$(talosctl config info --output yaml | yq --exit-status '.endpoints[0]') || [[ -z "${controller}" ]]; then
         log fatal "No Talos controller found"
@@ -85,10 +73,10 @@ function bootstrap_kubernetes() {
         sleep 5
     done
 
-    log info "Kubernetes is bootstrapped" "controller" "${controller}"
+    log info "Kubernetes installed successfully" "controller" "${controller}"
 }
 
-# Fetch the kubeconfig from a controller node
+# Fetch the kubeconfig to local machine
 function fetch_kubeconfig() {
     log info "Fetching kubeconfig"
 
@@ -120,7 +108,7 @@ function wait_for_nodes() {
     done
 }
 
-# Resources to be applied before the helmfile charts are installed
+# Apply resources before the helmfile charts are installed
 function apply_resources() {
     log info "Applying resources"
 
@@ -139,7 +127,7 @@ function apply_resources() {
         log fatal "Failed to apply resources"
     fi
 
-    log info "Resources applied"
+    log info "Resources applied successfully"
 }
 
 # Apply Custom Resource Definitions (CRDs)
@@ -152,25 +140,25 @@ function apply_crds() {
         log fatal "File does not exist" "file" "${helmfile_file}"
     fi
 
-    if ! crds=$(helmfile --file "${helmfile_file}" template --quiet) || [[ -z "${crds}" ]]; then
-        log fatal "Unable to render CRDs from Helmfile" "file" "${helmfile_file}"
+    if ! crds=$(helmfile --file "${helmfile_file}" template --include-crds --quiet | yq ea --exit-status 'select(.kind == "CustomResourceDefinition")' -) || [[ -z "${crds}" ]]; then
+        log fatal "Failed to render CRDs from Helmfile" "file" "${helmfile_file}"
     fi
 
-    if ! echo "${crds}" | kubectl diff --filename - &>/dev/null; then
+    if echo "${crds}" | kubectl diff --filename - &>/dev/null; then
         log info "CRDs are up-to-date"
         return
     fi
 
     if ! echo "${crds}" | kubectl apply --server-side --filename - &>/dev/null; then
-        log fatal "Failed to apply CRDs"
+        log fatal "Failed to apply crds from Helmfile" "file" "${helmfile_file}"
     fi
 
     log info "CRDs applied successfully"
 }
 
-# Sync Helm releases
-function sync_apps() {
-    log info "Syncing Helm releases"
+# Apply applications using Helmfile
+function apply_apps() {
+    log info "Applying apps"
 
     local -r helmfile_file="${ROOT_DIR}/bootstrap/helmfile.yaml"
 
@@ -179,20 +167,20 @@ function sync_apps() {
     fi
 
     if ! helmfile --file "${helmfile_file}" sync --hide-notes; then
-        log fatal "Failed to sync Helm releases"
+        log fatal "Failed to apply apps from Helmfile" "file" "${helmfile_file}"
     fi
 
-    log info "Helm releases synced successfully"
+    log info "Apps applied successfully"
 }
 
 function main() {
     install_talos
-    bootstrap_kubernetes
+    install_kubernetes
     fetch_kubeconfig
     wait_for_nodes
     apply_resources
     apply_crds
-    sync_apps
+    apply_apps
 }
 
 main "$@"

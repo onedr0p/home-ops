@@ -1,10 +1,11 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/helmfile
 
+# This helmfile is for installing Custom Resource Definitions (CRDs) from Helm charts.
+# It is not intended to be used with helmfile apply or sync.
+
 helmDefaults:
-  args: ['--include-crds']
-  postRenderer: bash
-  postRendererArgs: ['-c', "yq ea --exit-status 'select(.kind == \"CustomResourceDefinition\")' -"]
+  args: ['--include-crds'] # Prevent helmfile apply or sync
 
 releases:
   - name: cloudflare-dns
