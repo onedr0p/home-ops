@@ -186,13 +186,13 @@ function sync_apps() {
 }
 
 function main() {
-    # install_talos
-    # bootstrap_kubernetes
-    # fetch_kubeconfig
-    # wait_for_nodes
-    # apply_resources
+    install_talos
+    bootstrap_kubernetes
+    fetch_kubeconfig
+    wait_for_nodes
+    apply_resources
     apply_crds
-    # sync_apps
+    sync_apps
 }
 
 main "$@"
