@@ -10,13 +10,13 @@ releases:
   - name: cilium
     namespace: kube-system
     chart: oci://ghcr.io/home-operations/charts-mirror/cilium
-    version: 1.18.0
+    version: 1.18.1
     values: ['../kubernetes/apps/kube-system/cilium/app/helm/values.yaml']
 
   - name: coredns
     namespace: kube-system
     chart: oci://ghcr.io/coredns/charts/coredns
-    version: 1.43.1
+    version: 1.43.2
     values: ['../kubernetes/apps/kube-system/coredns/app/helm/values.yaml']
     needs: ['kube-system/cilium']
 
@@ -34,36 +34,16 @@ releases:
     values: ['../kubernetes/apps/cert-manager/cert-manager/app/helm/values.yaml']
     needs: ['kube-system/spegel']
 
-  - name: external-secrets
-    namespace: external-secrets
-    chart: oci://ghcr.io/external-secrets/charts/external-secrets
-    version: 0.19.0
-    values: ['../kubernetes/apps/external-secrets/external-secrets/app/helm/values.yaml']
-    hooks:
-      - # Apply cluster secret store
-        events: ['postsync']
-        command: kubectl
-        args:
-          - apply
-          - --namespace=external-secrets
-          - --server-side
-          - --field-manager=kustomize-controller
-          - --filename
-          - ../kubernetes/apps/external-secrets/external-secrets/app/clustersecretstore.yaml
-          - --wait=true
-        showlogs: true
-    needs: ['cert-manager/cert-manager']
-
   - name: flux-operator
     namespace: flux-system
     chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
-    version: 0.27.0
+    version: 0.28.0
     values: ['../kubernetes/apps/flux-system/flux-operator/app/helm/values.yaml']
-    needs: ['external-secrets/external-secrets']
+    needs: ['cert-manager/cert-manager']
 
   - name: flux-instance
     namespace: flux-system
     chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
-    version: 0.27.0
+    version: 0.28.0
     values: ['../kubernetes/apps/flux-system/flux-instance/app/helm/values.yaml']
     needs: ['flux-system/flux-operator']

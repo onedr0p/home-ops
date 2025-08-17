@@ -1,0 +1,28 @@
+---
+machine:
+  install:
+    diskSelector:
+      model: Samsung SSD 870
+    image: factory.talos.dev/metal-installer/05b4a47a70bc97786ed83d200567dcc8a13f731b164537ba59d5397d668851fa:v1.11.0-beta.2
+  network:
+    hostname: k8s-0
+    interfaces:
+      - deviceSelector:
+          hardwareAddr: 00:30:93:12:*
+          driver: atlantic
+        mtu: 9000
+        dhcp: true
+        vip:
+          ip: 192.168.42.120
+  nodeLabels:
+    intel.feature.node.kubernetes.io/gpu: "true"
+    topology.kubernetes.io/zone: m
+  type: controlplane
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: local-hostpath
+provisioning:
+  diskSelector:
+    match: disk.model == "Corsair MP600 MICRO" && !system_disk
+  minSize: 1TB

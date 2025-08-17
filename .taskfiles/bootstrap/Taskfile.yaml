@@ -5,9 +5,9 @@ version: '3'
 tasks:
 
   default:
-    desc: Bootstrap Talos nodes and Cluster apps
-    cmd: bash {{.SCRIPTS_DIR}}/bootstrap-cluster.sh
+    desc: Bootstrap Talos and Kubernetes cluster
+    cmd: |
+      {{.SCRIPTS_DIR}}/bootstrap-talos.sh
     preconditions:
-      - talosctl config info
-      - test -f {{.ROOT_DIR}}/talosconfig
-      - test -f {{.SCRIPTS_DIR}}/bootstrap-cluster.sh
+      - test -f {{.SCRIPTS_DIR}}/bootstrap-talos.sh
+      - which gum helm helmfile kubectl op talosctl yq
