@@ -2,13 +2,15 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
+vars:
+  BOOTSTRAP_SCRIPT: '{{.SCRIPTS_DIR}}/bootstrap-talos.sh'
+
 tasks:
 
   default:
     desc: Bootstrap Talos and Kubernetes cluster
-    cmd: |
-      {{.SCRIPTS_DIR}}/bootstrap-talos.sh
+    cmd: bash {{.BOOTSTRAP_SCRIPT}}
     preconditions:
       - find --version | grep -q GNU
-      - test -f {{.SCRIPTS_DIR}}/bootstrap-talos.sh
+      - test -f {{.BOOTSTRAP_SCRIPT}}
       - which gum helm helmfile kubectl op talosctl yq
