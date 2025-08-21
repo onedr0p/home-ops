@@ -118,9 +118,7 @@ function apply_namespaces() {
         log error "Directory does not exist" "directory" "${apps_dir}"
     fi
 
-    for app in "${apps_dir}"/*/; do
-        namespace=$(basename "${app}")
-
+    find "${apps_dir}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | while IFS= read -r namespace; do
         if kubectl get namespace "${namespace}" &>/dev/null; then
             log info "Namespace is up-to-date" "namespace" "${namespace}"
             continue
