@@ -1,1 +1,1 @@
-{{ (fromYaml (readFile "../../kubernetes/apps/cert-manager/cert-manager/app/helmrelease.yaml")).spec.values | toYaml }}
+{{ exec "yq" (list "select(documentIndex == 1).spec.values" "../../kubernetes/apps/cert-manager/cert-manager/app/helmrelease.yaml") }}
