@@ -10,7 +10,7 @@ set -Eeuo pipefail
 #   2. Path to the patch file for the machineconfig.
 #
 # Example Usage:
-#   ./render-maching-config.sh machineconfig.yaml.j2 nodes/k8s-0.yaml.j2
+#   ./render-maching-config.sh talos/machineconfig.yaml.j2 talos/nodes/k8s-0.yaml.j2
 #
 # Output:
 #   The merged Talos configuration is printed to standard output.
@@ -26,7 +26,7 @@ function log() {
 
 function main() {
 
-    local base patch type result
+    local base patch type result tmpdir="$(mktemp -d)"
 
     # Determine the machine type from the patch file
     if ! type=$(yq --exit-status 'select(documentIndex == 0) | .machine.type' "${MACHINEPATCH}") || [[ -z "${type}" ]]; then
@@ -38,20 +38,18 @@ function main() {
         log fatal "Failed to render base machine configuration" "file" "${MACHINEBASE}"
     fi
 
-    BASE_TMPFILE=$(mktemp)
-    echo "${base}" >"${BASE_TMPFILE}"
+    echo "${base}" >"${tmpdir}/base.yaml"
 
     # Render the patch machine configurations
     if ! patch=$(minijinja-cli --define "machinetype=${type}" "${MACHINEPATCH}" | op inject) || [[ -z "${patch}" ]]; then
         log fatal "Failed to render patch machine configuration" "file" "${MACHINEPATCH}"
     fi
 
-    PATCH_TMPFILE=$(mktemp)
-    echo "${patch}" >"${PATCH_TMPFILE}"
+    echo "${patch}" >"${tmpdir}/patch.yaml"
 
     # Apply the patch to the base machine configuration
-    if ! result=$(talosctl machineconfig patch "${BASE_TMPFILE}" --patch "@${PATCH_TMPFILE}") || [[ -z "${result}" ]]; then
-        log fatal "Failed to apply patch to machine configuration" "base_file" "${BASE_TMPFILE}" "patch_file" "${PATCH_TMPFILE}"
+    if ! result=$(talosctl machineconfig patch "${tmpdir}/base.yaml" --patch "@${tmpdir}/patch.yaml") || [[ -z "${result}" ]]; then
+        log fatal "Failed to apply patch to machine configuration" "base_file" "${tmpdir}/base.yaml" "patch_file" "${tmpdir}/patch.yaml"
     fi
 
     echo "${result}"
