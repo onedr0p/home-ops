@@ -1,7 +1,10 @@
 #!/usr/bin/env -S just --justfile
 
-[doc('Bootstrap')]
+[doc('Bootstrap Recipes')]
 mod bootstrap '.just/bootstrap.just'
+
+[doc('Kube Recipes')]
+mod kube '.just/kube.just'
 
 [private]
 default:
