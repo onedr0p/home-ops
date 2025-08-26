@@ -1,5 +1,6 @@
 set shell := ["bash", "-Eeu", "-o", "pipefail", "-c"]
-set working-directory := '../'
+
+scripts_dir := justfile_dir() + '/scripts'
 
 [doc('Bootstrap')]
 default: talos kubernetes kubeconfig wait namespaces resources crds apps
@@ -14,32 +15,32 @@ with-deps:
 
 [doc('Install Talos')]
 talos: with-deps
-	@bash ./scripts/bootstrap.sh talos
+	@bash {{scripts_dir}}/bootstrap.sh talos
 
 [doc('Install Kubernetes')]
 kubernetes: with-deps
-	@bash ./scripts/bootstrap.sh kubernetes
+	@bash {{scripts_dir}}/bootstrap.sh kubernetes
 
 [doc('Fetch kubeconfig')]
 kubeconfig: with-deps
-	@bash ./scripts/bootstrap.sh kubeconfig
+	@bash {{scripts_dir}}/bootstrap.sh kubeconfig
 
 [doc('Wait for nodes to be not-ready')]
 wait: with-deps
-	@bash ./scripts/bootstrap.sh wait
+	@bash {{scripts_dir}}/bootstrap.sh wait
 
 [doc('Apply Namespaces')]
 namespaces: with-deps
-	@bash ./scripts/bootstrap.sh namespaces
+	@bash {{scripts_dir}}/bootstrap.sh namespaces
 
 [doc('Apply Resources')]
 resources: with-deps
-	@bash ./scripts/bootstrap.sh resources
+	@bash {{scripts_dir}}/bootstrap.sh resources
 
 [doc('Apply CRDs')]
 crds: with-deps
-	@bash ./scripts/bootstrap.sh crds
+	@bash {{scripts_dir}}/bootstrap.sh crds
 
 [doc('Apply Apps')]
 apps: with-deps
-	@bash ./scripts/bootstrap.sh apps
+	@bash {{scripts_dir}}/bootstrap.sh apps

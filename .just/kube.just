@@ -1,5 +1,4 @@
 set shell := ["bash", "-Eeu", "-o", "pipefail", "-c"]
-set working-directory := '../'
 
 [private]
 default:
@@ -27,29 +26,34 @@ prune-pods: with-deps
 [doc('Reconcile all ExternalSecrets Secrets')]
 [group: 'reconcile']
 reconcile-es: with-deps
-	@kubectl get es -A --no-headers | awk '{print $1, $2}' | xargs -l bash -c \
-		'kubectl -n $0 annotate --field-manager flux-client-side-apply --overwrite es $1 force-sync="$(date +%s)"'
+	@kubectl get es -A --no-headers | while read -r ns name _; do \
+		kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite es "$name" force-sync="$(date +%s)"; \
+	done
 
 [doc('Reconcile all Flux GitRepositories')]
 [group: 'reconcile']
 reconcile-git: with-deps
-	@kubectl get gitrepo -A --no-headers | awk '{print $1, $2}' | xargs -l bash -c \
-		'kubectl -n $0 annotate --field-manager flux-client-side-apply --overwrite gitrepo $1 reconcile.fluxcd.io/requestedAt="$(date +%s)"'
+	@kubectl get gitrepo -A --no-headers | while read -r ns name _; do \
+		kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite gitrepo "$name" reconcile.fluxcd.io/requestedAt="$(date +%s)"; \
+	done
 
 [doc('Reconcile all Flux HelmReleases')]
 [group: 'reconcile']
 reconcile-hr: with-deps
-	@kubectl get hr -A --no-headers | awk '{print $1, $2}' | xargs -l bash -c \
-		'kubectl -n $0 annotate --field-manager flux-client-side-apply --overwrite hr $1 reconcile.fluxcd.io/requestedAt="$(date +%s)" reconcile.fluxcd.io/forceAt="$(date +%s)"'
+	@kubectl get hr -A --no-headers | while read -r ns name _; do \
+		kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite hr "$name" reconcile.fluxcd.io/requestedAt="$(date +%s)" reconcile.fluxcd.io/forceAt="$(date +%s)"; \
+	done
 
 [doc('Reconcile all Flux Kustomizations')]
 [group: 'reconcile']
 reconcile-ks: with-deps
-	@kubectl get ks -A --no-headers | awk '{print $1, $2}' | xargs -l bash -c \
-		'kubectl -n $0 annotate --field-manager flux-client-side-apply --overwrite ks $1 reconcile.fluxcd.io/requestedAt="$(date +%s)"'
+	@kubectl get ks -A --no-headers | while read -r ns name _; do \
+		kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite ks "$name" reconcile.fluxcd.io/requestedAt="$(date +%s)"; \
+	done
 
 [doc('Reconcile all Flux OCIRepositories')]
 [group: 'reconcile']
 reconcile-oci: with-deps
-	@kubectl get ocirepo -A --no-headers | awk '{print $1, $2}' | xargs -l bash -c \
-		'kubectl -n $0 annotate --field-manager flux-client-side-apply --overwrite ocirepo $1 reconcile.fluxcd.io/requestedAt="$(date +%s)"'
+	@kubectl get ocirepo -A --no-headers | while read -r ns name _; do \
+		kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite ocirepo "$name" reconcile.fluxcd.io/requestedAt="$(date +%s)"; \
+	done
