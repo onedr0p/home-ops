@@ -11,4 +11,4 @@ mod talos
 
 [private]
 default:
-    @just --list --unsorted
+    @just --list

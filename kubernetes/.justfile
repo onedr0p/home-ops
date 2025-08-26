@@ -2,7 +2,7 @@ set working-directory := '../'
 
 [private]
 default:
-    @just --list kubernetes --unsorted
+    @just --list kubernetes
 
 [doc('Spawn a shell on a node')]
 node-shell node:
