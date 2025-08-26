@@ -12,18 +12,18 @@ prune-pods:
 
 [doc('Sync all Flux Kustomizations')]
 sync-ks:
-    @flux get ks --all-namespaces --no-header \
-        | awk '{print $1, $2}' | xargs -l -P0 bash -c 'flux --namespace $0 reconcile ks $1 --with-source'
+    @kubectl get ks --all-namespaces --no-headers | awk '{print $1, $2}' \
+        | xargs -l bash -c 'kubectl --namespace $0 annotate --field-manager=flux-client-side-apply --overwrite ks $1 reconcile.fluxcd.io/requestedAt="$(date +%s)"'
 
 [doc('Sync all Flux HelmReleases')]
 sync-hr:
-    @flux get hr --all-namespaces --no-header \
-        | awk '{print $1, $2}' | xargs -l -P0 bash -c 'flux --namespace $0 reconcile hr $1 --force --reset'
+    @kubectl get hr --all-namespaces --no-headers | awk '{print $1, $2}' \
+        | xargs -l bash -c 'kubectl --namespace $0 annotate --field-manager=flux-client-side-apply --overwrite hr $1 reconcile.fluxcd.io/requestedAt="$(date +%s)" reconcile.fluxcd.io/forceAt="$(date +%s)"'
 
 [doc('Sync all ExternalSecrets Secrets')]
 sync-es:
-    @kubectl get es --all-namespaces --no-headers --output=jsonpath='{range .items[*]}{.metadata.namespace} {.metadata.name}{"\n"}{end}' \
-        | xargs -l -P0 bash -c 'kubectl --namespace $0 annotate externalsecret $1 force-sync="$(date +%s)" --overwrite'
+    @kubectl get es --all-namespaces --no-headers | awk '{print $1, $2}' \
+        | xargs -l bash -c 'kubectl --namespace $0 annotate --field-manager=flux-client-side-apply --overwrite es $1 force-sync="$(date +%s)"'
 
 [doc('Spawn a shell on a node')]
 node-shell node:
