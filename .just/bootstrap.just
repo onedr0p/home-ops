@@ -1,16 +1,11 @@
+import './imports/deps.just'
+
+set shell := ["bash", "-Eeu", "-o", "pipefail", "-c"]
 set working-directory := '../'
 
 [private]
 default:
 	@just --list bootstrap --unsorted
-
-[private]
-deps:
-	@command -V gum helm helmfile jq kubectl op talosctl > /dev/null
-	@awk --version | grep -q GNU || (echo "GNU awk is required" && exit 1)
-	@find --version | grep -q GNU || (echo "GNU find is required" && exit 1)
-	@sed --version | grep -q GNU || (echo "GNU sed is required" && exit 1)
-	@yq --version | grep -q "mikefarah" || (echo "mikefarah/yq is required" && exit 1)
 
 [doc('Bootstrap Everything')]
 everything: talos kubernetes kubeconfig wait namespaces resources crds apps
