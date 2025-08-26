@@ -1,4 +1,4 @@
-deps:
+with-deps:
 	@for tool in curl flux gum helm helmfile jq kubectl op talosctl; do \
 		command -v $tool >/dev/null || (echo "$tool is required" && exit 1) \
 	done

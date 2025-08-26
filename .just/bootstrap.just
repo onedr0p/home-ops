@@ -1,4 +1,4 @@
-import './imports/deps.just'
+import './imports/common.just'
 
 set shell := ["bash", "-Eeu", "-o", "pipefail", "-c"]
 set working-directory := '../'
@@ -11,33 +11,33 @@ default:
 everything: talos kubernetes kubeconfig wait namespaces resources crds apps
 
 [doc('Bootstrap Talos')]
-talos: deps
+talos: with-deps
 	@bash ./scripts/bootstrap.sh talos
 
 [doc('Bootstrap Kubernetes')]
-kubernetes: deps
+kubernetes: with-deps
 	@bash ./scripts/bootstrap.sh kubernetes
 
 [doc('Fetch kubeconfig')]
-kubeconfig: deps
+kubeconfig: with-deps
 	@bash ./scripts/bootstrap.sh kubeconfig
 
 [doc('Wait for nodes to be not-ready')]
-wait: deps
+wait: with-deps
 	@bash ./scripts/bootstrap.sh wait
 
 [doc('Apply Namespaces')]
-namespaces: deps
+namespaces: with-deps
 	@bash ./scripts/bootstrap.sh namespaces
 
 [doc('Apply Resources')]
-resources: deps
+resources: with-deps
 	@bash ./scripts/bootstrap.sh resources
 
 [doc('Apply CRDs')]
-crds: deps
+crds: with-deps
 	@bash ./scripts/bootstrap.sh crds
 
 [doc('Apply Apps')]
-apps: deps
+apps: with-deps
 	@bash ./scripts/bootstrap.sh apps
