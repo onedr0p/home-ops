@@ -6,7 +6,7 @@ set shell := ["bash", "-Eeu", "-o", "pipefail", "-c"]
 mod bootstrap '.just/bootstrap.just'
 
 [doc('Kube Recipes')]
-mod kubernetes '.just/kubernetes.just'
+mod kube '.just/kube.just'
 
 [doc('Talos Recipes')]
 mod talos '.just/talos.just'
