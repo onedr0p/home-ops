@@ -1,13 +1,13 @@
 #!/usr/bin/env -S just --justfile
 
 [doc('Bootstrap Recipes')]
-mod bootstrap
+mod bootstrap '.just/bootstrap.justfile'
 
 [doc('Kube Recipes')]
-mod kubernetes
+mod kubernetes '.just/kubernetes.justfile'
 
 [doc('Talos Recipes')]
-mod talos
+mod talos '.just/talos.justfile'
 
 [private]
 default:
