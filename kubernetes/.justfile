@@ -1,5 +1,9 @@
 set working-directory := '../'
 
+[private]
+default:
+    @just --list kube --unsorted
+
 [doc('Prune all unused Pods')]
 prune-pods:
     @kubectl delete pods --all-namespaces --field-selector status.phase=Failed --ignore-not-found=true
@@ -20,3 +24,7 @@ sync-hr:
 sync-es:
     @kubectl get es --all-namespaces --no-headers --output=jsonpath='{range .items[*]}{.metadata.namespace} {.metadata.name}{"\n"}{end}' \
         | xargs -l -P0 bash -c 'kubectl --namespace $0 annotate externalsecret $1 force-sync="$(date +%s)" --overwrite'
+
+[doc('Spawn a shell on a node')]
+node-shell node:
+    @kubectl node-shell --namespace kube-system -x {{node}}

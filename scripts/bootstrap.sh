@@ -11,7 +11,7 @@ function log() {
 }
 
 # Apply the Talos configuration to all the nodes
-function install_talos() {
+function talos() {
     log info "Installing Talos configuration"
 
     local machineconfig_file="${ROOT_DIR}/talos/machineconfig.yaml.j2"
@@ -59,7 +59,7 @@ function install_talos() {
 }
 
 # Bootstrap Talos on a controller node
-function install_kubernetes() {
+function kubernetes() {
     log info "Installing Kubernetes"
 
     if ! controller=$(talosctl config info --output yaml | yq --exit-status '.endpoints[0]') || [[ -z "${controller}" ]]; then
@@ -77,7 +77,7 @@ function install_kubernetes() {
 }
 
 # Fetch the kubeconfig to local machine
-function fetch_kubeconfig() {
+function kubeconfig() {
     log info "Fetching kubeconfig"
 
     if ! controller=$(talosctl config info --output yaml | yq --exit-status '.endpoints[0]') || [[ -z "${controller}" ]]; then
@@ -92,7 +92,7 @@ function fetch_kubeconfig() {
 }
 
 # Talos requires the nodes to be 'Ready=False' before applying resources
-function wait_for_nodes() {
+function wait() {
     log info "Waiting for nodes to be available"
 
     # Skip waiting if all nodes are 'Ready=True'
@@ -109,7 +109,7 @@ function wait_for_nodes() {
 }
 
 # Apply namespaces to the cluster
-function apply_namespaces() {
+function namespaces() {
     log info "Applying namespaces"
 
     local -r apps_dir="${ROOT_DIR}/kubernetes/apps"
@@ -133,7 +133,7 @@ function apply_namespaces() {
 }
 
 # Apply resources before the helmfile charts are installed
-function apply_resources() {
+function resources() {
     log info "Applying resources"
 
     local -r resources_file="${ROOT_DIR}/bootstrap/resources.yaml"
@@ -155,7 +155,7 @@ function apply_resources() {
 }
 
 # Apply Custom Resource Definitions (CRDs)
-function apply_crds() {
+function crds() {
     log info "Applying CRDs"
 
     local -r helmfile_file="${ROOT_DIR}/bootstrap/helmfile.d/00-crds.yaml"
@@ -181,7 +181,7 @@ function apply_crds() {
 }
 
 # Apply applications using Helmfile
-function apply_apps() {
+function apps() {
     log info "Applying apps"
 
     local -r helmfile_file="${ROOT_DIR}/bootstrap/helmfile.d/01-apps.yaml"
@@ -198,14 +198,20 @@ function apply_apps() {
 }
 
 function main() {
-    install_talos
-    install_kubernetes
-    fetch_kubeconfig
-    wait_for_nodes
-    apply_namespaces
-    apply_resources
-    apply_crds
-    apply_apps
+    local stages=("$@")
+
+    # If no arguments, run the full bootstrap sequence
+    if [[ ${#stages[@]} -eq 0 ]]; then
+        stages=(talos kubernetes kubeconfig wait namespaces resources crds apps)
+    fi
+
+    for stage in "${stages[@]}"; do
+        if declare -F "${stage}" >/dev/null; then
+            "${stage}"
+        else
+            log fatal "Unknown stage" "stage" "${stage}"
+        fi
+    done
 }
 
 main "$@"

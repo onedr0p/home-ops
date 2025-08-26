@@ -1,6 +1,8 @@
 set working-directory := '../'
 
-tmpdir := `mktemp -d`
+[private]
+default:
+    @just --list talos
 
 [doc('Apply Node')]
 apply-node node mode="auto":
@@ -21,6 +23,16 @@ upgrade-k8s version:
 reboot-node node mode="powercycle":
     @talosctl --nodes {{node}} reboot --mode={{mode}}
 
+[doc('Shutdown Node')]
+[confirm('Are you sure you want to shutdown?')]
+shutdown-node node:
+    @talosctl --nodes {{node}} shutdown --force
+
+[doc('Reset Node')]
+[confirm('Are you sure you want to reset?')]
+reset-node node:
+    @talosctl --nodes {{node}} reset --graceful=false
+
 [doc('Generate kubeconfig')]
 gen-kubeconfig:
     @talosctl kubeconfig --nodes $(talosctl config info --output yaml | yq --exit-status '.endpoints[0]') --force --force-context-name main ./
@@ -31,5 +43,6 @@ gen-schematic:
 
 [doc('Download Image')]
 download-image version schematic:
-    @curl -o ./talos/talos-{{version}}-{{schematic}}.iso \
+    @curl -fL --retry 5 --retry-delay 5 --retry-all-errors \
+        -o ./talos/talos-{{version}}-{{replace_regex(schematic, '^(.{8}).*', '$1')}}.iso \
         "https://factory.talos.dev/image/{{schematic}}/{{version}}/metal-amd64.iso"
