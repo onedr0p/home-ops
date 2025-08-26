@@ -4,6 +4,9 @@ set working-directory := '../'
 default:
     @just --list bootstrap --unsorted
 
+[doc('Bootstrap Everything')]
+everything: talos kubernetes kubeconfig wait namespaces resources crds apps
+
 [doc('Bootstrap Talos')]
 talos:
     @bash ./scripts/bootstrap.sh talos
