@@ -14,7 +14,7 @@ talos:
 	#!/usr/bin/env bash -Eeuo pipefail
 	just log info "Installing Talos configuration ..."
 	for node in $(talosctl config info -o yaml | yq -e '.nodes | join (" ")'); do
-		if ! output=$(just talos apply-node "${node}" true 2>&1); then
+		if ! output=$(just talos apply-node "${node}" --insecure 2>&1); then
 			if [[ "${output}" == *"certificate required"* ]]; then
 				just log info "Talos node is already configured, skipping apply of config" "node" "${node}"
 				continue

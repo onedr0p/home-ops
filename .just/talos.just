@@ -2,7 +2,7 @@ set shell := ['bash', '-Eeu', '-o', 'pipefail', '-c']
 
 scripts_dir := justfile_dir() + '/scripts'
 talos_dir := justfile_dir() + '/talos'
-tmp_dir := `mktemp -d`
+temp_dir := `mktemp -d`
 
 controller := `talosctl config info -o yaml | yq -e '.endpoints[0]'`
 
@@ -11,8 +11,8 @@ default:
 	@just --list talos
 
 [doc('Apply Node')]
-apply-node node insecure="false":
-	@just talos render-config {{node}} | talosctl -n {{node}} apply-config -m auto --dry-run -f /dev/stdin {{ if insecure == "true" { "--insecure" } else { "" } }}
+apply-node node *args:
+	@just talos render-config {{node}} | talosctl -n {{node}} apply-config --dry-run -f /dev/stdin {{args}}
 
 [doc('Download Image')]
 download-image version schematic:
@@ -37,10 +37,10 @@ reboot-node node:
 [doc('Render Config')]
 render-config node:
 	@minijinja-cli -D "machinetype=$(just talos machine-type {{node}})" \
-		{{talos_dir}}/machineconfig.yaml.j2 | op inject >"{{tmp_dir}}/base.yaml"
+		{{talos_dir}}/machineconfig.yaml.j2 | op inject >"{{temp_dir}}/base.yaml"
 	@minijinja-cli -D "machinetype=$(just talos machine-type {{node}})" \
-		{{talos_dir}}/nodes/{{node}}.yaml.j2 | op inject >"{{tmp_dir}}/patch.yaml"
-	@talosctl machineconfig patch {{tmp_dir}}/base.yaml -p @{{tmp_dir}}/patch.yaml
+		{{talos_dir}}/nodes/{{node}}.yaml.j2 | op inject >"{{temp_dir}}/patch.yaml"
+	@talosctl machineconfig patch {{temp_dir}}/base.yaml -p @{{temp_dir}}/patch.yaml
 
 [doc('Reset Node')]
 [confirm]
