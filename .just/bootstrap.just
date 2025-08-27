@@ -82,7 +82,7 @@ resources:
 crds:
 	#!/usr/bin/env bash -Eeuo pipefail
 	just log info "Applying CRDs ..."
-	if ! crds=$(helmfile --file "{{bootstrap_dir}}/helmfile.d/00-crds.yaml" template --include-crds --no-hooks -q | yq ea -e 'select(.kind == "CustomResourceDefinition")' -) || [[ -z "${crds}" ]]; then
+	if ! crds=$(helmfile --file "{{bootstrap_dir}}/helmfile.d/00-crds.yaml" template -q | yq ea -e 'select(.kind == "CustomResourceDefinition")') || [[ -z "${crds}" ]]; then
 		just log fatal "Failed to render CRDs from Helmfile"
 	fi
 	if ! echo "${crds}" | kubectl diff --filename - &>/dev/null; then
