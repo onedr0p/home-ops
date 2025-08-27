@@ -1,4 +1,4 @@
-set shell := ["bash", "-Eeu", "-o", "pipefail", "-c"]
+set shell := ['bash', '-Eeu', '-o', 'pipefail', '-c']
 
 [private]
 default:

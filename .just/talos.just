@@ -1,34 +1,46 @@
-set shell := ["bash", "-Eeu", "-o", "pipefail", "-c"]
+set shell := ['bash', '-Eeu', '-o', 'pipefail', '-c']
 
 scripts_dir := justfile_dir() + '/scripts'
 talos_dir := justfile_dir() + '/talos'
+tmp_dir := `mktemp -d`
+
+controller := `talosctl config info -o yaml | yq -e '.endpoints[0]'`
 
 [private]
 default:
 	@just --list talos
 
 [doc('Apply Node')]
-apply-node node mode="auto":
-	@bash {{scripts_dir}}/render-machine-config.sh {{talos_dir}}/machineconfig.yaml.j2 {{talos_dir}}/nodes/{{node}}.yaml.j2 \
-		| talosctl -n {{node}} apply-config -m {{mode}} --dry-run -f /dev/stdin
+apply-node node insecure="false":
+	@just talos render-config {{node}} | talosctl -n {{node}} apply-config -m auto --dry-run -f /dev/stdin {{ if insecure == "true" { "--insecure" } else { "" } }}
 
 [doc('Download Image')]
 download-image version schematic:
-	@curl -fL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors \
+	@gum spin -s line --title "Downloading Talos {{version}} ..." -- \
+	curl -sfL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors \
 		-o {{talos_dir}}/talos-{{version}}-{{replace_regex(schematic, '^(.{8}).*', '$1')}}.iso \
 		"https://factory.talos.dev/image/{{schematic}}/{{version}}/metal-amd64.iso"
+	@just log info "Downloaded Talos" version {{version}} schematic {{schematic}}
 
 [doc('Generate Kubeconfig')]
 generate-kubeconfig:
-	@talosctl kubeconfig -n "$(talosctl config info -o yaml | yq -e '.endpoints[0]')" -f --force-context-name main {{justfile_dir()}}
+	@talosctl kubeconfig -n "{{controller}}" -f --force-context-name main {{justfile_dir()}}
 
-[doc('Generate Schematic')]
+[doc('Generate Schematic Id')]
 generate-schematic-id:
-	@curl -sX POST --data-binary @./talos/schematic.yaml https://factory.talos.dev/schematics | jq -r '.id'
+	@curl -sX POST --data-binary @{{talos_dir}}/schematic.yaml https://factory.talos.dev/schematics | jq -r '.id'
 
 [doc('Reboot Node')]
-reboot-node node mode="powercycle":
-	@talosctl -n {{node}} reboot -m {{mode}}
+reboot-node node:
+	@talosctl -n {{node}} reboot -m powercycle
+
+[doc('Render Config')]
+render-config node:
+	@minijinja-cli -D "machinetype=$(just talos machine-type {{node}})" \
+		{{talos_dir}}/machineconfig.yaml.j2 | op inject >"{{tmp_dir}}/base.yaml"
+	@minijinja-cli -D "machinetype=$(just talos machine-type {{node}})" \
+		{{talos_dir}}/nodes/{{node}}.yaml.j2 | op inject >"{{tmp_dir}}/patch.yaml"
+	@talosctl machineconfig patch {{tmp_dir}}/base.yaml -p @{{tmp_dir}}/patch.yaml
 
 [doc('Reset Node')]
 [confirm]
@@ -41,10 +53,16 @@ shutdown-node node:
 
 [doc('Upgrade Kubernetes')]
 upgrade-k8s version:
-	@talosctl -n $(talosctl config info -o yaml | yq -e '.endpoints[0]') upgrade-k8s --to {{version}}
+	@talosctl -n "{{controller}}" upgrade-k8s --to {{version}}
 
 [doc('Upgrade Node')]
-upgrade-node node mode="powercycle":
-	@talosctl -n {{node}} upgrade \
-		-i "$(yq -e 'select(documentIndex == 0) | .machine.install.image' {{talos_dir}}/machineconfig.yaml.j2)" \
-		-m {{mode}} --timeout=10m
+upgrade-node node:
+	@talosctl -n {{node}} upgrade -i "$(just talos machine-image)" -m powercycle --timeout=10m
+
+[private]
+machine-type node:
+	@minijinja-cli {{talos_dir}}/nodes/{{node}}.yaml.j2 | yq -e '.machine.type // ""'
+
+[private]
+machine-image:
+	@minijinja-cli {{talos_dir}}/machineconfig.yaml.j2 | yq -e '.machine.install.image // ""'

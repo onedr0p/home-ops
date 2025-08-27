@@ -1,6 +1,6 @@
 #!/usr/bin/env -S just --justfile
 
-set shell := ["bash", "-Eeu", "-o", "pipefail", "-c"]
+set shell := ['bash', '-Eeu', '-o', 'pipefail', '-c']
 
 [doc('Bootstrap Recipes')]
 mod bootstrap '.just/bootstrap.just'
@@ -17,3 +17,7 @@ mod talos '.just/talos.just'
 [private]
 default:
 	@just --list
+
+[positional-arguments, private]
+log lvl msg *args:
+    @gum log -t rfc3339 -s -l "{{lvl}}" "{{msg}}" {{args}}
