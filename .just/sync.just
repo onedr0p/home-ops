@@ -6,7 +6,7 @@ default:
 
 [doc('Sync ExternalSecrets')]
 es:
-    kubectl get es -A --no-headers | while read -r ns name _; do \
+    @kubectl get es -A --no-headers | while read -r ns name _; do \
         kubectl -n "${ns}" annotate --field-manager flux-client-side-apply --overwrite es "${name}" force-sync="$(date +%s)"; \
     done
 
