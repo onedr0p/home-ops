@@ -4,13 +4,14 @@ bootstrap_dir := justfile_dir() + '/bootstrap'
 kubernetes_dir := justfile_dir() + '/kubernetes'
 
 controller := `talosctl config info -o yaml | yq -e '.endpoints[0]'`
+nodes := `talosctl config info -o yaml | yq -e '.nodes | join (" ")'`
 
 [doc('Bootstrap Cluster')]
 default: talos kubernetes kubeconfig wait namespaces resources crds apps
 
 [doc('Install Talos')]
 talos: (with-banner "Installing Talos")
-    @for node in $(talosctl config info -o yaml | yq -e '.nodes | join (" ")'); do \
+    @for node in {{nodes}}; do \
         if ! output=$(just talos apply-node "${node}" --insecure 2>&1); then \
             if [[ "${output}" == *"certificate required"* ]]; then \
                 just log info "Talos node is already configured, skipping apply of config" "node" "${node}"; \
