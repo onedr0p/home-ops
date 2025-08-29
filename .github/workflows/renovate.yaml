@@ -4,12 +4,13 @@ name: Renovate
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
     paths:
       - .renovaterc.json5
       - .renovate/**.json5
   schedule:
-    - cron: "0 * * * *"
+    - cron: 0 * * * *
   workflow_dispatch:
     inputs:
       dryRun:
@@ -48,25 +49,25 @@ jobs:
         uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         id: app-token
         with:
-          app-id: "${{ secrets.BOT_APP_ID }}"
-          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
 
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
-          token: "${{ steps.app-token.outputs.token }}"
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Run Renovate
         uses: renovatebot/github-action@a447f09147d00e00ae2a82ad5ef51ca89352da80 # v43.0.9
         env:
-          LOG_LEVEL: "${{ inputs.logLevel || 'debug' }}"
+          LOG_LEVEL: ${{ inputs.logLevel || 'debug' }}
           RENOVATE_AUTODISCOVER: true
-          RENOVATE_AUTODISCOVER_FILTER: "${{ github.repository }}"
-          RENOVATE_DRY_RUN: "${{ inputs.dryRun }}"
+          RENOVATE_AUTODISCOVER_FILTER: ${{ github.repository }}
+          RENOVATE_DRY_RUN: ${{ inputs.dryRun }}
           RENOVATE_INTERNAL_CHECKS_FILTER: strict
           RENOVATE_PLATFORM: github
           RENOVATE_PLATFORM_COMMIT: true
         with:
-          token: "${{ steps.app-token.outputs.token }}"
-          renovate-version: "${{ inputs.version || 'latest' }}"
+          token: ${{ steps.app-token.outputs.token }}
+          renovate-version: ${{ inputs.version || 'latest' }}
