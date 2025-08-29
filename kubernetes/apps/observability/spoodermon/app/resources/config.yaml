@@ -12,7 +12,6 @@ alerting:
     resolved-priority: 0
     title: Spoodermon
     user-key: ${SPOODERMON_PUSHOVER_USER_KEY}
-
 endpoints:
   - name: Ping
     url: icmp://${SPOODERMON_DDNS_HOSTNAME}
@@ -24,7 +23,6 @@ endpoints:
       - "[CONNECTED] == true"
     alerts: &alerts
       - type: pushover
-
   - name: Status Page
     url: https://${SPOODERMON_STATUS_HOSTNAME}
     interval: 1m
@@ -34,17 +32,14 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
     alerts: *alerts
-
 external-endpoints:
   - name: Heartbeat
     token: ${SPOODERMON_HEARTBEAT_TOKEN}
     heartbeat:
       interval: 10m
     alerts: *alerts
-
 ui:
   title: Status | Spoodermon
   header: Status
-
 web:
   port: ${GATUS_WEB_PORT}

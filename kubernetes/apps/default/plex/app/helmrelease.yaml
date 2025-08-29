@@ -51,7 +51,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              capabilities: {drop: ["ALL"]}
             resources:
               requests:
                 cpu: 100m
@@ -75,7 +75,8 @@ spec:
             port: *port
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.turbo.ac"]
+        hostnames:
+          - "{{ .Release.Name }}.turbo.ac"
         parentRefs:
           - name: external
             namespace: kube-system
@@ -87,7 +88,8 @@ spec:
             filters:
               - type: RequestHeaderModifier
                 requestHeaderModifier:
-                  remove: ["Range"]
+                  remove:
+                    - "Range"
             matches:
               - path:
                   type: PathPrefix
