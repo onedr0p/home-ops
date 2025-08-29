@@ -1,23 +1,18 @@
 #!/usr/bin/env -S just --justfile
 
-set quiet
+set quiet := true
 set shell := ['bash', '-eu', '-o', 'pipefail', '-c']
 
-[doc('Bootstrap Recipes')]
 mod bootstrap '.just/bootstrap.just'
-
-[doc('Kubernetes Recipes')]
 mod kube '.just/kube.just'
-
-[doc('Sync Recipes')]
 mod sync '.just/sync.just'
-
 mod talos '.just/talos.just'
 
 [private]
 default:
     just --list
 
-[positional-arguments, private]
+[positional-arguments]
+[private]
 log lvl msg *args:
-    gum log -t rfc3339 -s -l "{{lvl}}" "{{msg}}" {{args}}
+    gum log -t rfc3339 -s -l "{{ lvl }}" "{{ msg }}" {{ args }}
