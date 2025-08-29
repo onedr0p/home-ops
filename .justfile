@@ -1,5 +1,6 @@
 #!/usr/bin/env -S just --justfile
 
+set quiet
 set shell := ['bash', '-eu', '-o', 'pipefail', '-c']
 
 [doc('Bootstrap Recipes')]
@@ -15,9 +16,9 @@ mod sync '.just/sync.just'
 mod talos '.just/talos.just'
 
 [private]
-@default:
+default:
     just --list
 
 [positional-arguments, private]
-@log lvl msg *args:
+log lvl msg *args:
     gum log -t rfc3339 -s -l "{{lvl}}" "{{msg}}" {{args}}
