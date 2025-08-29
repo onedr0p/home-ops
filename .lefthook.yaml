@@ -1,9 +1,20 @@
 ---
 pre-commit:
+  parallel: true
   jobs:
     - name: Format YAML
       run: yamlfmt {staged_files}
-      glob: "*.yaml"
+      glob:
+        - "*.yaml"
       exclude:
         - "*.sops.yaml"
       stage_fixed: true
+
+    - name: Format Just
+      run: |
+        for file in {staged_files}; do
+            just --justfile $file --fmt --unstable
+        done
+      glob:
+        - "*.just"
+        - .justfile
