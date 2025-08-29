@@ -3,7 +3,8 @@ name: Flux Local
 
 on:
   pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -56,7 +57,9 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        resource: ["helmrelease", "kustomization"]
+        resource:
+          - helmrelease
+          - kustomization
       fail-fast: false
     steps:
       - name: Checkout Pull Request Branch
@@ -70,7 +73,7 @@ jobs:
         with:
           path: default
           persist-credentials: false
-          ref: "${{ github.event.repository.default_branch }}"
+          ref: ${{ github.event.repository.default_branch }}
 
       - name: Run flux-local diff
         uses: docker://ghcr.io/allenporter/flux-local:v7.8.0
@@ -114,7 +117,9 @@ jobs:
 
   success:
     if: ${{ !cancelled() }}
-    needs: ["test", "diff"]
+    needs:
+      - test
+      - diff
     name: Flux Local - Success
     runs-on: ubuntu-latest
     steps:
