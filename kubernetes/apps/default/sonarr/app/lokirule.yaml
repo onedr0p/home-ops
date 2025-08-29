@@ -11,6 +11,7 @@ groups:
             {{ $labels.app }} is experiencing database issues
         labels:
           severity: critical
+
       - alert: SonarrDatabaseIsMalformed
         expr: |
           sum by (app) (count_over_time({app=~"sonarr"} |~ "(?i)database disk image is malformed"[5m])) > 0
