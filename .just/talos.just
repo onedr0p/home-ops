@@ -35,7 +35,7 @@ render-config node:
         "{{ talos_dir }}/machineconfig.yaml.j2" | op inject >"{{ temp_dir }}/base.yaml"
     minijinja-cli -D "machinetype=$(just talos machine-type {{ node }})" \
         "{{ talos_dir }}/nodes/{{ node }}.yaml.j2" | op inject >"{{ temp_dir }}/patch.yaml"
-    talosctl machineconfig patch "{{ temp_dir }}/base.yaml" -p "{{ temp_dir }}/patch.yaml"
+    talosctl machineconfig patch "{{ temp_dir }}/base.yaml" -p "@{{ temp_dir }}/patch.yaml"
 
 [confirm]
 reset-node node:
