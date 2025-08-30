@@ -76,11 +76,11 @@ resources:
 [doc('Apply Helmfile CRDs')]
 crds:
     just log debug "Runnning stage $0 ..."
-    if ! crds=$(helmfile --file "{{ bootstrap_dir }}/helmfile.d/00-crds.yaml" template -q) || [[ -z "$crds" ]]; then \
+    if ! crds=$(helmfile -f "{{ bootstrap_dir }}/helmfile.d/00-crds.yaml" template -q) || [[ -z "$crds" ]]; then \
         just log fatal "Failed to render CRDs from Helmfile" "stage" "$0"; \
     fi; \
-    if ! echo "$crds" | kubectl diff --filename - &>/dev/null; then \
-        if ! echo "$crds" | kubectl apply --server-side --filename - &>/dev/null; then \
+    if ! echo "$crds" | kubectl diff -f - &>/dev/null; then \
+        if ! echo "$crds" | kubectl apply --server-side -f - &>/dev/null; then \
             just log fatal "Failed to apply helmfile" "stage" "$0"; \
         fi; \
     fi
@@ -88,6 +88,6 @@ crds:
 [doc('Apply Helmfile Apps')]
 apps:
     just log debug "Runnning stage $0 ..."
-    if ! helmfile --file "{{ bootstrap_dir }}/helmfile.d/01-apps.yaml" sync --hide-notes; then \
+    if ! helmfile -f "{{ bootstrap_dir }}/helmfile.d/01-apps.yaml" sync --hide-notes; then \
         just log fatal "Failed to apply helmfile" "stage" "$0"; \
     fi
