@@ -5,6 +5,9 @@ set shell := ['bash', '-eu', '-o', 'pipefail', '-c']
 default:
     just --list kube
 
+browse-pvc namespace pvc:
+    kubectl browse-pvc --namespace {{ namespace }} --image docker.io/library/alpine:latest {{ pvc }}
+
 node-shell node:
     kubectl node-shell -n kube-system -x {{ node }}
 
