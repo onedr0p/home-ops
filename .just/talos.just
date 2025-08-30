@@ -10,9 +10,11 @@ controller := `talosctl config info -o yaml | yq -e '.endpoints[0]'`
 default:
     just --list talos
 
+[doc('Apply Talos config to a node')]
 apply-node node *args:
     just talos render-config "{{ node }}" | talosctl -n "{{ node }}" apply-config -f /dev/stdin {{ args }}
 
+[doc('Download Talos machine image')]
 download-image version schematic:
     gum spin -s line --title "Downloading Talos {{ version }} ..." -- \
     curl -sfL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors \
@@ -20,16 +22,20 @@ download-image version schematic:
         "https://factory.talos.dev/image/{{ schematic }}/{{ version }}/metal-amd64.iso"
     just log info "Downloaded Talos" version "{{ version }}" schematic "{{ schematic }}"
 
-generate-kubeconfig:
+[doc('Generate kubeconfig for Talos cluster')]
+gen-kubeconfig:
     talosctl kubeconfig -n "{{ controller }}" -f --force-context-name main {{ justfile_dir() }}
 
-generate-schematic-id:
-    curl -sX POST --data-binary "@{{ talos_dir }}/schematic.yaml" \
-        "https://factory.talos.dev/schematics" | jq -r '.id'
+[doc('Generate schematic ID from Talos schematic')]
+gen-schematic-id:
+    curl -sX POST -d "@{{ talos_dir }}/schematic.yaml" "https://factory.talos.dev/schematics" | jq -r '.id'
 
+[doc('Reboot a node')]
 reboot-node node:
-    talosctl -n {{ node }} reboot -m powercycle
+    gum confirm "Reboot node {{ node }}?" && \
+        talosctl -n {{ node }} reboot -m powercycle || exit 0
 
+[doc('Render Talos config for a node')]
 render-config node:
     minijinja-cli -D "machinetype=$(just talos machine-type {{ node }})" \
         "{{ talos_dir }}/machineconfig.yaml.j2" | op inject >"{{ temp_dir }}/base.yaml"
@@ -37,16 +43,21 @@ render-config node:
         "{{ talos_dir }}/nodes/{{ node }}.yaml.j2" | op inject >"{{ temp_dir }}/patch.yaml"
     talosctl machineconfig patch "{{ temp_dir }}/base.yaml" -p "@{{ temp_dir }}/patch.yaml"
 
-[confirm]
+[doc('Reset a node')]
 reset-node node:
-    talosctl -n "{{ node }}" reset --graceful=false
+    gum confirm "Reset node {{ node }}?" && \
+        talosctl -n "{{ node }}" reset --graceful=false || exit 0
 
+[doc('Shutdown a node')]
 shutdown-node node:
-    talosctl -n "{{ node }}" shutdown --force
+    gum confirm "Shutdown node {{ node }}?" && \
+        talosctl -n "{{ node }}" shutdown --force || exit 0
 
+[doc('Upgrade Kubernetes version on the cluster')]
 upgrade-k8s version:
     talosctl -n "{{ controller }}" upgrade-k8s --to {{ version }}
 
+[doc('Upgrade Talos version on a node')]
 upgrade-node node:
     talosctl -n "{{ node }}" upgrade -i "$(just talos machine-image)" -m powercycle --timeout=10m
 

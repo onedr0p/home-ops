@@ -12,7 +12,6 @@ mod talos '.just/talos.just'
 default:
     just --list
 
-[positional-arguments]
 [private]
 log lvl msg *args:
     gum log -t rfc3339 -s -l "{{ lvl }}" "{{ msg }}" {{ args }}
