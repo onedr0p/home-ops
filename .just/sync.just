@@ -3,7 +3,7 @@ set shell := ['bash', '-eu', '-o', 'pipefail', '-c']
 
 [private]
 default:
-    just --list sync
+    just -l sync
 
 [doc('Sync ExternalSecrets')]
 es:

@@ -10,7 +10,7 @@ mod talos '.just/talos.just'
 
 [private]
 default:
-    just --list
+    just -l
 
 [private]
 log lvl msg *args:
