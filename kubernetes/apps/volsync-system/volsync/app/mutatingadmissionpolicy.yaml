@@ -27,11 +27,11 @@ spec:
           - jobs
   matchConditions:
     - name: has-volsync-job-name-prefix
-      expression: >
+      expression: >-
         object.metadata.name.startsWith("volsync-src-")
 
     - name: has-volsync-created-by-labels
-      expression: >
+      expression: >-
         object.metadata.labels["app.kubernetes.io/created-by"] == "volsync"
 
   failurePolicy: Fail
@@ -39,7 +39,7 @@ spec:
   mutations:
     - patchType: JSONPatch
       jsonPatch:
-        expression: >
+        expression: >-
           [
 
             JSONPatch{
@@ -85,15 +85,15 @@ spec:
           - jobs
   matchConditions:
     - name: has-volsync-job-name-prefix
-      expression: >
+      expression: >-
         object.metadata.name.startsWith("volsync-")
 
     - name: has-volsync-created-by-labels
-      expression: >
+      expression: >-
         object.metadata.labels["app.kubernetes.io/created-by"] == "volsync"
 
     - name: repository-volume-does-not-exist
-      expression: >
+      expression: >-
         !object.spec.template.spec.volumes.exists(item, item.name == "repository")
 
   failurePolicy: Fail

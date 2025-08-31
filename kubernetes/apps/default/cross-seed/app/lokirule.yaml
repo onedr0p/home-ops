@@ -3,7 +3,7 @@ groups:
   - name: cross-seed
     rules:
       - alert: CrossSeedDatabaseMalformed
-        expr: |
+        expr: |-
           sum by (app) (count_over_time({app="cross-seed"} |~ "(?i)database disk image is malformed"[5m])) > 0
         for: 5m
         annotations:
@@ -13,7 +13,7 @@ groups:
           severity: critical
 
       - alert: CrossSeedFailedToInject
-        expr: |
+        expr: |-
           sum by (app) (count_over_time({app="cross-seed"} |~ "(?i)failed to inject"[5m])) > 0
         for: 5m
         annotations:

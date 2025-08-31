@@ -9,7 +9,7 @@ spec:
     - name: smartctl-exporter.rules
       rules:
         - alert: SmartDeviceHighTemperature
-          expr: |
+          expr: |-
             smartctl_device_temperature{temperature_type="current"} > 65
           for: 5m
           annotations:
@@ -19,7 +19,7 @@ spec:
             severity: critical
 
         - alert: SmartDeviceTestFailed
-          expr: |
+          expr: |-
             (smartctl_device_smart_status != 1 or smartctl_device_status != 1)
           for: 5m
           annotations:
@@ -27,8 +27,9 @@ spec:
               Mounted drive {{ $labels.device }} on device {{ $labels.instance }} did not pass its SMART test
           labels:
             severity: critical
+
         - alert: SmartDeviceCriticalWarning
-          expr: |
+          expr: |-
             smartctl_device_critical_warning != 0
           for: 5m
           annotations:
@@ -37,7 +38,7 @@ spec:
           labels:
             severity: critical
         - alert: SmartDeviceMediaErrors
-          expr: |
+          expr: |-
             smartctl_device_media_errors != 0
           for: 5m
           annotations:
@@ -46,7 +47,7 @@ spec:
           labels:
             severity: critical
         - alert: SmartDeviceAvailableSpareUnderThreadhold
-          expr: |
+          expr: |-
             smartctl_device_available_spare_threshold > smartctl_device_available_spare
           for: 5m
           annotations:
@@ -55,7 +56,7 @@ spec:
           labels:
             severity: critical
         - alert: SmartDeviceInterfaceSlow
-          expr: |
+          expr: |-
             smartctl_device_interface_speed{speed_type="current"} != on(device, instance, namespace, pod) smartctl_device_interface_speed{speed_type="max"}
           annotations:
             summary: >-

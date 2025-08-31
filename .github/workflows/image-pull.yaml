@@ -61,7 +61,7 @@ jobs:
 
       - name: Extract Images
         id: extract
-        run: |
+        run: |-
           echo "${{ matrix.branch }}=$(jq --compact-output '.' images.json)" >> $GITHUB_OUTPUT
 
           echo '## Branch ${{ matrix.branch }} images' >> $GITHUB_STEP_SUMMARY
@@ -79,7 +79,7 @@ jobs:
     steps:
       - name: Diff Images
         id: diff
-        run: |
+        run: |-
           images=$(jq --compact-output --null-input \
               --argjson f1 '${{ needs.extract.outputs.default }}' \
               --argjson f2 '${{ needs.extract.outputs.pull }}' \

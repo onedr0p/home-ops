@@ -3,7 +3,7 @@ groups:
   - name: sonarr
     rules:
       - alert: SonarrDatabaseIsLocked
-        expr: |
+        expr: |-
           sum by (app) (count_over_time({app=~"sonarr"} |~ "(?i)database is locked"[5m])) > 0
         for: 5m
         annotations:
@@ -13,7 +13,7 @@ groups:
           severity: critical
 
       - alert: SonarrDatabaseIsMalformed
-        expr: |
+        expr: |-
           sum by (app) (count_over_time({app=~"sonarr"} |~ "(?i)database disk image is malformed"[5m])) > 0
         for: 5m
         annotations:
