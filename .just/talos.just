@@ -15,12 +15,12 @@ apply-node node *args:
     just talos render-config "{{ node }}" | talosctl -n "{{ node }}" apply-config -f /dev/stdin {{ args }}
 
 [doc('Download Talos machine image')]
-download-image version:
-    export SCHEMATIC="$(just talos gen-schematic-id)"; \
-    just log info "Downloading Talos" version "{{ version }}" schematic "${SCHEMATIC}"; \
-    curl -fL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors \
-        -o "{{ talos_dir }}/talos-{{ version }}-${SCHEMATIC:0:8}.iso" \
-        "https://factory.talos.dev/image/${SCHEMATIC}/{{ version }}/metal-amd64.iso"
+download-image version schematic:
+    gum spin --title "Downloading Talos {{ version }} ..." -- \
+    curl -sfL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors \
+        -o "{{ talos_dir }}/talos-{{ version }}-{{ replace_regex(schematic, '^(.{8}).*', '$1') }}.iso" \
+        "https://factory.talos.dev/image/{{ schematic }}/{{ version }}/metal-amd64.iso"
+    just log info "Downloaded Talos" version "{{ version }}" schematic "{{ schematic }}"
 
 [doc('Generate kubeconfig for Talos cluster')]
 gen-kubeconfig:
