@@ -20,7 +20,7 @@ download-image version:
     just log info "Downloading Talos" version "{{ version }}" schematic "${SCHEMATIC}"; \
     curl -fL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors \
         -o "{{ talos_dir }}/talos-{{ version }}-${SCHEMATIC:0:8}.iso" \
-        "https://factory.talos.dev/image/${SCHEMATIC}/{{ version }}/metal-amd64.iso"; \
+        "https://factory.talos.dev/image/${SCHEMATIC}/{{ version }}/metal-amd64.iso"
 
 [doc('Generate kubeconfig for Talos cluster')]
 gen-kubeconfig:
@@ -39,7 +39,7 @@ reboot-node node:
 render-config node:
     export CONTROLLER="$(just talos machine-controller {{ node }})"; \
     just template "{{ talos_dir }}/machineconfig.yaml.j2" >"{{ temp_dir }}/base.yaml"; \
-    just template "{{ talos_dir }}/nodes/{{ node }}.yaml.j2" >"{{ temp_dir }}/overlay.yaml"; \
+    just template "{{ talos_dir }}/nodes/{{ node }}.yaml.j2" >"{{ temp_dir }}/overlay.yaml"
     talosctl machineconfig patch "{{ temp_dir }}/base.yaml" -p "@{{ temp_dir }}/overlay.yaml"
 
 [doc('Reset a node')]
