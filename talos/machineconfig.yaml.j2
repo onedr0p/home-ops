@@ -3,7 +3,7 @@ version: v1alpha1
 machine:
   ca:
     crt: op://kubernetes/talos/MACHINE_CA_CRT
-    {% if machinetype == 'controlplane' %}
+    {% if ENV.CONTROLLER %}
     key: op://kubernetes/talos/MACHINE_CA_KEY
     {% endif %}
   certSANs:
@@ -19,7 +19,7 @@ machine:
     kubePrism:
       enabled: true
       port: 7445
-    {% if machinetype == 'controlplane' %}
+    {% if ENV.CONTROLLER %}
     kubernetesTalosAPIAccess:
       allowedKubernetesNamespaces:
         - actions-runner-system
@@ -103,7 +103,7 @@ machine:
 cluster:
   ca:
     crt: op://kubernetes/talos/CLUSTER_CA_CRT
-    {% if machinetype == 'controlplane' %}
+    {% if ENV.CONTROLLER %}
     key: op://kubernetes/talos/CLUSTER_CA_KEY
     {% endif %}
   clusterName: main
@@ -120,7 +120,7 @@ cluster:
       - 10.43.0.0/16
   secret: op://kubernetes/talos/CLUSTER_SECRET
   token: op://kubernetes/talos/CLUSTER_TOKEN
-  {% if machinetype == 'controlplane' %}
+  {% if ENV.CONTROLLER %}
   aggregatorCA:
     crt: op://kubernetes/talos/CLUSTER_AGGREGATORCA_CRT
     key: op://kubernetes/talos/CLUSTER_AGGREGATORCA_KEY

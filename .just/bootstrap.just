@@ -64,7 +64,7 @@ namespaces:
 [doc('Apply Kubernetes resources')]
 resources:
     just log debug "Running stage $0 ..."
-    if ! rs=$(minijinja-cli "{{ bootstrap_dir }}/resources.yaml.j2" | op inject) || [[ -z "$rs" ]]; then \
+    if ! rs=$(just template "{{ bootstrap_dir }}/resources.yaml.j2") || [[ -z "$rs" ]]; then \
         just log fatal "Failed to render resources"; \
     fi; \
     if ! echo "$rs" | kubectl diff -f - &>/dev/null; then \

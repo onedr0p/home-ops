@@ -15,12 +15,12 @@ apply-node node *args:
     just talos render-config "{{ node }}" | talosctl -n "{{ node }}" apply-config -f /dev/stdin {{ args }}
 
 [doc('Download Talos machine image')]
-download-image version schematic:
-    gum spin -s line --title "Downloading Talos {{ version }} ..." -- \
-    curl -sfL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors \
-        -o "{{ talos_dir }}/talos-{{ version }}-{{ replace_regex(schematic, '^(.{8}).*', '$1') }}.iso" \
-        "https://factory.talos.dev/image/{{ schematic }}/{{ version }}/metal-amd64.iso"
-    just log info "Downloaded Talos" version "{{ version }}" schematic "{{ schematic }}"
+download-image version:
+    export SCHEMATIC="$(just talos gen-schematic-id)"; \
+    just log info "Downloading Talos" version "{{ version }}" schematic "${SCHEMATIC}"; \
+    curl -fL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors \
+        -o "{{ talos_dir }}/talos-{{ version }}-${SCHEMATIC:0:8}.iso" \
+        "https://factory.talos.dev/image/${SCHEMATIC}/{{ version }}/metal-amd64.iso"; \
 
 [doc('Generate kubeconfig for Talos cluster')]
 gen-kubeconfig:
@@ -28,7 +28,7 @@ gen-kubeconfig:
 
 [doc('Generate schematic ID from Talos schematic')]
 gen-schematic-id:
-    curl -sX POST -d "@{{ talos_dir }}/schematic.yaml" "https://factory.talos.dev/schematics" | jq -r '.id'
+    curl -sX POST --data-binary "@{{ talos_dir }}/schematic.yaml" "https://factory.talos.dev/schematics" | jq -r '.id'
 
 [doc('Reboot a node')]
 reboot-node node:
@@ -37,11 +37,10 @@ reboot-node node:
 
 [doc('Render Talos config for a node')]
 render-config node:
-    minijinja-cli -D "machinetype=$(just talos machine-type {{ node }})" \
-        "{{ talos_dir }}/machineconfig.yaml.j2" | op inject >"{{ temp_dir }}/base.yaml"
-    minijinja-cli -D "machinetype=$(just talos machine-type {{ node }})" \
-        "{{ talos_dir }}/nodes/{{ node }}.yaml.j2" | op inject >"{{ temp_dir }}/patch.yaml"
-    talosctl machineconfig patch "{{ temp_dir }}/base.yaml" -p "@{{ temp_dir }}/patch.yaml"
+    export CONTROLLER="$(just talos machine-controller {{ node }})"; \
+    just template "{{ talos_dir }}/machineconfig.yaml.j2" >"{{ temp_dir }}/base.yaml"; \
+    just template "{{ talos_dir }}/nodes/{{ node }}.yaml.j2" >"{{ temp_dir }}/overlay.yaml"; \
+    talosctl machineconfig patch "{{ temp_dir }}/base.yaml" -p "@{{ temp_dir }}/overlay.yaml"
 
 [doc('Reset a node')]
 reset-node node:
@@ -62,9 +61,9 @@ upgrade-node node:
     talosctl -n "{{ node }}" upgrade -i "$(just talos machine-image)" -m powercycle --timeout=10m
 
 [private]
-machine-type node:
-    minijinja-cli "{{ talos_dir }}/nodes/{{ node }}.yaml.j2" | yq -e '.machine.type // ""'
+machine-controller node:
+    just template "{{ talos_dir }}/nodes/{{ node }}.yaml.j2" | yq -e '(.machine.type == "controlplane") // ""'
 
 [private]
 machine-image:
-    minijinja-cli "{{ talos_dir }}/machineconfig.yaml.j2" | yq -e '.machine.install.image // ""'
+    just template "{{ talos_dir }}/machineconfig.yaml.j2" | yq -e '.machine.install.image // ""'
