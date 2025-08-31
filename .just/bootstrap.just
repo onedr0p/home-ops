@@ -27,7 +27,7 @@ talos:
 kubernetes:
     just log debug "Running stage $0 ..."
     until op=$(talosctl -n "{{ controller }}" bootstrap 2>&1 || true) && [[ "$op" == *"AlreadyExists"* ]]; do \
-        just log info "Kubernetes bootstrap in progress. Waiting 5 seconds..." "stage" "$0"; \
+        just log info "Kubernetes bootstrap in progress. Retrying in 5 seconds..." "stage" "$0"; \
         sleep 5; \
     done
 

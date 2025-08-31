@@ -6,8 +6,8 @@ default:
     just -l kube
 
 [doc('Browse a PVC')]
-browse-pvc namespace pvc:
-    kubectl browse-pvc -n {{ namespace }} -i mirror.gcr.io/alpine:latest {{ pvc }}
+browse-pvc namespace claim:
+    kubectl browse-pvc -n {{ namespace }} -i mirror.gcr.io/alpine:latest {{ claim }}
 
 [doc('Open a shell on a node')]
 node-shell node:
