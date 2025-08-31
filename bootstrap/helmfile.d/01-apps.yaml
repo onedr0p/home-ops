@@ -12,14 +12,14 @@ releases:
     chart: oci://ghcr.io/home-operations/charts-mirror/cilium
     version: 1.18.1
     values:
-      - ../values.yaml.gotmpl
+      - ./templates/values.yaml.gotmpl
 
   - name: coredns
     namespace: kube-system
     chart: oci://ghcr.io/coredns/charts/coredns
     version: 1.43.3
     values:
-      - ../values.yaml.gotmpl
+      - ./templates/values.yaml.gotmpl
     needs:
       - kube-system/cilium
 
@@ -28,7 +28,7 @@ releases:
     chart: oci://ghcr.io/spegel-org/helm-charts/spegel
     version: 0.3.0
     values:
-      - ../values.yaml.gotmpl
+      - ./templates/values.yaml.gotmpl
     needs:
       - kube-system/coredns
 
@@ -37,7 +37,7 @@ releases:
     chart: oci://quay.io/jetstack/charts/cert-manager
     version: v1.18.2
     values:
-      - ../values.yaml.gotmpl
+      - ./templates/values.yaml.gotmpl
     needs:
       - kube-system/spegel
 
@@ -46,7 +46,7 @@ releases:
     chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
     version: 0.28.0
     values:
-      - ../values.yaml.gotmpl
+      - ./templates/values.yaml.gotmpl
     needs:
       - cert-manager/cert-manager
 
@@ -55,6 +55,6 @@ releases:
     chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
     version: 0.28.0
     values:
-      - ../values.yaml.gotmpl
+      - ./templates/values.yaml.gotmpl
     needs:
       - flux-system/flux-operator
