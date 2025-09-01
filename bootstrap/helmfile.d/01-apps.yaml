@@ -10,9 +10,9 @@ releases:
   - chart: oci://ghcr.io/home-operations/charts-mirror/cilium
     name: cilium
     namespace: kube-system
-    values:
+    values: &values
       - ./templates/values.yaml.gotmpl
-    version: |-
+    version: &version |-
       {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
 
   - chart: oci://ghcr.io/coredns/charts/coredns
@@ -20,47 +20,37 @@ releases:
     namespace: kube-system
     needs:
       - kube-system/cilium
-    values:
-      - ./templates/values.yaml.gotmpl
-    version: |-
-      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
+    values: *values
+    version: *version
 
   - chart: oci://ghcr.io/spegel-org/helm-charts/spegel
     name: spegel
     namespace: kube-system
     needs:
       - kube-system/coredns
-    values:
-      - ./templates/values.yaml.gotmpl
-    version: |-
-      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
+    values: *values
+    version: *version
 
   - chart: oci://quay.io/jetstack/charts/cert-manager
     name: cert-manager
     namespace: cert-manager
     needs:
       - kube-system/spegel
-    values:
-      - ./templates/values.yaml.gotmpl
-    version: |-
-      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
+    values: *values
+    version: *version
 
   - chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
     name: flux-operator
     namespace: flux-system
     needs:
       - cert-manager/cert-manager
-    values:
-      - ./templates/values.yaml.gotmpl
-    version: |-
-      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
+    values: *values
+    version: *version
 
   - chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
     name: flux-instance
     namespace: flux-system
     needs:
       - flux-system/flux-operator
-    values:
-      - ./templates/values.yaml.gotmpl
-    version: |-
-      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
+    values: *values
+    version: *version

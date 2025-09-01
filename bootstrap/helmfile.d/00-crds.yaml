@@ -17,29 +17,25 @@ releases:
   - chart: oci://ghcr.io/home-operations/charts-mirror/external-dns
     name: cloudflare-dns
     namespace: network
-    version: |-
+    version: &version |-
       {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
 
   - chart: oci://ghcr.io/external-secrets/charts/external-secrets
     name: external-secrets
     namespace: external-secrets
-    version: |-
-      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
+    version: *version
 
   - chart: oci://ghcr.io/wiremind/wiremind-helm-charts/gateway-api-crds
     name: gateway-api-crds
     namespace: kube-system
-    version: |-
-      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
+    version: *version
 
   - chart: oci://ghcr.io/home-operations/charts-mirror/keda
     name: keda
     namespace: observability
-    version: |-
-      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
+    version: *version
 
   - chart: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
     name: kube-prometheus-stack
     namespace: observability
-    version: |-
-      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
+    version: *version
