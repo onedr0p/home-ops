@@ -14,27 +14,32 @@ helmDefaults:
     - yq ea -e 'select(.kind == "CustomResourceDefinition")'
 
 releases:
-  - name: cloudflare-dns
+  - chart: oci://ghcr.io/home-operations/charts-mirror/external-dns
+    name: cloudflare-dns
     namespace: network
-    chart: oci://ghcr.io/home-operations/charts-mirror/external-dns
-    version: 1.18.0
+    version: |-
+      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
 
-  - name: external-secrets
+  - chart: oci://ghcr.io/external-secrets/charts/external-secrets
+    name: external-secrets
     namespace: external-secrets
-    chart: oci://ghcr.io/external-secrets/charts/external-secrets
-    version: 0.19.2
+    version: |-
+      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
 
-  - name: gateway-api-crds
+  - chart: oci://ghcr.io/wiremind/wiremind-helm-charts/gateway-api-crds
+    name: gateway-api-crds
     namespace: kube-system
-    chart: oci://ghcr.io/wiremind/wiremind-helm-charts/gateway-api-crds
-    version: 1.3.0
+    version: |-
+      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
 
-  - name: keda
+  - chart: oci://ghcr.io/home-operations/charts-mirror/keda
+    name: keda
     namespace: observability
-    chart: oci://ghcr.io/home-operations/charts-mirror/keda
-    version: 2.17.2
+    version: |-
+      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
 
-  - name: kube-prometheus-stack
+  - chart: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
+    name: kube-prometheus-stack
     namespace: observability
-    chart: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
-    version: 77.1.3
+    version: |-
+      {{ (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name))).spec.ref.tag | toYaml }}
