@@ -3,7 +3,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: httpsredirect
+  name: http-redirect
   annotations:
     external-dns.alpha.kubernetes.io/controller: none
 spec:
@@ -11,12 +11,11 @@ spec:
     - name: internal
       namespace: kube-system
       sectionName: http
-    - name: external
-      namespace: kube-system
-      sectionName: http
+  hostnames:
+    - "*.turbo.ac"
   rules:
     - filters:
-        - requestRedirect:
+        - type: RequestRedirect
+          requestRedirect:
             scheme: https
             statusCode: 301
-          type: RequestRedirect
