@@ -11,7 +11,8 @@ browse-pvc namespace claim:
 
 [doc('Open a shell on a node')]
 node-shell node:
-    kubectl node-shell -n kube-system --image mirror.gcr.io/alpine:latest -x {{ node }}
+    kubectl debug node/{{ node }} -n default -it --image="mirror.gcr.io/alpine:latest" --profile sysadmin
+    kubectl delete pod -n default -l app.kubernetes.io/managed-by=kubectl-debug
 
 [doc('Prune pods in Failed, Pending, or Succeeded state')]
 prune-pods:
