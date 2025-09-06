@@ -3,7 +3,7 @@
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: EnvoyProxy
 metadata:
-  name: config
+  name: envoy-external
 spec:
   telemetry:
     metrics:
@@ -20,10 +20,9 @@ spec:
         container:
           resources:
             requests:
-              cpu: 150m
-              memory: 640Mi
+              cpu: 100m
             limits:
-              cpu: 500m
               memory: 1Gi
       envoyService:
         externalTrafficPolicy: Cluster
+        name: envoy-external
