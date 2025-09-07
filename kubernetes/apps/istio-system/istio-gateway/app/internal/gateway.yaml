@@ -3,14 +3,14 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: external
+  name: internal
   annotations:
-    external-dns.alpha.kubernetes.io/target: &hostname external.turbo.ac
+    external-dns.alpha.kubernetes.io/target: &hostname internal.turbo.ac
 spec:
-  gatewayClassName: cilium
+  gatewayClassName: istio
   addresses:
     - type: IPAddress
-      value: 192.168.42.126
+      value: 192.168.42.121
   infrastructure:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: *hostname
@@ -20,7 +20,7 @@ spec:
       port: 80
       allowedRoutes:
         namespaces:
-          from: Same
+          from: All
     - name: https
       protocol: HTTPS
       port: 443
