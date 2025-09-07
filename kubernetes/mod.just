@@ -1,9 +1,16 @@
 set quiet := true
 set shell := ['bash', '-euo', 'pipefail', '-c']
 
+kubernetes_dir := justfile_dir() + '/kubernetes'
+
 [private]
 default:
     just -l kube
+
+[doc('Apply local Flux Kustomization')]
+apply-ks namespace *args:
+    flux-local build ks --all-namespaces --path "{{ kubernetes_dir }}/apps/{{ namespace }}" {{ args }} \
+        | kubectl apply --server-side --field-manager kustomize-controller -f -
 
 [doc('Browse a PVC')]
 browse-pvc namespace claim:
