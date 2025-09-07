@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: envoy-gateway-metrics
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gateway-helm
+  namespaceSelector:
+    matchNames:
+      - network
+  endpoints:
+    - port: http
+      path: /metrics
+      honorLabels: true
