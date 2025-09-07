@@ -12,27 +12,13 @@ spec:
     type: Kubernetes
     kubernetes:
       envoyDeployment:
+        replicas: 2
         container:
           resources:
             requests:
               cpu: 100m
             limits:
               memory: 1Gi
-      envoyHpa:
-        minReplicas: 1
-        maxReplicas: 2
-        metrics:
-          - type: Resource
-            resource:
-              name: cpu
-              target:
-                averageUtilization: 50
-                type: Utilization
-        behavior:
-          scaleDown:
-            stabilizationWindowSeconds: 300
-          scaleUp:
-            stabilizationWindowSeconds: 300
       envoyService:
         name: envoy-external
         externalTrafficPolicy: Cluster
