@@ -3,12 +3,12 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: sabnzbd
+  name: qui
 spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: sabnzbd
+    name: qui
   install:
     remediation:
       retries: -1
@@ -18,18 +18,18 @@ spec:
       retries: 3
   values:
     controllers:
-      sabnzbd:
+      qui:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/home-operations/sabnzbd
-              tag: 4.5.3@sha256:ecb57bd6257fbfbd9aee70d8ef3df8814b7270ae793fd1f44219ae73cacd519a
+              repository: ghcr.io/autobrr/qui
+              tag: v0.3.0@sha256:a347580c19e8569b9398502cb8a5e6a6726c360915d028b32b50e17350fb168e
             env:
-              CROSS_SEED_HOST: cross-seed.default.svc.cluster.local
-              SABNZBD__PORT: &port 80
-              SABNZBD__HOST_WHITELIST_ENTRIES: sabnzbd.turbo.ac
+              QUI__HOST: 0.0.0.0
+              QUI__PORT: &port 80
+              QUI__LOG_LEVEL: INFO
               TZ: America/New_York
             envFrom:
               - secretRef:
@@ -40,22 +40,22 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /api?mode=version
+                    path: /health
                     port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: {drop: ["ALL"]}
-            resources:
-              requests:
-                cpu: 100m
-              limits:
-                memory: 12Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -74,30 +74,8 @@ spec:
           - "{{ .Release.Name }}.turbo.ac"
         parentRefs:
           - name: internal
-            namespace: kube-system
+            namespace: istio-system
             sectionName: https
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
-      media:
-        type: nfs
-        server: expanse.internal
-        path: /mnt/eros/Media
-        globalMounts:
-          - path: /media/Downloads/sabnzbd
-            subPath: Downloads/sabnzbd
-      scripts:
-        type: configMap
-        name: "{{ .Release.Name }}-scripts"
-        defaultMode: 0775
-        globalMounts:
-          - readOnly: true
-      tmpfs:
-        type: emptyDir
-        advancedMounts:
-          sabnzbd:
-            app:
-              - path: /config/logs
-                subPath: logs
-              - path: /tmp
-                subPath: tmp
