@@ -3,16 +3,21 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: istio-base
+  name: envoy-gateway
 spec:
-  interval: 1h
+  interval: 5m
   chartRef:
     kind: OCIRepository
-    name: istio-base
+    name: envoy-gateway
   install:
+    crds: CreateReplace
     remediation:
       retries: -1
   upgrade:
     cleanupOnFail: true
+    crds: CreateReplace
     remediation:
       retries: 3
+  values:
+    global:
+      imageRegistry: mirror.gcr.io
