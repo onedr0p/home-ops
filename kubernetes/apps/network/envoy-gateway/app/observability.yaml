@@ -17,3 +17,21 @@ spec:
     matchLabels:
       app.kubernetes.io/component: proxy
       app.kubernetes.io/name: envoy
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: envoy-gateway
+spec:
+  endpoints:
+    - port: metrics
+      path: /metrics
+      honorLabels: true
+  jobLabel: envoy-gateway
+  namespaceSelector:
+    matchNames:
+      - network
+  selector:
+    matchLabels:
+      control-plane: envoy-gateway
