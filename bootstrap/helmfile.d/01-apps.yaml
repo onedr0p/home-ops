@@ -13,6 +13,18 @@ releases:
     version: 1.18.1
     values:
       - ./templates/values.yaml.gotmpl
+    hooks:
+      - # Advertise Kube API VIP
+        events:
+          - 'postsync'
+        command: kubectl
+        args:
+          - apply
+          - --server-side
+          - --namespace=kube-system
+          - --field-manager=kustomize-controller
+          - --filename=../../kubernetes/apps/kube-system/cilium/networking.yaml
+        showlogs: true
 
   - name: coredns
     namespace: kube-system
