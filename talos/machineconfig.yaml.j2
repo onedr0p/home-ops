@@ -70,11 +70,18 @@ machine:
         - 192.168.42.0/24
   network:
     interfaces:
-      - deviceSelector:
-          hardwareAddr: 00:30:93:12:*
-          driver: atlantic
-        mtu: 9000
+      - interface: bond0
+        bond:
+          deviceSelectors:
+            - hardwareAddr: 00:30:93:12:*
+              driver: atlantic
+          mode: active-backup
         dhcp: true
+        vlans:
+          - # VPN
+            vlanId: 90
+            dhcp: false
+            mtu: 9000
   nodeLabels:
     intel.feature.node.kubernetes.io/gpu: "true"
     topology.kubernetes.io/region: main
