@@ -1,0 +1,104 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: multus
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: multus
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    controllers:
+      multus:
+        type: daemonset
+        initContainers:
+          cni-plugins:
+            image:
+              repository: ghcr.io/home-operations/cni-plugins
+              tag: 1.8.0@sha256:9353f70c1d202437a492935e9c053f91c352e69c8fa683ef039ae550ac4a27f5
+        containers:
+          multus:
+            image:
+              repository: ghcr.io/k8snetworkplumbingwg/multus-cni
+              tag: v4.2.2@sha256:7591a27cd28eeafd6dfb197618b06dabd9446a7026164b9b21fee67adc925761
+            args:
+              - --cleanup-config-on-exit
+              - --multus-cni-conf-dir=/tmp
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                add:
+                  - NET_ADMIN
+                drop:
+                  - ALL
+    defaultPodOptions:
+      hostNetwork: true
+      priorityClassName: system-node-critical
+      tolerations:
+        - key: CriticalAddonsOnly
+          operator: Exists
+    rbac:
+      roles:
+        multus:
+          type: ClusterRole
+          rules:
+            - apiGroups:
+                - k8s.cni.cncf.io
+              resources:
+                - "*"
+              verbs:
+                - "*"
+            - apiGroups:
+                - ""
+              resources:
+                - pods
+                - pods/status
+              verbs:
+                - get
+                - update
+            - apiGroups:
+                - ""
+                - events.k8s.io
+              resources:
+                - events
+              verbs:
+                - create
+                - patch
+                - update
+      bindings:
+        multus:
+          type: ClusterRoleBinding
+          roleRef:
+            identifier: multus
+          subjects:
+            - identifier: multus
+    serviceAccount:
+      multus: {}
+    persistence:
+      etc-cni-net-d:
+        type: hostPath
+        hostPath: /etc/cni/net.d
+        globalMounts:
+          - path: /host/etc/cni/net.d
+      opt-cni-bin:
+        type: hostPath
+        hostPath: /opt/cni/bin
+        globalMounts:
+          - path: /host/opt/cni/bin
+      tmp:
+        type: emptyDir

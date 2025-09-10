@@ -1,0 +1,27 @@
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: multus-vpn
+spec:
+  config: |-
+    {
+      "cniVersion": "0.3.1",
+      "name": "multus-vpn",
+      "plugins": [
+        {
+          "type": "macvlan",
+          "master": "bond0.90",
+          "mode": "bridge",
+          "ipam": {
+            "type": "static",
+            "routes": [
+              {"dst": "0.0.0.0/0", "gw": "192.168.90.1"}
+            ]
+          }
+        },
+        {
+          "type": "sbr"
+        }
+      ]
+    }
