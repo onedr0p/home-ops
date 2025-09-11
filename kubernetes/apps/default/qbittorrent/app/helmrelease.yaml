@@ -29,7 +29,7 @@ spec:
             env:
               TZ: America/New_York
               QBT_WEBUI_PORT: &port 80
-              QBT_TORRENTING_PORT: &torrentPort 50413
+              QBT_TORRENTING_PORT: 50469
             probes:
               liveness: &probes
                 enabled: true
@@ -58,6 +58,13 @@ spec:
               limits:
                 memory: 18Gi
     defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "multus-vpn",
+            "namespace": "network",
+            "ips": ["192.168.90.10/24"]
+          }]
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -71,14 +78,6 @@ spec:
         ports:
           http:
             port: *port
-      bittorrent:
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 192.168.42.122
-        ports:
-          bittorrent-tcp:
-            port: *torrentPort
-            protocol: TCP
     route:
       app:
         hostnames:
