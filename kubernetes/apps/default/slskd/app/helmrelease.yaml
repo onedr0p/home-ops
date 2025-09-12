@@ -33,7 +33,7 @@ spec:
               SLSKD_HTTP_PORT: &port 80
               SLSKD_NO_AUTH: true
               SLSKD_NO_HTTPS: true
-              SLSKD_SLSK_LISTEN_PORT: &soulseekPort 50300
+              SLSKD_SLSK_LISTEN_PORT: 50429
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}-secret"
@@ -61,6 +61,13 @@ spec:
               limits:
                 memory: 1Gi
     defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "vpn",
+            "namespace": "network",
+            "ips": ["192.168.90.12/24"]
+          }]
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -69,19 +76,9 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        forceRename: "{{ .Release.Name }}"
-        primary: true
         ports:
           http:
             port: *port
-      soulseek:
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 192.168.42.127
-        ports:
-          soulseek-tcp:
-            port: *soulseekPort
-            protocol: TCP
     route:
       app:
         hostnames:
