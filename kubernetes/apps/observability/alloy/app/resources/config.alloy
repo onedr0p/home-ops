@@ -8,6 +8,10 @@ logging {
 // It watches cluster state and ensures targets are continually synced with what is currently running in your cluster
 discovery.kubernetes "pod" {
 	role = "pod"
+  selectors {
+    role  = "pod"
+    field = "spec.nodeName=" + coalesce(sys.env("NODE_NAME"), constants.hostname)
+  }
 }
 
 discovery.kubernetes "service" {
