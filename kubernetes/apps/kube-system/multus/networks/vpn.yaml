@@ -1,0 +1,56 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/k8s.cni.cncf.io/networkattachmentdefinition_v1.json
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: vpn
+spec:
+  config: |-
+    {
+      "cniVersion": "0.3.1",
+      "name": "vpn",
+      "plugins": [
+        {
+          "type": "macvlan",
+          "master": "bond0.90",
+          "mode": "bridge",
+          "ipam": {
+            "type": "static",
+            "routes": [
+              {"dst": "0.0.0.0/5"},
+              {"dst": "8.0.0.0/7"},
+              {"dst": "11.0.0.0/8"},
+              {"dst": "12.0.0.0/6"},
+              {"dst": "16.0.0.0/4"},
+              {"dst": "32.0.0.0/3"},
+              {"dst": "64.0.0.0/2"},
+              {"dst": "128.0.0.0/3"},
+              {"dst": "160.0.0.0/5"},
+              {"dst": "168.0.0.0/6"},
+              {"dst": "172.0.0.0/12"},
+              {"dst": "172.32.0.0/11"},
+              {"dst": "172.64.0.0/10"},
+              {"dst": "172.128.0.0/9"},
+              {"dst": "173.0.0.0/8"},
+              {"dst": "174.0.0.0/7"},
+              {"dst": "176.0.0.0/4"},
+              {"dst": "192.0.0.0/9"},
+              {"dst": "192.128.0.0/11"},
+              {"dst": "192.160.0.0/13"},
+              {"dst": "192.169.0.0/16"},
+              {"dst": "192.170.0.0/15"},
+              {"dst": "192.172.0.0/14"},
+              {"dst": "192.176.0.0/12"},
+              {"dst": "192.192.0.0/10"},
+              {"dst": "193.0.0.0/8"},
+              {"dst": "194.0.0.0/7"},
+              {"dst": "196.0.0.0/6"},
+              {"dst": "200.0.0.0/5"},
+              {"dst": "208.0.0.0/4"},
+              {"dst": "224.0.0.0/3"}
+            ],
+            "gateway": "192.168.90.1"
+          }
+        }
+      ]
+    }
