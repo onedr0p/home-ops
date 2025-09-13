@@ -8,7 +8,7 @@ controller := `talosctl config info -o yaml | yq -e '.endpoints[0]'`
 nodes := `talosctl config info -o yaml | yq -e '.nodes | join (" ")'`
 
 [private]
-default: talos kubernetes controller-kubeconfig wait namespaces resources crds apps cilium-kubeconfig
+default: talos k8s (kubeconfig "node") wait namespaces resources crds apps kubeconfig
 
 [doc('Install Talos')]
 talos:
@@ -24,21 +24,23 @@ talos:
     done
 
 [doc('Install Kubernetes')]
-kubernetes:
+k8s:
     just log info "Running stage..." "stage" "$0"
     until op=$(talosctl -n "{{ controller }}" bootstrap 2>&1 || true) && [[ "$op" == *"AlreadyExists"* ]]; do \
         just log info "Kubernetes bootstrap in progress. Retrying in 5 seconds..." "stage" "$0"; \
         sleep 5; \
     done
 
-[doc('Fetch kubeconfig with the controller endpoint')]
-controller-kubeconfig:
+[doc('Fetch kubeconfig')]
+kubeconfig lb="cilium":
     just log info "Running stage..." "stage" "$0"
-    if ! just talos gen-kubeconfig; then \
+    if ! talosctl kubeconfig -n "{{ controller }}" -f --force-context-name main {{ justfile_dir() }}; then \
         just log fatal "Failed to fetch kubeconfig" "stage" "$0"; \
     fi
-    if ! kubectl config set-cluster main --server "https://{{ controller }}:6443"; then \
-        just log fatal "Failed to set kubectl cluster server address" "stage" "$0"; \
+    if [[ "{{ lb }}" != "cilium" ]]; then \
+        if ! kubectl config set-cluster main --server "https://{{ controller }}:6443"; then \
+            just log fatal "Failed to set kubectl cluster server address" "stage" "$0"; \
+        fi; \
     fi
 
 [doc('Wait for nodes to be not-ready')]
@@ -55,7 +57,7 @@ wait:
 namespaces:
     just log info "Running stage..." "stage" "$0"
     find "{{ kubernetes_dir }}/apps" -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | while IFS= read -r ns; do \
-        if ! kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply --server-side -f -; then \
+        if ! kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply --server-side --field-manager flux-client-side-apply -f -; then \
             just log fatal "Failed to apply namespace" "stage" "$0" "namespace" "$ns"; \
         fi; \
     done
@@ -63,14 +65,14 @@ namespaces:
 [doc('Apply Kubernetes resources')]
 resources:
     just log info "Running stage..." "stage" "$0"
-    if ! just template "{{ bootstrap_dir }}/resources.yaml.j2" | kubectl apply --server-side -f -; then \
+    if ! just template "{{ bootstrap_dir }}/resources.yaml.j2" | kubectl apply --server-side --field-manager flux-client-side-apply -f -; then \
         just log fatal "Failed to apply resources" "stage" "$0"; \
     fi;
 
 [doc('Apply Helmfile CRDs')]
 crds:
     just log info "Running stage..." "stage" "$0"
-    if ! helmfile -f "{{ bootstrap_dir }}/helmfile.d/00-crds.yaml" template -q | kubectl apply --server-side -f -; then \
+    if ! helmfile -f "{{ bootstrap_dir }}/helmfile.d/00-crds.yaml" template -q | kubectl apply --server-side --field-manager flux-client-side-apply -f -; then \
         just log fatal "Failed to apply crds" "stage" "$0"; \
     fi;
 
@@ -79,11 +81,4 @@ apps:
     just log info "Running stage..." "stage" "$0"
     if ! helmfile -f "{{ bootstrap_dir }}/helmfile.d/01-apps.yaml" sync --hide-notes; then \
         just log fatal "Failed to sync helmfile" "stage" "$0"; \
-    fi
-
-[doc('Fetch kubeconfig with the cilium endpoint')]
-cilium-kubeconfig:
-    just log info "Running stage..." "stage" "$0"
-    if ! just talos gen-kubeconfig; then \
-        just log fatal "Failed to fetch kubeconfig" "stage" "$0"; \
     fi
