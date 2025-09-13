@@ -3,12 +3,12 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: slskd
+  name: watchstate
 spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: slskd
+    name: watchstate
   install:
     remediation:
       retries: -1
@@ -18,33 +18,20 @@ spec:
       retries: 3
   values:
     controllers:
-      slskd:
-        annotations:
-          reloader.stakater.com/auto: "true"
+      watchstate:
         containers:
           app:
             image:
-              repository: ghcr.io/slskd/slskd
-              tag: 0.23.2@sha256:28df5325f301537ea8669b2ef90112a30cc9f2efd3eb714c9a778460b5dc6288
-            env:
-              DOTNET_BUNDLE_EXTRACT_BASE_DIR: /tmp/.net
-              TZ: America/New_York
-              SLSKD_APP_DIR: /config
-              SLSKD_HTTP_PORT: &port 80
-              SLSKD_NO_AUTH: true
-              SLSKD_NO_HTTPS: true
-              SLSKD_SLSK_LISTEN_PORT: 50429
-            envFrom:
-              - secretRef:
-                  name: "{{ .Release.Name }}-secret"
+              repository: ghcr.io/arabcoders/watchstate
+              tag: v0.4.1@sha256:4b49160a826eb9519c599f8bfadc7e33d11b07fff03ac403b5d3c69cc98a911c
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /health
-                    port: *port
+                    path: /v1/api/system/healthcheck
+                    port: &port 8080
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
@@ -57,18 +44,9 @@ spec:
             resources:
               requests:
                 cpu: 10m
-                memory: 128Mi
               limits:
-                memory: 1Gi
+                memory: 2Gi
     defaultPodOptions:
-      annotations:
-        k8s.v1.cni.cncf.io/networks: |-
-          [{
-            "name": "vpn",
-            "namespace": "kube-system",
-            "ips": ["192.168.90.12/24"],
-            "mac": "c6:58:f2:a7:62:ce"
-          }]
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -88,32 +66,13 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
-      config-file:
-        type: configMap
-        name: "{{ .Release.Name }}-configmap"
-        defaultMode: 0775
-        globalMounts:
-          - path: /config/slskd.yml
-            subPath: slskd.yml
-            readOnly: true
-      media:
-        type: nfs
-        server: expanse.internal
-        path: /mnt/eros/Media
-        globalMounts:
-          - path: /media/Downloads/soulseek
-            subPath: Downloads/soulseek
       tmpfs:
         type: emptyDir
         advancedMounts:
-          slskd:
+          watchstate:
             app:
               - path: /tmp
                 subPath: tmp
