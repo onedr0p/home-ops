@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/probe_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: vpn-icmp-external
+spec:
+  module: icmp
+  prober:
+    url: blackbox-exporter-vpn.observability.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      static:
+        - 1.1.1.1
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/probe_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: vpn-http-external
+spec:
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-vpn.observability.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      static:
+        - https://one.one.one.one

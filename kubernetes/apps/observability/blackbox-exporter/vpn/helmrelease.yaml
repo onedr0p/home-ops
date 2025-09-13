@@ -3,12 +3,12 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: blackbox-exporter
+  name: blackbox-exporter-vpn
 spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: blackbox-exporter
+    name: blackbox-exporter-vpn
   install:
     remediation:
       retries: -1
@@ -17,7 +17,17 @@ spec:
     remediation:
       retries: 3
   values:
-    fullnameOverride: blackbox-exporter
+    fullnameOverride: blackbox-exporter-vpn
+    strategy:
+      type: Recreate
+    podAnnotations:
+      k8s.v1.cni.cncf.io/networks: |-
+        [{
+          "name": "vpn",
+          "namespace": "kube-system",
+          "ips": ["192.168.90.13/24"],
+          "mac": "3e:d0:83:c0:8e:13"
+        }]
     securityContext:
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
@@ -51,7 +61,7 @@ spec:
     prometheusRule:
       enabled: true
       rules:
-        - alert: BlackboxProbeFailed
+        - alert: VPNBlackboxProbeFailed
           expr: |-
             probe_success == 0
           for: 15m
@@ -60,3 +70,31 @@ spec:
           annotations:
             summary: |-
               The host {{ $labels.target }} is currently unreachable
+
+        - alert: VPNICMPProbeDown
+          expr: |-
+            probe_success{job="vpn-icmp-external"} == 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: |-
+              ICMP probe to {{ $labels.target }} via the VPN has been failing for more than 15 minutes
+
+        - alert: VPNHTTPProbeDown
+          expr: probe_success{job="vpn-http-external"} == 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: |-
+              HTTP probe to {{ $labels.target }} via the VPN has been failing for more than 15 minutes
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: blackbox-exporter-vpn
+            patch: |-
+              - op: remove
+                path: /spec/strategy/rollingUpdate
