@@ -81,10 +81,10 @@ spec:
         existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /config
-      config-cache:
-        existingClaim: "{{ .Release.Name }}-cache"
+      config-metadata:
+        existingClaim: "{{ .Release.Name }}-metadata"
         globalMounts:
-          - path: /config/cache
+          - path: /config/metadata
       media:
         type: nfs
         server: expanse.internal
@@ -97,9 +97,9 @@ spec:
         advancedMounts:
           emby:
             app:
+              - path: /config/cache
+                subPath: logs
               - path: /config/logs
                 subPath: logs
               - path: /tmp
                 subPath: tmp
-              - path: /transcode
-                subPath: transcode
