@@ -47,18 +47,15 @@ spec:
           match kubernetes.*
           buffer_size 0
           merge_log on
-
           kube_tag_prefix kubernetes.var.log.containers.
           k8s-logging.parser on
           k8s-logging.exclude on
           namespace_labels off
           annotations on
-
         [FILTER]
           name modify
           match kubernetes.*
           add source home-ops
-
         [FILTER]
           name nest
           match kubernetes.*
@@ -66,14 +63,12 @@ spec:
           operation lift
           nested_under kubernetes
           add_prefix k_
-
         [FILTER]
           name nest
           match kubernetes.*
           operation lift
           nested_under k_labels
           add_prefix k_labels_
-
         [FILTER]
           name modify
           match kubernetes.*
