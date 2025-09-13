@@ -1,0 +1,105 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: emby
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: emby
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    controllers:
+      emby:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/home-operations/emby
+              tag: 4.8.11.0@sha256:48cd01b20e49548aee694fcdeff273fc623f0ac83c31ac99d55d31c22b2177a6
+            env:
+              TZ: America/New_York
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /web/index.html
+                    port: &port 8096
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: {drop: ["ALL"]}
+            resources:
+              requests:
+                cpu: 100m
+              limits:
+                gpu.intel.com/i915: 1
+                memory: 8Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.turbo.ac"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+    persistence:
+      config:
+        existingClaim: "{{ .Release.Name }}"
+        globalMounts:
+          - path: /config
+      config-cache:
+        existingClaim: "{{ .Release.Name }}-cache"
+        globalMounts:
+          - path: /config/cache
+      media:
+        type: nfs
+        server: expanse.internal
+        path: /mnt/eros/Media
+        globalMounts:
+          - path: /media
+            readOnly: true
+      tmpfs:
+        type: emptyDir
+        advancedMounts:
+          emby:
+            app:
+              - path: /config/logs
+                subPath: logs
+              - path: /tmp
+                subPath: tmp
+              - path: /transcode
+                subPath: transcode

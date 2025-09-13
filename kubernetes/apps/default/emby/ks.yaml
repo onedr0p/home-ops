@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app watchstate
+  name: &app emby
   namespace: &namespace default
 spec:
   commonMetadata:
@@ -14,14 +14,16 @@ spec:
     - ../../../../components/keda/nfs-scaler
     - ../../../../components/volsync
   dependsOn:
+    - name: intel-device-plugin-gpu
+      namespace: kube-system
     - name: rook-ceph-cluster
       namespace: rook-ceph
   interval: 1h
-  path: ./kubernetes/apps/default/watchstate/app
+  path: ./kubernetes/apps/default/emby/app
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 5Gi
+      VOLSYNC_CAPACITY: 10Gi
   prune: true
   retryInterval: 2m
   sourceRef:
