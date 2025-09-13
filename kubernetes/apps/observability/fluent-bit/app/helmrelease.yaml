@@ -69,14 +69,6 @@ spec:
           operation lift
           nested_under k_labels
           add_prefix k_labels_
-        [FILTER]
-          name modify
-          match kubernetes.*
-          rename k_labels_app.kubernetes.io/instance app
-          rename k_labels_app.kubernetes.io/name app
-          rename k_labels_app app
-          rename k_labels_k8s-app app
-          rename k_container_name app
 
       outputs: |-
         [OUTPUT]
@@ -85,4 +77,5 @@ spec:
           host loki-headless.observability.svc.cluster.local
           port 3100
           line_format json
-          labels job=fluent-bit, source=$source, namespace=$kubernetes_namespace_name
+          labels cluster=main
+          structured_metadata $kubernetes['namespace_name'],$kubernetes['pod_name']
