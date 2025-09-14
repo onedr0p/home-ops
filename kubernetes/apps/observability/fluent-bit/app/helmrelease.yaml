@@ -59,6 +59,28 @@ spec:
           labels on
           annotations off
 
+        [FILTER]
+          name nest
+          match kubernetes.*
+          wildcard pod_name
+          operation lift
+          nested_under kubernetes
+          add_prefix k_
+
+        [FILTER]
+          name nest
+          match kubernetes.*
+          operation lift
+          nested_under k_labels
+          add_prefix k_labels_
+
+        [FILTER]
+          name modify
+          match kubernetes.*
+          rename k_labels_app.kubernetes.io/name app
+          rename k_labels_app app
+          rename k_labels_k8s-app app
+
       outputs: |-
         [OUTPUT]
           Name loki
@@ -66,6 +88,6 @@ spec:
           host loki-headless.observability.svc.cluster.local
           port 3100
           line_format json
-          labels job=fluent-bit, app=$kubernetes['labels']['app.kubernetes.io/name']
-          structured_metadata $kubernetes['pod_name'], namespace=$kubernetes['namespace_name'], host=$kubernetes['host']
+          labels job=fluent-bit, app=${app}
+          structured_metadata ${k_pod_name}, namespace=${k_namespace_name}, host=${k_host}
           compress gzip
