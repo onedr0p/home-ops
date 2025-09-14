@@ -51,7 +51,11 @@ spec:
           kube_ca_file /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
           kube_token_file /var/run/secrets/kubernetes.io/serviceaccount/token
           kube_tag_prefix kubernetes.var.log.containers.
+          merge_log on
+          merge_log_key log_processed
+          merge_log_trim on
           k8s-logging.parser on
+          k8s-Logging.exclude off
           labels on
           annotations off
 
@@ -63,5 +67,5 @@ spec:
           port 3100
           line_format json
           labels job=fluent-bit
-          auto_kubernetes_labels on
+          structured_metadata $kubernetes['namespace_name'],$kubernetes['pod_name']
           compress gzip
