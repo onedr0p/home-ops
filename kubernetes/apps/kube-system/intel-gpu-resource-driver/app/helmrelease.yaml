@@ -20,3 +20,13 @@ spec:
     cdi:
       staticPath: /var/cdi/static
       dynamicPath: /var/cdi/dynamic
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: DeviceClass
+              name: gpu.intel.com
+            patch: |-
+              - op: replace
+                path: /apiVersion
+                value: resource.k8s.io/v1
