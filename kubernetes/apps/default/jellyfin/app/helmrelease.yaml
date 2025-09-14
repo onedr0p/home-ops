@@ -51,10 +51,11 @@ spec:
               readOnlyRootFilesystem: true
               capabilities: {drop: ["ALL"]}
             resources:
+              claims:
+                - name: gpu
               requests:
                 cpu: 100m
               limits:
-                gpu.intel.com/i915: 1
                 memory: 8Gi
     defaultPodOptions:
       securityContext:
@@ -103,3 +104,17 @@ spec:
                 subPath: log
               - path: /tmp
                 subPath: tmp
+  postRenderers:
+    - kustomize:
+        patches:
+          - patch: |-
+              - op: add
+                path: /spec/template/spec/resourceClaims
+                value:
+                  - name: gpu
+                    resourceClaimTemplateName: jellyfin-gpu
+            target:
+              group: apps
+              version: v1
+              kind: Deployment
+              name: jellyfin
