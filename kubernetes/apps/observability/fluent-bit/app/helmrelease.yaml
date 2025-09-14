@@ -1,0 +1,86 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: fluent-bit
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: fluent-bit
+  maxHistory: 2
+  interval: 1h
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    config:
+      service: |-
+        [SERVICE]
+          Daemon Off
+          Flush {{ .Values.flush }}
+          Log_Level {{ .Values.logLevel }}
+          Parsers_File /fluent-bit/etc/parsers.conf
+          Parsers_File /fluent-bit/etc/conf/custom_parsers.conf
+          HTTP_Server On
+          HTTP_Listen 0.0.0.0
+          HTTP_Port {{ .Values.metricsPort }}
+          Health_Check On
+
+      inputs: |-
+        [INPUT]
+          name tail
+          alias kubernetes
+          path /var/log/containers/*.log
+          parser containerd
+          tag kubernetes.*
+          mem_buf_limit 5MB
+          skip_empty_lines on
+          skip_long_lines on
+
+      filters: |-
+        [FILTER]
+          name kubernetes
+          alias kubernetes
+          match kubernetes.*
+          buffer_size 0
+          merge_log on
+          keep_log off
+          kube_tag_prefix kubernetes.var.log.containers.
+          k8s-logging.parser on
+          k8s-logging.exclude on
+          namespace_labels off
+          annotations on
+        [FILTER]
+          name modify
+          match kubernetes.*
+          add source home-ops
+        [FILTER]
+          name nest
+          match kubernetes.*
+          wildcard pod_name
+          operation lift
+          nested_under kubernetes
+          add_prefix k_
+        [FILTER]
+          name nest
+          match kubernetes.*
+          operation lift
+          nested_under k_labels
+          add_prefix k_labels_
+
+      outputs: |-
+        [OUTPUT]
+          Name loki
+          Match kubernetes.*
+          host loki-headless.observability.svc.cluster.local
+          port 3100
+          line_format json
+          labels job=fluentbit, cluster=main
+          auto_kubernetes_labels on
+          compress gzip
