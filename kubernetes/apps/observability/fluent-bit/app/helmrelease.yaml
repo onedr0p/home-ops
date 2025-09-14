@@ -27,10 +27,10 @@ spec:
           log_level {{ .Values.logLevel }}
           parsers_file /fluent-bit/etc/parsers.conf
           parsers_file /fluent-bit/etc/conf/custom_parsers.conf
-          http_Server on
-          http_Listen 0.0.0.0
+          http_server on
+          http_listen 0.0.0.0
           http_port {{ .Values.metricsPort }}
-          Health_check on
+          health_check on
 
       inputs: |-
         [INPUT]
@@ -55,7 +55,7 @@ spec:
           merge_log_key log_processed
           merge_log_trim on
           k8s-logging.parser on
-          k8s-Logging.exclude off
+          k8s-logging.exclude off
           labels on
           annotations off
 
@@ -83,8 +83,8 @@ spec:
 
       outputs: |-
         [OUTPUT]
-          Name loki
-          Match kubernetes.*
+          name loki
+          match kubernetes.*
           host loki-headless.observability.svc.cluster.local
           port 3100
           line_format json
