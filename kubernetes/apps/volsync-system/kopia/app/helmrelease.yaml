@@ -77,10 +77,27 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
+    configMaps:
+      config:
+        forceRename: &configMapName "{{ .Release.Name }}-configmap"
+        data:
+          repository.config: |-
+            {
+              "storage": {
+                "type": "filesystem",
+                "config": {
+                  "path": "/repository"
+                }
+              },
+              "hostname": "volsync.{{ .Release.Namespace }}.svc.cluster.local",
+              "username": "volsync",
+              "description": "volsync",
+              "enableActions": false
+            }
     persistence:
       config-file:
         type: configMap
-        name: "{{ .Release.Name }}-configmap"
+        name: *configMapName
         globalMounts:
           - path: /config/repository.config
             subPath: repository.config

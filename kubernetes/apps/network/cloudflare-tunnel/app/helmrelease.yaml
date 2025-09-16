@@ -76,10 +76,25 @@ spec:
       app:
         endpoints:
           - port: http
+    configMaps:
+      config:
+        forceRename: &configMapName "{{ .Release.Name }}-configmap"
+        data:
+          config.yaml: |-
+            ingress:
+              - hostname: turbo.ac
+                originRequest:
+                  originServerName: turbo.ac
+                service: https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local:443
+              - hostname: "*.turbo.ac"
+                originRequest:
+                  originServerName: external.turbo.ac
+                service: https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local:443
+              - service: http_status:404
     persistence:
       config-file:
         type: configMap
-        name: "{{ .Release.Name }}-configmap"
+        name: *configMapName
         globalMounts:
           - path: /etc/cloudflared/config.yaml
             subPath: config.yaml

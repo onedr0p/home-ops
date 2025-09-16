@@ -20,8 +20,6 @@ spec:
     controllers:
       go2rtc:
         strategy: RollingUpdate
-        annotations:
-          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -86,10 +84,41 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    configMaps:
+      config:
+        forceRename: &configMapName "{{ .Release.Name }}-configmap"
+        data:
+          go2rtc.yaml: |-
+            log:
+              streams: error # Prevent log spam from UniFi Protect
+            api:
+              listen: :80
+              origin: "*"
+            rtsp:
+              listen: :554
+            webrtc:
+              listen: :8555
+              candidates:
+                - 192.168.42.124:8555
+                - stun:8555
+              ice_servers:
+                - urls:
+                    - stun:stun.cloudflare.com:3478
+            streams:
+              driveway:
+                - rtspx://192.168.1.1:7441/SB74mRIu1CkoPcEq
+              garage:
+                - rtspx://192.168.1.1:7441/dFl352XtCUFREtRz
+              porch:
+                - rtspx://192.168.1.1:7441/ezkTDbaOR71GUE67
+              living_room:
+                - rtspx://192.168.1.1:7441/6yxwoNNfNeg3iNAQ
+              basement:
+                - rtspx://192.168.1.1:7441/ugTfZ3GQFk0lNUN0
     persistence:
       config-file:
         type: configMap
-        name: "{{ .Release.Name }}-configmap"
+        name: *configMapName
         globalMounts:
           - path: /config/go2rtc.yaml
             subPath: go2rtc.yaml
