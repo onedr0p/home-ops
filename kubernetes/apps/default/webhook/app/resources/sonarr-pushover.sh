@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+set -euo pipefail
 
 function notify() {
     if [[ "${SONARR_EVENT_TYPE}" == "Test" ]]; then

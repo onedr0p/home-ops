@@ -67,9 +67,7 @@ spec:
         existingClaim: "{{ .Release.Name }}-cache"
       config-file:
         type: configMap
-        name: mosquitto
-        advancedMounts:
-          mosquitto:
-            app:
-              - path: /mosquitto/config/mosquitto.conf
-                subPath: mosquitto.conf
+        name: "{{ .Release.Name }}"
+        globalMounts:
+          - path: /mosquitto/config/mosquitto.conf
+            subPath: mosquitto.conf

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+set -euo pipefail
 
 # Remove the port from the IP address since Sonarr listens on port 80
 SONARR_REMOTE_ADDR=${SONARR_REMOTE_ADDR%%:*}

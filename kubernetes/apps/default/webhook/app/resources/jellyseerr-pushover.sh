@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+set -euo pipefail
 
 JELLYSEERR_PUSHOVER_URL=${1:?}
 PAYLOAD=${2:?}
