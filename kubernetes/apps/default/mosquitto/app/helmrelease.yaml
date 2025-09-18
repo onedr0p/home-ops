@@ -53,7 +53,6 @@ spec:
             port: 1883
     configMaps:
       config:
-        forceRename: &configMapName "{{ .Release.Name }}-configmap"
         data:
           mosquitto.conf: |-
             allow_anonymous true
@@ -68,7 +67,7 @@ spec:
         existingClaim: "{{ .Release.Name }}-cache"
       config-file:
         type: configMap
-        name: *configMapName
+        identifier: config
         globalMounts:
           - path: /mosquitto/config/mosquitto.conf
             subPath: mosquitto.conf

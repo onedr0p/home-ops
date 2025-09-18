@@ -78,7 +78,6 @@ spec:
           - port: http
     configMaps:
       config:
-        forceRename: &configMapName "{{ .Release.Name }}-configmap"
         data:
           config.yaml: |-
             ingress:
@@ -94,7 +93,7 @@ spec:
     persistence:
       config-file:
         type: configMap
-        name: *configMapName
+        identifier: config
         globalMounts:
           - path: /etc/cloudflared/config.yaml
             subPath: config.yaml
