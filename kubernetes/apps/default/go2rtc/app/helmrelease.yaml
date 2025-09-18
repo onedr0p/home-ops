@@ -86,7 +86,6 @@ spec:
                 port: *port
     configMaps:
       config:
-        forceRename: &configMapName "{{ .Release.Name }}-configmap"
         data:
           go2rtc.yaml: |-
             log:
@@ -118,7 +117,7 @@ spec:
     persistence:
       config-file:
         type: configMap
-        name: *configMapName
+        identifier: config
         globalMounts:
           - path: /config/go2rtc.yaml
             subPath: go2rtc.yaml

@@ -95,7 +95,6 @@ spec:
                 port: *port
     configMaps:
       config:
-        forceRename: &configMapName "{{ .Release.Name }}-configmap"
         data:
           slskd.yml: |-
             directories:
@@ -116,7 +115,7 @@ spec:
         existingClaim: "{{ .Release.Name }}"
       config-file:
         type: configMap
-        name: *configMapName
+        identifier: config
         globalMounts:
           - path: /config/slskd.yml
             subPath: slskd.yml

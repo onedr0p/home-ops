@@ -91,7 +91,6 @@ spec:
                 port: *port
     configMaps:
       config:
-        forceRename: &configMapName "{{ .Release.Name }}-configmap"
         data:
           .qbt.toml: |-
             [qbittorrent]
@@ -101,7 +100,7 @@ spec:
         existingClaim: "{{ .Release.Name }}"
       config-file:
         type: configMap
-        name: *configMapName
+        identifier: config
         globalMounts:
           - path: /config/.qbt.toml
             subPath: .qbt.toml
