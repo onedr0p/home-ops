@@ -60,7 +60,7 @@ spec:
     prometheusRule:
       enabled: true
       rules:
-        - alert: VPNBlackboxProbeFailed
+        - alert: VpnProbeFailed
           expr: |-
             probe_success == 0
           for: 15m
@@ -68,26 +68,7 @@ spec:
             severity: critical
           annotations:
             summary: |-
-              The host {{ $labels.target }} is currently unreachable
-
-        - alert: VPNICMPProbeDown
-          expr: |-
-            probe_success{job="vpn-icmp-external"} == 0
-          for: 15m
-          labels:
-            severity: critical
-          annotations:
-            summary: |-
-              ICMP probe to {{ $labels.target }} via the VPN has been failing for more than 15 minutes
-
-        - alert: VPNHTTPProbeDown
-          expr: probe_success{job="vpn-http-external"} == 0
-          for: 15m
-          labels:
-            severity: critical
-          annotations:
-            summary: |-
-              HTTP probe to {{ $labels.target }} via the VPN has been failing for more than 15 minutes
+              The probe targeting {{ $labels.instance }} is currently having connectivity issues
   postRenderers:
     - kustomize:
         patches:
