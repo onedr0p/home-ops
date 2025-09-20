@@ -5,7 +5,7 @@ kubernetes_dir := justfile_dir() + '/kubernetes'
 
 [private]
 default:
-    just -l kube
+    just -l kubernetes
 
 [doc('Apply local Flux Kustomization')]
 apply-ks namespace *args:
