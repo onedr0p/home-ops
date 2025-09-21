@@ -3,14 +3,19 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app blackbox-exporter-lan
-  namespace: &namespace observability
+  name: &app tuppr
+  namespace: &namespace system-upgrade
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: *app
+      namespace: *namespace
   interval: 1h
-  path: ./kubernetes/apps/observability/blackbox-exporter/lan
+  path: ./kubernetes/apps/system-upgrade/tuppr/app
   prune: true
   retryInterval: 2m
   sourceRef:
@@ -19,23 +24,22 @@ spec:
     namespace: flux-system
   targetNamespace: *namespace
   timeout: 5m
-  wait: false
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app blackbox-exporter-vpn
-  namespace: &namespace observability
+  name: &app tuppr-upgrades
+  namespace: &namespace system-upgrade
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: multus-networks
-      namespace: kube-system
+    - name: tuppr
+      namespace: system-upgrade
   interval: 1h
-  path: ./kubernetes/apps/observability/blackbox-exporter/vpn
+  path: ./kubernetes/apps/system-upgrade/tuppr/upgrades
   prune: true
   retryInterval: 2m
   sourceRef:

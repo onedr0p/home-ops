@@ -33,6 +33,7 @@ spec:
               SLSKD_HTTP_PORT: &port 80
               SLSKD_NO_AUTH: true
               SLSKD_NO_HTTPS: true
+              SLSKD_NO_VERSION_CHECK: true
               SLSKD_SLSK_LISTEN_PORT: 50429
             envFrom:
               - secretRef:
@@ -92,12 +93,29 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    configMaps:
+      config:
+        data:
+          slskd.yml: |-
+            directories:
+              downloads: /media/Downloads/soulseek/complete
+              incomplete: /media/Downloads/soulseek/incomplete
+            permissions:
+              file:
+                mode: 750
+            shares:
+              directories:
+                - /media/Downloads/soulseek/shared
+              filters:
+                - \.ini$
+                - Thumbs.db$
+                - \.DS_Store$
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
       config-file:
         type: configMap
-        name: "{{ .Release.Name }}-configmap"
+        identifier: config
         globalMounts:
           - path: /config/slskd.yml
             subPath: slskd.yml

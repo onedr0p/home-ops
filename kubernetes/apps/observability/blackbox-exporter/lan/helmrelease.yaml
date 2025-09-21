@@ -3,12 +3,12 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: blackbox-exporter
+  name: blackbox-exporter-lan
 spec:
   interval: 1h
   chartRef:
     kind: OCIRepository
-    name: blackbox-exporter
+    name: blackbox-exporter-lan
   install:
     remediation:
       retries: -1
@@ -17,7 +17,7 @@ spec:
     remediation:
       retries: 3
   values:
-    fullnameOverride: blackbox-exporter
+    fullnameOverride: blackbox-exporter-lan
     securityContext:
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
@@ -50,7 +50,7 @@ spec:
     prometheusRule:
       enabled: true
       rules:
-        - alert: BlackboxProbeFailed
+        - alert: LanProbeFailed
           expr: |-
             probe_success == 0
           for: 15m
@@ -58,4 +58,4 @@ spec:
             severity: critical
           annotations:
             summary: |-
-              The host {{ $labels.target }} is currently unreachable
+              The probe targeting {{ $labels.instance }} is currently having connectivity issues
