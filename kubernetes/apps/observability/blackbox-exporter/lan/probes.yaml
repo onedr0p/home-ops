@@ -1,0 +1,39 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/probe_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: lan-icmp
+spec:
+  module: icmp
+  prober:
+    url: blackbox-exporter-lan.observability.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      static:
+        - expanse.internal
+        - garage-door.internal
+        - hdhomerun.internal
+        - idrac.internal
+        - kiosk.internal
+        - kvm.internal
+        - pikvm.internal
+        - receiver.internal
+        - ups.internal
+        - vacuum.internal
+        - zigbee-controller.internal
+        - zwave-controller.internal
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/probe_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: lan-tcp
+spec:
+  module: tcp_connect
+  prober:
+    url: blackbox-exporter-lan.observability.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      static:
+        - expanse.internal:2049

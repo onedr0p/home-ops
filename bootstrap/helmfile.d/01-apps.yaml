@@ -10,9 +10,29 @@ releases:
   - name: cilium
     namespace: kube-system
     chart: oci://ghcr.io/home-operations/charts-mirror/cilium
-    version: 1.18.1
+    version: 1.18.2
     values:
       - ./templates/values.yaml.gotmpl
+    hooks:
+      - # Wait for Cilium CRDs to be available
+        command: bash
+        args:
+          - -c
+          - until kubectl get crd ciliumloadbalancerippools.cilium.io ciliuml2announcementpolicies.cilium.io ciliumbgpadvertisements.cilium.io ciliumbgppeerconfigs.cilium.io ciliumbgpclusterconfigs.cilium.io &>/dev/null; do sleep 5; done
+        events:
+          - postsync
+        showlogs: true
+      - # Apply Cilium Resources
+        command: kubectl
+        args:
+          - apply
+          - --namespace=kube-system
+          - --server-side
+          - --field-manager=kustomize-controller
+          - --filename=../../kubernetes/apps/kube-system/cilium/app/networking.yaml
+        events:
+          - postsync
+        showlogs: true
 
   - name: coredns
     namespace: kube-system
@@ -26,7 +46,7 @@ releases:
   - name: spegel
     namespace: kube-system
     chart: oci://ghcr.io/spegel-org/helm-charts/spegel
-    version: 0.3.0
+    version: 0.4.0
     values:
       - ./templates/values.yaml.gotmpl
     needs:

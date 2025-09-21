@@ -1,0 +1,96 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: fluent-bit
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: fluent-bit
+  maxHistory: 2
+  interval: 1h
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    config:
+      service: |-
+        [SERVICE]
+          daemon off
+          flush {{ .Values.flush }}
+          log_level {{ .Values.logLevel }}
+          parsers_file /fluent-bit/etc/parsers.conf
+          parsers_file /fluent-bit/etc/conf/custom_parsers.conf
+          http_server on
+          http_listen 0.0.0.0
+          http_port {{ .Values.metricsPort }}
+          health_check on
+
+      inputs: |-
+        [INPUT]
+          name tail
+          alias kubernetes
+          path /var/log/containers/*.log
+          parser containerd
+          tag kubernetes.*
+          skip_empty_lines on
+          skip_long_lines on
+
+      filters: |-
+        [FILTER]
+          name kubernetes
+          match kubernetes.*
+          kube_url https://kubernetes.default.svc:443
+          kube_ca_file /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          kube_token_file /var/run/secrets/kubernetes.io/serviceaccount/token
+          kube_tag_prefix kubernetes.var.log.containers.
+          merge_log on
+          merge_log_key log_processed
+          merge_log_trim on
+          k8s-logging.parser on
+          k8s-logging.exclude off
+          labels on
+          annotations off
+
+        [FILTER]
+          name nest
+          match kubernetes.*
+          operation lift
+          nested_under kubernetes
+          add_prefix k_
+
+        [FILTER]
+          name nest
+          match kubernetes.*
+          operation lift
+          nested_under k_labels
+          add_prefix k_labels_
+
+        [FILTER]
+          name modify
+          match kubernetes.*
+          rename k_labels_app.kubernetes.io/name app
+          rename k_labels_app app
+          rename k_labels_k8s-app app
+
+      outputs: |-
+        [OUTPUT]
+          name loki
+          match kubernetes.*
+          host loki-headless.observability.svc.cluster.local
+          port 3100
+          uri /loki/api/v1/push
+          line_format json
+          labels job=fluent-bit, namespace=$k_namespace_name, app=$app
+          structured_metadata container=$k_container_name, pod=$k_pod_name, host=$k_host
+          compress gzip
+    dashboards:
+      enabled: true
+    serviceMonitor:
+      enabled: true

@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/k8s.cni.cncf.io/networkattachmentdefinition_v1.json
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: iot
+spec:
+  config: |-
+    {
+      "cniVersion": "0.3.1",
+      "name": "iot",
+      "plugins": [
+        {
+          "type": "macvlan",
+          "master": "bond0.70",
+          "mode": "bridge",
+          "ipam": {
+            "type": "static",
+            "routes": [
+              {"dst": "0.0.0.0/0", "gw": "192.168.70.1"}
+            ]
+          }
+        },
+        {
+          "type": "sbr"
+        }
+      ]
+    }

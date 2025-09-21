@@ -50,6 +50,14 @@ spec:
               limits:
                 memory: 8Gi
     defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "vpn",
+            "namespace": "kube-system",
+            "ips": ["192.168.90.11/24"],
+            "mac": "a6:3e:4f:09:e4:9c"
+          }]
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -66,8 +74,8 @@ spec:
         hostnames:
           - "{{ .Release.Name }}.turbo.ac"
         parentRefs:
-          - name: internal
-            namespace: istio-system
+          - name: envoy-internal
+            namespace: network
             sectionName: https
     persistence:
       config:

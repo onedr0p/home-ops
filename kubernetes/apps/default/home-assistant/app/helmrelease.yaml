@@ -25,7 +25,7 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/home-assistant
-              tag: 2025.9.1@sha256:fe188478864988a04274743529685ad2f15dd3bb0041096a79dbe5a7b5ebc770
+              tag: 2025.9.4@sha256:55c7db16301626265c6c8132985137ca0798303773dafa244e562353baa93a6f
             env:
               TZ: America/New_York
               HASS_HTTP_TRUSTED_PROXY_1: 192.168.42.0/24
@@ -43,6 +43,14 @@ spec:
               limits:
                 memory: 2Gi
     defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "iot",
+            "namespace": "kube-system",
+            "ips": ["192.168.70.20/24"],
+            "mac": "c6:07:27:af:fb:53"
+          }]
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -61,8 +69,8 @@ spec:
           - "{{ .Release.Name }}.turbo.ac"
           - hass.turbo.ac
         parentRefs:
-          - name: external
-            namespace: istio-system
+          - name: envoy-external
+            namespace: network
             sectionName: https
     persistence:
       config:

@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: envoy-gateway
+spec:
+  interval: 5m
+  chartRef:
+    kind: OCIRepository
+    name: envoy-gateway
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  values:
+    global:
+      imageRegistry: mirror.gcr.io
+    config:
+      envoyGateway:
+        provider:
+          type: Kubernetes
+          kubernetes:
+            deploy:
+              type: GatewayNamespace

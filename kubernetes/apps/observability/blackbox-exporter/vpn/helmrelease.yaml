@@ -1,0 +1,80 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: blackbox-exporter-vpn
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: blackbox-exporter-vpn
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    fullnameOverride: blackbox-exporter-vpn
+    strategy:
+      type: Recreate
+    podAnnotations:
+      k8s.v1.cni.cncf.io/networks: |-
+        [{
+          "name": "vpn",
+          "namespace": "kube-system",
+          "ips": ["192.168.90.13/24"],
+          "mac": "3e:d0:83:c0:8e:13"
+        }]
+    securityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities: {add: ["NET_RAW"]}
+    config:
+      modules:
+        http_2xx:
+          prober: http
+          timeout: 5s
+          http:
+            valid_http_versions:
+              - HTTP/1.1
+              - HTTP/2.0
+            follow_redirects: true
+            preferred_ip_protocol: ip4
+        icmp:
+          prober: icmp
+          timeout: 5s
+          icmp:
+            preferred_ip_protocol: ip4
+        tcp_connect:
+          prober: tcp
+          timeout: 5s
+          tcp:
+            preferred_ip_protocol: ip4
+    serviceMonitor:
+      enabled: true
+      selfMonitor:
+        enabled: true
+    prometheusRule:
+      enabled: true
+      rules:
+        - alert: VpnProbeFailed
+          expr: |-
+            probe_success == 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: |-
+              The probe targeting {{ $labels.instance }} is currently having connectivity issues
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: blackbox-exporter-vpn
+            patch: |-
+              - op: remove
+                path: /spec/strategy/rollingUpdate

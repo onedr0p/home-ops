@@ -14,11 +14,6 @@ spec:
       kind: HelmRelease
       name: *app
       namespace: *namespace
-  healthCheckExprs:
-    - apiVersion: external-secrets.io/v1
-      kind: ClusterSecretStore
-      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
-      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   interval: 1h
   path: ./kubernetes/apps/external-secrets/external-secrets/app
   prune: true
@@ -28,4 +23,4 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: *namespace
-  timeout: 15m
+  timeout: 5m

@@ -29,7 +29,7 @@ spec:
             env:
               TZ: America/New_York
               QBT_WEBUI_PORT: &port 80
-              QBT_TORRENTING_PORT: &torrentPort 50413
+              QBT_TORRENTING_PORT: 50469
             probes:
               liveness: &probes
                 enabled: true
@@ -58,6 +58,14 @@ spec:
               limits:
                 memory: 18Gi
     defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "vpn",
+            "namespace": "kube-system",
+            "ips": ["192.168.90.10/24"],
+            "mac": "32:0b:d8:1f:b6:e4"
+          }]
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -66,26 +74,16 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        forceRename: "{{ .Release.Name }}"
-        primary: true
         ports:
           http:
             port: *port
-      bittorrent:
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 192.168.42.122
-        ports:
-          bittorrent-tcp:
-            port: *torrentPort
-            protocol: TCP
     route:
       app:
         hostnames:
           - "{{ .Release.Name }}.turbo.ac"
         parentRefs:
-          - name: internal
-            namespace: istio-system
+          - name: envoy-internal
+            namespace: network
             sectionName: https
         rules:
           - backendRefs:
@@ -102,11 +100,10 @@ spec:
         existingClaim: "{{ .Release.Name }}"
       config-file:
         type: configMap
-        name: "{{ .Release.Name }}"
+        identifier: config
         globalMounts:
           - path: /config/.qbt.toml
             subPath: .qbt.toml
-            readOnly: true
       media:
         type: nfs
         server: expanse.internal
@@ -117,7 +114,5 @@ spec:
       qbrr:
         type: image
         image: ghcr.io/buroa/qbrr:0.1.1@sha256:fe4a1d100ba896999253a5122d9c77cc4920779d618c23f765458cb6ec7383ca
-        globalMounts:
-          - readOnly: true
       tmp:
         type: emptyDir

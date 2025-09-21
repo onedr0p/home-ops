@@ -1,0 +1,89 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumloadbalancerippool_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: pool
+spec:
+  allowFirstLastIPs: "No"
+  blocks:
+    - cidr: 192.168.42.0/24
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliuml2announcementpolicy_v2alpha1.json
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: l2-policy
+spec:
+  loadBalancerIPs: true
+  interfaces:
+    - bond0
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumbgpadvertisement_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumBGPAdvertisement
+metadata:
+  name: l3-bgp-advertisement
+  labels:
+    advertise: bgp
+spec:
+  advertisements:
+    - advertisementType: Service
+      service:
+        addresses:
+          - LoadBalancerIP
+      selector:
+        matchExpressions:
+          - {key: somekey, operator: NotIn, values: ["never-used-value"]}
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumbgppeerconfig_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumBGPPeerConfig
+metadata:
+  name: l3-bgp-peer-config
+spec:
+  families:
+    - afi: ipv4
+      safi: unicast
+      advertisements:
+        matchLabels:
+          advertise: bgp
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumbgpclusterconfig_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumBGPClusterConfig
+metadata:
+  name: l3-bgp-cluster-config
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux
+  bgpInstances:
+    - name: cilium
+      localASN: 64514
+      peers:
+        - name: unifi
+          peerASN: 64513
+          peerAddress: 192.168.1.1
+          peerConfigRef:
+            name: l3-bgp-peer-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-api
+  annotations:
+    lbipam.cilium.io/ips: 192.168.42.120
+spec:
+  type: LoadBalancer
+  selector:
+    k8s-app: kube-apiserver
+    tier: control-plane
+  ports:
+    - name: https
+      port: 6443
+      protocol: TCP
+      targetPort: 6443

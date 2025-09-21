@@ -1,0 +1,78 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: watchstate
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: watchstate
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    controllers:
+      watchstate:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/arabcoders/watchstate
+              tag: v0.4.2@sha256:509a7fd3031503693dfb438190594448bef47f416d62326dd32a625f8a3bc8ff
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /v1/api/system/healthcheck
+                    port: &port 8080
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: {drop: ["ALL"]}
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.turbo.ac"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+    persistence:
+      config:
+        existingClaim: "{{ .Release.Name }}"
+      tmpfs:
+        type: emptyDir
+        advancedMounts:
+          watchstate:
+            app:
+              - path: /tmp
+                subPath: tmp

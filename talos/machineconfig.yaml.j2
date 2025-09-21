@@ -50,7 +50,7 @@ machine:
   install:
     diskSelector:
       model: Samsung SSD 870
-    image: factory.talos.dev/metal-installer/05b4a47a70bc97786ed83d200567dcc8a13f731b164537ba59d5397d668851fa:v1.11.0
+    image: factory.talos.dev/metal-installer/05b4a47a70bc97786ed83d200567dcc8a13f731b164537ba59d5397d668851fa:v1.11.1
     wipe: false
   kernel:
     modules:
@@ -64,19 +64,29 @@ machine:
       featureGates:
         ImageVolume: true
       serializeImagePulls: false
-    image: ghcr.io/siderolabs/kubelet:v1.34.0
+    image: ghcr.io/siderolabs/kubelet:v1.34.1
     nodeIP:
       validSubnets:
         - 192.168.42.0/24
   network:
     interfaces:
-      - deviceSelector:
-          hardwareAddr: 00:30:93:12:*
-          driver: atlantic
-        mtu: 9000
+      - interface: bond0
+        bond:
+          deviceSelectors:
+            - hardwareAddr: 00:30:93:12:*
+              driver: atlantic
+          mode: active-backup
         dhcp: true
-        vip:
-          ip: 192.168.42.120
+        mtu: 9000
+        vlans:
+          - # IOT
+            vlanId: 70
+            dhcp: false
+            mtu: 9000
+          - # VPN
+            vlanId: 90
+            dhcp: false
+            mtu: 9000
   nodeLabels:
     intel.feature.node.kubernetes.io/gpu: "true"
     topology.kubernetes.io/region: main
@@ -139,11 +149,11 @@ cluster:
       enable-aggregator-routing: "true"
       feature-gates: ImageVolume=true,MutatingAdmissionPolicy=true
       runtime-config: admissionregistration.k8s.io/v1beta1=true
-    image: registry.k8s.io/kube-apiserver:v1.34.0
+    image: registry.k8s.io/kube-apiserver:v1.34.1
   controllerManager:
     extraArgs:
       bind-address: 0.0.0.0
-    image: registry.k8s.io/kube-controller-manager:v1.34.0
+    image: registry.k8s.io/kube-controller-manager:v1.34.1
   coreDNS:
     disabled: true
   etcd:
@@ -156,7 +166,7 @@ cluster:
       listen-metrics-urls: http://0.0.0.0:2381
   proxy:
     disabled: true
-    image: registry.k8s.io/kube-proxy:v1.34.0
+    image: registry.k8s.io/kube-proxy:v1.34.1
   scheduler:
     config:
       apiVersion: kubescheduler.config.k8s.io/v1
@@ -177,7 +187,7 @@ cluster:
                     whenUnsatisfiable: ScheduleAnyway
     extraArgs:
       bind-address: 0.0.0.0
-    image: registry.k8s.io/kube-scheduler:v1.34.0
+    image: registry.k8s.io/kube-scheduler:v1.34.1
   secretboxEncryptionSecret: op://kubernetes/talos/CLUSTER_SECRETBOXENCRYPTIONSECRET
   serviceAccount:
     key: op://kubernetes/talos/CLUSTER_SERVICEACCOUNT_KEY
