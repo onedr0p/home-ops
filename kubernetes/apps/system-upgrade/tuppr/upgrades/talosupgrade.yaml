@@ -10,20 +10,15 @@ spec:
     tag: v1.11.1
   upgradePolicy:
     debug: true
-    # force: false
     rebootMode: powercycle
   nodeLabelSelector:
-    # matchLabels:
-    #   kubernetes.io/hostname: k8s-0
     matchExpressions:
       - key: node-role.kubernetes.io/control-plane
         operator: Exists
   healthChecks:
+    - apiVersion: v1
+      kind: Node
+      expr: status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
     - apiVersion: ceph.rook.io/v1
       kind: CephCluster
-      expr: status.ceph.health in ['HEALTH_OK', 'HEALTH_WARN']
-      # talosctl:
-      #   image:
-      #     repository: # Optional, default: ghcr.io/siderolabs/talosctl
-      #     tag: # Optional, default: current installed Talos version
-      #     pullPolicy: # Optional, default: IfNotPresent
+      expr: status.ceph.health in ['HEALTH_OK']
