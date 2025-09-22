@@ -9,19 +9,6 @@ spec:
   blocks:
     - cidr: 192.168.42.0/24
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliuml2announcementpolicy_v2alpha1.json
-apiVersion: cilium.io/v2alpha1
-kind: CiliumL2AnnouncementPolicy
-metadata:
-  name: l2-policy
-spec:
-  loadBalancerIPs: true
-  interfaces:
-    - bond0
-  nodeSelector:
-    matchLabels:
-      kubernetes.io/os: linux
----
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumbgpadvertisement_v2.json
 apiVersion: cilium.io/v2
 kind: CiliumBGPAdvertisement
@@ -83,7 +70,4 @@ spec:
     k8s-app: kube-apiserver
     tier: control-plane
   ports:
-    - name: https
-      port: 6443
-      protocol: TCP
-      targetPort: 6443
+    - port: 6443
