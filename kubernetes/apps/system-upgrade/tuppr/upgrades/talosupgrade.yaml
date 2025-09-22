@@ -10,6 +10,8 @@ spec:
     tag: v1.11.1
   upgradePolicy:
     debug: true
+    force: false
+    placementPreset: hard
     rebootMode: powercycle
   nodeLabelSelector:
     matchExpressions:
@@ -20,11 +22,14 @@ spec:
       apiVersion: v1
       kind: Node
       expr: status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
+      timeout: 15m
     - # No active VolSync replications
       apiVersion: volsync.backube/v1alpha1
       kind: ReplicationSource
       expr: status.conditions.filter(c, c.type == "Synchronizing").all(c, c.status == "False")
+      timeout: 15m
     - # Ceph cluster is Healthy
       apiVersion: ceph.rook.io/v1
       kind: CephCluster
       expr: status.ceph.health in ['HEALTH_OK']
+      timeout: 15m
