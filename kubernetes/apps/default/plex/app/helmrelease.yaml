@@ -9,13 +9,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: plex
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   values:
     controllers:
       plex:
@@ -73,7 +66,8 @@ spec:
       app:
         type: LoadBalancer
         annotations:
-          lbipam.cilium.io/ips: 192.168.42.128
+          lbipam.cilium.io/ips: 192.168.69.128
+        externalTrafficPolicy: Local
         ports:
           http:
             port: *port
@@ -85,6 +79,28 @@ spec:
           - name: envoy-external
             namespace: network
             sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+            filters:
+              - type: RequestHeaderModifier
+                requestHeaderModifier:
+                  remove:
+                    - "Range"
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /library/streams
+            timeouts:
+              request: 0s
+              backendRequest: 0s
+          - backendRefs:
+              - identifier: app
+                port: *port
+            timeouts:
+              request: 0s
+              backendRequest: 0s
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
@@ -106,7 +122,5 @@ spec:
             app:
               - path: /config/Library/Application Support/Plex Media Server/Logs
                 subPath: logs
-              - path: /transcode
-                subPath: transcode
               - path: /tmp
                 subPath: tmp

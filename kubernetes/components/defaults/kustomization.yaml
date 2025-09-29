@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+  - target:
+      kind: HelmRelease
+      version: v2
+      group: helm.toolkit.fluxcd.io
+    patch: |-
+      - op: add
+        path: /spec/install
+        value:
+          crds: CreateReplace
+          remediation:
+            retries: -1
+      - op: add
+        path: /spec/upgrade
+        value:
+          cleanupOnFail: true
+          crds: CreateReplace
+          remediation:
+            retries: 3

@@ -37,6 +37,12 @@ snapshot:
         kubectl -n "$ns" patch replicationsources "$name" --type merge -p '{"spec":{"trigger":{"manual":"$(date +%s)"}}}'; \
     done
 
+[doc('Suspend or resume VolSync')]
+volsync state:
+    flux -n volsync-system {{ state }} kustomization volsync
+    flux -n volsync-system {{ state }} helmrelease volsync
+    kubectl -n volsync-system scale deployment volsync --replicas {{ if state != "suspend" { "1" } else { "0" } }}
+
 [doc('Sync ExternalSecrets')]
 sync-es:
     kubectl get es --no-headers -A | while read -r ns name _; do \

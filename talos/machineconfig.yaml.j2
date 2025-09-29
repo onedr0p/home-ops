@@ -6,9 +6,6 @@ machine:
     {% if ENV.IS_CONTROLLER %}
     key: op://kubernetes/talos/MACHINE_CA_KEY
     {% endif %}
-  certSANs:
-    - 127.0.0.1
-    - 192.168.42.120
   features:
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
@@ -51,7 +48,7 @@ machine:
   install:
     diskSelector:
       model: Samsung SSD 870
-    image: factory.talos.dev/metal-installer/05b4a47a70bc97786ed83d200567dcc8a13f731b164537ba59d5397d668851fa:v1.11.1
+    image: factory.talos.dev/metal-installer/05b4a47a70bc97786ed83d200567dcc8a13f731b164537ba59d5397d668851fa:v1.11.2
     wipe: false
   kernel:
     modules:
@@ -119,7 +116,7 @@ cluster:
     {% endif %}
   clusterName: main
   controlPlane:
-    endpoint: https://192.168.42.120:6443
+    endpoint: https://k8s.internal:6443
   id: op://kubernetes/talos/CLUSTER_ID
   network:
     cni:
@@ -143,8 +140,7 @@ cluster:
       rules:
         - level: Metadata
     certSANs:
-      - 127.0.0.1
-      - 192.168.42.120
+      - k8s.internal
     disablePodSecurityPolicy: true
     extraArgs:
       enable-aggregator-routing: "true"

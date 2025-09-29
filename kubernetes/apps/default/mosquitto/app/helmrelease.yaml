@@ -9,13 +9,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: mosquitto
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   values:
     controllers:
       mosquitto:
@@ -47,7 +40,8 @@ spec:
         type: LoadBalancer
         annotations:
           external-dns.alpha.kubernetes.io/hostname: mosquitto.turbo.ac
-          lbipam.cilium.io/ips: 192.168.42.129
+          lbipam.cilium.io/ips: 192.168.69.129
+        externalTrafficPolicy: Local
         ports:
           http:
             port: 1883

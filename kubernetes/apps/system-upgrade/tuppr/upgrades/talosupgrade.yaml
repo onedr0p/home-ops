@@ -3,27 +3,19 @@
 apiVersion: tuppr.home-operations.com/v1alpha1
 kind: TalosUpgrade
 metadata:
-  name: controllers
+  name: talos
 spec:
-  image:
-    repository: factory.talos.dev/metal-installer
-    tag: v1.11.1
-  upgradePolicy:
-    debug: true
-    # force: false
+  talos:
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+    version: v1.11.2
+  policy:
     rebootMode: powercycle
-  nodeLabelSelector:
-    # matchLabels:
-    #   kubernetes.io/hostname: k8s-0
-    matchExpressions:
-      - key: node-role.kubernetes.io/control-plane
-        operator: Exists
   healthChecks:
+    - apiVersion: volsync.backube/v1alpha1
+      kind: ReplicationSource
+      expr: |-
+        status.conditions.filter(c, c.type == "Synchronizing").all(c, c.status == "False")
     - apiVersion: ceph.rook.io/v1
       kind: CephCluster
-      expr: status.ceph.health in ['HEALTH_OK', 'HEALTH_WARN']
-      # talosctl:
-      #   image:
-      #     repository: # Optional, default: ghcr.io/siderolabs/talosctl
-      #     tag: # Optional, default: current installed Talos version
-      #     pullPolicy: # Optional, default: IfNotPresent
+      expr: |-
+        status.ceph.health in ['HEALTH_OK']
