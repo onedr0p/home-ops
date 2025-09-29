@@ -11,11 +11,12 @@ patches:
         path: /spec/install
         value:
           crds: CreateReplace
-          strategy:
-            name: RetryOnFailure
+          remediation:
+            retries: -1
       - op: add
         path: /spec/upgrade
         value:
+          cleanupOnFail: true
           crds: CreateReplace
-          strategy:
-            name: RetryOnFailure
+          remediation:
+            retries: 3
