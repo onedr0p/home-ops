@@ -15,23 +15,19 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
-          init-config:
+          gatus-sidecar:
             image:
-              repository: ghcr.io/home-operations/k8s-sidecar
-              tag: 1.30.10@sha256:dd3b1f0c4e6b4512b2deb50c58acf65fd0f0927120a59a95eec854d32a6c9ce3
-            env:
-              FOLDER: /config
-              LABEL: gatus.io/enabled
-              NAMESPACE: ALL
-              RESOURCE: both
-              UNIQUE_FILENAMES: true
-              METHOD: WATCH
+              repository: ghcr.io/home-operations/gatus-sidecar
+              tag: 0.0.2@sha256:a28b8273b78af391aee297b2a8bba750e15c298e4d14a14a4c4de2fa2d6b50cd
+            args:
+              - --gateway=envoy-external
+              - --output=/config
             restartPolicy: Always
             resources:
               requests:
                 cpu: 10m
               limits:
-                memory: 128Mi
+                memory: 64Mi
         containers:
           app:
             image:
@@ -93,10 +89,9 @@ spec:
           type: ClusterRole
           rules:
             - apiGroups:
-                - ""
+                - gateway.networking.k8s.io
               resources:
-                - configmaps
-                - secrets
+                - httproutes
               verbs:
                 - get
                 - watch
