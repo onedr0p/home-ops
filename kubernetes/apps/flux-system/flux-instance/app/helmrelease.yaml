@@ -111,7 +111,7 @@ spec:
               kind: Deployment
               name: helm-controller
           - # Controller-level SOPS decryption
-            patch: |
+            patch: |-
               - op: add
                 path: /spec/template/spec/containers/0/args/-
                 value: --sops-age-secret=sops-age-secret
@@ -119,7 +119,7 @@ spec:
               kind: Deployment
               name: kustomize-controller
           - # Watch configmaps and secrets attached to HelmReleases and Kustomizations
-            patch: |
+            patch: |-
               - op: add
                 path: /spec/template/spec/containers/0/args/-
                 value: --watch-configs-label-selector=owner!=helm
@@ -127,7 +127,7 @@ spec:
               kind: Deployment
               name: (helm-controller|kustomize-controller)
           - # Cancel health checks on new Kustomizations revisions
-            patch: |
+            patch: |-
               - op: add
                 path: /spec/template/spec/containers/0/args/-
                 value: --feature-gates=CancelHealthCheckOnNewRevision=true
