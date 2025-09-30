@@ -114,10 +114,15 @@ spec:
   compression:
     - type: Brotli
     - type: Gzip
+  connection:
+    bufferLimit: 64Mi
   targetSelectors:
     - group: gateway.networking.k8s.io
       kind: Gateway
   tcpKeepalive: {}
+  timeout:
+    http:
+      requestTimeout: 0s  
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/envoyproxy/gateway/refs/heads/main/charts/gateway-helm/crds/generated/gateway.envoyproxy.io_clienttrafficpolicies.yaml
 apiVersion: gateway.envoyproxy.io/v1alpha1
@@ -135,6 +140,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: Gateway
   tcpKeepalive: {}
+  timeout:
+    http:
+      requestReceivedTimeout: 0s
   tls:
     minVersion: "1.2"
     alpnProtocols:
