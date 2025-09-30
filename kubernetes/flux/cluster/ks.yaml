@@ -6,6 +6,8 @@ metadata:
   name: cluster-apps
   namespace: flux-system
 spec:
+  decryption:
+    provider: sops
   interval: 1h
   path: ./kubernetes/apps
   prune: true
@@ -18,9 +20,6 @@ spec:
   wait: false
   patches:
     - # Add Sops decryption to all Kustomizations
-      target:
-        group: kustomize.toolkit.fluxcd.io
-        kind: Kustomization
       patch: |-
         apiVersion: kustomize.toolkit.fluxcd.io/v1
         kind: Kustomization
@@ -29,6 +28,9 @@ spec:
         spec:
           decryption:
             provider: sops
+      target:
+        group: kustomize.toolkit.fluxcd.io
+        kind: Kustomization
     - # Add HelmRelease defaults to all Kustomizations
       patch: |-
         apiVersion: kustomize.toolkit.fluxcd.io/v1
