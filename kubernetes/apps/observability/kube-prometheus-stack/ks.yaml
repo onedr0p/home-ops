@@ -9,24 +9,15 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../components/defaults
-    - ../../../../components/gatus/guarded
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   interval: 1h
   path: ./kubernetes/apps/observability/kube-prometheus-stack/app
-  postBuild:
-    substitute:
-      APP: kube-prometheus-stack
-      GATUS_SUBDOMAIN: prometheus
   prune: true
-  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   targetNamespace: *namespace
-  timeout: 5m
   wait: false

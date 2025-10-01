@@ -10,9 +10,6 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../components/defaults
-    - ../../../../components/gatus/external
-    - ../../../../components/gpu
     - ../../../../components/nfs-scaler
     - ../../../../components/volsync
   dependsOn:
@@ -25,16 +22,13 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_PATH: /web/index.html
       VOLSYNC_CAPACITY: 50Gi
   prune: true
-  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   targetNamespace: *namespace
-  timeout: 5m
   wait: false
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
@@ -50,11 +44,9 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/default/plex/tools
   prune: true
-  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   targetNamespace: *namespace
-  timeout: 5m
   wait: false

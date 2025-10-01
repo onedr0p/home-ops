@@ -10,8 +10,6 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../components/defaults
-    - ../../../../components/gatus/external
     - ../../../../components/volsync
   dependsOn:
     - name: multus-networks
@@ -23,14 +21,11 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_SUBDOMAIN: hass
       VOLSYNC_CAPACITY: 5Gi
   prune: true
-  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   targetNamespace: *namespace
-  timeout: 5m
   wait: false

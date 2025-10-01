@@ -5,38 +5,33 @@ kind: HelmRelease
 metadata:
   name: gatus
 spec:
-  interval: 1h
   chartRef:
     kind: OCIRepository
     name: gatus
+  interval: 1h
   values:
     controllers:
       gatus:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
-          init-config:
+          gatus-sidecar:
             image:
-              repository: ghcr.io/home-operations/k8s-sidecar
-              tag: 1.30.10@sha256:dd3b1f0c4e6b4512b2deb50c58acf65fd0f0927120a59a95eec854d32a6c9ce3
-            env:
-              FOLDER: /config
-              LABEL: gatus.io/enabled
-              NAMESPACE: ALL
-              RESOURCE: both
-              UNIQUE_FILENAMES: true
-              METHOD: WATCH
-            restartPolicy: Always
+              repository: ghcr.io/home-operations/gatus-sidecar
+              tag: 0.0.3@sha256:9d227ecdd2b1db04f484c108d58f6defb3f72447c44ddb8f609d2e66f77f52d4
+            args:
+              - --gateway=envoy-external
             resources:
               requests:
                 cpu: 10m
               limits:
-                memory: 128Mi
+                memory: 64Mi
+            restartPolicy: Always
         containers:
           app:
             image:
               repository: ghcr.io/twin/gatus
-              tag: v5.25.0@sha256:4dfe1e0bef060df1b1e7f193ad9a89010d9e1c0fda7f673891c73d65f1312a5b
+              tag: v5.25.2@sha256:9ff09fe5eb5e96b7f2126dc95b375a87a7bc16380d5cb9d798af4e0ef36f0049
             env:
               GATUS_CONFIG_PATH: /config
               GATUS_DELAY_START_SECONDS: 5
@@ -93,10 +88,9 @@ spec:
           type: ClusterRole
           rules:
             - apiGroups:
-                - ""
+                - gateway.networking.k8s.io
               resources:
-                - configmaps
-                - secrets
+                - httproutes
               verbs:
                 - get
                 - watch

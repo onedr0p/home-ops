@@ -10,8 +10,6 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../components/defaults
-    - ../../../../components/gatus/guarded
     - ../../../../components/nfs-scaler
     - ../../../../components/volsync
   dependsOn:
@@ -24,11 +22,9 @@ spec:
       APP: *app
       VOLSYNC_CAPACITY: 2Gi
   prune: true
-  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   targetNamespace: *namespace
-  timeout: 5m
   wait: false

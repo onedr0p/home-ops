@@ -5,10 +5,10 @@ kind: HelmRelease
 metadata:
   name: plex
 spec:
-  interval: 1h
   chartRef:
     kind: OCIRepository
     name: plex
+  interval: 1h
   values:
     controllers:
       plex:
@@ -73,6 +73,9 @@ spec:
             port: *port
     route:
       app:
+        annotations:
+          gatus.home-operations.com/endpoint: |-
+            conditions: ["[STATUS] == 401"]
         hostnames:
           - "{{ .Release.Name }}.turbo.ac"
         parentRefs:
@@ -87,20 +90,14 @@ spec:
               - type: RequestHeaderModifier
                 requestHeaderModifier:
                   remove:
-                    - "Range"
+                    - Range
             matches:
               - path:
                   type: PathPrefix
                   value: /library/streams
-            timeouts:
-              request: 0s
-              backendRequest: 0s
           - backendRefs:
               - identifier: app
                 port: *port
-            timeouts:
-              request: 0s
-              backendRequest: 0s
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"

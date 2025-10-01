@@ -5,10 +5,10 @@ kind: HelmRelease
 metadata:
   name: kromgo
 spec:
-  interval: 1h
   chartRef:
     kind: OCIRepository
     name: kromgo
+  interval: 1h
   values:
     controllers:
       kromgo:
@@ -60,6 +60,9 @@ spec:
             port: *healthPort
     route:
       app:
+        annotations:
+          gatus.home-operations.com/endpoint: |-
+            conditions: ["[STATUS] == 404"]
         hostnames:
           - "{{ .Release.Name }}.turbo.ac"
         parentRefs:
