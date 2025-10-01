@@ -35,8 +35,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../components/gatus/guarded
   dependsOn:
     - name: rook-ceph
       namespace: *namespace
@@ -58,10 +56,6 @@ spec:
       current: status.ceph.health in ['HEALTH_OK', 'HEALTH_WARN']
   interval: 1h
   path: ./kubernetes/apps/rook-ceph/rook-ceph/cluster
-  postBuild:
-    substitute:
-      APP: *app
-      GATUS_SUBDOMAIN: rook
   prune: true
   retryInterval: 2m
   sourceRef:
