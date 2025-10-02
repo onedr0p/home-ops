@@ -4,7 +4,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app actions-runner-controller
-  namespace: &namespace actions-runner-system
+  namespace: actions-runner-system
 spec:
   commonMetadata:
     labels:
@@ -12,8 +12,8 @@ spec:
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
-      name: *app
-      namespace: *namespace
+      name: actions-runner-controller
+      namespace: actions-runner-system
   interval: 1h
   path: ./kubernetes/apps/actions-runner-system/actions-runner-controller/app
   prune: true
@@ -21,21 +21,19 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app actions-runner-controller-runners
-  namespace: &namespace actions-runner-system
+  name: actions-runner-controller-runners
+  namespace: actions-runner-system
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: actions-runner-controller
-      namespace: *namespace
     - name: openebs
       namespace: openebs-system
   interval: 1h
@@ -45,5 +43,4 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   wait: false
