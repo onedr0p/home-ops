@@ -10,11 +10,6 @@ spec:
       namespace: openebs-system
     - name: snapshot-controller
       namespace: kube-system
-  healthChecks:
-    - apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      name: volsync
-      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/volsync-system/volsync/app
   prune: true
@@ -22,6 +17,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
+  wait: true
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -38,3 +34,4 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
+  wait: false

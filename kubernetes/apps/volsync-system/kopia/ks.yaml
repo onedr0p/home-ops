@@ -9,11 +9,6 @@ spec:
     - ../../../../components/nfs-scaler
   dependsOn:
     - name: volsync
-  healthChecks:
-    - apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      name: kopia
-      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/volsync-system/kopia/app
   postBuild:
@@ -24,3 +19,4 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
+  wait: false
