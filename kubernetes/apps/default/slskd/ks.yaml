@@ -3,8 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app slskd
-  namespace: &namespace default
+  name: slskd
 spec:
   components:
     - ../../../../components/nfs-scaler
@@ -17,11 +16,10 @@ spec:
   path: ./kubernetes/apps/default/slskd/app
   postBuild:
     substitute:
-      APP: *app
+      APP: slskd
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   wait: false

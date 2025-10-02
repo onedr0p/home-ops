@@ -3,8 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app zwave
-  namespace: &namespace default
+  name: zwave
 spec:
   components:
     - ../../../../components/volsync
@@ -15,12 +14,11 @@ spec:
   path: ./kubernetes/apps/default/zwave/app
   postBuild:
     substitute:
-      APP: *app
+      APP: zwave
       VOLSYNC_CAPACITY: 1Gi
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   wait: false
