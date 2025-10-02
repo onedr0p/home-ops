@@ -3,12 +3,8 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app thelounge
-  namespace: &namespace default
+  name: thelounge
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   components:
     - ../../../../components/volsync
   dependsOn:
@@ -18,12 +14,11 @@ spec:
   path: ./kubernetes/apps/default/thelounge/app
   postBuild:
     substitute:
-      APP: *app
+      APP: thelounge
       VOLSYNC_CAPACITY: 5Gi
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   wait: false
