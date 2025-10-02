@@ -3,13 +3,15 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: intel-device-plugin-gpu
+  name: intel-gpu-resource-driver
 spec:
   chartRef:
     kind: OCIRepository
-    name: intel-device-plugins-gpu
+    name: intel-gpu-resource-driver
   interval: 1h
   values:
-    name: i915
-    nodeFeatureRule: false
-    sharedDevNum: 99
+    image:
+      repository: ghcr.io/intel/intel-resource-drivers-for-kubernetes
+    cdi:
+      staticPath: /var/cdi/static
+      dynamicPath: /var/cdi/dynamic

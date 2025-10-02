@@ -34,6 +34,7 @@ machine:
         [plugins."io.containerd.cri.v1.images"]
           discard_unpacked_layers = false
         [plugins."io.containerd.cri.v1.runtime"]
+          cdi_spec_dirs = ["/var/cdi/static", "/var/cdi/dynamic"]
           device_ownership_from_security_context = true
     - op: overwrite
       path: /etc/nfsmount.conf
@@ -85,7 +86,7 @@ machine:
             dhcp: false
             mtu: 9000
   nodeLabels:
-    intel.feature.node.kubernetes.io/gpu: "true"
+    node.kubernetes.io/gpu: "true"
     topology.kubernetes.io/region: main
   sysctls:
     fs.inotify.max_user_instances: "8192"
