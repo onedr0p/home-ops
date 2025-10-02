@@ -3,17 +3,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app cert-manager
-  namespace: &namespace cert-manager
+  name: cert-manager
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
-      name: *app
-      namespace: *namespace
+      namespace: cert-manager
+      name: cert-manager
     - apiVersion: cert-manager.io/v1
       kind: ClusterIssuer
       name: letsencrypt-production
@@ -29,4 +25,4 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
+  targetNamespace: cert-manager
