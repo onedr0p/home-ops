@@ -5,5 +5,16 @@ kind: Kustomization
 namespace: actions-runner-system
 components:
   - ../../components/namespace
+replacements:
+  - source:
+      kind: Kustomization
+      fieldPath: metadata.namespace
+    targets:
+      - select:
+          kind: Kustomization
+        fieldPaths:
+          - spec.targetNamespace
+        options:
+          create: true
 resources:
   - ./actions-runner-controller/ks.yaml
