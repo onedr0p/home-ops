@@ -5,11 +5,14 @@ kind: Kustomization
 namespace: actions-runner-system
 components:
   - ../../components/namespace
+resources:
+  - ./actions-runner-controller/ks.yaml
 replacements:
   - source:
       kind: Kustomization
       group: kustomize.toolkit.fluxcd.io
       version: v1
+      name: actions-runner-controller
       fieldPath: metadata.namespace
     targets:
       - select:
@@ -20,5 +23,19 @@ replacements:
           - spec.targetNamespace
         options:
           create: true
-resources:
-  - ./actions-runner-controller/ks.yaml
+
+  - source:
+      kind: Kustomization
+      group: kustomize.toolkit.fluxcd.io
+      version: v1
+      name: actions-runner-controller
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: Kustomization
+          group: kustomize.toolkit.fluxcd.io
+          version: v1
+        fieldPaths:
+          - spec.commonMetadata.labels.app.kubernetes.io/name
+        options:
+          create: true
