@@ -12,3 +12,14 @@ resources:
   - ./echo/ks.yaml
   - ./envoy-gateway/ks.yaml
   - ./unifi-dns/ks.yaml
+replacements:
+  - source:
+      kind: Kustomization
+      group: kustomize.config.k8s.io
+      fieldPath: metadata.namespace
+    targets:
+      - select:
+          kind: Kustomization
+          group: kustomize.toolkit.fluxcd.io
+        fieldPaths:
+          - spec.targetNamespace
