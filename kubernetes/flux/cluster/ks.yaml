@@ -12,12 +12,10 @@ spec:
   interval: 1h
   path: ./kubernetes/apps
   prune: true
-  retryInterval: 5m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  timeout: 15m
   wait: false
   patches:
     - # Add Kustomization defaults for all child Kustomizations
@@ -44,7 +42,6 @@ spec:
                   rollback:
                     cleanupOnFail: true
                     recreate: true
-                  timeout: 10m
                   upgrade:
                     cleanupOnFail: true
                     crds: CreateReplace
@@ -56,8 +53,6 @@ spec:
               target:
                 group: helm.toolkit.fluxcd.io
                 kind: HelmRelease
-          retryInterval: 5m
-          timeout: 15m
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization
