@@ -5,6 +5,8 @@ kind: Kustomization
 namespace: network
 components:
   - ../../components/namespace
+replacements:
+  - path: ../../components/replacements/ks.yaml
 resources:
   - ./certificates/ks.yaml
   - ./cloudflare-tunnel/ks.yaml
@@ -12,15 +14,3 @@ resources:
   - ./echo/ks.yaml
   - ./envoy-gateway/ks.yaml
   - ./unifi-dns/ks.yaml
-replacements:
-  - source:
-      kind: Namespace
-      fieldPath: metadata.name
-    targets:
-      - select:
-          kind: Kustomization
-          group: kustomize.toolkit.fluxcd.io
-        fieldPaths:
-          - spec.targetNamespace
-        options:
-          create: true

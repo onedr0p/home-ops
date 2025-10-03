@@ -5,6 +5,8 @@ kind: Kustomization
 namespace: observability
 components:
   - ../../components/namespace
+replacements:
+  - path: ../../components/replacements/ks.yaml
 resources:
   - ./blackbox-exporter/ks.yaml
   - ./fluent-bit/ks.yaml
@@ -19,15 +21,3 @@ resources:
   - ./snmp-exporter/ks.yaml
   - ./spoodermon/ks.yaml
   - ./unpoller/ks.yaml
-replacements:
-  - source:
-      kind: Namespace
-      fieldPath: metadata.name
-    targets:
-      - select:
-          kind: Kustomization
-          group: kustomize.toolkit.fluxcd.io
-        fieldPaths:
-          - spec.targetNamespace
-        options:
-          create: true
