@@ -70,6 +70,14 @@ spec:
           rename k_labels_app app
           rename k_labels_k8s-app app
 
+      customParsers: |-
+        [PARSER]
+          name containerd
+          format regex
+          regex ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>[^ ]*) (?<log>.*)$
+          time_key time
+          time_format %Y-%m-%dT%H:%M:%S.%L%z
+
       outputs: |-
         [OUTPUT]
           name loki

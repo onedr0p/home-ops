@@ -3,12 +3,8 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app qbittorrent
-  namespace: &namespace default
+  name: qbittorrent
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   components:
     - ../../../../components/nfs-scaler
     - ../../../../components/volsync
@@ -21,12 +17,11 @@ spec:
   path: ./kubernetes/apps/default/qbittorrent/app
   postBuild:
     substitute:
-      APP: *app
+      APP: qbittorrent
       VOLSYNC_CAPACITY: 2Gi
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
   wait: false

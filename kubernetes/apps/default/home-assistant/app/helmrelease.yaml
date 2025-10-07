@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/home-assistant
-              tag: 2025.9.4@sha256:55c7db16301626265c6c8132985137ca0798303773dafa244e562353baa93a6f
+              tag: 2025.10.1@sha256:c2febd5870a769d2131b2a716f3ed447289984e440ff415f3e634a6233101bb8
             env:
               TZ: America/New_York
               HASS_HTTP_TRUSTED_PROXY_1: 192.168.69.0/24
@@ -58,6 +58,9 @@ spec:
             port: 8123
     route:
       app:
+        annotations:
+          gatus.home-operations.com/endpoint: |-
+            conditions: ["[STATUS] == 200"]
         hostnames:
           - "{{ .Release.Name }}.turbo.ac"
           - hass.turbo.ac
