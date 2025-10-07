@@ -15,3 +15,13 @@ spec:
     cdi:
       staticPath: /var/cdi/static
       dynamicPath: /var/cdi/dynamic
+  postRenderers:
+    - kustomize:
+        patches:
+          - patch: |-
+              - op: replace
+                path: /spec/template/spec/containers/0/securityContext/allowPrivilegeEscalation
+                value: false
+            target:
+              kind: DaemonSet
+              name: intel-gpu-resource-driver-kubelet-plugin
