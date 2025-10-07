@@ -10,18 +10,6 @@ spec:
     name: intel-gpu-resource-driver
   interval: 1h
   values:
-    image:
-      repository: ghcr.io/intel/intel-resource-drivers-for-kubernetes
     cdi:
       staticPath: /var/cdi/static
       dynamicPath: /var/cdi/dynamic
-  postRenderers:
-    - kustomize:
-        patches:
-          - patch: |-
-              - op: replace
-                path: /spec/template/spec/containers/0/securityContext/allowPrivilegeEscalation
-                value: false
-            target:
-              kind: DaemonSet
-              name: intel-gpu-resource-driver-kubelet-plugin
