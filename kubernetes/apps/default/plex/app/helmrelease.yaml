@@ -101,10 +101,6 @@ spec:
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
-      config-cache:
-        existingClaim: "{{ .Release.Name }}-cache"
-        globalMounts:
-          - path: /config/Library/Application Support/Plex Media Server/Cache
       media:
         type: nfs
         server: expanse.internal
@@ -112,12 +108,5 @@ spec:
         globalMounts:
           - path: /media
             readOnly: true
-      tmpfs:
+      tmp:
         type: emptyDir
-        advancedMounts:
-          plex:
-            app:
-              - path: /config/Library/Application Support/Plex Media Server/Logs
-                subPath: logs
-              - path: /tmp
-                subPath: tmp
