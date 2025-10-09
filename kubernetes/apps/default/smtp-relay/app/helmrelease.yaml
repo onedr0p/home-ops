@@ -49,6 +49,7 @@ spec:
       app:
         type: LoadBalancer
         annotations:
+          external-dns.alpha.kubernetes.io/hostname: smtp-relay.turbo.ac
           lbipam.cilium.io/ips: 192.168.69.122
         externalTrafficPolicy: Local
         ports:
@@ -62,7 +63,7 @@ spec:
             runtime_dir /cache/run
             tls off
             hostname {env:SMTP_RELAY_HOSTNAME}
-            smtp tcp://0.0.0.0:587 {
+            smtp tcp://0.0.0.0:{env:SMTP_RELAY_SMTP_PORT} {
                 default_source {
                     deliver_to &remote_queue
                 }
@@ -73,7 +74,7 @@ spec:
             target.smtp remote_smtp {
                 starttls yes
                 auth plain {env:SMTP_RELAY_USERNAME} {env:SMTP_RELAY_PASSWORD}
-                targets tcp://{env:SMTP_RELAY_SERVER}:{env:SMTP_RELAY_SERVER_PORT}
+                targets tcp://{env:SMTP_RELAY_SERVER}:587
             }
     persistence:
       cache:
