@@ -7,12 +7,10 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
 configMapGenerator:
-  - name: sonarr-loki-rules
+  - name: sonarr-configmap
     files:
-      - sonarr.yaml=./lokirule.yaml
-    options:
-      labels:
-        loki_rule: "true"
+      - refresh-series.sh=./resources/refresh-series.sh
+      - tag-codecs.sh=./resources/tag-codecs.sh
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

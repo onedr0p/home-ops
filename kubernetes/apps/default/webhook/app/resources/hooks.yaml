@@ -1,12 +1,4 @@
 ---
-- id: jellyseerr-pushover
-  execute-command: /config/jellyseerr-pushover.sh
-  command-working-directory: /config
-  pass-arguments-to-command:
-    - source: string
-      name: '{{ getenv "JELLYSEERR_PUSHOVER_URL" }}'
-    - source: entire-payload
-
 - id: radarr-pushover
   execute-command: /config/radarr-pushover.sh
   command-working-directory: /config
@@ -67,43 +59,3 @@
     - envname: SONARR_DOWNLOAD_CLIENT
       source: payload
       name: downloadClient
-
-- id: sonarr-refresh-series
-  execute-command: /config/sonarr-refresh-series.sh
-  command-working-directory: /config
-  pass-environment-to-command:
-    - envname: SONARR_REMOTE_ADDR
-      source: request
-      name: remote-addr
-    - envname: SONARR_API_KEY
-      source: string
-      name: '{{ getenv "SONARR_API_KEY" }}'
-    - envname: SONARR_EVENT_TYPE
-      source: payload
-      name: eventType
-    - envname: SONARR_SERIES_ID
-      source: payload
-      name: series.id
-    - envname: SONARR_SERIES_TITLE
-      source: payload
-      name: series.title
-
-- id: sonarr-tag-codecs
-  execute-command: /config/sonarr-tag-codecs.sh
-  command-working-directory: /config
-  pass-environment-to-command:
-    - envname: SONARR_REMOTE_ADDR
-      source: request
-      name: remote-addr
-    - envname: SONARR_API_KEY
-      source: string
-      name: '{{ getenv "SONARR_API_KEY" }}'
-    - envname: SONARR_EVENT_TYPE
-      source: payload
-      name: eventType
-    - envname: SONARR_SERIES_ID
-      source: payload
-      name: series.id
-    - envname: SONARR_SERIES_TITLE
-      source: payload
-      name: series.title
