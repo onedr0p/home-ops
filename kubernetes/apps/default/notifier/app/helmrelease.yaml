@@ -3,15 +3,16 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: webhook
+  name: notifier
 spec:
   chartRef:
     kind: OCIRepository
-    name: webhook
+    name: notifier
   interval: 1h
   values:
     controllers:
-      webhook:
+      notifier:
+        replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -47,18 +48,10 @@ spec:
         ports:
           http:
             port: *port
-    route:
-      app:
-        hostnames:
-          - "{{ .Release.Name }}.turbo.ac"
-        parentRefs:
-          - name: envoy-internal
-            namespace: network
-            sectionName: https
     persistence:
       config:
         type: configMap
-        name: webhook-configmap
+        name: notifier-configmap
         defaultMode: 0775
         globalMounts:
           - readOnly: true
