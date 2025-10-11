@@ -1,7 +1,7 @@
 ---
 alerting:
   pushover:
-    application-token: ${SPOODERMON_PUSHOVER_TOKEN}
+    application-token: ${BUDDY_PUSHOVER_TOKEN}
     default-alert:
       description: health-check failed
       failure-threshold: 5
@@ -10,24 +10,13 @@ alerting:
       success-threshold: 3
     priority: 1
     resolved-priority: 0
-    title: Spoodermon
-    user-key: ${SPOODERMON_PUSHOVER_USER_KEY}
+    title: Gatus
+    user-key: ${BUDDY_PUSHOVER_USER_KEY}
 
 endpoints:
-  - name: Cloudflare
-    url: icmp://1.1.1.1
-    interval: 1m
-    conditions:
-      - "[CONNECTED] == true"
-
-  - name: Google
-    url: icmp://8.8.8.8
-    interval: 1m
-    conditions:
-      - "[CONNECTED] == true"
-
   - name: Ping
-    url: icmp://${SPOODERMON_DDNS_HOSTNAME}
+    group: buddy
+    url: icmp://${BUDDY_DDNS_HOSTNAME}
     interval: 1m
     ui:
       hide-url: true
@@ -38,7 +27,8 @@ endpoints:
       - type: pushover
 
   - name: Status Page
-    url: https://${SPOODERMON_STATUS_HOSTNAME}
+    group: buddy
+    url: https://${BUDDY_STATUS_HOSTNAME}
     interval: 1m
     ui:
       hide-url: true
@@ -49,19 +39,8 @@ endpoints:
 
 external-endpoints:
   - name: Heartbeat
-    token: ${SPOODERMON_HEARTBEAT_TOKEN}
+    group: buddy
+    token: ${BUDDY_HEARTBEAT_TOKEN}
     heartbeat:
       interval: 10m
     alerts: *alerts
-
-storage:
-  type: sqlite
-  caching: true
-  path: ${GATUS_CONFIG_PATH}/gatus.db
-
-ui:
-  title: Status | Spoodermon
-  header: Status
-
-web:
-  port: ${GATUS_WEB_PORT}
