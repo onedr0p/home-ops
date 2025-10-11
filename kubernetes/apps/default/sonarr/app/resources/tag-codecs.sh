@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2154
 set -euo pipefail
 
-[[ "${sonarr_eventtype:-}" == "Download" ]] || exit 0
+# Incoming environment variables
+EVENT_TYPE="${sonarr_eventtype:-}"
+SERIES_ID="${sonarr_series_id:-}"
 
-CURL_CMD=("curl" "-fsSL" "--header" "X-Api-Key: ${SONARR__AUTH__APIKEY:-}")
-SONARR_API_URL="http://localhost:${SONARR__SERVER__PORT:-}/api/v3"
+# Only proceed for "Download" events with valid series ID
+[[ "${EVENT_TYPE}" == "Download" && -n "${SERIES_ID}" ]] || exit 0
+
+# Required environment variables
+: "${SONARR__AUTH__APIKEY:?API key required}"
+: "${SONARR__SERVER__PORT:?Server port required}"
+
+# Setup curl command and base API URL
+readonly CURL_CMD=("curl" "-fsSL" "--max-time" "30" "--header" "X-Api-Key: ${SONARR__AUTH__APIKEY}")
+readonly SONARR_API_URL="http://localhost:${SONARR__SERVER__PORT}/api/v3"
 
 # Get codec tags for a series
 get_codec_tags() {
@@ -24,14 +33,15 @@ get_codec_tags() {
 # Get or create tag
 get_or_create_tag() {
     local tag_label="$1"
-    local existing_tags tag_id
+    local tag_id
 
-    existing_tags=$("${CURL_CMD[@]}" "${SONARR_API_URL}/tag")
-    tag_id=$(echo "$existing_tags" | jq -r ".[] | select(.label == \"$tag_label\") | .id")
+    tag_id=$("${CURL_CMD[@]}" "${SONARR_API_URL}/tag" | \
+        jq -r --arg label "$tag_label" '.[] | select(.label == $label) | .id')
 
     if [[ -z "$tag_id" ]]; then
         tag_id=$("${CURL_CMD[@]}" -X POST -H "Content-Type: application/json" \
-            -d "{\"label\": \"$tag_label\"}" "${SONARR_API_URL}/tag" | jq -r '.id')
+            --data-binary "$(jq -n --arg label "$tag_label" '{label: $label}')" \
+            "${SONARR_API_URL}/tag" | jq -r '.id')
     fi
 
     echo "$tag_id"
@@ -42,23 +52,20 @@ update_series_tags() {
     local series_data="$1"
     local codecs="$2"
 
-    # Get current codec tag IDs (tags that start with "codec:")
-    local current_codec_tags existing_tags
-    existing_tags=$("${CURL_CMD[@]}" "${SONARR_API_URL}/tag")
-    current_codec_tags=$(echo "$existing_tags" | jq -r '
-        [.[] | select(.label | startswith("codec:")) | .id]'
-    )
+    # Get current codec tag IDs and remove them
+    local current_codec_tags
+    current_codec_tags=$("${CURL_CMD[@]}" "${SONARR_API_URL}/tag" | \
+        jq -r '[.[] | select(.label | startswith("codec:")) | .id]')
 
-    # Remove existing codec tags
     series_data=$(echo "$series_data" | jq --argjson remove_tags "$current_codec_tags" '
         .tags |= map(select(. as $tag | $remove_tags | index($tag) | not))
     ')
 
     # Add new codec tags
     local new_tag_ids=()
-    for codec in $codecs; do
-        new_tag_ids+=($(get_or_create_tag "$codec"))
-    done
+    while IFS= read -r codec; do
+        [[ -n "$codec" ]] && new_tag_ids+=($(get_or_create_tag "$codec"))
+    done <<< "$codecs"
 
     # Add new tags if any
     if [[ ${#new_tag_ids[@]} -gt 0 ]]; then
@@ -72,22 +79,31 @@ update_series_tags() {
     echo "$series_data"
 }
 
-series_data=$("${CURL_CMD[@]}" "${SONARR_API_URL}/series/${sonarr_series_id:-}")
+series_data=$("${CURL_CMD[@]}" "${SONARR_API_URL}/series/${SERIES_ID}")
 series_title=$(echo "$series_data" | jq -r '.title')
 
 # Skip if no episode files
-[[ $(echo "$series_data" | jq -r '.statistics.episodeFileCount // 0') -eq 0 ]] && { echo "Skipping $series_title - no episode files"; exit 0; }
+if [[ $(echo "$series_data" | jq -r '.statistics.episodeFileCount // 0') -eq 0 ]]; then
+    echo "Skipping $series_title - no episode files"
+    exit 0
+fi
 
-codecs=$(get_codec_tags "${sonarr_series_id:-}")
+codecs=$(get_codec_tags "${SERIES_ID}")
 
 # Skip if no codecs found
-[[ -z "$codecs" ]] && { echo "Skipping $series_title - no codecs found"; exit 0; }
+if [[ -z "$codecs" ]]; then
+    echo "Skipping $series_title - no codecs found"
+    exit 0
+fi
 
 updated_data=$(update_series_tags "$series_data" "$codecs")
 
 # Skip if no tag changes
-[[ $(echo "$series_data" | jq -c '.tags') == $(echo "$updated_data" | jq -c '.tags') ]] && { echo "Skipping $series_title - no tag changes needed"; exit 0; }
+if [[ $(echo "$series_data" | jq -c '.tags') == $(echo "$updated_data" | jq -c '.tags') ]]; then
+    echo "Skipping $series_title - no tag changes needed"
+    exit 0
+fi
 
 echo "Updating $series_title with codecs: ${codecs//$'\n'/, }"
-"${CURL_CMD[@]}" -X PUT -H "Content-Type: application/json" -d "$updated_data" \
-    "${SONARR_API_URL}/series" &>/dev/null
+"${CURL_CMD[@]}" -X PUT -H "Content-Type: application/json" \
+    --data-binary "$updated_data" "${SONARR_API_URL}/series" >/dev/null
