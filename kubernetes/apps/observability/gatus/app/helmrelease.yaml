@@ -39,6 +39,9 @@ spec:
               GATUS_DELAY_START_SECONDS: 5
               GATUS_WEB_PORT: &port 80
               TZ: America/New_York
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &probes
                 enabled: true
@@ -55,17 +58,14 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: {drop: ["ALL"]}
+              capabilities: {add: ["NET_RAW"], drop: ["ALL"]}
             resources:
               requests:
                 cpu: 100m
               limits:
                 memory: 256Mi
     defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
+      hostUsers: false
     service:
       app:
         ports:
@@ -125,5 +125,7 @@ spec:
         type: configMap
         name: "{{ .Release.Name }}-configmap"
         globalMounts:
+          - path: /config/buddy.yaml
+            subPath: buddy.yaml
           - path: /config/config.yaml
             subPath: config.yaml
