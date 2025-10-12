@@ -12,6 +12,7 @@ spec:
   values:
     controllers:
       slskd:
+        type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -54,6 +55,12 @@ spec:
                 memory: 128Mi
               limits:
                 memory: 1Gi
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              storageClass: ceph-block
+              accessMode: ReadWriteOnce
+              size: 5Gi
     defaultPodOptions:
       annotations:
         k8s.v1.cni.cncf.io/networks: |-
@@ -104,8 +111,6 @@ spec:
                 - Thumbs.db$
                 - \.DS_Store$
     persistence:
-      config:
-        existingClaim: "{{ .Release.Name }}"
       config-file:
         type: configMap
         identifier: config
