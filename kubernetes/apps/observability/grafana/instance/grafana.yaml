@@ -1,0 +1,72 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafana_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana
+spec:
+  config:
+    analytics:
+      check_for_updates: "false"
+      check_for_plugin_updates: "false"
+      feedback_links_enabled: "false"
+      reporting_enabled: "false"
+    auth.anonymous:
+      enabled: true
+    log:
+      mode: console
+    news:
+      news_feed_enabled: "false"
+    server:
+      root_url: https://grafana.turbo.ac
+  deployment:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: grafana
+              envFrom:
+                - secretRef:
+                    name: grafana-secret
+              volumeMounts:
+                - name: sidecar-dashboards
+                  mountPath: /var/lib/grafana/dashboards
+                - name: sidecar-datasources
+                  mountPath: /etc/grafana/provisioning/datasources
+            - name: k8s-sidecar
+              image: ghcr.io/kiwigrid/k8s-sidecar:1.30.1
+              env:
+                - name: METHOD
+                  value: WATCH
+                - name: LABEL
+                  value: grafana_datasource
+                - name: FOLDER
+                  value: /etc/grafana/provisioning/datasources
+                - name: RESOURCE
+                  value: both
+                - name: NAMESPACE
+                  value: ALL
+                - name: REQ_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-secret
+                      key: GF_SECURITY_ADMIN_USER
+                - name: REQ_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-secret
+                      key: GF_SECURITY_ADMIN_PASSWORD
+                - name: REQ_URL
+                  value: http://localhost:3000/api/admin/provisioning/datasources/reload
+                - name: REQ_METHOD
+                  value: POST
+              volumeMounts:
+                - name: sidecar-dashboards
+                  mountPath: /var/lib/grafana/dashboards
+                - name: sidecar-datasources
+                  mountPath: /etc/grafana/provisioning/datasources
+          volumes:
+            - name: sidecar-dashboards
+              emptyDir: {}
+            - name: sidecar-datasources
+              emptyDir: {}
