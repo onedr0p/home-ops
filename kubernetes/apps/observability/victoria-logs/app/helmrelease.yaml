@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-logs
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: victoria-logs
+  interval: 1h
+  values:
+    fullnameOverride: victoria-logs
+    retentionPeriod: 14d
+    server:
+      persistentVolume:
+        enabled: true
+        storageClassName: ceph-block
+        size: 20Gi
+      serviceMonitor:
+        enabled: true
+    dashboards:
+      enabled: true
+      labels:
+        grafana_dashboard: "1"

@@ -36,22 +36,19 @@ spec:
       filters: |-
         [FILTER]
           name kubernetes
+          alias kubernetes
           match kubernetes.*
-          kube_url https://kubernetes.default.svc:443
-          kube_ca_file /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-          kube_token_file /var/run/secrets/kubernetes.io/serviceaccount/token
-          kube_tag_prefix kubernetes.var.log.containers.
           merge_log on
-          merge_log_key log_processed
-          merge_log_trim on
+          kube_tag_prefix kubernetes.var.log.containers.
           k8s-logging.parser on
-          k8s-logging.exclude off
-          labels on
-          annotations off
+          k8s-logging.exclude on
+          namespace_labels off
+          annotations on
 
         [FILTER]
           name nest
           match kubernetes.*
+          wildcard pod_name
           operation lift
           nested_under kubernetes
           add_prefix k_
@@ -66,9 +63,11 @@ spec:
         [FILTER]
           name modify
           match kubernetes.*
+          rename k_labels_app.kubernetes.io/instance app
           rename k_labels_app.kubernetes.io/name app
           rename k_labels_app app
           rename k_labels_k8s-app app
+          rename k_container_name app
 
       customParsers: |-
         [PARSER]
@@ -80,14 +79,13 @@ spec:
 
       outputs: |-
         [OUTPUT]
-          name loki
-          match kubernetes.*
-          host loki-headless.observability.svc.cluster.local
-          port 3100
-          uri /loki/api/v1/push
-          line_format json
-          labels job=fluent-bit, namespace=$k_namespace_name, app=$app
-          structured_metadata container=$k_container_name, pod=$k_pod_name, host=$k_host
+          Name http
+          Match kubernetes.*
+          host victoria-logs-server.observability.svc.cluster.local
+          port 9428
+          uri /insert/jsonline?_stream_fields=stream,k_namespace_name,k_pod_name,app&_msg_field=log&_time_field=date
+          format json_lines
+          json_date_format iso8601
           compress gzip
     dashboards:
       enabled: true
