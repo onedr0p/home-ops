@@ -31,7 +31,7 @@ spec:
                 - secretRef:
                     name: grafana-secret
               volumeMounts:
-                - name: sidecar-dashboards
+                - name: grafana-sidecar-dashboards
                   mountPath: /var/lib/grafana/dashboards
             - name: k8s-sidecar
               image: ghcr.io/kiwigrid/k8s-sidecar:1.30.11
@@ -63,11 +63,11 @@ spec:
                 - name: REQ_METHOD
                   value: POST
               volumeMounts:
-                - name: sidecar-dashboards
+                - name: grafana-sidecar-dashboards
                   mountPath: /var/lib/grafana/dashboards
           volumes:
-            - name: sidecar-provider
+            - name: grafana-sidecar-provider
               configMap:
-                name: sidecar-provider-configmap
-            - name: sidecar-dashboards
+                name: grafana-sidecar-provider
+            - name: grafana-sidecar-dashboards
               emptyDir: {}
