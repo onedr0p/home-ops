@@ -4,6 +4,8 @@ apiVersion: grafana.integreatly.org/v1beta1
 kind: Grafana
 metadata:
   name: grafana
+  labels:
+    grafana.internal/instance: grafana
 spec:
   config:
     analytics:
@@ -31,21 +33,21 @@ spec:
               volumeMounts:
                 - name: sidecar-dashboards
                   mountPath: /var/lib/grafana/dashboards
-                - name: sidecar-datasources
-                  mountPath: /etc/grafana/provisioning/datasources
             - name: k8s-sidecar
               image: ghcr.io/kiwigrid/k8s-sidecar:1.30.11
               env:
                 - name: METHOD
                   value: WATCH
                 - name: LABEL
-                  value: grafana_datasource
+                  value: grafana_dashboard
                 - name: FOLDER
-                  value: /etc/grafana/provisioning/datasources
+                  value: /var/lib/grafana/dashboards
                 - name: RESOURCE
                   value: both
                 - name: NAMESPACE
                   value: ALL
+                - name: FOLDER_ANNOTATION
+                  value: grafana_folder
                 - name: REQ_USERNAME
                   valueFrom:
                     secretKeyRef:
@@ -57,16 +59,12 @@ spec:
                       name: grafana-secret
                       key: GF_SECURITY_ADMIN_PASSWORD
                 - name: REQ_URL
-                  value: http://localhost:3000/api/admin/provisioning/datasources/reload
+                  value: http://localhost:3000/api/admin/provisioning/dashboards/reload
                 - name: REQ_METHOD
                   value: POST
               volumeMounts:
                 - name: sidecar-dashboards
                   mountPath: /var/lib/grafana/dashboards
-                - name: sidecar-datasources
-                  mountPath: /etc/grafana/provisioning/datasources
           volumes:
             - name: sidecar-dashboards
-              emptyDir: {}
-            - name: sidecar-datasources
               emptyDir: {}

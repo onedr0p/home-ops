@@ -5,10 +5,12 @@ kind: GrafanaDatasource
 metadata:
   name: prometheus
 spec:
-  instanceSelector: {}
+  instanceSelector:
+    matchLabels:
+      grafana.internal/instance: grafana
   datasource:
     type: prometheus
-    name: Prometheus
+    name: prometheus
     access: proxy
     isDefault: true
     url: http://prometheus-operated.observability.svc.cluster.local:9090
@@ -19,10 +21,12 @@ kind: GrafanaDatasource
 metadata:
   name: alertmanager
 spec:
-  instanceSelector: {}
+  instanceSelector:
+    matchLabels:
+      grafana.internal/instance: grafana
   datasource:
     type: alertmanager
-    name: Alertmanager
+    name: alertmanager
     access: proxy
     jsonData:
       implementation: prometheus
