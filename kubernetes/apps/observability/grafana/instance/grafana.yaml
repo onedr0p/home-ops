@@ -13,61 +13,96 @@ spec:
       check_for_plugin_updates: "false"
       feedback_links_enabled: "false"
       reporting_enabled: "false"
+    auth:
+      disable_login_form: "false"
     auth.anonymous:
-      enabled: true
+      enabled: "true"
     log:
       mode: console
     news:
       news_feed_enabled: "false"
+    security:
+      admin_user: admin
     server:
       root_url: https://grafana.turbo.ac
   deployment:
+    metadata:
+      annotations:
+        reloader.stakater.com/auto: "true"
     spec:
       template:
         spec:
-          containers:
-            - name: grafana
-              envFrom:
-                - secretRef:
-                    name: grafana-secret
-              volumeMounts:
-                - name: grafana-sidecar-dashboards
-                  mountPath: /var/lib/grafana/dashboards
+          initContainers:
             - name: k8s-sidecar
               image: ghcr.io/kiwigrid/k8s-sidecar:1.30.11
               env:
-                - name: METHOD
-                  value: WATCH
-                - name: LABEL
-                  value: grafana_dashboard
                 - name: FOLDER
                   value: /var/lib/grafana/dashboards
-                - name: RESOURCE
-                  value: both
-                - name: NAMESPACE
-                  value: ALL
                 - name: FOLDER_ANNOTATION
                   value: grafana_folder
-                - name: REQ_USERNAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: grafana-secret
-                      key: GF_SECURITY_ADMIN_USER
+                - name: LABEL
+                  value: grafana_dashboard
+                - name: IGNORE_ALREADY_PROCESSED
+                  value: "true"
+                - name: METHOD
+                  value: WATCH
+                - name: NAMESPACE
+                  value: ALL
+                - name: RESOURCE
+                  value: configmap
+                - name: REQ_METHOD
+                  value: POST
                 - name: REQ_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: grafana-secret
                       key: GF_SECURITY_ADMIN_PASSWORD
                 - name: REQ_URL
-                  value: http://localhost:3000/api/admin/provisioning/dashboards/reload
-                - name: REQ_METHOD
-                  value: POST
+                  value: http://localhost:3000/api/admin/provisioning/datasources/reload
+                - name: REQ_USERNAME
+                  value: admin
+                - name: UNIQUE_FILENAMES
+                  value: "true"
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: {drop: ["ALL"]}
               volumeMounts:
                 - name: grafana-sidecar-dashboards
                   mountPath: /var/lib/grafana/dashboards
+                - name: tmpfs
+                  mountPath: /tmp
+              restartPolicy: Always
+          containers:
+            - name: grafana
+              env:
+                - name: GF_SECURITY_ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-secret
+                      key: GF_SECURITY_ADMIN_PASSWORD
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: {drop: ["ALL"]}
+              volumeMounts:
+                - name: grafana-sidecar-provider
+                  mountPath: /etc/grafana/provisioning/dashboards
+                - name: grafana-sidecar-dashboards
+                  mountPath: /var/lib/grafana/dashboards
+                - name: tmpfs
+                  mountPath: /tmp
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 64535
+            runAsGroup: 64535
+            fsGroup: 64535
+            fsGroupChangePolicy: OnRootMismatch
           volumes:
             - name: grafana-sidecar-provider
               configMap:
                 name: grafana-sidecar-provider
             - name: grafana-sidecar-dashboards
+              emptyDir: {}
+            - name: tmpfs
               emptyDir: {}

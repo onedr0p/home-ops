@@ -4,10 +4,10 @@ kind: ConfigMap
 metadata:
   name: grafana-sidecar-provider
 data:
-  provider.yaml: |-
+  provisioning.yaml: |-
     apiVersion: 1
     providers:
-      - name: sidecar
+      - name: configmap-dashboard-provider
         type: file
         disableDeletion: false
         updateIntervalSeconds: 10
@@ -25,7 +25,6 @@ rules:
       - ""
     resources:
       - configmaps
-      - secrets
     verbs:
       - get
       - watch
@@ -42,4 +41,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: grafana-sa
-    namespace: monitoring
+    namespace: observability
