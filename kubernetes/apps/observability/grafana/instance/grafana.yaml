@@ -21,20 +21,22 @@ spec:
       mode: console
     news:
       news_feed_enabled: "false"
+    plugins:
+      plugin_admin_enabled: "false"
     security:
-      admin_user: admin
+      angular_support_enabled: "true"
     server:
+      enable_gzip: "true"
       root_url: https://grafana.turbo.ac
   deployment:
-    metadata:
-      annotations:
-        reloader.stakater.com/auto: "true"
     spec:
+      strategy:
+        type: Recreate
       template:
         spec:
           initContainers:
             - name: k8s-sidecar
-              image: ghcr.io/kiwigrid/k8s-sidecar:1.30.11
+              image: ghcr.io/kiwigrid/k8s-sidecar:1.30.9
               env:
                 - name: FOLDER
                   value: /var/lib/grafana/dashboards
@@ -55,10 +57,10 @@ spec:
                 - name: REQ_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: grafana-secret
+                      name: grafana-admin-password-secret
                       key: GF_SECURITY_ADMIN_PASSWORD
                 - name: REQ_URL
-                  value: http://localhost:3000/api/admin/provisioning/datasources/reload
+                  value: http://localhost:3000/api/admin/provisioning/dashboards/reload
                 - name: REQ_USERNAME
                   value: admin
                 - name: UNIQUE_FILENAMES
@@ -79,7 +81,7 @@ spec:
                 - name: GF_SECURITY_ADMIN_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: grafana-secret
+                      name: grafana-admin-password-secret
                       key: GF_SECURITY_ADMIN_PASSWORD
               securityContext:
                 allowPrivilegeEscalation: false
@@ -87,18 +89,20 @@ spec:
                 capabilities: {drop: ["ALL"]}
               volumeMounts:
                 - name: grafana-sidecar-provider
-                  mountPath: /etc/grafana/provisioning/dashboards
+                  mountPath: /etc/grafana/provisioning/dashboards/sidecar-provider.yaml
+                  subPath: provider.yaml
                 - name: grafana-sidecar-dashboards
                   mountPath: /var/lib/grafana/dashboards
-                - name: tmpfs
-                  mountPath: /tmp
           securityContext:
             runAsNonRoot: true
-            runAsUser: 64535
-            runAsGroup: 64535
-            fsGroup: 64535
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
             fsGroupChangePolicy: OnRootMismatch
           volumes:
+            - name: grafana-data
+              persistentVolumeClaim:
+                claimName: grafana-pvc
             - name: grafana-sidecar-provider
               configMap:
                 name: grafana-sidecar-provider
@@ -106,3 +110,12 @@ spec:
               emptyDir: {}
             - name: tmpfs
               emptyDir: {}
+  persistentVolumeClaim:
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: ceph-block
+  disableDefaultSecurityContext: All

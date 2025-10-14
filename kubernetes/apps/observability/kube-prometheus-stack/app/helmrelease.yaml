@@ -112,6 +112,15 @@ spec:
     grafana:
       enabled: false
       forceDeployDashboards: true
+      operator:
+        dashboardsConfigMapRefEnabled: true
+        folder: observability
+        matchLabels:
+          grafana.internal/instance: grafana
+      sidecar:
+        dashboards:
+          label: grafana_dashboard_ignored # GrafanaDashboard is used instead, don't conflict with k8s-sidecar
+          labelValue: "1"
     additionalPrometheusRulesMap:
       dockerhub-rules:
         groups:
