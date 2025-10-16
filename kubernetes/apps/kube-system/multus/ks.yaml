@@ -5,6 +5,14 @@ kind: Kustomization
 metadata:
   name: multus
 spec:
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: multus
+      namespace: kube-system
+    - apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      name: network-attachment-definitions.k8s.cni.cncf.io
   interval: 1h
   path: ./kubernetes/apps/kube-system/multus/app
   prune: true
@@ -13,7 +21,6 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: kube-system
-  wait: true
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
