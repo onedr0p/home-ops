@@ -30,8 +30,8 @@ spec:
       root_url: https://grafana.turbo.ac
   deployment:
     spec:
-      strategy:
-        type: Recreate
+      # strategy:
+      #   type: Recreate
       template:
         spec:
           containers:
@@ -52,16 +52,16 @@ spec:
             runAsGroup: 1000
             fsGroup: 1000
             fsGroupChangePolicy: OnRootMismatch
-          volumes:
-            - name: grafana-data
-              persistentVolumeClaim:
-                claimName: grafana-pvc
-  persistentVolumeClaim:
-    spec:
-      accessModes:
-        - ReadWriteOnce
-      resources:
-        requests:
-          storage: 10Gi
-      storageClassName: ceph-block
+            # volumes:
+            #   - name: grafana-data
+            #     persistentVolumeClaim:
+            #       claimName: grafana-pvc
+  # persistentVolumeClaim:
+  #   spec:
+  #     accessModes:
+  #       - ReadWriteOnce
+  #     resources:
+  #       requests:
+  #         storage: 10Gi
+  #     storageClassName: ceph-block
   disableDefaultSecurityContext: All
