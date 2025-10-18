@@ -33,7 +33,7 @@ metrics:
     title: Pods
 
   - name: cluster_cpu_usage
-    query: round(avg(instance:node_cpu_utilisation:rate5m{kubernetes_node!=""}) * 100, 0.1)
+    query: round(avg(instance:node_cpu_utilisation:rate5m{pod!=""}) * 100, 0.1)
     suffix: "%"
     colors:
       - {color: "green", min: 0, max: 35}
@@ -42,7 +42,7 @@ metrics:
     title: CPU
 
   - name: cluster_memory_usage
-    query: round(sum(node_memory_MemTotal_bytes{kubernetes_node!=""} - node_memory_MemAvailable_bytes{kubernetes_node!=""}) / sum(node_memory_MemTotal_bytes{kubernetes_node!=""}) * 100, 0.1)
+    query: round(sum(node_memory_MemTotal_bytes{pod!=""} - node_memory_MemAvailable_bytes{pod!=""}) / sum(node_memory_MemTotal_bytes{pod!=""}) * 100, 0.1)
     suffix: "%"
     colors:
       - {color: green, min: 0, max: 35}
@@ -69,7 +69,7 @@ metrics:
     title: Age
 
   - name: cluster_uptime_days
-    query: round(avg(node_time_seconds{kubernetes_node!=""} - node_boot_time_seconds{kubernetes_node!=""}) / 86400)
+    query: round(avg(node_time_seconds{pod!=""} - node_boot_time_seconds{pod!=""}) / 86400)
     suffix: "d"
     colors:
       - {color: "green", min: 0, max: 180}
