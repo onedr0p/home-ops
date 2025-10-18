@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/servicemonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: grafana
+spec:
+  endpoints:
+    - port: grafana
+      path: /metrics
+      honorLabels: true
+  jobLabel: grafana
+  namespaceSelector:
+    matchNames:
+      - observability
+  selector:
+    matchLabels:
+      grafana.internal/instance: grafana
