@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: victoria-logs-vector-k8s-monitoring
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      grafana.internal/instance: grafana
+  datasources:
+    - datasourceName: prometheus
+      inputName: DS_PROMETHEUS
+  configMapRef:
+    name: victoria-logs-vector-k8s-monitoring
+    key: vector-k8s-monitoring.json
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/grafana.integreatly.org/grafanadashboard_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: victoria-logs-single-node
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      grafana.internal/instance: grafana
+  datasources:
+    - datasourceName: prometheus
+      inputName: DS_PROMETHEUS
+  configMapRef:
+    name: victoria-logs-victorialogs-single-node
+    key: victorialogs-single-node.json
