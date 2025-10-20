@@ -17,6 +17,21 @@ spec:
         enabled: true
         storageClassName: ceph-block
         size: 20Gi
+      route:
+        enabled: true
+        hostnames:
+          - victoria-logs.turbo.ac
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        filters:
+          - type: RequestRedirect
+            requestRedirect:
+              path:
+                type: ReplaceFullPath
+                replaceFullPath: /select/vmui/
+              statusCode: 302
       serviceMonitor:
         enabled: true
     dashboards:
