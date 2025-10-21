@@ -24,7 +24,19 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
-            sectionName: https
+            sectionName:
+        extraRules:
+          - filters:
+              - type: RequestRedirect
+                requestRedirect:
+                  path:
+                    type: ReplaceFullPath
+                    replaceFullPath: /select/vmui/
+                  statusCode: 302
+            matches:
+              - path:
+                  type: Exact
+                  value: /
       serviceMonitor:
         enabled: true
     dashboards:
