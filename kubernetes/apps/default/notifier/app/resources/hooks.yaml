@@ -1,23 +1,27 @@
 ---
 - id: jellyseerr-pushover
   execute-command: /config/jellyseerr-pushover.sh
-  pass-arguments-to-command:
-    - source: string
+  pass-environment-to-command:
+    - envname: PUSHOVER_URL
+      source: string
       name: '{{ getenv "JELLYSEERR_PUSHOVER_URL" }}'
+  pass-arguments-to-command:
     - source: entire-payload
 
 - id: radarr-pushover
   execute-command: /config/radarr-pushover.sh
   pass-environment-to-command:
-    - envname: RADARR_PUSHOVER_URL
+    - envname: PUSHOVER_URL
       source: string
       name: '{{ getenv "RADARR_PUSHOVER_URL" }}'
+  pass-arguments-to-command:
     - source: entire-payload
 
 - id: sonarr-pushover
   execute-command: /config/sonarr-pushover.sh
   pass-environment-to-command:
-    - envname: SONARR_PUSHOVER_URL
+    - envname: PUSHOVER_URL
       source: string
       name: '{{ getenv "SONARR_PUSHOVER_URL" }}'
+  pass-arguments-to-command:
     - source: entire-payload

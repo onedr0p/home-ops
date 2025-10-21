@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Incoming environment variables
-RADARR_PUSHOVER_URL=${1:-}
-PAYLOAD=${2:-}
+# Incoming arguments
+PAYLOAD=${1:-}
+
+# Required environment variables
+: "${PUSHOVER_URL:?Pushover URL required}"
 
 echo "[DEBUG] Radarr Payload: ${PAYLOAD}"
 
@@ -52,7 +54,7 @@ function notify() {
     esac
 
     apprise -vv --title "${PUSHOVER_TITLE}" --body "${PUSHOVER_MESSAGE}" --input-format html \
-        "${RADARR_PUSHOVER_URL}?url=${PUSHOVER_URL}&url_title=${PUSHOVER_URL_TITLE}&priority=${PUSHOVER_PRIORITY}&format=html"
+        "${PUSHOVER_URL}?url=${PUSHOVER_URL}&url_title=${PUSHOVER_URL_TITLE}&priority=${PUSHOVER_PRIORITY}&format=html"
 }
 
 function main() {
