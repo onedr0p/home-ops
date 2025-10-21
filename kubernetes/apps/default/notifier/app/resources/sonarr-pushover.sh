@@ -1,35 +1,55 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Incoming environment variables
+SONARR_PUSHOVER_URL=${1:-}
+PAYLOAD=${2:-}
+
+echo "[DEBUG] Sonarr Payload: ${PAYLOAD}"
+
+function _jq() {
+    jq -r "${1:?}" <<<"${PAYLOAD}"
+}
+
 function notify() {
-    if [[ "${SONARR_EVENT_TYPE}" == "Test" ]]; then
-        printf -v PUSHOVER_TITLE "Test Notification"
-        printf -v PUSHOVER_MESSAGE "Howdy this is a test notification"
-        printf -v PUSHOVER_URL "%s" "${SONARR_APPLICATION_URL}"
-        printf -v PUSHOVER_URL_TITLE "View Series"
-        printf -v PUSHOVER_PRIORITY "low"
-    elif [[ "${SONARR_EVENT_TYPE}" == "ManualInteractionRequired" ]]; then
-        printf -v PUSHOVER_TITLE "Episode Requires Manual Interaction"
-        printf -v PUSHOVER_MESSAGE "<b>%s</b><small>\n<b>Client:</b> %s</small>" \
-            "${SONARR_SERIES_TITLE}" \
-            "${SONARR_DOWNLOAD_CLIENT}"
-        printf -v PUSHOVER_URL "%s/activity/queue" "${SONARR_APPLICATION_URL}"
-        printf -v PUSHOVER_URL_TITLE "View Queue"
-        printf -v PUSHOVER_PRIORITY "high"
-    elif [[ "${SONARR_EVENT_TYPE}" == "Download" ]]; then
-        printf -v PUSHOVER_TITLE "Episode Added"
-        printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small><small>" \
-            "${SONARR_SERIES_TITLE}" \
-            "${SONARR_EPISODE_SEASON_NUMBER}" \
-            "${SONARR_EPISODE_NUMBER}" \
-            "${SONARR_EPISODE_TITLE}" \
-            "${SONARR_DOWNLOAD_CLIENT}"
-        printf -v PUSHOVER_URL "%s/series/%s" \
-            "${SONARR_APPLICATION_URL}" \
-            "${SONARR_SERIES_TITLE_SLUG}"
-        printf -v PUSHOVER_URL_TITLE "View Series"
-        printf -v PUSHOVER_PRIORITY "low"
-    fi
+    local event_type=$(_jq '.eventType')
+
+    case "${event_type}" in
+        "Test")
+            printf -v PUSHOVER_TITLE "Test Notification"
+            printf -v PUSHOVER_MESSAGE "Howdy this is a test notification"
+            printf -v PUSHOVER_URL "%s" "$(_jq '.applicationUrl')"
+            printf -v PUSHOVER_URL_TITLE "View Series"
+            printf -v PUSHOVER_PRIORITY "low"
+            ;;
+        "ManualInteractionRequired")
+            printf -v PUSHOVER_TITLE "Episode Requires Manual Interaction"
+            printf -v PUSHOVER_MESSAGE "<b>%s</b><small>\n<b>Client:</b> %s</small>" \
+                "$(_jq '.series.title')" \
+                "$(_jq '.downloadClient')"
+            printf -v PUSHOVER_URL "%s/activity/queue" "$(_jq '.applicationUrl')"
+            printf -v PUSHOVER_URL_TITLE "View Queue"
+            printf -v PUSHOVER_PRIORITY "high"
+            ;;
+        "Download")
+            printf -v PUSHOVER_TITLE "Episode Added"
+            printf -v PUSHOVER_MESSAGE "<b>%s (S%02dE%02d)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small>" \
+                "$(_jq '.series.title')" \
+                "$(_jq '.episodes[0].seasonNumber')" \
+                "$(_jq '.episodes[0].episodeNumber')" \
+                "$(_jq '.episodes[0].title')" \
+                "$(_jq '.downloadClient')"
+            printf -v PUSHOVER_URL "%s/series/%s" \
+                "$(_jq '.applicationUrl')" \
+                "$(_jq '.series.titleSlug')"
+            printf -v PUSHOVER_URL_TITLE "View Series"
+            printf -v PUSHOVER_PRIORITY "low"
+            ;;
+        *)
+            echo "[ERROR] Unknown event type: ${event_type}" >&2
+            return 1
+            ;;
+    esac
 
     apprise -vv --title "${PUSHOVER_TITLE}" --body "${PUSHOVER_MESSAGE}" --input-format html \
         "${SONARR_PUSHOVER_URL}?url=${PUSHOVER_URL}&url_title=${PUSHOVER_URL_TITLE}&priority=${PUSHOVER_PRIORITY}&format=html"

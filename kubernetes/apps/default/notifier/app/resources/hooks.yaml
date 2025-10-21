@@ -1,61 +1,23 @@
 ---
+- id: jellyseerr-pushover
+  execute-command: /config/jellyseerr-pushover.sh
+  pass-arguments-to-command:
+    - source: string
+      name: '{{ getenv "JELLYSEERR_PUSHOVER_URL" }}'
+    - source: entire-payload
+
 - id: radarr-pushover
   execute-command: /config/radarr-pushover.sh
-  command-working-directory: /config
   pass-environment-to-command:
     - envname: RADARR_PUSHOVER_URL
       source: string
       name: '{{ getenv "RADARR_PUSHOVER_URL" }}'
-    - envname: RADARR_EVENT_TYPE
-      source: payload
-      name: eventType
-    - envname: RADARR_APPLICATION_URL
-      source: payload
-      name: applicationUrl
-    - envname: RADARR_MOVIE_TITLE
-      source: payload
-      name: movie.title
-    - envname: RADARR_MOVIE_YEAR
-      source: payload
-      name: movie.year
-    - envname: RADARR_MOVIE_OVERVIEW
-      source: payload
-      name: movie.overview
-    - envname: RADARR_MOVIE_TMDB_ID
-      source: payload
-      name: movie.tmdbId
-    - envname: RADARR_DOWNLOAD_CLIENT
-      source: payload
-      name: downloadClient
+    - source: entire-payload
 
 - id: sonarr-pushover
   execute-command: /config/sonarr-pushover.sh
-  command-working-directory: /config
   pass-environment-to-command:
     - envname: SONARR_PUSHOVER_URL
       source: string
       name: '{{ getenv "SONARR_PUSHOVER_URL" }}'
-    - envname: SONARR_EVENT_TYPE
-      source: payload
-      name: eventType
-    - envname: SONARR_APPLICATION_URL
-      source: payload
-      name: applicationUrl
-    - envname: SONARR_SERIES_TITLE
-      source: payload
-      name: series.title
-    - envname: SONARR_SERIES_TITLE_SLUG
-      source: payload
-      name: series.titleSlug
-    - envname: SONARR_EPISODE_TITLE
-      source: payload
-      name: episodes.0.title
-    - envname: SONARR_EPISODE_SEASON_NUMBER
-      source: payload
-      name: episodes.0.seasonNumber
-    - envname: SONARR_EPISODE_NUMBER
-      source: payload
-      name: episodes.0.episodeNumber
-    - envname: SONARR_DOWNLOAD_CLIENT
-      source: payload
-      name: downloadClient
+    - source: entire-payload
