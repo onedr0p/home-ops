@@ -17,11 +17,18 @@ function notify() {
     local event_type=$(_jq '.eventType')
 
     case "${event_type}" in
-        "Test")
-            printf -v PUSHOVER_TITLE "Test Notification"
-            printf -v PUSHOVER_MESSAGE "Howdy this is a test notification"
-            printf -v PUSHOVER_URL "%s" "$(_jq '.applicationUrl')"
-            printf -v PUSHOVER_URL_TITLE "View Movies"
+        "Download")
+            printf -v PUSHOVER_TITLE "Movie %s" \
+                "$( [[ "$(_jq '.isUpgrade')" == "true" ]] && echo "Upgraded" || echo "Added" )"
+            printf -v PUSHOVER_MESSAGE "<b>%s (%s)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small>" \
+                "$(_jq '.movie.title')" \
+                "$(_jq '.movie.year')" \
+                "$(_jq '.movie.overview')" \
+                "$(_jq '.downloadClient')"
+            printf -v PUSHOVER_URL "%s/movie/%s" \
+                "$(_jq '.applicationUrl')" \
+                "$(_jq '.movie.tmdbId')"
+            printf -v PUSHOVER_URL_TITLE "View Movie"
             printf -v PUSHOVER_PRIORITY "low"
             ;;
         "ManualInteractionRequired")
@@ -34,17 +41,11 @@ function notify() {
             printf -v PUSHOVER_URL_TITLE "View Queue"
             printf -v PUSHOVER_PRIORITY "high"
             ;;
-        "Download")
-            printf -v PUSHOVER_TITLE "Movie Added"
-            printf -v PUSHOVER_MESSAGE "<b>%s (%s)</b><small>\n%s</small><small>\n\n<b>Client:</b> %s</small>" \
-                "$(_jq '.movie.title')" \
-                "$(_jq '.movie.year')" \
-                "$(_jq 'movie.overview')" \
-                "$(_jq '.downloadClient')"
-            printf -v PUSHOVER_URL "%s/movie/%s" \
-                "$(_jq '.applicationUrl')" \
-                "$(_jq '.movie.tmdbId')"
-            printf -v PUSHOVER_URL_TITLE "View Movie"
+        "Test")
+            printf -v PUSHOVER_TITLE "Test Notification"
+            printf -v PUSHOVER_MESSAGE "Howdy this is a test notification"
+            printf -v PUSHOVER_URL "%s" "$(_jq '.applicationUrl')"
+            printf -v PUSHOVER_URL_TITLE "View Movies"
             printf -v PUSHOVER_PRIORITY "low"
             ;;
         *)
