@@ -72,8 +72,8 @@ machine:
       - interface: bond0
         bond:
           deviceSelectors:
-            - hardwareAddr: 00:30:93:12:*
-              driver: atlantic
+            - hardwareAddr: # TODO
+              driver: igc
           mode: active-backup
         dhcp: true
         mtu: 9000
@@ -109,6 +109,10 @@ machine:
     user.max_user_namespaces: "11255"
     vm.nr_hugepages: "1024"
   token: op://kubernetes/talos/MACHINE_TOKEN
+  udev:
+    rules:
+      - # Thunderbolt
+        ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
 cluster:
   ca:
     crt: op://kubernetes/talos/CLUSTER_CA_CRT
