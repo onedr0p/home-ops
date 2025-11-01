@@ -4,7 +4,6 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 scripts_dir := justfile_dir() + '/scripts'
 talos_dir := justfile_dir() + '/talos'
 controller := `talosctl config info -o yaml | yq -e '.endpoints[0]'`
-nodes := `talosctl config info -o yaml | yq -e '.nodes | join (",")'`
 
 [private]
 default:
