@@ -138,10 +138,8 @@ In my cluster there are two instances of [ExternalDNS](https://github.com/kubern
 |-----------------------------|-----|--------------|---------------------------------|------|---------------|-------------------------|
 | ASUS NUC 14 Pro CU 5 125H   | 3   | 1TB SSD      | 1TB (local) / 800GB (rook-ceph) | 96GB | Talos         | Kubernetes              |
 | Dell PowerEdge T340         | 1   | 1TB SSD      | 8x22TB ZFS (mirrored vdevs)     | 64GB | TrueNAS SCALE | NFS + Backup Server     |
-| PiKVM (RasPi 4)             | 1   | 64GB (SD)    | -                               | 4GB  | PiKVM         | KVM                     |
-| TESmart 8 Port KVM Switch   | 1   | -            | -                               | -    | -             | Network KVM (for PiKVM) |
+| JetKVM                      | 3   | -            | -                               | -    | -             | KVM for Kubernetes      |
 | UniFi UDMP Max              | 1   | -            | 2x4TB HDD                       | -    | -             | Router & NVR            |
-| UniFi US-16-XG              | 1   | -            | -                               | -    | -             | 10Gb Core Switch        |
 | UniFi USW-Enterprise-24-PoE | 1   | -            | -                               | -    | -             | 2.5Gb PoE Switch        |
 | UniFi USP PDU Pro           | 1   | -            | -                               | -    | -             | PDU                     |
 | APC SMT1500RM2U             | 1   | -            | -                               | -    | -             | UPS                     |
