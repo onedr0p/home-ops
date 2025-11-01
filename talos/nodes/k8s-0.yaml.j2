@@ -2,6 +2,29 @@
 machine:
   network:
     hostname: k8s-0
+    interfaces:
+      - # k8s-1
+        deviceSelector:
+          driver: thunderbolt-net
+          busPath: 1-1.0 # right port
+        dhcp: false
+        mtu: 65520
+        addresses:
+          - 169.254.255.21/32
+        routes:
+          - network: 169.254.255.22/32
+            metric: 2048
+      - # k8s-2
+        deviceSelector:
+          driver: thunderbolt-net
+          busPath: 0-1.0 # left port
+        dhcp: false
+        mtu: 65520
+        addresses:
+          - 169.254.255.21/32
+        routes:
+          - network: 169.254.255.23/32
+            metric: 2048
   nodeLabels:
     topology.kubernetes.io/zone: m
   type: controlplane
