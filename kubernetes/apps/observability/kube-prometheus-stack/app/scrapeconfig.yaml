@@ -8,7 +8,6 @@ spec:
   staticConfigs:
     - targets:
         - expanse.internal:9100
-        - pikvm.internal:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
@@ -34,13 +33,15 @@ spec:
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
-  name: pikvm
+  name: jetkvm
 spec:
   staticConfigs:
     - targets:
-        - pikvm.internal
-  metricsPath: /api/export/prometheus/metrics
+        - jetkvm-0.internal
+        - jetkvm-1.internal
+        - jetkvm-2.internal
+  metricsPath: /metrics
   relabelings:
     - action: replace
       targetLabel: job
-      replacement: pikvm
+      replacement: jetkvm
