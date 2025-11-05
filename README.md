@@ -97,7 +97,7 @@ graph TD
 <details>
   <summary>Click here to see my high-level network diagram</summary>
 
-  <img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/network-topology.png" align="center" width="600px" alt="dns"/>
+  <img src="https://github.com/user-attachments/assets/01c2c51f-2ab1-4ae5-994c-2cd07c1301c4" align="center" width="600px" alt="network" />
 </details>
 
 ---
@@ -131,7 +131,7 @@ In my cluster there are two instances of [ExternalDNS](https://github.com/kubern
 <details>
   <summary>Click here to see my server rack</summary>
 
-  <img width="273" alt="Image" src="https://private-user-images.githubusercontent.com/213795/510233722-4d9f5a55-7c3c-4e89-87bf-f8545fb936e3.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjIzNTg0NjgsIm5iZiI6MTc2MjM1ODE2OCwicGF0aCI6Ii8yMTM3OTUvNTEwMjMzNzIyLTRkOWY1YTU1LTdjM2MtNGU4OS04N2JmLWY4NTQ1ZmI5MzZlMy5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMTA1JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTEwNVQxNTU2MDhaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yY2U2OTk2MTNjMWY2NmE0MDYzZDFkZmUzNDZjNWQyYjk3MmY5NDQ0YTYxYTNjMGQ3NTdmZDFhZTcwODZjYjRkJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.9Cw7Bt8M62nVD0rZQlLAijV8FiNWFUkAlNfyf5OhnHE" />
+  <img src="https://github.com/user-attachments/assets/4d9f5a55-7c3c-4e89-87bf-f8545fb936e3" align="center" width="250px" alt="rack" />
 </details>
 
 | Device                      | Num | OS Disk Size | Data Disk Size                  | Ram  | OS            | Function                |
