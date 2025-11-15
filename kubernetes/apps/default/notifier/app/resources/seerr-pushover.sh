@@ -5,9 +5,9 @@ set -euo pipefail
 PAYLOAD=${1:-}
 
 # Required environment variables
-: "${APPRISE_JELLYSEERR_PUSHOVER_URL:?Pushover URL required}"
+: "${APPRISE_SEERR_PUSHOVER_URL:?Pushover URL required}"
 
-echo "[DEBUG] Jellyseerr Payload: ${PAYLOAD}"
+echo "[DEBUG] Seerr Payload: ${PAYLOAD}"
 
 function _jq() {
     jq -r "${1:?}" <<<"${PAYLOAD}"
@@ -19,9 +19,9 @@ function notify() {
     case "${event_type}" in
         "TEST_NOTIFICATION")
             printf -v PUSHOVER_TITLE "Test Notification"
-            printf -v PUSHOVER_MESSAGE "Howdy this is a test notification from <b>%s</b>" "Jellyseerr"
+            printf -v PUSHOVER_MESSAGE "Howdy this is a test notification from <b>%s</b>" "Seerr"
             printf -v PUSHOVER_URL "%s" "https://requests.turbo.ac"
-            printf -v PUSHOVER_URL_TITLE "Open %s" "Jellyseerr"
+            printf -v PUSHOVER_URL_TITLE "Open %s" "Seerr"
             printf -v PUSHOVER_PRIORITY "%s" "low"
             ;;
         "*")

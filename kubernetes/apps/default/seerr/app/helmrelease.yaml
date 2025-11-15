@@ -3,22 +3,22 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: jellyseerr
+  name: seerr
 spec:
   chartRef:
     kind: OCIRepository
-    name: jellyseerr
+    name: seerr
   interval: 1h
   values:
     controllers:
-      jellyseerr:
+      seerr:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/fallenbagel/jellyseerr
-              tag: 2.7.3@sha256:9cc9e9ee6cd5cf5a23feb45c37742ba34cfd6314d81d259cddb373a97ac92cdd
+              repository: docker.io/seerr/seerr
+              tag: develop@sha256:a75da69a3f052d7ed3fdadb32868ee74d0dcf3d8fb2136d099345c3d0ddc2537
             env:
               TZ: America/New_York
               LOG_LEVEL: "info"
