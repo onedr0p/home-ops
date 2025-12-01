@@ -39,6 +39,13 @@ _... managed with Flux, Renovate, and GitHub Actions_ <img src="https://fonts.gs
 
 </div>
 
+
+<div align="center">
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/onedr0p/home-ops)
+
+</div>
+
 ---
 
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f4a1/512.gif" alt="💡" width="20" height="20"> Overview
