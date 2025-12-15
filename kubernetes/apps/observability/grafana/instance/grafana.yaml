@@ -60,11 +60,15 @@ spec:
                 claimName: grafana-pvc
   httpRoute:
     spec:
+      hostnames:
+        - grafana.turbo.ac
       parentRefs:
         - name: envoy-internal
           namespace: network
-      hostnames:
-        - grafana.turbo.ac
+      rules:
+        - backendRefs:
+            - name: grafana-service
+              port: 3000
   persistentVolumeClaim:
     spec:
       accessModes:
