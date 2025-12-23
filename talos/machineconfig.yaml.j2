@@ -63,25 +63,6 @@ machine:
     nodeIP:
       validSubnets:
         - 192.168.42.0/24
-  network:
-    interfaces:
-      - interface: bond0
-        bond:
-          deviceSelectors:
-            - driver: igc
-              hardwareAddr: 88:ae:dd:72:*
-          mode: active-backup
-        dhcp: true
-        mtu: 9000
-        vlans:
-          - # IOT
-            vlanId: 70
-            dhcp: false
-            mtu: 9000
-          - # VPN
-            vlanId: 90
-            dhcp: false
-            mtu: 9000
   nodeLabels:
     node.kubernetes.io/gpu: "true"
     topology.kubernetes.io/region: main
@@ -196,6 +177,39 @@ cluster:
   serviceAccount:
     key: op://kubernetes/talos/CLUSTER_SERVICEACCOUNT_KEY
   {% endif %}
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: net0
+selector:
+  match: link.driver == "igc" && mac(link.permanent_addr).startsWith("88:ae:dd:72:")
+---
+apiVersion: v1alpha1
+kind: BondConfig
+name: bond0
+links:
+  - net0
+bondMode: active-backup
+mtu: 9000
+---
+apiVersion: v1alpha1
+kind: DHCPv4Config
+name: bond0
+clientIdentifier: mac
+---
+apiVersion: v1alpha1
+kind: VLANConfig
+name: bond0.70
+vlanID: 70
+parent: bond0
+mtu: 9000
+---
+apiVersion: v1alpha1
+kind: VLANConfig
+name: bond0.90
+vlanID: 90
+parent: bond0
+mtu: 9000
 ---
 apiVersion: v1alpha1
 kind: UserVolumeConfig

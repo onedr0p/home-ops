@@ -1,33 +1,43 @@
 ---
 machine:
-  network:
-    interfaces:
-      - # k8s-0
-        deviceSelector:
-          driver: thunderbolt-net
-          busPath: 1-*
-        dhcp: false
-        mtu: 65520
-        addresses:
-          - 169.254.255.21/32
-        routes:
-          - network: 169.254.255.20/32
-            metric: 2048
-      - # k8s-2
-        deviceSelector:
-          driver: thunderbolt-net
-          busPath: 0-*
-        dhcp: false
-        mtu: 65520
-        addresses:
-          - 169.254.255.21/32
-        routes:
-          - network: 169.254.255.22/32
-            metric: 2048
+  type: controlplane
   nodeLabels:
     topology.kubernetes.io/zone: m
-  type: controlplane
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
 hostname: k8s-1
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: k8s-1-to-k8s-0
+selector:
+  match: link.driver == "thunderbolt-net" && link.bus_path == "1-1.0"
+---
+apiVersion: v1alpha1
+kind: LinkConfig
+name: k8s-1-to-k8s-0
+addresses:
+  - address: 169.254.255.21/32 # k8s-1
+mtu: 65520
+routes:
+  - destination: 169.254.255.20/32 # k8s-0
+    metric: 2048
+up: true
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: k8s-1-to-k8s-2
+selector:
+  match: link.driver == "thunderbolt-net" && link.bus_path == "0-1.0"
+---
+apiVersion: v1alpha1
+kind: LinkConfig
+name: k8s-1-to-k8s-2
+addresses:
+  - address: 169.254.255.21/32 # k8s-1
+mtu: 65520
+routes:
+  - destination: 169.254.255.22/32 # k8s-2
+    metric: 2048
+up: true
