@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: ghcr.io/autobrr/qui
-              tag: v1.11.0@sha256:5c7c08d5e8d4c4fe966106b58d3705f19921a69606b3dc4f237009a6c25a0ac7
+              tag: main@sha256:3287a10429249f52371722f8afb4f9fdf458ddd6c482d093051522e702536039
             env:
               QUI__HOST: 0.0.0.0
               QUI__PORT: &port 80
@@ -71,3 +71,10 @@ spec:
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
+      media:
+        type: nfs
+        server: expanse.internal
+        path: /mnt/eros/Media
+        globalMounts:
+          - path: /media/Downloads
+            subPath: Downloads
