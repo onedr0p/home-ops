@@ -9,8 +9,7 @@ spec:
     - name: snmp-exporter.rules
       rules:
         - alert: UPSOnBattery
-          expr: |-
-            (upsAdvBatteryRunTimeRemaining/60/100 <= 20 and upsBasicBatteryTimeOnBattery > 0)
+          expr: upsAdvBatteryRunTimeRemaining_seconds < 300
           annotations:
             summary: >-
               ZPM {{$labels.instance}} is running on batteries and has less than 20 minutes of battery left
@@ -19,7 +18,7 @@ spec:
             severity: critical
 
         - alert: UPSReplaceBattery
-          expr: upsAdvTestDiagnosticsResults != 1
+          expr: upsAdvBattery_needsreplacing > 0
           annotations:
             summary: >-
               ZPM {{ $labels.instance }} battery needs to be replaced
