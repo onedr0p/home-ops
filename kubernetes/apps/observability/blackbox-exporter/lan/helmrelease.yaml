@@ -3,14 +3,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: blackbox-exporter
+  name: blackbox-exporter-lan
 spec:
   chartRef:
     kind: OCIRepository
-    name: blackbox-exporter
+    name: blackbox-exporter-lan
   interval: 1h
   values:
-    fullnameOverride: blackbox-exporter
+    fullnameOverride: blackbox-exporter-lan
     config:
       modules:
         http_2xx:
@@ -41,7 +41,7 @@ spec:
       rules:
         - alert: LanProbeFailed
           expr: |-
-            probe_success{service="blackbox-exporter"} == 0
+            probe_success{service="blackbox-exporter-lan"} == 0
           for: 15m
           labels:
             severity: critical
