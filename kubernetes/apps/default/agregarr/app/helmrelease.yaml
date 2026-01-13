@@ -3,47 +3,34 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: bazarr
+  name: agregarr
 spec:
   chartRef:
     kind: OCIRepository
-    name: bazarr
+    name: agregarr
   interval: 1h
   values:
     controllers:
-      bazarr:
+      agregarr:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/home-operations/bazarr
-              tag: 1.5.4@sha256:6e2fab9cca3096714795458aec222da5e2e5cde07ed07e439f9879c9de3b5b94
+              repository: ghcr.io/agregarr/agregarr
+              tag: 2.1.0@sha256:c692e8266562a252d87a1310557505ca971ace5aa846de39b297706c103b155b
             env:
-              BAZARR__PORT: &port 80
+              PORT: &port 80
               TZ: America/New_York
-            probes:
-              liveness: &probes
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /health
-                    port: *port
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              readiness: *probes
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: {drop: ["ALL"]}
             resources:
               requests:
                 cpu: 10m
               limits:
                 memory: 1Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: {drop: ["ALL"]}
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -66,11 +53,7 @@ spec:
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
-      media:
-        type: nfs
-        server: expanse.internal
-        path: /mnt/eros/Media
         globalMounts:
-          - path: /media
+          - path: /app/config
       tmp:
         type: emptyDir
