@@ -88,21 +88,9 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
-    configMaps:
-      config:
-        data:
-          .qbt.toml: |-
-            [qbittorrent]
-            addr = "http://localhost:80"
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
-      config-file:
-        type: configMap
-        identifier: config
-        globalMounts:
-          - path: /config/.qbt.toml
-            subPath: .qbt.toml
       media:
         type: nfs
         server: expanse.internal
