@@ -19,18 +19,15 @@ spec:
               repository: ghcr.io/alexxit/go2rtc
               tag: 1.9.14@sha256:675c318b23c06fd862a61d262240c9a63436b4050d177ffc68a32710d9e05bae
             probes:
-              liveness: &probes
+              liveness:
                 enabled: true
-                custom: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
                 spec:
-                  httpGet:
-                    path: /
-                    port: &port 80
-                  initialDelaySeconds: 0
+                  failureThreshold: 30
                   periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -51,7 +48,7 @@ spec:
         primary: true
         ports:
           http:
-            port: *port
+            port: 80
       streams:
         type: LoadBalancer
         annotations:
@@ -76,7 +73,7 @@ spec:
         rules:
           - backendRefs:
               - identifier: app
-                port: *port
+                port: 80
     configMaps:
       config:
         data:
