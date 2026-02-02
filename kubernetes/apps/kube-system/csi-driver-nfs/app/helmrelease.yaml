@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: csi-driver-nfs
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: csi-driver-nfs
+  interval: 1h
+  values:
+    storageClass:
+      create: true
+      name: nfs-slow
+      parameters:
+        server: expanse.internal
+        share: /mnt/eros/Kubernetes
+      mountOptions:
+        - nfsvers=4.2
+        - hard=True
+        - nconnect=8
+        - noatime=True
+        - rsize=1048576
+        - wsize=1048576
+        - async=True
+      reclaimPolicy: Delete
+      volumeBindingMode: Immediate
