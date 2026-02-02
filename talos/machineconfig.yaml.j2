@@ -42,8 +42,11 @@ machine:
         [ NFSMount_Global_Options ]
         nfsvers=4.2
         hard=True
-        nconnect=16
+        nconnect=8
         noatime=True
+        rsize=1048576
+        wsize=1048576
+        async=True
   install:
     diskSelector:
       model: Samsung SSD 870
@@ -222,10 +225,4 @@ provisioning:
 apiVersion: v1alpha1
 kind: WatchdogTimerConfig
 device: /dev/watchdog0
-timeout: 5m
----
-apiVersion: v1alpha1
-kind: OOMConfig
-triggerExpression: "false"
-cgroupRankingExpression: "0.0"
-sampleInterval: 5s
+timeout: 10m
