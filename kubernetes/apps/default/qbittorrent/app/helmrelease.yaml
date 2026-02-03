@@ -91,6 +91,19 @@ spec:
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
+      incomplete:
+        type: custom
+        volumeSpec:
+          ephemeral:
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - "ReadWriteOnce"
+                resources:
+                  requests:
+                    storage: 1Mi # ignored
+                storageClassName: openebs-hostpath
+                volumeMode: Filesystem
       media:
         type: nfs
         server: expanse.internal
