@@ -98,12 +98,18 @@ spec:
             volumeClaimTemplate:
               spec:
                 accessModes:
-                  - "ReadWriteOnce"
+                  - ReadWriteOnce
                 resources:
                   requests:
                     storage: 1Mi # ignored
                 storageClassName: openebs-hostpath
                 volumeMode: Filesystem
+      scratch:
+        type: nfs
+        server: expanse.internal
+        path: /mnt/ceres/Scratch
+        globalMounts:
+          - path: /scratch
       media:
         type: nfs
         server: expanse.internal
