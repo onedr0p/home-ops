@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: csi-driver-smb
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: csi-driver-smb
+  interval: 1h
+  values:
+    storageClasses:
+      - name: smb-csi
+        allowVolumeExpansion: true
+        mountOptions:
+          - dir_mode=0770
+          - file_mode=0770
+          - noperm
+          - mfsymlinks
+          - cache=strict
+          - noserverino
+        parameters:
+          csi.storage.k8s.io/node-stage-secret-name: smbcreds
+          csi.storage.k8s.io/node-stage-secret-namespace: kube-system
+          source: //smb-server.default.svc.cluster.local/media
+        reclaimPolicy: Delete
+        volumeBindingMode: Immediate
+    windows:
+      enabled: false
