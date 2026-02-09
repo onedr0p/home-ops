@@ -25,7 +25,7 @@ api_call() {
 
 # Check for episodes with TBA/TBD titles
 episodes=$(api_call "${SONARR_API_URL}/episode?seriesId=${SERIES_ID}" | \
-    jq '[.[] | select(.title // "" | ascii_downcase | test("^(tba|tbd)$"))] | length')
+    jq '[.[] | select(.title // "" | ascii_downcase | test("(tba|tbd)"))] | length')
 
 # Refresh series if any TBA/TBD episodes found
 if (( episodes > 0 )); then
