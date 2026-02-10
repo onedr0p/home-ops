@@ -9,3 +9,11 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./scrapeconfig.yaml
+configMapGenerator:
+  - name: flux-metrics-configmap
+    files:
+      - flux-metrics.yaml=./resources/flux-metrics.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
