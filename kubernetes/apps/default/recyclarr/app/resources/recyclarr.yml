@@ -1,11 +1,19 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/refs/tags/v7.5.2/schemas/config-schema.json
 sonarr:
   sonarr:
     base_url: http://sonarr.default.svc.cluster.local
     api_key: !env_var SONARR_API_KEY
     delete_old_custom_formats: true
     replace_existing_custom_formats: true
+    media_naming:
+      episodes:
+        rename: true
+        standard: default
+        daily: default
+        anime: default
+      season: default
+      series: plex-imdb
     include:
       - template: sonarr-quality-definition-series
       - template: sonarr-v4-quality-profile-web-1080p
@@ -24,6 +32,13 @@ sonarr:
         assign_scores_to:
           - name: WEB-1080p
           - name: WEB-2160p
+      - trash_ids:
+          - 5d9fd1b1e06cd8a475462f40214b7df6 # FLUX (Sonarr)
+        assign_scores_to:
+          - name: WEB-1080p
+            score: 100
+          - name: WEB-2160p
+            score: 100
 
 radarr:
   radarr:
@@ -31,6 +46,11 @@ radarr:
     api_key: !env_var RADARR_API_KEY
     delete_old_custom_formats: true
     replace_existing_custom_formats: true
+    media_naming:
+      folder: plex-imdb
+      movie:
+        rename: true
+        standard: plex-imdb
     include:
       - template: radarr-quality-definition-sqp-streaming
       - template: radarr-quality-profile-sqp-1-2160p-default
