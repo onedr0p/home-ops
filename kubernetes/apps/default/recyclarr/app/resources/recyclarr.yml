@@ -8,10 +8,10 @@ sonarr:
     replace_existing_custom_formats: true
     media_naming:
       episodes:
+        anime: default
+        daily: default
         rename: true
         standard: default
-        daily: default
-        anime: default
       season: default
       series: plex-imdb
     include:
@@ -24,7 +24,16 @@ sonarr:
       - name: WEB-1080p
       - name: WEB-2160p
     custom_formats:
-      - trash_ids:
+      - # FLUX trumps REPACKS
+        trash_ids:
+          - 5d9fd1b1e06cd8a475462f40214b7df6 # FLUX
+        assign_scores_to:
+          - name: WEB-1080p
+            score: 100
+          - name: WEB-2160p
+            score: 100
+      - # Unwanted
+        trash_ids:
           - 32b367365729d530ca1c124a0b180c64 # Bad Dual Groups
           - 82d40da2bc6923f41e14394075dd4b03 # No-RlsGroup
           - e1a997ddb54e3ecbfe06341ad323c458 # Obfuscated
@@ -32,13 +41,6 @@ sonarr:
         assign_scores_to:
           - name: WEB-1080p
           - name: WEB-2160p
-      - trash_ids:
-          - 5d9fd1b1e06cd8a475462f40214b7df6 # FLUX (Sonarr)
-        assign_scores_to:
-          - name: WEB-1080p
-            score: 100
-          - name: WEB-2160p
-            score: 100
 
 radarr:
   radarr:
@@ -58,7 +60,14 @@ radarr:
     quality_profiles:
       - name: SQP-1 (2160p)
     custom_formats:
-      - trash_ids:
+      - # BHDStudio trumps REPACKS
+        trash_ids:
+          - 5153ec7413d9dae44e24275589b5e944 # BHDStudio
+        assign_scores_to:
+          - name: SQP-1 (2160p)
+            score: 100
+      - # Unwanted
+        trash_ids:
           - 957d0f44b592285f26449575e8b1167e # Special Edition
           - b6832f586342ef70d9c128d40c07b872 # Bad Dual Groups
           - cc444569854e9de0b084ab2b8b1532b2 # Black and White Editions
