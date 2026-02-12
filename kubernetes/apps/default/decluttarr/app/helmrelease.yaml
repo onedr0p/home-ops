@@ -1,0 +1,50 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: decluttarr
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: decluttarr
+  interval: 1h
+  values:
+    controllers:
+      decluttarr:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/manimatter/decluttarr
+              tag: v2.0.0@sha256:1e93192e9477cb01591de2ddac12d503662e2659792448e811b74bdb58e07ae4
+            env:
+              TZ: America/New_York
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: {drop: ["ALL"]}
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    persistence:
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /app/logs
+      secret-file:
+        type: secret
+        name: "{{ .Release.Name }}-secret"
+        globalMounts:
+          - path: /app/config/config.yaml
+            subPath: config.yaml
