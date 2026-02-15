@@ -1,0 +1,83 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: seasonpackerr
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: seasonpackerr
+  interval: 1h
+  values:
+    controllers:
+      seasonpackarr:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/nuxencs/seasonpackarr
+              tag: v0.14.0@sha256:b8e759b3fb3c9587aafbb5ebcf4a5527245afd35b5893439fd21aea0283c8144
+            env:
+              TZ: America/New_York
+              SEASONPACKARR__DISABLE_CONFIG_FILE: true
+              SEASONPACKARR__PORT: &port 80
+              SEASONPACKARR__LOG_LEVEL: INFO
+              SEASONPACKARR__SMART_MODE: true
+              SEASONPACKARR__SMART_MODE_THRESHOLD: 0.75
+              SEASONPACKARR__PARSE_TORRENT_FILE: true
+              SEASONPACKARR__FUZZY_MATCHING_SKIP_REPACK_COMPARE: true
+              SEASONPACKARR__CLIENTS_DEFAULT_HOST: qbittorrent.default.svc.cluster.local
+              SEASONPACKARR__CLIENTS_DEFAULT_PORT: 80
+              SEASONPACKARR__CLIENTS_DEFAULT_PREIMPORTPATH: /media/Downloads/qbittorrent/complete/sonarr
+            probes:
+              liveness:
+                enabled: true
+                spec:
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /readiness
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: {drop: ["ALL"]}
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    persistence:
+      media:
+        type: nfs
+        server: expanse.internal
+        path: /mnt/eros/Media
+        globalMounts:
+          - path: /media
+      tmp:
+        type: emptyDir
