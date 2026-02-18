@@ -18,12 +18,12 @@ machine:
       port: 7445
     {% if ENV.IS_CONTROLLER %}
     kubernetesTalosAPIAccess:
+      enabled: true
       allowedKubernetesNamespaces:
         - actions-runner-system
         - system-upgrade
       allowedRoles:
         - os:admin
-      enabled: true
     {% endif %}
     rbac: true
   files:
@@ -192,7 +192,7 @@ name: bond0
 links:
   - net0
 bondMode: active-backup
-mtu: 1500
+mtu: 9000
 ---
 apiVersion: v1alpha1
 kind: DHCPv4Config
@@ -204,14 +204,14 @@ kind: VLANConfig
 name: bond0.70
 vlanID: 70
 parent: bond0
-mtu: 1500
+mtu: 9000
 ---
 apiVersion: v1alpha1
 kind: VLANConfig
 name: bond0.90
 vlanID: 90
 parent: bond0
-mtu: 1500
+mtu: 9000
 ---
 apiVersion: v1alpha1
 kind: UserVolumeConfig
