@@ -109,7 +109,6 @@ spec:
     grafana:
       enabled: false
     kubeControllerManager:
-      enabled: true
       service:
         selector:
           component: kube-apiserver
@@ -131,6 +130,22 @@ spec:
         spec:
           endpoints:
             - scheme: http
+    kubeScheduler:
+      service:
+        selector:
+          component: kube-apiserver
+      vmScrape:
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              port: http-metrics
+              scheme: https
+              tlsConfig:
+                insecureSkipVerify: true
+    kube-state-metrics:
+      fullnameOverride: kube-state-metrics
+    prometheus-node-exporter:
+      fullnameOverride: node-exporter
     vmalert:
       spec:
         extraArgs:
