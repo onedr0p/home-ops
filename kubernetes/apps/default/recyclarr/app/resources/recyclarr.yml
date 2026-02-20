@@ -1,11 +1,12 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/refs/tags/v7.5.2/schemas/config-schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/refs/tags/v8.0.0/schemas/config-schema.json
 sonarr:
-  sonarr:
+  series:
     base_url: http://sonarr.default.svc.cluster.local
     api_key: !env_var SONARR_API_KEY
     delete_old_custom_formats: true
-    replace_existing_custom_formats: true
+    media_management:
+      propers_and_repacks: do_not_prefer
     media_naming:
       episodes:
         anime: default
@@ -14,15 +15,15 @@ sonarr:
         standard: default
       season: default
       series: plex-imdb
-    include:
-      - template: sonarr-quality-definition-series
-      - template: sonarr-v4-quality-profile-web-1080p
-      - template: sonarr-v4-custom-formats-web-1080p
-      - template: sonarr-v4-quality-profile-web-2160p
-      - template: sonarr-v4-custom-formats-web-2160p
+    quality_definition:
+      type: series
     quality_profiles:
-      - name: WEB-1080p
-      - name: WEB-2160p
+      - trash_id: 72dae194fc92bf828f32cde7744e51a1 # WEB-1080p
+        reset_unmatched_scores:
+          enabled: true
+      - trash_id: d1498e7d189fbe6c7110ceaabb7473e6 # WEB-2160p
+        reset_unmatched_scores:
+          enabled: true
     custom_formats:
       - # FLUX trumps REPACKS
         trash_ids:
@@ -43,22 +44,23 @@ sonarr:
           - name: WEB-2160p
 
 radarr:
-  radarr:
+  movies:
     base_url: http://radarr.default.svc.cluster.local
     api_key: !env_var RADARR_API_KEY
     delete_old_custom_formats: true
-    replace_existing_custom_formats: true
+    media_management:
+      propers_and_repacks: do_not_prefer
     media_naming:
       folder: plex-imdb
       movie:
         rename: true
         standard: plex-imdb
-    include:
-      - template: radarr-quality-definition-sqp-streaming
-      - template: radarr-quality-profile-sqp-1-2160p-default
-      - template: radarr-custom-formats-sqp-1-2160p
+    quality_definition:
+      type: sqp-uhd
     quality_profiles:
-      - name: SQP-1 (2160p)
+      - trash_id: 5128baeb2b081b72126bc8482b2a86a0 # SQP-1 (2160p)
+        reset_unmatched_scores:
+          enabled: true
     custom_formats:
       - # Unwanted
         trash_ids:
