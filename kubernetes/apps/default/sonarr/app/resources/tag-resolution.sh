@@ -5,8 +5,8 @@ set -euo pipefail
 EVENT_TYPE="${sonarr_eventtype:-}"
 SERIES_ID="${sonarr_series_id:-}"
 
-# Only proceed for "Download" events or no event (manual bulk run)
-[[ -z "${EVENT_TYPE}" || "${EVENT_TYPE}" == "Download" ]] || exit 0
+# Only proceed for "Download", "EpisodeFileDelete" events, or no event (manual bulk run)
+[[ -z "${EVENT_TYPE}" || "${EVENT_TYPE}" == "Download" || "${EVENT_TYPE}" == "EpisodeFileDelete" ]] || exit 0
 
 # Required environment variables
 : "${SONARR__AUTH__APIKEY:?API key required}"
