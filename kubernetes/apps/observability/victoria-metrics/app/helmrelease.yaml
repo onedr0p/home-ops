@@ -146,6 +146,10 @@ spec:
       fullnameOverride: kube-state-metrics
     prometheus-node-exporter:
       fullnameOverride: node-exporter
+    vmagent:
+      spec:
+        externalLabels:
+          cluster: main
     vmalert:
       spec:
         extraArgs:
@@ -159,6 +163,8 @@ spec:
         hostnames:
           - vmsingle.turbo.ac
       spec:
+        extraArgs:
+          maxLabelsPerTimeseries: 110
         storage:
           accessModes:
             - ReadWriteOnce
