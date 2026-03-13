@@ -16,9 +16,9 @@ spec:
           app:
             image:
               repository: ghcr.io/zariel/brrpolice
-              tag: v0.9.4@sha256:8157b317c0c5de72c455092533cdf172c894aae44cbc2699bc5190b6c882f021
+              tag: v0.10.3@sha256:6d04bd2920ebbfffd36265c1656601633ebaa92afe84a89c7768d6d90cd7accf
             env:
-              BRRPOLICE_HTTP__BIND: 0.0.0.0:80
+              BRRPOLICE_HTTP__PORT: &port 80
               BRRPOLICE_LOGGING__LEVEL: info
               BRRPOLICE_QBITTORRENT__BASE_URL: http://qbittorrent.default.svc.cluster.local
               TZ: America/New_York
@@ -35,7 +35,7 @@ spec:
                 spec:
                   httpGet:
                     path: /readyz
-                    port: &port 80
+                    port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 5
