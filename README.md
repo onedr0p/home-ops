@@ -134,15 +134,16 @@ In my cluster there are two instances of [ExternalDNS](https://github.com/kubern
   <img src="https://github.com/user-attachments/assets/4d9f5a55-7c3c-4e89-87bf-f8545fb936e3" align="center" width="250px" alt="rack" />
 </details>
 
-| Device                      | Num | OS Disk Size | Data Disk Size                  | Ram  | OS            | Function                |
-|-----------------------------|-----|--------------|---------------------------------|------|---------------|-------------------------|
-| ASUS NUC 14 Pro CU 5 125H   | 3   | 1TB SSD      | 1TB (local) / 800GB (rook-ceph) | 96GB | Talos         | Kubernetes              |
-| Dell PowerEdge T340         | 1   | 1TB SSD      | 8x22TB ZFS (mirrored vdevs)     | 64GB | TrueNAS SCALE | NFS + Backup Server     |
-| JetKVM                      | 3   | -            | -                               | -    | -             | KVM for Kubernetes      |
-| UniFi UDMP Max              | 1   | -            | 2x4TB HDD                       | -    | -             | Router & NVR            |
-| UniFi USW-Enterprise-24-PoE | 1   | -            | -                               | -    | -             | 2.5Gb PoE Switch        |
-| UniFi USP PDU Pro           | 1   | -            | -                               | -    | -             | PDU                     |
-| APC SMT1500RM2U             | 1   | -            | -                               | -    | -             | UPS                     |
+| Device                      | Num | OS Disk Size      | Data Disk Size                  | Ram   | OS            | Function                 |
+|-----------------------------|-----|-------------------|---------------------------------|-------|---------------|--------------------------|
+| ASUS NUC 14 Pro CU 5 125H   | 3   | 1TB SSD           | 1TB (local) / 800GB (rook-ceph) | 96GB  | Talos         | Kubernetes               |
+| 45Drives HL15               | 1   | 1TB NVMe (mirror) | 12x22TB ZFS (mirrored vdevs)    | 256GB | TrueNAS SCALE | NFS + Backup Server      |
+| JetKVM                      | 3   | -                 | -                               | -     | -             | KVM for Kubernetes Nodes |
+| UniFi UDM Pro Max           | 1   | -                 | 2x4TB HDD                       | -     | -             | Router & NVR             |
+| UniFi USW Enterprise 24 PoE | 1   | -                 | -                               | -     | -             | 2.5Gb PoE+ Switch        |
+| UniFi US XG 16              | 1   | -                 | -                               | -     | -             | 10Gb SFP+ Switch         |
+| UniFi USP PDU Pro           | 1   | -                 | -                               | -     | -             | PDU                      |
+| APC SMT1500RM2U             | 1   | -                 | -                               | -     | -             | UPS                      |
 
 ---
 
