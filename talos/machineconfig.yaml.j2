@@ -49,7 +49,7 @@ machine:
   install:
     diskSelector:
       model: Samsung SSD 870
-    image: factory.talos.dev/metal-installer/9e5ed426e06fd7f5c832d0520f18c4f7d06998fa3d8711d84e8377e3c088730f:v1.12.6
+    image: factory.talos.dev/metal-installer/c57d7db6d46b10329ac04a0d74a7a80eb7361faf2e7f4b0ea6008e2ae5067781:v1.12.6
     wipe: false
   kernel:
     modules:
@@ -181,15 +181,9 @@ cluster:
 ---
 apiVersion: v1alpha1
 kind: LinkAliasConfig
-name: net1
-selector:
-  match: link.driver == "atlantic" && mac(link.permanent_addr).startsWith("00:30:93:12:")
----
-apiVersion: v1alpha1
-kind: LinkAliasConfig
 name: net0
 selector:
-  match: link.driver == "igc" && mac(link.permanent_addr).startsWith("88:ae:dd:72:")
+  match: link.driver == "atlantic" && mac(link.permanent_addr).startsWith("00:30:93:12:")
 ---
 apiVersion: v1alpha1
 kind: BondConfig
