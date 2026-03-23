@@ -49,7 +49,7 @@ machine:
   install:
     diskSelector:
       model: Samsung SSD 870
-    image: factory.talos.dev/metal-installer/e0af0ea601df6a51a34c3ab23dbbee502b1496405520f5638cbeebce2193de1a:v1.12.6
+    image: factory.talos.dev/metal-installer/cc720ffb8efc8f12637b8660a86448a88b3f89f516995fb9c67bf80564e723b1:v1.12.6
     wipe: false
   kernel:
     modules:
@@ -181,6 +181,12 @@ cluster:
 ---
 apiVersion: v1alpha1
 kind: LinkAliasConfig
+name: net1
+selector:
+  match: link.driver == "atlantic" && mac(link.permanent_addr).startsWith("00:30:93:12:")
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
 name: net0
 selector:
   match: link.driver == "igc" && mac(link.permanent_addr).startsWith("88:ae:dd:72:")
@@ -223,4 +229,4 @@ provisioning:
 apiVersion: v1alpha1
 kind: WatchdogTimerConfig
 device: /dev/watchdog0
-timeout: 15m
+timeout: 5m
