@@ -70,10 +70,10 @@ releases:
     needs:
       - cert-manager/cert-manager
 
-  - name: onepassword
+  - name: onepassword-connect
     namespace: external-secrets
-    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
-    version: 4.6.2
+    chart: oci://ghcr.io/1password/connect
+    version: 2.4.1
     values:
       - ./templates/values.yaml.gotmpl
     hooks:
@@ -91,7 +91,7 @@ releases:
           - apply
           - --server-side
           - --field-manager=kustomize-controller
-          - --filename=../../kubernetes/apps/external-secrets/onepassword/app/clustersecretstore.yaml
+          - --filename=../../kubernetes/apps/external-secrets/onepassword-connect/app/clustersecretstore.yaml
         events:
           - postsync
         showlogs: true
@@ -105,7 +105,7 @@ releases:
     values:
       - ./templates/values.yaml.gotmpl
     needs:
-      - external-secrets/onepassword
+      - external-secrets/onepassword-connect
 
   - name: flux-instance
     namespace: flux-system
