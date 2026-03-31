@@ -3,14 +3,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: onepassword
+  name: onepassword-connect
 spec:
   dependsOn:
     - name: external-secrets
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
-      name: onepassword
+      name: onepassword-connect
       namespace: external-secrets
     - apiVersion: external-secrets.io/v1
       kind: ClusterSecretStore
@@ -21,7 +21,7 @@ spec:
       failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
       current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   interval: 1h
-  path: ./kubernetes/apps/external-secrets/onepassword/app
+  path: ./kubernetes/apps/external-secrets/onepassword-connect/app
   prune: true
   sourceRef:
     kind: GitRepository
