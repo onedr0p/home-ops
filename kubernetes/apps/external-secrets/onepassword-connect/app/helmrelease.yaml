@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: onepassword-connect
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: onepassword-connect
+  interval: 1h
+  values:
+    api:
+      serviceMonitor:
+        enabled: true
+    connect:
+      credentialsName: onepassword-connect-secret
+      credentialsKey: 1password-credentials.json
