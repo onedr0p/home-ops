@@ -10,8 +10,12 @@ spec:
     name: onepassword-connect
   interval: 1h
   values:
-    api:
-      serviceMonitor:
-        enabled: true
     connect:
+      api:
+        httpPort: 80
+        imageRepository: ghcr.io/1password/connect-api
+        serviceMonitor:
+          enabled: true
       credentialsName: onepassword-connect-credentials-secret
+      sync:
+        imageRepository: ghcr.io/1password/connect-sync
