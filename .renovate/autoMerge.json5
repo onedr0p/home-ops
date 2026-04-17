@@ -2,7 +2,7 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   packageRules: [
     {
-      description: "Auto-merge trusted container digests",
+      description: "Auto-merge trusted OCI digests",
       matchDatasources: ["docker"],
       automerge: true,
       automergeType: "pr",
@@ -11,13 +11,14 @@
       ignoreTests: false,
     },
     {
-      description: "Auto-merge OCI Charts",
+      description: "Auto-merge high-cadence OCI packages weekly",
       matchDatasources: ["docker"],
       automerge: true,
       automergeType: "pr",
       matchUpdateTypes: ["minor", "patch"],
       matchPackageNames: ["/kube-prometheus-stack/"],
       ignoreTests: false,
+      schedule: ["before 6am on Monday"],
     },
     {
       description: "Auto-merge GitHub Actions",
@@ -31,23 +32,11 @@
     {
       description: "Auto-merge trusted GitHub Actions",
       matchManagers: ["github-actions"],
-      matchPackageNames: [
-        "/^actions\//",
-        "/^renovatebot\//",
-      ],
+      matchPackageNames: ["/^actions\//", "/^renovatebot\//"],
       automerge: true,
       automergeType: "branch",
       matchUpdateTypes: ["minor", "patch", "digest"],
       minimumReleaseAge: "1 minute",
-      ignoreTests: true,
-    },
-    {
-      description: "Auto-merge GitHub Releases",
-      matchDatasources: ["github-releases"],
-      automerge: true,
-      automergeType: "branch",
-      matchUpdateTypes: ["minor", "patch"],
-      matchPackageNames: ["/external-dns/", "/gateway-api/", "/prometheus-operator/"],
       ignoreTests: true,
     },
   ],
