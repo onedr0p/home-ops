@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: silence-operator
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: silence-operator
+  interval: 1h
+  values:
+    alertmanagerAddress: http://alertmanager-operated.o11y.svc.cluster.local:9093
+    networkPolicy:
+      enabled: false
