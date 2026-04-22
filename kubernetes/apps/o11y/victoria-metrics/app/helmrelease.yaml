@@ -1,0 +1,252 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-metrics
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: victoria-metrics
+  interval: 1h
+  values:
+    fullnameOverride: victoria-metrics
+
+    global:
+      clusterLabel: home
+
+    victoria-metrics-operator:
+      crds:
+        cleanup:
+          image:
+            repository: registry.k8s.io/kubectl
+
+    vmcluster:
+      enabled: true
+      spec:
+        retentionPeriod: 90d
+        vmstorage:
+          replicaCount: 3
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: vmstorage
+          storage:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: openebs-hostpath
+                resources:
+                  requests:
+                    storage: 100Gi
+        vmselect:
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: vmselect
+          storage:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: openebs-hostpath
+                resources:
+                  requests:
+                    storage: 5Gi
+        vminsert:
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: vminsert
+      route:
+        select:
+          enabled: true
+          parentRefs:
+            - name: envoy-internal
+              namespace: network
+          hostnames:
+            - vmselect.turbo.ac
+        insert:
+          enabled: true
+          parentRefs:
+            - name: envoy-internal
+              namespace: network
+          hostnames:
+            - vminsert.turbo.ac
+
+    vmagent:
+      spec:
+        scrapeInterval: 30s
+        remoteWrite:
+          - url: http://vminsert-victoria-metrics.o11y.svc.cluster.local:8480/insert/0/prometheus/api/v1/write
+        extraArgs:
+          promscrape.streamParse: "true"
+        externalLabels:
+          cluster: home
+
+    vmalert:
+      spec:
+        evaluationInterval: 30s
+        remoteWrite:
+          url: http://vminsert-victoria-metrics.o11y.svc.cluster.local:8480/insert/0/prometheus/api/v1/write
+        remoteRead:
+          url: http://vmselect-victoria-metrics.o11y.svc.cluster.local:8481/select/0/prometheus/
+        externalLabels:
+          cluster: home
+
+    alertmanager:
+      spec:
+        externalURL: https://vmalertmanager.turbo.ac
+        replicaCount: 2
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: vmalertmanager
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: openebs-hostpath
+              resources:
+                requests:
+                  storage: 5Gi
+      useManagedConfig: true
+      config:
+        route:
+          receiver: pushover
+          repeat_interval: 12h
+          routes:
+            - receiver: blackhole
+              matchers:
+                - alertname = InfoInhibitor
+            - receiver: buddy-heartbeat
+              matchers:
+                - alertname = "Watchdog"
+              group_interval: 2m
+              group_wait: 0s
+              repeat_interval: 2m30s
+          group_by:
+            - alertname
+            - cluster
+            - job
+          group_interval: 5m
+          group_wait: 1m
+        inhibit_rules:
+          - equal:
+              - alertname
+              - namespace
+            source_matchers:
+              - severity = "critical"
+            target_matchers:
+              - severity = "warning"
+        receivers:
+          - name: blackhole
+          - name: buddy-heartbeat
+            webhook_configs:
+              - http_config:
+                  bearer_token_secret:
+                    name: vmalertmanager-secret
+                    key: BUDDY_HEARTBEAT_TOKEN
+                url_secret:
+                  name: vmalertmanager-secret
+                  key: BUDDY_HEARTBEAT_URL
+          - name: pushover
+            pushover_configs:
+              - html: true
+                message: |-
+                  {{- range .Alerts }}
+                    {{- if ne .Annotations.description "" }}
+                      {{ .Annotations.description }}
+                    {{- else if ne .Annotations.summary "" }}
+                      {{ .Annotations.summary }}
+                    {{- else if ne .Annotations.message "" }}
+                      {{ .Annotations.message }}
+                    {{- else }}
+                      Alert description not available
+                    {{- end }}
+                    {{- if gt (len .Labels.SortedPairs) 0 }}
+                      <small>
+                        {{- range .Labels.SortedPairs }}
+                          <b>{{ .Name }}:</b> {{ .Value }}
+                        {{- end }}
+                      </small>
+                    {{- end }}
+                  {{- end }}
+                priority: |-
+                  {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
+                send_resolved: true
+                sound: gamelan
+                title: >-
+                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+                token:
+                  name: vmalertmanager-secret
+                  key: ALERTMANAGER_PUSHOVER_TOKEN
+                url_title: View in Alertmanager
+                user_key:
+                  name: vmalertmanager-secret
+                  key: PUSHOVER_USER_KEY
+      route:
+        enabled: true
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        hostnames:
+          - vmalertmanager.turbo.ac
+
+    vmsingle:
+      enabled: false
+
+    defaultDashboards:
+      grafanaOperator:
+        enabled: true
+        spec:
+          allowCrossNamespaceImport: true
+
+    defaultDatasources:
+      grafanaOperator:
+        enabled: true
+        spec:
+          allowCrossNamespaceImport: true
+
+    grafana:
+      enabled: false
+      forceDeployDatasource: true
+
+    kubeControllerManager:
+      vmScrape:
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              port: http-metrics
+              scheme: https
+              tlsConfig:
+                insecureSkipVerify: true
+
+    kubeEtcd:
+      service:
+        selector:
+          component: kube-apiserver
+        port: 2381
+        targetPort: 2381
+      vmScrape:
+        spec:
+          endpoints:
+            - scheme: http
+
+    kubeScheduler:
+      vmScrape:
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              port: http-metrics
+              scheme: https
+              tlsConfig:
+                insecureSkipVerify: true
