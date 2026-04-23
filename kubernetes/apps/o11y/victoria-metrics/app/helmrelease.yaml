@@ -9,6 +9,10 @@ spec:
     kind: OCIRepository
     name: victoria-metrics
   interval: 1h
+  valuesFrom:
+    - kind: ConfigMap
+      name: flux-metrics-configmap
+      valuesKey: flux-metrics.yaml
   values:
     fullnameOverride: victoria-metrics
 
@@ -111,6 +115,7 @@ spec:
 
     alertmanager:
       spec:
+        disableNamespaceMatcher: true
         externalURL: https://vmalertmanager.turbo.ac
         replicaCount: 2
         topologySpreadConstraints:
