@@ -11,32 +11,20 @@ spec:
   interval: 1h
   values:
     fullnameOverride: victoria-logs
+    dashboards:
+      enabled: true
     server:
       persistentVolume:
         enabled: true
-        storageClassName: ceph-block
-        size: 20Gi
-      retentionPeriod: 14d
+        storageClassName: openebs-hostpath
+        size: 100Gi
+      retentionPeriod: 90d
       route:
         enabled: true
         hostnames:
-          - victoria-logs.turbo.ac
+          - vlogs.turbo.ac
         parentRefs:
           - name: envoy-internal
             namespace: network
-        extraRules:
-          - filters:
-              - type: RequestRedirect
-                requestRedirect:
-                  path:
-                    type: ReplaceFullPath
-                    replaceFullPath: /select/vmui/
-                  statusCode: 302
-            matches:
-              - path:
-                  type: Exact
-                  value: /
       serviceMonitor:
         enabled: true
-    dashboards:
-      enabled: true

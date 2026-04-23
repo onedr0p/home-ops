@@ -15,124 +15,7 @@ spec:
       valuesKey: flux-metrics.yaml
   values:
     fullnameOverride: victoria-metrics
-
-    global:
-      clusterLabel: cluster
-
-    victoria-metrics-operator:
-      crds:
-        cleanup:
-          image:
-            repository: registry.k8s.io/kubectl
-
-    vmcluster:
-      enabled: true
-      spec:
-        retentionPeriod: 90d
-        vmstorage:
-          replicaCount: 3
-          topologySpreadConstraints:
-            - maxSkew: 1
-              topologyKey: kubernetes.io/hostname
-              whenUnsatisfiable: DoNotSchedule
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: vmstorage
-          storage:
-            volumeClaimTemplate:
-              spec:
-                storageClassName: openebs-hostpath
-                resources:
-                  requests:
-                    storage: 100Gi
-        vmselect:
-          topologySpreadConstraints:
-            - maxSkew: 1
-              topologyKey: kubernetes.io/hostname
-              whenUnsatisfiable: DoNotSchedule
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: vmselect
-          storage:
-            volumeClaimTemplate:
-              spec:
-                storageClassName: openebs-hostpath
-                resources:
-                  requests:
-                    storage: 5Gi
-        vminsert:
-          topologySpreadConstraints:
-            - maxSkew: 1
-              topologyKey: kubernetes.io/hostname
-              whenUnsatisfiable: DoNotSchedule
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: vminsert
-      route:
-        select:
-          enabled: true
-          parentRefs:
-            - name: envoy-internal
-              namespace: network
-          hostnames:
-            - vmselect.turbo.ac
-        insert:
-          enabled: true
-          parentRefs:
-            - name: envoy-internal
-              namespace: network
-          hostnames:
-            - vminsert.turbo.ac
-
-    vmagent:
-      spec:
-        remoteWrite:
-          - url: http://vminsert-victoria-metrics.o11y.svc.cluster.local:8480/insert/0/prometheus/api/v1/write
-        extraArgs:
-          promscrape.streamParse: "true"
-          promscrape.dropOriginalLabels: "true"
-          promscrape.maxScrapeSize: 50MiB
-        externalLabels:
-          cluster: main
-
-    vmalert:
-      spec:
-        remoteWrite:
-          url: http://vminsert-victoria-metrics.o11y.svc.cluster.local:8480/insert/0/prometheus/api/v1/write
-        remoteRead:
-          url: http://vmselect-victoria-metrics.o11y.svc.cluster.local:8481/select/0/prometheus/
-        externalLabels:
-          cluster: main
-        extraArgs:
-          external.url: https://vmalert.turbo.ac
-      route:
-        enabled: true
-        parentRefs:
-          - name: envoy-internal
-            namespace: network
-        hostnames:
-          - vmalert.turbo.ac
-
     alertmanager:
-      spec:
-        disableNamespaceMatcher: true
-        externalURL: https://vmalertmanager.turbo.ac
-        replicaCount: 2
-        topologySpreadConstraints:
-          - maxSkew: 1
-            topologyKey: kubernetes.io/hostname
-            whenUnsatisfiable: DoNotSchedule
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/name: vmalertmanager
-        storage:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: openebs-hostpath
-              resources:
-                requests:
-                  storage: 5Gi
-      useManagedConfig: true
       config:
         route:
           receiver: pushover
@@ -209,31 +92,27 @@ spec:
                   key: PUSHOVER_USER_KEY
       route:
         enabled: true
+        hostnames:
+          - vmalertmanager.turbo.ac
         parentRefs:
           - name: envoy-internal
             namespace: network
-        hostnames:
-          - vmalertmanager.turbo.ac
-
-    vmsingle:
-      enabled: false
-
+      spec:
+        externalURL: https://vmalertmanager.turbo.ac
+      useManagedConfig: true
     defaultDashboards:
       grafanaOperator:
         enabled: true
         spec:
           allowCrossNamespaceImport: true
-
     defaultDatasources:
       grafanaOperator:
         enabled: true
         spec:
           allowCrossNamespaceImport: true
-
     grafana:
       enabled: false
       forceDeployDatasource: true
-
     kubeControllerManager:
       vmScrape:
         spec:
@@ -243,7 +122,6 @@ spec:
               scheme: https
               tlsConfig:
                 insecureSkipVerify: true
-
     kubeEtcd:
       service:
         selector:
@@ -254,7 +132,6 @@ spec:
         spec:
           endpoints:
             - scheme: http
-
     kubeScheduler:
       vmScrape:
         spec:
@@ -264,7 +141,46 @@ spec:
               scheme: https
               tlsConfig:
                 insecureSkipVerify: true
-
+    # TODO: remove this workaround once the operator chart is updated
+    victoria-metrics-operator:
+      crds:
+        cleanup:
+          image:
+            repository: registry.k8s.io/kubectl
+    vmagent:
+      spec:
+        extraArgs:
+          promscrape.dropOriginalLabels: "true"
+          promscrape.maxScrapeSize: 50MiB
+          promscrape.streamParse: "true"
+    vmalert:
+      spec:
+        extraArgs:
+          external.url: https://vmalert.turbo.ac
+      route:
+        enabled: true
+        hostnames:
+          - vmalert.turbo.ac
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    vmsingle:
+      route:
+        enabled: true
+        hostnames:
+          - vmsingle.turbo.ac
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+      spec:
+        retentionPeriod: 90d
+        storage:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 100Gi
+          storageClassName: openebs-hostpath
     additionalVictoriaMetricsMap:
       dockerhub-rules:
         create: true
