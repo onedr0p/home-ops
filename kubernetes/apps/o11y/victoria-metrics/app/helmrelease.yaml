@@ -99,6 +99,13 @@ spec:
             namespace: network
       spec:
         externalURL: https://vmalertmanager.turbo.ac
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ceph-block
+              resources:
+                requests:
+                  storage: 1Gi
       useManagedConfig: true
     defaultDashboards:
       grafanaOperator:
@@ -177,8 +184,8 @@ spec:
             - ReadWriteOnce
           resources:
             requests:
-              storage: 100Gi
-          storageClassName: openebs-hostpath
+              storage: 50Gi
+          storageClassName: ceph-block
     additionalVictoriaMetricsMap:
       dockerhub-rules:
         create: true
