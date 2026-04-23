@@ -55,8 +55,8 @@ spec:
             fsGroupChangePolicy: OnRootMismatch
           volumes:
             - name: grafana-data
-              emptyDir:
-                sizeLimit: 1Gi
+              persistentVolumeClaim:
+                claimName: grafana-pvc
   httpRoute:
     spec:
       hostnames:
@@ -68,4 +68,12 @@ spec:
         - backendRefs:
             - name: grafana-service
               port: 3000
+  persistentVolumeClaim:
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: ceph-block
   disableDefaultSecurityContext: All
