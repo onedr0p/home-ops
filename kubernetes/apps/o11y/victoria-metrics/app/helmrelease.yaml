@@ -86,6 +86,8 @@ spec:
           - url: http://vminsert-victoria-metrics.o11y.svc.cluster.local:8480/insert/0/prometheus/api/v1/write
         extraArgs:
           promscrape.streamParse: "true"
+          promscrape.dropOriginalLabels: "true"
+          promscrape.maxScrapeSize: 50MiB
         externalLabels:
           cluster: main
 
@@ -97,6 +99,15 @@ spec:
           url: http://vmselect-victoria-metrics.o11y.svc.cluster.local:8481/select/0/prometheus/
         externalLabels:
           cluster: main
+        extraArgs:
+          external.url: https://vmalert.turbo.ac
+      route:
+        enabled: true
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        hostnames:
+          - vmalert.turbo.ac
 
     alertmanager:
       spec:
