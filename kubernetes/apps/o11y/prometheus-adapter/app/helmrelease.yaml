@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: prometheus-adapter
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: prometheus-adapter
+  interval: 1h
+  values:
+    prometheus:
+      url: http://vmsingle-victoria-metrics-cluster.o11y.svc.cluster.local
+      port: 8428
+    rules:
+      default: false
+      external:
+        - seriesQuery: '{__name__="probe_success"}'
+          resources:
+            namespaced: false
+          name:
+            as: probe_success
+          metricsQuery: max_over_time(<<.Series>>{<<.LabelMatchers>>}[1m])

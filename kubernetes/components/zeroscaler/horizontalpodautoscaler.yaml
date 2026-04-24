@@ -1,0 +1,38 @@
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ${APP}
+spec:
+  minReplicas: 0
+  maxReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: ${CONTROLLER:=Deployment}
+    name: ${APP}
+  metrics:
+    - type: External
+      external:
+        metric:
+          name: ${ZEROSCALER_METRIC_NAME:=probe_success}
+          selector:
+            matchLabels:
+              job: ${ZEROSCALER_JOB_NAME:=nfs_probe}
+        target:
+          type: Value
+          value: "1"
+  behavior:
+    scaleDown:
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 15
+      selectPolicy: Max
+      stabilizationWindowSeconds: 0
+    scaleUp:
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 15
+      selectPolicy: Max
+      stabilizationWindowSeconds: 0
