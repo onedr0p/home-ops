@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-logs-collector
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: victoria-logs-collector
+  values:
+    fullnameOverride: victoria-logs-collector
+    image:
+      registry: quay.io
+    remoteWrite:
+      - url: http://victoria-logs-server.o11y.svc.cluster.local:9428
