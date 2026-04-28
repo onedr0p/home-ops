@@ -1,0 +1,48 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.36.0/mutatingadmissionpolicybinding-admissionregistration-v1.json
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: grafana-image-mirror
+spec:
+  policyName: grafana-image-mirror
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/v1.36.0/mutatingadmissionpolicy-admissionregistration-v1.json
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicy
+metadata:
+  name: grafana-image-mirror
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - apps
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - deployments
+  matchConditions:
+    - name: is-grafana-deployment
+      expression: >-
+        object.metadata.name == "grafana-deployment"
+    - name: has-docker-io-grafana-image
+      expression: >-
+        object.spec.template.spec.containers.exists(c,
+          c.image.startsWith("docker.io/grafana/")
+        )
+  failurePolicy: Fail
+  reinvocationPolicy: IfNeeded
+  mutations:
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: >-
+          [
+            JSONPatch{
+              op: "replace",
+              path: "/spec/template/spec/containers/0/image",
+              value: "mirror.gcr.io/grafana/" + object.spec.template.spec.containers[0].image.replace("docker.io/grafana/", "")
+            }
+          ]
