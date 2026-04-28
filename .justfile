@@ -1,6 +1,7 @@
 #!/usr/bin/env -S just --justfile
 
-set quiet := true
+set lazy
+set quiet
 set shell := ['bash', '-euo', 'pipefail', '-c']
 
 mod bootstrap "bootstrap"

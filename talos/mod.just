@@ -1,4 +1,5 @@
-set quiet := true
+set lazy
+set quiet
 set shell := ['bash', '-euo', 'pipefail', '-c']
 
 scripts_dir := justfile_dir() + '/scripts'
