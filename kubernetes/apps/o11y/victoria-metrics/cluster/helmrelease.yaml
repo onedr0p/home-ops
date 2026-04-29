@@ -129,20 +129,6 @@ spec:
       forceDeployDatasource: true
     kube-state-metrics:
       fullnameOverride: kube-state-metrics
-    kubeApiServer:
-      vmScrape:
-        spec:
-          metricRelabelConfigs:
-            - # Drop high cardinality labels
-              action: drop
-              sourceLabels:
-                - __name__
-              regex: (apiserver|etcd|rest_client)_request(|_sli|_slo)_duration_seconds_bucket
-            - # Drop high cardinality labels
-              action: drop
-              sourceLabels:
-                - __name__
-              regex: (apiserver_response_sizes_bucket|apiserver_watch_events_sizes_bucket)
     kubeControllerManager:
       vmScrape:
         spec:
@@ -171,39 +157,6 @@ spec:
               scheme: https
               tlsConfig:
                 insecureSkipVerify: true
-    kubelet:
-      vmScrape:
-        spec:
-          metricRelabelConfigs:
-            - # Drop high-cardinality labels
-              action: labeldrop
-              regex: (uid|id|name)
-            - # Drop high-cardinality labels
-              action: drop
-              sourceLabels:
-                - __name__
-              regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
-            - # Drop cgroup metrics with no pod
-              action: drop
-              sourceLabels:
-                - id
-                - pod
-              regex: .+;
-            - # Drop less useful container blkio metrics
-              action: drop
-              sourceLabels:
-                - __name__
-              regex: container_blkio_device_usage_total
-            - # Drop less useful container filesystem io metrics
-              action: drop
-              sourceLabels:
-                - __name__
-              regex: "container_fs_(io_current|io_time_seconds_total|io_time_weighted_seconds_total|reads_merged_total|sector_reads_total|sector_writes_total|writes_merged_total)"
-            - # Drop less useful container process metrics
-              action: drop
-              sourceLabels:
-                - __name__
-              regex: container_(tasks_state|threads_max)
     prometheus-node-exporter:
       fullnameOverride: node-exporter
     victoria-metrics-operator:
