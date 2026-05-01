@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: node-exporter
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: node-exporter
+  interval: 1h
+  values:
+    fullnameOverride: node-exporter
+    prometheus:
+      monitor:
+        enabled: true
+        jobLabel: app.kubernetes.io/instance
+        relabelings:
+          - action: replace
+            regex: (.*)
+            replacement: $1
+            sourceLabels:
+              - __meta_kubernetes_pod_node_name
+            targetLabel: kubernetes_node
+          - action: replace
+            regex: (.*)
+            replacement: $1
+            sourceLabels:
+              - __meta_kubernetes_pod_node_name
+            targetLabel: nodename
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64M
+      limits:
+        memory: 64M
+    hostNetwork: false
