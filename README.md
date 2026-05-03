@@ -129,21 +129,38 @@ In my cluster there are two instances of [ExternalDNS](https://github.com/kubern
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2699_fe0f/512.gif" alt="⚙" width="20" height="20"> Hardware
 
 <details>
-  <summary>Click here to see my server rack</summary>
+  <summary>Expand for Eye Candy</summary>
 
-  <img src="https://github.com/user-attachments/assets/4d9f5a55-7c3c-4e89-87bf-f8545fb936e3" align="center" width="250px" alt="rack" />
+  <img src="https://github.com/user-attachments/assets/bff6a21d-a480-473f-8856-81129299656f" align="center" width="250px" alt="rack" />
 </details>
 
-| Device                      | Num | OS Disk Size      | Data Disk Size                  | Ram   | OS            | Function                 |
-|-----------------------------|-----|-------------------|---------------------------------|-------|---------------|--------------------------|
-| ASUS NUC 14 Pro CU 5 125H   | 3   | 1TB SSD           | 1TB (local) / 800GB (rook-ceph) | 96GB  | Talos         | Kubernetes               |
-| 45Drives HL15               | 1   | 1TB NVMe (mirror) | 12x22TB ZFS (mirrored vdevs)    | 256GB | TrueNAS SCALE | NFS + Backup Server      |
-| JetKVM                      | 3   | -                 | -                               | -     | -             | KVM for Kubernetes Nodes |
-| UniFi UDM Pro Max           | 1   | -                 | 2x4TB HDD                       | -     | -             | Router & NVR             |
-| UniFi USW Enterprise 24 PoE | 1   | -                 | -                               | -     | -             | 2.5Gb PoE+ Switch        |
-| UniFi US XG 16              | 1   | -                 | -                               | -     | -             | 10Gb SFP+ Switch         |
-| UniFi USP PDU Pro           | 1   | -                 | -                               | -     | -             | PDU                      |
-| APC SMT1500RM2U             | 1   | -                 | -                               | -     | -             | UPS                      |
+| Device                      | Num | Disks                                                                                                                        | Ram    | Function            |
+|-----------------------------|-----|------------------------------------------------------------------------------------------------------------------------------|--------|---------------------|
+| ASUS NUC 14 Pro CU 5 125H   | 3   | <ul><li>480GB¹ (OS)</li><li>1TB² (local)</li><li>800GB³ (rook-ceph)</li></ul>                                                | 96GB⁴  | Kubernetes (Talos)  |
+| 45Drives HL15 2.0           | 1   | <ul><li>1TB⁵ (OS, mirror)</li><li>12x22TB⁶ (2x 6-wide RAIDZ2)</li><li>2x1.92TB⁷ (MD/SLOG)</li><li>1x375GB⁸ (L2ARC)</li></ul> | 256GB⁹ | ZFS (TrueNAS SCALE) |
+| JetKVM                      | 3   |                                                                                                                              |        | KVM for Talos Nodes |
+| UniFi UDM Pro Max           | 1   | <ul><li>2x4TB¹⁰ (NVR, mirror)</li></ul>                                                                                      |        | Router & NVR        |
+| UniFi USW Enterprise 24 PoE | 1   |                                                                                                                              |        | 2.5G PoE+ Switch    |
+| UniFi US XG 16              | 1   |                                                                                                                              |        | 10G SFP+ Switch     |
+| UniFi USP PDU Pro           | 1   |                                                                                                                              |        | PDU                 |
+| APC SMT1500RM2U             | 1   |                                                                                                                              |        | UPS                 |
+
+<details>
+  <summary>Expand for more details</summary>
+
+| #  | Component                                              |
+|----|--------------------------------------------------------|
+| ¹  | HPE/Samsung SM863a 480GB SSD                           |
+| ²  | Corsair MP600 Micro 1TB M.2 NVMe (2242)                |
+| ³  | Micron 7450 MAX 800GB M.2 NVMe (2280)                  |
+| ⁴  | Crucial RAM 96GB Kit (2x48GB) DDR5 5600MHz SODIMM      |
+| ⁵  | WD Blue SN550 1TB M.2 NVMe (2280)                      |
+| ⁶  | Seagate Exos X22 ST22000NM001E 22TB HDD                |
+| ⁷  | Samsung PM9A3 1.92TB M.2 NVMe (22110)                  |
+| ⁸  | Intel Optane DC P4800X 375GB PCIe NVMe                 |
+| ⁹  | SK Hynix RAM 256GB Kit (8x32GB) DDR4 3200MHz ECC RDIMM |
+| ¹⁰ | Western Digital WD Red Plus 4TB HDD                    |
+</details>
 
 ---
 
