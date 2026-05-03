@@ -128,38 +128,42 @@ In my cluster there are two instances of [ExternalDNS](https://github.com/kubern
 
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2699_fe0f/512.gif" alt="⚙" width="20" height="20"> Hardware
 
-#### Compute — ASUS NUC 14 Pro CU 5 125H ×3 · 96GB RAM · Talos / Kubernetes
+### Compute
 
-- 480GB HPE/Samsung SM863a SSD (OS)
-- 1TB Corsair MP600 Micro NVMe 2242 (local storage)
-- 800GB Micron 7450 MAX NVMe 2280 (rook-ceph)
-- JetKVM w/ DC Extension
+**ASUS NUC 14 Pro (Core Ultra 5 125H) × 3** · 96 GB RAM · Talos / Kubernetes
 
-#### Storage — 45Drives HL15 2.0 ×1 · 256GB RAM · TrueNAS SCALE / ZFS
+- **OS** — 480 GB HPE/Samsung SM863a SATA SSD
+- **Local storage** — 1 TB Corsair MP600 Micro NVMe (2242)
+- **Rook-Ceph** — 800 GB Micron 7450 MAX NVMe (2280)
+- **Out-of-band** — JetKVM with DC extension
 
-- 1TB WD Blue SN550 NVMe 2280 (OS, mirror)
-- ZFS Pool:
-  - 12×22TB Seagate Exos X22 HDD (2× 6-wide RAIDZ2)
-  - 2×1.92TB Samsung PM9A3 NVMe 22110 (Metadata/SLOG)
-  - 375GB Intel Optane DC P4800X PCIe NVMe (L2ARC)
-- ZFS Pool:
-  - 2x1TB Samsung 870 EVO SSD (mirror)
+### Storage
 
-#### Networking — UniFi
+**45Drives HL15 2.0** · 256 GB RAM · TrueNAS SCALE / ZFS
 
-- UDM Pro Max — Router & NVR · 2×4TB WD Red Plus HDD (NVR, mirror)
-- USW Enterprise 24 PoE — 2.5G PoE+ Switch
-- US XG 16 — 10G SFP+ Switch
-- USP PDU Pro — PDU
+- **Boot** — 2 × 1 TB WD Blue SN550 NVMe (2280), mirrored
+- **Bulk pool**
+  - 12 × 22 TB Seagate Exos X22 HDD — 2× 6-wide RAIDZ2
+  - 2 × 1.92 TB Samsung PM9A3 NVMe (22110) — metadata / SLOG
+  - 375 GB Intel Optane DC P4800X — L2ARC
+- **Fast pool**
+  - 2 × 1 TB Samsung 870 EVO SATA SSD — mirrored
 
-#### Power — APC SMT1500RM2U — UPS
+### Networking — UniFi
+
+- **UDM Pro Max** — router & NVR · 2 × 4 TB WD Red Plus HDD (mirror)
+- **USW Enterprise 24 PoE** — 2.5 G PoE+ switch
+- **US XG 16** — 10 G SFP+ switch
+- **USP PDU Pro** — PDU
+
+### Power
+**APC SMT1500RM2U** — 1500 VA rackmount UPS
 
 <details>
-  <summary>Expand for Eye Candy</summary>
+  <summary>📸 Expand for eye candy</summary>
 
-  <img src="https://github.com/user-attachments/assets/bff6a21d-a480-473f-8856-81129299656f" align="center" width="250px" alt="rack" />
+  <img src="https://github.com/user-attachments/assets/bff6a21d-a480-473f-8856-81129299656f" width="250" alt="rack" />
 </details>
-
 
 ---
 
