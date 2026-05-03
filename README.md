@@ -128,39 +128,38 @@ In my cluster there are two instances of [ExternalDNS](https://github.com/kubern
 
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2699_fe0f/512.gif" alt="⚙" width="20" height="20"> Hardware
 
+#### Compute — ASUS NUC 14 Pro CU 5 125H ×3 · 96GB RAM · Talos / Kubernetes
+
+- 480GB HPE/Samsung SM863a SSD (OS)
+- 1TB Corsair MP600 Micro NVMe 2242 (local storage)
+- 800GB Micron 7450 MAX NVMe 2280 (rook-ceph)
+- JetKVM w/ DC Extension
+
+#### Storage — 45Drives HL15 2.0 ×1 · 256GB RAM · TrueNAS SCALE / ZFS
+
+- 1TB WD Blue SN550 NVMe 2280 (OS, mirror)
+- ZFS Pool:
+  - 12×22TB Seagate Exos X22 HDD (2× 6-wide RAIDZ2)
+  - 2×1.92TB Samsung PM9A3 NVMe 22110 (Metadata/SLOG)
+  - 375GB Intel Optane DC P4800X PCIe NVMe (L2ARC)
+- ZFS Pool:
+  - 2x1TB Samsung 870 EVO SSD (mirror)
+
+#### Networking — UniFi
+
+- UDM Pro Max — Router & NVR · 2×4TB WD Red Plus HDD (NVR, mirror)
+- USW Enterprise 24 PoE — 2.5G PoE+ Switch
+- US XG 16 — 10G SFP+ Switch
+- USP PDU Pro — PDU
+
+#### Power — APC SMT1500RM2U — UPS
+
 <details>
   <summary>Expand for Eye Candy</summary>
 
   <img src="https://github.com/user-attachments/assets/bff6a21d-a480-473f-8856-81129299656f" align="center" width="250px" alt="rack" />
 </details>
 
-| Device                      | Num | Disks                                                                                                                        | Ram    | Function            |
-|-----------------------------|-----|------------------------------------------------------------------------------------------------------------------------------|--------|---------------------|
-| ASUS NUC 14 Pro CU 5 125H   | 3   | <ul><li>480GB¹ (OS)</li><li>1TB² (local)</li><li>800GB³ (rook-ceph)</li></ul>                                                | 96GB⁴  | Kubernetes (Talos)  |
-| 45Drives HL15 2.0           | 1   | <ul><li>1TB⁵ (OS, mirror)</li><li>12x22TB⁶ (2x 6-wide RAIDZ2)</li><li>2x1.92TB⁷ (MD/SLOG)</li><li>1x375GB⁸ (L2ARC)</li></ul> | 256GB⁹ | ZFS (TrueNAS SCALE) |
-| JetKVM                      | 3   |                                                                                                                              |        | KVM for Talos Nodes |
-| UniFi UDM Pro Max           | 1   | <ul><li>2x4TB¹⁰ (NVR, mirror)</li></ul>                                                                                      |        | Router & NVR        |
-| UniFi USW Enterprise 24 PoE | 1   |                                                                                                                              |        | 2.5G PoE+ Switch    |
-| UniFi US XG 16              | 1   |                                                                                                                              |        | 10G SFP+ Switch     |
-| UniFi USP PDU Pro           | 1   |                                                                                                                              |        | PDU                 |
-| APC SMT1500RM2U             | 1   |                                                                                                                              |        | UPS                 |
-
-<details>
-  <summary>Expand for more details</summary>
-
-| #  | Component                                              |
-|----|--------------------------------------------------------|
-| ¹  | HPE/Samsung SM863a 480GB SSD                           |
-| ²  | Corsair MP600 Micro 1TB M.2 NVMe (2242)                |
-| ³  | Micron 7450 MAX 800GB M.2 NVMe (2280)                  |
-| ⁴  | Crucial RAM 96GB Kit (2x48GB) DDR5 5600MHz SODIMM      |
-| ⁵  | WD Blue SN550 1TB M.2 NVMe (2280)                      |
-| ⁶  | Seagate Exos X22 ST22000NM001E 22TB HDD                |
-| ⁷  | Samsung PM9A3 1.92TB M.2 NVMe (22110)                  |
-| ⁸  | Intel Optane DC P4800X 375GB PCIe NVMe                 |
-| ⁹  | SK Hynix RAM 256GB Kit (8x32GB) DDR4 3200MHz ECC RDIMM |
-| ¹⁰ | Western Digital WD Red Plus 4TB HDD                    |
-</details>
 
 ---
 
