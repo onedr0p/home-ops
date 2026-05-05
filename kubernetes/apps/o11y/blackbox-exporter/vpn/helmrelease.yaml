@@ -13,6 +13,7 @@ spec:
     fullnameOverride: blackbox-exporter-vpn
     strategy:
       type: Recreate
+      rollingUpdate: null
     podAnnotations:
       k8s.v1.cni.cncf.io/networks: |-
         [{
@@ -58,12 +59,3 @@ spec:
           annotations:
             summary: |-
               The probe targeting {{ $labels.instance }} is currently having connectivity issues
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              kind: Deployment
-              name: blackbox-exporter-vpn
-            patch: |-
-              - op: remove
-                path: /spec/strategy/rollingUpdate
