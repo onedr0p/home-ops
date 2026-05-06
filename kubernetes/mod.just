@@ -14,7 +14,7 @@ default:
 [doc('Apply local Flux Kustomization')]
 [script]
 apply-ks ns ks:
-    just kube render-local-ks "{{ ns }}" "{{ ks }}" | kubectl apply --server-side --force-conflicts --field-manager=kustomize-controller -f /dev/stdin
+    just kube render-local-ks "{{ ns }}" "{{ ks }}" | kubectl apply --server-side --force-conflicts --field-manager=kustomize-controller -f -
 
 [doc('Browse a PVC')]
 [script]
@@ -24,7 +24,7 @@ browse-pvc ns claim:
 [doc('Delete local Flux Kustomization')]
 [script]
 delete-ks ns ks:
-    just kube render-local-ks "{{ ns }}" "{{ ks }}" | kubectl delete -f /dev/stdin
+    just kube render-local-ks "{{ ns }}" "{{ ks }}" | kubectl delete -f -
 
 [doc('Open a shell on a node')]
 [script]
