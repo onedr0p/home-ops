@@ -3,8 +3,6 @@ set quiet
 set script-interpreter := ['bash', '-euo', 'pipefail']
 set shell := ['bash', '-euo', 'pipefail', '-c']
 
-kubernetes_dir := justfile_dir() + '/kubernetes'
-
 controller := `talosctl config info -o yaml | yq -e '.endpoints[0]'`
 nodes := `talosctl config info -o yaml | yq -e '.nodes | join (" ")'`
 
@@ -15,7 +13,7 @@ default:
 
 [doc('Bootstrap Cluster')]
 [script]
-cluster: talos kube (kubeconfig "node") wait namespaces resources crds apps kubeconfig
+cluster: talos kube (kubeconfig "node") wait resources crds apps kubeconfig
 
 [private]
 [script]
@@ -63,16 +61,6 @@ wait:
             sleep 5
         done
     fi
-
-[private]
-[script]
-namespaces:
-    just log info "Running stage..." "stage" "$(basename "$0")"
-    find "{{ kubernetes_dir }}/apps" -mindepth 1 -maxdepth 1 -type d | while IFS= read -r dir; do
-        if ! kustomize build "$dir" | yq ea -e 'select(.kind == "Namespace")' | kubectl apply --server-side --field-manager bootstrap --force-conflicts -f -; then
-            just log fatal "Failed to apply namespace" "stage" "$(basename "$0")" "namespace" "$(basename "$dir")"
-        fi
-    done
 
 [private]
 [script]
