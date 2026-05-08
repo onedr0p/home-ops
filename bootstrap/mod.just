@@ -66,9 +66,11 @@ wait:
 [script]
 resources:
     just log info "Running stage..." "stage" "$(basename "$0")"
-    if ! just template "{{ source_directory() }}/resources.yaml.j2" | kubectl apply --server-side --field-manager bootstrap --force-conflicts -f -; then
-        just log fatal "Failed to apply resources" "stage" "$(basename "$0")"
-    fi
+    for f in {{ source_directory() }}/resources/*.yaml.j2; do
+        if ! just template "$f" | kubectl apply --server-side --field-manager bootstrap --force-conflicts -f -; then
+            just log fatal "Failed to apply resources" "stage" "$(basename "$0")" "file" "$f"
+        fi
+    done
 
 [private]
 [script]
