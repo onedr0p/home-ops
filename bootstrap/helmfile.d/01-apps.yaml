@@ -14,15 +14,20 @@ releases:
     values:
       - ./templates/values.yaml.gotmpl
     hooks:
-      - # Wait for Cilium CRDs to be available
-        command: bash
+      - # Wait for CRDs to be available
+        command: kubectl
         args:
-          - -c
-          - until kubectl get crd ciliumloadbalancerippools.cilium.io ciliumbgpadvertisements.cilium.io ciliumbgppeerconfigs.cilium.io ciliumbgpclusterconfigs.cilium.io &>/dev/null; do sleep 5; done
+          - wait
+          - --for=create
+          - --timeout=5m
+          - crd/ciliumbgpadvertisements.cilium.io
+          - crd/ciliumbgpclusterconfigs.cilium.io
+          - crd/ciliumbgppeerconfigs.cilium.io
+          - crd/ciliumloadbalancerippools.cilium.io
         events:
           - postsync
         showlogs: true
-      - # Apply Cilium Resources
+      - # Apply Resources
         command: kubectl
         args:
           - apply
@@ -77,15 +82,17 @@ releases:
     values:
       - ./templates/values.yaml.gotmpl
     hooks:
-      - # Wait for ExternalSecrets CRDs to be available
-        command: bash
+      - # Wait for CRDs to be available
+        command: kubectl
         args:
-          - -c
-          - until kubectl get crd clustersecretstores.external-secrets.io &>/dev/null; do sleep 5; done
+          - wait
+          - --for=create
+          - --timeout=5m
+          - crd/clustersecretstores.external-secrets.io
         events:
           - postsync
         showlogs: true
-      - # Apply ExternalSecret Resources
+      - # Apply Resources
         command: kubectl
         args:
           - apply
