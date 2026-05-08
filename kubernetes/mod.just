@@ -1,10 +1,7 @@
 set lazy
-set positional-arguments
 set quiet
 set script-interpreter := ['bash', '-euo', 'pipefail']
 set shell := ['bash', '-euo', 'pipefail', '-c']
-
-kubernetes_dir := justfile_dir() + '/kubernetes'
 
 [private]
 [script]
@@ -96,4 +93,4 @@ view-secret ns secret:
 [private]
 [script]
 render-local-ks ns ks:
-    flux-local build ks --namespace "{{ ns }}" --path "{{ kubernetes_dir }}/flux/cluster" "{{ ks }}"
+    flux-local build ks --namespace "{{ ns }}" --path "{{ source_directory() }}/flux/cluster" "{{ ks }}"
