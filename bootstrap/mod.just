@@ -13,7 +13,7 @@ default:
 
 [doc('Bootstrap Cluster')]
 [script]
-cluster: talos kube (kubeconfig "node") wait resources crds apps kubeconfig
+cluster: talos kube (kubeconfig "node") wait-for-nodes resources crds apps kubeconfig
 
 [private]
 [script]
@@ -53,7 +53,7 @@ kubeconfig lb="cilium":
 
 [private]
 [script]
-wait:
+wait-for-nodes:
     just log info "Running stage..." "stage" "$(basename "$0")"
     if ! kubectl wait nodes --for=condition=Ready=True --all --timeout=10s &>/dev/null; then
         until kubectl wait nodes --for=condition=Ready=False --all --timeout=10s &>/dev/null; do

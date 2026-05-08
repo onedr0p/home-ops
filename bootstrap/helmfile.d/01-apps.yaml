@@ -2,6 +2,8 @@
 # yaml-language-server: $schema=https://json.schemastore.org/helmfile
 
 helmDefaults:
+  args:
+    - --force-conflicts
   cleanupOnFail: true
   wait: true
   waitForJobs: true
@@ -19,11 +21,11 @@ releases:
         args:
           - wait
           - --for=create
-          - --timeout=5m
           - crd/ciliumbgpadvertisements.cilium.io
           - crd/ciliumbgpclusterconfigs.cilium.io
           - crd/ciliumbgppeerconfigs.cilium.io
           - crd/ciliumloadbalancerippools.cilium.io
+          - --timeout=2m
         events:
           - postsync
         showlogs: true
@@ -31,10 +33,10 @@ releases:
         command: kubectl
         args:
           - apply
-          - --namespace=kube-system
+          - --namespace={{ .Release.Namespace }}
           - --server-side
-          - --field-manager=kustomize-controller
-          - --filename=../../kubernetes/apps/kube-system/cilium/app/networking.yaml
+          - --force-conflicts
+          - --filename=../../kubernetes/apps/{{ .Release.Namespace }}/{{ .Release.Name }}/app/networking.yaml
         events:
           - postsync
         showlogs: true
@@ -87,8 +89,8 @@ releases:
         args:
           - wait
           - --for=create
-          - --timeout=5m
           - crd/clustersecretstores.external-secrets.io
+          - --timeout=2m
         events:
           - postsync
         showlogs: true
@@ -97,8 +99,8 @@ releases:
         args:
           - apply
           - --server-side
-          - --field-manager=kustomize-controller
-          - --filename=../../kubernetes/apps/external-secrets/onepassword-connect/app/clustersecretstore.yaml
+          - --force-conflicts
+          - --filename=../../kubernetes/apps/{{ .Release.Namespace }}/{{ .Release.Name }}/app/clustersecretstore.yaml
         events:
           - postsync
         showlogs: true
