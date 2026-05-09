@@ -1,0 +1,37 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  customDatasources: {
+    "talos-factory": {
+      defaultRegistryUrlTemplate: "https://factory.talos.dev/versions",
+      format: "json",
+      transformTemplates: ['{"releases": $map($, function($v) { {"version": $v} })}'],
+    },
+  },
+  customManagers: [
+    {
+      description: "Process Talos Factory installer images",
+      customType: "regex",
+      managerFilePatterns: ["/talos\\/.*\\.yaml(?:\\.j2)?$/"],
+      matchStrings: [
+        "image:\\s+factory\\.talos\\.dev\\/[^/]+\\/[^:]+:(?<currentValue>v\\S+)",
+      ],
+      datasourceTemplate: "custom.talos-factory",
+      versioningTemplate: "semver",
+      depNameTemplate: "siderolabs/talos",
+    },
+  ],
+  packageRules: [
+    {
+      description: "Disable docker datasource for Talos Factory images (handled by custom.talos-factory)",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/factory\\.talos\\.dev/"],
+      enabled: false,
+    },
+    {
+      addLabels: ["renovate/talos"],
+      matchDatasources: ["custom.talos-factory"],
+      semanticCommitScope: "container",
+      commitMessageTopic: "{{depName}}",
+    },
+  ],
+}
