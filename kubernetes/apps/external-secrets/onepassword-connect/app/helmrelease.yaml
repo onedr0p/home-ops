@@ -31,34 +31,23 @@ spec:
               kind: Deployment
               name: onepassword-connect
             patch: |-
+              - op: remove
+                path: /spec/template/spec/containers/0/env/0
+              - op: remove
+                path: /spec/template/spec/containers/1/env/1
               - op: add
-                path: /spec/template/spec/containers/0/env/-
+                path: /spec/template/spec/containers/0/envFrom
                 value:
-                  name: OP_SESSION
-                  valueFrom:
-                    secretKeyRef:
+                  - secretRef:
                       name: onepassword-connect-credentials-secret
-                      key: 1password-credentials.json
               - op: add
-                path: /spec/template/spec/containers/1/env/-
+                path: /spec/template/spec/containers/1/envFrom
                 value:
-                  name: OP_SESSION
-                  valueFrom:
-                    secretKeyRef:
+                  - secretRef:
                       name: onepassword-connect-credentials-secret
-                      key: 1password-credentials.json
-              - op: test
-                path: /spec/template/spec/containers/0/volumeMounts/1/name
-                value: credentials
               - op: remove
                 path: /spec/template/spec/containers/0/volumeMounts/1
-              - op: test
-                path: /spec/template/spec/containers/1/volumeMounts/1/name
-                value: credentials
               - op: remove
                 path: /spec/template/spec/containers/1/volumeMounts/1
-              - op: test
-                path: /spec/template/spec/volumes/1/name
-                value: credentials
               - op: remove
                 path: /spec/template/spec/volumes/1
