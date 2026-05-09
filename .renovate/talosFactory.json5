@@ -1,0 +1,23 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  customDatasources: {
+    "talos-factory": {
+      defaultRegistryUrlTemplate: "https://factory.talos.dev/versions",
+      format: "json",
+      transformTemplates: ['{"releases": $.{"version": $}}'],
+    },
+  },
+  customManagers: [
+    {
+      description: "Process Talos installer image via factory versions endpoint",
+      customType: "regex",
+      managerFilePatterns: ["/talos/.+\\.yaml(?:\\.j2)?$/"],
+      matchStrings: [
+        "factory\\.talos\\.dev/\\S+?-installer/.+?:(?<currentValue>\\S+)",
+      ],
+      depNameTemplate: "siderolabs/talos",
+      datasourceTemplate: "custom.talos-factory",
+      versioningTemplate: "semver",
+    },
+  ],
+}
