@@ -11,11 +11,54 @@ spec:
   interval: 1h
   values:
     connect:
+      annotations:
+        reloader.stakater.com/auto: "true"
       api:
         httpPort: 80
         imageRepository: ghcr.io/1password/connect-api
         serviceMonitor:
           enabled: true
-      credentialsName: onepassword-connect-credentials-secret
       sync:
         imageRepository: ghcr.io/1password/connect-sync
+  postRenderers:
+    - # NOTE: Instead of having the credentials mounted as a file, we can set them as an environment variable.
+      # This is because on bootstrap kustomize strips quotes around the JSON in stringData values, which makes
+      # the value a JSON object instead of a string. Instead of having the secret contain raw JSON we just use
+      # the base64 encoded value of the JSON in onepassword-connect-credentials-secret which avoids the issue.
+      kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: onepassword-connect
+            patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/env/-
+                value:
+                  name: OP_SESSION
+                  valueFrom:
+                    secretKeyRef:
+                      name: onepassword-connect-credentials-secret
+                      key: 1password-credentials.json
+              - op: add
+                path: /spec/template/spec/containers/1/env/-
+                value:
+                  name: OP_SESSION
+                  valueFrom:
+                    secretKeyRef:
+                      name: onepassword-connect-credentials-secret
+                      key: 1password-credentials.json
+              - op: test
+                path: /spec/template/spec/containers/0/volumeMounts/1/name
+                value: credentials
+              - op: remove
+                path: /spec/template/spec/containers/0/volumeMounts/1
+              - op: test
+                path: /spec/template/spec/containers/1/volumeMounts/1/name
+                value: credentials
+              - op: remove
+                path: /spec/template/spec/containers/1/volumeMounts/1
+              - op: test
+                path: /spec/template/spec/volumes/1/name
+                value: credentials
+              - op: remove
+                path: /spec/template/spec/volumes/1
