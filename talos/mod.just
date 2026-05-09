@@ -31,7 +31,7 @@ gen-schematic-id:
 [doc('Reboot a node')]
 [script]
 reboot-node node:
-    talosctl -n {{ node }} reboot -m powercycle || exit 0
+    talosctl -n {{ node }} reboot -m powercycle
 
 [doc('Render Talos config for a node')]
 [script]
@@ -44,13 +44,13 @@ render-config node:
 [doc('Reset a node')]
 [script]
 reset-node node *args:
-    talosctl -n "{{ node }}" reset --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL --system-labels-to-wipe u-local-hostpath --graceful=false {{ args }} || exit 0
+    talosctl -n "{{ node }}" reset --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL --system-labels-to-wipe u-local-hostpath --graceful=false {{ args }}
 
 [confirm('Shutdown node ' + node + ' [y|N] ?')]
 [doc('Shutdown a node')]
 [script]
 shutdown-node node *args:
-    talosctl -n "{{ node }}" shutdown --force {{ args }} || exit 0
+    talosctl -n "{{ node }}" shutdown --force {{ args }}
 
 [confirm('Upgrade Kubernetes to ' + version + ' [y|N] ?')]
 [doc('Upgrade Kubernetes version on the cluster')]
