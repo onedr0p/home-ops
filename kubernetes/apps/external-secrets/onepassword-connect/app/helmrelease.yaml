@@ -31,16 +31,22 @@ spec:
               kind: Deployment
               name: onepassword-connect
             patch: |-
-              - op: add
-                path: /spec/template/spec/containers/0/env/-
+              - op: test
+                path: /spec/template/spec/containers/0/env/0/name
+                value: OP_SESSION
+              - op: replace
+                path: /spec/template/spec/containers/0/env/0
                 value:
                   name: OP_SESSION
                   valueFrom:
                     secretKeyRef:
                       name: onepassword-connect-credentials-secret
                       key: 1password-credentials.json
-              - op: add
-                path: /spec/template/spec/containers/1/env/-
+              - op: test
+                path: /spec/template/spec/containers/1/env/1/name
+                value: OP_SESSION
+              - op: replace
+                path: /spec/template/spec/containers/1/env/1
                 value:
                   name: OP_SESSION
                   valueFrom:
