@@ -12,11 +12,10 @@ default:
     just -l bootstrap
 
 [doc('Bootstrap a Talos & Kubernetes cluster end-to-end')]
-[group('All')]
 [script]
 cluster: nodes k8s (kubeconfig "node") base apps kubeconfig
 
-[doc('Apply Talos configuration to all nodes')]
+[private]
 [script]
 nodes:
     just log info "Running stage..." "stage" "$(basename "$0")"
@@ -30,7 +29,7 @@ nodes:
         fi
     done
 
-[doc('Bootstrap Kubernetes (etcd) on the controller')]
+[private]
 [script]
 k8s:
     just log info "Running stage..." "stage" "$(basename "$0")"
@@ -39,7 +38,7 @@ k8s:
         sleep 5
     done
 
-[doc('Fetch kubeconfig (lb=node points kubectl at controller IP)')]
+[private]
 [script]
 kubeconfig lb="cilium":
     just log info "Running stage..." "stage" "$(basename "$0")"
@@ -52,7 +51,7 @@ kubeconfig lb="cilium":
         fi
     fi
 
-[doc('Apply base manifests')]
+[private]
 [script]
 base: ready
     just log info "Running stage..." "stage" "$(basename "$0")"
@@ -63,7 +62,7 @@ base: ready
         just log fatal "Failed to apply crds" "stage" "$(basename "$0")"
     fi
 
-[doc('Sync Helm releases')]
+[private]
 [script]
 apps:
     just log info "Running stage..." "stage" "$(basename "$0")"
