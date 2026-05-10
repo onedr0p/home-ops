@@ -4,7 +4,7 @@
     "talos-factory": {
       defaultRegistryUrlTemplate: "https://factory.talos.dev/versions",
       format: "json",
-      transformTemplates: ['{"releases": $map($, function($v) { {"version": $v} })}'],
+      transformTemplates: ['{"releases": [$.{"version": $}]}'],
     },
   },
   customManagers: [
@@ -13,7 +13,7 @@
       customType: "regex",
       managerFilePatterns: ["/talos\\/.*\\.yaml(?:\\.j2)?$/"],
       matchStrings: [
-        "image:\\s+factory\\.talos\\.dev\\/[^/]+\\/[^:]+:(?<currentValue>v\\S+)",
+        "factory\\.talos\\.dev\\/[^/]+\\/[^:]+:(?<currentValue>v\\S+)",
       ],
       datasourceTemplate: "custom.talos-factory",
       versioningTemplate: "semver",
@@ -21,12 +21,6 @@
     },
   ],
   packageRules: [
-    {
-      description: "Disable docker datasource for Talos Factory images (handled by custom.talos-factory)",
-      matchDatasources: ["docker"],
-      matchPackageNames: ["/factory\\.talos\\.dev/"],
-      enabled: false,
-    },
     {
       addLabels: ["renovate/talos"],
       matchDatasources: ["custom.talos-factory"],
