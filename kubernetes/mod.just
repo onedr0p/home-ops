@@ -31,6 +31,29 @@ prune-pods:
         kubectl delete pods -A --field-selector status.phase="$phase" --ignore-not-found=true
     done
 
+[doc('Restore a PVC from VolSync, scaling the workload down [previous=0]')]
+[script]
+restore ns app previous='0':
+    flux -n {{ ns }} suspend kustomization {{ app }}
+    flux -n {{ ns }} suspend helmrelease {{ app }}
+    kubectl -n {{ ns }} get deploy,sts -l app.kubernetes.io/name={{ app }} -o name \
+        | xargs -r -I{} kubectl -n {{ ns }} scale {} --replicas=0
+    kubectl -n {{ ns }} wait pod --for=delete --selector="app.kubernetes.io/name={{ app }}" --timeout=5m
+    kubectl -n {{ ns }} get replicationdestination {{ app }}-dst -o json \
+        | jq 'del(.status)
+            | .metadata = {name: "{{ app }}-manual", namespace: .metadata.namespace}
+            | .spec.kopia.copyMethod = "Direct"
+            | .spec.kopia.destinationPVC = "{{ app }}"
+            | .spec.kopia.previous = {{ previous }}' \
+        | kubectl apply --server-side -f -
+    kubectl -n {{ ns }} wait job/volsync-dst-{{ app }}-manual --for=create --timeout=120s
+    kubectl -n {{ ns }} wait job/volsync-dst-{{ app }}-manual --for=condition=complete --timeout=120m
+    kubectl -n {{ ns }} delete replicationdestination {{ app }}-manual
+    flux -n {{ ns }} resume kustomization {{ app }}
+    flux -n {{ ns }} resume helmrelease {{ app }}
+    flux -n {{ ns }} reconcile helmrelease {{ app }} --force
+    kubectl -n {{ ns }} wait pod --for=condition=ready --selector="app.kubernetes.io/name={{ app }}" --timeout=5m
+
 [doc('Snapshot VolSync PVCs')]
 [script]
 snapshot:
