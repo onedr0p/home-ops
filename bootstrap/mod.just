@@ -7,13 +7,11 @@ controller := `talosctl config info -o yaml | yq -e '.endpoints[0]'`
 nodes := `talosctl config info -o yaml | yq -e '.nodes | join (" ")'`
 
 [private]
-[script]
 default:
     just -l bootstrap
 
 [confirm('Bootstrap cluster? [y|N]')]
 [doc('Bootstrap a Talos & Kubernetes cluster end-to-end')]
-[script]
 cluster: nodes k8s (kubeconfig "node") base apps kubeconfig
 
 [private]

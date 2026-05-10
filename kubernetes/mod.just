@@ -4,27 +4,22 @@ set script-interpreter := ['bash', '-euo', 'pipefail']
 set shell := ['bash', '-euo', 'pipefail', '-c']
 
 [private]
-[script]
 default:
     just -l kube
 
 [doc('Apply local Flux Kustomization')]
-[script]
 apply-ks ns ks:
     just kube render-local-ks "{{ ns }}" "{{ ks }}" | kubectl apply --server-side --force-conflicts --field-manager=kustomize-controller -f -
 
 [doc('Browse a PVC')]
-[script]
 browse-pvc ns claim:
     kubectl browse-pvc -n {{ ns }} -i mirror.gcr.io/alpine:latest {{ claim }}
 
 [doc('Delete local Flux Kustomization')]
-[script]
 delete-ks ns ks:
     just kube render-local-ks "{{ ns }}" "{{ ks }}" | kubectl delete -f -
 
 [doc('Open a shell on a node')]
-[script]
 node-shell node:
     kubectl debug node/{{ node }} -n default -it --image="mirror.gcr.io/alpine:latest" --profile sysadmin
     kubectl delete pod -n default -l app.kubernetes.io/managed-by=kubectl-debug
@@ -44,7 +39,6 @@ snapshot:
     done
 
 [doc('Suspend or resume VolSync')]
-[script]
 volsync state:
     flux -n volsync-system {{ state }} kustomization volsync
     flux -n volsync-system {{ state }} helmrelease volsync
@@ -86,11 +80,9 @@ sync-oci:
     done
 
 [doc('View a secret')]
-[script]
 view-secret ns secret:
     kubectl view-secret -n {{ ns }} {{ secret }}
 
 [private]
-[script]
 render-local-ks ns ks:
     flux-local build ks --namespace "{{ ns }}" --path "{{ source_directory() }}/flux/cluster" "{{ ks }}"
