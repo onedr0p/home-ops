@@ -31,7 +31,7 @@ prune-pods:
         kubectl delete pods -A --field-selector status.phase="$phase" --ignore-not-found=true
     done
 
-[doc('Restore a PVC from VolSync, scaling the workload down [previous=0]')]
+[doc('Restore a PVC from VolSync')]
 [script]
 restore ns app previous='0':
     flux -n {{ ns }} suspend kustomization {{ app }}
