@@ -1,9 +1,10 @@
+experimental_monorepo_root = true
+
 [env]
 _.python.venv = { path = "{{config_root}}/.venv", create = true }
 KUBECONFIG = "{{config_root}}/kubeconfig"
 MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 TALOSCONFIG = "{{config_root}}/talosconfig"
-JUST_UNSTABLE = "1"
 LEFTHOOK_OUTPUT = "false"
 
 _.file = [
@@ -14,3 +15,36 @@ _.file = [
 "python" = "latest"
 "uv" = "latest"
 "pipx:flux-local" = "latest"
+
+[settings]
+experimental = true
+quiet = true
+
+[monorepo]
+config_roots = ["kubernetes", "talos", "bootstrap"]
+
+[tasks.log]
+hide = true
+description = "Structured log via gum"
+usage = '''
+arg "<lvl>"
+arg "<msg>"
+arg "[args]..."
+'''
+run = '''
+eval "set -- $usage_args"
+gum log -t rfc3339 -s -l "$usage_lvl" "$usage_msg" "$@"
+'''
+
+[tasks.template]
+hide = true
+description = "Render minijinja template through op inject"
+usage = '''
+arg "<file>"
+arg "[args]..."
+'''
+run = '''
+set -euo pipefail
+eval "set -- $usage_args"
+minijinja-cli "$usage_file" "$@" | op inject
+'''

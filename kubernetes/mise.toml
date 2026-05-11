@@ -1,0 +1,166 @@
+[tasks.apply-ks]
+description = "Apply local Flux Kustomization"
+usage = '''
+arg "<ns>"
+arg "<ks>"
+'''
+run = '''
+set -euo pipefail
+mise run //kubernetes:render-local-ks "$usage_ns" "$usage_ks" \
+    | kubectl apply --server-side --force-conflicts --field-manager=kustomize-controller -f -
+'''
+
+[tasks.browse-pvc]
+description = "Browse a PVC"
+usage = '''
+arg "<ns>"
+arg "<claim>"
+'''
+run = '''
+kubectl run -n "$usage_ns" "browse-pvc-$usage_claim" -it --rm --restart=Never \
+    --image=mirror.gcr.io/alpine:latest \
+    --overrides="{\"spec\":{\"containers\":[{\"name\":\"browse-pvc-${usage_claim}\",\"image\":\"mirror.gcr.io/alpine:latest\",\"stdin\":true,\"tty\":true,\"command\":[\"/bin/sh\"],\"workingDir\":\"/mnt\",\"volumeMounts\":[{\"mountPath\":\"/mnt\",\"name\":\"data\"}]}],\"volumes\":[{\"name\":\"data\",\"persistentVolumeClaim\":{\"claimName\":\"${usage_claim}\"}}]}}"
+'''
+
+[tasks.debug-node]
+description = "Debug a node"
+usage = 'arg "<node>"'
+run = '''
+trap 'kubectl delete pod -n default -l app.kubernetes.io/managed-by=kubectl-debug --ignore-not-found --wait=false' EXIT
+kubectl debug "node/$usage_node" -n default -it --image=mirror.gcr.io/alpine:latest --profile=sysadmin
+'''
+
+[tasks.delete-ks]
+description = "Delete local Flux Kustomization"
+usage = '''
+arg "<ns>"
+arg "<ks>"
+'''
+run = '''
+set -euo pipefail
+mise run //kubernetes:render-local-ks "$usage_ns" "$usage_ks" | kubectl delete -f -
+'''
+
+[tasks.prune-pods]
+description = "Prune pods in Failed, Pending, or Succeeded state"
+run = '''
+set -euo pipefail
+for phase in Failed Pending Succeeded; do
+    kubectl delete pods -A --field-selector "status.phase=$phase" --ignore-not-found=true
+done
+'''
+
+[tasks.render-local-ks]
+hide = true
+usage = '''
+arg "<ns>"
+arg "<ks>"
+'''
+run = 'flux-local build ks --namespace "$usage_ns" --path "$MISE_PROJECT_ROOT/flux/cluster" "$usage_ks"'
+
+[tasks.restore]
+description = "Restore a PVC from VolSync"
+usage = '''
+arg "<ns>"
+arg "<app>"
+arg "[previous]" default="0"
+'''
+run = '''
+set -euo pipefail
+flux -n "$usage_ns" suspend kustomization "$usage_app"
+flux -n "$usage_ns" suspend helmrelease "$usage_app"
+kubectl -n "$usage_ns" get deploy,sts -l "app.kubernetes.io/name=$usage_app" -o name \
+    | xargs -r -I{} kubectl -n "$usage_ns" scale {} --replicas=0
+kubectl -n "$usage_ns" wait pod --for=delete --selector="app.kubernetes.io/name=$usage_app" --timeout=5m
+kubectl -n "$usage_ns" get replicationdestination "$usage_app-dst" -o json \
+    | jq "del(.status)
+        | .metadata = {name: \"${usage_app}-manual\", namespace: .metadata.namespace}
+        | .spec.kopia.copyMethod = \"Direct\"
+        | .spec.kopia.destinationPVC = \"${usage_app}\"
+        | .spec.kopia.previous = ${usage_previous}" \
+    | kubectl apply --server-side -f -
+kubectl -n "$usage_ns" wait "job/volsync-dst-${usage_app}-manual" --for=create --timeout=120s
+kubectl -n "$usage_ns" wait "job/volsync-dst-${usage_app}-manual" --for=condition=complete --timeout=120m
+kubectl -n "$usage_ns" delete replicationdestination "${usage_app}-manual"
+flux -n "$usage_ns" resume kustomization "$usage_app"
+flux -n "$usage_ns" resume helmrelease "$usage_app"
+flux -n "$usage_ns" reconcile helmrelease "$usage_app" --force
+kubectl -n "$usage_ns" wait pod --for=condition=ready --selector="app.kubernetes.io/name=$usage_app" --timeout=5m
+'''
+
+[tasks.snapshot]
+description = "Snapshot VolSync PVCs"
+run = '''
+set -euo pipefail
+kubectl get replicationsources --no-headers -A | while read -r ns name _; do
+    kubectl -n "$ns" patch replicationsources "$name" --type merge -p '{"spec":{"trigger":{"manual":"$(date +%s)"}}}'
+done
+'''
+
+[tasks.sync-es]
+description = "Sync ExternalSecrets"
+run = '''
+set -euo pipefail
+kubectl get es --no-headers -A | while read -r ns name _; do
+    kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite es "$name" "force-sync=$(date +%s)"
+done
+'''
+
+[tasks.sync-git]
+description = "Sync GitRepositories"
+run = '''
+set -euo pipefail
+kubectl get gitrepo --no-headers -A | while read -r ns name _; do
+    kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite gitrepo "$name" "reconcile.fluxcd.io/requestedAt=$(date +%s)"
+done
+'''
+
+[tasks.sync-hr]
+description = "Sync HelmReleases"
+run = '''
+set -euo pipefail
+kubectl get hr --no-headers -A | while read -r ns name _; do
+    kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite hr "$name" "reconcile.fluxcd.io/requestedAt=$(date +%s)" "reconcile.fluxcd.io/forceAt=$(date +%s)"
+done
+'''
+
+[tasks.sync-ks]
+description = "Sync Kustomizations"
+run = '''
+set -euo pipefail
+kubectl get ks --no-headers -A | while read -r ns name _; do
+    kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite ks "$name" "reconcile.fluxcd.io/requestedAt=$(date +%s)"
+done
+'''
+
+[tasks.sync-oci]
+description = "Sync OCIRepositories"
+run = '''
+set -euo pipefail
+kubectl get ocirepo --no-headers -A | while read -r ns name _; do
+    kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite ocirepo "$name" "reconcile.fluxcd.io/requestedAt=$(date +%s)"
+done
+'''
+
+[tasks.view-secret]
+description = "View a secret"
+usage = '''
+arg "<ns>"
+arg "<secret>"
+'''
+run = 'kubectl view-secret -n "$usage_ns" "$usage_secret"'
+
+[tasks.volsync]
+description = "Suspend or resume VolSync"
+usage = 'arg "<state>"'
+run = '''
+set -euo pipefail
+flux -n volsync-system "$usage_state" kustomization volsync
+flux -n volsync-system "$usage_state" helmrelease volsync
+if [[ "$usage_state" == "suspend" ]]; then
+    replicas=0
+else
+    replicas=1
+fi
+kubectl -n volsync-system scale deployment volsync --replicas "$replicas"
+'''

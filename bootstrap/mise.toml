@@ -1,0 +1,96 @@
+[tasks.cluster]
+description = "Bootstrap a Talos & Kubernetes cluster end-to-end"
+confirm = "Bootstrap cluster? [y|N]"
+run = '''
+set -euo pipefail
+mise run //bootstrap:nodes
+mise run //bootstrap:k8s
+mise run //bootstrap:config node
+mise run //bootstrap:base
+mise run //bootstrap:apps
+mise run //bootstrap:config
+'''
+
+[tasks.nodes]
+hide = true
+run = '''
+set -euo pipefail
+nodes="$(talosctl config info -o yaml | yq -e '.nodes | join (" ")')"
+mise run //:log info "Running stage..." stage "${MISE_TASK_NAME##*:}"
+for n in $nodes; do
+    if ! op=$(mise run --yes //talos:apply-node "$n" --insecure 2>&1); then
+        if [[ "$op" == *"certificate required"* ]]; then
+            mise run //:log info "Talos already configured, skipping apply of config" stage "${MISE_TASK_NAME##*:}" node "$n"
+            continue
+        fi
+        mise run //:log fatal "Failed to apply Talos configuration" stage "${MISE_TASK_NAME##*:}" node "$n" output "$op"
+    fi
+done
+'''
+
+[tasks.k8s]
+hide = true
+run = '''
+set -euo pipefail
+controller="$(talosctl config info -o yaml | yq -e '.endpoints[0]')"
+mise run //:log info "Running stage..." stage "${MISE_TASK_NAME##*:}"
+until op=$(talosctl -n "$controller" bootstrap 2>&1 || true) && [[ "$op" == *"AlreadyExists"* ]]; do
+    mise run //:log info "Kubernetes bootstrap in progress. Retrying in 5 seconds..." stage "${MISE_TASK_NAME##*:}"
+    sleep 5
+done
+'''
+
+[tasks.config]
+hide = true
+usage = 'arg "[lb]" default="cilium"'
+run = '''
+set -euo pipefail
+controller="$(talosctl config info -o yaml | yq -e '.endpoints[0]')"
+mise run //:log info "Running stage..." stage "${MISE_TASK_NAME##*:}"
+if ! talosctl kubeconfig -n "$controller" -f --force-context-name main "$MISE_MONOREPO_ROOT"; then
+    mise run //:log fatal "Failed to fetch kubeconfig" stage "${MISE_TASK_NAME##*:}"
+fi
+if [[ "$usage_lb" != "cilium" ]]; then
+    if ! kubectl config set-cluster main --server "https://${controller}:6443"; then
+        mise run //:log fatal "Failed to set kubectl cluster server address" stage "${MISE_TASK_NAME##*:}"
+    fi
+fi
+'''
+
+[tasks.base]
+hide = true
+run = '''
+set -euo pipefail
+mise run //bootstrap:ready
+mise run //:log info "Running stage..." stage "${MISE_TASK_NAME##*:}"
+if ! kustomize build "$MISE_PROJECT_ROOT/kustomize/apps" | mise run //:template - | kubectl apply --server-side --force-conflicts -f -; then
+    mise run //:log fatal "Failed to apply base manifests" stage "${MISE_TASK_NAME##*:}"
+fi
+if ! helmfile -f "$MISE_PROJECT_ROOT/helmfile.d/crds.yaml" template -q | yq ea -e 'select(.kind == "CustomResourceDefinition")' | kubectl apply --server-side --force-conflicts -f -; then
+    mise run //:log fatal "Failed to apply base crds" stage "${MISE_TASK_NAME##*:}"
+fi
+'''
+
+[tasks.apps]
+hide = true
+run = '''
+set -euo pipefail
+mise run //:log info "Running stage..." stage "${MISE_TASK_NAME##*:}"
+if ! helmfile -f "$MISE_PROJECT_ROOT/helmfile.d/apps.yaml" sync --hide-notes; then
+    mise run //:log fatal "Failed to sync helmfile" stage "${MISE_TASK_NAME##*:}"
+fi
+'''
+
+# Wait until nodes register as Ready=False. They only become Ready=True once the CNI is healthy.
+[tasks.ready]
+hide = true
+run = '''
+set -euo pipefail
+mise run //:log info "Running stage..." stage "${MISE_TASK_NAME##*:}"
+if ! kubectl wait nodes --for=condition=Ready=True --all --timeout=10s &>/dev/null; then
+    until kubectl wait nodes --for=condition=Ready=False --all --timeout=10s &>/dev/null; do
+        mise run //:log info "Nodes not available, waiting for nodes to be available. Retrying in 5 seconds..." stage "${MISE_TASK_NAME##*:}"
+        sleep 5
+    done
+fi
+'''

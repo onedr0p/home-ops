@@ -1,0 +1,122 @@
+[tasks.apply-node]
+description = "Apply Talos config to a node"
+confirm = "Apply Talos config to {{ arg(name='node') }} [y|N] ?"
+usage = '''
+arg "<node>"
+arg "[args]..."
+'''
+run = '''
+set -euo pipefail
+eval "set -- $usage_args"
+mise run //talos:render-config "$usage_node" \
+    | talosctl -n "$usage_node" apply-config -f /dev/stdin "$@"
+'''
+
+[tasks.download-image]
+description = "Download Talos machine image"
+usage = 'arg "<version>"'
+run = '''
+set -euo pipefail
+SCHEMATIC="$(mise run //talos:schematic-id)"
+export SCHEMATIC
+curl -fL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors --progress-bar \
+    -o "$MISE_PROJECT_ROOT/talos-${usage_version}-${SCHEMATIC:0:8}.iso" \
+    "https://factory.talos.dev/image/${SCHEMATIC}/${usage_version}/metal-amd64.iso"
+mise run //:log info "Downloaded Talos" version "$usage_version" schematic "$SCHEMATIC"
+'''
+
+[tasks.reboot-node]
+description = "Reboot a node"
+confirm = "Reboot node {{ arg(name='node') }} [y|N] ?"
+usage = 'arg "<node>"'
+run = 'talosctl -n "$usage_node" reboot -m powercycle'
+
+[tasks.render-config]
+description = "Render Talos config for a node"
+usage = 'arg "<node>"'
+run = '''
+set -euo pipefail
+CONTROLPLANE="$(mise run //talos:machine-controller "$usage_node")"
+SCHEMATIC="$(mise run //talos:schematic-id)"
+export CONTROLPLANE SCHEMATIC
+talosctl machineconfig patch <(mise run //:template "$MISE_PROJECT_ROOT/machineconfig.yaml.j2") \
+    -p @<(mise run //:template "$MISE_PROJECT_ROOT/nodes/${usage_node}.yaml.j2")
+'''
+
+[tasks.reset-node]
+description = "Reset a node"
+confirm = "Reset node {{ arg(name='node') }} [y|N] ?"
+usage = '''
+arg "<node>"
+arg "[args]..."
+'''
+run = '''
+eval "set -- $usage_args"
+talosctl -n "$usage_node" reset \
+    --system-labels-to-wipe STATE \
+    --system-labels-to-wipe EPHEMERAL \
+    --system-labels-to-wipe u-local-hostpath \
+    --graceful=false "$@"
+'''
+
+[tasks.shutdown-node]
+description = "Shutdown a node"
+confirm = "Shutdown node {{ arg(name='node') }} [y|N] ?"
+usage = '''
+arg "<node>"
+arg "[args]..."
+'''
+run = '''
+eval "set -- $usage_args"
+talosctl -n "$usage_node" shutdown --force "$@"
+'''
+
+[tasks.upgrade-k8s]
+description = "Upgrade Kubernetes version on the cluster"
+confirm = "Upgrade Kubernetes to {{ arg(name='version') }} [y|N] ?"
+usage = 'arg "<version>"'
+run = '''
+set -euo pipefail
+controller="$(talosctl config info -o yaml | yq -e '.endpoints[0]')"
+talosctl -n "$controller" upgrade-k8s --to "$usage_version"
+'''
+
+[tasks.upgrade-node]
+description = "Upgrade Talos version on a node"
+confirm = "Upgrade node {{ arg(name='node') }} [y|N] ?"
+usage = '''
+arg "<node>"
+arg "[args]..."
+'''
+run = '''
+eval "set -- $usage_args"
+image="$(mise run //talos:machine-image)"
+talosctl -n "$usage_node" upgrade -i "$image" -m powercycle --timeout=10m "$@"
+'''
+
+[tasks.schematic-id]
+hide = true
+run = '''
+set -euo pipefail
+curl -sX POST \
+    --data-binary @<(mise run //:template "$MISE_PROJECT_ROOT/schematic.yaml.j2") \
+    "https://factory.talos.dev/schematics" \
+    | jq -r '.id'
+'''
+
+[tasks.machine-controller]
+hide = true
+usage = 'arg "<node>"'
+run = '''
+set -euo pipefail
+mise run //:template "$MISE_PROJECT_ROOT/nodes/${usage_node}.yaml.j2" \
+    | yq -e 'select(.machine) | (.machine.type == "controlplane") // ""'
+'''
+
+[tasks.machine-image]
+hide = true
+run = '''
+set -euo pipefail
+mise run //:template "$MISE_PROJECT_ROOT/machineconfig.yaml.j2" \
+    | yq -e 'select(.machine) | .machine.install.image'
+'''
