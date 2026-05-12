@@ -74,12 +74,11 @@ volsync state:
 [doc('Sync a resource')]
 [script]
 sync resource:
-    now=$(date +%s)
     kubectl get {{ resource }} --no-headers -A | while read -r ns name _; do
         kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite {{ resource }} "$name" \
-            "force-sync=$now" \
-            "reconcile.fluxcd.io/requestedAt=$now" \
-            "reconcile.fluxcd.io/forceAt=$now"
+            "force-sync=$(date +%s)" \
+            "reconcile.fluxcd.io/requestedAt=$(date +%s)" \
+            "reconcile.fluxcd.io/forceAt=$(date +%s)"
     done
 
 [doc('View a secret')]
