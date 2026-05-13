@@ -1,8 +1,14 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/helmfile
 
-# This helmfile is for extracting and installing Custom Resource Definitions (CRDs) from Helm charts.
-# It is not intended to be used with helmfile apply or helmfile sync.
+# Bootstraps cluster-wide Custom Resource Definitions (CRDs) by extracting them
+# from upstream Helm charts and applying them directly with kubectl. The releases
+# below are never reconciled with helmfile apply or helmfile sync — only their
+# CRDs are rendered (via --include-crds) and piped to the cluster.
+#
+# Installing CRDs out-of-band ensures they exist before Flux begins reconciling
+# workloads that reference them, avoiding the need for dependsOn chains on nearly
+# every Kustomization that consumes a CRD-backed resource.
 
 helmDefaults:
   args:
@@ -20,7 +26,7 @@ releases:
     chart: oci://ghcr.io/grafana/helm-charts/grafana-operator
     version: 5.22.2
 
-  - name: prometheus-operator-crds
+  - name: kube-prometheus-stack
     namespace: o11y
-    chart: oci://ghcr.io/prometheus-community/charts/prometheus-operator-crds
-    version: 29.0.0
+    chart: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
+    version: 85.0.2
