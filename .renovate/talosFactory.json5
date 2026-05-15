@@ -7,6 +7,19 @@
       transformTemplates: ['{"releases": [$.{"version": $}]}'],
     },
   },
+  customManagers: [
+    {
+      description: "Process Talos Factory installer images",
+      customType: "regex",
+      managerFilePatterns: ["/talos\\/.*\\.yaml(?:\\.j2|\\.tpl)?$/"],
+      matchStrings: [
+        "factory\\.talos\\.dev\\/[^/]+\\/[^:]+:(?<currentValue>v\\S+)",
+      ],
+      datasourceTemplate: "custom.talos-factory",
+      versioningTemplate: "semver",
+      depNameTemplate: "siderolabs/talos",
+    },
+  ],
   packageRules: [
     {
       addLabels: ["renovate/talos"],
