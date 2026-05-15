@@ -62,5 +62,7 @@ machine-controller node:
     just template "{{ source_directory() }}/nodes/{{ node }}.yaml.j2" | yq -e 'select(.machine) | (.machine.type == "controlplane") // ""'
 
 [private]
+[script]
 machine-image:
+    export SCHEMATIC="$(just talos schematic-id)"
     just template "{{ source_directory() }}/machineconfig.yaml.j2" | yq -e 'select(.machine) | .machine.install.image'
