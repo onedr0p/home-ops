@@ -18,15 +18,22 @@ helmDefaults:
 releases:
   - name: envoy-gateway
     namespace: network
-    chart: oci://mirror.gcr.io/envoyproxy/gateway-helm
-    version: 1.8.0
+    inherit:
+      - template: default
 
   - name: grafana-operator
     namespace: o11y
-    chart: oci://ghcr.io/grafana/helm-charts/grafana-operator
-    version: 5.22.2
+    inherit:
+      - template: default
 
   - name: kube-prometheus-stack
     namespace: o11y
-    chart: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
-    version: 85.1.3
+    inherit:
+      - template: default
+
+templates:
+  default:
+    chart: '{{ (fromYaml (tpl (readFile "./templates/release.yaml.gotmpl") .)).chart }}'
+    version: '{{ (fromYaml (tpl (readFile "./templates/release.yaml.gotmpl") .)).version }}'
+    values:
+      - ./templates/values.yaml.gotmpl
