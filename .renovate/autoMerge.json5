@@ -3,48 +3,27 @@
   packageRules: [
     {
       description: "Auto-merge trusted OCI digests",
-      matchDatasources: [
-        "docker"
-      ],
-      matchUpdateTypes: [
-        "digest"
-      ],
-      matchPackageNames: [
-        "/home-operations/"
-      ],
+      matchDatasources: ["docker"],
+      matchUpdateTypes: ["digest"],
+      matchPackageNames: ["/home-operations/"],
       automerge: true,
       automergeType: "pr",
       ignoreTests: false,
     },
     {
       description: "Auto-merge high-cadence OCI packages weekly",
-      matchDatasources: [
-        "docker"
-      ],
-      matchUpdateTypes: [
-        "minor",
-        "patch"
-      ],
-      matchPackageNames: [
-        "/kube-prometheus-stack/"
-      ],
+      matchDatasources: ["docker"],
+      matchUpdateTypes: ["minor", "patch"],
+      matchPackageNames: ["/kube-prometheus-stack/"],
       automerge: true,
       automergeType: "pr",
       ignoreTests: false,
-      schedule: [
-        "before 6am on Monday"
-      ],
+      schedule: ["before 6am on Monday"],
     },
     {
       description: "Auto-merge GitHub Actions",
-      matchManagers: [
-        "github-actions"
-      ],
-      matchUpdateTypes: [
-        "minor",
-        "patch",
-        "digest"
-      ],
+      matchManagers: ["github-actions"],
+      matchUpdateTypes: ["minor", "patch", "digest"],
       automerge: true,
       automergeType: "branch",
       minimumReleaseAge: "3 days",
@@ -52,18 +31,9 @@
     },
     {
       description: "Auto-merge trusted GitHub Actions",
-      matchManagers: [
-        "github-actions"
-      ],
-      matchPackageNames: [
-        "/^actions\\//",
-        "/^renovatebot\\//"
-      ],
-      matchUpdateTypes: [
-        "minor",
-        "patch",
-        "digest"
-      ],
+      matchManagers: ["github-actions"],
+      matchPackageNames: ["/^actions\\//", "/^renovatebot\\//"],
+      matchUpdateTypes: ["minor", "patch", "digest"],
       automerge: true,
       automergeType: "branch",
       minimumReleaseAge: "1 minute",
@@ -71,15 +41,9 @@
     },
     {
       description: "Auto-merge Grafana dashboards",
-      matchDatasources: [
-        "custom.grafana-dashboards"
-      ],
-      matchUpdateTypes: [
-        "major"
-      ],
-      addLabels: [
-        "renovate/grafana-dashboard"
-      ],
+      matchDatasources: ["custom.grafana-dashboards"],
+      matchUpdateTypes: ["major"],
+      addLabels: ["renovate/grafana-dashboard"],
       automerge: true,
       automergeType: "branch",
       ignoreTests: true,
