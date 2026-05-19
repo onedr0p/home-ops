@@ -1,10 +1,12 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/helmfile
-
+bases:
+  - _defaults.yaml
+---
+# yaml-language-server: $schema=https://json.schemastore.org/helmfile
 helmDefaults:
-  args:
-    - --force-conflicts
   cleanupOnFail: true
+  forceConflicts: true
   wait: true
   waitForJobs: true
 
@@ -108,10 +110,3 @@ releases:
       - template: default
     needs:
       - flux-system/flux-operator
-
-templates:
-  default:
-    chart: '{{ (fromYaml (tpl (readFile "./templates/release.yaml.gotmpl") .)).chart }}'
-    version: '{{ (fromYaml (tpl (readFile "./templates/release.yaml.gotmpl") .)).version }}'
-    values:
-      - ./templates/values.yaml.gotmpl
