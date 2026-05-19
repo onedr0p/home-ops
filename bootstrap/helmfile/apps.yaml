@@ -1,20 +1,20 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/helmfile
-
+bases:
+  - _defaults.yaml
+---
+# yaml-language-server: $schema=https://json.schemastore.org/helmfile
 helmDefaults:
-  args:
-    - --force-conflicts
   cleanupOnFail: true
+  forceConflicts: true
   wait: true
   waitForJobs: true
 
 releases:
   - name: cilium
     namespace: kube-system
-    chart: oci://quay.io/cilium/charts/cilium
-    version: 1.19.4
-    values:
-      - ./templates/values.yaml.gotmpl
+    inherit:
+      - template: default
     hooks:
       - # Wait for CRDs to be available
         command: kubectl
@@ -43,46 +43,36 @@ releases:
 
   - name: coredns
     namespace: kube-system
-    chart: oci://ghcr.io/coredns/charts/coredns
-    version: 1.45.2
-    values:
-      - ./templates/values.yaml.gotmpl
+    inherit:
+      - template: default
     needs:
       - kube-system/cilium
 
   - name: spegel
     namespace: kube-system
-    chart: oci://ghcr.io/spegel-org/helm-charts/spegel
-    version: 0.7.0
-    values:
-      - ./templates/values.yaml.gotmpl
+    inherit:
+      - template: default
     needs:
       - kube-system/coredns
 
   - name: cert-manager
     namespace: cert-manager
-    chart: oci://quay.io/jetstack/charts/cert-manager
-    version: v1.20.2
-    values:
-      - ./templates/values.yaml.gotmpl
+    inherit:
+      - template: default
     needs:
       - kube-system/spegel
 
   - name: external-secrets
     namespace: external-secrets
-    chart: oci://ghcr.io/external-secrets/charts/external-secrets
-    version: 2.5.0
-    values:
-      - ./templates/values.yaml.gotmpl
+    inherit:
+      - template: default
     needs:
       - cert-manager/cert-manager
 
   - name: onepassword-connect
     namespace: external-secrets
-    chart: oci://ghcr.io/1password/connect
-    version: 2.4.1
-    values:
-      - ./templates/values.yaml.gotmpl
+    inherit:
+      - template: default
     hooks:
       - # Wait for CRDs to be available
         command: kubectl
@@ -109,18 +99,14 @@ releases:
 
   - name: flux-operator
     namespace: flux-system
-    chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
-    version: 0.49.0
-    values:
-      - ./templates/values.yaml.gotmpl
+    inherit:
+      - template: default
     needs:
       - external-secrets/onepassword-connect
 
   - name: flux-instance
     namespace: flux-system
-    chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
-    version: 0.49.0
-    values:
-      - ./templates/values.yaml.gotmpl
+    inherit:
+      - template: default
     needs:
       - flux-system/flux-operator

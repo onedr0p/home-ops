@@ -3,10 +3,10 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: grafana
+  name: grafana-operator
 spec:
   interval: 1h
-  path: ./kubernetes/apps/o11y/grafana/app
+  path: ./kubernetes/apps/o11y/grafana-operator/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -22,11 +22,11 @@ metadata:
   name: grafana-instance
 spec:
   dependsOn:
-    - name: grafana
+    - name: grafana-operator
     - name: rook-ceph-cluster
       namespace: rook-ceph
   interval: 1h
-  path: ./kubernetes/apps/o11y/grafana/instance
+  path: ./kubernetes/apps/o11y/grafana-operator/instance
   prune: true
   sourceRef:
     kind: GitRepository

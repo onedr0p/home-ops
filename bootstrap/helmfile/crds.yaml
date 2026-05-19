@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/helmfile
+bases:
+  - _defaults.yaml
+---
+# yaml-language-server: $schema=https://json.schemastore.org/helmfile
+helmDefaults:
+  args:
+    - --include-crds
+    - --no-hooks
+
+releases:
+  - name: envoy-gateway
+    namespace: network
+    inherit:
+      - template: default
+
+  - name: grafana-operator
+    namespace: o11y
+    inherit:
+      - template: default
+
+  - name: kube-prometheus-stack
+    namespace: o11y
+    inherit:
+      - template: default
