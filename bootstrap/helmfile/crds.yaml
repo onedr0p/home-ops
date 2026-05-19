@@ -1,9 +1,18 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/helmfile
+
+# Bootstraps cluster-wide Custom Resource Definitions (CRDs) by extracting them
+# from upstream Helm charts and applying them directly with kubectl. The releases
+# below are never reconciled with helmfile apply or helmfile sync — only their
+# CRDs are rendered (via --include-crds) and piped to the cluster.
+#
+# Installing CRDs out-of-band ensures they exist before Flux begins reconciling
+# workloads that reference them, avoiding the need for dependsOn chains on nearly
+# every Kustomization that consumes a CRD-backed resource.
+
 bases:
-  - _defaults.yaml
----
-# yaml-language-server: $schema=https://json.schemastore.org/helmfile
+  - defaults.yaml
+
 helmDefaults:
   args:
     - --include-crds
