@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: Flux Local
+name: Flate
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   filter:
-    name: Flux Local - Filter
+    name: Flate - Filter
     runs-on: ubuntu-latest
     outputs:
       changed-files: ${{ steps.changed-files.outputs.changed_files }}
@@ -30,46 +30,34 @@ jobs:
   test:
     if: ${{ needs.filter.outputs.changed-files != '[]' }}
     needs: filter
-    name: Flux Local - Test
+    name: Flate - Test
     runs-on: ubuntu-latest
     steps:
-      - name: Load Secrets
-        id: load-secrets
-        uses: 1password/load-secrets-action@92467eb28f72e8255933372f1e0707c567ce2259 # v4.0.0
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          GITHUB_BOT_APP_CLIENT_ID: op://kubernetes/github-bot/GITHUB_BOT_APP_CLIENT_ID
-          GITHUB_BOT_APP_PRIVATE_KEY: op://kubernetes/github-bot/GITHUB_BOT_APP_PRIVATE_KEY
-
-      - name: Generate Token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        id: app-token
-        with:
-          client-id: ${{ steps.load-secrets.outputs.GITHUB_BOT_APP_CLIENT_ID }}
-          private-key: ${{ steps.load-secrets.outputs.GITHUB_BOT_APP_PRIVATE_KEY }}
-
-      - name: Checkout
+      - name: Checkout Pull Request Branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-          token: ${{ steps.app-token.outputs.token }}
+          path: pull
 
-      - name: Run flux-local test
-        uses: docker://ghcr.io/allenporter/flux-local:v8.1.0
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Checkout Default Branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.repository.default_branch }}
+          path: default
+
+      - name: Run flate test
+        uses: docker://ghcr.io/home-operations/flate:0.0.4
         with:
           args: >-
             test
-            --all-namespaces
-            --enable-helm
-            --path /github/workspace/kubernetes/flux/cluster
-            --verbose
+            --path ./pull
+            --path-orig ./default
 
   diff:
     if: ${{ needs.filter.outputs.changed-files != '[]' }}
     needs: filter
-    name: Flux Local - Diff
+    name: Flate - Diff
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -81,51 +69,30 @@ jobs:
           - kustomization
       fail-fast: false
     steps:
-      - name: Load Secrets
-        id: load-secrets
-        uses: 1password/load-secrets-action@92467eb28f72e8255933372f1e0707c567ce2259 # v4.0.0
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          GITHUB_BOT_APP_CLIENT_ID: op://kubernetes/github-bot/GITHUB_BOT_APP_CLIENT_ID
-          GITHUB_BOT_APP_PRIVATE_KEY: op://kubernetes/github-bot/GITHUB_BOT_APP_PRIVATE_KEY
-
-      - name: Generate Token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        id: app-token
-        with:
-          client-id: ${{ steps.load-secrets.outputs.GITHUB_BOT_APP_CLIENT_ID }}
-          private-key: ${{ steps.load-secrets.outputs.GITHUB_BOT_APP_PRIVATE_KEY }}
-
       - name: Checkout Pull Request Branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          path: pull
           persist-credentials: false
-          token: ${{ steps.app-token.outputs.token }}
+          path: pull
 
       - name: Checkout Default Branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          path: default
           persist-credentials: false
           ref: ${{ github.event.repository.default_branch }}
-          token: ${{ steps.app-token.outputs.token }}
+          path: default
 
-      - name: Run flux-local diff
-        uses: docker://ghcr.io/allenporter/flux-local:v8.1.0
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Run flate diff
+        uses: docker://ghcr.io/home-operations/flate:0.0.4
         with:
           args: >-
             diff ${{ matrix.resource }}
-            --unified 6
-            --path /github/workspace/pull/kubernetes/flux/cluster
-            --path-orig /github/workspace/default/kubernetes/flux/cluster
-            --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
             --limit-bytes 10000
-            --all-namespaces
-            --sources "flux-system"
             --output-file diff.patch
+            --path ./pull
+            --path-orig ./default
+            --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
+            --unified 6
 
       - name: Generate Diff
         id: diff
@@ -133,6 +100,15 @@ jobs:
           echo 'diff<<EOF' >> $GITHUB_OUTPUT
           cat diff.patch >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
+
+      - if: ${{ steps.diff.outputs.diff != '' }}
+        name: Generate Token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          client-id: ${{ secrets.BOT_APP_CLIENT_ID }}
+          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+          permission-pull-requests: write
 
       - if: ${{ steps.diff.outputs.diff != '' }}
         name: Add Comment
@@ -150,7 +126,7 @@ jobs:
     needs:
       - test
       - diff
-    name: Flux Local - Success
+    name: Flate - Success
     runs-on: ubuntu-latest
     steps:
       - name: Any jobs failed?

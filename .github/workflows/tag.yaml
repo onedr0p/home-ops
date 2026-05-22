@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Load Secrets
         id: load-secrets
-        uses: 1password/load-secrets-action@92467eb28f72e8255933372f1e0707c567ce2259 # v4.0.0
+        uses: 1password/load-secrets-action@92467eb28f72e8255933372f1e0707c567ce2259 # v4.0.0 # zizmor: ignore[unpinned-tools]
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           GITHUB_BOT_APP_CLIENT_ID: op://kubernetes/github-bot/GITHUB_BOT_APP_CLIENT_ID
@@ -29,6 +29,7 @@ jobs:
         with:
           client-id: ${{ steps.load-secrets.outputs.GITHUB_BOT_APP_CLIENT_ID }}
           private-key: ${{ steps.load-secrets.outputs.GITHUB_BOT_APP_PRIVATE_KEY }}
+          permission-contents: write
 
       - name: Get Previous Tag and Determine Next Tag
         id: determine-next-tag
@@ -56,10 +57,12 @@ jobs:
 
       - name: Create Tag
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          TAG_NAME: ${{ steps.determine-next-tag.outputs.result }}
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |-
-            const tagName = "${{ steps.determine-next-tag.outputs.result }}";
+            const tagName = process.env.TAG_NAME;
 
             const tag = await github.rest.git.createTag({
               owner: context.repo.owner,
