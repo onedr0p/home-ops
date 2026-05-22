@@ -48,15 +48,19 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           path: default
 
-      - name: Gather Images
-        uses: docker://ghcr.io/home-operations/flate:0.0.4
+      - name: Setup Mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
         with:
-          args: >-
-            diff images
-            --output json
-            --output-file images.json
-            --path ./pull
-            --path-orig ./default
+          tool_versions: |
+            github:home-operations/flate latest
+
+      - name: Gather Images
+        run: >-
+          flate diff images
+          --output json
+          --output-file images.json
+          --path ./pull
+          --path-orig ./default
 
       - name: Extract Images
         id: extract
