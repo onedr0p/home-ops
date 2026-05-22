@@ -32,6 +32,12 @@ jobs:
     needs: filter
     name: Flate - Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        resource:
+          - helmrelease
+          - kustomization
+      fail-fast: false
     steps:
       - name: Checkout Pull Request Branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -53,7 +59,9 @@ jobs:
             github:home-operations/flate latest
 
       - name: Run flate test
-        run: flate test --path ./pull --path-orig ./default
+        env:
+          RESOURCE: ${{ matrix.resource }}
+        run: flate test "$RESOURCE" --path ./pull --path-orig ./default
 
   diff:
     if: ${{ needs.filter.outputs.changed-files != '[]' }}
@@ -92,14 +100,7 @@ jobs:
       - name: Run flate diff
         env:
           RESOURCE: ${{ matrix.resource }}
-        run: >-
-          flate diff "$RESOURCE"
-          --limit-bytes 10000
-          --output-file diff.patch
-          --path ./pull
-          --path-orig ./default
-          --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
-          --unified 6
+        run: flate diff "$RESOURCE" --limit-bytes 10000 --output-file diff.patch --path ./pull --path-orig ./default --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart" --unified 6
 
       - name: Generate Diff
         id: diff
