@@ -27,46 +27,10 @@ jobs:
         with:
           patterns: kubernetes/**/*
 
-  test:
+  flate:
     if: ${{ needs.filter.outputs.changed-files != '[]' }}
     needs: filter
-    name: Flate - Test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        resource:
-          - helmrelease
-          - kustomization
-      fail-fast: false
-    steps:
-      - name: Checkout Pull Request Branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-          path: pull
-
-      - name: Checkout Default Branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-          ref: ${{ github.event.repository.default_branch }}
-          path: default
-
-      - name: Setup Mise
-        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
-        with:
-          tool_versions: |
-            github:home-operations/flate latest
-
-      - name: Run flate test
-        env:
-          RESOURCE: ${{ matrix.resource }}
-        run: flate test "$RESOURCE" --path ./pull --path-orig ./default
-
-  diff:
-    if: ${{ needs.filter.outputs.changed-files != '[]' }}
-    needs: filter
-    name: Flate - Diff
+    name: Flate
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -81,15 +45,15 @@ jobs:
       - name: Checkout Pull Request Branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          persist-credentials: false
           path: pull
+          persist-credentials: false
 
       - name: Checkout Default Branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          persist-credentials: false
           ref: ${{ github.event.repository.default_branch }}
           path: default
+          persist-credentials: false
 
       - name: Setup Mise
         uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
@@ -97,17 +61,21 @@ jobs:
           tool_versions: |
             github:home-operations/flate latest
 
-      - name: Run flate diff
+      - name: Run flate test
         env:
           RESOURCE: ${{ matrix.resource }}
-        run: flate diff "$RESOURCE" --limit-bytes 10000 --output-file diff.patch --path ./pull --path-orig ./default --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart" --unified 6
+        run: flate test "$RESOURCE" --path ./pull --path-orig ./default
 
-      - name: Generate Diff
+      - name: Run flate diff
         id: diff
-        run: |-
-          echo 'diff<<EOF' >> $GITHUB_OUTPUT
-          cat diff.patch >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
+        env:
+          RESOURCE: ${{ matrix.resource }}
+        run: |
+          {
+            echo 'diff<<EOF'
+            flate diff "$RESOURCE" --path ./pull --path-orig ./default
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
 
       - if: ${{ steps.diff.outputs.diff != '' }}
         name: Load Secrets
@@ -133,7 +101,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           header: ${{ github.event.pull_request.number }}/kubernetes/${{ matrix.resource }}
-          message: |-
+          message: |
             ```diff
             ${{ steps.diff.outputs.diff }}
             ```
@@ -141,8 +109,7 @@ jobs:
   success:
     if: ${{ !cancelled() }}
     needs:
-      - test
-      - diff
+      - flate
     name: Flate - Success
     runs-on: ubuntu-latest
     steps:
