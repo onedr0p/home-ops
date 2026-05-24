@@ -40,6 +40,7 @@ jobs:
         with:
           path: pull
           persist-credentials: false
+          sparse-checkout: kubernetes/
 
       - name: Checkout Default Branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -47,10 +48,12 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           path: default
           persist-credentials: false
+          sparse-checkout: kubernetes/
 
       - name: Setup Mise
         uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
         with:
+          cache: false
           tool_versions: |
             github:home-operations/flate latest
 
@@ -74,8 +77,12 @@ jobs:
       max-parallel: 4
       fail-fast: false
     steps:
-      - name: Install talosctl
-        run: curl -fsSL https://talos.dev/install | sh
+      - name: Setup Mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          cache: false
+          tool_versions: |
+            talosctl latest
 
       - name: Pull Image
         env:
