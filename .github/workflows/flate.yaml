@@ -37,7 +37,7 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        resource:
+        kind:
           - helmrelease
           - kustomization
       fail-fast: false
@@ -47,6 +47,7 @@ jobs:
         with:
           path: pull
           persist-credentials: false
+          sparse-checkout: kubernetes/
 
       - name: Checkout Default Branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -54,6 +55,7 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           path: default
           persist-credentials: false
+          sparse-checkout: kubernetes/
 
       - name: Setup Mise
         uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
@@ -64,17 +66,17 @@ jobs:
 
       - name: Run flate test
         env:
-          RESOURCE: ${{ matrix.resource }}
-        run: flate test "$RESOURCE" --path ./pull --path-orig ./default
+          KIND: ${{ matrix.kind }}
+        run: flate test "$KIND" --path ./pull --path-orig ./default
 
       - name: Run flate diff
         id: diff
         env:
-          RESOURCE: ${{ matrix.resource }}
+          KIND: ${{ matrix.kind }}
         run: |
           {
             echo 'diff<<EOF'
-            flate diff "$RESOURCE" --path ./pull --path-orig ./default
+            flate diff "$KIND" --path ./pull --path-orig ./default
             echo 'EOF'
           } >> $GITHUB_OUTPUT
 
@@ -97,15 +99,45 @@ jobs:
           permission-pull-requests: write
 
       - if: ${{ steps.diff.outputs.diff != '' }}
-        name: Add Comment
-        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        name: Add or Update Comment
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          DIFF: ${{ steps.diff.outputs.diff }}
+          KIND: ${{ matrix.kind }}
         with:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          header: ${{ github.event.pull_request.number }}/kubernetes/${{ matrix.resource }}
-          message: |
-            ```diff
-            ${{ steps.diff.outputs.diff }}
-            ```
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const { DIFF, KIND } = process.env;
+            const label = { helmrelease: "HelmRelease", kustomization: "Kustomization" }[KIND];
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const pr = context.payload.pull_request;
+            const sha = pr.head.sha;
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const marker = `<!-- Sticky Pull Request Comment${issue_number}/kubernetes/${KIND} -->`;
+            const body = [
+              marker,
+              `<details open><summary>${label} diff</summary>`,
+              ``,
+              "```diff",
+              DIFF,
+              "```",
+              ``,
+              `</details>`,
+              ``,
+              `<sub>Generated for [\`${sha.slice(0, 7)}\`](${pr.html_url}/commits/${sha}) · [workflow run](${runUrl})</sub>`,
+            ].join("\n");
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100,
+            });
+            const existing = comments.find(c => c.body?.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
 
   success:
     if: ${{ !cancelled() }}
