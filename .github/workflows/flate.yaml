@@ -111,9 +111,6 @@ jobs:
             const label = { helmrelease: "HelmRelease", kustomization: "Kustomization" }[KIND];
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
-            const pr = context.payload.pull_request;
-            const sha = pr.head.sha;
-            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
             const marker = `<!-- Sticky Pull Request Comment${issue_number}/kubernetes/${KIND} -->`;
             const body = [
               marker,
@@ -125,7 +122,7 @@ jobs:
               ``,
               `</details>`,
               ``,
-              `<sub>Generated for [\`${sha.slice(0, 7)}\`](${pr.html_url}/commits/${sha}) · [workflow run](${runUrl})</sub>`,
+              `<sub>[Workflow run](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId})</sub>`,
             ].join("\n");
 
             const comments = await github.paginate(github.rest.issues.listComments, {
