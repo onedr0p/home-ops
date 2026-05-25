@@ -87,5 +87,4 @@ view-secret ns secret:
 
 [private]
 render-local-ks ns ks:
-    docker run --rm --volume "{{ justfile_directory() }}":/workspace ghcr.io/allenporter/flux-local:latest \
-        build ks --namespace "{{ ns }}" --path "/workspace/kubernetes/flux/cluster" "{{ ks }}"
+    flate build ks --namespace "{{ ns }}" --path "{{ justfile_directory() }}/kubernetes" --output yaml "{{ ks }}"
