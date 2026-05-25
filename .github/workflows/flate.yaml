@@ -32,9 +32,6 @@ jobs:
     needs: filter
     name: Flate
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
     strategy:
       matrix:
         kind:
@@ -61,17 +58,34 @@ jobs:
         run: flate test "$KIND" --path ./kubernetes
 
       - name: Run flate diff
-        id: diff
         env:
           KIND: ${{ matrix.kind }}
-        run: |
-          {
-            echo 'diff<<EOF'
-            flate diff "$KIND" --path ./kubernetes
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
+        run: flate diff "$KIND" --path ./kubernetes | ifne tee "$KIND.diff"
 
-      - if: ${{ steps.diff.outputs.diff != '' }}
+      - if: ${{ hashFiles(format('{0}.diff', matrix.kind)) != '' }}
+        name: Upload diff
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: flate-diff-${{ matrix.kind }}
+          path: ${{ matrix.kind }}.diff
+          retention-days: 1
+
+  comment:
+    if: ${{ !cancelled() && needs.flate.result != 'skipped' }}
+    needs: flate
+    name: Flate - Comment
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Download diffs
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          pattern: flate-diff-*
+          merge-multiple: true
+
+      - if: ${{ hashFiles('helmrelease.diff', 'kustomization.diff') != '' }}
         name: Load Secrets
         id: load-secrets
         uses: 1password/load-secrets-action@92467eb28f72e8255933372f1e0707c567ce2259 # v4.0.0 # zizmor: ignore[unpinned-tools]
@@ -80,7 +94,7 @@ jobs:
           GITHUB_BOT_APP_CLIENT_ID: op://kubernetes/github-bot/GITHUB_BOT_APP_CLIENT_ID
           GITHUB_BOT_APP_PRIVATE_KEY: op://kubernetes/github-bot/GITHUB_BOT_APP_PRIVATE_KEY
 
-      - if: ${{ steps.diff.outputs.diff != '' }}
+      - if: ${{ hashFiles('helmrelease.diff', 'kustomization.diff') != '' }}
         name: Generate Token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -89,31 +103,52 @@ jobs:
           private-key: ${{ steps.load-secrets.outputs.GITHUB_BOT_APP_PRIVATE_KEY }}
           permission-pull-requests: write
 
-      - if: ${{ steps.diff.outputs.diff != '' }}
+      - if: ${{ hashFiles('helmrelease.diff', 'kustomization.diff') != '' }}
         name: Add or Update Comment
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        env:
-          DIFF: ${{ steps.diff.outputs.diff }}
-          KIND: ${{ matrix.kind }}
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
-            const { DIFF, KIND } = process.env;
-            const label = { helmrelease: "HelmRelease", kustomization: "Kustomization" }[KIND];
+            const fs = require('fs');
+            const read = (path) => { try { return fs.readFileSync(path, 'utf8'); } catch { return ''; } };
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
-            const marker = `<!-- Sticky Pull Request Comment${issue_number}/kubernetes/${KIND} -->`;
+            const marker = `<!-- Sticky Pull Request Comment${issue_number}/kubernetes/flate -->`;
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+
+            const diffs = {
+              HelmRelease: read("helmrelease.diff"),
+              Kustomization: read("kustomization.diff"),
+            };
+            const active = Object.values(diffs).filter(d => d.trim()).length;
+            const budget = active > 0 ? Math.floor(60000 / active) : 0;
+
+            const section = (label, diff) => {
+              if (!diff.trim()) return [];
+              if (diff.length > budget) return [
+                `<details><summary>${label} diff (${diff.length.toLocaleString()} chars — too large to post)</summary>`,
+                ``,
+                `Diff exceeds GitHub's comment size limit. Download the artifact from the [workflow run](${runUrl}).`,
+                ``,
+                `</details>`,
+              ];
+              return [
+                `<details open><summary>${label} diff</summary>`,
+                ``,
+                "```diff",
+                diff,
+                "```",
+                ``,
+                `</details>`,
+              ];
+            };
+
             const body = [
               marker,
-              `<details open><summary>${label} diff</summary>`,
+              ...section("HelmRelease", diffs.HelmRelease),
+              ...section("Kustomization", diffs.Kustomization),
               ``,
-              "```diff",
-              DIFF,
-              "```",
-              ``,
-              `</details>`,
-              ``,
-              `<sub>[Workflow run](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId})</sub>`,
+              `<sub>Diff created by [flate](https://github.com/home-operations/flate) — [Workflow run](${runUrl})</sub>`,
             ].join("\n");
 
             const comments = await github.paginate(github.rest.issues.listComments, {
@@ -131,6 +166,7 @@ jobs:
     if: ${{ !cancelled() }}
     needs:
       - flate
+      - comment
     name: Flate - Success
     runs-on: ubuntu-latest
     steps:
