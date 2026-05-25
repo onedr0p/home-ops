@@ -42,20 +42,11 @@ jobs:
           - kustomization
       fail-fast: false
     steps:
-      - name: Checkout Pull Request Branch
+      - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          path: pull
+          fetch-depth: 0
           persist-credentials: false
-          sparse-checkout: kubernetes/
-
-      - name: Checkout Default Branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          ref: ${{ github.event.repository.default_branch }}
-          path: default
-          persist-credentials: false
-          sparse-checkout: kubernetes/
 
       - name: Setup Mise
         uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
@@ -67,7 +58,7 @@ jobs:
       - name: Run flate test
         env:
           KIND: ${{ matrix.kind }}
-        run: flate test "$KIND" --path ./pull --path-orig ./default
+        run: flate test "$KIND" --path ./kubernetes
 
       - name: Run flate diff
         id: diff
@@ -76,7 +67,7 @@ jobs:
         run: |
           {
             echo 'diff<<EOF'
-            flate diff "$KIND" --path ./pull --path-orig ./default
+            flate diff "$KIND" --path ./kubernetes
             echo 'EOF'
           } >> $GITHUB_OUTPUT
 
@@ -111,9 +102,6 @@ jobs:
             const label = { helmrelease: "HelmRelease", kustomization: "Kustomization" }[KIND];
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
-            const pr = context.payload.pull_request;
-            const sha = pr.head.sha;
-            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
             const marker = `<!-- Sticky Pull Request Comment${issue_number}/kubernetes/${KIND} -->`;
             const body = [
               marker,
@@ -125,7 +113,7 @@ jobs:
               ``,
               `</details>`,
               ``,
-              `<sub>Generated for [\`${sha.slice(0, 7)}\`](${pr.html_url}/commits/${sha}) · [workflow run](${runUrl})</sub>`,
+              `<sub>[Workflow run](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId})</sub>`,
             ].join("\n");
 
             const comments = await github.paginate(github.rest.issues.listComments, {

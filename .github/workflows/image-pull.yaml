@@ -35,20 +35,11 @@ jobs:
     outputs:
       images: ${{ steps.extract.outputs.images }}
     steps:
-      - name: Checkout Pull Request Branch
+      - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          path: pull
+          fetch-depth: 0
           persist-credentials: false
-          sparse-checkout: kubernetes/
-
-      - name: Checkout Default Branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          ref: ${{ github.event.repository.default_branch }}
-          path: default
-          persist-credentials: false
-          sparse-checkout: kubernetes/
 
       - name: Setup Mise
         uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
@@ -62,7 +53,7 @@ jobs:
         run: |
           {
             echo 'images<<EOF'
-            flate diff images --output json --path ./pull --path-orig ./default
+            flate diff images --output json --path ./kubernetes
             echo 'EOF'
           } >> $GITHUB_OUTPUT
 

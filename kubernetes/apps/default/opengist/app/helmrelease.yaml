@@ -1,0 +1,101 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: opengist
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: opengist
+  interval: 1h
+  values:
+    controllers:
+      opengist:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/thomiceli/opengist
+              tag: 1.12.2@sha256:5cdaaeaf2d73a9c87100fed850416bc258e5ef1fe5208cfa9153f992a6285be5
+            command:
+              - "./opengist"
+            env:
+              OG_HTTP_PORT: &port 80
+              OG_OPENGIST_HOME: /config
+              OG_CUSTOM_NAME: turbo.ac gists
+              OG_EXTERNAL_URL: https://gist.turbo.ac
+              OG_SSH_GIT_ENABLED: false
+              OG_METRICS_ENABLED: true
+              OG_METRICS_HOST: 0.0.0.0
+              OG_METRICS_PORT: &metricsPort 8080
+              TZ: America/New_York
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
+            probes:
+              liveness:
+                enabled: true
+                spec:
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthcheck
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: {drop: ["ALL"]}
+            resources:
+              requests:
+                cpu: 100m
+              limits:
+                memory: 512Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+          metrics:
+            port: *metricsPort
+    serviceMonitor:
+      app:
+        endpoints:
+          - port: metrics
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.turbo.ac"
+          - gist.turbo.ac
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+    persistence:
+      config:
+        existingClaim: "{{ .Release.Name }}"
+        globalMounts:
+          - path: /config
+      tmp:
+        type: emptyDir
