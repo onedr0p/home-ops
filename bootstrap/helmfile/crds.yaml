@@ -10,6 +10,9 @@
 # workloads that reference them, avoiding the need for dependsOn chains on nearly
 # every Kustomization that consumes a CRD-backed resource.
 
+bases:
+  - defaults.yaml
+
 helmDefaults:
   args:
     - --include-crds
@@ -18,15 +21,15 @@ helmDefaults:
 releases:
   - name: envoy-gateway
     namespace: network
-    chart: oci://mirror.gcr.io/envoyproxy/gateway-helm
-    version: 1.8.0
+    inherit:
+      - template: default
 
   - name: grafana-operator
     namespace: o11y
-    chart: oci://ghcr.io/grafana/helm-charts/grafana-operator
-    version: 5.22.2
+    inherit:
+      - template: default
 
   - name: kube-prometheus-stack
     namespace: o11y
-    chart: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
-    version: 85.0.2
+    inherit:
+      - template: default

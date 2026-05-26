@@ -1,12 +1,12 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: grafana
+  name: grafana-operator
 spec:
   interval: 1h
-  path: ./kubernetes/apps/o11y/grafana/app
+  path: ./kubernetes/apps/o11y/grafana-operator/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -15,18 +15,18 @@ spec:
   targetNamespace: o11y
   wait: true
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: grafana-instance
 spec:
   dependsOn:
-    - name: grafana
+    - name: grafana-operator
     - name: rook-ceph-cluster
       namespace: rook-ceph
   interval: 1h
-  path: ./kubernetes/apps/o11y/grafana/instance
+  path: ./kubernetes/apps/o11y/grafana-operator/instance
   prune: true
   sourceRef:
     kind: GitRepository

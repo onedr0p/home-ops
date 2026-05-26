@@ -3,33 +3,38 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: seasonpackerr
+  name: opengist
 spec:
   chartRef:
     kind: OCIRepository
-    name: seasonpackerr
+    name: opengist
   interval: 1h
   values:
     controllers:
-      seasonpackarr:
+      opengist:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
         containers:
           app:
             image:
-              repository: ghcr.io/nuxencs/seasonpackarr
-              tag: v0.14.0@sha256:b8e759b3fb3c9587aafbb5ebcf4a5527245afd35b5893439fd21aea0283c8144
+              repository: ghcr.io/thomiceli/opengist
+              tag: 1.12.2@sha256:5cdaaeaf2d73a9c87100fed850416bc258e5ef1fe5208cfa9153f992a6285be5
+            command:
+              - "./opengist"
             env:
+              OG_HTTP_PORT: &port 80
+              OG_OPENGIST_HOME: /config
+              OG_CUSTOM_NAME: turbo.ac gists
+              OG_EXTERNAL_URL: https://gist.turbo.ac
+              OG_SSH_GIT_ENABLED: false
+              OG_METRICS_ENABLED: true
+              OG_METRICS_HOST: 0.0.0.0
+              OG_METRICS_PORT: &metricsPort 8080
               TZ: America/New_York
-              SEASONPACKARR__DISABLE_CONFIG_FILE: true
-              SEASONPACKARR__HOST: 0.0.0.0
-              SEASONPACKARR__PORT: &port 80
-              SEASONPACKARR__LOG_LEVEL: INFO
-              SEASONPACKARR__SMART_MODE: true
-              SEASONPACKARR__SMART_MODE_THRESHOLD: 0.75
-              SEASONPACKARR__PARSE_TORRENT_FILE: true
-              SEASONPACKARR__FUZZY_MATCHING_SKIP_REPACK_COMPARE: true
-              SEASONPACKARR__CLIENTS_DEFAULT_HOST: qbittorrent.default.svc.cluster.local
-              SEASONPACKARR__CLIENTS_DEFAULT_PORT: 80
-              SEASONPACKARR__CLIENTS_DEFAULT_PREIMPORTPATH: /media/Downloads/qbittorrent/complete/sonarr
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness:
                 enabled: true
@@ -42,7 +47,7 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /api/healthz/readiness
+                    path: /healthcheck
                     port: *port
                   periodSeconds: 10
                   timeoutSeconds: 5
@@ -52,15 +57,15 @@ spec:
                 spec:
                   failureThreshold: 30
                   periodSeconds: 10
-            resources:
-              requests:
-                cpu: 10m
-              limits:
-                memory: 256Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: {drop: ["ALL"]}
+            resources:
+              requests:
+                cpu: 100m
+              limits:
+                memory: 512Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -73,12 +78,24 @@ spec:
         ports:
           http:
             port: *port
+          metrics:
+            port: *metricsPort
+    serviceMonitor:
+      app:
+        endpoints:
+          - port: metrics
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.turbo.ac"
+          - gist.turbo.ac
+        parentRefs:
+          - name: envoy-external
+            namespace: network
     persistence:
-      media:
-        type: nfs
-        server: expanse.internal
-        path: /mnt/eros/Media
+      config:
+        existingClaim: "{{ .Release.Name }}"
         globalMounts:
-          - path: /media
+          - path: /config
       tmp:
         type: emptyDir
