@@ -19,14 +19,12 @@ machine:
   install:
     diskSelector:
       model: MK000480GWCEV
-    image: factory.talos.dev/metal-installer/{{ .SchematicID }}:v1.13.2
     wipe: false
   kubelet:
     defaultRuntimeSeccompProfileEnabled: true
     disableManifestsDirectory: true
     extraConfig:
       serializeImagePulls: false
-    image: ghcr.io/siderolabs/kubelet:v1.36.1
     nodeIP:
       validSubnets:
         - 192.168.42.0/24

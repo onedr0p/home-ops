@@ -82,22 +82,6 @@
       minimumGroupSize: 2,
     },
     {
-      description: "Kubernetes Group",
-      groupName: "kubernetes",
-      matchDatasources: ["docker"],
-      matchPackageNames: [
-        "/kube-apiserver/",
-        "/kube-controller-manager/",
-        "/kube-proxy/",
-        "/kube-scheduler/",
-        "/kubelet/",
-      ],
-      group: {
-        commitMessageTopic: "{{{groupName}}} group",
-      },
-      minimumGroupSize: 5,
-    },
-    {
       description: "Rook-Ceph Group",
       groupName: "rook-ceph",
       matchDatasources: ["docker"],
@@ -139,6 +123,36 @@
     {
       matchDatasources: ["github-releases"],
       addLabels: ["renovate/github-release"],
+    },
+  ],
+  customDatasources: {
+    "talos-factory": {
+      defaultRegistryUrlTemplate: "https://factory.talos.dev/versions",
+      transformTemplates: [
+        '{"releases": $map($, function($v) { {"version": $v} }) }',
+      ],
+    },
+  },
+  customManagers: [
+    {
+      customType: "regex",
+      description: "Update Talos version in topf.yaml",
+      fileMatch: ["(^|/)topf\\.yaml$"],
+      matchStrings: ["talosVersion:\\s*(?<currentValue>\\S+)"],
+      datasourceTemplate: "custom.talos-factory",
+      depNameTemplate: "siderolabs/talos",
+      extractVersionTemplate: "^v(?<version>.+)$",
+      versioningTemplate: "semver",
+    },
+    {
+      customType: "regex",
+      description: "Update Kubernetes version in topf.yaml (tracks the Talos-bundled kubelet image)",
+      fileMatch: ["(^|/)topf\\.yaml$"],
+      matchStrings: ["kubernetesVersion:\\s*(?<currentValue>\\S+)"],
+      datasourceTemplate: "docker",
+      depNameTemplate: "ghcr.io/siderolabs/kubelet",
+      extractVersionTemplate: "^v(?<version>.+)$",
+      versioningTemplate: "semver",
     },
   ],
 }

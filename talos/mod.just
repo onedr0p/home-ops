@@ -34,14 +34,15 @@ shutdown-node node *args:
 upgrade-k8s version:
     talosctl -n "$(talosctl config info -o yaml | yq -e '.endpoints[0]')" upgrade-k8s --to {{ version }}
 
-[doc('Download Talos machine image')]
+[doc('Download Talos machine image(s); optional node filter')]
 [script]
-download-image version:
-    SCHEMATIC="$(curl -fsSX POST --data-binary @schematic.yaml https://factory.talos.dev/schematics | jq -r '.id')"
-    if [[ ! "$SCHEMATIC" =~ ^[0-9a-f]{64}$ ]]; then
-        just log fatal "Invalid schematic ID returned from factory" value "$SCHEMATIC"
-    fi
-    curl -fL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors --progress-bar \
-        -o "talos-{{ version }}-${SCHEMATIC:0:8}.iso" \
-        "https://factory.talos.dev/image/${SCHEMATIC}/{{ version }}/metal-amd64.iso"
-    just log info "Downloaded Talos" version "{{ version }}" schematic "${SCHEMATIC}"
+download-image node="" *args:
+    VERSION="v$(yq -e '.talosVersion' topf.yaml)"
+    SCHEMATICS="$(topf schematic-ids {{ if node != '' { "--nodes-filter '^" + node + "$'" } else { '' } }} {{ args }})"
+    [[ -z "$SCHEMATICS" ]] && just log fatal "No schematic IDs returned from topf"
+    while IFS= read -r SCHEMATIC; do
+        curl -fL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors --progress-bar \
+            -o "talos-${VERSION}-${SCHEMATIC:0:8}.iso" \
+            "https://factory.talos.dev/image/${SCHEMATIC}/${VERSION}/metal-amd64.iso"
+        just log info "Downloaded Talos" version "${VERSION}" schematic "${SCHEMATIC}"
+    done <<< "$SCHEMATICS"
