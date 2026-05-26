@@ -37,18 +37,11 @@ upgrade-k8s version:
 [doc('Download Talos machine image')]
 [script]
 download-image version:
-    SCHEMATIC="$(yq -e '.schematicId' topf.yaml)"
+    SCHEMATIC="$(curl -fsSX POST --data-binary @schematic.yaml https://factory.talos.dev/schematics | jq -r '.id')"
+    if [[ ! "$SCHEMATIC" =~ ^[0-9a-f]{64}$ ]]; then
+        just log fatal "Invalid schematic ID returned from factory" value "$SCHEMATIC"
+    fi
     curl -fL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors --progress-bar \
         -o "talos-{{ version }}-${SCHEMATIC:0:8}.iso" \
         "https://factory.talos.dev/image/${SCHEMATIC}/{{ version }}/metal-amd64.iso"
     just log info "Downloaded Talos" version "{{ version }}" schematic "${SCHEMATIC}"
-
-[doc('Fetch schematic ID write it to the topf config')]
-[script]
-schematic-id:
-    schematic="$(curl -sX POST --data-binary @schematic.yaml "https://factory.talos.dev/schematics" | jq -r '.id')"
-    if [[ ! "$schematic" =~ ^[0-9a-f]{64}$ ]]; then
-        just log fatal "Invalid schematic ID returned from factory" value "$schematic"
-    fi
-    yq -i ".schematicId = \"$schematic\" | .schematicId style=\"\"" topf.yaml
-    just log info "Updated schematicId in topf config" id "$schematic"
