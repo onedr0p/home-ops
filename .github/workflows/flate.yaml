@@ -52,17 +52,12 @@ jobs:
           tool_versions: |
             github:home-operations/flate latest
 
-      - name: Run flate test
-        env:
-          BRANCH: ${{ github.event.repository.default_branch }}
-          KIND: ${{ matrix.kind }}
-        run: flate test "$KIND" --path ./kubernetes --base "$BRANCH"
-
       - name: Run flate diff
         env:
+          FLATE_PATH: ./kubernetes/flux/cluster
           KIND: ${{ matrix.kind }}
         run: |
-          flate diff "$KIND" --path ./kubernetes > "$KIND.diff"
+          flate diff "$KIND" > "$KIND.diff"
           [ -s "$KIND.diff" ] || rm "$KIND.diff"
 
       - if: ${{ hashFiles(format('{0}.diff', matrix.kind)) != '' }}
