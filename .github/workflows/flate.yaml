@@ -111,43 +111,49 @@ jobs:
             const read = (path) => { try { return fs.readFileSync(path, 'utf8'); } catch { return ''; } };
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
-            const marker = `<!-- Sticky Pull Request Comment${issue_number}/kubernetes/flate -->`;
+            const marker = `<!-- flate -->`;
             const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
 
             const diffs = {
-              HelmRelease: read("helmrelease.diff"),
               Kustomization: read("kustomization.diff"),
+              HelmRelease: read("helmrelease.diff"),
             };
-            const active = Object.values(diffs).filter(d => d.trim()).length;
-            const budget = active > 0 ? Math.floor(60000 / active) : 0;
+            const LIMIT = 65000; // GitHub caps comment bodies at 65,536; leave headroom
 
-            const section = (label, diff) => {
-              if (!diff.trim()) return [];
-              if (diff.length > budget) return [
-                `<details><summary>${label} diff (${diff.length.toLocaleString()} chars — too large to post)</summary>`,
-                ``,
-                `Diff exceeds GitHub's comment size limit. Download the artifact from the [workflow run](${runUrl}).`,
-                ``,
-                `</details>`,
-              ];
-              return [
-                `<details open><summary>${label} diff</summary>`,
-                ``,
-                "```diff",
-                diff,
-                "```",
-                ``,
-                `</details>`,
-              ];
-            };
+            const inlineSection = (label, diff) => [
+              `<details open><summary>${label} diff</summary>`,
+              ``,
+              "```diff",
+              diff,
+              "```",
+              ``,
+              `</details>`,
+            ];
+            const linkedSection = (label, diff) => [
+              `<details><summary>${label} diff (${diff.length.toLocaleString()} chars — too large to post)</summary>`,
+              ``,
+              `Diff exceeds GitHub's comment size limit. Download the artifact from the [workflow run](${runUrl}).`,
+              ``,
+              `</details>`,
+            ];
 
-            const body = [
+            // Inline every diff, then evict the largest to a link until the whole
+            // comment fits — so a small diff never bumps a big one off inline.
+            const present = Object.entries(diffs).filter(([, diff]) => diff.trim());
+            const linked = new Set();
+            const render = () => [
               marker,
-              ...section("HelmRelease", diffs.HelmRelease),
-              ...section("Kustomization", diffs.Kustomization),
+              ...present.flatMap(([label, diff]) =>
+                linked.has(label) ? linkedSection(label, diff) : inlineSection(label, diff)),
               ``,
               `<sub>Diff created by [flate](https://github.com/home-operations/flate) — [Workflow run](${runUrl})</sub>`,
             ].join("\n");
+            for (const [label] of [...present].sort((a, b) => b[1].length - a[1].length)) {
+              if (render().length <= LIMIT) break;
+              linked.add(label);
+            }
+
+            const body = render();
 
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner, repo, issue_number, per_page: 100,
