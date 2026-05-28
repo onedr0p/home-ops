@@ -50,18 +50,19 @@ jobs:
 
       - name: Extract Images
         id: extract
+        env:
+          FLATE_OUTPUT: json
+          FLATE_PATH: ./kubernetes/flux/cluster
         run: |
-          {
-            echo 'images<<EOF'
-            flate diff images --output json --path ./kubernetes
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
+          echo 'images<<EOF' >> $GITHUB_OUTPUT
+          flate diff images >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
   pull:
     if: ${{ needs.extract.outputs.images != '[]' }}
     needs: extract
     name: Image Pull - Pull Images
-    runs-on: home-ops-runner
+    runs-on: ${{ github.event.repository.name }}-runner
     strategy:
       matrix:
         image: ${{ fromJSON(needs.extract.outputs.images) }}
