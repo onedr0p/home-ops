@@ -10,26 +10,22 @@
 # workloads that reference them, avoiding the need for dependsOn chains on nearly
 # every Kustomization that consumes a CRD-backed resource.
 
-bases:
-  - defaults.yaml
-
 helmDefaults:
   args:
     - --include-crds
     - --no-hooks
 
+bases:
+  - default.yaml
+
+defaultInherit: default
+
 releases:
   - name: envoy-gateway
     namespace: network
-    inherit:
-      - template: default
 
   - name: grafana-operator
     namespace: o11y
-    inherit:
-      - template: default
 
   - name: kube-prometheus-stack
     namespace: o11y
-    inherit:
-      - template: default
