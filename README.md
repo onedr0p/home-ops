@@ -109,7 +109,7 @@ While most of my infrastructure and workloads are self-hosted I do rely upon the
 Alternative solutions to the first two of these problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/); however, maintaining another cluster and monitoring another group of workloads would be more work and probably be more or equal out to the same costs as described below.
 
 | Service                                   | Use                                                            | Cost           |
-|-------------------------------------------|----------------------------------------------------------------|----------------|
+| ----------------------------------------- | -------------------------------------------------------------- | -------------- |
 | [1Password](https://1password.com/)       | Secrets with [External Secrets](https://external-secrets.io/)  | ~$65/yr        |
 | [Cloudflare](https://www.cloudflare.com/) | Domain and S3                                                  | ~$50/yr        |
 | [GCP](https://cloud.google.com/)          | Voice interactions with Home Assistant over Google Assistant   | Free           |
@@ -143,11 +143,11 @@ In my cluster there are two instances of [ExternalDNS](https://github.com/kubern
 
 - **Boot** — 2 × 1 TB WD Blue SN550 NVMe (2280), mirrored
 - **Bulk pool**
-  - 12 × 22 TB Seagate Exos X22 HDD — 2× 6-wide RAIDZ2
-  - 2 × 1.92 TB Samsung PM9A3 NVMe (22110) — metadata / SLOG
-  - 375 GB Intel Optane DC P4800X — L2ARC
+    - 12 × 22 TB Seagate Exos X22 HDD — 2× 6-wide RAIDZ2
+    - 2 × 1.92 TB Samsung PM9A3 NVMe (22110) — metadata / SLOG
+    - 375 GB Intel Optane DC P4800X — L2ARC
 - **Fast pool**
-  - 2 × 1 TB Samsung 870 EVO SATA SSD — mirrored
+    - 2 × 1 TB Samsung 870 EVO SATA SSD — mirrored
 
 ### Networking — UniFi
 
@@ -157,6 +157,7 @@ In my cluster there are two instances of [ExternalDNS](https://github.com/kubern
 - **USP PDU Pro** — PDU
 
 ### Power
+
 **APC SMT1500RM2U** — 1500 VA rackmount UPS
 
 <details>
