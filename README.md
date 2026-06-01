@@ -12,7 +12,7 @@ _... managed with Flux, Renovate, and GitHub Actions_ <img src="https://fonts.gs
 
 [![Home-Internet](https://kromgo.k13.dev/badges/buddy_ping)](https://status.k13.dev)&nbsp;&nbsp;
 [![Status-Page](https://kromgo.k13.dev/badges/buddy_status-page)](https://status.k13.dev)&nbsp;&nbsp;
-[![Alertmanager](https://kromgo.k13.adev/badges/buddy_heartbeat)](https://status.k13.dev)
+[![Alertmanager](https://kromgo.k13.dev/badges/buddy_heartbeat)](https://status.k13.dev)
 
 </div>
 
