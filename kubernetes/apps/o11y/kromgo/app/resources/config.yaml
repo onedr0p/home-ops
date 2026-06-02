@@ -1,95 +1,87 @@
----
 # yaml-language-server: $schema=https://raw.githubusercontent.com/home-operations/kromgo/main/config.schema.json
 
 badges:
-  - id: talos_version
+  - title: Talos
+    id: talos_version
     query: label_replace(node_os_info{name="Talos"}, "version_id", "$1", "version_id", "v(.+)")
-    value: labels["version_id"]
-    title: Talos
+    valueExpr: labels["version_id"]
     icon: si:talos
 
-  - id: kubernetes_version
+  - title: Kubernetes
+    id: kubernetes_version
     query: label_replace(kubernetes_build_info{service="kubernetes"}, "git_version", "$1", "git_version", "v(.+)")
-    value: labels["git_version"]
-    title: Kubernetes
+    valueExpr: labels["git_version"]
     icon: si:kubernetes
 
-  - id: flux_version
+  - title: Flux
+    id: flux_version
     query: label_replace(flux_instance_info, "revision", "$1", "revision", "v(.+)@sha256:.+")
-    value: labels["revision"]
-    title: Flux
+    valueExpr: labels["revision"]
     icon: si:flux
 
-  - id: cluster_node_count
+  - title: Nodes
+    id: cluster_node_count
     query: count(count by (node) (kube_node_status_condition{condition="Ready"}))
-    color: '"green"'
-    title: Nodes
+    colorExpr: '"green"'
 
-  - id: cluster_pod_count
+  - title: Pods
+    id: cluster_pod_count
     query: sum(kube_pod_status_phase{phase="Running"})
-    value: humanizeNumber(result)
-    color: '"green"'
-    title: Pods
+    valueExpr: humanizeCommas(result)
+    colorExpr: '"green"'
 
-  - id: cluster_cpu_usage
+  - title: CPU
+    id: cluster_cpu_usage
     query: round(avg(instance:node_cpu_utilisation:rate5m{pod!=""}) * 100, 0.1)
-    value: string(result) + "%"
-    color: 'result <= 35 ? "green" : result <= 75 ? "orange" : "red"'
-    title: CPU
+    valueExpr: string(result) + "%"
+    colorExpr: 'colorScale(result, [35.0, 75.0], ["green", "orange", "red"])'
 
-  - id: cluster_memory_usage
+  - title: Memory
+    id: cluster_memory_usage
     query: round(sum(node_memory_MemTotal_bytes{pod!=""} - node_memory_MemAvailable_bytes{pod!=""}) / sum(node_memory_MemTotal_bytes{pod!=""}) * 100, 0.1)
-    value: string(result) + "%"
-    color: 'result <= 35 ? "green" : result <= 75 ? "orange" : "red"'
-    title: Memory
+    valueExpr: string(result) + "%"
+    colorExpr: 'colorScale(result, [35.0, 75.0], ["green", "orange", "red"])'
 
-  - id: cluster_power_usage
+  - title: Power
+    id: cluster_power_usage
     query: avg(upsAdvOutputActivePower)
-    value: humanizeNumber(math.round(result)) + "w"
-    color: 'result <= 400 ? "green" : result <= 750 ? "orange" : "red"'
-    title: Power
+    valueExpr: humanizeCommas(math.round(result)) + "w"
+    colorExpr: 'colorScale(result, [400.0, 750.0], ["green", "orange", "red"])'
 
-  - id: cluster_birth_age
+  - title: Age
+    id: cluster_birth_age
     query: round(time() - min(kube_node_created))
-    value: humanizeDays(result)
-    color: 'result <= 15552000 ? "green" : result <= 31104000 ? "orange" : "red"'
-    title: Age
+    valueExpr: humanizeDurationDays(result)
+    colorExpr: 'colorScale(result, [15552000.0, 31104000.0], ["green", "orange", "red"])'
 
-  - id: cluster_uptime_age
+  - title: Uptime
+    id: cluster_uptime_age
     query: round(avg(node_time_seconds{pod!=""} - node_boot_time_seconds{pod!=""}))
-    value: humanizeDays(result)
-    color: 'result <= 15552000 ? "green" : result <= 31104000 ? "orange" : "red"'
-    title: Uptime
+    valueExpr: humanizeDurationDays(result)
+    colorExpr: 'colorScale(result, [15552000.0, 31104000.0], ["green", "orange", "red"])'
 
-  - id: cluster_alert_count
+  - title: Alerts
+    id: cluster_alert_count
     query: alertmanager_alerts{state="active"} - 1 # Ignore Watchdog
-    color: 'result < 1 ? "green" : "red"'
-    title: Alerts
+    colorExpr: 'colorScale(result, [1.0], ["green", "red"])'
 
-  - id: buddy_ping
+  - title: Home Internet
+    id: buddy_ping
     query: gatus_results_endpoint_success{key="buddy_ping"}
-    value: 'result == 1.0 ? "up" : "down"'
-    color: 'result == 1.0 ? "green" : "red"'
-    title: Home Internet
+    valueExpr: 'result == 1.0 ? "up" : "down"'
+    colorExpr: 'result == 1.0 ? "green" : "red"'
     icon: si:ubiquiti
-    gallery:
-      hidden: true
 
-  - id: buddy_status-page
+  - title: Status Page
+    id: buddy_status_page
     query: gatus_results_endpoint_success{key="buddy_status-page"}
-    value: 'result == 1.0 ? "up" : "down"'
-    color: 'result == 1.0 ? "green" : "red"'
-    title: Status Page
+    valueExpr: 'result == 1.0 ? "up" : "down"'
+    colorExpr: 'result == 1.0 ? "green" : "red"'
     icon: si:statuspage
-    gallery:
-      hidden: true
 
-  - id: buddy_heartbeat
+  - title: Alertmanager
+    id: buddy_heartbeat
     query: gatus_results_endpoint_success{key="buddy_heartbeat"}
-    value: 'result == 1.0 ? "up" : "down"'
-    color: 'result == 1.0 ? "green" : "red"'
-    title: Alertmanager
+    valueExpr: 'result == 1.0 ? "up" : "down"'
+    colorExpr: 'result == 1.0 ? "green" : "red"'
     icon: si:prometheus
-    gallery:
-      hidden: true
-
