@@ -54,10 +54,9 @@ jobs:
 
       - name: Run flate diff
         env:
-          FLATE_PATH: ./kubernetes/flux/cluster
           KIND: ${{ matrix.kind }}
         run: |
-          flate diff "$KIND" > "$KIND.diff"
+          flate diff "$KIND" --path ./kubernetes/flux/cluster --output github > "$KIND.diff"
           [ -s "$KIND.diff" ] || rm "$KIND.diff"
 
       - if: ${{ hashFiles(format('{0}.diff', matrix.kind)) != '' }}
