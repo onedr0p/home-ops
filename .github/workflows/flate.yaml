@@ -52,12 +52,11 @@ jobs:
           cache: false
           tool_versions: |
             github:home-operations/flate 0.2.7
-            minify v2.24.13
 
       - name: Run flate
         id: flate
         run: |
-          flate diff all -p ./kubernetes/flux/cluster -o html | minify --type=html > diff.html
+          flate diff all -p ./kubernetes/flux/cluster -o html > diff.html
           if [ -s diff.html ]; then
             echo "diff=true" >> "$GITHUB_OUTPUT"
           else
