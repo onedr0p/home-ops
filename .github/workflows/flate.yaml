@@ -82,7 +82,8 @@ jobs:
             const fs = require("fs");
             const crypto = require("crypto");
             const pr = context.issue.number;
-            const url = `https://${process.env.DUFS_DOMAIN}/flate/pr-${pr}.html`;
+            const dir = `https://${process.env.DUFS_DOMAIN}/flate/`;
+            const url = `${dir}${pr}.html`;
             const auth = "Basic " + Buffer.from(`${process.env.DUFS_USERNAME}:${process.env.DUFS_PASSWORD}`).toString("base64");
 
             const body = fs.readFileSync("diff.html");
@@ -93,6 +94,8 @@ jobs:
             if (remoteHash === localHash) {
               return core.info(`Diff unchanged (sha256 ${localHash}) — skipping upload.`);
             }
+
+            await fetch(dir, { method: "MKCOL", headers: { Authorization: auth } });
 
             const res = await fetch(url, { method: "PUT", headers: { Authorization: auth }, body });
             if (!res.ok) return core.setFailed(`PUT ${url} returned HTTP ${res.status}`);
@@ -132,7 +135,7 @@ jobs:
             const shortSha = sha.slice(0, 7);
             const commitUrl = `${context.serverUrl}/${owner}/${repo}/commit/${sha}`;
             const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
-            const diffUrl = `https://${process.env.DUFS_DOMAIN}/flate/pr-${issue_number}.html`;
+            const diffUrl = `https://${process.env.DUFS_DOMAIN}/flate/${issue_number}.html`;
 
             const body = [
               marker,
@@ -176,7 +179,7 @@ jobs:
         with:
           script: |
             const pr = context.issue.number;
-            const url = `https://${process.env.DUFS_DOMAIN}/flate/pr-${pr}.html`;
+            const url = `https://${process.env.DUFS_DOMAIN}/flate/${pr}.html`;
             const auth = "Basic " + Buffer.from(`${process.env.DUFS_USERNAME}:${process.env.DUFS_PASSWORD}`).toString("base64");
             const res = await fetch(url, { method: "DELETE", headers: { Authorization: auth } });
             if (res.ok) core.info(`Deleted ${url}`);
