@@ -5,16 +5,11 @@ kind: Kustomization
 metadata:
   name: dufs
 spec:
-  components:
-    - ../../../../components/volsync
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
   interval: 1h
   path: ./kubernetes/apps/default/dufs/app
-  postBuild:
-    substitute:
-      APP: dufs
   prune: true
   sourceRef:
     kind: GitRepository
