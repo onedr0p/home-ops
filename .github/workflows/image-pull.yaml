@@ -46,7 +46,7 @@ jobs:
         with:
           cache: false
           tool_versions: |
-            github:home-operations/flate 0.2.7
+            github:home-operations/flate 0.2.10
 
       - name: Extract Images
         id: extract
@@ -90,4 +90,6 @@ jobs:
 
       - name: All jobs passed or skipped?
         if: ${{ !(contains(needs.*.result, 'failure')) }}
-        run: echo "All jobs passed or skipped" && echo "${{ toJSON(needs.*.result) }}"
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: echo "All jobs passed or skipped" && echo "$RESULTS"
