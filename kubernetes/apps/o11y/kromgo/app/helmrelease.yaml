@@ -10,9 +10,98 @@ spec:
     name: kromgo
   interval: 1h
   values:
-    podAnnotations:
-      reloader.stakater.com/auto: "true"
-    existingConfigMap: kromgo-configmap
+    config:
+      prometheus: http://prometheus-operated.{{ .Release.Namespace }}.svc.cluster.local:9090
+      badges:
+        - title: Talos
+          id: talos_version
+          query: label_replace(node_os_info{name="Talos"}, "version_id", "$1", "version_id", "v(.+)")
+          valueExpr: labels["version_id"]
+          icon: si:talos
+
+        - title: Kubernetes
+          id: kubernetes_version
+          query: label_replace(kubernetes_build_info{service="kubernetes"}, "git_version", "$1", "git_version", "v(.+)")
+          valueExpr: labels["git_version"]
+          icon: si:kubernetes
+
+        - title: Flux
+          id: flux_version
+          query: label_replace(flux_instance_info, "revision", "$1", "revision", "v(.+)@sha256:.+")
+          valueExpr: labels["revision"]
+          icon: si:flux
+
+        - title: Nodes
+          id: cluster_node_count
+          query: count(count by (node) (kube_node_status_condition{condition="Ready"}))
+          colorExpr: '"green"'
+
+        - title: Pods
+          id: cluster_pod_count
+          query: sum(kube_pod_status_phase{phase="Running"})
+          valueExpr: humanizeCommas(result)
+          colorExpr: '"green"'
+
+        - title: CPU
+          id: cluster_cpu_usage
+          query: round(avg(instance:node_cpu_utilisation:rate5m{pod!=""}) * 100, 0.1)
+          valueExpr: string(result) + "%"
+          colorExpr: 'colorScale(result, [35.0, 75.0], ["green", "orange", "red"])'
+
+        - title: Memory
+          id: cluster_memory_usage
+          query: round(sum(node_memory_MemTotal_bytes{pod!=""} - node_memory_MemAvailable_bytes{pod!=""}) / sum(node_memory_MemTotal_bytes{pod!=""}) * 100, 0.1)
+          valueExpr: string(result) + "%"
+          colorExpr: 'colorScale(result, [35.0, 75.0], ["green", "orange", "red"])'
+
+        - title: Power
+          id: cluster_power_usage
+          query: avg(upsAdvOutputActivePower)
+          valueExpr: humanizeCommas(math.round(result)) + "w"
+          colorExpr: 'colorScale(result, [400.0, 750.0], ["green", "orange", "red"])'
+
+        - title: Age
+          id: cluster_birth_age
+          query: round(time() - min(kube_node_created))
+          valueExpr: humanizeDurationDays(result)
+          colorExpr: 'colorScale(result, [15552000.0, 31104000.0], ["green", "orange", "red"])'
+
+        - title: Uptime
+          id: cluster_uptime_age
+          query: round(avg(node_time_seconds{pod!=""} - node_boot_time_seconds{pod!=""}))
+          valueExpr: humanizeDurationDays(result)
+          colorExpr: 'colorScale(result, [15552000.0, 31104000.0], ["green", "orange", "red"])'
+
+        - title: Alerts
+          id: cluster_alert_count
+          query: alertmanager_alerts{state="active"} - 1 # Ignore Watchdog
+          colorExpr: 'colorScale(result, [1.0], ["green", "red"])'
+
+        - title: Home Internet
+          id: buddy_ping
+          query: gatus_results_endpoint_success{key="buddy_ping"}
+          valueExpr: 'result == 1.0 ? "up" : "down"'
+          colorExpr: 'result == 1.0 ? "brightgreen" : "red"'
+          icon: si:ubiquiti
+
+        - title: Status Page
+          id: buddy_status_page
+          query: gatus_results_endpoint_success{key="buddy_status-page"}
+          valueExpr: 'result == 1.0 ? "up" : "down"'
+          colorExpr: 'result == 1.0 ? "brightgreen" : "red"'
+          icon: si:statuspage
+
+        - title: Alertmanager
+          id: buddy_heartbeat
+          query: gatus_results_endpoint_success{key="buddy_heartbeat"}
+          valueExpr: 'result == 1.0 ? "up" : "down"'
+          colorExpr: 'result == 1.0 ? "brightgreen" : "red"'
+          icon: si:prometheus
+    resources:
+      requests:
+        cpu: 10m
+      limits:
+        memory: 64Mi
     httpRoute:
       enabled: true
       annotations:
@@ -22,9 +111,4 @@ spec:
         - name: envoy-external
           namespace: network
       hostnames:
-        - kromgo.turbo.ac
-    resources:
-      requests:
-        cpu: 10m
-      limits:
-        memory: 64Mi
+        - "{{ .Release.Name }}.turbo.ac"
