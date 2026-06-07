@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kopiur.home-operations.com/backupconfig_v1alpha1.json
+apiVersion: kopiur.home-operations.com/v1alpha1
+kind: BackupConfig
+metadata:
+  name: ${APP}
+spec:
+  repository:
+    kind: ClusterRepository
+    name: nas
+  sources:
+    - pvc:
+        name: ${APP}
+  # Point-in-time CSI snapshot (no app downtime, no RWO contention).
+  copyMethod: Snapshot
+  volumeSnapshotClassName: ${KOPIUR_SNAPSHOTCLASS:=csi-ceph-blockpool}
+  # Mover reads the app's data and writes the shared NFS repo — match the UID
+  # that owns the data (default 1000; override per-app with KOPIUR_PUID/PGID).
+  mover:
+    securityContext:
+      runAsUser: ${KOPIUR_PUID:=1000}
+      runAsGroup: ${KOPIUR_PGID:=1000}
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
+  retention:
+    keepDaily: 7
+    keepWeekly: 4
