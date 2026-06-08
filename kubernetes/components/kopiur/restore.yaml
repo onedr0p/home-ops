@@ -19,3 +19,13 @@ spec:
   # Secret into this namespace (chart secretProjection.enabled gates the RBAC).
   credentialProjection:
     enabled: true
+  # Populating a FRESH volume for a non-root app needs a privileged (root) mover:
+  # kopiur sets no pod-level fsGroup, so a non-root mover can't write a freshly
+  # provisioned (root-owned) PVC, and privilegedMode restores files with their
+  # ORIGINAL uid/gid so the app can read them. Requires the workload namespace to
+  # opt in: kopiur.home-operations.com/privileged-movers=true.
+  mover:
+    privilegedMode: true
+    securityContext:
+      runAsUser: 0
+      runAsNonRoot: false
