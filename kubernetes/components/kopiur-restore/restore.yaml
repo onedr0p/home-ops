@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kopiur.home-operations.com/restore_v1alpha1.json
+apiVersion: kopiur.home-operations.com/v1alpha1
+kind: Restore
+metadata:
+  name: ${APP}
+spec:
+  # Passive volume-populator (no `target`): the PVC's dataSourceRef drives it.
+  # Deploy-or-restore — fresh cluster + existing repo hydrates the PVC before the
+  # app starts; brand-new repo comes up empty and is backed up going forward.
+  # Repo is inferred from the BackupConfig named below (../kopiur component).
+  source:
+    fromConfig:
+      name: ${APP}
+      offset: 0 # 0 = latest snapshot
+  policy:
+    onMissingSnapshot: Continue # default for fromConfig — empty volume if none
+  # Restore mover reads the shared ClusterRepository — project the credential
+  # Secret into this namespace (chart secretProjection.enabled gates the RBAC).
+  credentialProjection:
+    enabled: true
