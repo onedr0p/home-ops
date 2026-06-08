@@ -11,15 +11,21 @@ spec:
   interval: 1h
   values:
     installScope: cluster
-    webhook:
-      certManager:
+    grafanaDashboard:
+      enabled: true
+      grafanaOperator:
         enabled: true
-      serviceMonitor:
-        enabled: true
+        matchLabels:
+          dashboards: grafana
     metrics:
       serviceMonitor:
         enabled: true
       prometheusRule:
         enabled: true
-    grafanaDashboard:
+    secretProjection:
       enabled: true
+    webhook:
+      tls:
+        mode: self
+      serviceMonitor:
+        enabled: true

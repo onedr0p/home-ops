@@ -8,6 +8,10 @@ spec:
   repository:
     kind: ClusterRepository
     name: nas
+  # Operator projects the ClusterRepository's credential Secret into this
+  # namespace for the mover (chart secretProjection.enabled gates the RBAC).
+  credentialProjection:
+    enabled: true
   sources:
     - pvc:
         name: ${APP}
@@ -22,10 +26,7 @@ spec:
       runAsGroup: ${KOPIUR_PGID:=1000}
       runAsNonRoot: true
       allowPrivilegeEscalation: false
-      capabilities:
-        drop: ["ALL"]
-      seccompProfile:
-        type: RuntimeDefault
+      capabilities: { drop: ["ALL"] }
   retention:
     keepDaily: 7
     keepWeekly: 4
