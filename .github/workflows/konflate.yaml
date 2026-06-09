@@ -28,7 +28,7 @@ jobs:
         env:
           PR: ${{ github.event.pull_request.number }}
         run: |
-          if status="$(curl -fsS --retry 10 --retry-delay 3 \
+          if status="$(curl -fsS --retry 10 --retry-delay 3 --retry-all-errors \
                -H 'Accept: text/markdown' \
                -o summary.md -w '%header{x-konflate-render-status}' \
                "https://${KONFLATE_DOMAIN}/api/prs/${PR}/summary")" \
