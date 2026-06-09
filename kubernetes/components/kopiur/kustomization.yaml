@@ -7,9 +7,9 @@ kind: Component
 # app via its ks.yaml `components:` + postBuild substitute APP=<app>; point the app's
 # `existingClaim` at ${APP}.
 #
-# The Restore populator uses a privileged (root) mover so it can write a freshly
-# provisioned PVC and restore files with their ORIGINAL uid/gid. The workload namespace
-# MUST opt in: annotate it kopiur.home-operations.com/privileged-movers=true.
+# The Restore populator runs as a non-root mover (runAsUser/runAsGroup ${KOPIUR_PUID})
+# with a pod-level fsGroup, so it can write a freshly provisioned PVC; restored files are
+# owned ${KOPIUR_PUID}:${KOPIUR_PGID}. No privileged-mover namespace opt-in required.
 resources:
   - ./backupconfig.yaml
   - ./backupschedule.yaml
