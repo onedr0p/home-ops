@@ -5,29 +5,13 @@ kind: Restore
 metadata:
   name: ${APP}
 spec:
-  # Passive volume-populator (no `target`): the PVC's dataSourceRef drives it.
-  # Deploy-or-restore — fresh cluster + existing repo hydrates the PVC before the
-  # app starts; brand-new repo comes up empty and is backed up going forward.
-  # Repo is inferred from the BackupConfig named below (../kopiur component).
   source:
-    fromConfig:
+    fromPolicy:
       name: ${APP}
       offset: 0 # 0 = latest snapshot
+  target:
+    populator: {}
   policy:
-    onMissingSnapshot: Continue # default for fromConfig — empty volume if none
-  # Restore mover reads the shared ClusterRepository — project the credential
-  # Secret into this namespace (chart secretProjection.enabled gates the RBAC).
+    onMissingSnapshot: Continue # default for fromPolicy — empty volume if none
   credentialProjection:
     enabled: true
-  # 0.1.14+ exposes a pod-level securityContext on the mover, so a NON-root mover can
-  # populate a freshly provisioned PVC: fsGroup makes the volume group-writable (setgid)
-  # and files are restored owned ${KOPIUR_PUID}:${KOPIUR_PGID}. No root, no privilegedMode,
-  # no namespace privileged-mover opt-in. (For mixed-ownership data, use mover.privilegedMode
-  # + the ns opt-in instead, to preserve original uid/gid.)
-  mover:
-    securityContext:
-      runAsUser: ${KOPIUR_PUID:=1000}
-      runAsGroup: ${KOPIUR_PGID:=1000}
-    podSecurityContext:
-      fsGroup: ${KOPIUR_PGID:=1000}
-      fsGroupChangePolicy: OnRootMismatch

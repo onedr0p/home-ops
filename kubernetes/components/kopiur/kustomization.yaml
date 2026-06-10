@@ -2,16 +2,8 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-# Full kopiur lifecycle for an app (the volsync component analog): a deploy-or-restore
-# PVC + passive Restore populator, plus the BackupConfig + BackupSchedule. Compose on an
-# app via its ks.yaml `components:` + postBuild substitute APP=<app>; point the app's
-# `existingClaim` at ${APP}.
-#
-# The Restore populator runs as a non-root mover (runAsUser/runAsGroup ${KOPIUR_PUID})
-# with a pod-level fsGroup, so it can write a freshly provisioned PVC; restored files are
-# owned ${KOPIUR_PUID}:${KOPIUR_PGID}. No privileged-mover namespace opt-in required.
 resources:
-  - ./backupconfig.yaml
-  - ./backupschedule.yaml
+  - ./snapshotpolicy.yaml
+  - ./snapshotschedule.yaml
   - ./pvc.yaml
   - ./restore.yaml

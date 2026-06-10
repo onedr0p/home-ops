@@ -5,11 +5,6 @@ kind: ClusterRepository
 metadata:
   name: nas
 spec:
-  # kopia has no native NFS backend — it is reached through the filesystem
-  # backend by mounting the export at `path`. The operator synthesizes an inline
-  # NFS volume on every mover Job (bootstrap, backup, maintenance).
-  # NOTE: dedicated repo dir — kept separate from volsync's /mnt/ceres/Kopia so
-  # the two tools never share a kopia repo or its maintenance lease.
   backend:
     filesystem:
       path: /repo
@@ -18,29 +13,24 @@ spec:
           server: expanse.internal
           path: /mnt/ceres/Kopiur
   encryption:
-    # Cluster-scoped: every Secret ref must carry an explicit namespace.
     passwordSecretRef:
       name: kopiur-nas-secret
       namespace: kopiur-system
       key: KOPIA_PASSWORD
   create:
     enabled: true
-  # Tenancy gate — only these namespaces may target this repository.
   allowedNamespaces:
     list:
       - default
-  # Per-tenant kopia identity (rendered by kopiur at admission, not Flux/Helm).
   identityDefaults:
-    hostnameTemplate: "{{ .Namespace }}"
-    usernameTemplate: "{{ .Namespace }}-{{ .ConfigName }}"
-  # Default-managed maintenance (quick 6h / full daily). The managed Maintenance
-  # CR lands in kopiur-system; pin the mover UID to the NAS repo ownership.
+    hostnameExpr: namespace
+    usernameExpr: namespace + '-' + policyName
+  moverDefaults:
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+    podSecurityContext:
+      fsGroup: 1000
+      fsGroupChangePolicy: OnRootMismatch
   maintenance:
     enabled: true
-    mover:
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        allowPrivilegeEscalation: false
-        capabilities: { drop: ["ALL"] }
