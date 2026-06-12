@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -10,129 +10,57 @@ spec:
     name: gatus
   interval: 1h
   values:
-    controllers:
-      gatus:
-        type: statefulset
-        annotations:
-          reloader.stakater.com/auto: "true"
-        initContainers:
-          gatus-sidecar:
-            image:
-              repository: ghcr.io/home-operations/gatus-sidecar
-              tag: 0.2.0@sha256:1209cfc77224a6336f8126efa3e46edcc29e7ae5c3a9d4c59229f7895aff593c
-            args:
-              - --auto-httproute
-              - --enable-httproute
-              - --enable-service
-            resources:
-              requests:
-                cpu: 10m
-              limits:
-                memory: 128Mi
-            restartPolicy: Always
-        containers:
-          app:
-            image:
-              repository: ghcr.io/twin/gatus
-              tag: v5.36.0@sha256:c5f210d095fa78e6efaa20ffeb14803f2ba4f10615e16a6d12087697149617f0
-            env:
-              GATUS_DELAY_START_SECONDS: 5
-              GATUS_CONFIG_PATH: /config
-              GATUS_WEB_PORT: &port 80
-              TZ: America/New_York
-            envFrom:
-              - secretRef:
-                  name: "{{ .Release.Name }}-secret"
-            probes:
-              liveness: &probes
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /health
-                    port: *port
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              readiness: *probes
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
-            resources:
-              requests:
-                cpu: 100m
-              limits:
-                memory: 256Mi
-        statefulset:
-          volumeClaimTemplates:
-            - name: config
-              storageClass: ceph-block
-              accessMode: ReadWriteOnce
-              size: 5Gi
-    defaultPodOptions:
-      automountServiceAccountToken: true
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
-    service:
-      app:
-        ports:
-          http:
-            port: *port
-    serviceMonitor:
-      app:
-        endpoints:
-          - port: http
-    route:
-      app:
-        annotations:
-          gatus.home-operations.com/enabled: "false"
-        hostnames:
-          - "{{ .Release.Name }}.turbo.ac"
-          - status.turbo.ac
-        parentRefs:
-          - name: envoy-external
-            namespace: network
-    rbac:
-      roles:
-        gatus:
-          type: ClusterRole
-          rules:
-            - apiGroups:
-                - ""
-              resources:
-                - services
-              verbs:
-                - get
-                - watch
-                - list
-            - apiGroups:
-                - gateway.networking.k8s.io
-              resources:
-                - gateways
-                - httproutes
-              verbs:
-                - get
-                - watch
-                - list
-      bindings:
-        gatus:
-          type: ClusterRoleBinding
-          roleRef:
-            identifier: gatus
-          subjects:
-            - identifier: gatus
+    fullnameOverride: gatus
+    # Reloader reads the workload, not the pod: roll gatus when the mounted
+    # ConfigMap or the envFrom Secret changes.
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
+    gatus:
+      delayStartSeconds: "5"
+      env:
+        TZ: America/New_York
+      envFrom:
+        - secretRef:
+            name: gatus-secret
+      resources:
+        requests:
+          cpu: 100m
+        limits:
+          memory: 256Mi
+    sidecar:
+      kinds:
+        httproute:
+          enable: true
+          auto: true
+        service:
+          enable: true
+      resources:
+        requests:
+          cpu: 10m
+        limits:
+          memory: 128Mi
+    config:
+      existingConfigMap: gatus-configmap
+      items:
+        - key: config.yaml
+          path: config.yaml
+        - key: buddy.yaml
+          path: buddy.yaml
     persistence:
-      config-file:
-        type: configMap
-        name: "{{ .Release.Name }}-configmap"
-        globalMounts:
-          - path: /config/buddy.yaml
-            subPath: buddy.yaml
-          - path: /config/config.yaml
-            subPath: config.yaml
+      # Reuse the PVC left behind by the previous StatefulSet's
+      # volumeClaimTemplate so the sqlite uptime history carries over.
+      enabled: true
+      existingClaim: config-gatus-0
+    monitoring:
+      serviceMonitor:
+        enabled: true
+    httpRoute:
+      enabled: true
+      annotations:
+        gatus.home-operations.com/enabled: "false"
+      hostnames:
+        - gatus.turbo.ac
+        - status.turbo.ac
+      parentRefs:
+        - name: envoy-external
+          namespace: network
