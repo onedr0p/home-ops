@@ -11,8 +11,6 @@ spec:
   interval: 1h
   values:
     fullnameOverride: gatus
-    # Reloader reads the workload, not the pod: roll gatus when the mounted
-    # ConfigMap or the envFrom Secret changes.
     deploymentAnnotations:
       reloader.stakater.com/auto: "true"
     gatus:
@@ -39,6 +37,19 @@ spec:
           cpu: 10m
         limits:
           memory: 128Mi
+    httpRoute:
+      enabled: true
+      annotations:
+        gatus.home-operations.com/enabled: "false"
+      hostnames:
+        - "{{ .Release.Name }}.turbo.ac"
+        - status.turbo.ac
+      parentRefs:
+        - name: envoy-external
+          namespace: network
+    monitoring:
+      serviceMonitor:
+        enabled: true
     config:
       existingConfigMap: gatus-configmap
       items:
@@ -47,20 +58,5 @@ spec:
         - key: buddy.yaml
           path: buddy.yaml
     persistence:
-      # Reuse the PVC left behind by the previous StatefulSet's
-      # volumeClaimTemplate so the sqlite uptime history carries over.
       enabled: true
       existingClaim: config-gatus-0
-    monitoring:
-      serviceMonitor:
-        enabled: true
-    httpRoute:
-      enabled: true
-      annotations:
-        gatus.home-operations.com/enabled: "false"
-      hostnames:
-        - gatus.turbo.ac
-        - status.turbo.ac
-      parentRefs:
-        - name: envoy-external
-          namespace: network
