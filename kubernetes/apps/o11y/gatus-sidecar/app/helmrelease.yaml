@@ -10,7 +10,6 @@ spec:
     name: gatus-sidecar
   interval: 1h
   values:
-    fullnameOverride: gatus-sidecar
     deploymentAnnotations:
       reloader.stakater.com/auto: "true"
     gatus:
@@ -51,7 +50,7 @@ spec:
       serviceMonitor:
         enabled: true
     config:
-      existingConfigMap: gatus-sidecar-configmap
+      existingConfigMap: "{{ .Release.Name }}-configmap"
       items:
         - key: config.yaml
           path: config.yaml
