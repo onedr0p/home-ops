@@ -1,0 +1,58 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gatus-sidecar
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: gatus-sidecar
+  interval: 1h
+  values:
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
+    gatus:
+      delayStartSeconds: "5"
+      env:
+        TZ: America/New_York
+      envFrom:
+        - secretRef:
+            name: "{{ .Release.Name }}-secret"
+    sidecar:
+      kinds:
+        httproute:
+          enable: true
+          auto: true
+        service:
+          enable: true
+    httpRoute:
+      enabled: true
+      annotations:
+        gatus.home-operations.com/enabled: "false"
+      hostnames:
+        - "{{ .Release.Name }}.turbo.ac"
+        - status.turbo.ac
+      parentRefs:
+        - name: envoy-external
+          namespace: network
+    monitoring:
+      serviceMonitor:
+        enabled: true
+    config:
+      existingConfigMap: "{{ .Release.Name }}-configmap"
+      items:
+        - key: config.yaml
+          path: config.yaml
+        - key: buddy.yaml
+          path: buddy.yaml
+    persistence:
+      enabled: true
+      storageClass: ceph-block
+      accessMode: ReadWriteOnce
+      size: 5Gi
+    resources:
+      requests:
+        cpu: 100m
+      limits:
+        memory: 512Mi
