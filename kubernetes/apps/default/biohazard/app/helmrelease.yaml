@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: biohazard
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: konflate
+  interval: 1h
+  values:
+    config:
+      repo: github://JJGadgets/Biohazard
+    httpRoute:
+      enabled: true
+      annotations:
+        gatus.home-operations.com/endpoint: |-
+          conditions: ["[STATUS] == 200"]
+      parentRefs:
+        - name: envoy-external
+          namespace: network
+      hostnames:
+        - "{{ .Release.Name }}.turbo.ac"
+    monitoring:
+      serviceMonitor:
+        enabled: true
+    resources:
+      requests:
+        cpu: 50m
+      limits:
+        memory: 1Gi
