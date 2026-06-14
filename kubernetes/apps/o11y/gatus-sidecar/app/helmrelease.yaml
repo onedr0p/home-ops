@@ -3,14 +3,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: gatus
+  name: gatus-sidecar
 spec:
   chartRef:
     kind: OCIRepository
-    name: gatus
+    name: gatus-sidecar
   interval: 1h
   values:
-    fullnameOverride: gatus
+    fullnameOverride: gatus-sidecar
     deploymentAnnotations:
       reloader.stakater.com/auto: "true"
     gatus:
@@ -19,7 +19,7 @@ spec:
         TZ: America/New_York
       envFrom:
         - secretRef:
-            name: gatus-secret
+            name: gatus-sidecar-secret
       resources:
         requests:
           cpu: 100m
@@ -42,7 +42,7 @@ spec:
       annotations:
         gatus.home-operations.com/enabled: "false"
       hostnames:
-        - "{{ .Release.Name }}.turbo.ac"
+        - gatus.turbo.ac
         - status.turbo.ac
       parentRefs:
         - name: envoy-external
@@ -51,7 +51,7 @@ spec:
       serviceMonitor:
         enabled: true
     config:
-      existingConfigMap: gatus-configmap
+      existingConfigMap: gatus-sidecar-configmap
       items:
         - key: config.yaml
           path: config.yaml
