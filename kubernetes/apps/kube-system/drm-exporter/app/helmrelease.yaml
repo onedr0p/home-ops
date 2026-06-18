@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: drm-exporter
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: drm-exporter
+  interval: 1h
+  values:
+    dra:
+      enabled: true
+      deviceClassName: gpu.intel.com
+    securityContext:
+      capabilities:
+        add:
+          - PERFMON
+    monitoring:
+      serviceMonitor:
+        enabled: true
+      dashboards:
+        enabled: true
+        grafanaOperator:
+          enabled: true
+          matchLabels:
+            dashboards: grafana
+    resources:
+      requests:
+        cpu: 10m
+      limits:
+        memory: 128Mi
