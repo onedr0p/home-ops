@@ -1,10 +1,11 @@
 ---
 customization:
   extraKernelArgs:
-    - i915.enable_guc=3 # Meteor Lake CPU & Intel iGPU
+    - i915.force_probe=!7d55 # Intel iGPU (disable i915)
+    - xe.force_probe=7d55 # Intel iGPU (enable xe)
     - intel_iommu=on # PCI Passthrough
     - iommu=pt # PCI Passthrough
-    - module_blacklist=igc # Thunderbolt NICs
+    - module_blacklist=igc # Thunderbolt NICs (disable igc)
     - sysctl.kernel.kexec_load_disabled=1 # Meteor Lake CPU & Intel iGPU
     - thunderbolt.host_reset=0 # Thunderbolt NICs
   systemExtensions:
@@ -13,3 +14,4 @@ customization:
       - siderolabs/intel-ucode # Intel iGPU
       - siderolabs/mei # Intel iGPU
       - siderolabs/thunderbolt # Thunderbolt NICs
+      - siderolabs/xe # Intel iGPU
