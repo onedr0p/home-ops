@@ -28,68 +28,52 @@ spec:
       routes:
         radarr-download:
           target: radarr
-          title: '{{ if eq .payload.eventType "Download" }}Movie {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}{{ else }}Test Notification{{ end }}'
+          title: "Movie {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}"
           message: |-
-            {{- if eq .payload.eventType "Download" -}}
             {{ .payload.movie.title }} ({{ .payload.movie.year }})
-            {{ .payload.movie.overview }}
+            {{ .payload.movie.overview | ellipsis 300 }}
 
-            Client: {{ .payload.downloadClient }}
-            {{- else -}}
-            Howdy this is a test notification
-            {{- end -}}
+            Client: {{ .payload.downloadClient | default "unknown" }}
           params:
             priority: low
-            url: '{{ if eq .payload.eventType "Download" }}{{ .payload.applicationUrl }}/movie/{{ .payload.movie.tmdbId }}{{ else }}{{ .payload.applicationUrl }}{{ end }}'
-            url_title: '{{ if eq .payload.eventType "Download" }}View Movie{{ else }}View Movies{{ end }}'
-          whenExpr: payload.eventType in ["Download", "Test"]
+            url: "{{ .payload.applicationUrl }}/movie/{{ .payload.movie.tmdbId }}"
+            url_title: View Movie
+          whenExpr: payload.eventType == "Download"
         radarr-manual:
           target: radarr
-          title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}Movie Requires Manual Interaction{{ else }}Test Notification{{ end }}'
+          title: Movie Requires Manual Interaction
           message: |-
-            {{- if eq .payload.eventType "ManualInteractionRequired" -}}
             {{ .payload.movie.title }} ({{ .payload.movie.year }})
-            Client: {{ .payload.downloadClient }}
-            {{- else -}}
-            Howdy this is a test notification
-            {{- end -}}
+            Client: {{ .payload.downloadClient | default "unknown" }}
           params:
-            priority: '{{ if eq .payload.eventType "ManualInteractionRequired" }}high{{ else }}low{{ end }}'
-            url: '{{ if eq .payload.eventType "ManualInteractionRequired" }}{{ .payload.applicationUrl }}/activity/queue{{ else }}{{ .payload.applicationUrl }}{{ end }}'
-            url_title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}View Queue{{ else }}View Movies{{ end }}'
-          whenExpr: payload.eventType in ["ManualInteractionRequired", "Test"]
+            priority: high
+            url: "{{ .payload.applicationUrl }}/activity/queue"
+            url_title: View Queue
+          whenExpr: payload.eventType == "ManualInteractionRequired"
         sonarr-download:
           target: sonarr
-          title: '{{ if eq .payload.eventType "Download" }}Episode {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}{{ else }}Test Notification{{ end }}'
+          title: "Episode {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}"
           message: |-
-            {{- if eq .payload.eventType "Download" -}}
             {{ .payload.series.title }} ({{ printf "S%02dE%02d" (toInt (index .payload.episodes 0).seasonNumber) (toInt (index .payload.episodes 0).episodeNumber) }})
             {{ (index .payload.episodes 0).title }}
 
-            Client: {{ .payload.downloadClient }}
-            {{- else -}}
-            Howdy this is a test notification
-            {{- end -}}
+            Client: {{ .payload.downloadClient | default "unknown" }}
           params:
             priority: low
-            url: '{{ if eq .payload.eventType "Download" }}{{ .payload.applicationUrl }}/series/{{ .payload.series.titleSlug }}{{ else }}{{ .payload.applicationUrl }}{{ end }}'
+            url: "{{ .payload.applicationUrl }}/series/{{ .payload.series.titleSlug }}"
             url_title: View Series
-          whenExpr: payload.eventType in ["Download", "Test"]
+          whenExpr: payload.eventType == "Download"
         sonarr-manual:
           target: sonarr
-          title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}Episode Requires Manual Interaction{{ else }}Test Notification{{ end }}'
+          title: Episode Requires Manual Interaction
           message: |-
-            {{- if eq .payload.eventType "ManualInteractionRequired" -}}
             {{ .payload.series.title }}
-            Client: {{ .payload.downloadClient }}
-            {{- else -}}
-            Howdy this is a test notification
-            {{- end -}}
+            Client: {{ .payload.downloadClient | default "unknown" }}
           params:
-            priority: '{{ if eq .payload.eventType "ManualInteractionRequired" }}high{{ else }}low{{ end }}'
-            url: '{{ if eq .payload.eventType "ManualInteractionRequired" }}{{ .payload.applicationUrl }}/activity/queue{{ else }}{{ .payload.applicationUrl }}{{ end }}'
-            url_title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}View Queue{{ else }}View Series{{ end }}'
-          whenExpr: payload.eventType in ["ManualInteractionRequired", "Test"]
+            priority: high
+            url: "{{ .payload.applicationUrl }}/activity/queue"
+            url_title: View Queue
+          whenExpr: payload.eventType == "ManualInteractionRequired"
     monitoring:
       serviceMonitor:
         enabled: true
