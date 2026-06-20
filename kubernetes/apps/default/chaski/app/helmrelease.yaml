@@ -1,0 +1,83 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: chaski
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: chaski
+  interval: 1h
+  values:
+    replicaCount: 2
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true" # roll on chaski-secret rotation
+    env:
+      TZ: America/New_York
+    envFrom:
+      - secretRef:
+          name: chaski-secret
+    monitoring:
+      serviceMonitor:
+        enabled: true
+    resources:
+      requests:
+        cpu: 10m
+      limits:
+        memory: 128Mi
+    # routes/targets are emitted verbatim into the ConfigMap — the `{{ … }}` here
+    # is chaski's CEL/Go-template syntax (evaluated per webhook), not Helm's.
+    config:
+      targets:
+        radarr:
+          apprise:
+            url: '{{ env "RADARR_PUSHOVER_URL" }}'
+        sonarr:
+          apprise:
+            url: '{{ env "SONARR_PUSHOVER_URL" }}'
+      routes:
+        # Radarr Connect webhook → POST /notify/radarr
+        radarr:
+          target: radarr
+          whenExpr: payload.eventType in ["Download", "ManualInteractionRequired", "Test"]
+          title: '{{ if eq .payload.eventType "Download" }}Movie {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}{{ else if eq .payload.eventType "ManualInteractionRequired" }}Movie Requires Manual Interaction{{ else }}Test Notification{{ end }}'
+          message: |-
+            {{- if eq .payload.eventType "Download" -}}
+            <b>{{ .payload.movie.title }} ({{ .payload.movie.year }})</b><small>
+            {{ .payload.movie.overview }}</small><small>
+
+            <b>Client:</b> {{ .payload.downloadClient }}</small>
+            {{- else if eq .payload.eventType "ManualInteractionRequired" -}}
+            <b>{{ .payload.movie.title }} ({{ .payload.movie.year }})</b><small>
+            <b>Client:</b> {{ .payload.downloadClient }}</small>
+            {{- else -}}
+            Howdy this is a test notification
+            {{- end -}}
+          params:
+            format: html
+            priority: '{{ if eq .payload.eventType "ManualInteractionRequired" }}high{{ else }}low{{ end }}'
+            url: '{{ if eq .payload.eventType "Download" }}{{ .payload.applicationUrl }}/movie/{{ .payload.movie.tmdbId }}{{ else if eq .payload.eventType "ManualInteractionRequired" }}{{ .payload.applicationUrl }}/activity/queue{{ else }}{{ .payload.applicationUrl }}{{ end }}'
+            url_title: '{{ if eq .payload.eventType "Download" }}View Movie{{ else if eq .payload.eventType "ManualInteractionRequired" }}View Queue{{ else }}View Movies{{ end }}'
+        # Sonarr Connect webhook → POST /notify/sonarr
+        sonarr:
+          target: sonarr
+          whenExpr: payload.eventType in ["Download", "ManualInteractionRequired", "Test"]
+          title: '{{ if eq .payload.eventType "Download" }}Episode {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}{{ else if eq .payload.eventType "ManualInteractionRequired" }}Episode Requires Manual Interaction{{ else }}Test Notification{{ end }}'
+          message: |-
+            {{- if eq .payload.eventType "Download" -}}
+            <b>{{ .payload.series.title }} ({{ printf "S%02dE%02d" (int (index .payload.episodes 0).seasonNumber) (int (index .payload.episodes 0).episodeNumber) }})</b><small>
+            {{ (index .payload.episodes 0).title }}</small><small>
+
+            <b>Client:</b> {{ .payload.downloadClient }}</small>
+            {{- else if eq .payload.eventType "ManualInteractionRequired" -}}
+            <b>{{ .payload.series.title }}</b><small>
+            <b>Client:</b> {{ .payload.downloadClient }}</small>
+            {{- else -}}
+            Howdy this is a test notification
+            {{- end -}}
+          params:
+            format: html
+            priority: '{{ if eq .payload.eventType "ManualInteractionRequired" }}high{{ else }}low{{ end }}'
+            url: '{{ if eq .payload.eventType "Download" }}{{ .payload.applicationUrl }}/series/{{ .payload.series.titleSlug }}{{ else if eq .payload.eventType "ManualInteractionRequired" }}{{ .payload.applicationUrl }}/activity/queue{{ else }}{{ .payload.applicationUrl }}{{ end }}'
+            url_title: '{{ if eq .payload.eventType "Download" }}View Series{{ else if eq .payload.eventType "ManualInteractionRequired" }}View Queue{{ else }}View Series{{ end }}'
