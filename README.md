@@ -108,6 +108,8 @@ While most of my infrastructure and workloads are self-hosted I do rely upon the
 
 Alternative solutions to the first two of these problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/); however, maintaining another cluster and monitoring another group of workloads would be more work and probably be more or equal out to the same costs as described below.
 
+Cloudflare Tunnels could be swapped for many options, one of which is [Towonel](https://codeberg.org/towonel/towonel).
+
 | Service                                   | Use                                                            | Cost           |
 | ----------------------------------------- | -------------------------------------------------------------- | -------------- |
 | [1Password](https://1password.com/)       | Secrets with [External Secrets](https://external-secrets.io/)  | ~$65/yr        |
