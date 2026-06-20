@@ -1,4 +1,3 @@
----
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -32,15 +31,14 @@ spec:
           title: '{{ if eq .payload.eventType "Download" }}Movie {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}{{ else }}Test Notification{{ end }}'
           message: |-
             {{- if eq .payload.eventType "Download" -}}
-            <b>{{ .payload.movie.title }} ({{ .payload.movie.year }})</b><small>
-            {{ .payload.movie.overview }}</small><small>
+            {{ .payload.movie.title }} ({{ .payload.movie.year }})
+            {{ .payload.movie.overview }}
 
-            <b>Client:</b> {{ .payload.downloadClient }}</small>
+            Client: {{ .payload.downloadClient }}
             {{- else -}}
             Howdy this is a test notification
             {{- end -}}
           params:
-            format: html
             priority: low
             url: '{{ if eq .payload.eventType "Download" }}{{ .payload.applicationUrl }}/movie/{{ .payload.movie.tmdbId }}{{ else }}{{ .payload.applicationUrl }}{{ end }}'
             url_title: '{{ if eq .payload.eventType "Download" }}View Movie{{ else }}View Movies{{ end }}'
@@ -50,13 +48,12 @@ spec:
           title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}Movie Requires Manual Interaction{{ else }}Test Notification{{ end }}'
           message: |-
             {{- if eq .payload.eventType "ManualInteractionRequired" -}}
-            <b>{{ .payload.movie.title }} ({{ .payload.movie.year }})</b><small>
-            <b>Client:</b> {{ .payload.downloadClient }}</small>
+            {{ .payload.movie.title }} ({{ .payload.movie.year }})
+            Client: {{ .payload.downloadClient }}
             {{- else -}}
             Howdy this is a test notification
             {{- end -}}
           params:
-            format: html
             priority: '{{ if eq .payload.eventType "ManualInteractionRequired" }}high{{ else }}low{{ end }}'
             url: '{{ if eq .payload.eventType "ManualInteractionRequired" }}{{ .payload.applicationUrl }}/activity/queue{{ else }}{{ .payload.applicationUrl }}{{ end }}'
             url_title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}View Queue{{ else }}View Movies{{ end }}'
@@ -66,15 +63,14 @@ spec:
           title: '{{ if eq .payload.eventType "Download" }}Episode {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}{{ else }}Test Notification{{ end }}'
           message: |-
             {{- if eq .payload.eventType "Download" -}}
-            <b>{{ .payload.series.title }} ({{ printf "S%02dE%02d" (int (index .payload.episodes 0).seasonNumber) (int (index .payload.episodes 0).episodeNumber) }})</b><small>
-            {{ (index .payload.episodes 0).title }}</small><small>
+            {{ .payload.series.title }} ({{ printf "S%02dE%02d" (toInt (index .payload.episodes 0).seasonNumber) (toInt (index .payload.episodes 0).episodeNumber) }})
+            {{ (index .payload.episodes 0).title }}
 
-            <b>Client:</b> {{ .payload.downloadClient }}</small>
+            Client: {{ .payload.downloadClient }}
             {{- else -}}
             Howdy this is a test notification
             {{- end -}}
           params:
-            format: html
             priority: low
             url: '{{ if eq .payload.eventType "Download" }}{{ .payload.applicationUrl }}/series/{{ .payload.series.titleSlug }}{{ else }}{{ .payload.applicationUrl }}{{ end }}'
             url_title: View Series
@@ -84,13 +80,12 @@ spec:
           title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}Episode Requires Manual Interaction{{ else }}Test Notification{{ end }}'
           message: |-
             {{- if eq .payload.eventType "ManualInteractionRequired" -}}
-            <b>{{ .payload.series.title }}</b><small>
-            <b>Client:</b> {{ .payload.downloadClient }}</small>
+            {{ .payload.series.title }}
+            Client: {{ .payload.downloadClient }}
             {{- else -}}
             Howdy this is a test notification
             {{- end -}}
           params:
-            format: html
             priority: '{{ if eq .payload.eventType "ManualInteractionRequired" }}high{{ else }}low{{ end }}'
             url: '{{ if eq .payload.eventType "ManualInteractionRequired" }}{{ .payload.applicationUrl }}/activity/queue{{ else }}{{ .payload.applicationUrl }}{{ end }}'
             url_title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}View Queue{{ else }}View Series{{ end }}'
