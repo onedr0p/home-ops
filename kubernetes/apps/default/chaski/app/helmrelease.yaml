@@ -27,9 +27,8 @@ spec:
           apprise:
             url: pover://{{ env "PUSHOVER_USER_KEY" }}@{{ env "SONARR_PUSHOVER_TOKEN" }}
       routes:
-        radarr:
+        radarr-download:
           target: radarr
-          whenExpr: payload.eventType in ["Download", "Test"]
           title: '{{ if eq .payload.eventType "Download" }}Movie {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}{{ else }}Test Notification{{ end }}'
           message: |-
             {{- if eq .payload.eventType "Download" -}}
@@ -45,9 +44,9 @@ spec:
             priority: low
             url: '{{ if eq .payload.eventType "Download" }}{{ .payload.applicationUrl }}/movie/{{ .payload.movie.tmdbId }}{{ else }}{{ .payload.applicationUrl }}{{ end }}'
             url_title: '{{ if eq .payload.eventType "Download" }}View Movie{{ else }}View Movies{{ end }}'
+          whenExpr: payload.eventType in ["Download", "Test"]
         radarr-manual:
           target: radarr
-          whenExpr: payload.eventType in ["ManualInteractionRequired", "Test"]
           title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}Movie Requires Manual Interaction{{ else }}Test Notification{{ end }}'
           message: |-
             {{- if eq .payload.eventType "ManualInteractionRequired" -}}
@@ -61,9 +60,9 @@ spec:
             priority: '{{ if eq .payload.eventType "ManualInteractionRequired" }}high{{ else }}low{{ end }}'
             url: '{{ if eq .payload.eventType "ManualInteractionRequired" }}{{ .payload.applicationUrl }}/activity/queue{{ else }}{{ .payload.applicationUrl }}{{ end }}'
             url_title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}View Queue{{ else }}View Movies{{ end }}'
-        sonarr:
+          whenExpr: payload.eventType in ["ManualInteractionRequired", "Test"]
+        sonarr-download:
           target: sonarr
-          whenExpr: payload.eventType in ["Download", "Test"]
           title: '{{ if eq .payload.eventType "Download" }}Episode {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}{{ else }}Test Notification{{ end }}'
           message: |-
             {{- if eq .payload.eventType "Download" -}}
@@ -79,9 +78,9 @@ spec:
             priority: low
             url: '{{ if eq .payload.eventType "Download" }}{{ .payload.applicationUrl }}/series/{{ .payload.series.titleSlug }}{{ else }}{{ .payload.applicationUrl }}{{ end }}'
             url_title: View Series
+          whenExpr: payload.eventType in ["Download", "Test"]
         sonarr-manual:
           target: sonarr
-          whenExpr: payload.eventType in ["ManualInteractionRequired", "Test"]
           title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}Episode Requires Manual Interaction{{ else }}Test Notification{{ end }}'
           message: |-
             {{- if eq .payload.eventType "ManualInteractionRequired" -}}
@@ -95,6 +94,7 @@ spec:
             priority: '{{ if eq .payload.eventType "ManualInteractionRequired" }}high{{ else }}low{{ end }}'
             url: '{{ if eq .payload.eventType "ManualInteractionRequired" }}{{ .payload.applicationUrl }}/activity/queue{{ else }}{{ .payload.applicationUrl }}{{ end }}'
             url_title: '{{ if eq .payload.eventType "ManualInteractionRequired" }}View Queue{{ else }}View Series{{ end }}'
+          whenExpr: payload.eventType in ["ManualInteractionRequired", "Test"]
     monitoring:
       serviceMonitor:
         enabled: true
