@@ -3,8 +3,8 @@ set quiet
 set script-interpreter := ['bash', '-euo', 'pipefail']
 set shell := ['bash', '-euo', 'pipefail', '-c']
 
-controller := `talosctl config info -o yaml | yq -e '.endpoints[0]'`
-nodes := `talosctl config info -o yaml | yq -e '.nodes | join (" ")'`
+controller := `talosctl config info -o yaml | yq -r -e '.endpoints[0]'`
+nodes := `talosctl config info -o yaml | yq -r -e '.nodes | join (" ")'`
 
 [private]
 default:
@@ -57,7 +57,7 @@ base: ready
     if ! kustomize build {{ source_directory() }}/kustomize/apps | just template - | kubectl apply --server-side --force-conflicts -f -; then
         just log fatal "Failed to apply base manifests" "stage" "$(basename "$0")" "file" "$f"
     fi
-    if ! helmfile -f "{{ source_directory() }}/helmfile/crds.yaml" template -q | yq ea -e 'select(.kind == "CustomResourceDefinition")' | kubectl apply --server-side --force-conflicts -f -; then
+    if ! helmfile -f "{{ source_directory() }}/helmfile/crds.yaml" template -q | yq ea -r -e 'select(.kind == "CustomResourceDefinition")' | kubectl apply --server-side --force-conflicts -f -; then
         just log fatal "Failed to apply base crds" "stage" "$(basename "$0")"
     fi
 
