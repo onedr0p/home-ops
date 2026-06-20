@@ -1,3 +1,4 @@
+set default-script
 set no-exit-message
 set quiet
 set script-interpreter := ['bash', '-euo', 'pipefail']
@@ -15,7 +16,6 @@ default:
 cluster: nodes k8s (kubeconfig "node") base apps kubeconfig
 
 [private]
-[script]
 nodes:
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
     for n in {{ nodes }}; do
@@ -29,7 +29,6 @@ nodes:
     done
 
 [private]
-[script]
 k8s:
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
     until op=$(talosctl -n "{{ controller }}" bootstrap 2>&1 || true) && [[ "$op" == *"AlreadyExists"* ]]; do
@@ -38,7 +37,6 @@ k8s:
     done
 
 [private]
-[script]
 kubeconfig lb="cilium":
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
     if ! talosctl kubeconfig -n "{{ controller }}" -f --force-context-name main {{ justfile_dir() }}; then
@@ -51,7 +49,6 @@ kubeconfig lb="cilium":
     fi
 
 [private]
-[script]
 base: ready
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
     if ! kustomize build {{ source_directory() }}/kustomize/apps | just template - | kubectl apply --server-side --force-conflicts -f -; then
@@ -62,7 +59,6 @@ base: ready
     fi
 
 [private]
-[script]
 apps:
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
     if ! helmfile -f "{{ source_directory() }}/helmfile/apps.yaml" sync --hide-notes; then
@@ -71,7 +67,6 @@ apps:
 
 # Wait until nodes register as Ready=False. They only become Ready=True once the CNI is healthy.
 [private]
-[script]
 ready:
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
     if ! kubectl wait nodes --for=condition=Ready=True --all --timeout=10s &>/dev/null; then

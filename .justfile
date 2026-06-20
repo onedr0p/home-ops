@@ -1,5 +1,6 @@
 #!/usr/bin/env -S just --justfile
 
+set default-script
 set lazy
 set quiet
 set shell := ['bash', '-euo', 'pipefail', '-c']

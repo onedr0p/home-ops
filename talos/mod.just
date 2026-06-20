@@ -1,3 +1,4 @@
+set default-script
 set quiet
 set script-interpreter := ['bash', '-euo', 'pipefail']
 set shell := ['bash', '-euo', 'pipefail', '-c']
@@ -12,7 +13,6 @@ apply-node node *args:
     just talos render-config "{{ node }}" | talosctl -n "{{ node }}" apply-config -f /dev/stdin {{ args }}
 
 [doc('Download Talos machine image')]
-[script]
 download-image version:
     export SCHEMATIC="$(just talos schematic-id)"
     curl -fL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors --progress-bar \
@@ -26,7 +26,6 @@ reboot-node node:
     talosctl -n {{ node }} reboot -m powercycle
 
 [doc('Render Talos config for a node')]
-[script]
 render-config node:
     export CONTROLPLANE="$(just talos machine-controller {{ node }})"
     export SCHEMATIC="$(just talos schematic-id)"
@@ -62,7 +61,6 @@ machine-controller node:
     just template "{{ source_directory() }}/nodes/{{ node }}.yaml.j2" | yq -r -e 'select(.machine) | (.machine.type == "controlplane") // ""'
 
 [private]
-[script]
 machine-image:
     export SCHEMATIC="$(just talos schematic-id)"
     just template "{{ source_directory() }}/machineconfig.yaml.j2" | yq -r -e 'select(.machine) | .machine.install.image'
