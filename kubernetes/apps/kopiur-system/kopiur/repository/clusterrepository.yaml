@@ -5,6 +5,8 @@ kind: ClusterRepository
 metadata:
   name: nas
 spec:
+  allowedNamespaces:
+    all: true
   backend:
     filesystem:
       path: /repo
@@ -12,25 +14,27 @@ spec:
         nfs:
           server: expanse.internal
           path: /mnt/ceres/Kopiur
+  create:
+    enabled: true
+  credentialProjection:
+    allowed: true
   encryption:
     passwordSecretRef:
       name: kopiur-nas-secret
       namespace: kopiur-system
       key: KOPIA_PASSWORD
-  create:
-    enabled: true
-  allowedNamespaces:
-    all: true
   identityDefaults:
     hostnameExpr: namespace
     usernameExpr: namespace + '-' + policyName
   moverDefaults:
-    securityContext:
-      runAsUser: 1000
-      runAsGroup: 1000
+    cache:
+      capacity: 1Mi
+      mode: Ephemeral
+      storageClassName: openebs-hostpath
     podSecurityContext:
       fsGroup: 1000
       fsGroupChangePolicy: OnRootMismatch
-    ttlSecondsAfterFinished: 86400
-  maintenance:
-    enabled: true
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+    ttlSecondsAfterFinished: 300

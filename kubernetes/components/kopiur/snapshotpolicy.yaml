@@ -5,16 +5,26 @@ kind: SnapshotPolicy
 metadata:
   name: ${APP}
 spec:
+  copyMethod: Snapshot
+  credentialProjection:
+    enabled: true
   repository:
     kind: ClusterRepository
     name: nas
-  credentialProjection:
-    enabled: true
+  retention:
+    keepDaily: 7
+    keepHourly: 24
   sources:
     - pvc:
         name: ${APP}
-  copyMethod: Snapshot
-  volumeSnapshotClassName: ${KOPIUR_SNAPSHOTCLASS:=csi-ceph-blockpool}
-  retention:
-    keepDaily: 7
-    keepWeekly: 4
+  verification:
+    deep:
+      schedule:
+        cron: H 5 * * 0
+        jitter: 1h
+        timezone: America/New_York
+    quick:
+      cron: H 5 * * *
+      jitter: 1h
+      timezone: America/New_York
+  volumeSnapshotClassName: ${KOPIUR_SNAPSHOTCLASS:=csi-ceph-block}
