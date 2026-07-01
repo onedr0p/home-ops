@@ -1,5 +1,6 @@
 #!/usr/bin/env -S just --justfile
 
+set default-list
 set default-script
 set lazy
 set quiet
@@ -16,10 +17,6 @@ mod kube "kubernetes"
 # Talos Recipes
 [group: 'Talos']
 mod talos "talos"
-
-[private]
-default:
-    just -l
 
 [private]
 log lvl msg *args:

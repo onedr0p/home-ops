@@ -1,3 +1,4 @@
+set default-list
 set default-script
 set no-exit-message
 set quiet
@@ -6,10 +7,6 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 
 controller := `talosctl config info -o yaml | yq -r -e '.endpoints[0]'`
 nodes := `talosctl config info -o yaml | yq -r -e '.nodes | join (" ")'`
-
-[private]
-default:
-    just -l bootstrap
 
 [confirm('Bootstrap cluster? [y|N]')]
 [doc('Bootstrap a Talos & Kubernetes cluster end-to-end')]
