@@ -28,9 +28,9 @@ spec:
       routes:
         radarr-download:
           target: radarr
-          title: "<b>Movie {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}</b>"
+          title: Movie {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}
           message: |-
-            {{ .payload.movie.title }} ({{ .payload.movie.year }})
+            <b>{{ .payload.movie.title }} ({{ .payload.movie.year }})</b>
             {{ .payload.movie.overview | ellipsis 300 }}
 
             Client: {{ .payload.downloadClient | default "unknown" }}
@@ -42,9 +42,9 @@ spec:
           whenExpr: payload.eventType == "Download"
         radarr-manual:
           target: radarr
-          title: <b>Movie Requires Manual Interaction</b>
+          title: Movie Requires Manual Interaction
           message: |-
-            {{ .payload.movie.title }} ({{ .payload.movie.year }})
+            <b>{{ .payload.movie.title }} ({{ .payload.movie.year }})</b>
             Client: {{ .payload.downloadClient | default "unknown" }}
           params:
             format: html
@@ -54,9 +54,9 @@ spec:
           whenExpr: payload.eventType == "ManualInteractionRequired"
         sonarr-download:
           target: sonarr
-          title: "<b>Episode {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}</b>"
+          title: Episode {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}
           message: |-
-            {{ .payload.series.title }} ({{ printf "S%02dE%02d" (toInt (index .payload.episodes 0).seasonNumber) (toInt (index .payload.episodes 0).episodeNumber) }})
+            <b>{{ .payload.series.title }} ({{ printf "S%02dE%02d" (toInt (index .payload.episodes 0).seasonNumber) (toInt (index .payload.episodes 0).episodeNumber) }})</b>
             {{ (index .payload.episodes 0).title }}
 
             Client: {{ .payload.downloadClient | default "unknown" }}
@@ -68,9 +68,9 @@ spec:
           whenExpr: payload.eventType == "Download"
         sonarr-manual:
           target: sonarr
-          title: <b>Episode Requires Manual Interaction</b>
+          title: Episode Requires Manual Interaction
           message: |-
-            {{ .payload.series.title }}
+            <b>{{ .payload.series.title }}</b>
             Client: {{ .payload.downloadClient | default "unknown" }}
           params:
             format: html
