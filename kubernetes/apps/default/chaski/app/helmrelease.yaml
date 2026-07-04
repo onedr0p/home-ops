@@ -28,48 +28,52 @@ spec:
       routes:
         radarr-download:
           target: radarr
-          title: "Movie {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}"
+          title: "<b>Movie {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}</b>"
           message: |-
             {{ .payload.movie.title }} ({{ .payload.movie.year }})
             {{ .payload.movie.overview | ellipsis 300 }}
 
             Client: {{ .payload.downloadClient | default "unknown" }}
           params:
+            format: html
             priority: low
             url: "{{ .payload.applicationUrl }}/movie/{{ .payload.movie.tmdbId }}"
             url_title: View Movie
           whenExpr: payload.eventType == "Download"
         radarr-manual:
           target: radarr
-          title: Movie Requires Manual Interaction
+          title: <b>Movie Requires Manual Interaction</b>
           message: |-
             {{ .payload.movie.title }} ({{ .payload.movie.year }})
             Client: {{ .payload.downloadClient | default "unknown" }}
           params:
+            format: html
             priority: high
             url: "{{ .payload.applicationUrl }}/activity/queue"
             url_title: View Queue
           whenExpr: payload.eventType == "ManualInteractionRequired"
         sonarr-download:
           target: sonarr
-          title: "Episode {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}"
+          title: "<b>Episode {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}</b>"
           message: |-
             {{ .payload.series.title }} ({{ printf "S%02dE%02d" (toInt (index .payload.episodes 0).seasonNumber) (toInt (index .payload.episodes 0).episodeNumber) }})
             {{ (index .payload.episodes 0).title }}
 
             Client: {{ .payload.downloadClient | default "unknown" }}
           params:
+            format: html
             priority: low
             url: "{{ .payload.applicationUrl }}/series/{{ .payload.series.titleSlug }}"
             url_title: View Series
           whenExpr: payload.eventType == "Download"
         sonarr-manual:
           target: sonarr
-          title: Episode Requires Manual Interaction
+          title: <b>Episode Requires Manual Interaction</b>
           message: |-
             {{ .payload.series.title }}
             Client: {{ .payload.downloadClient | default "unknown" }}
           params:
+            format: html
             priority: high
             url: "{{ .payload.applicationUrl }}/activity/queue"
             url_title: View Queue
