@@ -10,33 +10,24 @@ spec:
     name: kopiur
   interval: 1h
   values:
-    controller:
-      # replicaCount: 2
-      extraVolumes:
-        - name: repo
-          nfs:
-            server: expanse.internal
-            path: /mnt/ceres/Kopiur
-      extraVolumeMounts:
-        - name: repo
-          mountPath: /repo
-      resources:
-        requests:
-          cpu: 100m
-        limits:
-          memory: 2Gi
-      streamingLists: true
-    grafanaDashboard:
-      enabled: true
-      grafanaOperator:
+    extraVolumes:
+      - name: repo
+        nfs:
+          server: expanse.internal
+          path: /mnt/ceres/Kopiur
+    extraVolumeMounts:
+      - name: repo
+        mountPath: /repo
+    monitoring:
+      dashboards:
         enabled: true
-        matchLabels:
-          dashboards: grafana
-    installScope: cluster
-    metrics:
-      serviceMonitor:
-        enabled: true
+        grafanaOperator:
+          enabled: true
+          matchLabels:
+            dashboards: grafana
       prometheusRule:
+        enabled: true
+      serviceMonitor:
         enabled: true
     podSecurityContext:
       runAsNonRoot: true
@@ -44,5 +35,8 @@ spec:
       runAsGroup: 1000
       fsGroup: 1000
       fsGroupChangePolicy: OnRootMismatch
-    # webhook:
-    #   replicaCount: 2
+    resources:
+      requests:
+        cpu: 100m
+      limits:
+        memory: 2Gi
