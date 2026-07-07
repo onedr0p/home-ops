@@ -8,15 +8,18 @@ spec:
   allowedNamespaces:
     all: true
   backend:
-    filesystem:
-      path: /repo
-      volume:
-        nfs:
-          server: expanse.internal
-          path: /mnt/ceres/Kopiur
+    sftp:
+      host: expanse.internal
+      port: 22
+      path: /mnt/ceres/Kopiur
+      username: backup
+      auth:
+        secretRef:
+          name: kopiur-repository-secret
+          namespace: kopiur-system
   encryption:
     passwordSecretRef:
-      name: kopiur-nas-secret
+      name: kopiur-repository-secret
       namespace: kopiur-system
       key: KOPIA_PASSWORD
   moverDefaults:
