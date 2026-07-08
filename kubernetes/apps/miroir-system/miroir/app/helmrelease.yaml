@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: miroir
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: miroir
+  interval: 1h
+  values:
+    kubeletDir: /var/lib/kubelet
+    nodes:
+      k8s-0:
+        backend: lvmthin
+        device: /dev/disk/by-partlabel/r-miroir
+      k8s-1:
+        backend: lvmthin
+        device: /dev/disk/by-partlabel/r-miroir
+      k8s-2:
+        backend: lvmthin
+        device: /dev/disk/by-partlabel/r-miroir
+    storageClass:
+      create: true
+      name: miroir-local
+      isDefault: false
+    replicatedStorageClass:
+      create: true
+      name: miroir-replicated
+      isDefault: false

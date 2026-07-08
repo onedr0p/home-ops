@@ -52,6 +52,8 @@ machine:
     wipe: false
   kernel:
     modules:
+      - name: drbd
+      - name: drbd_transport_tcp
       - name: nbd
       - name: thunderbolt
   kubelet:
@@ -59,6 +61,8 @@ machine:
     disableManifestsDirectory: true
     extraConfig:
       serializeImagePulls: false
+      shutdownGracePeriod: 90s
+      shutdownGracePeriodCriticalPods: 60s
     image: ghcr.io/siderolabs/kubelet:v1.36.2
     nodeIP:
       validSubnets:
@@ -212,8 +216,8 @@ parent: bond0
 mtu: 9000
 ---
 apiVersion: v1alpha1
-kind: UserVolumeConfig
-name: local-hostpath
+kind: RawVolumeConfig
+name: miroir
 provisioning:
   diskSelector:
     match: disk.model == "Corsair MP600 MICRO" && !system_disk
