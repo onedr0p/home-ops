@@ -10,6 +10,12 @@ spec:
     name: miroir
   interval: 1h
   values:
+    controller:
+      autoTieBreaker: true
+    drbd:
+      resync:
+        discardGranularity: "65536"
+      verifyAlg: crc32c
     monitoring:
       serviceMonitor:
         enabled: true
@@ -27,7 +33,4 @@ spec:
       create: true
       name: miroir-replicated
       isDefault: false
-    storageClass:
-      create: true
-      name: miroir-local
-      isDefault: false
+      quorum: freeze
