@@ -32,8 +32,11 @@ spec:
       k8s-2:
         backend: lvmthin
         device: /dev/disk/by-partlabel/r-miroir
-    replicatedStorageClass:
-      create: true
-      name: miroir-replicated
-      isDefault: false
-      quorum: freeze
+    storageClasses:
+      - name: miroir-local
+        isDefault: false
+      - name: miroir-replicated
+        isDefault: false
+    volumeSnapshotClasses:
+      - name: miroir-snap
+
