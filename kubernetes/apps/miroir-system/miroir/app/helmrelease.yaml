@@ -9,6 +9,8 @@ spec:
     kind: OCIRepository
     name: miroir
   interval: 1h
+  upgrade:
+    crds: CreateReplace
   values:
     replicaCount: 2
     monitoring:
@@ -22,28 +24,3 @@ spec:
         enabled: true
       prometheusRule:
         enabled: true
-    nodes:
-      k8s-0:
-        pools:
-          default:
-            backend: lvmthin
-            device: /dev/disk/by-partlabel/r-miroir
-      k8s-1:
-        pools:
-          default:
-            backend: lvmthin
-            device: /dev/disk/by-partlabel/r-miroir
-      k8s-2:
-        pools:
-          default:
-            backend: lvmthin
-            device: /dev/disk/by-partlabel/r-miroir
-    storageClasses:
-      - name: miroir-local
-        isDefault: false
-      - name: miroir-replicated
-        isDefault: false
-        quorum: freeze
-        replicas: 2
-    volumeSnapshotClasses:
-      - name: miroir-snap
