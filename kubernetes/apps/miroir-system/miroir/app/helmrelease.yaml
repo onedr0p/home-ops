@@ -11,6 +11,13 @@ spec:
   interval: 1h
   values:
     replicaCount: 2
+    drbd:
+      # DRBD's default activity-log size amplifies scattered random writes
+      # (kopia caches) on consumer NVMe; larger AL trades longer post-crash
+      # resync for less metadata churn
+      alExtents: 6007
+      verify:
+        schedule: "0 5 * * 1"
     monitoring:
       dashboards:
         enabled: true
