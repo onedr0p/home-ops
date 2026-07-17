@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/storage.k8s.io/storageclass_v1.json
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: miroir-slow-local
+provisioner: miroir.home-operations.com
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+parameters:
+  miroir.home-operations.com/pool: slow
+  miroir.home-operations.com/replicas: "1"
+  csi.storage.k8s.io/fstype: ext4
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/storage.k8s.io/storageclass_v1.json
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: miroir-slow
+provisioner: miroir.home-operations.com
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+parameters:
+  miroir.home-operations.com/pool: slow
+  miroir.home-operations.com/replicas: "2"
+  miroir.home-operations.com/quorum: freeze
+  csi.storage.k8s.io/fstype: ext4

@@ -10,7 +10,9 @@ spec:
     name: miroir
   interval: 1h
   values:
-    replicaCount: 2
+    autoEvictAfter: 1h
+    drbd:
+      alExtents: 6007
     monitoring:
       dashboards:
         enabled: true
@@ -22,28 +24,4 @@ spec:
         enabled: true
       prometheusRule:
         enabled: true
-    nodes:
-      k8s-0:
-        pools:
-          default:
-            backend: lvmthin
-            device: /dev/disk/by-partlabel/r-miroir
-      k8s-1:
-        pools:
-          default:
-            backend: lvmthin
-            device: /dev/disk/by-partlabel/r-miroir
-      k8s-2:
-        pools:
-          default:
-            backend: lvmthin
-            device: /dev/disk/by-partlabel/r-miroir
-    storageClasses:
-      - name: miroir-local
-        isDefault: false
-      - name: miroir-replicated
-        isDefault: false
-        quorum: freeze
-        replicas: 2
-    volumeSnapshotClasses:
-      - name: miroir-snap
+    replicaCount: 2
