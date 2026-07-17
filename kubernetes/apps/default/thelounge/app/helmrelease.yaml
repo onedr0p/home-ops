@@ -17,10 +17,10 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/thelounge/thelounge
-              tag: 4.5.2@sha256:6607c590e81c9d553e83a2536a816b5f5536e5f4dae806a1571c53649b30dd36
+              repository: ghcr.io/home-operations/thelounge
+              tag: 4.5.2@sha256:7e18ada1421f341b6b129dbb8e4a307320c34ffe38ceef0799ead7f5a3643dbc
             env:
-              THELOUNGE_HOME: /config/thelounge
+              THELOUNGE_PORT: &port 80
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -51,7 +51,7 @@ spec:
       app:
         ports:
           http:
-            port: 9000
+            port: *port
     route:
       app:
         hostnames:
