@@ -5,6 +5,9 @@ kind: Kustomization
 metadata:
   name: miroir
 spec:
+  dependsOn:
+    - name: snapshot-controller
+      namespace: kube-system
   interval: 1h
   path: ./kubernetes/apps/miroir-system/miroir/app
   prune: true
@@ -23,8 +26,6 @@ metadata:
 spec:
   dependsOn:
     - name: miroir
-    - name: snapshot-controller
-      namespace: kube-system
   interval: 1h
   path: ./kubernetes/apps/miroir-system/miroir/config
   prune: true
