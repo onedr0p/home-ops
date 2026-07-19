@@ -24,4 +24,4 @@ log lvl msg *args:
 
 [private]
 template file *args:
-    minijinja-cli "{{ file }}" {{ args }} | vals eval -f -
+    minijinja-cli "{{ file }}" {{ args }} | op inject
