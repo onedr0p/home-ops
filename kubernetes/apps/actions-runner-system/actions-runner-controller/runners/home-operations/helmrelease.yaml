@@ -13,8 +13,8 @@ spec:
   values:
     githubConfigUrl: https://github.com/home-operations
     githubConfigSecret: home-operations-runner-secret
-    minRunners: 1
-    maxRunners: 3
+    minRunners: 3 # one warm runner per node
+    maxRunners: 3 # at most one runner per node (3 nodes)
     containerMode:
       type: kubernetes
       kubernetesModeWorkVolumeClaim:
@@ -28,7 +28,17 @@ spec:
       name: actions-runner-controller
       namespace: actions-runner-system
     template:
+      metadata:
+        labels:
+          runner: &name home-operations-runner
       spec:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    runner: *name
+                topologyKey: kubernetes.io/hostname
         containers:
           - name: runner
             image: ghcr.io/home-operations/actions-runner:2.335.1@sha256:0c6f38e8194f6c3714aa86c6dc8a72574484818ed625dd66074920b25c118508
