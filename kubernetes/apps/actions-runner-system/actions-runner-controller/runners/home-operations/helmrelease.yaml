@@ -42,10 +42,13 @@ spec:
               - name: ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER
                 value: "false"
             securityContext:
-              privileged: true
+              capabilities:
+                add:
+                  - NET_ADMIN
             resources:
               limits:
                 devices.kubevirt.io/kvm: 1
+                devices.kubevirt.io/tun: 1
         securityContext:
           fsGroup: 1001
           fsGroupChangePolicy: OnRootMismatch
