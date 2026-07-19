@@ -7,6 +7,7 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 
 controller := `talosctl config info -o yaml | yq -r -e '.endpoints[0]'`
 nodes := `talosctl config info -o yaml | yq -r -e '.nodes | join (" ")'`
+ho_account := env_var_or_default('OP_HOME_OPERATIONS_ACCOUNT', '')
 
 [confirm('Bootstrap cluster? [y|N]')]
 [doc('Bootstrap a Talos & Kubernetes cluster end-to-end')]
@@ -50,6 +51,9 @@ base: ready
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
     if ! kustomize build {{ source_directory() }}/kustomize/apps | just template - | kubectl apply --server-side --force-conflicts -f -; then
         just log fatal "Failed to apply base manifests" "stage" "{{ recipe_name() }}" "file" "$f"
+    fi
+    if ! kustomize build {{ source_directory() }}/kustomize/apps-home-operations | OP_ACCOUNT="{{ ho_account }}" just template - | kubectl apply --server-side --force-conflicts -f -; then
+        just log fatal "Failed to apply home-operations manifests" "stage" "{{ recipe_name() }}"
     fi
     if ! helmfile -f "{{ source_directory() }}/helmfile/crds.yaml" template -q | yq ea -r -e 'select(.kind == "CustomResourceDefinition")' | kubectl apply --server-side --force-conflicts -f -; then
         just log fatal "Failed to apply base crds" "stage" "{{ recipe_name() }}"
