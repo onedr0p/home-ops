@@ -3,25 +3,22 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: onepassword-connect-home-operations
+  name: onepassword-sdk-home-operations
 spec:
   dependsOn:
     - name: external-secrets
+    - name: onepassword-connect
   healthChecks:
-    - apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      name: onepassword-connect-home-operations
-      namespace: external-secrets
     - apiVersion: external-secrets.io/v1
       kind: ClusterSecretStore
-      name: onepassword-connect-home-operations
+      name: onepassword-sdk-home-operations
   healthCheckExprs:
     - apiVersion: external-secrets.io/v1
       kind: ClusterSecretStore
       failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
       current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   interval: 1h
-  path: ./kubernetes/apps/external-secrets/onepassword-connect-home-operations/app
+  path: ./kubernetes/apps/external-secrets/onepassword-sdk-home-operations/app
   prune: true
   sourceRef:
     kind: GitRepository
