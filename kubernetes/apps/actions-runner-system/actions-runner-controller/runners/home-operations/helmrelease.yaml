@@ -3,16 +3,18 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &name home-ops-runner
+  name: home-operations-runner
 spec:
   chartRef:
     kind: OCIRepository
-    name: home-ops-runner
+    name: home-operations-runner
   interval: 1h
   values:
-    githubConfigUrl: https://github.com/onedr0p/home-ops
-    githubConfigSecret: home-ops-runner-secret
-    minRunners: 1
+    githubConfigUrl: https://github.com/home-operations
+    githubConfigSecret: home-operations-runner-secret
+    runnerScaleSetName: home-operations-onedr0p
+    runnerGroup: home-operations
+    minRunners: 3
     maxRunners: 3
     containerMode:
       type: kubernetes
@@ -27,7 +29,17 @@ spec:
       name: actions-runner-controller
       namespace: actions-runner-system
     template:
+      metadata:
+        labels:
+          runner: &name home-operations-runner
       spec:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    runner: *name
+                topologyKey: kubernetes.io/hostname
         containers:
           - name: runner
             image: ghcr.io/home-operations/actions-runner:2.335.1@sha256:0c6f38e8194f6c3714aa86c6dc8a72574484818ed625dd66074920b25c118508
@@ -36,19 +48,9 @@ spec:
             env:
               - name: ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER
                 value: "false"
-              - name: NODE
-                valueFrom:
-                  fieldRef:
-                    fieldPath: status.hostIP
-            volumeMounts:
-              - mountPath: /var/run/secrets/talos.dev
-                name: talos
-                readOnly: true
+            resources:
+              limits:
+                devices.kubevirt.io/kvm: 1
         securityContext:
           fsGroup: 1001
           fsGroupChangePolicy: OnRootMismatch
-        serviceAccountName: *name
-        volumes:
-          - name: talos
-            secret:
-              secretName: *name
