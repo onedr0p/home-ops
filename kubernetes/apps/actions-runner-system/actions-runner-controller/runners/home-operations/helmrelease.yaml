@@ -1,0 +1,42 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: home-operations-runner
+spec:
+  chartRef:
+    kind: OCIRepository
+    # Chart source is shared with the home-ops runner (../home-ops/ocirepository.yaml)
+    name: gha-runner-scale-set
+  interval: 1h
+  values:
+    githubConfigUrl: https://github.com/home-operations
+    githubConfigSecret: home-operations-runner-secret
+    minRunners: 1
+    maxRunners: 3
+    containerMode:
+      type: kubernetes
+      kubernetesModeWorkVolumeClaim:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: ceph-block
+        resources:
+          requests:
+            storage: 10Gi
+    controllerServiceAccount:
+      name: actions-runner-controller
+      namespace: actions-runner-system
+    template:
+      spec:
+        containers:
+          - name: runner
+            image: ghcr.io/home-operations/actions-runner:2.335.1@sha256:0c6f38e8194f6c3714aa86c6dc8a72574484818ed625dd66074920b25c118508
+            command:
+              - /home/runner/run.sh
+            env:
+              - name: ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER
+                value: "false"
+        securityContext:
+          fsGroup: 1001
+          fsGroupChangePolicy: OnRootMismatch
