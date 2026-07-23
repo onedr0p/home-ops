@@ -5,16 +5,6 @@ kind: TalosUpgrade
 metadata:
   name: talos
 spec:
-  talos:
-    # renovate: datasource=custom.talos-factory depName=siderolabs/talos
-    version: v1.13.6
-  policy:
-    rebootMode: powercycle
-  silences:
-    - matchers:
-        - name: alertname
-          value: ^(CephDaemonSlowOps|CephHealthWarning|CephMonDown|CephMonDownQuorumAtRisk|CephOSDDown|CephOSDDownHigh|CephOSDHostDown|CephSlowOps|KubeNodeEviction|KubeNodeNotReady|KubeNodeReadinessFlapping|KubeNodeUnreachable|TargetDown)$
-          matchType: "=~"
   healthChecks:
     - apiVersion: kopiur.home-operations.com/v1alpha1
       kind: Snapshot
@@ -28,3 +18,13 @@ spec:
       kind: CephCluster
       expr: |-
         status.ceph.health in ['HEALTH_OK']
+  policy:
+    rebootMode: powercycle
+  silences:
+    - matchers:
+        - name: alertname
+          value: ^(CephDaemonSlowOps|CephHealthWarning|CephMonDown|CephMonDownQuorumAtRisk|CephOSDDown|CephOSDDownHigh|CephOSDHostDown|CephSlowOps|KubeNodeEviction|KubeNodeNotReady|KubeNodeReadinessFlapping|KubeNodeUnreachable|TargetDown)$
+          matchType: "=~"
+  talos:
+    # renovate: datasource=custom.talos-factory depName=siderolabs/talos
+    version: v1.13.6
