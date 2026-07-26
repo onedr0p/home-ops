@@ -26,7 +26,7 @@ spec:
         labels:
           runner: *name
       spec:
-        runtimeClassName: kata-qemu
+        runtimeClassName: kata-qemu-nested
         affinity:
           podAntiAffinity:
             requiredDuringSchedulingIgnoredDuringExecution:
@@ -42,13 +42,32 @@ spec:
             env:
               - name: ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER
                 value: "false"
+            # Devices and NET_ADMIN resolve inside the Kata VM, not on the host
+            securityContext:
+              capabilities:
+                add: ["NET_ADMIN"]
+            volumeMounts:
+              - name: kvm
+                mountPath: /dev/kvm
+              - name: tun
+                mountPath: /dev/net/tun
+            # miroir's e2e alone is 12Gi of nested guests (2Gi cp + 2x5Gi workers)
             resources:
               requests:
                 cpu: 4
-                memory: 16Gi
+                memory: 32Gi
               limits:
-                cpu: 8
-                memory: 16Gi
+                cpu: 12
+                memory: 32Gi
+        volumes:
+          - name: kvm
+            hostPath:
+              path: /dev/kvm
+              type: CharDevice
+          - name: tun
+            hostPath:
+              path: /dev/net/tun
+              type: CharDevice
         securityContext:
           fsGroup: 1001
           fsGroupChangePolicy: OnRootMismatch
