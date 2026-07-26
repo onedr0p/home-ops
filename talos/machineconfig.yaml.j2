@@ -230,3 +230,14 @@ apiVersion: v1alpha1
 kind: WatchdogTimerConfig
 device: /dev/watchdog0
 timeout: 5m
+---
+apiVersion: v1alpha1
+kind: CRICustomizationConfig
+name: kata-qemu-nested
+content: |
+  [plugins."io.containerd.cri.v1.runtime".containerd.runtimes.kata-qemu-nested]
+    runtime_type = "io.containerd.kata.v2"
+    privileged_without_host_devices = true
+    pod_annotations = ["io.katacontainers.*"]
+  [plugins."io.containerd.cri.v1.runtime".containerd.runtimes.kata-qemu-nested.options]
+    ConfigPath = "/var/lib/kata-nested/configuration-qemu.toml"
