@@ -80,6 +80,21 @@ parent: bond0
 mtu: 9000
 ---
 apiVersion: v1alpha1
+kind: DummyLinkConfig
+name: dummy0
+addresses:
+  - address: 192.168.66.1/32
+---
+apiVersion: v1alpha1
+kind: BGPPeerConfig
+localASN: 64515
+advertise:
+  - dummy0
+neighbors:
+  - address: 192.168.67.1
+    peerASN: 64513
+---
+apiVersion: v1alpha1
 kind: ResolverConfig
 hostDNS:
   enabled: true
@@ -230,6 +245,7 @@ apiVersion: v1alpha1
 kind: KubeAPIServerConfig
 certExtraSANs:
   - k8s.internal
+  - 192.168.66.1
 extraArgs:
   enable-aggregator-routing: "true"
   feature-gates: HPAScaleToZero=true
