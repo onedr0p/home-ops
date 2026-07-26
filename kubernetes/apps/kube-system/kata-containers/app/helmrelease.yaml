@@ -1,0 +1,46 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kata-guest-kernel
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: kata-guest-kernel
+  interval: 1h
+  values:
+    controllers:
+      kata-guest-kernel:
+        type: daemonset
+        initContainers:
+          # Installs itself into the hostPath below, then exits; rsync renames
+          # into place so a booted Kata VM keeps its open inode on the old kernel
+          install:
+            image:
+              repository: ghcr.io/home-operations/kata-guest-kernel
+              tag: 3.32.0
+        containers:
+          pause:
+            image:
+              repository: registry.k8s.io/pause
+              tag: "3.10"
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                memory: 32Mi
+    defaultPodOptions:
+      priorityClassName: system-node-critical
+      tolerations:
+        - operator: Exists
+    persistence:
+      host:
+        type: hostPath
+        hostPath: /var/lib/kata-nested
+        hostPathType: DirectoryOrCreate
+        advancedMounts:
+          kata-guest-kernel:
+            install:
+              - path: /host/var/lib/kata-nested
