@@ -26,6 +26,7 @@ spec:
         labels:
           runner: *name
       spec:
+        runtimeClassName: kata-qemu
         affinity:
           podAntiAffinity:
             requiredDuringSchedulingIgnoredDuringExecution:
@@ -41,15 +42,13 @@ spec:
             env:
               - name: ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER
                 value: "false"
-            securityContext:
-              capabilities:
-                add:
-                  - NET_ADMIN
-                  - SYS_ADMIN
             resources:
+              requests:
+                cpu: 4
+                memory: 16Gi
               limits:
-                devices.kubevirt.io/kvm: 1
-                devices.kubevirt.io/tun: 1
+                cpu: 8
+                memory: 16Gi
         securityContext:
           fsGroup: 1001
           fsGroupChangePolicy: OnRootMismatch
