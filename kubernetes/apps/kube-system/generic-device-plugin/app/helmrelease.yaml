@@ -1,0 +1,63 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: generic-device-plugin
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: generic-device-plugin
+  interval: 1h
+  values:
+    controllers:
+      generic-device-plugin:
+        type: daemonset
+        strategy: RollingUpdate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/squat/generic-device-plugin
+              tag: 0.2.0@sha256:66c8d5c270eb2b721f1064c549b9b7898152a6d2f0163380a5d37dc7636c20ff
+            args:
+              - --domain=devices.kubevirt.io
+              - --device
+              - |
+                name: kvm
+                groups:
+                  - count: 20
+                    paths:
+                      - path: /dev/kvm
+              - --device
+              - |
+                name: tun
+                groups:
+                  - count: 20
+                    paths:
+                      - path: /dev/net/tun
+            securityContext:
+              privileged: true
+            resources:
+              requests:
+                cpu: 50m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
+    defaultPodOptions:
+      priorityClassName: system-node-critical
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
+        - operator: Exists
+          effect: NoExecute
+    persistence:
+      device-plugins:
+        type: hostPath
+        hostPath: /var/lib/kubelet/device-plugins
+        globalMounts:
+          - path: /var/lib/kubelet/device-plugins
+      dev:
+        type: hostPath
+        hostPath: /dev
+        globalMounts:
+          - path: /dev
