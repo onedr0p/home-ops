@@ -60,4 +60,4 @@ machine-controller node:
 [private]
 machine-image:
     export SCHEMATIC="$(just talos schematic-id)"
-    just template "{{ source_directory() }}/machineconfig.yaml.j2" | yq -r -e 'select(.machine) | .machine.install.image'
+    just template "{{ source_directory() }}/machineconfig.yaml.j2" | yq -r -e 'select(.kind == "UnattendedInstallConfig") | .installer.image'
