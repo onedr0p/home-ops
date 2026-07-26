@@ -3,53 +3,35 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: kata-nested-kernel
+  name: kata-guest-kernel
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: kata-nested-kernel
+      app.kubernetes.io/name: kata-guest-kernel
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: kata-nested-kernel
+        app.kubernetes.io/name: kata-guest-kernel
     spec:
       priorityClassName: system-node-critical
       tolerations:
         - operator: Exists
-      containers:
+      initContainers:
         - name: install
-          image: docker.io/library/busybox:1.37.0
-          command: ["/bin/sh", "-euc"]
-          args:
-            - |
-              cp /artifacts/vmlinux-nested /host/vmlinux-nested.tmp
-              mv /host/vmlinux-nested.tmp /host/vmlinux-nested
-              cp /artifacts/configuration-qemu.toml /host/configuration-qemu.toml.tmp
-              mv /host/configuration-qemu.toml.tmp /host/configuration-qemu.toml
-              exec sleep infinity
-          securityContext:
-            runAsUser: 0
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
-              add: ["DAC_OVERRIDE"]
+          image: ghcr.io/home-operations/kata-guest-kernel:3.32.0
+          volumeMounts:
+            - name: host
+              mountPath: /host/var/lib/kata-nested
+      containers:
+        - name: pause
+          image: registry.k8s.io/pause:3.10
           resources:
             requests:
               cpu: 5m
               memory: 16Mi
             limits:
-              memory: 64Mi
-          volumeMounts:
-            - name: artifacts
-              mountPath: /artifacts
-              readOnly: true
-            - name: host
-              mountPath: /host
+              memory: 32Mi
       volumes:
-        - name: artifacts
-          image:
-            reference: ghcr.io/home-operations/kata-nested-kernel:3.32.0
-            pullPolicy: IfNotPresent
         - name: host
           hostPath:
             path: /var/lib/kata-nested
