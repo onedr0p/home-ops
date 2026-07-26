@@ -42,10 +42,12 @@ spec:
             env:
               - name: ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER
                 value: "false"
-            # Devices and NET_ADMIN resolve inside the Kata VM, not on the host
+            # The QEMU provisioner builds a CNI bridge and tc-redirect-tap per node:
+            # NET_ADMIN for the bridge/tap, SYS_ADMIN for the per-node netns. Both,
+            # and the devices below, apply inside the Kata VM rather than on the host
             securityContext:
               capabilities:
-                add: ["NET_ADMIN"]
+                add: ["NET_ADMIN", "SYS_ADMIN"]
             volumeMounts:
               - name: kvm
                 mountPath: /dev/kvm
