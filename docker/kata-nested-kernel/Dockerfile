@@ -61,6 +61,8 @@ RUN sed -e 's|/opt/kata|/usr/local|g' \
     && grep -q '^path = "/usr/local/bin/qemu-system-x86_64"$' /configuration-qemu.toml \
     && ! grep -q '/opt/kata' /configuration-qemu.toml
 
-FROM docker.io/library/busybox:stable-musl
-COPY --from=build /vmlinux-nested /artifacts/vmlinux-nested
-COPY --from=build /configuration-qemu.toml /artifacts/configuration-qemu.toml
+# Consumed as a Kubernetes image volume, so this carries data only — nothing
+# executable, no shell, no base image to track for CVEs.
+FROM scratch
+COPY --from=build /vmlinux-nested /vmlinux-nested
+COPY --from=build /configuration-qemu.toml /configuration-qemu.toml

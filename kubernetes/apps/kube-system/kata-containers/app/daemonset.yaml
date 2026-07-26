@@ -18,7 +18,7 @@ spec:
         - operator: Exists
       containers:
         - name: install
-          image: ghcr.io/onedr0p/kata-nested-kernel:kata3.32.0
+          image: docker.io/library/busybox:1.37.0
           command: ["/bin/sh", "-euc"]
           args:
             - |
@@ -40,9 +40,16 @@ spec:
             limits:
               memory: 64Mi
           volumeMounts:
+            - name: artifacts
+              mountPath: /artifacts
+              readOnly: true
             - name: host
               mountPath: /host
       volumes:
+        - name: artifacts
+          image:
+            reference: ghcr.io/onedr0p/kata-nested-kernel:kata3.32.0
+            pullPolicy: IfNotPresent
         - name: host
           hostPath:
             path: /var/lib/kata-nested
