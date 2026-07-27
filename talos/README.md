@@ -69,3 +69,6 @@ just talos download-image <version>    # fetch a metal ISO from the Image Factor
 Verify a refactor of these templates by diffing rendered output before and after, then confirming
 `render-config <node> | talosctl -n <node> apply-config -f /dev/stdin --dry-run` reports
 "No changes." on every node.
+
+Pull requests touching `talos/**` are rendered against a `talosctl gen secrets` bundle (no
+1Password access in CI) and checked with `talosctl validate`.
