@@ -56,7 +56,11 @@ jobs:
           echo 'EOF' >> $GITHUB_OUTPUT
 
   pull:
-    if: ${{ needs.extract.outputs.images != '[]' }}
+    if: >-
+      ${{
+        needs.extract.outputs.images != '[]' &&
+        github.event.pull_request.head.repo.full_name == github.repository
+      }}
     needs: extract
     name: Image Pull - Pull Images
     runs-on: ${{ github.event.repository.name }}-runner
