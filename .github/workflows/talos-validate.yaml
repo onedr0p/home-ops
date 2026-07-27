@@ -37,7 +37,9 @@ jobs:
       - name: Get Nodes
         id: nodes
         run: |
-          echo "nodes=$(basename -a -s .yaml.j2 talos/nodes/*/*.yaml.j2 | grep -v '\.schematic$' | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
+          nodes="$(printf '%s\n' talos/nodes/*/*.yaml.j2 \
+              | jq -Rnc '[inputs | select(endswith(".schematic.yaml.j2") | not) | split("/") | last | rtrimstr(".yaml.j2")]')"
+          echo "nodes=${nodes}" >> "$GITHUB_OUTPUT"
 
   # Renders the node against a generated Talos secrets bundle and checks it
   # with talosctl validate. The job touches no real secrets, so it needs no
