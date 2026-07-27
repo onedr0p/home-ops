@@ -46,14 +46,29 @@ jobs:
         with:
           cache: false
           tool_versions: |
-            1password-cli latest
             aqua:mitsuhiko/minijinja latest
             jq latest
             just latest
 
+      # Stand-in for `op inject` so this job needs no 1Password access and
+      # renders contain no real secrets: each op:// reference becomes a unique
+      # 32-byte placeholder, which satisfies talosctl validate.
+      - name: Stub op inject
+        run: |
+          mkdir -p "${RUNNER_TEMP}/bin"
+          cat > "${RUNNER_TEMP}/bin/op" <<'EOF'
+          #!/usr/bin/env python3
+          import base64, hashlib, re, sys
+          sys.stdout.write(re.sub(
+              r"op://\S+",
+              lambda m: base64.b64encode(hashlib.sha256(m.group(0).encode()).digest()).decode(),
+              sys.stdin.read(),
+          ))
+          EOF
+          chmod +x "${RUNNER_TEMP}/bin/op"
+          echo "${RUNNER_TEMP}/bin" >> "$GITHUB_PATH"
+
       - name: Render & Validate
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         run: |
           for file in talos/nodes/*/*.yaml.j2; do
               [[ -f "${file}" ]] || continue
