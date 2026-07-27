@@ -39,18 +39,14 @@ jobs:
         run: |
           echo "nodes=$(basename -a -s .yaml.j2 talos/nodes/*/*.yaml.j2 | grep -v '\.schematic$' | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
 
-  # Renders the node with real secrets on the in-cluster runner and checks it
-  # with talosctl validate. Same-repo PRs only, so fork PRs can neither reach
-  # the vault token nor queue jobs on the self-hosted runner.
+  # Renders the node against a generated Talos secrets bundle and checks it
+  # with talosctl validate. The job touches no real secrets, so it needs no
+  # 1Password access, no self-hosted runner, and no output suppression.
   validate:
-    if: >-
-      ${{
-        needs.filter.outputs.changed-files != '[]' &&
-        github.event.pull_request.head.repo.full_name == github.repository
-      }}
+    if: ${{ needs.filter.outputs.changed-files != '[]' }}
     needs: filter
     name: Talos Validate - Validate
-    runs-on: ${{ github.event.repository.name }}-runner
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node: ${{ fromJSON(needs.filter.outputs.nodes) }}
@@ -69,15 +65,48 @@ jobs:
         with:
           cache: false
 
-      # Output is suppressed so secret material never reaches the logs of
-      # this public repo: validate errors embed offending field values on
-      # stderr (success prints only "valid for metal mode"). The rendered
-      # config never touches disk.
+      # Stand-in for `op inject`: substitutes op:// references with fields
+      # from a talosctl-generated secrets bundle; unmapped references pass
+      # through and fail the render loudly
+      - name: Stub op inject
+        run: |
+          talosctl gen secrets -o "${RUNNER_TEMP}/secrets.yaml"
+          mkdir -p "${RUNNER_TEMP}/bin"
+          cat > "${RUNNER_TEMP}/bin/op" <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          declare -A paths=(
+              [MACHINE_CA_CRT]=".certs.os.crt"
+              [MACHINE_CA_KEY]=".certs.os.key"
+              [MACHINE_TOKEN]=".trustdinfo.token"
+              [CLUSTER_CA_CRT]=".certs.k8s.crt"
+              [CLUSTER_CA_KEY]=".certs.k8s.key"
+              [CLUSTER_TOKEN]=".secrets.bootstraptoken"
+              [CLUSTER_AGGREGATORCA_CRT]=".certs.k8saggregator.crt"
+              [CLUSTER_AGGREGATORCA_KEY]=".certs.k8saggregator.key"
+              [CLUSTER_ETCD_CA_CRT]=".certs.etcd.crt"
+              [CLUSTER_ETCD_CA_KEY]=".certs.etcd.key"
+              [CLUSTER_SERVICEACCOUNT_KEY]=".certs.k8sserviceaccount.key"
+              [CLUSTER_SECRETBOXENCRYPTIONSECRET]=".secrets.secretboxencryptionsecret"
+              [CLUSTER_ID]=".cluster.id"
+              [CLUSTER_SECRET]=".cluster.secret"
+          )
+          input="$(cat)"
+          for name in "${!paths[@]}"; do
+              value="$(yq -r -e "${paths[$name]}" "${SECRETS_FILE}")"
+              ref="op://kubernetes/talos/${name}"
+              input="${input//"${ref}"/${value}}"
+          done
+          printf '%s\n' "${input}"
+          EOF
+          chmod +x "${RUNNER_TEMP}/bin/op"
+          echo "${RUNNER_TEMP}/bin" >> "$GITHUB_PATH"
+          echo "SECRETS_FILE=${RUNNER_TEMP}/secrets.yaml" >> "$GITHUB_ENV"
+
       - name: Render & Validate
         env:
           NODE: ${{ matrix.node }}
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-        run: just talos render-config "${NODE}" 2>/dev/null | talosctl validate --strict -m metal -c /dev/stdin > /dev/null 2>&1
+        run: just talos render-config "${NODE}" | talosctl validate --strict -m metal -c /dev/stdin
 
   success:
     if: ${{ !cancelled() }}

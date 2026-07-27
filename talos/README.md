@@ -70,5 +70,5 @@ Verify a refactor of these templates by diffing rendered output before and after
 `render-config <node> | talosctl -n <node> apply-config -f /dev/stdin --dry-run` reports
 "No changes." on every node.
 
-Same-repo pull requests touching `talos/**` are rendered on the in-cluster runner and checked
-with `talosctl validate` in CI.
+Pull requests touching `talos/**` are rendered against a `talosctl gen secrets` bundle (no
+1Password access in CI) and checked with `talosctl validate`.
