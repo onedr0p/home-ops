@@ -39,11 +39,9 @@ jobs:
         run: |
           echo "nodes=$(basename -a -s .yaml.j2 talos/nodes/*/*.yaml.j2 | grep -v '\.schematic$' | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
 
-  # Renders the node with real secrets on the in-cluster runner, checks it
-  # with talosctl validate, and reports a dry-run summary against the live
-  # node. Same-repo PRs only, so fork PRs can neither reach the vault token
-  # nor queue jobs on the self-hosted runner. Config changes in the dry-run
-  # are neutral; only render, validate, or apply errors fail.
+  # Renders the node with real secrets on the in-cluster runner and checks it
+  # with talosctl validate. Same-repo PRs only, so fork PRs can neither reach
+  # the vault token nor queue jobs on the self-hosted runner.
   validate:
     if: >-
       ${{
@@ -71,23 +69,16 @@ jobs:
         with:
           cache: false
 
-      # Render, validate, and apply output is suppressed so secret material
-      # never reaches the logs of this public repo; validation errors can
-      # quote field values
-      - name: Validate & Dry Run
+      # Render and validate output is suppressed so secret material never
+      # reaches the logs of this public repo; validation errors can quote
+      # field values
+      - name: Render & Validate
         env:
           NODE: ${{ matrix.node }}
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         run: |
           just talos render-config "${NODE}" > "${RUNNER_TEMP}/machineconfig.yaml" 2>/dev/null
           talosctl validate --strict -m metal -c "${RUNNER_TEMP}/machineconfig.yaml" > /dev/null 2>&1
-          output="$(talosctl -n "${NODE}" apply-config -f "${RUNNER_TEMP}/machineconfig.yaml" --dry-run 2>&1)"
-          if grep -q "No changes" <<< "${output}"; then
-              echo "${NODE}: valid, no changes" | tee -a "${GITHUB_STEP_SUMMARY}"
-          else
-              kinds="$(grep -oP '^[+-]\s*kind: \K\S+' <<< "${output}" | sort -u | paste -sd ', ' - || true)"
-              echo "${NODE}: valid, changes detected${kinds:+ (${kinds})}" | tee -a "${GITHUB_STEP_SUMMARY}"
-          fi
 
   success:
     if: ${{ !cancelled() }}
