@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: mosquitto
 spec:
+  components:
+    - ../../../../components/kopiur/backup
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
@@ -13,7 +15,6 @@ spec:
   postBuild:
     substitute:
       APP: mosquitto
-      CONTROLLER: StatefulSet
   prune: true
   sourceRef:
     kind: GitRepository
