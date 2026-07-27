@@ -3,48 +3,18 @@ version: v1alpha1
 machine:
   ca:
     crt: op://kubernetes/talos/MACHINE_CA_CRT
-    {% if ENV.CONTROLPLANE %}
-    key: op://kubernetes/talos/MACHINE_CA_KEY
-    {% endif %}
   features:
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
-    {% if ENV.CONTROLPLANE %}
-    kubernetesTalosAPIAccess:
-      enabled: true
-      allowedKubernetesNamespaces:
-        - actions-runner-system
-        - system-upgrade
-      allowedRoles:
-        - os:admin
-    {% endif %}
     rbac: true
   token: op://kubernetes/talos/MACHINE_TOKEN
 cluster:
   ca:
     crt: op://kubernetes/talos/CLUSTER_CA_CRT
-    {% if ENV.CONTROLPLANE %}
-    key: op://kubernetes/talos/CLUSTER_CA_KEY
-    {% endif %}
   clusterName: main
   controlPlane:
     endpoint: https://k8s.internal:6443
   token: op://kubernetes/talos/CLUSTER_TOKEN
-  {% if ENV.CONTROLPLANE %}
-  aggregatorCA:
-    crt: op://kubernetes/talos/CLUSTER_AGGREGATORCA_CRT
-    key: op://kubernetes/talos/CLUSTER_AGGREGATORCA_KEY
-  etcd:
-    advertisedSubnets:
-      - 192.168.42.0/24
-    ca:
-      crt: op://kubernetes/talos/CLUSTER_ETCD_CA_CRT
-      key: op://kubernetes/talos/CLUSTER_ETCD_CA_KEY
-    extraArgs:
-      listen-metrics-urls: http://0.0.0.0:2381
-  serviceAccount:
-    key: op://kubernetes/talos/CLUSTER_SERVICEACCOUNT_KEY
-  {% endif %}
 ---
 apiVersion: v1alpha1
 kind: LinkAliasConfig
@@ -221,9 +191,6 @@ nodeIP:
 labels:
   node.kubernetes.io/gpu: "true"
   topology.kubernetes.io/region: main
-  {% if ENV.CONTROLPLANE %}
-  node-role.kubernetes.io/control-plane: ""
-  {% endif %}
 ---
 apiVersion: v1alpha1
 kind: KubeletConfig
@@ -246,94 +213,3 @@ serviceSubnets:
 apiVersion: v1alpha1
 kind: KubePrismConfig
 port: 7445
-{% if ENV.CONTROLPLANE %}
----
-apiVersion: v1alpha1
-kind: KubeAPIServerConfig
-certExtraSANs:
-  - k8s.internal
-  - 192.168.66.1
-extraArgs:
-  enable-aggregator-routing: "true"
-  feature-gates: HPAScaleToZero=true
-image: registry.k8s.io/kube-apiserver:v1.36.3
----
-apiVersion: v1alpha1
-kind: KubeAuditPolicyConfig
-configuration:
-  apiVersion: audit.k8s.io/v1
-  kind: Policy
-  rules:
-    - level: Metadata
----
-apiVersion: v1alpha1
-kind: KubeAuthenticationConfig
-configuration:
-  anonymous:
-    conditions:
-      - path: /livez
-      - path: /readyz
-      - path: /healthz
-    enabled: true
-  jwt: []
----
-apiVersion: v1alpha1
-kind: KubeAuthorizerConfig
-name: node
-type: Node
----
-apiVersion: v1alpha1
-kind: KubeAuthorizerConfig
-name: rbac
-type: RBAC
----
-apiVersion: v1alpha1
-kind: KubeControllerManagerConfig
-extraArgs:
-  bind-address: 0.0.0.0
-  feature-gates: HPAScaleToZero=true
-image: registry.k8s.io/kube-controller-manager:v1.36.3
----
-apiVersion: v1alpha1
-kind: KubeCoreDNSConfig
-enabled: false
----
-apiVersion: v1alpha1
-kind: KubeEtcdEncryptionConfig
-config:
-  resources:
-    - providers:
-        - secretbox:
-            keys:
-              - name: key2
-                secret: op://kubernetes/talos/CLUSTER_SECRETBOXENCRYPTIONSECRET
-        - identity: {}
-      resources:
-        - secrets
----
-apiVersion: v1alpha1
-kind: KubeProxyConfig
-enabled: false
-image: registry.k8s.io/kube-proxy:v1.36.3
----
-apiVersion: v1alpha1
-kind: KubeSchedulerConfig
-config:
-  profiles:
-    - schedulerName: default-scheduler
-      plugins:
-        score:
-          disabled:
-            - name: ImageLocality
-      pluginConfig:
-        - name: PodTopologySpread
-          args:
-            defaultingType: List
-            defaultConstraints:
-              - maxSkew: 1
-                topologyKey: kubernetes.io/hostname
-                whenUnsatisfiable: ScheduleAnyway
-extraArgs:
-  bind-address: 0.0.0.0
-image: registry.k8s.io/kube-scheduler:v1.36.3
-{% endif %}
