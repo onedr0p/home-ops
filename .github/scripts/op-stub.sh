@@ -4,6 +4,8 @@
 # (SECRETS_FILE). Unmapped references pass through and fail the render.
 set -euo pipefail
 
+ref_prefix="op://kubernetes/talos"
+
 declare -A field_paths=(
     [MACHINE_CA_CRT]=".certs.os.crt"
     [MACHINE_CA_KEY]=".certs.os.key"
@@ -24,6 +26,6 @@ declare -A field_paths=(
 input="$(cat)"
 for field in "${!field_paths[@]}"; do
     value="$(yq -r -e "${field_paths[${field}]}" "${SECRETS_FILE}")"
-    input="${input//"op://kubernetes/talos/${field}"/${value}}"
+    input="${input//"${ref_prefix}/${field}"/${value}}"
 done
 printf '%s\n' "${input}"
