@@ -24,12 +24,12 @@ reboot-node node:
 
 [doc('Render Talos config for a node')]
 render-config node:
-    export SCHEMATIC="$(just talos schematic-id "{{ node }}")"
+    schematic="$(just talos schematic-id "{{ node }}")"
     role="controlplane"
     if [[ -f "{{ source_directory() }}/nodes/workers/{{ node }}.yaml.j2" ]]; then
         role="workers"
     fi
-    talosctl machineconfig patch <(just template "{{ source_directory() }}/cluster.yaml.j2") \
+    talosctl machineconfig patch <(just template "{{ source_directory() }}/cluster.yaml.j2" -D "schematic=${schematic}") \
         -p @<(just template "{{ source_directory() }}/${role}.yaml.j2") \
         -p @<(just template "{{ source_directory() }}/nodes/${role}/{{ node }}.yaml.j2")
 
@@ -69,5 +69,4 @@ schematic-id node="":
 
 [private]
 machine-image node="":
-    export SCHEMATIC="$(just talos schematic-id "{{ node }}")"
-    just template "{{ source_directory() }}/cluster.yaml.j2" | yq -r -e 'select(.kind == "UnattendedInstallConfig") | .installer.image'
+    just template "{{ source_directory() }}/cluster.yaml.j2" -D "schematic=$(just talos schematic-id "{{ node }}")" | yq -r -e 'select(.kind == "UnattendedInstallConfig") | .installer.image'
