@@ -20,26 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       changed-files: ${{ steps.changed-files.outputs.changed_files }}
-      nodes: ${{ steps.nodes.outputs.nodes }}
     steps:
       - name: Get Changed Files
         id: changed-files
         uses: bjw-s-labs/action-changed-files@a9a36fb08ce06db9b02fbd8026cc2c0945eb9841 # v0.6.0
         with:
           patterns: talos/**/*
-
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          sparse-checkout: talos
-
-      - name: Get Nodes
-        id: nodes
-        run: |
-          nodes="$(printf '%s\n' talos/nodes/*/*.yaml.j2 \
-              | jq -Rnc '[inputs | select(endswith(".schematic.yaml.j2") | not) | split("/") | last | rtrimstr(".yaml.j2")]')"
-          echo "nodes=${nodes}" >> "$GITHUB_OUTPUT"
 
   # Renders the node against a generated Talos secrets bundle and checks it
   # with talosctl validate. The job touches no real secrets, so it needs no
@@ -51,7 +37,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: ${{ fromJSON(needs.filter.outputs.nodes) }}
+        node:
+          - k8s-0
+          - k8s-1
+          - k8s-2
       fail-fast: false
     env:
       JUST_UNSTABLE: "1"

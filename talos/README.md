@@ -55,6 +55,7 @@ whose hardware diverges from the fleet. No overrides exist today.
 - Rendering a worker before `workers.yaml.j2` and `nodes/workers/` exist fails loudly. Adding the
   first worker means creating `workers.yaml.j2` (with `machine: { type: worker }` and a `ca` block
   carrying `crt` only) plus `nodes/workers/<node>.yaml.j2`.
+- New nodes must also be added to the matrix in `.github/workflows/talos-validate.yaml`.
 
 ## Common tasks
 
