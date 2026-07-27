@@ -27,72 +27,19 @@ jobs:
         with:
           patterns: talos/**/*
 
+  # Renders each node with real secrets on the in-cluster runner, checks it
+  # with talosctl validate, and reports a per-node dry-run summary against the
+  # live nodes. Same-repo PRs only, so fork PRs can neither reach the vault
+  # token nor queue jobs on the self-hosted runner. Config changes in the
+  # dry-run are neutral; only render, validate, or apply errors fail.
   validate:
-    if: ${{ needs.filter.outputs.changed-files != '[]' }}
-    needs: filter
-    name: Talos Validate - Render & Validate
-    runs-on: ubuntu-latest
-    env:
-      JUST_UNSTABLE: "1"
-      MINIJINJA_CONFIG_FILE: ${{ github.workspace }}/.minijinja.toml
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Setup Mise
-        uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea # v4.2.1
-        with:
-          cache: false
-          tool_versions: |
-            aqua:mitsuhiko/minijinja latest
-            jq latest
-            just latest
-
-      # Stand-in for `op inject` so this job needs no 1Password access and
-      # renders contain no real secrets: each op:// reference becomes a unique
-      # 32-byte placeholder, which satisfies talosctl validate.
-      - name: Stub op inject
-        run: |
-          mkdir -p "${RUNNER_TEMP}/bin"
-          cat > "${RUNNER_TEMP}/bin/op" <<'EOF'
-          #!/usr/bin/env python3
-          import base64, hashlib, re, sys
-          sys.stdout.write(re.sub(
-              r"op://\S+",
-              lambda m: base64.b64encode(hashlib.sha256(m.group(0).encode()).digest()).decode(),
-              sys.stdin.read(),
-          ))
-          EOF
-          chmod +x "${RUNNER_TEMP}/bin/op"
-          echo "${RUNNER_TEMP}/bin" >> "$GITHUB_PATH"
-
-      - name: Render & Validate
-        run: |
-          for file in talos/nodes/*/*.yaml.j2; do
-              [[ -f "${file}" ]] || continue
-              [[ "${file}" == *.schematic.yaml.j2 ]] && continue
-              node="$(basename "${file}" .yaml.j2)"
-              echo "Validating ${node}"
-              just talos render-config "${node}" > /tmp/machineconfig.yaml
-              talosctl validate --strict -m metal -c /tmp/machineconfig.yaml
-              rm /tmp/machineconfig.yaml
-          done
-
-  # Informational: renders with real secrets on the in-cluster runner and
-  # reports a per-node dry-run summary against the live nodes (never the diff
-  # itself, which may contain secret values). Changes are not a failure; only
-  # render or apply errors are. Same-repo PRs only, so fork PRs can neither
-  # reach the vault token nor queue jobs on the self-hosted runner.
-  dry-run:
     if: >-
       ${{
         needs.filter.outputs.changed-files != '[]' &&
         github.event.pull_request.head.repo.full_name == github.repository
       }}
     needs: filter
-    name: Talos Validate - Dry Run
+    name: Talos Validate - Validate
     runs-on: ${{ github.event.repository.name }}-runner
     env:
       JUST_UNSTABLE: "1"
@@ -113,7 +60,7 @@ jobs:
             jq latest
             just latest
 
-      - name: Dry Run
+      - name: Validate & Dry Run
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         run: |
@@ -123,10 +70,16 @@ jobs:
               [[ -f "${file}" ]] || continue
               [[ "${file}" == *.schematic.yaml.j2 ]] && continue
               node="$(basename "${file}" .yaml.j2)"
-              # Render/apply output is suppressed so secret material never
-              # reaches the logs of this public repo
+              # Render, validate, and apply output is suppressed so secret
+              # material never reaches the logs of this public repo; validation
+              # errors can quote field values
               if ! just talos render-config "${node}" > /tmp/machineconfig.yaml 2>/dev/null; then
                   echo "${node}: render failed" | tee -a "${GITHUB_STEP_SUMMARY}"
+                  failed=1
+                  continue
+              fi
+              if ! talosctl validate --strict -m metal -c /tmp/machineconfig.yaml > /dev/null 2>&1; then
+                  echo "${node}: validate failed" | tee -a "${GITHUB_STEP_SUMMARY}"
                   failed=1
                   continue
               fi
@@ -137,10 +90,10 @@ jobs:
               fi
               rm -f /tmp/machineconfig.yaml
               if grep -q "No changes" <<< "${output}"; then
-                  echo "${node}: no changes" | tee -a "${GITHUB_STEP_SUMMARY}"
+                  echo "${node}: valid, no changes" | tee -a "${GITHUB_STEP_SUMMARY}"
               else
                   kinds="$(grep -oP '^[+-]\s*kind: \K\S+' <<< "${output}" | sort -u | paste -sd ', ' - || true)"
-                  echo "${node}: changes detected${kinds:+ (${kinds})}" | tee -a "${GITHUB_STEP_SUMMARY}"
+                  echo "${node}: valid, changes detected${kinds:+ (${kinds})}" | tee -a "${GITHUB_STEP_SUMMARY}"
               fi
           done
           rm -f /tmp/machineconfig.yaml
