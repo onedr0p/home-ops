@@ -69,3 +69,8 @@ just talos download-image <version>    # fetch a metal ISO from the Image Factor
 Verify a refactor of these templates by diffing rendered output before and after, then confirming
 `render-config <node> | talosctl -n <node> apply-config -f /dev/stdin --dry-run` reports
 "No changes." on every node.
+
+Pull requests touching `talos/**` are rendered with placeholder secrets and checked with
+`talosctl validate` in CI. Same-repo pull requests additionally get an informational in-cluster
+dry-run against the live nodes, summarizing changed document kinds per node without printing the
+diff.
