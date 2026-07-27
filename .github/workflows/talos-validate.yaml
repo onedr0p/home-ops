@@ -69,16 +69,15 @@ jobs:
         with:
           cache: false
 
-      # Render and validate output is suppressed so secret material never
-      # reaches the logs of this public repo; validation errors can quote
-      # field values
+      # Output is suppressed so secret material never reaches the logs of
+      # this public repo: validate errors embed offending field values on
+      # stderr (success prints only "valid for metal mode"). The rendered
+      # config never touches disk.
       - name: Render & Validate
         env:
           NODE: ${{ matrix.node }}
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-        run: |
-          just talos render-config "${NODE}" > "${RUNNER_TEMP}/machineconfig.yaml" 2>/dev/null
-          talosctl validate --strict -m metal -c "${RUNNER_TEMP}/machineconfig.yaml" > /dev/null 2>&1
+        run: just talos render-config "${NODE}" 2>/dev/null | talosctl validate --strict -m metal -c /dev/stdin > /dev/null 2>&1
 
   success:
     if: ${{ !cancelled() }}
