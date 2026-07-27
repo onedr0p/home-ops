@@ -65,41 +65,12 @@ jobs:
         with:
           cache: false
 
-      # Stand-in for `op inject`: substitutes op:// references with fields
-      # from a talosctl-generated secrets bundle; unmapped references pass
-      # through and fail the render loudly
+      # .github/scripts/op-stub.sh resolves op:// references from a generated
+      # Talos secrets bundle so the render needs no 1Password access
       - name: Stub op inject
         run: |
           talosctl gen secrets -o "${RUNNER_TEMP}/secrets.yaml"
-          mkdir -p "${RUNNER_TEMP}/bin"
-          cat > "${RUNNER_TEMP}/bin/op" <<'EOF'
-          #!/usr/bin/env bash
-          set -euo pipefail
-          declare -A paths=(
-              [MACHINE_CA_CRT]=".certs.os.crt"
-              [MACHINE_CA_KEY]=".certs.os.key"
-              [MACHINE_TOKEN]=".trustdinfo.token"
-              [CLUSTER_CA_CRT]=".certs.k8s.crt"
-              [CLUSTER_CA_KEY]=".certs.k8s.key"
-              [CLUSTER_TOKEN]=".secrets.bootstraptoken"
-              [CLUSTER_AGGREGATORCA_CRT]=".certs.k8saggregator.crt"
-              [CLUSTER_AGGREGATORCA_KEY]=".certs.k8saggregator.key"
-              [CLUSTER_ETCD_CA_CRT]=".certs.etcd.crt"
-              [CLUSTER_ETCD_CA_KEY]=".certs.etcd.key"
-              [CLUSTER_SERVICEACCOUNT_KEY]=".certs.k8sserviceaccount.key"
-              [CLUSTER_SECRETBOXENCRYPTIONSECRET]=".secrets.secretboxencryptionsecret"
-              [CLUSTER_ID]=".cluster.id"
-              [CLUSTER_SECRET]=".cluster.secret"
-          )
-          input="$(cat)"
-          for name in "${!paths[@]}"; do
-              value="$(yq -r -e "${paths[$name]}" "${SECRETS_FILE}")"
-              ref="op://kubernetes/talos/${name}"
-              input="${input//"${ref}"/${value}}"
-          done
-          printf '%s\n' "${input}"
-          EOF
-          chmod +x "${RUNNER_TEMP}/bin/op"
+          install -Dm755 .github/scripts/op-stub.sh "${RUNNER_TEMP}/bin/op"
           echo "${RUNNER_TEMP}/bin" >> "$GITHUB_PATH"
           echo "SECRETS_FILE=${RUNNER_TEMP}/secrets.yaml" >> "$GITHUB_ENV"
 
