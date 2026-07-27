@@ -25,13 +25,13 @@ reboot-node node:
 [doc('Render Talos config for a node')]
 render-config node:
     export SCHEMATIC="$(just talos schematic-id)"
-    role="workers"
-    if [[ -n "$(just talos machine-controller {{ node }})" ]]; then
-        role="controlplane"
+    role="controlplane"
+    if [[ -f "{{ source_directory() }}/nodes/workers/{{ node }}.yaml.j2" ]]; then
+        role="workers"
     fi
     talosctl machineconfig patch <(just template "{{ source_directory() }}/cluster.yaml.j2") \
         -p @<(just template "{{ source_directory() }}/${role}.yaml.j2") \
-        -p @<(just template "{{ source_directory() }}/nodes/{{ node }}.yaml.j2")
+        -p @<(just template "{{ source_directory() }}/nodes/${role}/{{ node }}.yaml.j2")
 
 [confirm('Reset node ' + node + ' [y|N] ?')]
 [doc('Reset a node')]
@@ -56,10 +56,6 @@ upgrade-node node *args:
 [private]
 schematic-id:
     curl -sX POST --data-binary @<(just template "{{ source_directory() }}/schematic.yaml.j2") "https://factory.talos.dev/schematics" | jq -r '.id'
-
-[private]
-machine-controller node:
-    just template "{{ source_directory() }}/nodes/{{ node }}.yaml.j2" | yq -r -e 'select(.machine) | (.machine.type == "controlplane") // ""'
 
 [private]
 machine-image:
