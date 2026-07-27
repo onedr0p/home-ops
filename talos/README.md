@@ -26,8 +26,8 @@ talosctl machineconfig patch <(cluster.yaml.j2) \
     -p @<(nodes/<role>/<node>.yaml.j2)
 ```
 
-Each layer passes through `minijinja-cli` (Jinja templating with env access) and `op inject`
-(1Password secret resolution) before `talosctl` merges them. Later patches strategically merge into
+Each layer passes through `minijinja-cli` (strict Jinja templating; the schematic ID arrives as a
+`-D` define) and `op inject` (1Password secret resolution) before `talosctl` merges them. Later patches strategically merge into
 earlier ones: documents with the same kind/name are deep-merged, new documents are appended.
 
 Two conventions keep the layers honest:
