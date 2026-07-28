@@ -1,0 +1,40 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ocharted
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: ocharted
+  interval: 1h
+  values:
+    replicaCount: 2
+    podDisruptionBudget:
+      enabled: true
+    auth:
+      existingSecret: ocharted-secret
+      bypassNetworks:
+        - 10.42.0.0/16
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
+    httpRoute:
+      enabled: true
+      annotations:
+        gatus.home-operations.com/endpoint: |-
+          path: /healthz
+          conditions: ["[STATUS] == 200"]
+      hostnames:
+        - "{{ .Release.Name }}.turbo.ac"
+      parentRefs:
+        - name: envoy-external
+          namespace: network
+    monitoring:
+      serviceMonitor:
+        enabled: true
+    resources:
+      requests:
+        cpu: 10m
+      limits:
+        memory: 512Mi

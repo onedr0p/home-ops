@@ -52,6 +52,8 @@ jobs:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           GITHUB_BOT_APP_CLIENT_ID: op://kubernetes/github-bot/GITHUB_BOT_APP_CLIENT_ID
           GITHUB_BOT_APP_PRIVATE_KEY: op://kubernetes/github-bot/GITHUB_BOT_APP_PRIVATE_KEY
+          OCHARTED_USERNAME: op://kubernetes/ocharted/OCHARTED_USERNAME
+          OCHARTED_PASSWORD: op://kubernetes/ocharted/OCHARTED_PASSWORD
 
       - name: Generate Token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -83,6 +85,11 @@ jobs:
           RENOVATE_INTERNAL_CHECKS_FILTER: strict
           RENOVATE_PLATFORM: github
           RENOVATE_PLATFORM_COMMIT: true
+          RENOVATE_SECRETS: |-
+            {
+              "OCHARTED_USERNAME": "${{ steps.load-secrets.outputs.OCHARTED_USERNAME }}",
+              "OCHARTED_PASSWORD": "${{ steps.load-secrets.outputs.OCHARTED_PASSWORD }}"
+            }
         with:
           token: ${{ steps.app-token.outputs.token }}
           renovate-version: ${{ inputs.version || 'latest' }}
