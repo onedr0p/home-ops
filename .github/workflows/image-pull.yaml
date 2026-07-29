@@ -28,10 +28,14 @@ jobs:
           patterns: kubernetes/**/*
 
   extract:
-    if: ${{ needs.filter.outputs.changed-files != '[]' }}
+    if: >-
+      ${{
+        needs.filter.outputs.changed-files != '[]' &&
+        github.event.pull_request.head.repo.full_name == github.repository
+      }}
     needs: filter
     name: Image Pull - Extract Images
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.repository.name }}-runner
     outputs:
       images: ${{ steps.extract.outputs.images }}
     steps:
