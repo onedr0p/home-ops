@@ -1,0 +1,81 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: fluent-bit
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: fluent-bit
+  interval: 1h
+  values:
+    kind: Deployment
+    replicaCount: 1
+    # Keep the kmsg receiver off the node under investigation so its
+    # pre-crash kernel logs survive a hard hang of that node
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: NotIn
+                  values: ["k8s-1"]
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities: { drop: ["ALL"] }
+    resources:
+      requests:
+        cpu: 10m
+      limits:
+        memory: 128Mi
+    service:
+      type: LoadBalancer
+      annotations:
+        external-dns.alpha.kubernetes.io/hostname: fluent-bit.turbo.ac
+        gatus.home-operations.com/endpoint: |-
+          group: services
+          url: tcp://fluent-bit.o11y.svc:6001
+        lbipam.cilium.io/ips: 192.168.69.125
+    extraPorts:
+      - port: 6001
+        containerPort: 6001
+        protocol: TCP
+        name: kmsg
+    serviceMonitor:
+      enabled: true
+    config:
+      inputs: |
+        [INPUT]
+            Name tcp
+            Tag talos.kmsg
+            Listen 0.0.0.0
+            Port 6001
+            Format json
+            Source_Address_Key host
+      filters: ""
+      outputs: |
+        [OUTPUT]
+            Name http
+            Match talos.*
+            Host victoria-logs.o11y.svc.cluster.local
+            Port 9428
+            URI /insert/jsonline?_msg_field=msg&_time_field=talos-time&_stream_fields=host
+            Format json_lines
+            Json_Date_Key false
+            Compress gzip
+            Retry_Limit False
+  # The chart does not template externalTrafficPolicy, Local is required to
+  # preserve node source IPs for the host stream field
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Service
+              name: fluent-bit
+            patch: |
+              - op: add
+                path: /spec/externalTrafficPolicy
+                value: Local

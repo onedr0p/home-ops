@@ -19,6 +19,16 @@ spec:
         enabled: true
     server:
       fullnameOverride: victoria-logs
+      # Keep the log store off the node under investigation, a StatefulSet pod
+      # stuck on a hung node would halt ingestion for the whole cluster
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values: ["k8s-1"]
       persistentVolume:
         enabled: true
         storageClassName: ceph-block
