@@ -5,14 +5,6 @@ machine:
   ca:
     crt: op://kubernetes/talos/MACHINE_CA_CRT
     key: op://kubernetes/talos/MACHINE_CA_KEY
-  features:
-    kubernetesTalosAPIAccess:
-      enabled: true
-      allowedKubernetesNamespaces:
-        - actions-runner-system
-        - system-upgrade
-      allowedRoles:
-        - os:admin
 cluster:
   # ca merges as a unit; crt must be repeated alongside key
   ca:
@@ -125,3 +117,11 @@ config:
 extraArgs:
   bind-address: 0.0.0.0
 image: registry.k8s.io/kube-scheduler:v1.36.3
+---
+apiVersion: v1alpha1
+kind: KubeTalosAPIAccessConfig
+allowedRoles:
+  - os:admin
+allowedKubernetesNamespaces:
+  - actions-runner-system
+  - system-upgrade
