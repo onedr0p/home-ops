@@ -60,3 +60,41 @@ spec:
           peerAddress: 192.168.1.1
           peerConfigRef:
             name: l3-bgp-peer-config
+---
+# FRR keys peers by source address, so Cilium peers from a dedicated /32 to
+# leave the node address free for the Talos speaker
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumbgpnodeconfigoverride_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumBGPNodeConfigOverride
+metadata:
+  name: k8s-0
+spec:
+  bgpInstances:
+    - name: cilium
+      peers:
+        - name: unifi
+          localAddress: 192.168.42.110
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumbgpnodeconfigoverride_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumBGPNodeConfigOverride
+metadata:
+  name: k8s-1
+spec:
+  bgpInstances:
+    - name: cilium
+      peers:
+        - name: unifi
+          localAddress: 192.168.42.111
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumbgpnodeconfigoverride_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumBGPNodeConfigOverride
+metadata:
+  name: k8s-2
+spec:
+  bgpInstances:
+    - name: cilium
+      peers:
+        - name: unifi
+          localAddress: 192.168.42.112

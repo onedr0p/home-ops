@@ -9,18 +9,16 @@ labels:
   topology.kubernetes.io/zone: m
 ---
 apiVersion: v1alpha1
-kind: VLANConfig
-name: bond0.67
-vlanID: 67
-parent: bond0
-mtu: 9000
+kind: BondConfig
+name: bond0
+# /32 so the kernel never prefers it as the source for the Talos BGP session
 addresses:
-  - address: 192.168.67.10/24
+  - address: 192.168.42.110/32
 routes:
-  - gateway: 192.168.67.1
+  - gateway: 192.168.42.1
     table: 100
 ---
 apiVersion: v1alpha1
 kind: BGPInstanceConfig
 name: main
-routerID: 192.168.67.10
+routerID: 192.168.42.10
