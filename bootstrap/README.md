@@ -49,9 +49,15 @@ The Talos host BGP sessions need source addresses distinct from Cilium's
 ### BGP
 
 UniFi accepts a single FRR config upload per device (Settings → Routing →
-BGP), so both peer-groups — Cilium's LoadBalancer announcements and the Talos
-host speaker — live in one merged config. Re-uploading briefly bounces
-established sessions:
+BGP), so both peer-groups live in one merged config; re-uploading briefly
+bounces established sessions:
+
+- `k8s` (ASN 64514) — Cilium, peering from the node IPs on the SERVERS
+  subnet (`192.168.42.10-12`), announcing LoadBalancer Service IPs from the
+  `192.168.69.0/24` pool (see
+  `kubernetes/apps/kube-system/cilium/app/networking.yaml`)
+- `k8s-host` (ASN 64515) — the Talos host speaker, peering from VLAN 67,
+  announcing the anycast API address
 
 ```text
 router bgp 64513
