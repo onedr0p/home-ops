@@ -41,27 +41,33 @@ varies by Network release):
 k8s.internal → 192.168.66.1
 ```
 
-### Peering VLAN
+### Two speakers, one subnet
 
-The Talos host BGP sessions need source addresses distinct from Cilium's
-(FRR keys peers by source IP), so they peer over a dedicated VLAN:
+FRR keys peers by source address, and a BGP speaker's router ID must be
+unique, so the two speakers on each node are kept apart by address rather
+than by a dedicated VLAN:
 
-- VLAN 67, subnet `192.168.67.0/24`, UDM at `192.168.67.1`
-- Nodes at `192.168.67.10-12` (static, defined per node in `talos/nodes/`)
-- Tagged on the node trunk ports; the native VLAN stays SERVERS (42)
+| speaker | ASN   | source and router ID                   | announces                               |
+| ------- | ----- | -------------------------------------- | --------------------------------------- |
+| Talos   | 64515 | `192.168.42.10-12`, the node address   | the anycast API address                 |
+| Cilium  | 64514 | `192.168.42.110-112`, a `/32` on bond0 | LoadBalancer IPs from `192.168.69.0/24` |
+
+Talos has no way to pin a numbered session's source, so it takes the node
+address the kernel would select anyway. Cilium pins both its source and its
+router ID through `CiliumBGPNodeConfigOverride` (see
+`kubernetes/apps/kube-system/cilium/app/networking.yaml`).
+
+Cilium's addresses are `/32` on purpose. A `/24` would compete with the DHCP
+address for source selection on bond0 and the winner would depend on boot
+order; a `/32` is never selected as the source for `192.168.42.1`, so Talos
+deterministically uses the node address. They also sit below the DHCP pool
+(`.150-.254`) so nothing can lease them.
 
 ### BGP
 
 UniFi accepts a single FRR config upload per device (Settings → Routing →
 BGP), so both peer-groups live in one merged config; re-uploading briefly
 bounces established sessions:
-
-- `k8s` (ASN 64514) - Cilium, peering from the node IPs on the SERVERS
-  subnet (`192.168.42.10-12`), announcing LoadBalancer Service IPs from the
-  `192.168.69.0/24` pool (see
-  `kubernetes/apps/kube-system/cilium/app/networking.yaml`)
-- `k8s-host` (ASN 64515) - the Talos host speaker, peering from VLAN 67,
-  announcing the anycast API address
 
 ```text
 router bgp 64513
@@ -71,16 +77,16 @@ router bgp 64513
   neighbor k8s peer-group
   neighbor k8s remote-as 64514
 
-  neighbor 192.168.42.10 peer-group k8s
-  neighbor 192.168.42.11 peer-group k8s
-  neighbor 192.168.42.12 peer-group k8s
+  neighbor 192.168.42.110 peer-group k8s
+  neighbor 192.168.42.111 peer-group k8s
+  neighbor 192.168.42.112 peer-group k8s
 
   neighbor k8s-host peer-group
   neighbor k8s-host remote-as 64515
 
-  neighbor 192.168.67.10 peer-group k8s-host
-  neighbor 192.168.67.11 peer-group k8s-host
-  neighbor 192.168.67.12 peer-group k8s-host
+  neighbor 192.168.42.10 peer-group k8s-host
+  neighbor 192.168.42.11 peer-group k8s-host
+  neighbor 192.168.42.12 peer-group k8s-host
 
   address-family ipv4 unicast
     maximum-paths 3
