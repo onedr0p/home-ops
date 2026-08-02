@@ -132,6 +132,31 @@ summary"` on the UDM, and `192.168.66.1/32` showing three ECMP paths in
     Once `flux-instance` is healthy, Flux reconciles `kubernetes/` and manages
     these same releases from then on.
 
+## Data restore (Kopiur)
+
+Bootstrap itself restores no application data — that happens declaratively
+once Flux takes over, via [Kopiur](https://github.com/home-operations/kopiur)
+(deployed from `kubernetes/apps/kopiur-system/`, backed by the `expanse`
+ClusterRepository — kopia in S3 on `expanse.internal`).
+
+Apps that opt into the `kopiur/backup` component get a PVC whose
+`spec.dataSourceRef` points at a Kopiur `Restore` with `target.populator: {}`
+(see `kubernetes/components/kopiur/backup/`). That makes the `Restore` a
+passive volume-populator source: when Flux applies the app on a fresh
+cluster, the PVC is provisioned by restoring the latest snapshot for the
+app's SnapshotPolicy from the repository. The PVC stays unbound while the
+restore mover Job runs, so the app's pod simply stays `Pending` until the
+data is back — no ordering logic needed anywhere.
+
+Because the `Restore`s use `onMissingSnapshot: Continue`, an app with no
+snapshot yet (a brand-new app, or a deliberately fresh start) comes up with
+an empty volume instead of failing — the same manifests handle first deploy
+and disaster recovery ("deploy-or-restore").
+
+Each `Restore` pins the snapshot it resolved on first reconciliation and
+never silently retargets, even if a schedule fires mid-restore. Expect pods
+to sit `Pending` for as long as their volume takes to restore.
+
 ## Single source of truth
 
 The helmfiles define no chart versions or values of their own. Each release's
