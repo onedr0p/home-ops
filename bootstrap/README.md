@@ -12,13 +12,16 @@ directory is not used again until the next rebuild.
 
 ## Prerequisites
 
-- Tools installed via `mise install` (talosctl, kubectl, helmfile, kustomize,
-  just, minijinja-cli, op, gum, yq).
-- A signed-in 1Password CLI (`op`). Machine secrets never live in this repo;
-  every `op://` reference in the Talos configs and bootstrap manifests is
-  resolved at apply time with `op inject`.
-- A valid `talosconfig`. The justfile derives the controller endpoint and node
-  list from `talosctl config info`, so nothing is hardcoded here.
+- Tools pinned in `.mise/config.toml` installed via `mise install` (talosctl,
+  just, minijinja-cli, op, yq, jq), plus kubectl, helmfile, kustomize and gum
+  on the PATH (not pinned here).
+- A signed-in 1Password CLI (`op`), with access to both accounts (personal
+  and home-operations). Machine secrets never live in this repo; every
+  `op://` reference in the Talos configs and bootstrap manifests is resolved
+  at apply time with `op inject`.
+- A valid `talosconfig` at the repo root (mise points `TALOSCONFIG` there).
+  The justfile derives the controller endpoint and node list from
+  `talosctl config info`, so nothing is hardcoded here.
 - The UDM configuration below, so that `k8s.internal` resolves and routes to
   the anycast API address before any node exists.
 
@@ -31,7 +34,8 @@ of that arrangement lives on the UDM and must be in place before bootstrap:
 
 ### DNS record
 
-A static A record in UniFi (Settings → Routing → DNS):
+A static A record in UniFi (the DNS records UI has moved between Network
+releases; currently under the policy settings):
 
 ```text
 k8s.internal → 192.168.66.1
@@ -109,10 +113,12 @@ summary"` on the UDM, and `192.168.66.1/32` showing three ECMP paths in
    the Talos anycast address and works for the remainder of the bootstrap.
 4. **base** — Waits for nodes to register (they stay `Ready=False` until the
    CNI is installed), then applies:
-    - `kustomize/` — bootstrap Secrets (1Password Connect credentials,
-      Cloudflare tunnel ID) rendered through `op inject`, plus their
-      namespaces. These exist before their controllers so nothing deadlocks on
-      a missing Secret.
+    - `kustomize/` — bootstrap Secrets rendered through `op inject`, plus
+      their namespaces: 1Password Connect credentials and token plus the
+      Cloudflare tunnel ID from the personal account (`personal/`), and the
+      1Password service-account token from the home-operations account
+      (`home-operations/`, injected with its own `OP_ACCOUNT`). These exist
+      before their controllers so nothing deadlocks on a missing Secret.
     - `helmfile/crds.yaml` — CRDs extracted from upstream charts
       (envoy-gateway, grafana-operator, kube-prometheus-stack) and applied
       directly. Installing CRDs out-of-band means Flux Kustomizations that
