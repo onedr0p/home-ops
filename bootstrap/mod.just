@@ -10,7 +10,7 @@ nodes := `talosctl config info -o yaml | yq -r -e '.nodes | join (" ")'`
 
 [confirm('Bootstrap cluster? [y|N]')]
 [doc('Bootstrap a Talos & Kubernetes cluster end-to-end')]
-cluster: nodes k8s (kubeconfig "node") base apps kubeconfig
+cluster: nodes k8s kubeconfig base apps
 
 [private]
 nodes:
@@ -34,19 +34,14 @@ k8s:
     done
 
 [private]
-kubeconfig lb="cilium":
+kubeconfig:
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
     if ! talosctl kubeconfig -n "{{ controller }}" -f --force-context-name main {{ justfile_dir() }}; then
         just log fatal "Failed to fetch kubeconfig" "stage" "{{ recipe_name() }}"
     fi
-    if [[ "{{ lb }}" != "cilium" ]]; then
-        if ! kubectl config set-cluster main --server "https://{{ controller }}:6443"; then
-            just log fatal "Failed to set kubectl cluster server address" "stage" "{{ recipe_name() }}"
-        fi
-    fi
 
 [private]
-base: ready
+base: api-ready nodes-ready
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
     if ! kustomize build {{ source_directory() }}/kustomize/personal | just template - | kubectl apply --server-side --force-conflicts -f -; then
         just log fatal "Failed to apply personal manifests" "stage" "{{ recipe_name() }}"
@@ -65,9 +60,20 @@ apps:
         just log fatal "Failed to sync helmfile" "stage" "{{ recipe_name() }}"
     fi
 
-# Wait until nodes register as Ready=False. They only become Ready=True once the CNI is healthy.
+# Wait until every apiserver answers /readyz. Nodes advertise the anycast address whether or not their apiserver is up.
 [private]
-ready:
+api-ready:
+    just log info "Running stage..." "stage" "{{ recipe_name() }}"
+    for n in {{ nodes }}; do
+        until [[ "$(curl -ks -o /dev/null -w '%{http_code}' --connect-timeout 2 "https://${n}:6443/readyz")" == "200" ]]; do
+            just log info "Waiting for kube-apiserver. Retrying in 5 seconds..." "stage" "{{ recipe_name() }}" "node" "$n"
+            sleep 5
+        done
+    done
+
+# Wait until every node registers as Ready=False. They only become Ready=True once the CNI is healthy.
+[private]
+nodes-ready:
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
     if ! kubectl wait nodes --for=condition=Ready=True --all --timeout=10s &>/dev/null; then
         until kubectl wait nodes --for=condition=Ready=False --all --timeout=10s &>/dev/null; do
