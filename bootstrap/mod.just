@@ -60,6 +60,7 @@ apps:
         just log fatal "Failed to sync helmfile" "stage" "{{ recipe_name() }}"
     fi
 
+# Wait until every apiserver answers /readyz. Nodes advertise the anycast address whether or not their apiserver is up.
 [private]
 api-ready:
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
@@ -70,7 +71,7 @@ api-ready:
         done
     done
 
-# Wait until nodes register as Ready=False. They only become Ready=True once the CNI is healthy.
+# Wait until every node registers as Ready=False. They only become Ready=True once the CNI is healthy.
 [private]
 nodes-ready:
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
