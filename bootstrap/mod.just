@@ -10,7 +10,7 @@ nodes := `talosctl config info -o yaml | yq -r -e '.nodes | join (" ")'`
 
 [confirm('Bootstrap cluster? [y|N]')]
 [doc('Bootstrap a Talos & Kubernetes cluster end-to-end')]
-cluster: nodes k8s kubeconfig base apps
+cluster: nodes k8s (kubeconfig "node") base apps kubeconfig
 
 [private]
 nodes:
@@ -34,10 +34,15 @@ k8s:
     done
 
 [private]
-kubeconfig:
+kubeconfig lb="cilium":
     just log info "Running stage..." "stage" "{{ recipe_name() }}"
     if ! talosctl kubeconfig -n "{{ controller }}" -f --force-context-name main {{ justfile_dir() }}; then
         just log fatal "Failed to fetch kubeconfig" "stage" "{{ recipe_name() }}"
+    fi
+    if [[ "{{ lb }}" != "cilium" ]]; then
+        if ! kubectl config set-cluster main --server "https://{{ controller }}:6443"; then
+            just log fatal "Failed to set kubectl cluster server address" "stage" "{{ recipe_name() }}"
+        fi
     fi
 
 [private]
@@ -60,7 +65,7 @@ apps:
         just log fatal "Failed to sync helmfile" "stage" "{{ recipe_name() }}"
     fi
 
-# Wait until every apiserver answers /readyz. Nodes advertise the anycast address whether or not their apiserver is up.
+# Wait until every apiserver answers /readyz. Helm and kubectl calls after this stage are not retried.
 [private]
 api-ready:
     just log info "Running stage..." "stage" "{{ recipe_name() }}"

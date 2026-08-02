@@ -22,15 +22,18 @@ directory is not used again until the next rebuild.
 - A valid `talosconfig` at the repo root (mise points `TALOSCONFIG` there).
   The justfile derives the controller endpoint and node list from
   `talosctl config info`, so nothing is hardcoded here.
-- The UDM configuration below, so that `k8s.internal` resolves and routes to
-  the anycast API address before any node exists.
+- The UDM configuration below. `k8s.internal` points at the Cilium
+  LoadBalancer VIP, which exists only once Cilium is installed, so bootstrap
+  talks to the controller's node IP directly until the `apps` stage brings
+  Cilium up.
 
 ## UDM configuration
 
-Talos itself advertises the API address `192.168.66.1/32` over BGP (see
-`talos/cluster.yaml.j2`), so the Kubernetes API is reachable as soon as a
-control plane node is up; no CNI or LoadBalancer required. The router side
-of that arrangement lives on the UDM and must be in place before bootstrap:
+The Kubernetes API is fronted by a Cilium LoadBalancer Service (`kube-api`,
+`192.168.69.120`, `externalTrafficPolicy: Local` so only nodes with a
+healthy apiserver attract traffic). Cilium announces it to the UDM over BGP
+along with every other LoadBalancer IP. See
+`kubernetes/apps/kube-system/cilium/app/networking.yaml`.
 
 ### DNS record
 
@@ -38,30 +41,16 @@ A static A record in UniFi (under the policy settings; the UI location
 varies by Network release):
 
 ```text
-k8s.internal → 192.168.66.1
+k8s.internal → 192.168.69.120
 ```
-
-### Peering VLAN
-
-The Talos host BGP sessions need source addresses distinct from Cilium's
-(FRR keys peers by source IP), so they peer over a dedicated VLAN:
-
-- VLAN 67, subnet `192.168.67.0/24`, UDM at `192.168.67.1`
-- Nodes at `192.168.67.10-12` (static, defined per node in `talos/nodes/`)
-- Tagged on the node trunk ports; the native VLAN stays SERVERS (42)
 
 ### BGP
 
-UniFi accepts a single FRR config upload per device (Settings → Routing →
-BGP), so both peer-groups live in one merged config; re-uploading briefly
-bounces established sessions:
-
-- `k8s` (ASN 64514) - Cilium, peering from the node IPs on the SERVERS
-  subnet (`192.168.42.10-12`), announcing LoadBalancer Service IPs from the
-  `192.168.69.0/24` pool (see
-  `kubernetes/apps/kube-system/cilium/app/networking.yaml`)
-- `k8s-host` (ASN 64515) - the Talos host speaker, peering from VLAN 67,
-  announcing the anycast API address
+Cilium (ASN 64514) peers from the node IPs on the SERVERS subnet
+(`192.168.42.10-12`) and announces LoadBalancer Service IPs from the
+`192.168.69.0/24` pool. UniFi accepts a single FRR config upload per device
+(Settings → Routing → BGP); re-uploading briefly bounces established
+sessions:
 
 ```text
 router bgp 64513
@@ -75,29 +64,20 @@ router bgp 64513
   neighbor 192.168.42.11 peer-group k8s
   neighbor 192.168.42.12 peer-group k8s
 
-  neighbor k8s-host peer-group
-  neighbor k8s-host remote-as 64515
-
-  neighbor 192.168.67.10 peer-group k8s-host
-  neighbor 192.168.67.11 peer-group k8s-host
-  neighbor 192.168.67.12 peer-group k8s-host
-
   address-family ipv4 unicast
     maximum-paths 3
     neighbor k8s next-hop-self
     neighbor k8s soft-reconfiguration inbound
-    neighbor k8s-host next-hop-self
-    neighbor k8s-host soft-reconfiguration inbound
   exit-address-family
 exit
 ```
 
-`maximum-paths 3` gives true ECMP across the three control plane nodes
-(FRR's eBGP default is a single best path).
+`maximum-paths 3` gives true ECMP across the control plane nodes for the
+`kube-api` VIP (FRR's eBGP default is a single best path).
 
-To verify: `talosctl get bgppeerstatus` per node, `vtysh -c "show bgp
-summary"` on the UDM, and `192.168.66.1/32` showing three ECMP paths in
-`vtysh -c "show ip route"`.
+To verify: `vtysh -c "show bgp summary"` on the UDM, `192.168.69.120/32`
+showing an ECMP path per healthy apiserver in `vtysh -c "show ip route"`,
+and `curl -k https://k8s.internal:6443/livez`.
 
 ## Stages
 
@@ -108,13 +88,14 @@ summary"` on the UDM, and `192.168.66.1/32` showing three ECMP paths in
    Nodes that are already configured are skipped, so the stage is idempotent.
 2. **k8s** - Runs `talosctl bootstrap` against the controller, retrying until
    etcd reports the cluster already exists.
-3. **kubeconfig** - Fetches the kubeconfig with `talosctl kubeconfig`. The
-   generated server address is `https://k8s.internal:6443`, which routes via
-   the Talos anycast address and works for the remainder of the bootstrap.
+3. **kubeconfig** - Fetches the kubeconfig with `talosctl kubeconfig`, then
+   rewrites the server address to the controller's node IP: the generated
+   `https://k8s.internal:6443` points at the Cilium VIP, which does not
+   exist yet. The final stage re-fetches the kubeconfig so the endpoint
+   returns to `k8s.internal` once Cilium is serving it.
 4. **base** - Waits for every control plane apiserver to answer `/readyz`
-   (each node advertises the anycast address whether or not its apiserver is
-   up yet) and for nodes to register (they stay `Ready=False` until the CNI
-   is installed), then applies:
+   and for nodes to register (they stay `Ready=False` until the CNI is
+   installed), then applies:
     - `kustomize/` - bootstrap Secrets rendered through `op inject`, plus
       their namespaces: 1Password Connect credentials and token plus the
       Cloudflare tunnel ID from the personal account (`personal/`), and the
@@ -169,8 +150,9 @@ later reconcile, and Renovate updates only one place.
 
 ## Notes
 
-- The Kubernetes API endpoint does not depend on anything installed here:
-  `k8s.internal` rides the Talos-advertised anycast address, so the API stays
-  reachable even with the CNI down.
+- `k8s.internal` rides the Cilium `kube-api` LoadBalancer, so the named API
+  endpoint depends on Cilium being healthy. If the CNI is ever down, reach
+  the API directly at `https://192.168.42.10-12:6443` and the Talos API at
+  the same node addresses; neither depends on the CNI.
 - Every stage is safe to re-run. If bootstrap fails partway, fix the issue and
   run `just bootstrap cluster` again.
