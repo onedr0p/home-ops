@@ -60,3 +60,19 @@ spec:
           peerAddress: 192.168.1.1
           peerConfigRef:
             name: l3-bgp-peer-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-api
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: k8s.turbo.ac
+    lbipam.cilium.io/ips: 192.168.69.120
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    k8s-app: kube-apiserver
+    tier: control-plane
+  ports:
+    - port: 6443

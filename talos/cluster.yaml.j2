@@ -50,30 +50,6 @@ parent: bond0
 mtu: 9000
 ---
 apiVersion: v1alpha1
-kind: DummyLinkConfig
-name: dummy0
-addresses:
-  - address: 192.168.66.1/32
----
-apiVersion: v1alpha1
-kind: BGPInstanceConfig
-name: main
-localASN: 64515
-advertise:
-  - dummy0
-neighbors:
-  - address: 192.168.67.1
-    peerASN: 64513
-    holdTime: 9s
----
-apiVersion: v1alpha1
-kind: RoutingRuleConfig
-# name is the rule priority; it must stay above Cilium's local-table rule at 100
-name: "32000"
-src: 192.168.66.1/32
-table: 100
----
-apiVersion: v1alpha1
 kind: ResolverConfig
 hostDNS:
   enabled: true
