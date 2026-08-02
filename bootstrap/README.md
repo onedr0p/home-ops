@@ -41,6 +41,11 @@ varies by Network release):
 k8s.internal → 192.168.66.1
 ```
 
+Node names (`k8s-0/1/2`) resolve through the UDM's DHCP lease registration
+for both the workstation and the nodes themselves; host DNS member
+resolution is disabled so the anycast address never enters apid's dial
+pool. If a node name will not resolve, use its `192.168.42.x` address.
+
 ### Peering VLAN
 
 The Talos host BGP sessions need source addresses distinct from Cilium's
