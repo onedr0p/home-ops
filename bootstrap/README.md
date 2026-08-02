@@ -111,8 +111,10 @@ summary"` on the UDM, and `192.168.66.1/32` showing three ECMP paths in
 3. **kubeconfig** - Fetches the kubeconfig with `talosctl kubeconfig`. The
    generated server address is `https://k8s.internal:6443`, which routes via
    the Talos anycast address and works for the remainder of the bootstrap.
-4. **base** - Waits for nodes to register (they stay `Ready=False` until the
-   CNI is installed), then applies:
+4. **base** - Waits for every control plane apiserver to answer `/readyz`
+   (each node advertises the anycast address whether or not its apiserver is
+   up yet) and for nodes to register (they stay `Ready=False` until the CNI
+   is installed), then applies:
     - `kustomize/` - bootstrap Secrets rendered through `op inject`, plus
       their namespaces: 1Password Connect credentials and token plus the
       Cloudflare tunnel ID from the personal account (`personal/`), and the
