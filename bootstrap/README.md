@@ -33,24 +33,39 @@ The Kubernetes API is fronted by a Cilium LoadBalancer Service (`kube-api`,
 `192.168.69.120`, `externalTrafficPolicy: Local` so only nodes with a
 healthy apiserver attract traffic). Cilium announces it to the UDM over BGP
 along with every other LoadBalancer IP. See
-`kubernetes/apps/kube-system/cilium/app/networking.yaml`.
+[networking.yaml](../kubernetes/apps/kube-system/cilium/app/networking.yaml).
 
-### DNS record
+```mermaid
+graph LR
+    client[LAN client] -->|hashed flow| udm["UDM (ASN 64513)"]
+    udm -->|ECMP| k0["k8s-0 (192.168.42.10)"]
+    udm -->|ECMP| k1["k8s-1 (192.168.42.11)"]
+    udm -->|ECMP| k2["k8s-2 (192.168.42.12)"]
+    k0 & k1 & k2 -. "BGP (ASN 64514): VIPs from 192.168.69.0/24" .-> udm
+```
+
+The VIPs the UDM learns this way:
+
+| VIP              | Hostname            | Backs                          |
+| ---------------- | ------------------- | ------------------------------ |
+| `192.168.69.120` | `k8s.internal`      | `kube-api` Service (apiserver) |
+| `192.168.69.121` | `internal.turbo.ac` | `envoy-internal` Gateway       |
+| `192.168.69.126` | `external.turbo.ac` | `envoy-external` Gateway       |
 
 A static A record in UniFi (under the policy settings; the UI location
-varies by Network release):
+varies by Network release) points the API hostname at the VIP:
 
 ```text
 k8s.internal → 192.168.69.120
 ```
 
-### BGP
-
 Cilium (ASN 64514) peers from the node IPs on the SERVERS subnet
 (`192.168.42.10-12`) and announces LoadBalancer Service IPs from the
 `192.168.69.0/24` pool. UniFi accepts a single FRR config upload per device
-(Settings → Routing → BGP); re-uploading briefly bounces established
-sessions:
+(Settings → Routing → BGP):
+
+<details>
+<summary>FRR config</summary>
 
 ```text
 router bgp 64513
@@ -72,8 +87,13 @@ router bgp 64513
 exit
 ```
 
+</details>
+
 `maximum-paths 3` gives true ECMP across the control plane nodes for the
 `kube-api` VIP (FRR's eBGP default is a single best path).
+
+> [!WARNING]
+> Re-uploading the FRR config briefly bounces established BGP sessions.
 
 To verify: `vtysh -c "show bgp summary"` on the UDM, `192.168.69.120/32`
 showing an ECMP path per healthy apiserver in `vtysh -c "show ip route"`,
@@ -83,7 +103,13 @@ and `curl -k https://k8s.internal:6443/livez`. In
 line per node (a single flat line means multipath is not installed in the
 kernel).
 
-### Boot scripts (`/data/on_boot.d`)
+> [!NOTE]
+> `k8s.internal` rides the Cilium `kube-api` LoadBalancer, so the named API
+> endpoint depends on Cilium being healthy. If the CNI is ever down, reach
+> the API directly at `https://192.168.42.10-12:6443` and the Talos API at
+> the same node addresses; neither depends on the CNI.
+
+## UDM boot scripts
 
 The UDM root filesystem is an overlay: writes to `/etc` survive reboots but
 are wiped by firmware upgrades, and `/run` is tmpfs. `/data` is a real
@@ -96,11 +122,14 @@ script, run by the `udm-boot` service from
 curl -fsL "https://raw.githubusercontent.com/unifi-utilities/unifi-common/HEAD/remote_install.sh" | /bin/bash
 ```
 
-The service unit itself sits on the overlay, so a firmware upgrade can
-remove it while the scripts in `/data/on_boot.d` remain. After an upgrade,
-check `systemctl is-enabled udm-boot` and rerun the installer if needed.
+> [!WARNING]
+> The service unit itself sits on the overlay, so a firmware upgrade can
+> remove it :hurtrealbad: while the scripts in `/data/on_boot.d` remain.
+> After an
+> upgrade, check `systemctl is-enabled udm-boot` and rerun the installer if
+> needed.
 
-### ECMP flow hashing
+## ECMP flow hashing
 
 The kernel default (`fib_multipath_hash_policy=0`) hashes on source and
 destination IP only, so a given client always lands on the same node.
@@ -116,27 +145,42 @@ sysctl -w net.ipv4.fib_multipath_hash_policy=1
 ```
 
 The `sysctl.d` drop-in covers reboots on its own; the boot script recreates
-it after firmware upgrades. To verify spreading, run this a few times from
-one machine and expect the node in the SAN to vary:
+it after firmware upgrades.
 
-```sh
-openssl s_client -connect k8s.internal:6443 </dev/null 2>/dev/null \
-  | openssl x509 -noout -ext subjectAltName
-```
+> [!TIP]
+> To verify spreading, run this a few times from one machine and expect the
+> node in the SAN to vary:
+>
+> ```sh
+> openssl s_client -connect k8s.internal:6443 </dev/null 2>/dev/null \
+>   | openssl x509 -noout -ext subjectAltName
+> ```
 
-### HTTP/3 discovery (HTTPS records)
+## HTTP/3 discovery
 
 Envoy Gateway serves HTTP/3 (`http3: {}` in the `ClientTrafficPolicy`, UDP
 443 on both LoadBalancer Services), but browsers only discover it after a
 first TCP visit via `Alt-Svc` unless DNS advertises it. dnsmasq on the UDM
 can publish HTTPS (type 65) records for the gateway hostnames; the hex
 payload decodes to priority 1, target `.`, `alpn="h3,h2"`. Lookups follow
-CNAMEs, so app hostnames pointing at the gateways need no records of their
-own.
+CNAMEs, so app hostnames the UDM resolves to the gateways itself need no
+records of their own.
+
+> [!IMPORTANT]
+> Externally published apps (`plex`, anything else behind the Cloudflare
+> tunnel) are CNAMEs to `external.turbo.ac` in public DNS, and the UDM has
+> no HTTPS record for those names. The browser's HTTPS query is forwarded
+> upstream, where Cloudflare answers with its own HTTPS record, and
+> browsers then use that record and connect through Cloudflare, even
+> though the A/AAAA answer is the internal gateway IP. LAN traffic to
+> those apps rides the tunnel instead of the local path. :suspect:
 
 The main dnsmasq instance loads `--conf-dir=/run/dnsmasq.dhcp.conf.d/`,
 which is tmpfs and regenerated by `ubios-udapi-server`, hence another boot
-script. `/data/on_boot.d/40-dnsmasq-https-rr.sh`:
+script.
+
+<details>
+<summary><code>/data/on_boot.d/40-dnsmasq-https-rr.sh</code></summary>
 
 ```sh
 #!/bin/sh
@@ -151,10 +195,17 @@ RR
 exit 0
 ```
 
-Killing the main dnsmasq is safe; `ubios-udapi-server` respawns it with the
-new config. A provisioning event in the Network app can regenerate the conf
-dir and drop `custom.conf` until the next reboot; rerunning the script puts
-it back. To verify:
+</details>
+
+Killing the main dnsmasq is safe :goberserk:; `ubios-udapi-server` respawns
+it with the new config.
+
+> [!NOTE]
+> A provisioning event in the Network app can regenerate the conf dir and
+> drop `custom.conf` until the next reboot; rerunning the script puts it
+> back.
+
+To verify:
 
 ```sh
 dig +short @192.168.1.1 internal.turbo.ac HTTPS   # expect: 1 . alpn="h3,h2"
@@ -163,7 +214,12 @@ curl --http3-only -sk -o /dev/null -w '%{http_version}\n' https://internal.turbo
 
 ## Stages
 
-`just bootstrap cluster` runs these stages in order (see `mod.just`):
+`just bootstrap cluster` runs these stages in order (see [mod.just](mod.just)):
+
+```mermaid
+graph LR
+    nodes --> k8s --> kubeconfig --> base --> apps
+```
 
 1. **nodes** - Renders each node's Talos config (`talos/*.j2` templates plus
    1Password injection) and applies it with `talosctl apply-config --insecure`.
@@ -197,16 +253,22 @@ curl --http3-only -sk -o /dev/null -w '%{http_version}\n' https://internal.turbo
     Once `flux-instance` is healthy, Flux reconciles `kubernetes/` and manages
     these same releases from then on.
 
+> [!TIP]
+> Every stage is safe to re-run. If bootstrap fails partway, fix the issue
+> and run `just bootstrap cluster` again.
+
 ## Data restore (Kopiur)
 
 Bootstrap itself restores no application data; that happens declaratively
 once Flux takes over, via [Kopiur](https://github.com/home-operations/kopiur)
-(deployed from `kubernetes/apps/kopiur-system/`, backed by the `expanse`
+(deployed from [kubernetes/apps/kopiur-system/](../kubernetes/apps/kopiur-system/),
+backed by the `expanse`
 ClusterRepository: kopia in S3 on `expanse.internal`).
 
 Apps that opt into the `kopiur/backup` component get a PVC whose
 `spec.dataSourceRef` points at a Kopiur `Restore` with `target.populator: {}`
-(see `kubernetes/components/kopiur/backup/`). That makes the `Restore` a
+(see [kubernetes/components/kopiur/backup/](../kubernetes/components/kopiur/backup/)).
+That makes the `Restore` a
 passive volume-populator source: when Flux applies the app on a fresh
 cluster, the PVC is provisioned by restoring the latest snapshot for the
 app's SnapshotPolicy from the repository. The PVC stays unbound while the
@@ -227,14 +289,6 @@ to sit `Pending` for as long as their volume takes to restore.
 The helmfiles define no chart versions or values of their own. Each release's
 chart and version are read from the app's `ocirepository.yaml` and its values
 from the app's `helmrelease.yaml` under `kubernetes/apps/` (see
-`helmfile/templates/`). Bootstrap therefore installs exactly what Flux will
+[helmfile/templates/](helmfile/templates/)). Bootstrap therefore installs
+exactly what Flux will
 later reconcile, and Renovate updates only one place.
-
-## Notes
-
-- `k8s.internal` rides the Cilium `kube-api` LoadBalancer, so the named API
-  endpoint depends on Cilium being healthy. If the CNI is ever down, reach
-  the API directly at `https://192.168.42.10-12:6443` and the Talos API at
-  the same node addresses; neither depends on the CNI.
-- Every stage is safe to re-run. If bootstrap fails partway, fix the issue and
-  run `just bootstrap cluster` again.
