@@ -19,11 +19,8 @@ spec:
             image:
               repository: ghcr.io/homeassistant-ai/ha-mcp
               tag: 8.0.0@sha256:d65630f6a3fd14d8f536c27432d4d2cf3045e6f6a2d196cba754ee8566491ae4
-            # The image CMD defaults to stdio transport, which has no listener
             command: ["ha-mcp-web"]
             env:
-              # Explicit data dir, so persistence does not depend on the image's
-              # HOME or on the container uid owning /home/mcpuser
               HA_MCP_CONFIG_DIR: &configDir /config
               HOMEASSISTANT_URL: http://home-assistant.default.svc.cluster.local:8123
               MCP_HEALTHZ: true
