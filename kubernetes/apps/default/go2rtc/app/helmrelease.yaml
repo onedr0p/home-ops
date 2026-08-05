@@ -18,6 +18,11 @@ spec:
             image:
               repository: ghcr.io/alexxit/go2rtc
               tag: 1.9.14@sha256:675c318b23c06fd862a61d262240c9a63436b4050d177ffc68a32710d9e05bae
+            args:
+              - -config
+              - /state/go2rtc.yaml
+              - -config
+              - /config/go2rtc.yaml
             probes:
               liveness:
                 enabled: true
@@ -42,6 +47,8 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         forceRename: "{{ .Release.Name }}"
@@ -93,13 +100,6 @@ spec:
               ice_servers:
                 - urls:
                     - stun:stun.cloudflare.com:3478
-            streams:
-              driveway:
-                - rtspx://192.168.1.1:7441/SB74mRIu1CkoPcEq
-              garage:
-                - rtspx://192.168.1.1:7441/dFl352XtCUFREtRz
-              porch:
-                - rtspx://192.168.1.1:7441/ezkTDbaOR71GUE67
     persistence:
       config-file:
         type: configMap
@@ -107,3 +107,7 @@ spec:
         globalMounts:
           - path: /config/go2rtc.yaml
             subPath: go2rtc.yaml
+      state:
+        type: emptyDir
+        globalMounts:
+          - path: /state
