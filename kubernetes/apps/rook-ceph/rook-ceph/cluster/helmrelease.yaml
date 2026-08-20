@@ -11,6 +11,12 @@ spec:
   interval: 1h
   timeout: 10m
   values:
+    # Keep Ceph on Squid for the chart migration; Tentacle (v20) lands separately.
+    # The chart derives both cephVersion and the toolbox image from cephImage, and
+    # setting cephClusterSpec.cephVersion alongside it renders a duplicate key.
+    cephImage:
+      repository: quay.io/ceph/ceph
+      tag: v19.2.6
     cephClusterSpec:
       cephConfig:
         mon:
@@ -20,6 +26,8 @@ spec:
       crashCollector:
         disable: false
       csi:
+        cephfs:
+          kernelMountOptions: ms_mode=prefer-crc
         readAffinity:
           enabled: false # https://github.com/ceph/ceph-csi/issues/5772
       dashboard:
