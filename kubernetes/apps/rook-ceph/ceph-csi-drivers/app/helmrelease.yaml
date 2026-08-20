@@ -8,29 +8,98 @@ spec:
   chartRef:
     kind: OCIRepository
     name: ceph-csi-drivers
+  driftDetection:
+    mode: enabled
   interval: 1h
   values:
     # Rook-compatible values, see
-    # https://github.com/rook/rook/blob/release-1.20/deploy/charts/ceph-csi-drivers/values.yaml
+    # https://github.com/rook/rook/blob/v1.20.5/deploy/charts/ceph-csi-drivers/values.yaml
+    # Settings beyond that file preserve what rook v1.19 wrote into the live Driver
+    # CRs; chart defaults would otherwise overwrite them on helm adoption.
     operatorConfig:
       namespace: rook-ceph
       driverSpecDefaults:
         imageSet:
           name: rook-csi-operator-image-set-configmap
+        log:
+          rotation:
+            enabled: false
         nodePlugin:
           priorityClassName: system-node-critical
+          resources:
+            plugin:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 250m
+                memory: 512Mi
+            registrar:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 50m
+                memory: 128Mi
         controllerPlugin:
           priorityClassName: system-cluster-critical
+          resources:
+            attacher:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+            omapGenerator:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 250m
+                memory: 512Mi
+            plugin:
+              limits:
+                memory: 1Gi
+              requests:
+                memory: 512Mi
+            provisioner:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+            resizer:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+            snapshotter:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
     drivers:
       rbd:
         enabled: true
         name: rook-ceph.rbd.csi.ceph.com
-        # Chart default is "none", which would strip the csi-snapshotter sidecar on adoption
+        # Chart defaults render grpcTimeout 30, replicas 1, snapshotPolicy none and
+        # log rotation on; the live Driver CRs run 150/2/snapshotter-enabled/off
+        grpcTimeout: 150
         snapshotPolicy: volumeGroupSnapshot
+        log:
+          rotation:
+            enabled: false
+        controllerPlugin:
+          replicas: 2
       cephfs:
         enabled: true
         name: rook-ceph.cephfs.csi.ceph.com
+        grpcTimeout: 150
         snapshotPolicy: volumeGroupSnapshot
+        log:
+          rotation:
+            enabled: false
+        controllerPlugin:
+          replicas: 2
       nfs:
         enabled: false
         name: rook-ceph.nfs.csi.ceph.com
