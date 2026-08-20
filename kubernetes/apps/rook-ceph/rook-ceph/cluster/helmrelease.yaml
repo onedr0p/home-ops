@@ -11,12 +11,6 @@ spec:
   interval: 1h
   timeout: 10m
   values:
-    # Keep Ceph on Squid for the chart migration; Tentacle (v20) lands separately.
-    # The chart derives both cephVersion and the toolbox image from cephImage, and
-    # setting cephClusterSpec.cephVersion alongside it renders a duplicate key.
-    cephImage:
-      repository: quay.io/ceph/ceph
-      tag: v19.2.6
     cephClusterSpec:
       cephConfig:
         mon:
@@ -35,6 +29,16 @@ spec:
         urlPrefix: /
         ssl: false
         prometheusEndpoint: http://prometheus-operated.o11y.svc.cluster.local:9090
+      healthCheck:
+        muteHealthWarning:
+          AUTH_INSECURE_ROTATING_SERVICE_KEY_TYPE:
+            policy: mute
+          AUTH_INSECURE_CLIENT_KEY_TYPE:
+            policy: mute
+          AUTH_INSECURE_KEYS_ALLOWED:
+            policy: mute
+          AUTH_INSECURE_KEYS_CREATABLE:
+            policy: mute
       mgr:
         modules:
           - name: pg_autoscaler
@@ -51,6 +55,8 @@ spec:
           daemon:
             keyRotationPolicy: KeyGeneration
             keyGeneration: 2
+          csi:
+            keyType: aes # aes256k requires kernel 7.0+
       storage:
         devicePathFilter: /dev/disk/by-id/nvme-Micron_7450_MTFDKBA800TFS_.*
         useAllDevices: false
