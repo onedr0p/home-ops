@@ -12,6 +12,9 @@ spec:
   timeout: 10m
   values:
     cephClusterSpec:
+      cephVersion:
+        # Keep Ceph on Squid for the chart migration; Tentacle (v20) lands separately
+        image: quay.io/ceph/ceph:v19.2.6
       cephConfig:
         mon:
           mon_cluster_log_level: info
@@ -20,6 +23,8 @@ spec:
       crashCollector:
         disable: false
       csi:
+        cephfs:
+          kernelMountOptions: ms_mode=prefer-crc
         readAffinity:
           enabled: false # https://github.com/ceph/ceph-csi/issues/5772
       dashboard:
