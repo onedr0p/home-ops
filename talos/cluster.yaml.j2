@@ -157,6 +157,20 @@ contents: |
   wsize=1048576
 ---
 apiVersion: v1alpha1
+kind: EtcFileConfig
+name: lvm/lvm.conf
+mode: 0o644
+contents: |
+  backup {
+    backup = 0
+    archive = 0
+  }
+  devices {
+    # Keep Talos LVM autoactivation off DRBD, device-mapper and loop devices
+    global_filter = [ "r|^/dev/drbd.*|", "r|^/dev/dm-.*|", "r|^/dev/loop.*|" ]
+  }
+---
+apiVersion: v1alpha1
 kind: CRICustomizationConfig
 name: containerd
 content: |
