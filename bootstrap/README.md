@@ -15,8 +15,7 @@ directory is not used again until the next rebuild.
 - Tools pinned in `.mise/config.toml` installed via `mise install` (talosctl,
   just, minijinja-cli, op, yq, jq), plus kubectl, helmfile, kustomize and gum
   on the PATH (not pinned here).
-- A signed-in 1Password CLI (`op`), with access to both accounts (personal
-  and home-operations). Machine secrets never live in this repo; every
+- A signed-in 1Password CLI (`op`). Machine secrets never live in this repo; every
   `op://` reference in the Talos configs and bootstrap manifests is resolved
   at apply time with `op inject`.
 - A valid `talosconfig` at the repo root (mise points `TALOSCONFIG` there).
@@ -236,10 +235,8 @@ graph LR
    installed), then applies:
     - `kustomize/` - bootstrap Secrets rendered through `op inject`, plus
       their namespaces: 1Password Connect credentials and token plus the
-      Cloudflare tunnel ID from the personal account (`personal/`), and the
-      1Password service-account token from the home-operations account
-      (`home-operations/`, injected with its own `OP_ACCOUNT`). These exist
-      before their controllers so nothing deadlocks on a missing Secret.
+      Cloudflare tunnel ID (`personal/`). These exist before their
+      controllers so nothing deadlocks on a missing Secret.
     - `helmfile/crds.yaml` - CRDs extracted from upstream charts
       (envoy-gateway, grafana-operator, kube-prometheus-stack) and applied
       directly. Installing CRDs out-of-band means Flux Kustomizations that
