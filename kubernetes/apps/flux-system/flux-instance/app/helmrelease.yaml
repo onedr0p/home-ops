@@ -38,7 +38,7 @@ spec:
                 value: --requeue-dependency=5s
             target:
               kind: Deployment
-              name: (kustomize-controller|helm-controller|source-controller)
+              name: (helm-controller|source-controller)
           - # Increase the memory limits
             patch: |-
               apiVersion: apps/v1
@@ -61,6 +61,9 @@ spec:
               - op: add
                 path: /spec/template/spec/containers/0/args/-
                 value: --concurrent=20
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --requeue-dependency=5s
               - op: replace
                 path: /spec/template/spec/volumes/0
                 value:
