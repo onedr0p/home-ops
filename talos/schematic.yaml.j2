@@ -1,11 +1,13 @@
 ---
 customization:
   extraKernelArgs:
+    - audit=0 # Kernel audit off; SELinux permissive AVC records on unlabeled PV dirs exceed the rate limit
     - i915.enable_guc=3 # Meteor Lake CPU & Intel iGPU
     - intel_iommu=on # PCI Passthrough
     - iommu=pt # PCI Passthrough
     - module_blacklist=igc # Thunderbolt NICs (disable igc)
     - sysctl.kernel.kexec_load_disabled=1 # Meteor Lake CPU & Intel iGPU
+    - talos.auditd.disabled=1 # Talos auditd needs NETLINK_AUDIT, which audit=0 removes
     - thunderbolt.host_reset=0 # Thunderbolt NICs
   systemExtensions:
     officialExtensions:
