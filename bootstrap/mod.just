@@ -51,9 +51,6 @@ base: api-ready nodes-ready
     if ! kustomize build {{ source_directory() }}/kustomize/personal | just template - | kubectl apply --server-side --force-conflicts -f -; then
         just log fatal "Failed to apply personal manifests" "stage" "{{ recipe_name() }}"
     fi
-    if ! kustomize build {{ source_directory() }}/kustomize/home-operations | OP_ACCOUNT="home-operations.1password.com" just template - | kubectl apply --server-side --force-conflicts -f -; then
-        just log fatal "Failed to apply home-operations manifests" "stage" "{{ recipe_name() }}"
-    fi
     if ! helmfile -f "{{ source_directory() }}/helmfile/crds.yaml" template -q | yq ea -r -e 'select(.kind == "CustomResourceDefinition")' | kubectl apply --server-side --force-conflicts -f -; then
         just log fatal "Failed to apply base crds" "stage" "{{ recipe_name() }}"
     fi
