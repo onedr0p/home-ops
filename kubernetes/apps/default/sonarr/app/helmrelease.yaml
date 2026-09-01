@@ -26,7 +26,7 @@ spec:
               SONARR__AUTH__REQUIRED: DisabledForLocalAddresses
               SONARR__LOG__DBENABLED: "False"
               SONARR__LOG__LEVEL: info
-              SONARR__SERVER__ALLOWEDHOSTS: sonarr.turbo.ac,sonarr.default.svc.cluster.local
+              SONARR__SERVER__ALLOWEDHOSTS: "*"
               SONARR__SERVER__PORT: &port 80
               SONARR__SERVER__TRUSTEDNETWORKS: 10.42.0.0/16
               SONARR__UPDATE__BRANCH: develop
@@ -48,9 +48,6 @@ spec:
                   httpGet:
                     path: /ping
                     port: *port
-                    httpHeaders:
-                      - name: Host
-                        value: localhost
                   periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 5

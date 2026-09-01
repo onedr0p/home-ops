@@ -26,7 +26,7 @@ spec:
               RADARR__AUTH__REQUIRED: DisabledForLocalAddresses
               RADARR__LOG__DBENABLED: "False"
               RADARR__LOG__LEVEL: info
-              RADARR__SERVER__ALLOWEDHOSTS: radarr.turbo.ac,radarr.default.svc.cluster.local
+              RADARR__SERVER__ALLOWEDHOSTS: "*"
               RADARR__SERVER__PORT: &port 80
               RADARR__SERVER__TRUSTEDNETWORKS: 10.42.0.0/16
               RADARR__UPDATE__BRANCH: develop
@@ -48,9 +48,6 @@ spec:
                   httpGet:
                     path: /ping
                     port: *port
-                    httpHeaders:
-                      - name: Host
-                        value: localhost
                   periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 5
