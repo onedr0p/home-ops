@@ -26,9 +26,8 @@ spec:
               PROWLARR__AUTH__REQUIRED: DisabledForLocalAddresses
               PROWLARR__LOG__DBENABLED: "False"
               PROWLARR__LOG__LEVEL: info
-              PROWLARR__SERVER__ALLOWEDHOSTS: prowlarr.turbo.ac,prowlarr.default.svc.cluster.local
+              PROWLARR__SERVER__ALLOWEDHOSTS: "*"
               PROWLARR__SERVER__PORT: &port 80
-              PROWLARR__SERVER__TRUSTEDNETWORKS: 10.42.0.0/16
               PROWLARR__UPDATE__BRANCH: develop
               TZ: America/New_York
             envFrom:
@@ -48,9 +47,6 @@ spec:
                   httpGet:
                     path: /ping
                     port: *port
-                    httpHeaders:
-                      - name: Host
-                        value: localhost
                   periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 5
