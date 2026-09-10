@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kopiur.home-operations.com/repositoryreplication_v1alpha1.json
+apiVersion: kopiur.home-operations.com/v1alpha1
+kind: RepositoryReplication
+metadata:
+  name: expanse-r2
+spec:
+  sourceRef:
+    kind: ClusterRepository
+    name: expanse
+  destination:
+    s3:
+      auth:
+        secretRef:
+          name: kopiur-r2-secret
+      bucket: kopiur
+      endpoint: 0a10060d9ff3ad5770343527ec45f104.r2.cloudflarestorage.com
+      region: auto
+  schedule:
+    cron: 0 5 * * *
+    jitter: 30m
+  sync:
+    parallel: 8
