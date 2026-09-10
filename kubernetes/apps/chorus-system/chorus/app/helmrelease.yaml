@@ -1,0 +1,66 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: chorus
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: chorus
+  interval: 1h
+  values:
+    existingCredentialsSecret: chorus-secret
+    storage:
+      main: garage
+      storages:
+        garage:
+          type: S3
+          address: expanse.internal:9000
+          provider: Other
+          isSecure: false
+          defaultRegion: us-east-1
+        r2:
+          type: S3
+          provider: Other
+          isSecure: true
+          defaultRegion: auto
+    redis:
+      enabled: false
+    externalRedis:
+      addresses:
+        - chorus-dragonfly.chorus-system.svc.cluster.local:6379
+      existingSecret: chorus-dragonfly-secret
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+    proxy:
+      replicas: 2
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: chorus
+                  app.kubernetes.io/component: proxy
+      podDisruptionBudget:
+        enabled: true
+      config:
+        auth:
+          useStorage: garage
+      resources:
+        requests:
+          cpu: 10m
+        limits:
+          memory: 256Mi
+    worker:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 10m
+        limits:
+          memory: 512Mi
+    ui:
+      enabled: true
