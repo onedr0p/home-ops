@@ -95,6 +95,10 @@ spec:
                 requestHeaderModifier:
                   remove:
                     - Range
+                  set:
+                    &pipeline # Plex closes idle keep-alive connections after 20s unless this is set, so Envoy owns the pool
+                    - name: X-Plex-Http-Pipeline
+                      value: infinite
             matches:
               - path:
                   type: PathPrefix
@@ -102,6 +106,10 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+            filters:
+              - type: RequestHeaderModifier
+                requestHeaderModifier:
+                  set: *pipeline
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
