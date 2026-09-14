@@ -96,6 +96,14 @@ spec:
                     # Plex closes idle keep-alive connections after 20s unless this is set, so Envoy owns the pool
                     - name: X-Plex-Http-Pipeline
                       value: infinite
+          - backendRefs: *backendRefs
+            filters:
+              - type: RequestHeaderModifier
+                requestHeaderModifier: *pipeline
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /:/eventsource
           - # Ref: https://forums.plex.tv/t/external-srt-subtitles-are-not-working-w-reverse-proxy/886540
             backendRefs: *backendRefs
             filters:

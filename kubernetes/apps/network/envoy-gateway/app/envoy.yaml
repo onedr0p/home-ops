@@ -137,11 +137,15 @@ spec:
   targetSelectors:
     - group: gateway.networking.k8s.io
       kind: Gateway
-  tcpKeepalive: {}
+  tcpKeepalive:
+    idleTime: 60s
+    interval: 10s
+    probes: 3
   timeout:
     http:
-      connectionIdleTimeout: 30s
+      connectionIdleTimeout: 4s
       requestTimeout: 0s
+      streamIdleTimeout: 1h
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/clienttrafficpolicy_v1alpha1.json
 apiVersion: gateway.envoyproxy.io/v1alpha1
@@ -153,18 +157,19 @@ spec:
     xForwardedFor:
       trustedCIDRs:
         - 10.42.0.0/16
-  connection:
-    bufferLimit: 4Mi
   http2:
     onInvalidMessage: TerminateStream
   http3: {}
   targetSelectors:
     - group: gateway.networking.k8s.io
       kind: Gateway
-  tcpKeepalive: {}
+  tcpKeepalive:
+    idleTime: 60s
+    interval: 10s
+    probes: 3
   timeout:
     http:
-      idleTimeout: 120s
+      idleTimeout: 600s
   tls:
     minVersion: "1.2"
     alpnProtocols:
