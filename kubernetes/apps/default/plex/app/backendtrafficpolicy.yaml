@@ -10,6 +10,25 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: plex
+  requestBuffer:
+    limit: 1Mi
+  timeout:
+    http:
+      connectionIdleTimeout: 300s
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/backendtrafficpolicy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: plex-events
+spec:
+  mergeType: StrategicMerge
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: plex
+      # requestBuffer hangs WebSocket upgrades, so this rule-level policy replaces the route-level one without it
+      sectionName: events
   timeout:
     http:
       connectionIdleTimeout: 300s
