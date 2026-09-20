@@ -37,7 +37,7 @@ jobs:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           GITHUB_BOT_APP_CLIENT_ID: op://kubernetes/github-bot/GITHUB_BOT_APP_CLIENT_ID
           GITHUB_BOT_APP_PRIVATE_KEY: op://kubernetes/github-bot/GITHUB_BOT_APP_PRIVATE_KEY
-          ANTHROPIC_API_KEY: op://kubernetes/claude/ANTHROPIC_API_KEY
+          CLAUDE_CODE_OAUTH_TOKEN: op://kubernetes/claude/CLAUDE_CODE_OAUTH_TOKEN
 
       - name: Generate Token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -56,7 +56,7 @@ jobs:
       - name: Run Claude
         uses: anthropics/claude-code-action@cfc3eb22bfed5c26ef66e3223c982af27e4524de # v1.0.231
         with:
-          anthropic_api_key: ${{ steps.load-secrets.outputs.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ steps.load-secrets.outputs.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ steps.app-token.outputs.token }}
           allowed_bots: bot-ross[bot]
           prompt: |
