@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: Claude Review
+name: Claude Renovate Review
 
 on:
   pull_request:
@@ -24,9 +24,10 @@ jobs:
     if: >-
       ${{
         github.event.pull_request.head.repo.full_name == github.repository &&
-        !github.event.pull_request.draft
+        !github.event.pull_request.draft &&
+        startsWith(github.head_ref, 'renovate/')
       }}
-    name: Claude Review
+    name: Claude Renovate Review
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -63,8 +64,8 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            You review this pull request and report problems. You do not change
-            files.
+            You review this Renovate dependency update pull request and report
+            problems. You do not change files.
 
             This is a GitOps repository for a Talos Linux Kubernetes cluster
             reconciled by Flux. It holds Kubernetes manifests, Flux
@@ -78,10 +79,6 @@ jobs:
             Start with `gh pr view --comments` and `gh pr diff`. If an earlier
             comment from this review already covers the same change (the PR was
             only rebased), stop without commenting.
-
-            Then cover whichever of the two sections below apply to the diff.
-
-            ## Dependency upgrades
 
             For every version bump in the diff (container image, chart, Talos,
             Kubernetes, CLI tool, GitHub Action):
@@ -105,18 +102,9 @@ jobs:
                breaking change in a feature that is not used here is not
                actionable; leave it out.
 
-            ## Other changes
-
-            For everything that is not a version bump, look for:
-
-            - Bugs and misconfigurations in Kubernetes manifests, Flux
-              Kustomizations, HelmRelease values and Talos machine config
-            - Changes that would break reconciliation or take down a running
-              workload (renamed resources, immutable fields, removed PVCs,
-              broken dependsOn or substitution references)
-            - Security problems (plaintext secrets, overly broad RBAC, new
-              externally exposed routes, weakened securityContext)
-            - Inconsistency with how neighbouring apps in the repo are laid out
+            If the diff contains anything other than version bumps, check it
+            for changes that would break Flux reconciliation or take down a
+            running workload.
 
             Report only problems you are confident in; do not comment on style
             or praise the change.
