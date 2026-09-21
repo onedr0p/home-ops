@@ -115,8 +115,11 @@
       minimumGroupSize: 5,
     },
     {
+      // Scheduled tools stay out: a grouped branch takes its schedule from
+      // whichever update sorts first
       description: "Mise Tools Group",
       matchManagers: ["mise"],
+      matchDepNames: ["!node", "!oxfmt"],
       groupName: "mise tools",
       groupSlug: "mise-tools",
     },
@@ -146,6 +149,13 @@
       matchManagers: ["mise"],
       matchDepNames: ["1password-cli"],
       enabled: false,
+    },
+    // Scheduling rules
+    {
+      description: "High-cadence mise tools monthly",
+      matchManagers: ["mise"],
+      matchDepNames: ["node", "oxfmt"],
+      schedule: ["before 3am on the first day of the month"],
     },
     // Labeling rules
     {
