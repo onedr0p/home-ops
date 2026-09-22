@@ -32,13 +32,13 @@ spec:
       healthCheck:
         muteHealthWarning:
           AUTH_INSECURE_ROTATING_SERVICE_KEY_TYPE:
-            policy: mute
+            policy: unmute
           AUTH_INSECURE_CLIENT_KEY_TYPE:
-            policy: mute
+            policy: unmute
           AUTH_INSECURE_KEYS_ALLOWED:
-            policy: mute
+            policy: unmute
           AUTH_INSECURE_KEYS_CREATABLE:
-            policy: mute
+            policy: unmute
       mgr:
         modules:
           - name: pg_autoscaler
@@ -52,6 +52,7 @@ spec:
             memory: 8Gi # Required for bootstrap
       security:
         cephx:
+          allowedCiphers: [aes256k]
           daemon:
             keyRotationPolicy: KeyGeneration
             keyGeneration: 2
