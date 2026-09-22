@@ -56,7 +56,14 @@ spec:
             keyRotationPolicy: KeyGeneration
             keyGeneration: 2
           csi:
-            keyType: aes # aes256k requires kernel 7.0+
+            keyRotationPolicy: KeyGeneration
+            keyGeneration: 2
+            keepPriorKeyCountMax: 1
+            keyType: aes256k # Talos 1.14+ backports the kernel 7.0 aes256k support
+          rbdMirrorPeer:
+            keyRotationPolicy: KeyGeneration
+            keyGeneration: 2
+            keyType: aes256k
       storage:
         devicePathFilter: /dev/disk/by-id/nvme-Micron_7450_MTFDKBA800TFS_.*
         useAllDevices: false
