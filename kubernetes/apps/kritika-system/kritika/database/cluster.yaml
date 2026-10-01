@@ -1,0 +1,40 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: kritika-postgres
+spec:
+  instances: 2
+  # TensorChord's CloudNativePG build: Postgres with VectorChord and the
+  # pgvector it builds on.
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:18.6-1.1.1
+  postgresql:
+    shared_preload_libraries:
+      - vchord
+    # A commit waits for the standby while it is healthy, so a failover
+    # loses nothing; with the standby down, writes go on without it.
+    synchronous:
+      method: any
+      number: 1
+      dataDurability: preferred
+  primaryUpdateStrategy: unsupervised
+  # Update the standby first, then switch over to it, rather than restart
+  # the primary in place.
+  primaryUpdateMethod: switchover
+  enableSuperuserAccess: false
+  storage:
+    size: 10Gi
+    storageClass: ceph-block
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+  bootstrap:
+    initdb:
+      database: kritika
+      owner: kritika
+      secret:
+        name: kritika-postgres-credentials

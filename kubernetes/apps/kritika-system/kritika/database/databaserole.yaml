@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/databaserole_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: DatabaseRole
+metadata:
+  name: kritika-app
+spec:
+  cluster:
+    name: kritika-postgres
+  name: kritika_app
+  ensure: present
+  login: true
+  inherit: true
+  passwordSecret:
+    name: kritika-postgres-app
+  # Removing this resource leaves the role, so a running kritika keeps its
+  # connections.
+  databaseRoleReclaimPolicy: retain
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/postgresql.cnpg.io/databaserole_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: DatabaseRole
+metadata:
+  name: kritika-runner
+spec:
+  cluster:
+    name: kritika-postgres
+  name: kritika_runner
+  ensure: present
+  login: true
+  inherit: true
+  passwordSecret:
+    name: kritika-postgres-runner
+  databaseRoleReclaimPolicy: retain
