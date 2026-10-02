@@ -5,6 +5,15 @@ kind: Kustomization
 metadata:
   name: kritika-database
 spec:
+  healthChecks:
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      name: kritika-postgres
+      namespace: kritika-system
+  healthCheckExprs:
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
   interval: 1h
   path: ./kubernetes/apps/kritika-system/kritika/database
   prune: true
@@ -13,7 +22,6 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: kritika-system
-  wait: true
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
