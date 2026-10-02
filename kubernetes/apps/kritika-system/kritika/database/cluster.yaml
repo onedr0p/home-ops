@@ -16,6 +16,12 @@ spec:
           - /usr/lib/postgresql/18/lib/
         extension_control_path:
           - /usr/share/postgresql/18/
+    # kritika's leader lock is a session advisory lock; a holder that vanishes
+    # without closing its connection keeps it until keepalive notices.
+    parameters:
+      tcp_keepalives_idle: "60"
+      tcp_keepalives_interval: "10"
+      tcp_keepalives_count: "6"
     shared_preload_libraries:
       - vchord
     synchronous:
