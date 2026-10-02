@@ -2,6 +2,7 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: [
     "github>home-operations/renovate-presets#8.1.0",
+    "github>home-operations/renovate-presets//apps/cnpg.json5#8.1.0",
     "github>home-operations/renovate-presets//apps/grafanaDashboards.json5#8.1.0",
     "github>home-operations/renovate-presets//apps/talosFactory.json5#8.1.0",
     ":timezone(America/New_York)",
@@ -149,6 +150,12 @@
       matchManagers: ["mise"],
       matchDepNames: ["1password-cli"],
       enabled: false,
+    },
+    {
+      description: "Keep CloudNativePG on Postgres 18 until the extension images move with it",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],
+      allowedVersions: "/^18\\./",
     },
     // Scheduling rules
     {
