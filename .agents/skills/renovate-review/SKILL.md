@@ -71,19 +71,24 @@ repository's values, from the repository root:
 flate build hr <name> -n <namespace> --path kubernetes/flux/cluster --no-progress
 ```
 
-A render that fails is a finding on the bumped line: a value the new
-chart's schema rejects, a template that errors on this repository's
-values. A render that succeeds is what the cluster would apply; take the
-label values, resource names and ports the exposure search depends on from
-it rather than from a reading of the template, and narrow it with
-`--show-only <template path>` when the whole output is too long. Only the
-head is checked out, so the old chart does not render here: what it
-produced is read upstream, or from the names this repository already
-refers to.
+flate reports every failure in the namespace, not only the requested
+HelmRelease's, and exits nonzero for any of them. A failure is a finding
+on the bumped line only when it belongs to the HelmRelease under review
+and the update caused it: a value the new chart's schema rejects, a
+template that errors on this repository's values. A failure of another
+HelmRelease, or a source that could not be fetched, says nothing about the
+update; a chart from `ocharted.turbo.ac` always fails that way, since the
+review has no credentials for it.
 
-A chart from `ocharted.turbo.ac` needs credentials the review does not
-have; its render fails as "source not ready", which says nothing about the
-update.
+A render that succeeds is an offline approximation of what the cluster
+applies: CRDs and Secrets are left out, and templates that branch on
+Kubernetes capabilities see flate's bundled version, not the cluster's.
+Within that, take the label values, resource names and ports the exposure
+search depends on from the render rather than from a reading of the
+template, and narrow it with `--show-only <template path>` when the whole
+output is too long. Only the head is checked out, so the old chart does
+not render here: what it produced is read upstream, or from the names this
+repository already refers to.
 
 ## Exposure here
 
