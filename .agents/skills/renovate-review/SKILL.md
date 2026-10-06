@@ -32,11 +32,13 @@ read every intermediate release, breaking changes land in the middle.
   `url` is the registry path and `ref.tag` the version. A path under an
   owner (`oci://<registry>/<owner>/...`) is that owner's chart on GitHub,
   where `Chart.yaml`'s `sources` or `home` confirms the repository. A path
-  that begins with a hostname (`oci://<proxy>/<host>/<path>/<chart>`) is a
-  proxy of the Helm repository at `https://<host>/<path>`; find that
-  project's GitHub repository and read its `CHANGELOG.md` or releases
-  there. Chart version and app version differ: read the chart's changelog,
-  and the application's too when `appVersion` moved.
+  under `ghcr.io/home-operations/charts-mirror/<chart>` is a mirror of a
+  chart whose project publishes none in OCI form:
+  `apps/<chart>/metadata.yaml` in `home-operations/charts-mirror` names the
+  upstream Helm repository, and the chart's changelog and releases are in
+  that project's own GitHub repository. Chart version and app version
+  differ: read the chart's changelog, and the application's too when
+  `appVersion` moved.
 - A repository that publishes many charts prefixes its release tags with
   the chart name (`<chart>-1.2.3`, not `v1.2.3`). When a release is not
   found, list releases and look for the chart name.
@@ -77,8 +79,7 @@ on the bumped line only when it belongs to the HelmRelease under review
 and the update caused it: a value the new chart's schema rejects, a
 template that errors on this repository's values. A failure of another
 HelmRelease, or a source that could not be fetched, says nothing about the
-update; a chart from `ocharted.turbo.ac` always fails that way, since the
-review has no credentials for it.
+update.
 
 A render that succeeds is an offline approximation of what the cluster
 applies: CRDs and Secrets are left out, and templates that branch on
