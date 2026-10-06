@@ -1,6 +1,6 @@
 ---
 name: review-renovate-pr
-description: Review a Renovate dependency update in this Flux repository. Where to find each dependency's upstream history (OCIRepository charts through ghcr.io or the ocharted proxy, images, actions, mise tools), what counts as a breaking change, what under kubernetes/ to check for exposure to it, and this repository's auto-merge and grouping rules. Read it for any pull request on a renovate/ branch.
+description: Review a Renovate dependency update in this Flux repository. Where to find a dependency's upstream history (OCIRepository charts through ghcr.io or the ocharted proxy, images, actions, mise tools), what counts as a breaking change, how to check what under kubernetes/ depends on it, and where this repository's Renovate rules live. Read it for any pull request on a renovate/ branch.
 ---
 
 # Review a Renovate PR
@@ -35,10 +35,9 @@ read every intermediate release, breaking changes land in the middle.
   repository and read its `CHANGELOG.md` or releases there. Chart version
   and app version differ: read the chart's changelog, and the
   application's too when `appVersion` moved.
-- Multi-chart repositories (`prometheus-community/helm-charts`,
-  `VictoriaMetrics/helm-charts`, `bitnami/charts`) prefix release tags with
-  the chart name: `kube-prometheus-stack-75.0.0`, not `v75.0.0`. When a
-  release is not found, list releases and look for the chart name.
+- A repository that publishes many charts prefixes its release tags with
+  the chart name (`<chart>-1.2.3`, not `v1.2.3`). When a release is not
+  found, list releases and look for the chart name.
 - A digest-only update moved no version: say whether the tag was rebuilt
   (a security rebuild or a `latest`-style pin).
 - A release note that says "see #2785" is read with `gh issue view` or
@@ -64,18 +63,17 @@ from the PR or the template, not the sentence.
 ## Exposure here
 
 The question is not whether this repository sets the old thing but whether
-anything here depends on it:
+anything here depends on it. Search `kubernetes/` for:
 
-- **Label key or value**: what selects on the old one under `kubernetes/`:
-  `matchLabels`, `selector`, `labelSelector`, `jobLabel` in ServiceMonitor,
-  PodMonitor and PrometheusRule objects, and PromQL in rules and dashboards.
-- **Resource name**: references to the old name: `HTTPRoute` `backendRefs`,
-  ServiceMonitor selectors, cross-namespace DNS
-  (`<name>.<namespace>.svc.cluster.local`), NetworkPolicy selectors,
-  `dependsOn` and `healthChecks` in `ks.yaml`.
-- **Value, flag or CRD field**: the HelmRelease `values`, `valuesFrom`,
-  `postRenderers`, kustomize patches, and the CRD objects other apps create
-  (`apiVersion: <group>`).
+- **a label key or value**: whatever selects on it, such as `matchLabels`
+  and `selector` fields of monitors, network policies and disruption
+  budgets, and label matchers in PromQL rules and dashboards;
+- **a resource name**: whatever refers to it, such as route backends,
+  cross-namespace DNS (`<name>.<namespace>.svc.cluster.local`), selectors,
+  and Flux `dependsOn` and `healthChecks`;
+- **a value, flag or CRD field**: the HelmRelease `values`, `valuesFrom`,
+  `postRenderers`, kustomize patches, and the custom resources other apps
+  create from the dependency's CRDs (`apiVersion: <group>`).
 
 Before prescribing a rename or a new value, confirm it from the upstream
 PR's diff or from the chart's template at the new tag, read raw with
@@ -92,16 +90,11 @@ empty, is enough.
 
 - Flux reconciles `kubernetes/` from `main`: a merge rolls out within
   minutes.
-- Renovate auto-merges some updates (`.renovaterc.json5`): digests of
-  `home-operations` images; minor and patch updates of
-  `kube-prometheus-stack`, weekly; minor, patch and digest updates of
-  GitHub Actions; Grafana dashboards; Renovate presets. For those the
-  review is the last look before the merge.
-- Grouped PRs (`actions-runner-controller`, `flux-operator`, `kubernetes`,
-  `rook-ceph`, `talos`, `mise tools`) move several packages at once; cover
-  each.
+- `.renovaterc.json5` is the source for how Renovate treats this update:
+  its `automerge` rules say whether the PR merges on its own, in which case
+  the review is the last look before the merge; its `groupName` rules say
+  which PRs move several packages at once, each of which the review
+  covers; its labels and the shared preset's `!` on a major update should
+  agree with the title, and drift between them is worth a note.
 - Secrets are ExternalSecrets from 1Password: judge key names and mappings
   from the manifests.
-- A major update is labelled `type/major` and the shared preset puts a `!`
-  in its title; a title that disagrees with its labels is Renovate drift
-  worth a note.
