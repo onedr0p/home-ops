@@ -1,5 +1,5 @@
 ---
-name: review-renovate-pr
+name: renovate-review
 description: Review a Renovate dependency update in this Flux repository. Where to find a dependency's upstream history (charts from their OCIRepository, images, actions, mise tools), what counts as a breaking change, how to check what under kubernetes/ depends on it, and where this repository's Renovate rules live. Read it for any pull request on a renovate/ branch.
 ---
 
