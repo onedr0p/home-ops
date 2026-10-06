@@ -1,6 +1,6 @@
 ---
 name: review-renovate-pr
-description: Review a Renovate dependency update in this Flux repository. Where to find a dependency's upstream history (OCIRepository charts through ghcr.io or the ocharted proxy, images, actions, mise tools), what counts as a breaking change, how to check what under kubernetes/ depends on it, and where this repository's Renovate rules live. Read it for any pull request on a renovate/ branch.
+description: Review a Renovate dependency update in this Flux repository. Where to find a dependency's upstream history (charts from their OCIRepository, images, actions, mise tools), what counts as a breaking change, how to check what under kubernetes/ depends on it, and where this repository's Renovate rules live. Read it for any pull request on a renovate/ branch.
 ---
 
 # Review a Renovate PR
@@ -25,16 +25,18 @@ read every intermediate release, breaking changes land in the middle.
 
 ## Finding the upstream
 
-- `ghcr.io/<owner>/<repo>` images come from `<owner>/<repo>` on GitHub; for
-  other images, the body or the image's `org.opencontainers.image.source`
-  annotation names the source.
-- `oci://ghcr.io/home-operations/charts/<chart>` is the home-operations
-  fleet's own chart; its releases are in `home-operations/<chart>`.
-- `oci://ocharted.turbo.ac/<host>/<path>/<chart>` is a proxy of the Helm
-  repository at `https://<host>/<path>`; find that project's GitHub
-  repository and read its `CHANGELOG.md` or releases there. Chart version
-  and app version differ: read the chart's changelog, and the
-  application's too when `appVersion` moved.
+- An image at `<registry>/<owner>/<repo>` usually comes from `<owner>/<repo>`
+  on GitHub; otherwise the body or the image's
+  `org.opencontainers.image.source` annotation names the source.
+- A chart's source is the app's `OCIRepository` (`ocirepository.yaml`): its
+  `url` is the registry path and `ref.tag` the version. A path under an
+  owner (`oci://<registry>/<owner>/...`) is that owner's chart on GitHub,
+  where `Chart.yaml`'s `sources` or `home` confirms the repository. A path
+  that begins with a hostname (`oci://<proxy>/<host>/<path>/<chart>`) is a
+  proxy of the Helm repository at `https://<host>/<path>`; find that
+  project's GitHub repository and read its `CHANGELOG.md` or releases
+  there. Chart version and app version differ: read the chart's changelog,
+  and the application's too when `appVersion` moved.
 - A repository that publishes many charts prefixes its release tags with
   the chart name (`<chart>-1.2.3`, not `v1.2.3`). When a release is not
   found, list releases and look for the chart name.
