@@ -67,7 +67,16 @@ from the PR or the template, not the sentence.
 ## Rendering a chart update
 
 For a chart bump, render the HelmRelease with the new chart and this
-repository's values, from the repository root:
+repository's values, from the repository root, with the namespace's
+directory as the path:
+
+```
+flate build hr <name> --path kubernetes/apps/<namespace> --no-progress
+```
+
+A HelmRelease whose Kustomization depends on one in another namespace is
+reported as blocked there; render it from the whole tree instead, which
+takes several times the memory:
 
 ```
 flate build hr <name> -n <namespace> --path kubernetes/flux/cluster --no-progress
