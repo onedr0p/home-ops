@@ -7,8 +7,8 @@ description: Review a Renovate dependency update in this Flux repository. Where 
 
 Judge whether the update is safe to merge: what changed upstream between the
 old and new versions, and whether anything in this repository depends on
-it. Only `github.com`, `api.github.com` and `raw.githubusercontent.com` are
-reachable; doc sites, Artifact Hub and chart registries are not.
+it. GitHub is read with `gh`; a project's own changelog or documentation
+site with `curl`.
 
 ## The update
 
@@ -61,6 +61,29 @@ the old value while a search for the key still matches.
 Minor and patch updates carry breaking changes too. "Chart name prefix
 removed" is ambiguous between label values and resource names: settle it
 from the PR or the template, not the sentence.
+
+## Rendering a chart update
+
+For a chart bump, render the HelmRelease with the new chart and this
+repository's values, from the repository root:
+
+```
+flate build hr <name> -n <namespace> --path kubernetes/flux/cluster --no-progress
+```
+
+A render that fails is a finding on the bumped line: a value the new
+chart's schema rejects, a template that errors on this repository's
+values. A render that succeeds is what the cluster would apply; take the
+label values, resource names and ports the exposure search depends on from
+it rather than from a reading of the template, and narrow it with
+`--show-only <template path>` when the whole output is too long. Only the
+head is checked out, so the old chart does not render here: what it
+produced is read upstream, or from the names this repository already
+refers to.
+
+A chart from `ocharted.turbo.ac` needs credentials the review does not
+have; its render fails as "source not ready", which says nothing about the
+update.
 
 ## Exposure here
 
