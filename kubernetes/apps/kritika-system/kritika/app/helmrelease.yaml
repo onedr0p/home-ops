@@ -16,8 +16,9 @@ spec:
     config:
       webUrl: https://{{ .Release.Name }}.turbo.ac
       runnerRuntimeClass: gvisor
-      defaultsModelsReview: openrouter/~openai/gpt-sol-latest
-      defaultsModelsFallback: openrouter/~anthropic/claude-opus-latest
+      reviewModel: openrouter/~openai/gpt-sol-latest
+      reviewFallback: openrouter/~anthropic/claude-opus-latest
+      confidenceModel: openrouter/~anthropic/claude-sonnet-latest
       embeddingModel: openrouter/voyageai/voyage-code-4
       embeddingDims: 1024
     configFile:
@@ -29,8 +30,11 @@ spec:
           webhookSecret: { env: KRITIKA_GITHUB_WEBHOOK_SECRET }
       egress:
         allowHosts: [raw.githubusercontent.com]
-      defaults:
-        agent: { commands: [gh, curl, jq, yq, rg, fd] }
+      review:
+        approve: true
+      trigger:
+        exclude: [{ name: forks, expr: pr.fork }]
+      agent: { commands: [gh, curl, jq, yq, rg, fd] }
     envFrom:
       - secretRef:
           name: kritika-secret
