@@ -7,8 +7,8 @@ description: Review a Renovate dependency update in this Flux repository. Where 
 
 Judge whether the update is safe to merge: what changed upstream between the
 old and new versions, and whether anything in this repository depends on
-it. Only `github.com`, `api.github.com` and `raw.githubusercontent.com` are
-reachable; doc sites, Artifact Hub and chart registries are not.
+it. GitHub is read with `gh`; a project's own changelog or documentation
+site with `curl`.
 
 ## The update
 
@@ -32,11 +32,13 @@ read every intermediate release, breaking changes land in the middle.
   `url` is the registry path and `ref.tag` the version. A path under an
   owner (`oci://<registry>/<owner>/...`) is that owner's chart on GitHub,
   where `Chart.yaml`'s `sources` or `home` confirms the repository. A path
-  that begins with a hostname (`oci://<proxy>/<host>/<path>/<chart>`) is a
-  proxy of the Helm repository at `https://<host>/<path>`; find that
-  project's GitHub repository and read its `CHANGELOG.md` or releases
-  there. Chart version and app version differ: read the chart's changelog,
-  and the application's too when `appVersion` moved.
+  under `ghcr.io/home-operations/charts-mirror/<chart>` is a mirror of a
+  chart whose project publishes none in OCI form:
+  `apps/<chart>/metadata.yaml` in `home-operations/charts-mirror` names the
+  upstream Helm repository, and the chart's changelog and releases are in
+  that project's own GitHub repository. Chart version and app version
+  differ: read the chart's changelog, and the application's too when
+  `appVersion` moved.
 - A repository that publishes many charts prefixes its release tags with
   the chart name (`<chart>-1.2.3`, not `v1.2.3`). When a release is not
   found, list releases and look for the chart name.
@@ -61,6 +63,42 @@ the old value while a search for the key still matches.
 Minor and patch updates carry breaking changes too. "Chart name prefix
 removed" is ambiguous between label values and resource names: settle it
 from the PR or the template, not the sentence.
+
+## Rendering a chart update
+
+For a chart bump, render the HelmRelease with the new chart and this
+repository's values, from the repository root, with the namespace's
+directory as the path:
+
+```
+flate build hr <name> --path kubernetes/apps/<namespace> --no-progress
+```
+
+A HelmRelease whose Kustomization depends on one in another namespace is
+reported as blocked there; render it from the whole tree instead, which
+takes several times the memory:
+
+```
+flate build hr <name> -n <namespace> --path kubernetes/flux/cluster --no-progress
+```
+
+flate reports every failure in the namespace, not only the requested
+HelmRelease's, and exits nonzero for any of them. A failure is a finding
+on the bumped line only when it belongs to the HelmRelease under review
+and the update caused it: a value the new chart's schema rejects, a
+template that errors on this repository's values. A failure of another
+HelmRelease, or a source that could not be fetched, says nothing about the
+update.
+
+A render that succeeds is an offline approximation of what the cluster
+applies: CRDs and Secrets are left out, and templates that branch on
+Kubernetes capabilities see flate's bundled version, not the cluster's.
+Within that, take the label values, resource names and ports the exposure
+search depends on from the render rather than from a reading of the
+template, and narrow it with `--show-only <template path>` when the whole
+output is too long. Only the head is checked out, so the old chart does
+not render here: what it produced is read upstream, or from the names this
+repository already refers to.
 
 ## Exposure here
 

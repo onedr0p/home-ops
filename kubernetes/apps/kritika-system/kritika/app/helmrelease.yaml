@@ -16,8 +16,9 @@ spec:
     config:
       webUrl: https://{{ .Release.Name }}.turbo.ac
       runnerRuntimeClass: gvisor
-      reviewModel: openrouter/~openai/gpt-sol-latest
+      reviewModel: openrouter/~openai/gpt-luna-latest
       reviewFallback: openrouter/~anthropic/claude-opus-latest
+      reviewEffort: xhigh
       confidenceModel: openrouter/~anthropic/claude-sonnet-latest
       embeddingModel: openrouter/voyageai/voyage-code-4
       embeddingDims: 1024
@@ -29,12 +30,11 @@ spec:
           privateKey: { env: KRITIKA_GITHUB_PRIVATE_KEY }
           webhookSecret: { env: KRITIKA_GITHUB_WEBHOOK_SECRET }
       egress:
-        allowHosts: [raw.githubusercontent.com]
-      review:
-        approve: true
+        allow: ["*"]
+        deny: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, "*.internal"]
       trigger:
         exclude: [{ name: forks, expr: pr.fork }]
-      agent: { commands: [gh, curl, jq, yq, rg, fd] }
+      agent: { commands: [gh, curl, jq, yq, rg, fd, flate] }
     envFrom:
       - secretRef:
           name: kritika-secret
@@ -46,12 +46,15 @@ spec:
       runner:
         existingSecret: kritika-postgres-runner
     runner:
+      tools:
+        - name: flate
+          image: ghcr.io/home-operations/flate:0.6.5@sha256:e0e2d2de97539b3141977e8bb3bbb50ea5c5afe89477950e5fa972c9862478da
       resources:
         requests:
           cpu: 10m
-          memory: 128Mi
+          memory: 512Mi
         limits:
-          memory: 1Gi
+          memory: 3Gi
     httpRoute:
       enabled: true
       annotations:
