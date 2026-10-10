@@ -30,7 +30,11 @@ spec:
           privateKey: { env: KRITIKA_GITHUB_PRIVATE_KEY }
           webhookSecret: { env: KRITIKA_GITHUB_WEBHOOK_SECRET }
       providers:
-        anthropic: { type: anthropic, apiKey: { env: KRITIKA_ANTHROPIC_API_KEY } }
+        anthropic:
+          type: anthropic
+          apiKey: { env: KRITIKA_ANTHROPIC_API_KEY }
+          pricing:
+            ~sonnet-latest: { input: 2, output: 10, cacheRead: 0.1, cacheWrite: 2.5 }
         chatgpt: { type: chatgpt }
         openrouter: { type: openrouter, apiKey: { env: KRITIKA_OPENROUTER_API_KEY } }
       egress:
