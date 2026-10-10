@@ -1,6 +1,6 @@
 ---
 name: renovate-review
-description: Review a Renovate dependency update in this Flux repository. Where to find a dependency's upstream history (charts from their OCIRepository, images, actions, mise tools), what counts as a breaking change, how to check what under kubernetes/ depends on it, and where this repository's Renovate rules live. Read it for any pull request on a renovate/ branch.
+description: Review a Renovate dependency update in this Flux repository. Where to find a dependency's upstream history (charts from their OCIRepository, images, actions, mise tools), what counts as a breaking change, how to check what under kubernetes/ depends on it, how to write checked lines a second reader can verify, and where this repository's Renovate rules live. Read it for any pull request on a renovate/ branch.
 ---
 
 # Review a Renovate PR
@@ -53,8 +53,8 @@ read every intermediate release, breaking changes land in the middle.
 
 Flag in each release: `BREAKING CHANGE`, `⚠` or `!:` markers; removed or
 renamed Helm values, CRD fields, environment variables and flags; a
-required Kubernetes, Flux or Talos version; one-way schema or data
-migrations; changed defaults (authentication, storage class, ports,
+required Kubernetes, Flux, Talos or kernel version; one-way schema or
+data migrations; changed defaults (authentication, storage class, ports,
 probes); deprecations that became errors; new required keys with no
 default; and label values that changed while the key stayed, or resource
 names that dropped or gained a prefix, which break anything selecting on
@@ -63,6 +63,16 @@ the old value while a search for the key still matches.
 Minor and patch updates carry breaking changes too. "Chart name prefix
 removed" is ambiguous between label values and resource names: settle it
 from the PR or the template, not the sentence.
+
+An update also moves images that appear nowhere in the diff: a chart or
+operator that changes its default images, or stops setting them and
+leaves them to another operator's built-in defaults. Name each such image
+with its old and new version, read from the chart's or operator's source
+at both versions. Nothing here pins them, so Renovate never raises them
+and the review is the only place they show. A version a chart sets by
+default, such as the image of a workload its operator manages, is the
+default in the chart's `values.yaml` at the new tag unless the
+HelmRelease values pin it.
 
 ## Rendering a chart update
 
@@ -91,12 +101,13 @@ HelmRelease, or a source that could not be fetched, says nothing about the
 update.
 
 A render that succeeds is an offline approximation of what the cluster
-applies: CRDs and Secrets are left out, and templates that branch on
-Kubernetes capabilities see flate's bundled version, not the cluster's.
-Within that, take the label values, resource names and ports the exposure
-search depends on from the render rather than from a reading of the
-template, and narrow it with `--show-only <template path>` when the whole
-output is too long. Only the head is checked out, so the old chart does
+applies: CRDs and Secrets are left out, patches Flux applies from a parent
+Kustomization are not, and templates that branch on Kubernetes
+capabilities see flate's bundled version, not the cluster's. Within that,
+take the label values, resource names and ports the exposure search
+depends on from the render rather than from a reading of the template,
+and narrow it with `--show-only <template path>` when the whole output is
+too long. Only the head is checked out, so the old chart does
 not render here: what it produced is read upstream, or from the names this
 repository already refers to.
 
@@ -112,8 +123,15 @@ anything here depends on it. Search `kubernetes/` for:
   cross-namespace DNS (`<name>.<namespace>.svc.cluster.local`), selectors,
   and Flux `dependsOn` and `healthChecks`;
 - **a value, flag or CRD field**: the HelmRelease `values`, `valuesFrom`,
-  `postRenderers`, kustomize patches, and the custom resources other apps
-  create from the dependency's CRDs (`apiVersion: <group>`).
+  `postRenderers`, kustomize patches, including those the Kustomizations
+  in `kubernetes/flux/cluster` apply to every HelmRelease (a CRD upgrade
+  policy among them), and the custom resources other apps create from the
+  dependency's CRDs (`apiVersion: <group>`).
+
+An app configured through its own UI keeps that configuration on its
+volume, not in git, so a search of this repository proves nothing about
+it: an affected integration or setting there is one the review could not
+verify.
 
 Before prescribing a rename or a new value, confirm it from the upstream
 PR's diff or from the chart's template at the new tag, read raw with
@@ -125,6 +143,32 @@ A finding anchors to the bumped line in the diff; name the dependent file
 and line in its explanation. A breaking change that touches nothing here
 is not a finding: one sentence in the take, with the search that came up
 empty, is enough.
+
+## The account
+
+The summary's checked lines and the sources it lists are what a second
+reader judges the review by. That reader has the description and the diff
+but no tools: it never sees the commands the review ran or what they
+printed.
+
+- Give every entry under the release notes' breaking changes and upgrade
+  notes, and every step the upgrade guide names, a checked line of its
+  own, including one that touches nothing here: name the entry, then why
+  it does not apply or what it changes.
+- Put the evidence in the line: the value found and the file it came
+  from, or the source that says so. "`auth.enabled: true` already set in
+  the HelmRelease values" carries its proof; "auth checked" does not.
+- Write an inference out, and only one the evidence carries. A render of
+  the new chart that succeeded proves the tag exists and the values fit
+  its schema. A default the release changes to a value this repository
+  already sets explicitly changes nothing here; a prerequisite that comes
+  with it, such as a kernel or Kubernetes version, is checked on its own.
+- A version requirement is checked against the version this repository
+  targets, read from where it pins it. A target in git is not proof that
+  a rollout reached every node: say that the line rests on the target.
+- What the repository cannot show is not a check. Say in the take what
+  could not be verified and what to look at after the merge, and keep it
+  out of the checked lines.
 
 ## This repository
 
