@@ -16,9 +16,10 @@ spec:
     config:
       webUrl: https://{{ .Release.Name }}.turbo.ac
       runnerRuntimeClass: gvisor
-      reviewModel: openrouter/~openai/gpt-sol-latest
-      reviewFallback: openrouter/~anthropic/claude-opus-latest
-      confidenceModel: openrouter/~anthropic/claude-sonnet-latest
+      reviewModel: chatgpt/~sol-latest
+      reviewFallback: openrouter/~openai/gpt-sol-latest
+      confidenceModel: anthropic/~sonnet-latest
+      confidenceFallback: openrouter/~anthropic/claude-sonnet-latest
       embeddingModel: openrouter/voyageai/voyage-code-4
       embeddingDims: 1024
     configFile:
@@ -28,6 +29,10 @@ spec:
           clientId: { env: KRITIKA_GITHUB_CLIENT_ID }
           privateKey: { env: KRITIKA_GITHUB_PRIVATE_KEY }
           webhookSecret: { env: KRITIKA_GITHUB_WEBHOOK_SECRET }
+      providers:
+        anthropic: { type: anthropic, apiKey: { env: KRITIKA_ANTHROPIC_API_KEY } }
+        chatgpt: { type: chatgpt }
+        openrouter: { type: openrouter, apiKey: { env: KRITIKA_OPENROUTER_API_KEY } }
       egress:
         allow: ["*"]
         deny: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, "*.internal"]
