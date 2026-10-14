@@ -15,14 +15,18 @@ spec:
       reloader.stakater.com/auto: "true"
     config:
       webUrl: https://{{ .Release.Name }}.turbo.ac
-      runnerRuntimeClass: gvisor
-      reviewModel: chatgpt/~sol-latest
-      reviewFallback: openrouter/~openai/gpt-sol-latest
-      confidenceModel: anthropic/~sonnet-latest
-      confidenceFallback: openrouter/~anthropic/claude-sonnet-latest
-      embeddingModel: openrouter/voyageai/voyage-code-4
-      embeddingDims: 1024
-    configFile:
+      auth:
+        admin:
+          password: { env: KRITIKA_AUTH_ADMIN_PASSWORD }
+      review:
+        model: chatgpt/~sol-latest
+        fallback: openrouter/~openai/gpt-sol-latest
+      confidence:
+        model: anthropic/~sonnet-latest
+        fallback: openrouter/~anthropic/claude-sonnet-latest
+      embedding:
+        model: openrouter/voyageai/voyage-code-4
+        dims: 1024
       apps:
         github:
           accounts: [onedr0p]
@@ -42,7 +46,7 @@ spec:
         deny: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, "*.internal"]
       trigger:
         exclude: [{ name: forks, expr: pr.fork }]
-      agent: { commands: [gh, curl, jq, yq, rg, fd, flate] }
+      agent: { commands: [crane, curl, fd, flate, gh, jq, rg, yq] }
     envFrom:
       - secretRef:
           name: kritika-secret
@@ -54,6 +58,7 @@ spec:
       runner:
         existingSecret: kritika-postgres-runner
     runner:
+      runtimeClass: gvisor
       tools:
         - name: flate
           image: ghcr.io/home-operations/flate:0.6.5@sha256:e0e2d2de97539b3141977e8bb3bbb50ea5c5afe89477950e5fa972c9862478da
