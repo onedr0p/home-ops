@@ -46,7 +46,6 @@ spec:
         deny: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, "*.internal"]
       trigger:
         exclude: [{ name: forks, expr: pr.fork }]
-      agent: { commands: [crane, curl, fd, flate, gh, jq, rg, yq] }
     envFrom:
       - secretRef:
           name: kritika-secret
@@ -59,9 +58,6 @@ spec:
         existingSecret: kritika-postgres-runner
     runner:
       runtimeClass: gvisor
-      tools:
-        - name: flate
-          image: ghcr.io/home-operations/flate:0.6.5@sha256:e0e2d2de97539b3141977e8bb3bbb50ea5c5afe89477950e5fa972c9862478da
       resources:
         requests:
           cpu: 10m
