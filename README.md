@@ -75,8 +75,7 @@ This Git repository contains the following directories under [Kubernetes](./kube
 ```sh
 📁 kubernetes
 ├── 📁 apps       # applications
-├── 📁 components # re-useable kustomize components
-└── 📁 flux       # flux system configuration
+└── 📁 components # re-useable kustomize components
 ```
 
 ### Flux Workflow

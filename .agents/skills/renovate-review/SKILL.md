@@ -89,7 +89,7 @@ reported as blocked there; render it from the whole tree instead, which
 takes several times the memory:
 
 ```
-flate build hr <name> -n <namespace> --path kubernetes/flux/cluster --no-progress
+flate build hr <name> -n <namespace> --path kubernetes/apps --no-progress
 ```
 
 flate reports every failure in the namespace, not only the requested
@@ -123,10 +123,10 @@ anything here depends on it. Search `kubernetes/` for:
   cross-namespace DNS (`<name>.<namespace>.svc.cluster.local`), selectors,
   and Flux `dependsOn` and `healthChecks`;
 - **a value, flag or CRD field**: the HelmRelease `values`, `valuesFrom`,
-  `postRenderers`, kustomize patches, including those the Kustomizations
-  in `kubernetes/flux/cluster` apply to every HelmRelease (a CRD upgrade
-  policy among them), and the custom resources other apps create from the
-  dependency's CRDs (`apiVersion: <group>`).
+  `postRenderers`, kustomize patches, including those the FluxInstance in
+  `kubernetes/apps/flux-system/flux-instance` applies to every HelmRelease
+  (a CRD upgrade policy among them), and the custom resources other apps
+  create from the dependency's CRDs (`apiVersion: <group>`).
 
 An app configured through its own UI keeps that configuration on its
 volume, not in git, so a search of this repository proves nothing about
