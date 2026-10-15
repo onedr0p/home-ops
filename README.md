@@ -22,7 +22,7 @@ _... managed with Flux, Renovate, and GitHub Actions_ <img src="https://fonts.gs
 [![Talos](https://kromgo.turbo.ac/badges/talos_version)](https://talos.dev)&nbsp;&nbsp;
 [![Kubernetes](https://kromgo.turbo.ac/badges/kubernetes_version)](https://kubernetes.io)&nbsp;&nbsp;
 [![Flux](https://kromgo.turbo.ac/badges/flux_version)](https://fluxcd.io)&nbsp;&nbsp;
-[![Renovate](https://img.shields.io/badge/enabled-blue?logo=renovate)](https://developer.mend.io/github/onedr0p/home-ops)
+![Renovate](https://img.shields.io/badge/enabled-blue?logo=renovate)
 
 </div>
 
