@@ -1,0 +1,114 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  image-pull-extract:
+    if: ${{ github.event_name == 'pull_request' }}
+    name: Image Pull - Extract Images
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    outputs:
+      images: ${{ steps.extract.outputs.images }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Mise
+        uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
+        with:
+          cache: false
+          install: false
+
+      - name: Extract Images
+        id: extract
+        env:
+          MISE_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          echo 'images<<EOF' >> $GITHUB_OUTPUT
+          mise exec github:home-operations/flate -- flate diff images -p ./kubernetes/apps -o json >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
+  image-pull:
+    if: >-
+      ${{
+        needs.image-pull-extract.outputs.images != '[]' &&
+        github.event.pull_request.head.repo.full_name == github.repository
+      }}
+    needs: image-pull-extract
+    name: Image Pull - Pull Images
+    runs-on: ${{ github.event.repository.name }}-runner
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        image: ${{ fromJSON(needs.image-pull-extract.outputs.images) }}
+      max-parallel: 4
+      fail-fast: false
+    steps:
+      - name: Setup Mise
+        uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
+        with:
+          cache: false
+          install: false
+
+      - name: Pull Image
+        env:
+          IMAGE: ${{ matrix.image }}
+          MISE_GITHUB_TOKEN: ${{ github.token }}
+        run: mise exec talosctl -- talosctl --nodes "$NODE" image pull "$IMAGE"
+
+  zizmor:
+    name: Zizmor
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
+        with:
+          advanced-security: false
+          annotations: true
+
+  status:
+    if: ${{ !cancelled() }}
+    name: Build Success
+    needs:
+      - image-pull-extract
+      - image-pull
+      - zizmor
+    runs-on: ubuntu-26.04
+    permissions: {}
+    steps:
+      - name: Any jobs failed?
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
+
+      - name: All jobs passed or skipped?
+        if: ${{ !(contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: echo "All jobs passed or skipped" && echo "$RESULTS"
