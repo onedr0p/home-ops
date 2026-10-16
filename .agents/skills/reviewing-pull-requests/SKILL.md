@@ -1,16 +1,29 @@
 ---
-name: renovate-review
-description: Review a Renovate dependency update in this Flux repository. Where to find a dependency's upstream history (charts from their OCIRepository, images, actions, mise tools), what counts as a breaking change, how to check what under kubernetes/ depends on it, how to write checked lines a second reader can verify, and where this repository's Renovate rules live. Read it for any pull request on a renovate/ branch.
+name: reviewing-pull-requests
+description: Use when reviewing a pull request or Renovate update in this Flux repository, or checking what a change under kubernetes/ affects. Covers finding a dependency's upstream, breaking changes, Renovate's rules here, searching what depends on a change, and what a check proves. references/registry.md reads images and OCI charts with crane; references/rendering.md renders and diffs HelmReleases with flate.
 ---
 
-# Review a Renovate PR
+# Reviewing pull requests in home-ops
 
-Judge whether the update is safe to merge: what changed upstream between the
-old and new versions, and whether anything in this repository depends on
-it. GitHub is read with `gh`; a project's own changelog or documentation
-site with `curl`.
+Flux reconciles `kubernetes/` from `main`: a merge rolls out within
+minutes. Secrets are ExternalSecrets from 1Password: judge key names and
+mappings from the manifests.
 
-## The update
+Use the sections that fit the pull request: a Renovate update, on a
+`renovate/` branch; a change under `kubernetes/`, a Renovate update's
+included; what a check proves, for every review; and kritika's account,
+when the review runs in kritika.
+
+## A Renovate update
+
+Judge whether the update is safe to merge: what changed upstream between
+the old and new versions, and whether anything in this repository depends
+on it. GitHub is read with `gh`; a project's own changelog or
+documentation site with `curl`; an image or an OCI chart from its
+registry with `crane`, when it is available, as `references/registry.md`
+describes.
+
+### The update
 
 Take from the title, body, labels and diff: the package and its datasource
 (container image, Helm chart as an `OCIRepository`, GitHub Action, mise
@@ -23,15 +36,17 @@ excerpts. Read it first. Go upstream when it is missing, truncated or
 ambiguous, and always for a major update or a jump over several versions:
 read every intermediate release, breaking changes land in the middle.
 
-## Finding the upstream
+### Finding the upstream
 
 - An image at `<registry>/<owner>/<repo>` usually comes from `<owner>/<repo>`
   on GitHub; otherwise the body or the image's
-  `org.opencontainers.image.source` annotation names the source.
+  `org.opencontainers.image.source` label names the source, read as
+  `references/registry.md` describes.
 - A chart's source is the app's `OCIRepository` (`ocirepository.yaml`): its
   `url` is the registry path and `ref.tag` the version. A path under an
   owner (`oci://<registry>/<owner>/...`) is that owner's chart on GitHub,
-  where `Chart.yaml`'s `sources` or `home` confirms the repository. A path
+  where `Chart.yaml`'s `sources` or `home` confirms the repository;
+  `crane config` on the chart's tag prints them without a fetch. A path
   under `ghcr.io/home-operations/charts-mirror/<chart>` is a mirror of a
   chart whose project publishes none in OCI form:
   `apps/<chart>/metadata.yaml` in `home-operations/charts-mirror` names the
@@ -43,13 +58,14 @@ read every intermediate release, breaking changes land in the middle.
   the chart name (`<chart>-1.2.3`, not `v1.2.3`). When a release is not
   found, list releases and look for the chart name.
 - A digest-only update moved no version: say whether the tag was rebuilt
-  (a security rebuild or a `latest`-style pin).
+  (a security rebuild or a `latest`-style pin), and from what: compare the
+  old and new digests' `created` and `revision`.
 - A release note that says "see #2785" is read with `gh issue view` or
   `gh pr view`, and an issue is taken to the merged PR that closed it
   (`gh pr list -R <repo> --search "#<n>" --state merged`): the PR says what
   changed and in what scope, where the issue and the note may not.
 
-## What breaks
+### What breaks
 
 Flag in each release: `BREAKING CHANGE`, `⚠` or `!:` markers; removed or
 renamed Helm values, CRD fields, environment variables and flags; a
@@ -74,44 +90,27 @@ default, such as the image of a workload its operator manages, is the
 default in the chart's `values.yaml` at the new tag unless the
 HelmRelease values pin it.
 
-## Rendering a chart update
+For an update under `kubernetes/`, render it and search what depends on it
+as [a change under `kubernetes/`](#a-change-under-kubernetes) describes. A
+breaking change that touches nothing here is not a finding: one sentence in
+the take, with the search that came up empty, is enough.
 
-For a chart bump, render the HelmRelease with the new chart and this
-repository's values, from the repository root, with the namespace's
-directory as the path:
+### Renovate's rules
 
-```
-flate build hr <name> --path kubernetes/apps/<namespace> --no-progress
-```
+`.renovaterc.json5` is the source for how Renovate treats this update:
+its `automerge` rules say whether the PR merges on its own, in which case
+the review is the last look before the merge; its `groupName` rules say
+which PRs move several packages at once, each of which the review
+covers; its labels and the shared preset's `!` on a major update should
+agree with the title, and drift between them is worth a note.
 
-A HelmRelease whose Kustomization depends on one in another namespace is
-reported as blocked there; render it from the whole tree instead, which
-takes several times the memory:
+## A change under `kubernetes/`
 
-```
-flate build hr <name> -n <namespace> --path kubernetes/apps --no-progress
-```
+When a chart version or a HelmRelease's values change, render the
+HelmRelease as `references/rendering.md` describes when `flate` is
+available.
 
-flate reports every failure in the namespace, not only the requested
-HelmRelease's, and exits nonzero for any of them. A failure is a finding
-on the bumped line only when it belongs to the HelmRelease under review
-and the update caused it: a value the new chart's schema rejects, a
-template that errors on this repository's values. A failure of another
-HelmRelease, or a source that could not be fetched, says nothing about the
-update.
-
-A render that succeeds is an offline approximation of what the cluster
-applies: CRDs and Secrets are left out, patches Flux applies from a parent
-Kustomization are not, and templates that branch on Kubernetes
-capabilities see flate's bundled version, not the cluster's. Within that,
-take the label values, resource names and ports the exposure search
-depends on from the render rather than from a reading of the template,
-and narrow it with `--show-only <template path>` when the whole output is
-too long. Only the head is checked out, so the old chart does
-not render here: what it produced is read upstream, or from the names this
-repository already refers to.
-
-## Exposure here
+### Exposure here
 
 The question is not whether this repository sets the old thing but whether
 anything here depends on it. Search `kubernetes/` for:
@@ -139,25 +138,11 @@ PR's diff or from the chart's template at the new tag, read raw with
 Without that, make it a check to do after the merge rather than an edit; a
 wrong edit that gets applied is worse than none.
 
-A finding anchors to the bumped line in the diff; name the dependent file
-and line in its explanation. A breaking change that touches nothing here
-is not a finding: one sentence in the take, with the search that came up
-empty, is enough.
+A finding anchors to the changed line in the diff; name the dependent
+file and line in its explanation.
 
-## The account
+## What a check proves
 
-The summary's checked lines and the sources it lists are what a second
-reader judges the review by. That reader has the description and the diff
-but no tools: it never sees the commands the review ran or what they
-printed.
-
-- Give every entry under the release notes' breaking changes and upgrade
-  notes, and every step the upgrade guide names, a checked line of its
-  own, including one that touches nothing here: name the entry, then why
-  it does not apply or what it changes.
-- Put the evidence in the line: the value found and the file it came
-  from, or the source that says so. "`auth.enabled: true` already set in
-  the HelmRelease values" carries its proof; "auth checked" does not.
 - Write an inference out, and only one the evidence carries. A render of
   the new chart that succeeded proves the tag exists and the values fit
   its schema. A default the release changes to a value this repository
@@ -166,19 +151,23 @@ printed.
 - A version requirement is checked against the version this repository
   targets, read from where it pins it. A target in git is not proof that
   a rollout reached every node: say that the line rests on the target.
-- What the repository cannot show is not a check. Say in the take what
-  could not be verified and what to look at after the merge, and keep it
-  out of the checked lines.
+- Put the evidence in the claim: the value found and the file it came
+  from, or the source that says so. "`auth.enabled: true` already set in
+  the HelmRelease values" carries its proof; "auth checked" does not.
+- What the repository cannot show is not a check: say what could not be
+  verified and what to look at after the merge.
 
-## This repository
+## In kritika
 
-- Flux reconciles `kubernetes/` from `main`: a merge rolls out within
-  minutes.
-- `.renovaterc.json5` is the source for how Renovate treats this update:
-  its `automerge` rules say whether the PR merges on its own, in which case
-  the review is the last look before the merge; its `groupName` rules say
-  which PRs move several packages at once, each of which the review
-  covers; its labels and the shared preset's `!` on a major update should
-  agree with the title, and drift between them is worth a note.
-- Secrets are ExternalSecrets from 1Password: judge key names and mappings
-  from the manifests.
+kritika's confidence scorer judges the review by its checked lines and the
+sources it lists. It has the description and the diff but no tools: it
+never sees the commands the review ran or what they printed, and a
+release-note entry that no checked line covers lowers its score.
+
+- For an update, give every entry under the release notes' breaking
+  changes and upgrade notes, and every step the upgrade guide names, a
+  checked line of its own, including one that touches nothing here: name
+  the entry, then why it does not apply or what it changes.
+
+kritika's checkout has no git history, so only the head renders, as
+`references/rendering.md` says.
