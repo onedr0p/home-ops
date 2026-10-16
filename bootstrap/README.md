@@ -12,9 +12,8 @@ directory is not used again until the next rebuild.
 
 ## Prerequisites
 
-- Tools pinned in `.mise/config.toml` installed via `mise install` (talosctl,
-  just, minijinja-cli, op, yq, jq), plus kubectl, helmfile, kustomize and gum
-  on the PATH (not pinned here).
+- talosctl, just, minijinja-cli, op, yq, jq, kubectl, helmfile, kustomize and
+  gum on the PATH.
 - A signed-in 1Password CLI (`op`). Machine secrets never live in this repo; every
   `op://` reference in the Talos configs and bootstrap manifests is resolved
   at apply time with `op inject`.
