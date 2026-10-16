@@ -16,6 +16,10 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # renovate: datasource=custom.talos-factory depName=siderolabs/talos
+  TALOS_VERSION: v1.14.2
+
 jobs:
   image-pull-extract:
     if: ${{ github.event_name == 'pull_request' }}
@@ -74,7 +78,7 @@ jobs:
         env:
           IMAGE: ${{ matrix.image }}
           MISE_GITHUB_TOKEN: ${{ github.token }}
-        run: mise exec talosctl -- talosctl --nodes "$NODE" image pull "$IMAGE"
+        run: mise exec "talosctl@${TALOS_VERSION}" -- talosctl --nodes "$NODE" image pull "$IMAGE"
 
   zizmor:
     name: Zizmor
