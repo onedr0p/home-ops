@@ -151,6 +151,11 @@ file and line in its explanation.
 - A version requirement is checked against the version this repository
   targets, read from where it pins it. A target in git is not proof that
   a rollout reached every node: say that the line rests on the target.
+- Put the evidence in the claim: the value found and the file it came
+  from, or the source that says so. "`auth.enabled: true` already set in
+  the HelmRelease values" carries its proof; "auth checked" does not.
+- What the repository cannot show is not a check: say what could not be
+  verified and what to look at after the merge.
 
 ## In kritika
 
@@ -163,12 +168,6 @@ release-note entry that no checked line covers lowers its score.
   changes and upgrade notes, and every step the upgrade guide names, a
   checked line of its own, including one that touches nothing here: name
   the entry, then why it does not apply or what it changes.
-- Put the evidence in the line: the value found and the file it came
-  from, or the source that says so. "`auth.enabled: true` already set in
-  the HelmRelease values" carries its proof; "auth checked" does not.
-- What the repository cannot show is not a check. Say in the take what
-  could not be verified and what to look at after the merge, and keep it
-  out of the checked lines.
 
 kritika's checkout has no git history, so only the head renders, as
 `references/rendering.md` says.
