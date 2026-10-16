@@ -19,12 +19,8 @@ permissions:
   contents: read
 
 env:
-  # renovate: datasource=github-releases depName=rhysd/actionlint
-  ACTIONLINT_VERSION: "1.7.12"
   # renovate: datasource=github-releases depName=home-operations/flate
   FLATE_VERSION: "0.6.5"
-  # renovate: datasource=github-releases depName=zizmorcore/zizmor
-  ZIZMOR_VERSION: "1.31.0"
 
 jobs:
   image-pull-filter:
@@ -105,8 +101,8 @@ jobs:
           IMAGE: ${{ matrix.image }}
         run: talosctl --nodes "$NODE" image pull "$IMAGE"
 
-  workflow-lint:
-    name: Workflow Lint
+  zizmor:
+    name: Zizmor
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -116,11 +112,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Lint workflows
-        uses: home-operations/.github/actions/workflow-lint@1d6eebfd2066f2aa84939e573e56f60d8d2ed85f # workflow-lint-v1.0.4
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
         with:
-          actionlint-version: ${{ env.ACTIONLINT_VERSION }}
-          zizmor-version: ${{ env.ZIZMOR_VERSION }}
+          advanced-security: false
+          annotations: true
 
   status:
     if: ${{ !cancelled() }}
@@ -129,7 +125,7 @@ jobs:
       - image-pull-filter
       - image-pull-extract
       - image-pull
-      - workflow-lint
+      - zizmor
     runs-on: ubuntu-latest
     permissions: {}
     steps:
