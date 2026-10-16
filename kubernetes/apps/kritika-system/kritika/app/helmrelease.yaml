@@ -43,6 +43,7 @@ spec:
         openrouter: { type: openrouter, apiKey: { env: KRITIKA_OPENROUTER_API_KEY } }
       egress:
         allow: ["*"]
+        cache: [github.com]
         deny: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, "*.internal"]
       trigger:
         exclude: [{ name: forks, expr: pr.fork }]
@@ -56,6 +57,8 @@ spec:
         existingSecret: kritika-postgres-credentials
       runner:
         existingSecret: kritika-postgres-runner
+    gatewayCache:
+      enabled: true
     runner:
       runtimeClass: gvisor
       resources:
