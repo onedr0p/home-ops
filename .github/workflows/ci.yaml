@@ -17,6 +17,8 @@ permissions:
   contents: read
 
 env:
+  # renovate: datasource=github-releases depName=home-operations/flate
+  FLATE_VERSION: "0.6.5"
   # renovate: datasource=custom.talos-factory depName=siderolabs/talos
   TALOS_VERSION: v1.14.2
 
@@ -48,7 +50,7 @@ jobs:
           MISE_GITHUB_TOKEN: ${{ github.token }}
         run: |
           echo 'images<<EOF' >> $GITHUB_OUTPUT
-          mise exec github:home-operations/flate -- flate diff images -p ./kubernetes/apps -o json >> $GITHUB_OUTPUT
+          mise exec "github:home-operations/flate@${FLATE_VERSION}" -- flate diff images -p ./kubernetes/apps -o json >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
   image-pull:
