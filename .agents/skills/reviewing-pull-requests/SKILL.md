@@ -42,6 +42,10 @@ read every intermediate release, breaking changes land in the middle.
   on GitHub; otherwise the body or the image's
   `org.opencontainers.image.source` label names the source, read as
   `references/registry.md` describes.
+- An image update is checked against the image itself: when `crane` is
+  available, read the pinned digest's config as `references/registry.md`
+  describes. Its version and revision labels show what it was built from, to
+  compare with the release reviewed here.
 - A chart's source is the app's `OCIRepository` (`ocirepository.yaml`): its
   `url` is the registry path and `ref.tag` the version. A path under an
   owner (`oci://<registry>/<owner>/...`) is that owner's chart on GitHub,
