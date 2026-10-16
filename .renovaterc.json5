@@ -104,11 +104,8 @@
       minimumGroupSize: 5,
     },
     {
-      // Scheduled tools stay out: a grouped branch takes its schedule from
-      // whichever update sorts first
       description: "Mise Tools Group",
       matchManagers: ["mise"],
-      matchDepNames: ["!node", "!oxfmt"],
       groupName: "mise tools",
       groupSlug: "mise-tools",
     },
@@ -123,8 +120,7 @@
       minimumGroupSize: 2,
     },
     {
-      // After the mise tools catch-all so talos wins its own group; unites the
-      // mise pin, the factory installer image, and the tuppr upgrade version
+      // Unites the factory installer image and the tuppr upgrade version
       description: "Talos Group",
       groupName: "talos",
       matchPackageNames: ["siderolabs/talos"],
@@ -134,23 +130,10 @@
       minimumGroupSize: 2,
     },
     {
-      description: "1Password CLI is not resolvable on GitHub, bump manually",
-      matchManagers: ["mise"],
-      matchDepNames: ["1password-cli"],
-      enabled: false,
-    },
-    {
       description: "Keep CloudNativePG on Postgres 18 until the extension images move with it",
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],
       allowedVersions: "/^18\\./",
-    },
-    // Scheduling rules
-    {
-      description: "High-cadence mise tools monthly",
-      matchManagers: ["mise"],
-      matchDepNames: ["node", "oxfmt"],
-      schedule: ["before 3am on the first day of the month"],
     },
     // Commit message rules
     {
