@@ -16,10 +16,6 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  # renovate: datasource=github-releases depName=home-operations/flate
-  FLATE_VERSION: "0.6.5"
-
 jobs:
   image-pull-extract:
     if: ${{ github.event_name == 'pull_request' }}
@@ -40,13 +36,15 @@ jobs:
         uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
         with:
           cache: false
-          install_args: github:home-operations/flate@${{ env.FLATE_VERSION }}
+          install: false
 
       - name: Extract Images
         id: extract
+        env:
+          MISE_GITHUB_TOKEN: ${{ github.token }}
         run: |
           echo 'images<<EOF' >> $GITHUB_OUTPUT
-          mise exec "github:home-operations/flate@${FLATE_VERSION}" -- flate diff images -p ./kubernetes/apps -o json >> $GITHUB_OUTPUT
+          mise exec github:home-operations/flate -- flate diff images -p ./kubernetes/apps -o json >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
   image-pull:
