@@ -148,6 +148,3 @@ notes' breaking changes and upgrade notes, and every step the upgrade
 guide names, a checked line of its own, including one that touches
 nothing here: name the entry, then why it does not apply or what it
 changes.
-
-kritika's checkout has no git history, so only the head renders, as
-`references/rendering.md` says.
