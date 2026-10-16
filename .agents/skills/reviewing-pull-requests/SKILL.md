@@ -18,8 +18,10 @@ when the review runs in kritika.
 
 Judge whether the update is safe to merge: what changed upstream between
 the old and new versions, and whether anything in this repository depends
-on it. For an image or an OCI chart, read its registry as
-`references/registry.md` describes when `crane` is available.
+on it. GitHub is read with `gh`; a project's own changelog or
+documentation site with `curl`; an image or an OCI chart from its
+registry with `crane`, when it is available, as `references/registry.md`
+describes.
 
 ### The update
 
@@ -38,11 +40,13 @@ read every intermediate release, breaking changes land in the middle.
 
 - An image at `<registry>/<owner>/<repo>` usually comes from `<owner>/<repo>`
   on GitHub; otherwise the body or the image's
-  `org.opencontainers.image.source` label names the source.
+  `org.opencontainers.image.source` label names the source, read as
+  `references/registry.md` describes.
 - A chart's source is the app's `OCIRepository` (`ocirepository.yaml`): its
   `url` is the registry path and `ref.tag` the version. A path under an
   owner (`oci://<registry>/<owner>/...`) is that owner's chart on GitHub,
-  where `Chart.yaml`'s `sources` or `home` confirms the repository. A path
+  where `Chart.yaml`'s `sources` or `home` confirms the repository;
+  `crane config` on the chart's tag prints them without a fetch. A path
   under `ghcr.io/home-operations/charts-mirror/<chart>` is a mirror of a
   chart whose project publishes none in OCI form:
   `apps/<chart>/metadata.yaml` in `home-operations/charts-mirror` names the
@@ -50,6 +54,9 @@ read every intermediate release, breaking changes land in the middle.
   that project's own GitHub repository. Chart version and app version
   differ: read the chart's changelog, and the application's too when
   `appVersion` moved.
+- A repository that publishes many charts prefixes its release tags with
+  the chart name (`<chart>-1.2.3`, not `v1.2.3`). When a release is not
+  found, list releases and look for the chart name.
 - A digest-only update moved no version: say whether the tag was rebuilt
   (a security rebuild or a `latest`-style pin), and from what: compare the
   old and new digests' `created` and `revision`.
@@ -83,8 +90,10 @@ default, such as the image of a workload its operator manages, is the
 default in the chart's `values.yaml` at the new tag unless the
 HelmRelease values pin it.
 
-A breaking change that touches nothing here is not a finding: one sentence
-in the take, with the search that came up empty, is enough.
+For an update under `kubernetes/`, render it and search what depends on it
+as [a change under `kubernetes/`](#a-change-under-kubernetes) describes. A
+breaking change that touches nothing here is not a finding: one sentence in
+the take, with the search that came up empty, is enough.
 
 ### Renovate's rules
 
@@ -100,6 +109,8 @@ agree with the title, and drift between them is worth a note.
 When a chart version or a HelmRelease's values change, render the
 HelmRelease as `references/rendering.md` describes when `flate` is
 available.
+
+### Exposure here
 
 The question is not whether this repository sets the old thing but whether
 anything here depends on it. Search `kubernetes/` for:
@@ -125,26 +136,39 @@ Before prescribing a rename or a new value, confirm it from the upstream
 PR's diff or from the chart's template at the new tag, read raw with
 `gh api -H "Accept: application/vnd.github.raw+json" repos/<owner>/<repo>/contents/<path>?ref=<tag>`.
 Without that, make it a check to do after the merge rather than an edit; a
-wrong edit that gets applied is worse than none. A finding about a
-dependent names its file and line in the explanation.
+wrong edit that gets applied is worse than none.
+
+A finding anchors to the changed line in the diff; name the dependent
+file and line in its explanation.
 
 ## What a check proves
 
-- A render of the new chart that succeeded proves the tag exists and the
-  values fit its schema. A default the release changes to a value this
-  repository already sets explicitly changes nothing here; a prerequisite
-  that comes with it, such as a kernel or Kubernetes version, is checked
-  on its own.
+- Write an inference out, and only one the evidence carries. A render of
+  the new chart that succeeded proves the tag exists and the values fit
+  its schema. A default the release changes to a value this repository
+  already sets explicitly changes nothing here; a prerequisite that comes
+  with it, such as a kernel or Kubernetes version, is checked on its own.
 - A version requirement is checked against the version this repository
   targets, read from where it pins it. A target in git is not proof that
   a rollout reached every node: say that the line rests on the target.
 
 ## In kritika
 
-kritika's confidence scorer reads the review's checked lines and sources
-without tools, and a release-note entry that no checked line covers
-lowers its score. For an update, give every entry under the release
-notes' breaking changes and upgrade notes, and every step the upgrade
-guide names, a checked line of its own, including one that touches
-nothing here: name the entry, then why it does not apply or what it
-changes.
+kritika's confidence scorer judges the review by its checked lines and the
+sources it lists. It has the description and the diff but no tools: it
+never sees the commands the review ran or what they printed, and a
+release-note entry that no checked line covers lowers its score.
+
+- For an update, give every entry under the release notes' breaking
+  changes and upgrade notes, and every step the upgrade guide names, a
+  checked line of its own, including one that touches nothing here: name
+  the entry, then why it does not apply or what it changes.
+- Put the evidence in the line: the value found and the file it came
+  from, or the source that says so. "`auth.enabled: true` already set in
+  the HelmRelease values" carries its proof; "auth checked" does not.
+- What the repository cannot show is not a check. Say in the take what
+  could not be verified and what to look at after the merge, and keep it
+  out of the checked lines.
+
+kritika's checkout has no git history, so only the head renders, as
+`references/rendering.md` says.
