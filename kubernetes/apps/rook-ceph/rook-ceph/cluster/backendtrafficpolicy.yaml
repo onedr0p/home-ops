@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/backendtrafficpolicy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: ceph-objectstore
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: ceph-objectstore
+  retry:
+    numRetries: 2
+    retryOn:
+      triggers:
+        - reset-before-request
+  tcpKeepalive:
+    idleTime: 60s
+    interval: 10s
+    probes: 3
+  timeout:
+    http:
+      connectionIdleTimeout: 4s
+      requestTimeout: 0s
+      streamIdleTimeout: 1h
