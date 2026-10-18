@@ -3,21 +3,20 @@
 apiVersion: objectbucket.io/v1alpha1
 kind: ObjectBucketClaim
 metadata:
-  name: kritika-bucket
+  name: kritika-cache
 spec:
-  bucketName: kritika
+  bucketName: kritika-cache
   storageClassName: ceph-bucket
   additionalConfig:
+    bucketMaxSize: 20G
     bucketLifecycle: |
       {
         "Rules": [
           {
-            "ID": "ExpireAfter3Days",
+            "ID": "ExpireGatewayCache",
             "Status": "Enabled",
-            "Prefix": "",
-            "Expiration": {
-              "Days": 3
-            }
+            "Filter": { "Prefix": "" },
+            "Expiration": { "Days": 3 }
           }
         ]
       }
