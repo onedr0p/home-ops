@@ -61,6 +61,12 @@ spec:
         existingSecret: kritika-postgres-runner
     gatewayCache:
       enabled: true
+      storage:
+        type: s3
+        endpoint: http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
+        region: us-east-1
+        bucket: kritika
+        existingSecret: kritika-bucket
     runner:
       podTemplate:
         spec:
@@ -96,6 +102,8 @@ spec:
     networkPolicy:
       enabled: true
       type: cilium
+      # Cilium enforces egress on the RGW pod port (8080), not the Service port the endpoint names
+      egressPorts: [443, 8080]
     resources:
       requests:
         cpu: 10m
