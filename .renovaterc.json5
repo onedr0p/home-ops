@@ -1,10 +1,10 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: [
-    "github>home-operations/renovate-presets#8.1.0",
-    "github>home-operations/renovate-presets//apps/cnpg.json5#8.1.0",
-    "github>home-operations/renovate-presets//apps/grafanaDashboards.json5#8.1.0",
-    "github>home-operations/renovate-presets//apps/talosFactory.json5#8.1.0",
+    "github>home-operations/renovate-presets#9.0.0",
+    "github>home-operations/renovate-presets//apps/cnpg.json5#9.0.0",
+    "github>home-operations/renovate-presets//apps/grafanaDashboards.json5#9.0.0",
+    "github>home-operations/renovate-presets//apps/talosFactory.json5#9.0.0",
     ":timezone(America/New_York)",
   ],
   // The Main ruleset does not require up-to-date branches, and `auto` would
@@ -134,16 +134,6 @@
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],
       allowedVersions: "/^18\\./",
-    },
-    // Commit message rules
-    {
-      // The flux manager also extracts HelmRelease values images, so the file
-      // name is the only signal that a docker dep is a chart
-      description: "Title OCI chart updates as charts instead of images",
-      matchDatasources: ["docker"],
-      matchFileNames: ["**/ocirepository.yaml"],
-      semanticCommitScope: "helm",
-      commitMessageTopic: "chart {{depName}}",
     },
     // Labeling rules
     {
