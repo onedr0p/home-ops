@@ -12,7 +12,7 @@ spec:
   values:
     replicas: 2
     deploymentAnnotations:
-      reloader.stakater.com/auto: "true"
+      secret.reloader.stakater.com/auto: "true"
     config:
       webUrl: https://{{ .Release.Name }}.turbo.ac
       auth:
@@ -27,6 +27,9 @@ spec:
       embedding:
         model: openrouter/voyageai/voyage-code-4
         dims: 1024
+        documentPrompt: "Represent the document for retrieval: "
+        queryPrompt: "Represent the query for retrieving supporting documents: "
+        similarFloor: 0.3
       apps:
         github:
           accounts: [onedr0p]
@@ -56,14 +59,24 @@ spec:
         existingSecret: kritika-postgres-credentials
       runner:
         existingSecret: kritika-postgres-runner
+    gatewayCache:
+      enabled: true
+      storage:
+        type: s3
+        endpoint: http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc
+        region: us-east-1
+        bucket: kritika-cache
+        existingSecret: kritika-cache
     runner:
-      runtimeClass: gvisor
-      resources:
-        requests:
-          cpu: 10m
-          memory: 512Mi
-        limits:
-          memory: 2Gi
+      podTemplate:
+        spec:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+          runtimeClassName: gvisor
     httpRoute:
       enabled: true
       annotations:
@@ -89,6 +102,8 @@ spec:
     networkPolicy:
       enabled: true
       type: cilium
+      # Cilium enforces egress on the RGW pod port (8080), not the Service port the endpoint names
+      egressPorts: [443, 8080]
     resources:
       requests:
         cpu: 10m

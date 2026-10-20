@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app crowdsec-bouncer
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: crowdsec-bouncer
+  interval: 1h
+  values:
+    fullnameOverride: *app
+    config:
+      trustedProxies:
+        - 10.42.0.0/16
+      bouncer:
+        lapiURL: http://crowdsec-service:8080
+        metrics: true
+        apiKeySecretRef:
+          name: crowdsec-secret
+          key: BOUNCER_KEY_ENVOY
+      prometheus:
+        enabled: true
+        serviceMonitor:
+          enabled: true

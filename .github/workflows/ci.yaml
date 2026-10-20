@@ -16,6 +16,12 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # renovate: datasource=github-releases depName=home-operations/flate
+  FLATE_VERSION: "0.6.5"
+  # renovate: datasource=custom.talos-factory depName=siderolabs/talos
+  TALOS_VERSION: v1.14.2
+
 jobs:
   image-pull-extract:
     if: ${{ github.event_name == 'pull_request' }}
@@ -33,7 +39,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Mise
-        uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
           cache: false
           install: false
@@ -44,7 +50,7 @@ jobs:
           MISE_GITHUB_TOKEN: ${{ github.token }}
         run: |
           echo 'images<<EOF' >> $GITHUB_OUTPUT
-          mise exec github:home-operations/flate -- flate diff images -p ./kubernetes/apps -o json >> $GITHUB_OUTPUT
+          mise exec "github:home-operations/flate@${FLATE_VERSION}" -- flate diff images -p ./kubernetes/apps -o json >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
   image-pull:
@@ -65,7 +71,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Setup Mise
-        uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
+        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
           cache: false
           install: false
@@ -74,7 +80,7 @@ jobs:
         env:
           IMAGE: ${{ matrix.image }}
           MISE_GITHUB_TOKEN: ${{ github.token }}
-        run: mise exec talosctl -- talosctl --nodes "$NODE" image pull "$IMAGE"
+        run: mise exec "talosctl@${TALOS_VERSION}" -- talosctl --nodes "$NODE" image pull "$IMAGE"
 
   zizmor:
     name: Zizmor
