@@ -14,6 +14,9 @@ spec:
     image:
       repository: mirror.gcr.io/crowdsecurity/crowdsec
     lapi:
+      env:
+        - name: USE_WAL
+          value: "true"
       envFrom:
         - secretRef:
             name: &secret crowdsec-secret
@@ -27,6 +30,7 @@ spec:
         - namespace: network
           podName: envoy-external-*
           program: envoy
+          poll_without_inotify: true
       env:
         - name: COLLECTIONS
           value: yanis-kouidri/envoy
