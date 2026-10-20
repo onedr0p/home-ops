@@ -8,9 +8,13 @@ spec:
   chartRef:
     kind: OCIRepository
     name: crowdsec
+  install:
+    disableSchemaValidation: true # the chart schema rejects the kubernetes acquisition source
   interval: 1h
+  upgrade:
+    disableSchemaValidation: true
   values:
-    container_runtime: containerd
+    container_runtime: containerd # the default (docker) mounts /var/lib/docker/containers into the agent
     image:
       repository: mirror.gcr.io/crowdsecurity/crowdsec
     lapi:
@@ -26,16 +30,18 @@ spec:
         serviceMonitor:
           enabled: true
     agent:
-      acquisition:
-        - namespace: network
-          podName: envoy-external-*
-          program: envoy
-          poll_without_inotify: true
+      isDeployment: true
+      hostVarLog: false
+      serviceAccountName: crowdsec-agent
+      additionalAcquisition:
+        - source: kubernetes
+          namespace: network
+          selector: gateway.envoyproxy.io/owning-gateway-name=envoy-external
+          labels:
+            type: envoy
       env:
         - name: COLLECTIONS
           value: yanis-kouidri/envoy
-        - name: PARSERS
-          value: crowdsecurity/cri-logs
       metrics:
         serviceMonitor:
           enabled: true
