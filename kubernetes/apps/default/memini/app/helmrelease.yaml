@@ -19,7 +19,6 @@ spec:
             image:
               repository: ghcr.io/eleboucher/memini
             env:
-              MEMINI_UI_ADDR: ""
               MEMINI_EMBED_BASE_URL: https://openrouter.ai/api/v1
               MEMINI_EMBED_MODEL: openai/text-embedding-3-small
               MEMINI_API_KEYS_FILE: /etc/memini/api-keys.yaml
@@ -39,6 +38,24 @@ spec:
         enabled: true
     route:
       main:
+        enabled: true
+        hostnames:
+          - "{{ .Release.Name }}.turbo.ac"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: main
+                port: http
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /mcp
+              - path:
+                  type: PathPrefix
+                  value: /v1
+      ui:
         enabled: true
         hostnames:
           - "{{ .Release.Name }}.turbo.ac"
