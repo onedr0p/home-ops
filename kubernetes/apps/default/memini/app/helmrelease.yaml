@@ -47,6 +47,17 @@ spec:
         rules:
           - backendRefs:
               - identifier: main
+                port: ui
+      mcp:
+        enabled: true
+        hostnames:
+          - "{{ .Release.Name }}.turbo.ac"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: main
                 port: http
             matches:
               - path:
@@ -55,13 +66,6 @@ spec:
               - path:
                   type: PathPrefix
                   value: /v1
-      ui:
-        enabled: true
-        hostnames:
-          - "{{ .Release.Name }}.turbo.ac"
-        parentRefs:
-          - name: envoy-internal
-            namespace: network
     serviceMonitor:
       main:
         enabled: true
