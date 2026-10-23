@@ -1,0 +1,72 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: memini
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: memini
+  interval: 1h
+  values:
+    controllers:
+      main:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          main:
+            image:
+              repository: ghcr.io/eleboucher/memini
+            env:
+              MEMINI_EMBED_BASE_URL: https://openrouter.ai/api/v1
+              MEMINI_EMBED_MODEL: openai/text-embedding-3-small
+              MEMINI_CLIENT_DEFAULTS: '{"namespace_scope":"owner_tree"}'
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
+    route:
+      main:
+        enabled: true
+        hostnames:
+          - "{{ .Release.Name }}.turbo.ac"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: main
+                port: ui
+      mcp:
+        enabled: true
+        hostnames:
+          - "{{ .Release.Name }}.turbo.ac"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: main
+                port: http
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /mcp
+              - path:
+                  type: PathPrefix
+                  value: /v1
+    serviceMonitor:
+      main:
+        enabled: true
+    grafanaDashboards:
+      enabled: true
+    prometheusRule:
+      enabled: true
+    persistence:
+      data:
+        existingClaim: "{{ .Release.Name }}"
