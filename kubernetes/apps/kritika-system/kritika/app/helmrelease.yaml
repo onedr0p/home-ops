@@ -48,7 +48,9 @@ spec:
         allow: ["*"]
         deny: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, "*.internal"]
       trigger:
-        exclude: [{ name: forks, expr: pr.fork }]
+        exclude:
+          - { name: forks, expr: pr.fork }
+          - { name: release-please, expr: 'pr.headRef.startsWith("release-please--")' }
     envFrom:
       - secretRef:
           name: kritika-secret
