@@ -33,14 +33,12 @@ spec:
               readiness:
                 enabled: true
                 spec:
-                  periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 5
               startup:
                 enabled: true
                 spec:
                   failureThreshold: 30
-                  periodSeconds: 10
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -74,7 +72,6 @@ spec:
             port: 554
           streams-webrtc-tcp:
             port: 8555
-            protocol: TCP
           streams-webrtc-udp:
             port: 8555
             protocol: UDP
@@ -88,7 +85,6 @@ spec:
         rules:
           - backendRefs:
               - identifier: app
-                port: 80
     configMaps:
       config:
         data:
@@ -117,5 +113,3 @@ spec:
             subPath: go2rtc.yaml
       state:
         type: emptyDir
-        globalMounts:
-          - path: /state
