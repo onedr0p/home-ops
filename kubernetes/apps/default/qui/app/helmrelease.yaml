@@ -46,14 +46,12 @@ spec:
                   httpGet:
                     path: /health
                     port: *port
-                  periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 5
               startup:
                 enabled: true
                 spec:
                   failureThreshold: 30
-                  periodSeconds: 10
             resources:
               requests:
                 cpu: 10m
@@ -88,10 +86,6 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
@@ -99,5 +93,3 @@ spec:
         type: nfs
         server: expanse.internal
         path: /mnt/eros/Media
-        globalMounts:
-          - path: /media

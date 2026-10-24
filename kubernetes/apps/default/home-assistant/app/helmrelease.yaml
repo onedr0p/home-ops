@@ -38,14 +38,12 @@ spec:
                   httpGet:
                     path: /healthz
                     port: &port 8123
-                  periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 5
               startup:
                 enabled: true
                 spec:
                   failureThreshold: 30
-                  periodSeconds: 10
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -90,8 +88,6 @@ spec:
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
-        globalMounts:
-          - path: /config
       config-cache:
         existingClaim: "{{ .Release.Name }}-cache"
         globalMounts:

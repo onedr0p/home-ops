@@ -35,14 +35,12 @@ spec:
                   httpGet:
                     path: /api/v2/app/version
                     port: *port
-                  periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 5
               startup:
                 enabled: true
                 spec:
                   failureThreshold: 30
-                  periodSeconds: 10
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -75,7 +73,6 @@ spec:
         ports:
           bittorrent-tcp:
             port: *torrentPort
-            protocol: TCP
     route:
       app:
         hostnames:
@@ -86,7 +83,6 @@ spec:
         rules:
           - backendRefs:
               - identifier: app
-                port: *port
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
@@ -94,7 +90,5 @@ spec:
         type: nfs
         server: expanse.internal
         path: /mnt/eros/Media
-        globalMounts:
-          - path: /media
       tmp:
         type: emptyDir
