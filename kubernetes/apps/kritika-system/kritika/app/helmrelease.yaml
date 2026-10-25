@@ -102,8 +102,17 @@ spec:
       serviceMonitor:
         enabled: true
     networkPolicy:
-      # Cilium enforces egress on the RGW pod port (8080), not the Service port the endpoint names
-      egressPorts: [443, 8080]
+      extraEgress:
+        # RGW's Service sends port 80 to 8080 on its pods, and policies match the pod's port
+        - to:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: rook-ceph
+              podSelector:
+                matchLabels:
+                  rook_object_store: ceph-objectstore
+          ports:
+            - port: 8080
       postgres:
         podSelector:
           cnpg.io/cluster: kritika-postgres
