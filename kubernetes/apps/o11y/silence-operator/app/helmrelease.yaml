@@ -5,9 +5,13 @@ kind: HelmRelease
 metadata:
   name: silence-operator
 spec:
-  chartRef:
+  chart:
     kind: OCIRepository
-    name: silence-operator
+    spec:
+      interval: 15m
+      ref:
+        tag: 0.21.1
+      url: oci://gsoci.azurecr.io/charts/giantswarm/silence-operator
   interval: 1h
   values:
     alertmanagerAddress: http://alertmanager-operated.o11y.svc.cluster.local:9093

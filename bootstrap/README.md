@@ -283,8 +283,8 @@ to sit `Pending` for as long as their volume takes to restore.
 ## Single source of truth
 
 The helmfiles define no chart versions or values of their own. Each release's
-chart and version are read from the app's `ocirepository.yaml` and its values
-from the app's `helmrelease.yaml` under `kubernetes/apps/` (see
+chart, version and values are read from the app's `helmrelease.yaml` under
+`kubernetes/apps/` (see
 [helmfile/templates/](helmfile/templates/)). Bootstrap therefore installs
 exactly what Flux will
 later reconcile, and Renovate updates only one place.

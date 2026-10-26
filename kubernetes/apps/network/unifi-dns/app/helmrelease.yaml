@@ -5,9 +5,13 @@ kind: HelmRelease
 metadata:
   name: &app unifi-dns
 spec:
-  chartRef:
+  chart:
     kind: OCIRepository
-    name: unifi-dns
+    spec:
+      interval: 15m
+      ref:
+        tag: 1.23.0
+      url: oci://ghcr.io/home-operations/charts-mirror/external-dns
   interval: 1h
   values:
     fullnameOverride: *app

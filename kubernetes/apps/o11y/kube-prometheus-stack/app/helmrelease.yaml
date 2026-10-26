@@ -5,9 +5,13 @@ kind: HelmRelease
 metadata:
   name: kube-prometheus-stack
 spec:
-  chartRef:
+  chart:
     kind: OCIRepository
-    name: kube-prometheus-stack
+    spec:
+      interval: 15m
+      ref:
+        tag: 92.13.1
+      url: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
   interval: 1h
   valuesFrom:
     - kind: ConfigMap

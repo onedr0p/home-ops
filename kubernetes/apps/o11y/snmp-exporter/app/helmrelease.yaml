@@ -5,9 +5,13 @@ kind: HelmRelease
 metadata:
   name: &app snmp-exporter
 spec:
-  chartRef:
+  chart:
     kind: OCIRepository
-    name: snmp-exporter
+    spec:
+      interval: 15m
+      ref:
+        tag: 9.19.0
+      url: oci://ghcr.io/prometheus-community/charts/prometheus-snmp-exporter
   interval: 1h
   values:
     fullnameOverride: *app

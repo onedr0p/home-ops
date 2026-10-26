@@ -5,9 +5,13 @@ kind: HelmRelease
 metadata:
   name: &name home-ops-runner
 spec:
-  chartRef:
+  chart:
     kind: OCIRepository
-    name: home-ops-runner
+    spec:
+      interval: 15m
+      ref:
+        tag: 0.15.1
+      url: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
   interval: 1h
   values:
     githubConfigUrl: https://github.com/onedr0p/home-ops

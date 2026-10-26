@@ -5,9 +5,13 @@ kind: HelmRelease
 metadata:
   name: &name actions-runner-controller
 spec:
-  chartRef:
+  chart:
     kind: OCIRepository
-    name: gha-runner-scale-set-controller
+    spec:
+      interval: 15m
+      ref:
+        tag: 0.15.1
+      url: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
   interval: 1h
   values:
     fullnameOverride: *name

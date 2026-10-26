@@ -5,9 +5,13 @@ kind: HelmRelease
 metadata:
   name: &app smartctl-exporter
 spec:
-  chartRef:
+  chart:
     kind: OCIRepository
-    name: smartctl-exporter
+    spec:
+      interval: 15m
+      ref:
+        tag: 0.17.1
+      url: oci://ghcr.io/prometheus-community/charts/prometheus-smartctl-exporter
   interval: 1h
   values:
     fullnameOverride: *app
