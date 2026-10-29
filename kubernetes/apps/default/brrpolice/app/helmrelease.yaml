@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -10,58 +10,26 @@ spec:
     name: brrpolice
   interval: 1h
   values:
-    controllers:
-      brrpolice:
-        containers:
-          app:
-            image:
-              repository: ghcr.io/zariel/brrpolice
-              tag: v0.15.2@sha256:243b80bb8a809a069031f4edf3f31791252af89a38da9a13783bba18ce5f7df6
-            env:
-              BRRPOLICE_HTTP__PORT: &port 80
-              BRRPOLICE_LOGGING__LEVEL: info
-              BRRPOLICE_QBITTORRENT__BASE_URL: http://qbittorrent.default.svc.cluster.local
-              TZ: America/New_York
-            probes:
-              liveness:
-                enabled: true
-                spec:
-                  periodSeconds: 30
-                  timeoutSeconds: 5
-                  failureThreshold: 5
-              readiness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /readyz
-                    port: *port
-                  timeoutSeconds: 5
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
-            resources:
-              requests:
-                cpu: 10m
-              limits:
-                memory: 128Mi
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
-    service:
-      app:
-        ports:
-          http:
-            port: *port
-    serviceMonitor:
-      app:
-        endpoints:
-          - port: http
+    config:
+      qbittorrent:
+        base_url: http://qbittorrent.default.svc.cluster.local
+    extraEnv:
+      - name: TZ
+        value: America/New_York
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      fsGroupChangePolicy: OnRootMismatch
     persistence:
-      data:
-        existingClaim: "{{ .Release.Name }}"
+      existingClaim: brrpolice
+    monitoring:
+      serviceMonitor:
+        enabled: true
+      dashboards:
+        enabled: true
+        grafanaOperator:
+          enabled: true
+          matchLabels:
+            dashboards: grafana
