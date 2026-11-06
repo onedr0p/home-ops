@@ -20,7 +20,7 @@ spec:
             env:
               TZ: America/New_York
               QBT_WEBUI_PORT: &port 80
-              QBT_TORRENTING_PORT: &torrentPort 31288
+              QBT_TORRENTING_PORT: 31288
             probes:
               liveness:
                 enabled: true
@@ -51,6 +51,14 @@ spec:
               limits:
                 memory: 32Gi
     defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "servers",
+            "namespace": "kube-system",
+            "ips": ["192.168.42.122/24"],
+            "mac": "ce:78:94:26:32:04"
+          }]
       terminationGracePeriodSeconds: 300
       securityContext:
         runAsNonRoot: true
@@ -65,14 +73,6 @@ spec:
         ports:
           http:
             port: *port
-      bittorrent:
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 192.168.69.123
-        externalTrafficPolicy: Local
-        ports:
-          bittorrent-tcp:
-            port: *torrentPort
     route:
       app:
         hostnames:

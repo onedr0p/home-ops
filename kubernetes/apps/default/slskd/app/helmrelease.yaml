@@ -27,7 +27,7 @@ spec:
               SLSKD_NO_AUTH: true
               SLSKD_NO_HTTPS: true
               SLSKD_NO_VERSION_CHECK: true
-              SLSKD_SLSK_LISTEN_PORT: &soulseekPort 50429
+              SLSKD_SLSK_LISTEN_PORT: 50429
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}-secret"
@@ -61,6 +61,14 @@ spec:
               limits:
                 memory: 1Gi
     defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "servers",
+            "namespace": "kube-system",
+            "ips": ["192.168.42.127/24"],
+            "mac": "56:e6:9c:6b:d2:7d"
+          }]
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -74,14 +82,6 @@ spec:
         ports:
           http:
             port: *port
-      soulseek:
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 192.168.69.127
-        externalTrafficPolicy: Local
-        ports:
-          soulseek-tcp:
-            port: *soulseekPort
     route:
       app:
         hostnames:
