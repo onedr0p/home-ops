@@ -32,12 +32,16 @@ spec:
     triggerLoopOnEvent: true
     policy: sync
     sources:
+      - crd
       - gateway-httproute
       - service
     txtOwnerId: main
     txtPrefix: k8s.main.%{record_type}-
     domainFilters:
+      - resolver.arpa
       - turbo.ac
+    # Applies to every source. Keeps Cloudflare-only DNSEndpoints out of UniFi DNS.
+    labelFilter: external-dns.home-operations.com/provider notin (cloudflare)
     serviceMonitor:
       enabled: true
     podAnnotations:
