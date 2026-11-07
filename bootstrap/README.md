@@ -4,7 +4,7 @@ Everything needed to take freshly installed Talos nodes to a cluster that Flux
 manages on its own. The entire process is driven by a single command:
 
 ```sh
-just bootstrap cluster
+mise run //bootstrap:cluster
 ```
 
 Once it completes, Flux reconciles the rest of the repository and this
@@ -12,13 +12,13 @@ directory is not used again until the next rebuild.
 
 ## Prerequisites
 
-- talosctl, just, minijinja-cli, op, yq, jq, kubectl, helmfile, kustomize and
+- mise, talosctl, minijinja-cli, op, yq, jq, kubectl, helmfile, kustomize and
   gum on the PATH.
 - A signed-in 1Password CLI (`op`). Machine secrets never live in this repo; every
   `op://` reference in the Talos configs and bootstrap manifests is resolved
   at apply time with `op inject`.
 - A valid `talosconfig` at the repo root (mise points `TALOSCONFIG` there).
-  The justfile derives the controller endpoint and node list from
+  The bootstrap tasks derive the controller endpoint and node list from
   `talosctl config info`, so nothing is hardcoded here.
 - The UDM configuration below. `k8s.internal` points at the Cilium
   LoadBalancer VIP, which exists only once Cilium is installed, so bootstrap
@@ -212,7 +212,7 @@ curl --http3-only -sk -o /dev/null -w '%{http_version}\n' https://internal.turbo
 
 ## Stages
 
-`just bootstrap cluster` runs these stages in order (see [mod.just](mod.just)):
+`mise run //bootstrap:cluster` runs these stages in order (see [mise.toml](mise.toml)):
 
 ```mermaid
 graph LR
@@ -251,7 +251,7 @@ graph LR
 
 > [!TIP]
 > Every stage is safe to re-run. If bootstrap fails partway, fix the issue
-> and run `just bootstrap cluster` again.
+> and run `mise run //bootstrap:cluster` again.
 
 ## Data restore (Kopiur)
 
