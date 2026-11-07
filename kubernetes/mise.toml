@@ -1,0 +1,78 @@
+[tasks.apply-ks]
+description = "Apply local Flux Kustomization"
+usage = '''
+arg "<ns>" help="Namespace of the Flux Kustomization"
+arg "<ks>" help="Name of the Flux Kustomization"
+'''
+run = 'mise run //kubernetes:render-local-ks "$usage_ns" "$usage_ks" | kubectl apply --server-side --force-conflicts --field-manager=kustomize-controller -f -'
+
+[tasks.browse-pvc]
+description = "Browse a PVC"
+interactive = true
+usage = '''
+arg "<ns>" help="Namespace of the PVC"
+arg "<claim>" help="Name of the PVC"
+'''
+run = '''
+kubectl run -n "$usage_ns" "browse-pvc-$usage_claim" -it --rm --restart=Never \
+    --image=mirror.gcr.io/alpine:latest \
+    --overrides='{"spec":{"containers":[{"name":"browse-pvc-{{ usage.claim }}","image":"mirror.gcr.io/alpine:latest","stdin":true,"tty":true,"command":["/bin/sh"],"workingDir":"/mnt","volumeMounts":[{"mountPath":"/mnt","name":"data"}]}],"volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"{{ usage.claim }}"}}]}}'
+'''
+
+[tasks.debug-node]
+description = "Debug a node"
+extends = "node"
+interactive = true
+usage = 'arg "<node>" help="Name of the node"'
+run = '''
+trap 'kubectl delete pod -n default -l app.kubernetes.io/managed-by=kubectl-debug --field-selector "spec.nodeName=$usage_node" --ignore-not-found --wait=false' EXIT
+kubectl debug "node/$usage_node" -n default -it --image=mirror.gcr.io/alpine:latest --profile=sysadmin
+'''
+
+[tasks.delete-ks]
+description = "Delete local Flux Kustomization"
+usage = '''
+arg "<ns>" help="Namespace of the Flux Kustomization"
+arg "<ks>" help="Name of the Flux Kustomization"
+'''
+run = 'mise run //kubernetes:render-local-ks "$usage_ns" "$usage_ks" | kubectl delete -f -'
+
+[tasks.prune-pods]
+description = "Prune pods in Failed, Pending, or Succeeded state"
+run = '''
+for phase in Failed Pending Succeeded; do
+    kubectl delete pods -A --field-selector status.phase="$phase" --ignore-not-found=true
+done
+'''
+
+[tasks.sync]
+description = "Sync a resource"
+usage = '''
+arg "<resource>" help="Kind of resource to sync" {
+  choices "hr" "ks" "gitrepo" "ocirepo" "es"
+}
+'''
+run = '''
+kubectl get "$usage_resource" --no-headers -A | while read -r ns name _; do
+    kubectl -n "$ns" annotate --field-manager flux-client-side-apply --overwrite "$usage_resource" "$name" \
+        "force-sync=$(date +%s)" \
+        "reconcile.fluxcd.io/requestedAt=$(date +%s)" \
+        "reconcile.fluxcd.io/forceAt=$(date +%s)"
+done
+'''
+
+[tasks.view-secret]
+description = "View a secret"
+usage = '''
+arg "<ns>" help="Namespace of the secret"
+arg "<secret>" help="Name of the secret"
+'''
+run = 'kubectl view-secret -n "$usage_ns" "$usage_secret"'
+
+[tasks.render-local-ks]
+hide = true
+usage = '''
+arg "<ns>"
+arg "<ks>"
+'''
+run = 'flate build ks --namespace "$usage_ns" --output yaml "$usage_ks"'

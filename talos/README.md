@@ -14,11 +14,11 @@ rendered on demand and pushed to nodes with `talosctl`.
 | `nodes/<role>/<node>.yaml.j2`           | Per-node documents (hostname, addresses, BGP router ID, zone)             |
 | `nodes/<role>/<node>.schematic.yaml.j2` | Optional per-node schematic override                                      |
 | `schematic.yaml.j2`                     | Shared [Image Factory](https://factory.talos.dev) schematic               |
-| `mod.just`                              | Recipes (`just talos ...`)                                                |
+| `mise.toml`                             | Tasks (`mise run //talos:...`)                                            |
 
 ## Rendering
 
-`just talos render-config <node>` builds the final machine config in three layers:
+`mise run //talos:render-config <node>` builds the final machine config in three layers:
 
 ```
 talosctl machineconfig patch <(cluster.yaml.j2) \
@@ -40,8 +40,8 @@ Two conventions keep the layers honest:
 
 ## Schematics
 
-The schematic defines the Image Factory build (system extensions, kernel args). `just talos
-schematic-id` POSTs it to the factory and gets back a content-addressed ID, which is templated into
+The schematic defines the Image Factory build (system extensions, kernel args). The hidden
+`//talos:schematic-id` task POSTs it to the factory and gets back a content-addressed ID, which is templated into
 the `UnattendedInstallConfig` installer image and used by `download-image` and `upgrade-node`.
 
 Resolution is per node: `nodes/<role>/<node>.schematic.yaml.j2` wins when present, otherwise the
@@ -59,11 +59,11 @@ whose hardware diverges from the fleet. No overrides exist today.
 ## Common tasks
 
 ```sh
-just talos render-config <node>        # render a node's full machine config to stdout
-just talos apply-node <node>           # render and apply (talosctl apply-config)
-just talos upgrade-node <node>         # upgrade Talos using the node's schematic image
-just talos upgrade-k8s <version>       # upgrade Kubernetes across the cluster
-just talos download-image <version>    # fetch a metal ISO from the Image Factory
+mise run //talos:render-config <node>        # render a node's full machine config to stdout
+mise run //talos:apply-node <node>           # render and apply (talosctl apply-config)
+mise run //talos:upgrade-node <node>         # upgrade Talos using the node's schematic image
+mise run //talos:upgrade-k8s <version>       # upgrade Kubernetes across the cluster
+mise run //talos:download-image <version>    # fetch a metal ISO from the Image Factory
 ```
 
 Verify a refactor of these templates by diffing rendered output before and after, then confirming

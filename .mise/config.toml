@@ -1,9 +1,44 @@
+min_version = "2026.11.3"
+monorepo_root = true
+
 [env]
 FLATE_PATH = '{{config_root}}/kubernetes/apps'
 KUBECONFIG = "{{config_root}}/kubeconfig"
 MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 TALOSCONFIG = "{{config_root}}/talosconfig"
-JUST_UNSTABLE = "1"
 
 [hooks]
 postinstall = "lefthook install"
+
+# Shell completion runs this outside the task environment, from the caller's directory.
+[task_templates.node]
+usage = '''
+complete "node" run="find \"$(git rev-parse --show-toplevel)/talos/nodes\" -name '*.yaml.j2' ! -name '*.schematic.yaml.j2' -exec basename {} .yaml.j2 \\; | sort"
+'''
+
+[tasks.log]
+hide = true
+run = "gum log -t rfc3339 -s -l"
+
+# Runs in the caller's directory, so callers pass template paths relative to it.
+[tasks.template]
+hide = true
+dir = "{{ cwd }}"
+usage = '''
+arg "<file>" help="Template path, or - for stdin"
+arg "[args]" var=#true help="Extra arguments for minijinja-cli"
+'''
+run = '''
+eval "args=(${usage_args:-})"
+minijinja-cli "$usage_file" "${args[@]}" | op inject
+'''
+
+[task_config]
+cascade = true
+shell = "bash -euo pipefail -c"
+
+[monorepo]
+config_roots = ["bootstrap", "kubernetes", "talos"]
+
+[settings]
+task.quiet = true
