@@ -84,6 +84,11 @@ spec:
           rotation:
             enabled: false
         controllerPlugin:
+          # With this gate on, the provisioner never becomes ready without the
+          # ReferenceGrant CRD (from envoy-gateway) and the RBAC in rbac.yaml
+          containerExtraArgs:
+            csi-provisioner:
+              - --feature-gates=CrossNamespaceVolumeDataSource=true
           replicas: 2
       cephfs:
         name: rook-ceph.cephfs.csi.ceph.com
