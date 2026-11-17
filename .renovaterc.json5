@@ -1,15 +1,25 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: [
-    "github>home-operations/renovate-presets#11.0.0",
-    "github>home-operations/renovate-presets//apps/cnpg.json5#11.0.0",
-    "github>home-operations/renovate-presets//apps/grafanaDashboards.json5#11.0.0",
-    "github>home-operations/renovate-presets//apps/talosFactory.json5#11.0.0",
+    "github>home-operations/renovate-presets#12.0.0",
+    "github>home-operations/renovate-presets//apps/grafanaDashboards.json5#12.0.0",
+    "github>home-operations/renovate-presets//apps/talosFactory.json5#12.0.0",
     ":timezone(America/New_York)",
   ],
   // The Main ruleset does not require up-to-date branches, and `auto` would
   // still rebase every automerge PR each time main moves
   rebaseWhen: "conflicted",
+  customManagers: [
+    {
+      description: "Process CNPG ImageCatalog extension image references",
+      customType: "regex",
+      managerFilePatterns: ["/\\.ya?ml$/"],
+      matchStrings: [
+        "reference:\\s+(?<depName>[^@\\s]+):(?<currentValue>[^@\\s/]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?",
+      ],
+      datasourceTemplate: "docker",
+    },
+  ],
   packageRules: [
     // Auto-merge rules
     {
@@ -135,12 +145,6 @@
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],
       allowedVersions: "/^18\\./",
-    },
-    {
-      description: "The vchord Database version follows ghcr.io/home-operations/vchord, not the cnpg preset's vchord-scratch",
-      matchDatasources: ["docker"],
-      matchPackageNames: ["ghcr.io/tensorchord/vchord-scratch"],
-      enabled: false,
     },
     // Labeling rules
     {
