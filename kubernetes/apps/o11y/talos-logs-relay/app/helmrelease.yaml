@@ -5,11 +5,11 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app talos-logs
+  name: &app talos-logs-relay
 spec:
   chartRef:
     kind: OCIRepository
-    name: talos-logs
+    name: talos-logs-relay
   interval: 1h
   values:
     fullnameOverride: *app
@@ -53,11 +53,11 @@ spec:
     daemonSetVolumes:
       - name: data
         hostPath:
-          path: /var/lib/talos-logs
+          path: /var/lib/talos-logs-relay
           type: DirectoryOrCreate
     daemonSetVolumeMounts:
       - name: data
-        mountPath: /var/lib/talos-logs
+        mountPath: /var/lib/talos-logs-relay
     # Kernel lines end in a newline.
     luaScripts:
       strip_newline.lua: |
@@ -80,7 +80,7 @@ spec:
         [SERVICE]
             Flush 5
             HTTP_Server On
-            storage.path /var/lib/talos-logs
+            storage.path /var/lib/talos-logs-relay
             storage.max_chunks_up 16
             storage.backlog.mem_limit 16M
             scheduler.cap 30
