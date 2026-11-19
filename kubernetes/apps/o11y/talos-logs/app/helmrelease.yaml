@@ -84,15 +84,17 @@ spec:
             storage.max_chunks_up 16
             storage.backlog.mem_limit 16M
             scheduler.cap 30
-      # A Talos line is at most 64KiB. A line that is larger than Buffer_Size
-      # closes the connection, and the line is lost.
+      # A Talos line is at most 64KiB, and JSON escaping can grow it up to six
+      # times. A record that is larger than Buffer_Size closes the connection,
+      # and the record is lost. VictoriaLogs skips lines over 256KiB, so a
+      # larger buffer saves nothing.
       inputs: |
         [INPUT]
             Name tcp
             Alias talos
             Tag talos
             Port 6050
-            Buffer_Size 128
+            Buffer_Size 256
             Chunk_Size 64
             storage.type filesystem
       # machined replays the kernel ring buffer as a "kernel" service, as text
