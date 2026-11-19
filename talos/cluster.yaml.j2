@@ -7,6 +7,12 @@ machine:
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
     rbac: true
+  # The host network namespace cannot resolve cluster DNS, so this is the
+  # pinned ClusterIP of the talos-logs-relay Service.
+  logging:
+    destinations:
+      - endpoint: tcp://10.43.0.60:6050/
+        format: json_lines
   token: op://kubernetes/talos/MACHINE_TOKEN
 cluster:
   ca:
@@ -97,6 +103,11 @@ apiVersion: v1alpha1
 kind: WatchdogTimerConfig
 device: /dev/watchdog0
 timeout: 5m
+---
+apiVersion: v1alpha1
+kind: KmsgLogConfig
+name: talos-logs-relay
+url: tcp://10.43.0.60:6050/
 ---
 apiVersion: v1alpha1
 kind: KernelModuleConfig

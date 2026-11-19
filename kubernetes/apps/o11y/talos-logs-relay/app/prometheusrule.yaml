@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: talos-logs-relay-rules
+spec:
+  groups:
+    - name: talos-logs-relay.rules
+      rules:
+        # Fluent Bit retries connection errors and 5xx responses without
+        # counting them as errors, so only the chunk backlog catches an
+        # unreachable VictoriaLogs. A healthy relay holds 0 to 2 chunks. The
+        # counter windows are longer than `for`, so a single lost batch fires.
+        - alert: TalosLogsNotShipping
+          expr: |-
+            max by (pod) (
+              (increase(fluentbit_output_errors_total{job="talos-logs-relay", name="victorialogs"}[30m]) > 0)
+              or
+              (increase(fluentbit_output_dropped_records_total{job="talos-logs-relay", name="victorialogs"}[30m]) > 0)
+              or
+              (last_over_time(fluentbit_storage_fs_chunks{job="talos-logs-relay"}[5m]) > 10)
+            )
+          for: 15m
+          annotations:
+            summary: >-
+              Relay {{ $labels.pod }} cannot deliver the Talos logs of its node to VictoriaLogs
+          labels:
+            severity: critical
