@@ -8,10 +8,10 @@ spec:
   groups:
     - name: talos-logs-relay.rules
       rules:
-        # Fluent Bit retries connection errors and 5xx responses without
-        # counting them as errors, so only the chunk backlog catches an
-        # unreachable VictoriaLogs. A healthy relay holds 0 to 2 chunks. The
-        # counter windows are longer than `for`, so a single lost batch fires.
+        # Fluent Bit does not count connection errors and 5xx responses as
+        # errors, so only the chunk backlog catches an unreachable VictoriaLogs.
+        # The counter windows must be longer than `for`, or a single lost batch
+        # never fires.
         - alert: TalosLogsNotShipping
           expr: |-
             max by (pod) (
