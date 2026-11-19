@@ -10,13 +10,14 @@ spec:
       rules:
         # Fluent Bit retries connection errors and 5xx responses without
         # counting them as errors, so only the chunk backlog catches an
-        # unreachable VictoriaLogs. A healthy relay holds 0 to 2 chunks.
+        # unreachable VictoriaLogs. A healthy relay holds 0 to 2 chunks. The
+        # counter windows are longer than `for`, so a single lost batch fires.
         - alert: TalosLogsNotShipping
           expr: |-
             max by (pod) (
-              (increase(fluentbit_output_errors_total{job="talos-logs", name="victorialogs"}[15m]) > 0)
+              (increase(fluentbit_output_errors_total{job="talos-logs", name="victorialogs"}[30m]) > 0)
               or
-              (increase(fluentbit_output_dropped_records_total{job="talos-logs", name="victorialogs"}[15m]) > 0)
+              (increase(fluentbit_output_dropped_records_total{job="talos-logs", name="victorialogs"}[30m]) > 0)
               or
               (last_over_time(fluentbit_storage_fs_chunks{job="talos-logs"}[5m]) > 10)
             )
