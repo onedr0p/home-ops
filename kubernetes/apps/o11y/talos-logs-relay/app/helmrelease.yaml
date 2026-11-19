@@ -90,14 +90,13 @@ spec:
             Chunk_Size 64
             storage.type filesystem
       # The "kernel" service duplicates the lines that KmsgLogConfig sends.
-      # auditd is mostly SELinux AVC records, and dns-resolve-cache is two debug
-      # lines per host DNS query. The console dashboard polls machined every
-      # second.
+      # dns-resolve-cache is two debug lines per host DNS query. The console
+      # dashboard polls machined every second.
       filters: |
         [FILTER]
             Name grep
             Match talos
-            Exclude $talos-service ^(kernel|auditd|dns-resolve-cache)$
+            Exclude $talos-service ^(kernel|dns-resolve-cache)$
 
         [FILTER]
             Name grep
