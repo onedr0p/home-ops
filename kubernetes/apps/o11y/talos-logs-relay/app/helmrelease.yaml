@@ -1,7 +1,5 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# Talos sends its service and kernel logs as JSON lines over TCP, which
-# VictoriaLogs cannot read. This relay posts them to VictoriaLogs.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -39,17 +37,15 @@ spec:
         port: 6050
         containerPort: 6050
         protocol: TCP
-    # Talos sends from the host network namespace, where cluster DNS does not
-    # resolve, so talos/cluster.yaml.j2 holds this IP. The Local policy sends
-    # the lines of a node to the pod on that node, which stamps the node name.
+    # talos/cluster.yaml.j2 repeats this IP, because the host network namespace
+    # cannot resolve cluster DNS. The pod stamps its own node name, so each
+    # node must reach its local pod.
     service:
       clusterIP: 10.43.0.60
       internalTrafficPolicy: Local
     serviceMonitor:
       enabled: true
-    # The disk queue lives on the node, so unsent lines survive a pod restart.
-    # The directory is owned by root, so the container keeps the root user of
-    # the image.
+    # The directory is owned by root, so the container runs as root.
     daemonSetVolumes:
       - name: data
         hostPath:
@@ -70,12 +66,9 @@ spec:
           return 0, ts, record
         end
     config:
-      # Health_Check stays off. With it on, errors from VictoriaLogs fail the
-      # readiness probe, the Service drops the pod, and Talos cannot hand over
-      # lines during an outage. The default retry back-off grows to 2000s; a
-      # cap of 30s keeps recovery under a minute. Every chunk that is up maps
-      # about 2MB of memory, and the defaults (128 chunks up, a 100MB backlog
-      # queue at start) exceed the memory limit during a backlog.
+      # Health_Check must stay off. With it on, errors from VictoriaLogs fail
+      # the readiness probe, and Talos cannot hand over lines during an outage.
+      # The storage limits keep a backlog under the memory limit.
       service: |
         [SERVICE]
             Flush 5
@@ -84,10 +77,9 @@ spec:
             storage.max_chunks_up 16
             storage.backlog.mem_limit 16M
             scheduler.cap 30
-      # A Talos line is at most 64KiB, and JSON escaping can grow it up to six
-      # times. A record that is larger than Buffer_Size closes the connection,
-      # and the record is lost. VictoriaLogs skips lines over 256KiB, so a
-      # larger buffer saves nothing.
+      # A record larger than Buffer_Size is lost. JSON escaping can grow a
+      # 64KiB Talos line up to six times, and VictoriaLogs skips lines over
+      # 256KiB.
       inputs: |
         [INPUT]
             Name tcp
@@ -97,13 +89,10 @@ spec:
             Buffer_Size 256
             Chunk_Size 64
             storage.type filesystem
-      # machined replays the kernel ring buffer as a "kernel" service, as text
-      # with the replay time. KmsgLogConfig sends the same lines with their own
-      # time, facility and priority, so the copy from machined is dropped.
-      # auditd is SELinux AVC records and dns-resolve-cache is two debug lines
-      # per host DNS query.
-      # The console dashboard polls machined every second. Only lines from
-      # machined match (Logical_Op and), so calls through apid stay.
+      # The "kernel" service duplicates the lines that KmsgLogConfig sends.
+      # auditd is mostly SELinux AVC records, and dns-resolve-cache is two debug
+      # lines per host DNS query. The console dashboard polls machined every
+      # second.
       filters: |
         [FILTER]
             Name grep
@@ -128,10 +117,7 @@ spec:
             Match talos
             Hard_rename talos-level level
             Set node ${NODE_NAME}
-      # Kernel lines carry facility and no talos-service, service lines the
-      # reverse, so each node gets one stream per service and one per facility.
-      # syslogd lines carry both, and their message is in content, not msg.
-      # When the disk queue is full, Fluent Bit drops the oldest chunk.
+      # syslogd puts its message in content, not msg.
       outputs: |
         [OUTPUT]
             Name http
