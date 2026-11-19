@@ -130,6 +130,7 @@ spec:
             Set node ${NODE_NAME}
       # Kernel lines carry facility and no talos-service, service lines the
       # reverse, so each node gets one stream per service and one per facility.
+      # syslogd lines carry both, and their message is in content, not msg.
       # When the disk queue is full, Fluent Bit drops the oldest chunk.
       outputs: |
         [OUTPUT]
@@ -138,7 +139,7 @@ spec:
             Match talos
             Host victoria-logs.o11y.svc.cluster.local
             Port 9428
-            URI /insert/jsonline?_msg_field=msg&_time_field=talos-time&_stream_fields=node,talos-service,facility
+            URI /insert/jsonline?_msg_field=msg,content&_time_field=talos-time&_stream_fields=node,talos-service,facility
             Format json_lines
             Json_date_key false
             Retry_Limit no_limits
