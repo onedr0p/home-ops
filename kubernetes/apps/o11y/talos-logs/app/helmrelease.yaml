@@ -1,0 +1,144 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# Talos sends its service and kernel logs as JSON lines over TCP, which
+# VictoriaLogs cannot read. This relay posts them to VictoriaLogs.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app talos-logs
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: talos-logs
+  interval: 1h
+  values:
+    fullnameOverride: *app
+    serviceAccount:
+      create: false
+      automountServiceAccountToken: false
+    rbac:
+      create: false
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: [ALL]
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 128Mi
+    env:
+      - name: NODE_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: spec.nodeName
+    extraPorts:
+      - name: talos
+        port: 6050
+        containerPort: 6050
+        protocol: TCP
+    # Talos sends from the host network namespace, where cluster DNS does not
+    # resolve, so talos/cluster.yaml.j2 holds this IP. The Local policy sends
+    # the lines of a node to the pod on that node, which stamps the node name.
+    service:
+      clusterIP: 10.43.0.60
+      internalTrafficPolicy: Local
+    serviceMonitor:
+      enabled: true
+    # The disk queue lives on the node, so unsent lines survive a pod restart.
+    # The directory is owned by root, so the container keeps the root user of
+    # the image.
+    daemonSetVolumes:
+      - name: data
+        hostPath:
+          path: /var/lib/talos-logs
+          type: DirectoryOrCreate
+    daemonSetVolumeMounts:
+      - name: data
+        mountPath: /var/lib/talos-logs
+    # Kernel lines end in a newline.
+    luaScripts:
+      strip_newline.lua: |
+        function strip_newline(tag, ts, record)
+          local m = record["msg"]
+          if type(m) == "string" and m:sub(-1) == "\n" then
+            record["msg"] = m:sub(1, -2)
+            return 2, ts, record
+          end
+          return 0, ts, record
+        end
+    config:
+      # Health_Check stays off. With it on, errors from VictoriaLogs fail the
+      # readiness probe, the Service drops the pod, and Talos cannot hand over
+      # lines during an outage. The default retry back-off grows to 2000s; a
+      # cap of 30s keeps recovery under a minute. Every chunk that is up maps
+      # about 2MB of memory, and the defaults (128 chunks up, a 100MB backlog
+      # queue at start) exceed the memory limit during a backlog.
+      service: |
+        [SERVICE]
+            Flush 5
+            HTTP_Server On
+            HTTP_Port {{ .Values.metricsPort }}
+            storage.path /var/lib/talos-logs
+            storage.max_chunks_up 16
+            storage.backlog.mem_limit 16M
+            scheduler.cap 30
+      # A Talos line is at most 64KiB. A line that is larger than Buffer_Size
+      # closes the connection, and the line is lost.
+      inputs: |
+        [INPUT]
+            Name tcp
+            Alias talos
+            Tag talos
+            Port 6050
+            Buffer_Size 128
+            Chunk_Size 64
+            storage.type filesystem
+      # machined replays the kernel ring buffer as a "kernel" service, as text
+      # with the replay time. KmsgLogConfig sends the same lines with their own
+      # time, facility and priority, so the copy from machined is dropped.
+      # auditd is SELinux AVC records and dns-resolve-cache is two debug lines
+      # per host DNS query.
+      # The console dashboard polls machined every second. Only lines from
+      # machined match (Logical_Op and), so calls through apid stay.
+      filters: |
+        [FILTER]
+            Name grep
+            Match talos
+            Exclude $talos-service ^(kernel|auditd|dns-resolve-cache)$
+
+        [FILTER]
+            Name grep
+            Match talos
+            Logical_Op and
+            Exclude $talos-service ^machined$
+            Exclude $msg match\swith\sservice\s"dashboard"
+
+        [FILTER]
+            Name lua
+            Match talos
+            script /fluent-bit/scripts/strip_newline.lua
+            call strip_newline
+
+        [FILTER]
+            Name modify
+            Match talos
+            Hard_rename talos-level level
+            Set node ${NODE_NAME}
+      # Kernel lines carry facility and no talos-service, service lines the
+      # reverse, so each node gets one stream per service and one per facility.
+      # When the disk queue is full, Fluent Bit drops the oldest chunk.
+      outputs: |
+        [OUTPUT]
+            Name http
+            Alias victorialogs
+            Match talos
+            Host victoria-logs.o11y.svc.cluster.local
+            Port 9428
+            URI /insert/jsonline?_msg_field=msg&_time_field=talos-time&_stream_fields=node,talos-service,facility
+            Format json_lines
+            Json_date_key false
+            Retry_Limit no_limits
+            storage.total_limit_size 256M
