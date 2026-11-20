@@ -17,15 +17,16 @@ permissions:
   contents: read
 
 env:
+  FLATE_PATH: ./kubernetes/apps
   # renovate: datasource=github-releases depName=home-operations/flate
   FLATE_VERSION: "0.8.0"
   # renovate: datasource=custom.talos-factory depName=siderolabs/talos
   TALOS_VERSION: v1.14.6
 
 jobs:
-  image-pull-extract:
+  extract-images:
     if: ${{ github.event_name == 'pull_request' }}
-    name: Image Pull - Extract Images
+    name: Extract Images
     runs-on: ubuntu-26.04
     permissions:
       contents: read
@@ -50,23 +51,23 @@ jobs:
           MISE_GITHUB_TOKEN: ${{ github.token }}
         run: |
           echo 'images<<EOF' >> $GITHUB_OUTPUT
-          mise exec "github:home-operations/flate@${FLATE_VERSION}" -- flate diff images -p ./kubernetes/apps -o json >> $GITHUB_OUTPUT
+          mise exec "aqua:home-operations/flate@${FLATE_VERSION}" -- flate diff images -o json >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
-  image-pull:
+  pull-images:
     if: >-
       ${{
-        needs.image-pull-extract.outputs.images != '[]' &&
+        needs.extract-images.outputs.images != '[]' &&
         github.event.pull_request.head.repo.full_name == github.repository
       }}
-    needs: image-pull-extract
-    name: Image Pull - Pull Images
+    needs: extract-images
+    name: Pull Images
     runs-on: ${{ github.event.repository.name }}-runner
     permissions:
       contents: read
     strategy:
       matrix:
-        image: ${{ fromJSON(needs.image-pull-extract.outputs.images) }}
+        image: ${{ fromJSON(needs.extract-images.outputs.images) }}
       max-parallel: 4
       fail-fast: false
     steps:
@@ -81,6 +82,29 @@ jobs:
           IMAGE: ${{ matrix.image }}
           MISE_GITHUB_TOKEN: ${{ github.token }}
         run: mise exec "talosctl@${TALOS_VERSION}" -- talosctl --nodes "$NODE" image pull "$IMAGE"
+
+  flate:
+    name: Flate
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Mise
+        uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
+        with:
+          cache: false
+          install: false
+
+      # --base never renders the FluxInstance root layer, so shared components are only checked by a full run
+      - name: Run Flate
+        env:
+          MISE_GITHUB_TOKEN: ${{ github.token }}
+        run: mise exec "aqua:home-operations/flate@${FLATE_VERSION}" -- flate test
 
   zizmor:
     name: Zizmor
@@ -103,8 +127,9 @@ jobs:
     if: ${{ !cancelled() }}
     name: Build Success
     needs:
-      - image-pull-extract
-      - image-pull
+      - extract-images
+      - flate
+      - pull-images
       - zizmor
     runs-on: ubuntu-26.04
     permissions: {}
