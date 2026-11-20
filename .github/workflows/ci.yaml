@@ -17,9 +17,15 @@ permissions:
   contents: read
 
 env:
+  # Helm has no cluster to ask offline, so charts fall back to older or fewer resources without these
+  FLATE_API_VERSIONS: apiregistration.k8s.io/v1,cilium.io/v2/CiliumNetworkPolicy,gateway.networking.k8s.io/v1/HTTPRoute,monitoring.coreos.com/v1,monitoring.coreos.com/v1/ServiceMonitor
   FLATE_PATH: ./kubernetes/apps
+  # Flux fills an undefined postBuild variable with an empty string and reports no error
+  FLATE_STRICT_SUBSTITUTIONS: "true"
   # renovate: datasource=github-releases depName=home-operations/flate
   FLATE_VERSION: "0.8.0"
+  # renovate: datasource=github-releases depName=yannh/kubeconform
+  KUBECONFORM_VERSION: "0.8.0"
   # renovate: datasource=custom.talos-factory depName=siderolabs/talos
   TALOS_VERSION: v1.14.6
 
@@ -106,6 +112,34 @@ jobs:
           MISE_GITHUB_TOKEN: ${{ github.token }}
         run: mise exec "aqua:home-operations/flate@${FLATE_VERSION}" -- flate test
 
+  kubeconform:
+    name: Kubeconform
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Mise
+        uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
+        with:
+          cache: false
+          install: false
+
+      # An explicit shell turns on pipefail, so a failed render fails the step
+      - name: Run Kubeconform
+        shell: bash
+        env:
+          MISE_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mise exec "aqua:home-operations/flate@${FLATE_VERSION}" -- flate build all |
+            mise exec "aqua:yannh/kubeconform@${KUBECONFORM_VERSION}" -- kubeconform \
+              -strict -summary -ignore-missing-schemas -schema-location default \
+              -schema-location 'https://k8s-schemas.home-operations.com/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+
   zizmor:
     name: Zizmor
     runs-on: ubuntu-26.04
@@ -129,6 +163,7 @@ jobs:
     needs:
       - extract-images
       - flate
+      - kubeconform
       - pull-images
       - zizmor
     runs-on: ubuntu-26.04
