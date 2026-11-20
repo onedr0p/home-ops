@@ -17,6 +17,7 @@ permissions:
   contents: read
 
 env:
+  FLATE_PATH: ./kubernetes/apps
   # renovate: datasource=github-releases depName=home-operations/flate
   FLATE_VERSION: "0.8.0"
   # renovate: datasource=custom.talos-factory depName=siderolabs/talos
@@ -50,7 +51,7 @@ jobs:
           MISE_GITHUB_TOKEN: ${{ github.token }}
         run: |
           echo 'images<<EOF' >> $GITHUB_OUTPUT
-          mise exec "github:home-operations/flate@${FLATE_VERSION}" -- flate diff images -p ./kubernetes/apps -o json >> $GITHUB_OUTPUT
+          mise exec "github:home-operations/flate@${FLATE_VERSION}" -- flate diff images -o json >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
   pull-images:
@@ -102,7 +103,6 @@ jobs:
       # --base never renders the FluxInstance root layer, so shared components are only checked by a full run
       - name: Run Flate
         env:
-          FLATE_PATH: ./kubernetes/apps
           MISE_GITHUB_TOKEN: ${{ github.token }}
         run: mise exec "github:home-operations/flate@${FLATE_VERSION}" -- flate test
 
