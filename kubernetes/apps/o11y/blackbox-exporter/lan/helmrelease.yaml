@@ -13,6 +13,16 @@ spec:
     fullnameOverride: blackbox-exporter-lan
     config:
       modules:
+        dns_https_rr:
+          prober: dns
+          timeout: 5s
+          dns:
+            preferred_ip_protocol: ip4
+            query_name: internal.turbo.ac
+            query_type: HTTPS
+            validate_answer_rrs:
+              fail_if_none_matches_regexp:
+                - alpn="h3,h2"
         icmp:
           prober: icmp
           timeout: 5s
