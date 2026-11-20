@@ -11,7 +11,7 @@ rendered on demand and pushed to nodes with `talosctl`.
 | `cluster.yaml.j2`                       | Documents applied to every node                                           |
 | `controlplane.yaml.j2`                  | Control-plane-only documents, including `machine.type`                    |
 | `workers.yaml.j2`                       | Worker-only documents (does not exist yet; created with the first worker) |
-| `nodes/<role>/<node>.yaml.j2`           | Per-node documents (hostname, addresses, BGP router ID, zone)             |
+| `nodes/<role>/<node>.yaml.j2`           | Per-node documents (hostname, zone)                                       |
 | `nodes/<role>/<node>.schematic.yaml.j2` | Optional per-node schematic override                                      |
 | `schematic.yaml.j2`                     | Shared [Image Factory](https://factory.talos.dev) schematic               |
 | `mise.toml`                             | Tasks (`mise run //talos:...`)                                            |
