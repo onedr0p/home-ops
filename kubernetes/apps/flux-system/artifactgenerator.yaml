@@ -18,23 +18,3 @@ spec:
           to: "@artifact/kubernetes/apps/{namespace}/{app}/"
         - from: "@repo/kubernetes/components/**"
           to: "@artifact/kubernetes/components/"
----
-# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/source.extensions.fluxcd.io/artifactgenerator_v1beta1.json
-apiVersion: source.extensions.fluxcd.io/v1beta1
-kind: ArtifactGenerator
-metadata:
-  name: flux-core
-spec:
-  sources:
-    - alias: repo
-      kind: GitRepository
-      name: flux-system
-  artifacts:
-    # One artifact for both, so flux-instance still waits for flux-operator to apply the same revision
-    - name: flux-core
-      originRevision: "@repo"
-      copy:
-        - from: "@repo/kubernetes/apps/flux-system/flux-instance/app/**"
-          to: "@artifact/kubernetes/apps/flux-system/flux-instance/app/"
-        - from: "@repo/kubernetes/apps/flux-system/flux-operator/app/**"
-          to: "@artifact/kubernetes/apps/flux-system/flux-operator/app/"

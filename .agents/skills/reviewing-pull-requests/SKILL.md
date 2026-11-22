@@ -127,9 +127,9 @@ anything here depends on it. Search `kubernetes/` for:
   and Flux `dependsOn` and `healthChecks`;
 - **a value, flag or CRD field**: the HelmRelease `values`, `valuesFrom`,
   `postRenderers`, kustomize patches, including those the FluxInstance in
-  `kubernetes/apps/flux-system/flux-instance` applies to every HelmRelease
-  (a CRD upgrade policy among them), and the custom resources other apps
-  create from the dependency's CRDs (`apiVersion: <group>`).
+  `kubernetes/apps/flux-system/flux-operator/instance` applies to every
+  HelmRelease (a CRD upgrade policy among them), and the custom resources
+  other apps create from the dependency's CRDs (`apiVersion: <group>`).
 
 An app configured through its own UI keeps that configuration on its
 volume, not in git, so a search of this repository proves nothing about
