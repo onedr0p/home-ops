@@ -323,3 +323,8 @@ reads the chart and the version of each release from the app's
 [`helmfile/templates/`](helmfile/templates/)). As a result, bootstrap installs
 the same releases that Flux reconciles later, and Renovate updates only one
 place.
+
+Both templates read from `kubernetes/apps/<namespace>/<release>/app`. If the
+manifests of a release are in a different directory, the release sets a `path`
+label in the helmfile. The value is relative to the namespace directory. For
+example, `flux-instance` sets `path: flux-operator/instance`.

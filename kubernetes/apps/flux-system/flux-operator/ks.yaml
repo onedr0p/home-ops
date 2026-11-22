@@ -10,7 +10,25 @@ spec:
   prune: true
   sourceRef:
     kind: ExternalArtifact
-    name: flux-core
+    name: flux-operator
     namespace: flux-system
   targetNamespace: flux-system
   wait: true
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: flux-instance
+spec:
+  dependsOn:
+    - name: flux-operator
+  interval: 1h
+  path: ./kubernetes/apps/flux-system/flux-operator/instance
+  prune: true
+  # If source-watcher is down, point this and flux-operator at the flux-system GitRepository to apply a fix from Git
+  sourceRef:
+    kind: ExternalArtifact
+    name: flux-operator
+    namespace: flux-system
+  targetNamespace: flux-system
