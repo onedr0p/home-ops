@@ -141,10 +141,11 @@
       minimumGroupSize: 2,
     },
     {
-      description: "Keep CloudNativePG on Postgres 18 until the extension images move with it",
+      description: "Each ClusterImageCatalog row is one Postgres major, so never move a row to the next major",
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],
-      allowedVersions: "/^18\\./",
+      matchUpdateTypes: ["major"],
+      enabled: false,
     },
     {
       description: "Postgres image rebuilds restart every database, so offer them weekly",
