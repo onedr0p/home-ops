@@ -11,7 +11,7 @@
   rebaseWhen: "conflicted",
   customManagers: [
     {
-      description: "Process CNPG ImageCatalog extension image references",
+      description: "Process CNPG extension image references",
       customType: "regex",
       managerFilePatterns: ["/\\.ya?ml$/"],
       matchStrings: [
@@ -145,6 +145,13 @@
       matchDatasources: ["docker"],
       matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],
       allowedVersions: "/^18\\./",
+    },
+    {
+      description: "Postgres image rebuilds restart every database, so offer them weekly",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],
+      matchUpdateTypes: ["digest"],
+      schedule: ["before 6am on Monday"],
     },
     // Labeling rules
     {
