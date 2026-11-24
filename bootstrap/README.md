@@ -324,6 +324,12 @@ reads the chart and the version of each release from the app's
 the same releases that Flux reconciles later, and Renovate updates only one
 place.
 
+Cilium is the one exception. The apps helmfile turns off Hubble Relay and the
+Hubble UI, because Relay is not ready until CoreDNS runs, and CoreDNS installs
+after Cilium. When Flux reconciles Cilium, it turns them on. If you run the
+apps stage again on a running cluster, Relay and the UI stop until the next Flux
+reconcile.
+
 Both templates read from `kubernetes/apps/<namespace>/<release>/app`. If the
 manifests of a release are in a different directory, the release sets a `path`
 label in the helmfile. The value is relative to the namespace directory. For
