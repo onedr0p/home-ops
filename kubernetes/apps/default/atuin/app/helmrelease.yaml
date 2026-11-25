@@ -12,6 +12,17 @@ spec:
   values:
     controllers:
       atuin:
+        type: statefulset
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 5Gi
+              storageClass: ceph-block
+              dataSourceRef:
+                apiGroup: kopiur.home-operations.com
+                kind: Restore
+                name: "{{ .Release.Name }}"
         containers:
           app:
             image:
@@ -73,6 +84,3 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
-    persistence:
-      config:
-        existingClaim: "{{ .Release.Name }}"
