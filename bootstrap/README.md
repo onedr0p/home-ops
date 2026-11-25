@@ -261,7 +261,7 @@ graph LR
 
     [`helmfile/crds.yaml`](helmfile/crds.yaml) lists the charts that supply
     the CRDs: `envoy-gateway`, `grafana-operator`, `kopiur`,
-    `kube-prometheus-stack` and `snapshot-controller`. The stage renders the
+    `prometheus-operator-crds` and `snapshot-controller`. The stage renders the
     CRDs from these charts and applies them with `kubectl`. As a result, Flux
     `Kustomization` resources need no `dependsOn` entry to wait for these
     CRDs.

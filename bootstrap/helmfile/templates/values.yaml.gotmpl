@@ -1,2 +1,2 @@
 {{- $path := .Release.Labels | get "path" (printf "%s/app" .Release.Name) -}}
-{{ (fromYaml (readFile (printf "../../../kubernetes/apps/%s/%s/helmrelease.yaml" .Release.Namespace $path))).spec.values | toYaml }}
+{{ dig "spec" "values" (dict) (fromYaml (readFile (printf "../../../kubernetes/apps/%s/%s/helmrelease.yaml" .Release.Namespace $path))) | toYaml }}
