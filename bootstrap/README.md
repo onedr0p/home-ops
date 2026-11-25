@@ -308,8 +308,8 @@ Apps that run as a StatefulSet use the `kopiur/statefulset` component instead
 [`kubernetes/components/kopiur/statefulset/`](../kubernetes/components/kopiur/statefulset/)).
 This component has no PVC. The StatefulSet creates the PVC from a
 volumeClaimTemplate with the same `spec.dataSourceRef`. The template must be
-named `config`, so the PVC of the first pod is `config-${APP}-0`, which is the
-PVC that the `SnapshotPolicy` backs up. The policy sets
+named `config`. The PVC of the first pod is then `config-${APP}-0`, and the
+`SnapshotPolicy` backs up that PVC. The policy sets
 `sourcePathOverride: /pvc/${APP}`, so the snapshots of an app keep the kopia
 path that they had before the app became a StatefulSet. The restore mover
 writes the files as `KOPIUR_PUID` and `KOPIUR_PGID`, which are `1000` by
