@@ -117,6 +117,8 @@ spec:
                 ttl: 24h
                 url_title: View in Alertmanager
                 user_key_file: /etc/vm/secrets/alertmanager-secret/PUSHOVER_USER_KEY
+      monzoTemplate:
+        enabled: false
       route:
         enabled: true
         hostnames:
@@ -142,6 +144,13 @@ spec:
         extraArgs:
           # kube-apiserver serves about 13 MB of metrics, close to the 16 MiB default
           promscrape.maxScrapeSize: 32MiB
+        # Clamp the intervals that other charts set on their monitors to the 20s default
+        maxScrapeInterval: 20s
+        minScrapeInterval: 20s
+        # A CPU request stops the operator from adding its default CPU limit
+        resources:
+          requests:
+            cpu: 50m
     vmsingle:
       route:
         enabled: true
@@ -157,6 +166,9 @@ spec:
         image:
           repository: victoriametrics/victoria-metrics
           tag: v1.157.0-enterprise
+        resources:
+          requests:
+            cpu: 150m
         retentionPeriod: 1y
         storage:
           storageClassName: ceph-block
@@ -193,6 +205,15 @@ spec:
             - kubernetes.pod_labels.app.kubernetes.io/name
         remoteWriteSettings:
           maxDiskUsagePerURL: 10GB
+    kubelet:
+      vmScrape:
+        spec:
+          # This list replaces the chart's rules, which also copy every node label onto each series
+          relabelConfigs:
+            - sourceLabels: [__metrics_path__]
+              targetLabel: metrics_path
+            - targetLabel: job
+              replacement: kubelet
     kubeApiServer:
       vmScrape:
         spec:
