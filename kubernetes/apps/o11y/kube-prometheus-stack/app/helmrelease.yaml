@@ -35,6 +35,16 @@ spec:
               resources:
                 requests:
                   storage: 1Gi
+    kubeApiServer:
+      serviceMonitor:
+        # This list replaces the chart's drop rules, so the first rule repeats the chart default.
+        metricRelabelings:
+          - action: drop
+            regex: (etcd_request|apiserver_request_slo|apiserver_request_sli|apiserver_request)_duration_seconds_bucket;(0\.15|0\.2|0\.3|0\.35|0\.4|0\.45|0\.6|0\.7|0\.8|0\.9|1\.25|1\.5|1\.75|2|3|3\.5|4|4\.5|6|7|8|9|15|20|40|45|50)(\.0)?
+            sourceLabels: [__name__, le]
+          - action: drop
+            regex: (apiserver_request_body_size_bytes|apiserver_response_sizes|apiserver_storage_list_duration_seconds|apiserver_watch_cache_initialization_duration_seconds|apiserver_watch_cache_read_wait_seconds|apiserver_watch_events_dispatch_duration_seconds|apiserver_watch_events_sizes|apiserver_watch_list_duration_seconds|etcd_request_duration_seconds)_(bucket|count|sum)
+            sourceLabels: [__name__]
     kubeEtcd:
       service:
         selector:
