@@ -34,3 +34,19 @@ spec:
     jsonData:
       implementation: prometheus
     url: http://vmalertmanager-victoria-metrics.o11y.svc.cluster.local:9093
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/grafana.integreatly.org/grafanadatasource_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: victoria-logs
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  datasource:
+    type: victoriametrics-logs-datasource
+    name: victoria-logs
+    uid: VictoriaLogs
+    access: proxy
+    url: http://vlsingle-victoria-metrics.o11y.svc.cluster.local:9428
