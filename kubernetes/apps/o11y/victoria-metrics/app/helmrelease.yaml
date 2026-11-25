@@ -54,9 +54,10 @@ spec:
           folder: o11y
     defaultRules:
       rules:
-        # The kube-scheduler quantile rules often have no samples, which keeps this alert pending
         RecordingRulesNoData:
-          enabled: false
+          spec:
+            # The kube-scheduler quantile rules often have no samples
+            expr: sum(vmalert_recording_rules_last_evaluation_samples{group!="kube-scheduler.rules"}) without(id) < 1
     external:
       grafana:
         host: https://grafana.turbo.ac
@@ -157,6 +158,7 @@ spec:
                       app.kubernetes.io/name: vmsingle
                   topologyKey: kubernetes.io/hostname
         extraArgs:
+          # Hides dropped targets and pre-relabel labels on the targets page
           promscrape.dropOriginalLabels: "true"
           # kube-apiserver serves about 13 MB of metrics, close to the 16 MiB default
           promscrape.maxScrapeSize: 32MiB
@@ -182,9 +184,6 @@ spec:
         extraArgs:
           downsampling.period: 30d:5m,180d:1h
           eula: "true"
-          # The default allows two queries for each CPU up to 16, with no memory cap for a query
-          search.maxConcurrentRequests: "4"
-          search.maxMemoryPerQuery: 512MB
         image:
           repository: victoriametrics/victoria-metrics
           tag: v1.157.0-enterprise
