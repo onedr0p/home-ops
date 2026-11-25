@@ -294,27 +294,24 @@ Flux takes control. Flux deploys Kopiur from
 uses the `expanse` `ClusterRepository`, which is a kopia repository in S3 on
 `expanse.internal`.
 
-Apps that use the `kopiur/backup` component get a PVC (see
-[`kubernetes/components/kopiur/backup/`](../kubernetes/components/kopiur/backup/)).
-The `spec.dataSourceRef` of this PVC points at a Kopiur `Restore` with
-`target.populator: {}`. This configuration makes the `Restore` a passive
-volume-populator source. When Flux applies the app on a new cluster, Kopiur
-fills the PVC from the latest snapshot of the app's `SnapshotPolicy`. The PVC
-stays unbound while the restore mover `Job` runs, so the pod of the app stays
-`Pending` until the data is back. No ordering logic is necessary.
-
-Apps that run as a StatefulSet use the `kopiur/statefulset` component instead
-(see
+Apps that keep data run as a StatefulSet and use the `kopiur/statefulset`
+component (see
 [`kubernetes/components/kopiur/statefulset/`](../kubernetes/components/kopiur/statefulset/)).
 This component has no PVC. The StatefulSet creates the PVC from a
-volumeClaimTemplate with the same `spec.dataSourceRef`. The component expects
-a template named `config`. The PVC of the first pod is then
-`config-${APP}-0`, and the `SnapshotPolicy` backs up that PVC. If a chart
+volumeClaimTemplate. The `spec.dataSourceRef` of this template points at a
+Kopiur `Restore` with `target.populator: {}`. This configuration makes the
+`Restore` a passive volume-populator source. When Flux applies the app on a
+new cluster, Kopiur fills the PVC from the latest snapshot of the app's
+`SnapshotPolicy`. The PVC stays unbound while the restore mover `Job` runs, so
+the pod of the app stays `Pending` until the data is back. No ordering logic
+is necessary.
+
+The component expects a template named `config`. The PVC of the first pod is
+then `config-${APP}-0`, and the `SnapshotPolicy` backs up that PVC. If a chart
 fixes a different template name, set `KOPIUR_CLAIM` to that name. The policy
-sets
-`sourcePathOverride: /pvc/${APP}`, so the snapshots of an app keep the kopia
-path that they had before the app became a StatefulSet. The restore mover
-writes the files as `KOPIUR_PUID` and `KOPIUR_PGID`, which are `1000` by
+sets `sourcePathOverride: /pvc/${APP}`, so the snapshots of an app keep the
+kopia path that they had before the app became a StatefulSet. The restore
+mover writes the files as `KOPIUR_PUID` and `KOPIUR_PGID`, which are `1000` by
 default.
 
 The `Restore` resources use `onMissingSnapshot: Continue`. An app that has no
