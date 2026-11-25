@@ -12,8 +12,21 @@ spec:
   values:
     controllers:
       seerr:
+        type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 5Gi
+              storageClass: ceph-block
+              dataSourceRef:
+                apiGroup: kopiur.home-operations.com
+                kind: Restore
+                name: "{{ .Release.Name }}"
+              globalMounts:
+                - path: /app/config
         containers:
           app:
             image:
@@ -80,9 +93,5 @@ spec:
           - name: envoy-external
             namespace: network
     persistence:
-      config:
-        existingClaim: "{{ .Release.Name }}"
-        globalMounts:
-          - path: /app/config
       tmp:
         type: emptyDir
