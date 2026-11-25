@@ -24,7 +24,10 @@ spec:
               TZ: America/New_York
               SLSKD_APP_DIR: /config
               SLSKD_HTTP_PORT: &port 80
+              SLSKD_METRICS: true
+              SLSKD_METRICS_NO_AUTH: true
               SLSKD_NO_AUTH: true
+              SLSKD_NO_DISK_LOGGER: true
               SLSKD_NO_HTTPS: true
               SLSKD_NO_VERSION_CHECK: true
               SLSKD_SLSK_LISTEN_PORT: &soulseekPort 50429
@@ -82,6 +85,12 @@ spec:
         ports:
           soulseek-tcp:
             port: *soulseekPort
+    serviceMonitor:
+      app:
+        service:
+          identifier: app
+        endpoints:
+          - port: http
     route:
       app:
         hostnames:
@@ -104,12 +113,9 @@ spec:
                 destination:
                   permissions:
                     mode: 750
-                retry:
-                  partial: resume
-                  attempts: 3
-                  delay: 5000
-                  max_delay: 60000
             shares:
+              cache:
+                retention: 1440
               directories:
                 - /media/Downloads/soulseek/shared
               filters:
