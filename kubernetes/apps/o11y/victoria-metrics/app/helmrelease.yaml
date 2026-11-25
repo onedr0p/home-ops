@@ -52,6 +52,11 @@ spec:
         enabled: true
         spec:
           folder: o11y
+    defaultRules:
+      rules:
+        # The kube-scheduler quantile rules often have no samples, which keeps this alert pending
+        RecordingRulesNoData:
+          enabled: false
     external:
       grafana:
         host: https://grafana.turbo.ac
@@ -141,7 +146,18 @@ spec:
                   storage: 1Gi
     vmagent:
       spec:
+        # On another node, vmagent keeps scraping into its queue while the vmsingle node restarts
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: vmsingle
+                  topologyKey: kubernetes.io/hostname
         extraArgs:
+          promscrape.dropOriginalLabels: "true"
           # kube-apiserver serves about 13 MB of metrics, close to the 16 MiB default
           promscrape.maxScrapeSize: 32MiB
         # Clamp the intervals that other charts set on their monitors to the 20s default
@@ -151,6 +167,9 @@ spec:
         resources:
           requests:
             cpu: 50m
+          limits:
+            memory: 1Gi
+        useStrictSecurity: true
     vmsingle:
       route:
         enabled: true
@@ -163,18 +182,24 @@ spec:
         extraArgs:
           downsampling.period: 30d:5m,180d:1h
           eula: "true"
+          # The default allows two queries for each CPU up to 16, with no memory cap for a query
+          search.maxConcurrentRequests: "4"
+          search.maxMemoryPerQuery: 512MB
         image:
           repository: victoriametrics/victoria-metrics
           tag: v1.157.0-enterprise
         resources:
           requests:
             cpu: 150m
+          limits:
+            memory: 4Gi
         retentionPeriod: 1y
         storage:
           storageClassName: ceph-block
           resources:
             requests:
               storage: 100Gi
+        useStrictSecurity: true
     vlsingle:
       enabled: true
       route:
