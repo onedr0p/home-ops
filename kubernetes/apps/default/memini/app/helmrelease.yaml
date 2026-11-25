@@ -14,6 +14,18 @@ spec:
       main:
         annotations:
           reloader.stakater.com/auto: "true"
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 5Gi
+              storageClass: ceph-block
+              dataSourceRef:
+                apiGroup: kopiur.home-operations.com
+                kind: Restore
+                name: "{{ .Release.Name }}"
+              globalMounts:
+                - path: /data
         containers:
           main:
             image:
@@ -64,6 +76,6 @@ spec:
       enabled: true
     persistence:
       data:
-        existingClaim: "{{ .Release.Name }}"
+        enabled: false
       tmp:
         type: emptyDir
