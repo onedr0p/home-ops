@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: slskd
+spec:
+  groups:
+    - name: slskd.rules
+      rules:
+        - alert: SlskdNoDistributedParent
+          expr: |-
+            slskd_dnet_has_parent == 0
+          for: 1h
+          annotations:
+            summary: >-
+              slskd has no parent in the Soulseek distributed network
+          labels:
+            severity: critical
