@@ -5,6 +5,12 @@ kind: Restore
 metadata:
   name: ${APP}
 spec:
+  mover:
+    podSecurityContext:
+      fsGroup: ${KOPIUR_PGID:=1000}
+    securityContext:
+      runAsUser: ${KOPIUR_PUID:=1000}
+      runAsGroup: ${KOPIUR_PGID:=1000}
   policy:
     onMissingSnapshot: Continue
   source:
