@@ -1,0 +1,293 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-metrics
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: victoria-metrics
+  interval: 1h
+  valuesFrom:
+    - kind: ConfigMap
+      name: flux-metrics-configmap
+      valuesKey: flux-metrics.yaml
+  values:
+    fullnameOverride: victoria-metrics
+    global:
+      image:
+        registry: quay.io
+    victoria-metrics-operator:
+      crds:
+        cleanup:
+          enabled: false
+      operator:
+        enable_converter_ownership: true
+    grafana:
+      enabled: false
+    defaultDashboards:
+      dashboards:
+        k8s-resources-multicluster:
+          enabled: false
+        k8s-resources-windows-cluster:
+          enabled: false
+        k8s-resources-windows-namespace:
+          enabled: false
+        k8s-resources-windows-pod:
+          enabled: false
+        k8s-windows-cluster-rsrc-use:
+          enabled: false
+        k8s-windows-node-rsrc-use:
+          enabled: false
+        nodes-aix:
+          enabled: false
+        nodes-darwin:
+          enabled: false
+        prometheus:
+          enabled: false
+        prometheus-remote-write:
+          enabled: false
+      grafanaOperator:
+        enabled: true
+        spec:
+          folder: o11y
+    external:
+      grafana:
+        host: https://grafana.turbo.ac
+        datasource: prometheus
+    alertmanager:
+      config:
+        route:
+          receiver: pushover
+          group_by: ["alertname", "cluster", "job"]
+          group_interval: 5m
+          group_wait: 1m
+          repeat_interval: 12h
+          routes:
+            - receiver: blackhole
+              matchers: ['alertname = "InfoInhibitor"']
+            - receiver: buddy-heartbeat
+              matchers: ['alertname = "Watchdog"']
+              group_interval: 2m
+              group_wait: 0s
+              repeat_interval: 2m30s
+            - receiver: pushover
+              matchers: ['severity = "critical"']
+        inhibit_rules:
+          - equal: ["alertname", "namespace"]
+            source_matchers: ['severity = "critical"']
+            target_matchers: ['severity = "warning"']
+        receivers:
+          - name: blackhole
+          - name: buddy-heartbeat
+            webhook_configs:
+              - url_file: /etc/vm/secrets/alertmanager-secret/BUDDY_HEARTBEAT_URL
+                http_config:
+                  authorization:
+                    credentials_file: /etc/vm/secrets/alertmanager-secret/BUDDY_HEARTBEAT_TOKEN
+          - name: pushover
+            pushover_configs:
+              - html: true
+                message: |-
+                  {{- range .Alerts }}
+                    {{- if ne .Annotations.description "" }}
+                      {{ .Annotations.description }}
+                    {{- else if ne .Annotations.summary "" }}
+                      {{ .Annotations.summary }}
+                    {{- else if ne .Annotations.message "" }}
+                      {{ .Annotations.message }}
+                    {{- else }}
+                      Alert description not available
+                    {{- end }}
+                    {{- if gt (len .Labels.SortedPairs) 0 }}
+                      <small>
+                        {{- range .Labels.SortedPairs }}
+                          <b>{{ .Name }}:</b> {{ .Value }}
+                        {{- end }}
+                      </small>
+                    {{- end }}
+                  {{- end }}
+                priority: |-
+                  {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
+                sound: gamelan
+                title: >-
+                  [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+                token_file: /etc/vm/secrets/alertmanager-secret/ALERTMANAGER_PUSHOVER_TOKEN
+                ttl: 24h
+                url_title: View in Alertmanager
+                user_key_file: /etc/vm/secrets/alertmanager-secret/PUSHOVER_USER_KEY
+      monzoTemplate:
+        enabled: false
+      route:
+        enabled: true
+        hostnames:
+          - alertmanager.turbo.ac
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+      spec:
+        externalURL: https://alertmanager.turbo.ac
+        image:
+          repository: prometheus/alertmanager
+        secrets:
+          - alertmanager-secret
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ceph-block
+              resources:
+                requests:
+                  storage: 1Gi
+    vmagent:
+      spec:
+        extraArgs:
+          # kube-apiserver serves about 13 MB of metrics, close to the 16 MiB default
+          promscrape.maxScrapeSize: 32MiB
+        # Clamp the intervals that other charts set on their monitors to the 20s default
+        maxScrapeInterval: 20s
+        minScrapeInterval: 20s
+        # A CPU request stops the operator from adding its default CPU limit
+        resources:
+          requests:
+            cpu: 50m
+    vmsingle:
+      route:
+        enabled: true
+        hostnames:
+          - vmsingle.turbo.ac
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+      spec:
+        extraArgs:
+          downsampling.period: 30d:5m,180d:1h
+          eula: "true"
+        image:
+          repository: victoriametrics/victoria-metrics
+          tag: v1.157.0-enterprise
+        resources:
+          requests:
+            cpu: 150m
+        retentionPeriod: 1y
+        storage:
+          storageClassName: ceph-block
+          resources:
+            requests:
+              storage: 100Gi
+    vlsingle:
+      enabled: true
+      route:
+        enabled: true
+        hostnames:
+          - vlogs.turbo.ac
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+      spec:
+        retentionMaxDiskSpaceUsageBytes: 45GiB
+        retentionPeriod: 1y
+        storage:
+          storageClassName: ceph-block
+          resources:
+            requests:
+              storage: 50Gi
+    vlagent:
+      enabled: true
+      spec:
+        k8sCollector:
+          decolorizeFields:
+            - _msg
+          streamFields:
+            - kubernetes.pod_name
+            - kubernetes.pod_namespace
+            - kubernetes.container_name
+            - kubernetes.pod_labels.app.kubernetes.io/name
+        remoteWriteSettings:
+          maxDiskUsagePerURL: 10GB
+    kubelet:
+      vmScrape:
+        spec:
+          # This list replaces the chart's rules, which also copy every node label onto each series
+          relabelConfigs:
+            - sourceLabels: [__metrics_path__]
+              targetLabel: metrics_path
+            - targetLabel: job
+              replacement: kubelet
+    kubeApiServer:
+      vmScrape:
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              metricRelabelConfigs:
+                - action: drop
+                  regex: (etcd_request|apiserver_request_slo|apiserver_request_sli|apiserver_request)_duration_seconds_bucket;(0\.15|0\.2|0\.3|0\.35|0\.4|0\.45|0\.6|0\.7|0\.8|0\.9|1\.25|1\.5|1\.75|2|3|3\.5|4|4\.5|6|7|8|9|15|20|40|45|50)(\.0)?
+                  sourceLabels: [__name__, le]
+                - action: drop
+                  regex: (apiserver_request_body_size_bytes|apiserver_response_sizes|apiserver_storage_list_duration_seconds|apiserver_watch_cache_initialization_duration_seconds|apiserver_watch_cache_read_wait_seconds|apiserver_watch_events_dispatch_duration_seconds|apiserver_watch_events_sizes|apiserver_watch_list_duration_seconds|etcd_request_duration_seconds)_(bucket|count|sum)
+                  sourceLabels: [__name__]
+              port: https
+              scheme: https
+              tlsConfig:
+                caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                serverName: kubernetes
+    kubeControllerManager:
+      vmScrape:
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              port: http-metrics
+              scheme: https
+              tlsConfig:
+                insecureSkipVerify: true
+    kubeEtcd:
+      service:
+        port: 2381
+        targetPort: 2381
+        selector:
+          component: kube-apiserver # etcd runs on control plane nodes
+      vmScrape:
+        spec:
+          endpoints:
+            - port: http-metrics
+              scheme: http
+    kubeScheduler:
+      vmScrape:
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              port: http-metrics
+              scheme: https
+              tlsConfig:
+                insecureSkipVerify: true
+    extraRules:
+      dockerhub-rules:
+        groups:
+          - name: dockerhub
+            rules:
+              - alert: DockerhubRateLimitRisk
+                annotations:
+                  summary: There are {{ $value }} containers pulling from Dockerhub. This may lead to rate limiting.
+                expr: count(time() - container_last_seen{image=~"(docker.io).*",container!=""} < 30) > 100
+                labels:
+                  severity: critical
+      oom-rules:
+        groups:
+          - name: oom
+            rules:
+              - alert: OomKilled
+                annotations:
+                  summary: Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has been OOMKilled {{ $value }} times in the last 10 minutes.
+                expr: (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1
+                labels:
+                  severity: critical
+      zfs-rules:
+        groups:
+          - name: zfs
+            rules:
+              - alert: ZfsUnexpectedPoolState
+                annotations:
+                  summary: ZFS pool {{$labels.zpool}} on {{$labels.instance}} is in a unexpected state {{$labels.state}}
+                expr: node_zfs_zpool_state{state!="online"} > 0
+                labels:
+                  severity: critical

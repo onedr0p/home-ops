@@ -1,4 +1,4 @@
-# kube-prometheus-stack
+# victoria-metrics
 
 ## NAS Deployments
 
