@@ -303,6 +303,18 @@ fills the PVC from the latest snapshot of the app's `SnapshotPolicy`. The PVC
 stays unbound while the restore mover `Job` runs, so the pod of the app stays
 `Pending` until the data is back. No ordering logic is necessary.
 
+Apps that run as a StatefulSet use the `kopiur/statefulset` component instead
+(see
+[`kubernetes/components/kopiur/statefulset/`](../kubernetes/components/kopiur/statefulset/)).
+This component has no PVC. The StatefulSet creates the PVC from a
+volumeClaimTemplate with the same `spec.dataSourceRef`. The template must be
+named `config`. The PVC of the first pod is then `config-${APP}-0`, and the
+`SnapshotPolicy` backs up that PVC. The policy sets
+`sourcePathOverride: /pvc/${APP}`, so the snapshots of an app keep the kopia
+path that they had before the app became a StatefulSet. The restore mover
+writes the files as `KOPIUR_PUID` and `KOPIUR_PGID`, which are `1000` by
+default.
+
 The `Restore` resources use `onMissingSnapshot: Continue`. An app that has no
 snapshot starts with an empty volume and does not fail. As a result, the same
 manifests do the first deploy and the disaster recovery
