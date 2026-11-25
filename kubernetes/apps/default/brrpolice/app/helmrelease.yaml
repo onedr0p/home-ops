@@ -10,6 +10,8 @@ spec:
     name: brrpolice
   interval: 1h
   values:
+    controller:
+      type: statefulset
     config:
       qbittorrent:
         base_url: http://qbittorrent.default.svc.cluster.local
@@ -23,7 +25,11 @@ spec:
       fsGroup: 1000
       fsGroupChangePolicy: OnRootMismatch
     persistence:
-      existingClaim: brrpolice
+      storageClass: ceph-block
+      dataSourceRef:
+        apiGroup: kopiur.home-operations.com
+        kind: Restore
+        name: brrpolice
     monitoring:
       serviceMonitor:
         enabled: true

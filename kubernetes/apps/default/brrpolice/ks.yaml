@@ -6,13 +6,15 @@ metadata:
   name: brrpolice
 spec:
   components:
-    - ../../../../components/kopiur/backup
+    - ../../../../components/kopiur/statefulset
     - ../../../../components/zeroscaler
   interval: 1h
   path: ./kubernetes/apps/default/brrpolice/app
   postBuild:
     substitute:
       APP: brrpolice
+      CONTROLLER: StatefulSet
+      KOPIUR_CLAIM: data
   prune: true
   sourceRef:
     kind: ExternalArtifact
