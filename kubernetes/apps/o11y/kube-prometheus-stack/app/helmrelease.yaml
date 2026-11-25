@@ -61,6 +61,7 @@ spec:
             - name: envoy-internal
               namespace: network
       prometheusSpec:
+        enableAdminAPI: true
         externalUrl: https://prometheus.turbo.ac
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false
@@ -81,6 +82,9 @@ spec:
               resources:
                 requests:
                   storage: 50Gi
+        tsdb:
+          chunkEncoding:
+            floats: Xor2
     prometheus-node-exporter:
       fullnameOverride: node-exporter
     kube-state-metrics:
