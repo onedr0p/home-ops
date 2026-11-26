@@ -14,19 +14,6 @@ spec:
       main:
         annotations:
           reloader.stakater.com/auto: "true"
-        statefulset:
-          podManagementPolicy: Parallel
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 5Gi
-              storageClass: ceph-block
-              dataSourceRef:
-                apiGroup: kopiur.home-operations.com
-                kind: Restore
-                name: "{{ .Release.Name }}"
-              globalMounts:
-                - path: /data
         containers:
           main:
             image:
@@ -43,6 +30,19 @@ spec:
                 cpu: 10m
               limits:
                 memory: 512Mi
+        statefulset:
+          podManagementPolicy: Parallel
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 5Gi
+              storageClass: ceph-block
+              dataSourceRef:
+                apiGroup: kopiur.home-operations.com
+                kind: Restore
+                name: "{{ .Release.Name }}"
+              globalMounts:
+                - path: /data
     route:
       main:
         enabled: true

@@ -13,19 +13,6 @@ spec:
     controllers:
       zwave:
         type: statefulset
-        statefulset:
-          podManagementPolicy: Parallel
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 5Gi
-              storageClass: ceph-block
-              dataSourceRef:
-                apiGroup: kopiur.home-operations.com
-                kind: Restore
-                name: "{{ .Release.Name }}"
-              globalMounts:
-                - path: /usr/src/app/store
         containers:
           app:
             image:
@@ -62,6 +49,19 @@ spec:
                 cpu: 10m
               limits:
                 memory: 1Gi
+        statefulset:
+          podManagementPolicy: Parallel
+          volumeClaimTemplates:
+            - name: config
+              accessMode: ReadWriteOnce
+              size: 5Gi
+              storageClass: ceph-block
+              dataSourceRef:
+                apiGroup: kopiur.home-operations.com
+                kind: Restore
+                name: "{{ .Release.Name }}"
+              globalMounts:
+                - path: /usr/src/app/store
         pod:
           hostUsers: false
     service:
