@@ -110,8 +110,10 @@ arg "[node]" help="Node whose schematic to use, instead of the shared schematic"
 '''
 run = '''
 file="$(mise run //talos:schematic-file "${usage_node:-}")"
-schematic="$(curl -fsSX POST --data-binary @"$file" "https://factory.talos.dev/schematics" | jq -er '.id')"
-curl -fsS -o /dev/null -H "Accept: application/vnd.oci.image.index.v1+json" \
+schematic="$(curl -fsS --retry 2 --retry-connrefused --connect-timeout 15 --max-time 30 \
+    -X POST --data-binary @"$file" "https://factory.talos.dev/schematics" | jq -er '.id')"
+curl -fsS --retry 2 --retry-connrefused --connect-timeout 15 --max-time 240 -o /dev/null \
+    -H "Accept: application/vnd.oci.image.index.v1+json" \
     "https://factory.talos.dev/v2/metal-installer/${schematic}/manifests/${usage_version}"
 '''
 
