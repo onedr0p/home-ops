@@ -199,6 +199,18 @@ spec:
             requests:
               storage: 100Gi
         useStrictSecurity: true
+        vmBackup:
+          acceptEULA: true
+          customS3Endpoint: http://expanse.internal:9000
+          destination: s3://victoriametrics
+          disableHourly: true
+          disableMonthly: true
+          disableWeekly: true
+          extraArgs:
+            keepLastDaily: "7"
+          extraEnvsFrom:
+            - secretRef:
+                name: vmbackup-secret
     vlsingle:
       enabled: true
       route:
