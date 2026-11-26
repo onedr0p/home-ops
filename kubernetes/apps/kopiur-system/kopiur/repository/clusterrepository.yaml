@@ -35,10 +35,9 @@ spec:
         jitter: 1h
   moverDefaults:
     cache:
-      # Every cache PVC is 5Gi or larger. Kopia's own defaults are 5000 MiB per
-      # budget, larger than the whole PVC, so the sweeper never runs and the
-      # cache fills the volume. The metadata budget applies twice: kopia caps
-      # the index-blobs cache at the same size.
+      # Kopia defaults each budget to 5000 MiB, more than a whole 5Gi cache PVC, so the
+      # sweeper never runs and the cache fills the volume. Kopia also caps the
+      # index-blobs cache at the metadata budget, so that budget counts twice.
       contentCacheSizeMb: 512
       metadataCacheSizeMb: 1024
     podLabels:

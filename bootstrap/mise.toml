@@ -77,7 +77,7 @@ if ! helmfile -f helmfile/apps.yaml sync --hide-notes; then
 fi
 '''
 
-# Wait until every apiserver answers /readyz. Helm and kubectl calls after this stage are not retried.
+# Helm and kubectl calls after this stage are not retried.
 [tasks.api-ready]
 hide = true
 run = '''
@@ -91,7 +91,7 @@ for n in $nodes; do
 done
 '''
 
-# Wait until every node registers as Ready=False. They only become Ready=True once the CNI is healthy.
+# Nodes report Ready=False until the CNI is healthy, so either condition means they registered.
 [tasks.nodes-ready]
 hide = true
 depends = [":api-ready"]

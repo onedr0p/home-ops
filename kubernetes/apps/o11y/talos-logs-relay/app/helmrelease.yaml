@@ -38,8 +38,8 @@ spec:
         containerPort: 6050
         protocol: TCP
     # talos/cluster.yaml.j2 repeats this IP, because the host network namespace
-    # cannot resolve cluster DNS. The pod stamps its own node name, so each
-    # node must reach its local pod.
+    # cannot resolve cluster DNS. The pod stamps its own node name on each line,
+    # so each node sends to its local pod.
     service:
       clusterIP: 10.43.0.60
       internalTrafficPolicy: Local
@@ -54,7 +54,6 @@ spec:
     daemonSetVolumeMounts:
       - name: data
         mountPath: /var/lib/talos-logs-relay
-    # Kernel lines end in a newline.
     luaScripts:
       strip_newline.lua: |
         function strip_newline(tag, ts, record)
@@ -66,9 +65,6 @@ spec:
           return 0, ts, record
         end
     config:
-      # Health_Check must stay off. With it on, errors from VictoriaLogs fail
-      # the readiness probe, and Talos cannot hand over lines during an outage.
-      # The storage limits keep a backlog under the memory limit.
       service: |
         [SERVICE]
             Flush 5

@@ -6,8 +6,6 @@
     "github>home-operations/renovate-presets//apps/talosFactory.json5#12.0.0",
     ":timezone(America/New_York)",
   ],
-  // The Main ruleset does not require up-to-date branches, and `auto` would
-  // still rebase every automerge PR each time main moves
   rebaseWhen: "conflicted",
   customManagers: [
     {
@@ -21,7 +19,6 @@
     },
   ],
   packageRules: [
-    // Auto-merge rules
     {
       description: "Auto-merge trusted OCI digests",
       matchDatasources: ["docker"],
@@ -76,7 +73,6 @@
       automergeType: "pr",
       ignoreTests: false,
     },
-    // Grouping rules
     {
       description: "Actions Runner Controller Group",
       groupName: "actions-runner-controller",
@@ -131,7 +127,6 @@
       minimumGroupSize: 2,
     },
     {
-      // Unites the factory installer image and the tuppr upgrade version
       description: "Talos Group",
       groupName: "talos",
       matchPackageNames: ["siderolabs/talos"],
@@ -154,7 +149,6 @@
       matchUpdateTypes: ["digest"],
       schedule: ["before 6am on Monday"],
     },
-    // Labeling rules
     {
       matchUpdateTypes: ["major"],
       addLabels: ["type/major"],

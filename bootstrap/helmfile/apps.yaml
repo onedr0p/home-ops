@@ -1,13 +1,5 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/helmfile
-
-# Bootstraps core applications that provide a minimal runtime base for the
-# cluster. These releases are installed first so the cluster has the resources
-# Flux needs before its own reconciliation begins.
-#
-# After this bootstrap phase, Flux is ready to take over management of the
-# application stack and continue reconciling downstream state.
-
 helmDefaults:
   cleanupOnFail: true
   forceConflicts: true
@@ -29,8 +21,7 @@ releases:
       - name: hubble.ui.enabled
         value: false
     hooks:
-      - # Wait for CRDs to be available
-        command: kubectl
+      - command: kubectl
         args:
           - wait
           - --for=create
@@ -42,8 +33,7 @@ releases:
         events:
           - postsync
         showlogs: true
-      - # Apply Resources
-        command: kubectl
+      - command: kubectl
         args:
           - apply
           - --namespace={{ .Release.Namespace }}
@@ -77,8 +67,7 @@ releases:
   - name: onepassword-connect
     namespace: external-secrets
     hooks:
-      - # Wait for CRDs to be available
-        command: kubectl
+      - command: kubectl
         args:
           - wait
           - --for=create
@@ -87,8 +76,7 @@ releases:
         events:
           - postsync
         showlogs: true
-      - # Apply Resources
-        command: kubectl
+      - command: kubectl
         args:
           - apply
           - --server-side

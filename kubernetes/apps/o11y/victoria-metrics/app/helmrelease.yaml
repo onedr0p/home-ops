@@ -147,7 +147,6 @@ spec:
                   storage: 1Gi
     vmagent:
       spec:
-        # On another node, vmagent keeps scraping into its queue while the vmsingle node restarts
         affinity:
           podAntiAffinity:
             preferredDuringSchedulingIgnoredDuringExecution:
@@ -158,11 +157,9 @@ spec:
                       app.kubernetes.io/name: vmsingle
                   topologyKey: kubernetes.io/hostname
         extraArgs:
-          # Hides dropped targets and pre-relabel labels on the targets page
           promscrape.dropOriginalLabels: "true"
           # kube-apiserver serves about 13 MB of metrics, close to the 16 MiB default
           promscrape.maxScrapeSize: 32MiB
-        # Clamp the intervals that other charts set on their monitors to the 20s default
         maxScrapeInterval: 20s
         minScrapeInterval: 20s
         # A CPU request stops the operator from adding its default CPU limit
@@ -268,8 +265,9 @@ spec:
       service:
         port: 2381
         targetPort: 2381
+        # etcd is a Talos service, not a pod, so the apiserver pods stand in for the control plane nodes
         selector:
-          component: kube-apiserver # etcd runs on control plane nodes
+          component: kube-apiserver
       vmScrape:
         spec:
           endpoints:
