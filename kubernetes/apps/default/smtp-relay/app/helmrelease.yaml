@@ -22,6 +22,7 @@ spec:
               repository: ghcr.io/foxcpp/maddy
               tag: 0.9.8@sha256:f2396d08bad7cc3e2ec76422530a6310644ac03d435093991150486a791b08a2
             env:
+              SMTP_RELAY_METRICS_PORT: &metricsPort 9749
               SMTP_RELAY_SMTP_PORT: &port 25
             envFrom:
               - secretRef:
@@ -58,6 +59,7 @@ spec:
         runAsGroup: 1000
     service:
       app:
+        forceRename: "{{ .Release.Name }}"
         type: LoadBalancer
         annotations:
           external-dns.kubernetes.io/hostname: smtp-relay.turbo.ac
@@ -66,6 +68,16 @@ spec:
         ports:
           smtp:
             port: *port
+      metrics:
+        ports:
+          metrics:
+            port: *metricsPort
+    serviceMonitor:
+      app:
+        service:
+          identifier: metrics
+        endpoints:
+          - port: metrics
     configMaps:
       config:
         data:
@@ -74,6 +86,7 @@ spec:
             runtime_dir /cache/run
             tls off
             hostname {env:SMTP_RELAY_HOSTNAME}
+            openmetrics tcp://0.0.0.0:{env:SMTP_RELAY_METRICS_PORT} { }
             smtp tcp://0.0.0.0:{env:SMTP_RELAY_SMTP_PORT} {
                 default_source {
                     deliver_to &remote_queue
