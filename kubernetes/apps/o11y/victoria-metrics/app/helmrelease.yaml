@@ -198,22 +198,11 @@ spec:
           resources:
             requests:
               storage: 100Gi
+          dataSourceRef:
+            apiGroup: kopiur.home-operations.com
+            kind: Restore
+            name: vmsingle
         useStrictSecurity: true
-        vmBackup:
-          acceptEULA: true
-          customS3Endpoint: http://expanse.internal:9000
-          destination: s3://victoriametrics
-          disableHourly: true
-          disableMonthly: true
-          disableWeekly: true
-          extraArgs:
-            runOnStart: "true"
-          extraEnvsFrom:
-            - secretRef:
-                name: vmbackup-secret
-          restore:
-            onStart:
-              enabled: true
     vlsingle:
       enabled: true
       route:
