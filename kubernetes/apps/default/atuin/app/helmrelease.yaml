@@ -23,6 +23,8 @@ spec:
               ATUIN_PORT: &port 80
               ATUIN_OPEN_REGISTRATION: "true"
               ATUIN_DB_URI: sqlite:///config/atuin.db
+              ATUIN_METRICS__ENABLE: "true"
+              ATUIN_METRICS__HOST: "0.0.0.0"
               TZ: America/New_York
             args:
               - start
@@ -78,6 +80,12 @@ spec:
         ports:
           http:
             port: *port
+          metrics:
+            port: 9001
+    serviceMonitor:
+      app:
+        endpoints:
+          - port: metrics
     route:
       app:
         hostnames:
