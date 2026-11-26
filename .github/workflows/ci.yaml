@@ -83,6 +83,41 @@ jobs:
           MISE_GITHUB_TOKEN: ${{ github.token }}
         run: mise exec "talosctl@${TALOS_VERSION}" -- talosctl --nodes "$NODE" image pull "$IMAGE"
 
+  warm-talos-image:
+    if: ${{ github.event_name == 'pull_request' }}
+    name: Warm Talos Image
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: |
+            **/talosupgrade.yaml
+            **/schematic.yaml.j2
+
+      - name: Setup Mise
+        if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
+        uses: jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78 # v5.3.0
+        with:
+          cache: false
+          install: false
+
+      - name: Warm Talos Image
+        if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
+        run: |
+          version=$(yq '.spec.talos.version' kubernetes/apps/system-upgrade/tuppr/upgrades/talosupgrade.yaml)
+          mise run //talos:warm-image "$version"
+
   flate:
     name: Flate
     runs-on: ubuntu-26.04
@@ -130,6 +165,7 @@ jobs:
       - extract-images
       - flate
       - pull-images
+      - warm-talos-image
       - zizmor
     runs-on: ubuntu-26.04
     permissions: {}
