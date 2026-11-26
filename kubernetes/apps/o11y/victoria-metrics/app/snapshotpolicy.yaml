@@ -21,3 +21,26 @@ spec:
         name: vmsingle-victoria-metrics
       sourcePathOverride: /pvc/vmsingle
   volumeSnapshotClassName: csi-ceph-blockpool
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kopiur.home-operations.com/snapshotpolicy_v1alpha1.json
+apiVersion: kopiur.home-operations.com/v1alpha1
+kind: SnapshotPolicy
+metadata:
+  name: vlsingle
+spec:
+  mover:
+    cache:
+      capacity: 15Gi
+      mode: Persistent
+      storageClassName: miroir-slow
+    securityContext:
+      runAsUser: 65534
+      runAsGroup: 65534
+  repository:
+    kind: ClusterRepository
+    name: expanse
+  sources:
+    - pvc:
+        name: vlsingle-victoria-metrics
+      sourcePathOverride: /pvc/vlsingle
+  volumeSnapshotClassName: csi-ceph-blockpool
