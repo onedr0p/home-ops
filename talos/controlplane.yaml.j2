@@ -3,15 +3,15 @@ machine:
   type: controlplane
   # ca merges as a unit; crt must be repeated alongside key
   ca:
-    crt: op://kubernetes/talos/MACHINE_CA_CRT
-    key: op://kubernetes/talos/MACHINE_CA_KEY
+    crt: {{ certs.os.crt }}
+    key: {{ certs.os.key }}
 ---
-# 1Password holds certificates and keys base64-encoded; !!binary decodes them to the PEM these documents expect
+# The secrets bundle holds certificates and keys base64-encoded; !!binary decodes them to the PEM these documents expect
 apiVersion: v1alpha1
 kind: EtcdCAConfig
 issuingCA:
-  cert: !!binary op://kubernetes/talos/CLUSTER_ETCD_CA_CRT
-  key: !!binary op://kubernetes/talos/CLUSTER_ETCD_CA_KEY
+  cert: !!binary {{ certs.etcd.crt }}
+  key: !!binary {{ certs.etcd.key }}
 ---
 apiVersion: v1alpha1
 kind: EtcdMemberConfig
@@ -28,8 +28,8 @@ labels:
 apiVersion: v1alpha1
 kind: KubeAPIServerCAConfig
 issuingCA:
-  cert: !!binary op://kubernetes/talos/CLUSTER_CA_CRT
-  key: !!binary op://kubernetes/talos/CLUSTER_CA_KEY
+  cert: !!binary {{ certs.k8s.crt }}
+  key: !!binary {{ certs.k8s.key }}
 ---
 apiVersion: v1alpha1
 kind: KubeAPIServerConfig
@@ -43,8 +43,8 @@ image: registry.k8s.io/kube-apiserver:v1.37.3
 apiVersion: v1alpha1
 kind: KubeAggregatorCAConfig
 issuingCA:
-  cert: !!binary op://kubernetes/talos/CLUSTER_AGGREGATORCA_CRT
-  key: !!binary op://kubernetes/talos/CLUSTER_AGGREGATORCA_KEY
+  cert: !!binary {{ certs.k8saggregator.crt }}
+  key: !!binary {{ certs.k8saggregator.key }}
 ---
 apiVersion: v1alpha1
 kind: KubeAuditPolicyConfig
@@ -94,7 +94,7 @@ config:
         - secretbox:
             keys:
               - name: key2
-                secret: op://kubernetes/talos/CLUSTER_SECRETBOXENCRYPTIONSECRET
+                secret: {{ secrets.secretboxencryptionsecret }}
         - identity: {}
       resources:
         - secrets
@@ -128,7 +128,7 @@ image: registry.k8s.io/kube-scheduler:v1.37.3
 apiVersion: v1alpha1
 kind: KubeServiceAccountConfig
 issuer:
-  privateKey: !!binary op://kubernetes/talos/CLUSTER_SERVICEACCOUNT_KEY
+  privateKey: !!binary {{ certs.k8sserviceaccount.key }}
   issuerURL: https://k8s.internal:6443
 ---
 apiVersion: v1alpha1
