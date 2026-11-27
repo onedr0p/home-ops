@@ -70,13 +70,13 @@ mise run //talos:render-config <node>        # render a node's full machine conf
 mise run //talos:apply-node <node>           # render and apply (talosctl apply-config)
 mise run //talos:upgrade-node <node>         # upgrade Talos using the node's schematic image
 mise run //talos:upgrade-k8s <version>       # upgrade Kubernetes across the cluster
+mise run //talos:validate                    # validate every node's config with a generated secrets bundle
 mise run //talos:download-image <version>    # fetch a metal ISO from the Image Factory
 mise run //talos:gen-talosconfig             # write a talosconfig from the secrets bundle
-mise run //talos:gen-secrets                 # replace the secrets bundle with a new one (new clusters only)
 ```
 
 A control plane node that still runs the old configuration can rebuild the bundle that
-`gen-secrets` replaced:
+`mise run //bootstrap:gen-secrets` replaced:
 
 ```sh
 talosctl -n <node> get machineconfig v1alpha1 -o jsonpath='{.spec}' |

@@ -18,6 +18,8 @@ Before you run the command, do these steps:
 - Install these tools on the PATH: `mise`, `talosctl`, `minijinja-cli`, `op`,
   `yq`, `jq`, `kubectl`, `helm`, `helmfile`, `kustomize`, `gum` and `curl`.
 - Sign in to the 1Password CLI (`op`).
+- To give the cluster new Talos secrets, run `mise run //bootstrap:gen-secrets`.
+  Skip this step to keep the secrets that are in 1Password.
 - Put a valid `talosconfig` file at the root of the repository.
   `mise run //talos:gen-talosconfig` writes one from the Talos secrets bundle.
 - Apply the configuration in the next section to the UDM (the UniFi gateway).
