@@ -1,35 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Incoming environment variables
-EVENT_TYPE="${sonarr_eventtype:-}"
-SERIES_ID="${sonarr_series_id:-}"
+[[ "${sonarr_eventtype:-}" == "Grab" ]] || exit 0
 
-# Only proceed for "Grab" events with valid series ID
-[[ "${EVENT_TYPE}" == "Grab" && -n "${SERIES_ID}" ]] || exit 0
+readonly PLACEHOLDER_TITLE='\|(tba|tbd)\|'
+shopt -s nocasematch
+[[ "|${sonarr_release_episodetitles:-}|" =~ ${PLACEHOLDER_TITLE} ]] || exit 0
 
-# Required environment variables
 : "${SONARR__AUTH__APIKEY:?API key required}"
 : "${SONARR__SERVER__PORT:?Server port required}"
+: "${sonarr_series_id:?Series ID required}"
 
-# Setup base API URL
-readonly SONARR_API_URL="http://localhost:${SONARR__SERVER__PORT}/api/v3"
-
-# Wrapper for API calls
-api_call() {
-    curl -fsSL --max-time 30 \
-        --header "Content-Type: application/json" \
-        --header "X-Api-Key: ${SONARR__AUTH__APIKEY}" \
-        "$@"
-}
-
-# Check for episodes with TBA/TBD titles
-episodes=$(api_call "${SONARR_API_URL}/episode?seriesId=${SERIES_ID}" | \
-    jq '[.[] | select((.title // "" | ascii_downcase | test("(tba|tbd)")) and .airDateUtc < (now + 86400 | strftime("%Y-%m-%dT%H:%M:%SZ")))] | length')
-
-# Refresh series if any TBA/TBD episodes found
-if (( episodes > 0 )); then
-    echo "Refreshing series ${SERIES_ID} (${episodes} TBA/TBD episodes found)"
-    api_call -X POST --data-binary "{\"name\": \"RefreshSeries\", \"seriesId\": ${SERIES_ID}}" \
-        "${SONARR_API_URL}/command" >/dev/null
-fi
+echo "Refreshing ${sonarr_series_title:-series ${sonarr_series_id}}: a grabbed episode is titled ${BASH_REMATCH[1]}"
+curl -fsS --max-time 30 \
+    --header "Content-Type: application/json" \
+    --header "X-Api-Key: ${SONARR__AUTH__APIKEY}" \
+    --request POST \
+    --data "{\"name\":\"RefreshSeries\",\"seriesIds\":[${sonarr_series_id}]}" \
+    "http://localhost:${SONARR__SERVER__PORT}/api/v5/command" >/dev/null
