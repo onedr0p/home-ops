@@ -20,6 +20,9 @@ api() {
         "$@"
 }
 
+exec {lock}> /tmp/tag-resolution.lock
+flock "${lock}"
+
 series=$(api "${API_URL}/series${sonarr_series_id:+/${sonarr_series_id}}" | jq -c --arg prefix "${TAG_PREFIX}" '
     if type == "object" then [.] end
     | map({id, tags, labels: [.statistics.episodeFileQualities[]?.resolution | select(. > 0) | "\($prefix)\(.)p"]})
