@@ -19,11 +19,12 @@ Before you run the command, do these steps:
   `yq`, `jq`, `kubectl`, `helm`, `helmfile`, `kustomize`, `gum` and `curl`.
 - Sign in to the 1Password CLI (`op`).
 - Put a valid `talosconfig` file at the root of the repository.
+  `mise run //talos:gen-talosconfig` writes one from the Talos secrets bundle.
 - Apply the configuration in the next section to the UDM (the UniFi gateway).
 
-This repository holds no machine secrets. `op inject` resolves each `op://`
-reference in the Talos configuration and the bootstrap manifests at apply
-time.
+This repository holds no machine secrets. The Talos configuration reads the
+Talos secrets bundle from 1Password. `op inject` resolves each `op://`
+reference in the bootstrap manifests at apply time.
 
 mise points `TALOSCONFIG` at the `talosconfig` file. The bootstrap tasks read
 the controller endpoint and the node list from `talosctl config info`, so this

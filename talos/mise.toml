@@ -27,6 +27,24 @@ curl -fL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors --progre
 mise run //:log info "Downloaded Talos" version "$usage_version" schematic "$schematic"
 '''
 
+[tasks.gen-secrets]
+description = "Replace the Talos secrets bundle in 1Password with a new one"
+confirm = { message = "Replace the Talos secrets bundle in 1Password? It no longer matches the running cluster afterwards.", default = "no" }
+run = '''
+secrets="$(talosctl gen secrets -o -)"
+op document edit talos - --vault kubernetes <<<"$secrets"
+'''
+
+[tasks.gen-talosconfig]
+description = "Write a talosconfig from the Talos secrets bundle"
+run = '''
+secrets="$(mise run //talos:secrets)"
+talosctl gen config main https://k8s.internal:6443 --with-secrets /dev/stdin \
+    --output-types talosconfig --output "$TALOSCONFIG" --force <<<"$secrets"
+find nodes/controlplane -name '*.yaml.j2' ! -name '*.schematic.yaml.j2' -exec basename {} .yaml.j2 \; | sort | xargs talosctl config endpoint
+find nodes -name '*.yaml.j2' ! -name '*.schematic.yaml.j2' -exec basename {} .yaml.j2 \; | sort | xargs talosctl config node
+'''
+
 [tasks.reboot-node]
 description = "Reboot a node"
 extends = "node"
@@ -40,12 +58,13 @@ extends = "node"
 usage = 'arg "<node>" help="Node to render the config for"'
 run = '''
 schematic="$(mise run //talos:schematic-id "$usage_node")"
+secrets="$(mise run //talos:secrets)"
 role="controlplane"
 if [[ -f "nodes/workers/${usage_node}.yaml.j2" ]]; then
     role="workers"
 fi
-cluster="$(mise run //:template cluster.yaml.j2 -D "schematic=${schematic}")"
-role_patch="$(mise run //:template "${role}.yaml.j2")"
+cluster="$(mise run //:template cluster.yaml.j2 - -D "schematic=${schematic}" <<<"$secrets")"
+role_patch="$(mise run //:template "${role}.yaml.j2" - <<<"$secrets")"
 node_patch="$(mise run //:template "nodes/${role}/${usage_node}.yaml.j2")"
 talosctl machineconfig patch <(printf '%s\n' "$cluster") \
     -p @<(printf '%s\n' "$role_patch") \
@@ -97,7 +116,7 @@ arg "[args]" var=#true help="Extra arguments for talosctl upgrade"
 confirm = { message = "Upgrade node {{ usage.node }}?", default = "no" }
 run = '''
 eval "args=(${usage_args:-})"
-image="$(mise run //talos:machine-image "$usage_node")"
+image="$(mise run //talos:render-config "$usage_node" | yq -r -e 'select(.kind == "UnattendedInstallConfig") | .installer.image')"
 talosctl -n "$usage_node" upgrade -i "$image" -m powercycle --timeout=10m "${args[@]}"
 '''
 
@@ -123,10 +142,6 @@ schematic="$(mise run //:template "$file")"
 printf '%s\n' "$schematic" | curl -fsSX POST --data-binary @- "https://factory.talos.dev/schematics" | jq -er '.id'
 '''
 
-[tasks.machine-image]
+[tasks.secrets]
 hide = true
-usage = 'arg "[node]"'
-run = '''
-schematic="$(mise run //talos:schematic-id "${usage_node:-}")"
-mise run //:template cluster.yaml.j2 -D "schematic=${schematic}" | yq -r -e 'select(.kind == "UnattendedInstallConfig") | .installer.image'
-'''
+run = 'op document get talos --vault kubernetes'

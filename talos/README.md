@@ -26,17 +26,18 @@ talosctl machineconfig patch <(cluster.yaml.j2) \
     -p @<(nodes/<role>/<node>.yaml.j2)
 ```
 
-Each layer passes through `minijinja-cli` (strict Jinja templating; the schematic ID arrives as a
-`-D` define) and `op inject` (1Password secret resolution) before `talosctl` merges them. Later patches strategically merge into
-earlier ones: documents with the same kind/name are deep-merged, new documents are appended.
+Each layer passes through `minijinja-cli` (strict Jinja templating) before `talosctl` merges them.
+The schematic ID arrives as a `-D` define. Later patches strategically merge into earlier ones:
+documents with the same kind/name are deep-merged, new documents are appended.
 
 Two conventions keep the layers honest:
 
 - **Directory placement is the single source of truth for a node's role.** The role patch is chosen
   by which `nodes/<role>/` directory contains the node file, and `machine.type` is set by the role
   patch, not the node file. A node cannot claim one role by filename and another by content.
-- **Secrets never live in this repo.** All sensitive values are `op://kubernetes/talos/...`
-  references resolved at render time.
+- **Secrets never live in this repo.** The 1Password document `talos` in the `kubernetes` vault
+  holds the secrets bundle that `talosctl gen secrets` writes. The templates read its values by
+  key path, for example `{{ certs.os.crt }}`.
 
 ## Schematics
 
@@ -52,9 +53,11 @@ whose hardware diverges from the fleet. No overrides exist today.
 
 - `machine.ca` merges as a cert+key **unit**: a patch supplying only `key` blanks `crt`. This is
   why `controlplane.yaml.j2` repeats the `crt` reference alongside the key.
-- 1Password stores certificates and keys base64-encoded (the v1alpha1 format), but the CA and
-  service account documents take PEM. When `talosctl` parses the patch, the YAML `!!binary` tag
+- The secrets bundle holds certificates and keys base64-encoded (the v1alpha1 format), but the CA
+  and service account documents take PEM. When `talosctl` parses the patch, the YAML `!!binary` tag
   decodes the base64.
+- If a template names a bundle key that does not exist, the `minijinja-cli` error prints the first
+  100 characters of the secret values near that line.
 - Rendering a worker before `workers.yaml.j2` and `nodes/workers/` exist fails loudly. Adding the
   first worker means creating `workers.yaml.j2` (with `machine: { type: worker }` and a
   `KubeAPIServerCAConfig` that lists the cluster CA certificate under `acceptedCAs`) plus
@@ -68,6 +71,16 @@ mise run //talos:apply-node <node>           # render and apply (talosctl apply-
 mise run //talos:upgrade-node <node>         # upgrade Talos using the node's schematic image
 mise run //talos:upgrade-k8s <version>       # upgrade Kubernetes across the cluster
 mise run //talos:download-image <version>    # fetch a metal ISO from the Image Factory
+mise run //talos:gen-talosconfig             # write a talosconfig from the secrets bundle
+mise run //talos:gen-secrets                 # replace the secrets bundle with a new one (new clusters only)
+```
+
+A control plane node that still runs the old configuration can rebuild the bundle that
+`gen-secrets` replaced:
+
+```sh
+talosctl -n <node> get machineconfig v1alpha1 -o jsonpath='{.spec}' |
+    talosctl gen secrets --from-controlplane-config /dev/stdin -o -
 ```
 
 Verify a refactor of these templates by diffing rendered output before and after, then confirming
