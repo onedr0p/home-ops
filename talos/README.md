@@ -6,15 +6,15 @@ rendered on demand and pushed to nodes with `talosctl`.
 
 ## Layout
 
-| Path                                    | Purpose                                                                   |
-| --------------------------------------- | ------------------------------------------------------------------------- |
-| `cluster.yaml.j2`                       | Documents applied to every node                                           |
-| `controlplane.yaml.j2`                  | Control-plane-only documents, including `machine.type`                    |
-| `workers.yaml.j2`                       | Worker-only documents (does not exist yet; created with the first worker) |
-| `nodes/<role>/<node>.yaml.j2`           | Per-node documents (hostname, zone)                                       |
-| `nodes/<role>/<node>.schematic.yaml.j2` | Optional per-node schematic override                                      |
-| `schematic.yaml.j2`                     | Shared [Image Factory](https://factory.talos.dev) schematic               |
-| `mise.toml`                             | Tasks (`mise run //talos:...`)                                            |
+| Path                          | Purpose                                                                   |
+| ----------------------------- | ------------------------------------------------------------------------- |
+| `cluster.yaml.j2`             | Documents applied to every node                                           |
+| `controlplane.yaml.j2`        | Control-plane-only documents, including `machine.type`                    |
+| `workers.yaml.j2`             | Worker-only documents (does not exist yet; created with the first worker) |
+| `nodes/<role>/<node>.yaml.j2` | Per-node documents (hostname, zone)                                       |
+| `schematic.yaml.j2`           | Shared [Image Factory](https://factory.talos.dev) schematic               |
+| `schematics/<node>.yaml.j2`   | Optional per-node schematic override                                      |
+| `mise.toml`                   | Tasks (`mise run //talos:...`)                                            |
 
 ## Rendering
 
@@ -45,8 +45,8 @@ The schematic defines the Image Factory build (system extensions, kernel args). 
 `//talos:schematic-id` task POSTs it to the factory and gets back a content-addressed ID, which is templated into
 the `UnattendedInstallConfig` installer image and used by `download-image` and `upgrade-node`.
 
-Resolution is per node: `nodes/<role>/<node>.schematic.yaml.j2` wins when present, otherwise the
-shared `schematic.yaml.j2` applies. Overrides are complete files, not deltas; they exist for nodes
+Resolution is per node: `schematics/<node>.yaml.j2` wins when present, otherwise the shared
+`schematic.yaml.j2` applies. Overrides are complete files, not deltas; they exist for nodes
 whose hardware diverges from the fleet. No overrides exist today.
 
 ## Gotchas
