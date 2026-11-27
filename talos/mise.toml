@@ -33,8 +33,8 @@ run = '''
 secrets="$(mise run //talos:secrets)"
 talosctl gen config main https://k8s.internal:6443 --with-secrets /dev/stdin \
     --output-types talosconfig --output "$TALOSCONFIG" --force <<<"$secrets"
-find nodes/controlplane -name '*.yaml.j2' ! -name '*.schematic.yaml.j2' -exec basename {} .yaml.j2 \; | sort | xargs talosctl config endpoint
-find nodes -name '*.yaml.j2' ! -name '*.schematic.yaml.j2' -exec basename {} .yaml.j2 \; | sort | xargs talosctl config node
+basename -s .yaml.j2 nodes/controlplane/*.yaml.j2 | xargs talosctl config endpoint
+basename -s .yaml.j2 nodes/*/*.yaml.j2 | xargs talosctl config node
 '''
 
 [tasks.reboot-node]
@@ -117,7 +117,7 @@ description = "Validate every node's config with a generated secrets bundle"
 run = '''
 secrets="$(talosctl gen secrets -o -)"
 cluster="$(minijinja-cli cluster.yaml.j2 - -D schematic=validate <<<"$secrets")"
-find nodes -name '*.yaml.j2' ! -name '*.schematic.yaml.j2' | sort | while read -r node; do
+for node in nodes/*/*.yaml.j2; do
     role_patch="$(minijinja-cli "$(basename "$(dirname "$node")").yaml.j2" - <<<"$secrets")"
     node_patch="$(minijinja-cli "$node")"
     talosctl machineconfig patch /dev/stdin -p "$role_patch" -p "$node_patch" <<<"$cluster" |
@@ -125,24 +125,12 @@ find nodes -name '*.yaml.j2' ! -name '*.schematic.yaml.j2' | sort | while read -
 done
 '''
 
-[tasks.schematic-file]
-hide = true
-usage = 'arg "[node]"'
-run = '''
-file="schematic.yaml.j2"
-if [[ -n "${usage_node:-}" ]]; then
-    for f in nodes/*/"${usage_node}".schematic.yaml.j2; do
-        [[ -f "$f" ]] && file="$f"
-    done
-fi
-echo "$file"
-'''
-
 [tasks.schematic-id]
 hide = true
 usage = 'arg "[node]"'
 run = '''
-file="$(mise run //talos:schematic-file "${usage_node:-}")"
+file="schematics/${usage_node:-}.yaml.j2"
+[[ -f "$file" ]] || file="schematic.yaml.j2"
 schematic="$(mise run //:template "$file")"
 printf '%s\n' "$schematic" | curl -fsSX POST --data-binary @- "https://factory.talos.dev/schematics" | jq -er '.id'
 '''
