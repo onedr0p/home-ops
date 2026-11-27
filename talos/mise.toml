@@ -120,6 +120,19 @@ image="$(mise run //talos:render-config "$usage_node" | yq -r -e 'select(.kind =
 talosctl -n "$usage_node" upgrade -i "$image" -m powercycle --timeout=10m "${args[@]}"
 '''
 
+[tasks.validate]
+description = "Validate every node's config with a generated secrets bundle"
+run = '''
+secrets="$(talosctl gen secrets -o -)"
+cluster="$(minijinja-cli cluster.yaml.j2 - -D schematic=validate <<<"$secrets")"
+find nodes -name '*.yaml.j2' ! -name '*.schematic.yaml.j2' | sort | while read -r node; do
+    role_patch="$(minijinja-cli "$(basename "$(dirname "$node")").yaml.j2" - <<<"$secrets")"
+    node_patch="$(minijinja-cli "$node")"
+    talosctl machineconfig patch /dev/stdin -p "$role_patch" -p "$node_patch" <<<"$cluster" |
+        talosctl validate --strict --mode metal --config /dev/stdin
+done
+'''
+
 [tasks.schematic-file]
 hide = true
 usage = 'arg "[node]"'

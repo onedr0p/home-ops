@@ -20,6 +20,8 @@ env:
   FLATE_PATH: ./kubernetes/apps
   # renovate: datasource=github-releases depName=home-operations/flate
   FLATE_VERSION: "0.8.0"
+  # renovate: datasource=github-releases depName=mitsuhiko/minijinja
+  MINIJINJA_VERSION: "3.1.0"
   # renovate: datasource=custom.talos-factory depName=siderolabs/talos
   TALOS_VERSION: v1.15.0-beta.1
 
@@ -106,6 +108,28 @@ jobs:
           MISE_GITHUB_TOKEN: ${{ github.token }}
         run: mise exec "aqua:home-operations/flate@${FLATE_VERSION}" -- flate test
 
+  talos:
+    name: Talos
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Mise
+        uses: jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78 # v5.3.0
+        with:
+          cache: false
+          install: false
+
+      - name: Validate Talos Configs
+        env:
+          MISE_GITHUB_TOKEN: ${{ github.token }}
+        run: mise run --tool "talosctl@${TALOS_VERSION}" --tool "github:mitsuhiko/minijinja@${MINIJINJA_VERSION}" //talos:validate
+
   zizmor:
     name: Zizmor
     runs-on: ubuntu-26.04
@@ -130,6 +154,7 @@ jobs:
       - extract-images
       - flate
       - pull-images
+      - talos
       - zizmor
     runs-on: ubuntu-26.04
     permissions: {}
