@@ -27,14 +27,6 @@ curl -fL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors --progre
 mise run //:log info "Downloaded Talos" version "$usage_version" schematic "$schematic"
 '''
 
-[tasks.gen-secrets]
-description = "Replace the Talos secrets bundle in 1Password with a new one"
-confirm = { message = "Replace the Talos secrets bundle in 1Password? It no longer matches the running cluster afterwards.", default = "no" }
-run = '''
-secrets="$(talosctl gen secrets -o -)"
-op document edit talos - --vault kubernetes <<<"$secrets"
-'''
-
 [tasks.gen-talosconfig]
 description = "Write a talosconfig from the Talos secrets bundle"
 run = '''

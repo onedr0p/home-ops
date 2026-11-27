@@ -12,6 +12,14 @@ run = [
   { task = ":kubeconfig" },
 ]
 
+[tasks.gen-secrets]
+description = "Replace the Talos secrets bundle in 1Password with a new one"
+confirm = { message = "Replace the Talos secrets bundle in 1Password? It no longer matches the running cluster afterwards.", default = "no" }
+run = '''
+secrets="$(talosctl gen secrets -o -)"
+op document edit talos - --vault kubernetes <<<"$secrets"
+'''
+
 [tasks.nodes]
 hide = true
 run = '''
