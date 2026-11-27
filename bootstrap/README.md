@@ -327,9 +327,9 @@ restore takes.
 ## Single source of truth
 
 The helmfiles define no chart versions and no values of their own. A template
-reads the chart and the version of each release from the app's
-`ocirepository.yaml`. A second template reads the values from the app's
-`helmrelease.yaml`. Both files are under
+reads the chart and the version of each release from the `OCIRepository` chart
+template in the app's `helmrelease.yaml`. A second template reads the values
+from the same file. The file is under
 [`kubernetes/apps/`](../kubernetes/apps/) (see
 [`helmfile/templates/`](helmfile/templates/)). As a result, bootstrap installs
 the same releases that Flux reconciles later, and Renovate updates only one
