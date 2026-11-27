@@ -40,6 +40,15 @@ spec:
         anonymous:
           enabled: true
           user: &uiUser kopiur-ui-anonymous
+      networkPolicy:
+        enabled: true
+        proxySelector:
+          namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-name: envoy-internal
       rbac:
         bindings:
           - role: user
