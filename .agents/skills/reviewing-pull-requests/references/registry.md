@@ -16,6 +16,6 @@ or an OCI chart. It reads registries anonymously and prints JSON.
   On `ghcr.io/home-operations/*` images that is a
   `home-operations/containers` commit, not the app's: its diff says why a
   digest-only update was rebuilt.
-- `crane config <chart>:<version>` on an `OCIRepository` chart prints its
+- `crane config <chart>:<version>` on an OCI chart prints its
   `Chart.yaml` as JSON: `version`, `appVersion` and `sources`, at the old
   and the new tag.

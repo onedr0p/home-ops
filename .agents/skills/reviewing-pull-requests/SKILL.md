@@ -46,8 +46,10 @@ read every intermediate release, breaking changes land in the middle.
   available, read the pinned digest's config as `references/registry.md`
   describes. Its version and revision labels show what it was built from, to
   compare with the release reviewed here.
-- A chart's source is the app's `OCIRepository` (`ocirepository.yaml`): its
-  `url` is the registry path and `ref.tag` the version. A path under an
+- A chart's source is the `OCIRepository` chart template in the app's
+  `helmrelease.yaml` (`spec.chart.kind: OCIRepository`): its
+  `spec.chart.spec.url` is the registry path and `spec.chart.spec.ref.tag`
+  the version. A path under an
   owner (`oci://<registry>/<owner>/...`) is that owner's chart on GitHub,
   where `Chart.yaml`'s `sources` or `home` confirms the repository;
   `crane config` on the chart's tag prints them without a fetch. A path

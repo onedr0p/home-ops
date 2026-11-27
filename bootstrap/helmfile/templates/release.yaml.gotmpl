@@ -1,4 +1,4 @@
 {{- $path := .Release.Labels | get "path" (printf "%s/app" .Release.Name) -}}
-{{- $oci := fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/ocirepository.yaml" .Release.Namespace $path)) -}}
-chart: {{ $oci.spec.url }}
-version: {{ $oci.spec.ref.tag }}
+{{- $chart := (fromYaml (readFile (printf "../../kubernetes/apps/%s/%s/helmrelease.yaml" .Release.Namespace $path))).spec.chart.spec -}}
+chart: {{ $chart.url }}
+version: {{ $chart.ref.tag }}
