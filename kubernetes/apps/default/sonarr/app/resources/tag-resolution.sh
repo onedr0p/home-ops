@@ -1,121 +1,56 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Incoming environment variables
-EVENT_TYPE="${sonarr_eventtype:-}"
-SERIES_ID="${sonarr_series_id:-}"
+case "${sonarr_eventtype:-}" in
+    "" | Download | EpisodeFileDelete) ;;
+    *) exit 0 ;;
+esac
 
-# Only proceed for "Download", "EpisodeFileDelete" events, or no event (manual bulk run)
-[[ -z "${EVENT_TYPE}" || "${EVENT_TYPE}" == "Download" || "${EVENT_TYPE}" == "EpisodeFileDelete" ]] || exit 0
-
-# Required environment variables
 : "${SONARR__AUTH__APIKEY:?API key required}"
 : "${SONARR__SERVER__PORT:?Server port required}"
 
-# Setup base API URL
-readonly SONARR_API_URL="http://localhost:${SONARR__SERVER__PORT}/api/v3"
+readonly API_URL="http://localhost:${SONARR__SERVER__PORT}/api/v5"
+# Sonarr rejects tag labels with characters other than a-z, 0-9 and -
+readonly TAG_PREFIX="resolution-"
 
-# Prefix for all tags managed by this script
-readonly TAG_PREFIX="resolution:"
-
-# Wrapper for API calls
-api_call() {
-    curl -fsSL --max-time 30 \
+api() {
+    curl -fsS --max-time 30 \
         --header "Content-Type: application/json" \
         --header "X-Api-Key: ${SONARR__AUTH__APIKEY}" \
         "$@"
 }
 
-# Fetch all existing tags
-tags=$(api_call "${SONARR_API_URL}/tag")
+exec {lock}> /tmp/tag-resolution.lock
+flock "${lock}"
 
-# Refresh managed tag IDs from tags cache
-refresh_managed_ids() {
-    managed_tag_ids_json=$(jq -c --arg pfx "${TAG_PREFIX}" \
-        '[.[] | select(.label | startswith($pfx)) | .id]' <<< "${tags}")
-}
-refresh_managed_ids
+series=$(api "${API_URL}/series${sonarr_series_id:+/${sonarr_series_id}}" | jq -c --arg prefix "${TAG_PREFIX}" '
+    if type == "object" then [.] end
+    | map({id, tags, labels: [.statistics.episodeFileQualities[]?.resolution | select(. > 0) | "\($prefix)\(.)p"]})
+')
 
-# Ensure a tag exists; sets REPLY to the tag ID (avoids subshell)
-ensure_tag() {
-    local label="$1"
-    REPLY=$(jq -r --arg l "${label}" '.[] | select(.label == $l) | .id' <<< "${tags}")
-    if [[ -z "${REPLY}" ]]; then
-        REPLY=$(api_call -X POST --data-binary "{\"label\":\"${label}\"}" \
-            "${SONARR_API_URL}/tag" | jq -r '.id')
-        # Refresh tags cache in the current shell
-        tags=$(api_call "${SONARR_API_URL}/tag")
-        refresh_managed_ids
+tags=$(api "${API_URL}/tag" | jq -c --arg prefix "${TAG_PREFIX}" '
+    map(select(.label | startswith($prefix)))
+')
+
+labels=$(jq -r --argjson tags "${tags}" '
+    [.[].labels[], $tags[].label] | unique[]
+' <<< "${series}")
+
+for label in ${labels}; do
+    tag_id=$(jq --arg label "${label}" '.[] | select(.label == $label) | .id' <<< "${tags}")
+    if [[ -z "${tag_id}" ]]; then
+        tag_id=$(api --request POST --data "{\"label\":\"${label}\"}" "${API_URL}/tag" | jq '.id')
     fi
-}
 
-# Tag a single series; accepts series JSON as $2 (bulk) or fetches it (single)
-tag_series() {
-    local sid="$1"
-    local series_json="${2:-}"
+    jq -c --arg label "${label}" --argjson tag "${tag_id}" '
+        def has_files: any(.labels[]; . == $label);
+        def has_tag: any(.tags[]; . == $tag);
 
-    # Get all episode files for the series and extract unique resolutions
-    mapfile -t resolutions < <(
-        api_call "${SONARR_API_URL}/episodefile?seriesId=${sid}" \
-            | jq -r '[.[].quality.quality.resolution] | unique | .[] | select(. > 0) | "\(.)p"'
-    )
-
-    # Ensure tags exist and collect their IDs
-    active_tag_ids=()
-    for res in "${resolutions[@]+"${resolutions[@]}"}"; do
-        ensure_tag "${TAG_PREFIX}${res}"
-        active_tag_ids+=("${REPLY}")
+        {applyTags: "add", tags: [$tag], seriesIds: map(select(has_files and (has_tag | not)) | .id)},
+        {applyTags: "remove", tags: [$tag], seriesIds: map(select(has_tag and (has_files | not)) | .id)}
+        | select(.seriesIds != [])
+    ' <<< "${series}" | while IFS= read -r edit; do
+        echo "${label}: ${edit}"
+        api --request PUT --data "${edit}" "${API_URL}/series/editor" >/dev/null
     done
-
-    local add_json
-    if (( ${#active_tag_ids[@]} == 0 )); then
-        add_json='[]'
-    else
-        add_json=$(printf '%s\n' "${active_tag_ids[@]}" | jq -R 'tonumber' | jq -s '.')
-    fi
-
-    # Use cached series JSON in bulk mode, otherwise fetch it
-    if [[ -z "${series_json}" ]]; then
-        series_json=$(api_call "${SONARR_API_URL}/series/${sid}")
-    fi
-
-    local title
-    title=$(jq -r '.title' <<< "${series_json}")
-    echo "Processing ${title} (${sid})..."
-
-    # Remove all managed resolution: tags, then add active ones
-    local updated current_tags new_tags
-    updated=$(jq --argjson remove "${managed_tag_ids_json}" --argjson add "${add_json}" \
-        '.tags = ([.tags[] | select(IN($remove[]) | not)] + $add | unique)' <<< "${series_json}")
-    current_tags=$(jq -c '.tags' <<< "${series_json}")
-    new_tags=$(jq -c '.tags' <<< "${updated}")
-
-    if [[ "${current_tags}" == "${new_tags}" ]]; then
-        echo "  No changes needed for ${title} (${sid})"
-        return
-    fi
-
-    local tag_labels
-    tag_labels=$(jq -r --argjson ids "${add_json}" \
-        '[.[] | select(.id as $i | $ids | index($i)) | .label] | join(", ")' <<< "${tags}")
-    echo "  Tagging ${title} (${sid}) with: ${tag_labels:-none}"
-    api_call -X PUT --data-binary "${updated}" \
-        "${SONARR_API_URL}/series/${sid}" >/dev/null
-}
-
-# If called with a specific series (on import), tag just that series.
-# Otherwise, fetch all series once and process sequentially.
-if [[ -n "${SERIES_ID}" ]]; then
-    tag_series "${SERIES_ID}"
-else
-    echo "No series ID provided, processing all series..."
-    all_series=$(api_call "${SONARR_API_URL}/series")
-    count=$(jq 'length' <<< "${all_series}")
-
-    for (( i = 0; i < count; i++ )); do
-        series_json=$(jq -c ".[$i]" <<< "${all_series}")
-        sid=$(jq -r '.id' <<< "${series_json}")
-        tag_series "${sid}" "${series_json}"
-    done
-    echo "Finished processing ${count} series"
-fi
+done
