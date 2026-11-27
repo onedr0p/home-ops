@@ -27,9 +27,8 @@ talosctl machineconfig patch <(cluster.yaml.j2) \
 ```
 
 Each layer passes through `minijinja-cli` (strict Jinja templating) before `talosctl` merges them.
-The schematic ID arrives as a `-D` define, and the secrets bundle arrives as the template data.
-Later patches strategically merge into earlier ones: documents with the same kind/name are
-deep-merged, new documents are appended.
+The schematic ID arrives as a `-D` define. Later patches strategically merge into earlier ones:
+documents with the same kind/name are deep-merged, new documents are appended.
 
 Two conventions keep the layers honest:
 
@@ -76,11 +75,11 @@ mise run //talos:gen-talosconfig             # write a talosconfig from the secr
 mise run //talos:gen-secrets                 # replace the secrets bundle with a new one (new clusters only)
 ```
 
-`gen-secrets` overwrites the bundle in 1Password. A control plane node that still runs the previous
-configuration can rebuild the previous bundle:
+A control plane node that still runs the old configuration can rebuild the bundle that
+`gen-secrets` replaced:
 
 ```sh
-talosctl -n <node> get machineconfig v1alpha1 -o yaml | yq -r .spec |
+talosctl -n <node> get machineconfig v1alpha1 -o jsonpath='{.spec}' |
     talosctl gen secrets --from-controlplane-config /dev/stdin -o -
 ```
 

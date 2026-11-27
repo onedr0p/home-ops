@@ -63,8 +63,8 @@ role="controlplane"
 if [[ -f "nodes/workers/${usage_node}.yaml.j2" ]]; then
     role="workers"
 fi
-cluster="$(mise run //:template cluster.yaml.j2 - --format yaml -D "schematic=${schematic}" <<<"$secrets")"
-role_patch="$(mise run //:template "${role}.yaml.j2" - --format yaml <<<"$secrets")"
+cluster="$(mise run //:template cluster.yaml.j2 - -D "schematic=${schematic}" <<<"$secrets")"
+role_patch="$(mise run //:template "${role}.yaml.j2" - <<<"$secrets")"
 node_patch="$(mise run //:template "nodes/${role}/${usage_node}.yaml.j2")"
 talosctl machineconfig patch <(printf '%s\n' "$cluster") \
     -p @<(printf '%s\n' "$role_patch") \
@@ -116,7 +116,7 @@ arg "[args]" var=#true help="Extra arguments for talosctl upgrade"
 confirm = { message = "Upgrade node {{ usage.node }}?", default = "no" }
 run = '''
 eval "args=(${usage_args:-})"
-image="$(mise run //talos:machine-image "$usage_node")"
+image="$(mise run //talos:render-config "$usage_node" | yq -r -e 'select(.kind == "UnattendedInstallConfig") | .installer.image')"
 talosctl -n "$usage_node" upgrade -i "$image" -m powercycle --timeout=10m "${args[@]}"
 '''
 
@@ -140,16 +140,6 @@ run = '''
 file="$(mise run //talos:schematic-file "${usage_node:-}")"
 schematic="$(mise run //:template "$file")"
 printf '%s\n' "$schematic" | curl -fsSX POST --data-binary @- "https://factory.talos.dev/schematics" | jq -er '.id'
-'''
-
-[tasks.machine-image]
-hide = true
-usage = 'arg "[node]"'
-run = '''
-schematic="$(mise run //talos:schematic-id "${usage_node:-}")"
-secrets="$(mise run //talos:secrets)"
-mise run //:template cluster.yaml.j2 - --format yaml -D "schematic=${schematic}" <<<"$secrets" |
-    yq -r -e 'select(.kind == "UnattendedInstallConfig") | .installer.image'
 '''
 
 [tasks.secrets]
