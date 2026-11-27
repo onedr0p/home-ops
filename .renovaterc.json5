@@ -19,6 +19,14 @@
       ],
       datasourceTemplate: "docker",
     },
+    {
+      description: "Process HelmRelease OCIRepository chart templates until the Mend app runs Renovate 45.2.0 (renovatebot/renovate#47438), then remove",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)helmrelease\\.yaml$/"],
+      matchStrings: ["url: oci://(?<depName>\\S+)\\s+ref:\\s+tag: (?<currentValue>\\S+)"],
+      datasourceTemplate: "docker",
+      depTypeTemplate: "HelmChart",
+    },
   ],
   packageRules: [
     // Auto-merge rules
