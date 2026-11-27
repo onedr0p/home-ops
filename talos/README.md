@@ -50,11 +50,15 @@ whose hardware diverges from the fleet. No overrides exist today.
 
 ## Gotchas
 
-- `machine.ca` and `cluster.ca` merge as a cert+key **unit**: a patch supplying only `key` blanks
-  `crt`. This is why `controlplane.yaml.j2` repeats the `crt` references alongside the keys.
+- `machine.ca` merges as a cert+key **unit**: a patch supplying only `key` blanks `crt`. This is
+  why `controlplane.yaml.j2` repeats the `crt` reference alongside the key.
+- 1Password stores certificates and keys base64-encoded (the v1alpha1 format), but the CA and
+  service account documents take PEM. When `talosctl` parses the patch, the YAML `!!binary` tag
+  decodes the base64.
 - Rendering a worker before `workers.yaml.j2` and `nodes/workers/` exist fails loudly. Adding the
-  first worker means creating `workers.yaml.j2` (with `machine: { type: worker }` and a `ca` block
-  carrying `crt` only) plus `nodes/workers/<node>.yaml.j2`.
+  first worker means creating `workers.yaml.j2` (with `machine: { type: worker }` and a
+  `KubeAPIServerCAConfig` that lists the cluster CA certificate under `acceptedCAs`) plus
+  `nodes/workers/<node>.yaml.j2`.
 
 ## Common tasks
 

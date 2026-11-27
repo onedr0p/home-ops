@@ -15,11 +15,6 @@ machine:
         format: json_lines
   token: op://kubernetes/talos/MACHINE_TOKEN
 cluster:
-  ca:
-    crt: op://kubernetes/talos/CLUSTER_CA_CRT
-  clusterName: main
-  controlPlane:
-    endpoint: https://k8s.internal:6443
   token: op://kubernetes/talos/CLUSTER_TOKEN
 ---
 apiVersion: v1alpha1
@@ -183,6 +178,11 @@ content: |
     discard_unpacked_layers = false
   [plugins."io.containerd.cri.v1.runtime"]
     device_ownership_from_security_context = true
+---
+apiVersion: v1alpha1
+kind: KubeClusterConfig
+clusterName: main
+endpoint: https://k8s.internal:6443
 ---
 apiVersion: v1alpha1
 kind: KubeNodeConfig
