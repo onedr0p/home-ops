@@ -35,7 +35,9 @@ spec:
           message: |-
             <b>{{ .payload.movie.title }} ({{ .payload.movie.year }})</b>
             <small>{{ .payload.movie.overview | ellipsis 300 }}</small>
-            <small><b>Client:</b> {{ .payload.downloadClient | default "unknown" }}</small>
+            {{- with .payload.downloadClient }}
+            <small><b>Client:</b> {{ . }}</small>
+            {{- end }}
           params:
             format: html
             priority: low
@@ -47,7 +49,9 @@ spec:
           title: Movie Requires Manual Interaction
           message: |-
             <b>{{ .payload.movie.title }} ({{ .payload.movie.year }})</b>
-            <small><b>Client:</b> {{ .payload.downloadClient | default "unknown" }}</small>
+            {{- with .payload.downloadClient }}
+            <small><b>Client:</b> {{ . }}</small>
+            {{- end }}
           params:
             format: html
             priority: high
@@ -60,7 +64,9 @@ spec:
           message: |-
             <b>{{ .payload.series.title }} ({{ printf "S%02dE%02d" (toInt (index .payload.episodes 0).seasonNumber) (toInt (index .payload.episodes 0).episodeNumber) }})</b>
             <small>{{ (index .payload.episodes 0).title }}</small>
-            <small><b>Client:</b> {{ .payload.downloadClient | default "unknown" }}</small>
+            {{- with .payload.downloadClient }}
+            <small><b>Client:</b> {{ . }}</small>
+            {{- end }}
           params:
             format: html
             priority: low
@@ -72,7 +78,9 @@ spec:
           title: Episode Requires Manual Interaction
           message: |-
             <b>{{ .payload.series.title }}</b>
-            <small><b>Client:</b> {{ .payload.downloadClient | default "unknown" }}</small>
+            {{- with .payload.downloadClient }}
+            <small><b>Client:</b> {{ . }}</small>
+            {{- end }}
           params:
             format: html
             priority: high
