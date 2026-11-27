@@ -5,29 +5,31 @@ machine:
   ca:
     crt: op://kubernetes/talos/MACHINE_CA_CRT
     key: op://kubernetes/talos/MACHINE_CA_KEY
-cluster:
-  # ca merges as a unit; crt must be repeated alongside key
-  ca:
-    crt: op://kubernetes/talos/CLUSTER_CA_CRT
-    key: op://kubernetes/talos/CLUSTER_CA_KEY
-  aggregatorCA:
-    crt: op://kubernetes/talos/CLUSTER_AGGREGATORCA_CRT
-    key: op://kubernetes/talos/CLUSTER_AGGREGATORCA_KEY
-  etcd:
-    advertisedSubnets:
-      - 192.168.42.0/24
-    ca:
-      crt: op://kubernetes/talos/CLUSTER_ETCD_CA_CRT
-      key: op://kubernetes/talos/CLUSTER_ETCD_CA_KEY
-    extraArgs:
-      listen-metrics-urls: http://0.0.0.0:2381
-  serviceAccount:
-    key: op://kubernetes/talos/CLUSTER_SERVICEACCOUNT_KEY
+---
+# 1Password holds certificates and keys base64-encoded; !!binary decodes them to the PEM these documents expect
+apiVersion: v1alpha1
+kind: EtcdCAConfig
+issuingCA:
+  cert: !!binary op://kubernetes/talos/CLUSTER_ETCD_CA_CRT
+  key: !!binary op://kubernetes/talos/CLUSTER_ETCD_CA_KEY
+---
+apiVersion: v1alpha1
+kind: EtcdMemberConfig
+advertisedSubnets:
+  - 192.168.42.0/24
+extraArgs:
+  listen-metrics-urls: http://0.0.0.0:2381
 ---
 apiVersion: v1alpha1
 kind: KubeNodeConfig
 labels:
   node-role.kubernetes.io/control-plane: ""
+---
+apiVersion: v1alpha1
+kind: KubeAPIServerCAConfig
+issuingCA:
+  cert: !!binary op://kubernetes/talos/CLUSTER_CA_CRT
+  key: !!binary op://kubernetes/talos/CLUSTER_CA_KEY
 ---
 apiVersion: v1alpha1
 kind: KubeAPIServerConfig
@@ -37,6 +39,12 @@ extraArgs:
   enable-aggregator-routing: "true"
   feature-gates: CrossNamespaceVolumeDataSource=true
 image: registry.k8s.io/kube-apiserver:v1.37.3
+---
+apiVersion: v1alpha1
+kind: KubeAggregatorCAConfig
+issuingCA:
+  cert: !!binary op://kubernetes/talos/CLUSTER_AGGREGATORCA_CRT
+  key: !!binary op://kubernetes/talos/CLUSTER_AGGREGATORCA_KEY
 ---
 apiVersion: v1alpha1
 kind: KubeAuditPolicyConfig
@@ -116,6 +124,12 @@ config:
 extraArgs:
   bind-address: 0.0.0.0
 image: registry.k8s.io/kube-scheduler:v1.37.3
+---
+apiVersion: v1alpha1
+kind: KubeServiceAccountConfig
+issuer:
+  privateKey: !!binary op://kubernetes/talos/CLUSTER_SERVICEACCOUNT_KEY
+  issuerURL: https://k8s.internal:6443
 ---
 apiVersion: v1alpha1
 kind: KubeTalosAPIAccessConfig
