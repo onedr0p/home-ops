@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -8,58 +8,24 @@ spec:
   chart:
     kind: OCIRepository
     spec:
-      url: oci://ghcr.io/bjw-s-labs/helm/app-template
+      url: oci://ghcr.io/recyclarr/charts/recyclarr
       ref:
-        tag: 5.3.0
+        tag: 9.0.0
   interval: 1h
   values:
-    controllers:
-      recyclarr:
-        type: statefulset
-        containers:
-          app:
-            image:
-              repository: ghcr.io/recyclarr/recyclarr
-              tag: 8.8.1@sha256:3e9c41b9ec29bbf65fe846864058730d321a21f7695d8c0d9437b73e34d50ad9
-            env:
-              CRON_SCHEDULE: 0 0 * * *
-              RECYCLARR_DATA_DIR: /tmp
-            envFrom:
-              - secretRef:
-                  name: "{{ .Release.Name }}-secret"
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
-            resources:
-              requests:
-                cpu: 10m
-              limits:
-                memory: 128Mi
-        statefulset:
-          podManagementPolicy: Parallel
-          volumeClaimTemplates:
-            - name: config
-              accessMode: ReadWriteOnce
-              size: 5Gi
-              storageClass: ceph-block
-              dataSourceRef:
-                apiGroup: kopiur.home-operations.com
-                kind: Restore
-                name: "{{ .Release.Name }}"
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
-    persistence:
-      config-file:
-        type: configMap
-        name: "{{ .Release.Name }}-configmap"
-        globalMounts:
-          - path: /config/recyclarr.yml
-            subPath: recyclarr.yml
-      tmp:
-        type: emptyDir
+    apiKey:
+      existingSecret: recyclarr-api-key-secret
+    configs:
+      existingConfigMap: recyclarr-configmap
+    envFrom:
+      - secretRef:
+          name: recyclarr-secret
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
+    serviceMonitor:
+      enabled: true
+    resources:
+      requests:
+        cpu: 10m
+      limits:
+        memory: 512Mi
