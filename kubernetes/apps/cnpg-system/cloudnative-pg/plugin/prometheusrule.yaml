@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: plugin-barman-cloud-rules
+spec:
+  groups:
+    - name: plugin-barman-cloud.rules
+      rules:
+        - alert: PostgresWALArchivingFailing
+          expr: cnpg_pg_stat_archiver_last_failed_time > cnpg_pg_stat_archiver_last_archived_time
+          annotations:
+            summary: >-
+              {{ $labels.pod }} in {{ $labels.namespace }} cannot archive WAL files
+          for: 15m
+          labels:
+            severity: critical
+
+        - alert: PostgresBackupTooOld
+          expr: |-
+            (time() - max by (namespace, job) (barman_cloud_cloudnative_pg_io_last_available_backup_timestamp) > 36 * 3600)
+            or
+            (max by (namespace, job) (cnpg_collector_up) unless on (namespace, job) barman_cloud_cloudnative_pg_io_last_available_backup_timestamp)
+          annotations:
+            summary: >-
+              {{ $labels.job }} has no base backup from the last 36 hours
+          for: 1h
+          labels:
+            severity: critical

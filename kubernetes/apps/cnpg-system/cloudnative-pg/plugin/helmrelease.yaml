@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: plugin-barman-cloud
+spec:
+  chart:
+    kind: OCIRepository
+    spec:
+      url: oci://ghcr.io/cloudnative-pg/charts/plugin-barman-cloud
+      ref:
+        tag: 0.9.0
+  interval: 1h
+  values:
+    resources:
+      requests:
+        cpu: 10m
+      limits:
+        memory: 128Mi

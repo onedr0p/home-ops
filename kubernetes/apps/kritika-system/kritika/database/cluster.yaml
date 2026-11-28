@@ -4,6 +4,8 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: kritika-postgres
+  annotations:
+    cnpg.io/skipEmptyWalArchiveCheck: enabled
 spec:
   instances: 2
   imageCatalogRef:
@@ -39,7 +41,20 @@ spec:
     limits:
       memory: 2Gi
   bootstrap:
-    initdb:
+    recovery:
+      source: kritika-postgres-backup
       database: kritika
       secret:
         name: kritika-postgres-credentials
+  externalClusters:
+    - name: kritika-postgres-backup
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: kritika-postgres
+          serverName: kritika-postgres
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: kritika-postgres
