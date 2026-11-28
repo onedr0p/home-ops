@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/barmancloud.cnpg.io/objectstore_v1.json
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: kritika-postgres
+spec:
+  configuration:
+    destinationPath: s3://cloudnative-pg/kritika/
+    endpointURL: http://expanse.internal:9000
+    s3Credentials:
+      accessKeyId:
+        name: kritika-postgres-s3
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKey:
+        name: kritika-postgres-s3
+        key: AWS_SECRET_ACCESS_KEY
+    data:
+      compression: zstd
+    wal:
+      compression: zstd
+  instanceSidecarConfiguration:
+    resources:
+      requests:
+        cpu: 10m
+      limits:
+        memory: 256Mi
+  retentionPolicy: 30d
